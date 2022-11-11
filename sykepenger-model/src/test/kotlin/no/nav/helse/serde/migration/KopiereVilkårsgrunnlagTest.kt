@@ -1,8 +1,12 @@
 package no.nav.helse.serde.migration
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.person.Refusjonsopplysning
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.readResource
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Test
 
 internal class KopiereVilkårsgrunnlagTest: MigrationTest(TestMigration) {
@@ -48,6 +52,11 @@ internal class KopiereVilkårsgrunnlagTest: MigrationTest(TestMigration) {
         expectedJson = "/migrations/kopierevilkårsgrunnlag/kopier-om-skjæringstidspunkt-har-vilkårsgrunnlag-eldre-innslag_expected.json",
     )
 
+    @Test
+    fun `kopiere inn med nye refusjonsopplysninger`() = assertKopierteVilkårgrunnlag(
+        originalJson = "/migrations/kopierevilkårsgrunnlag/kopier-med-nye-refusjonsopplysninger_original.json",
+        expectedJson = "/migrations/kopierevilkårsgrunnlag/kopier-med-nye-refusjonsopplysninger_expected.json",
+    )
     private fun assertKopierteVilkårgrunnlag(originalJson: String, expectedJson: String) {
         val migrert = migrer(originalJson.readResource())
         val sisteInnslag = migrert.path("vilkårsgrunnlagHistorikk").firstOrNull()
@@ -64,14 +73,20 @@ internal class KopiereVilkårsgrunnlagTest: MigrationTest(TestMigration) {
         assertJson(migrert.toString(), expected)
     }
 
+
     private object TestMigration: KopiereVilkårsgrunnlag(
         versjon = 1337,
-        UUID.fromString("33fa499a-6fd2-43c2-a9cf-bdde739c546b") to LocalDate.parse("2020-05-05"),
-        UUID.fromString("491f6fb1-7fea-4fec-8095-1a0f8f7d543b") to LocalDate.parse("2020-01-01"),
-        UUID.fromString("dc3004ae-6d36-4f11-bb2c-32245540fb0e") to LocalDate.parse("2021-12-31"),
-        UUID.fromString("4284fe36-78ed-4191-b12e-caccaabe5962") to LocalDate.parse("2020-05-05"),
-        UUID.fromString("4284fe36-78ed-4191-b12e-caccaabe5962") to LocalDate.parse("2021-05-05"),
-        UUID.fromString("826f09da-f8e2-459b-8326-5ee8d10aa9e3") to LocalDate.parse("2018-01-01"),
-        UUID.fromString("0473f5e9-092e-4ff5-a321-23cd5e9330aa") to LocalDate.parse("2018-03-01")
+        Triple(UUID.fromString("33fa499a-6fd2-43c2-a9cf-bdde739c546b"), LocalDate.parse("2020-05-05"), null),
+        Triple(UUID.fromString("491f6fb1-7fea-4fec-8095-1a0f8f7d543b"), LocalDate.parse("2020-01-01"), null),
+        Triple(UUID.fromString("dc3004ae-6d36-4f11-bb2c-32245540fb0e"), LocalDate.parse("2021-12-31"), null),
+        Triple(UUID.fromString("4284fe36-78ed-4191-b12e-caccaabe5962"), LocalDate.parse("2020-05-05"), null),
+        Triple(UUID.fromString("4284fe36-78ed-4191-b12e-caccaabe5962"), LocalDate.parse("2021-05-05"), null),
+        Triple(UUID.fromString("826f09da-f8e2-459b-8326-5ee8d10aa9e3"), LocalDate.parse("2018-01-01"), null),
+        Triple(UUID.fromString("0473f5e9-092e-4ff5-a321-23cd5e9330aa"), LocalDate.parse("2018-03-01"), null),
+        Triple(UUID.fromString("893e57bf-6377-47bf-b029-3fb0c625f877"), LocalDate.parse("2018-05-01"),
+            Refusjonsopplysning(UUID.fromString("88a37f64-947c-4e33-8e22-5162989c390c"), LocalDate.parse("2018-05-01"), null, 31000.månedlig).let {
+                RefusjonsopplysningerBuilder().leggTil(it, LocalDateTime.now()).build()
+            }
+        )
     )
 }

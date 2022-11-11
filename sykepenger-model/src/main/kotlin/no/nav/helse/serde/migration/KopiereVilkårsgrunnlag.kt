@@ -6,11 +6,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.serde.migration.RefusjonsopplysningerIVilkårsgrunnlag.arrayNode
 import no.nav.helse.serde.serdeObjectMapper
 
 internal abstract class KopiereVilkårsgrunnlag(
     versjon: Int,
-    vararg vilkårsgrunnlagSomSkalKopieres: Pair<UUID, LocalDate>
+    vararg vilkårsgrunnlagSomSkalKopieres: Triple<UUID, LocalDate, Refusjonsopplysninger?>
 ): JsonMigration(version = versjon) {
     private val vilkårsgrunnlagSomSkalKopieres = vilkårsgrunnlagSomSkalKopieres.toList()
 
@@ -38,10 +40,14 @@ internal abstract class KopiereVilkårsgrunnlag(
 
         val oppdaterteVilkårsgrunnlag = aktiveVilkårsgrunnlag.deepCopy()
 
-        skalKopieresPåPerson.forEach { (vilkårsgrunnlagId, skjæringstidspunkt) ->
+        skalKopieresPåPerson.forEach { (vilkårsgrunnlagId, skjæringstidspunkt, nyeRefusjonsopplysninger) ->
             val vilkårsgrunnlagKopi = vilkårsgrunnlag.getValue(vilkårsgrunnlagId).deepCopy<ObjectNode>().apply {
                 put("skjæringstidspunkt", "$skjæringstidspunkt")
                 put("vilkårsgrunnlagId", "${UUID.randomUUID()}")
+                if (nyeRefusjonsopplysninger != null) {
+                    val arbeidsgiverInntektsopplysning = path("sykepengegrunnlag").path("arbeidsgiverInntektsopplysninger").single() as ObjectNode
+                    arbeidsgiverInntektsopplysning.putArray("refusjonsopplysninger").addAll(nyeRefusjonsopplysninger.arrayNode)
+                }
             }
             oppdaterteVilkårsgrunnlag.add(vilkårsgrunnlagKopi)
         }

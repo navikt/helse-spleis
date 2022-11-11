@@ -136,7 +136,7 @@ internal object RefusjonsopplysningerIVilkårsgrunnlag {
     private val SPLEIS = "Vilkårsprøving"
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-    private val Refusjonsopplysninger.arrayNode get() = RefusjonsopplysningerToArrayNode(this).arrayNode
+    internal val Refusjonsopplysninger.arrayNode get() = RefusjonsopplysningerToArrayNode(this).arrayNode
     private class RefusjonsopplysningerToArrayNode(refusjonsopplysninger: Refusjonsopplysninger):
         RefusjonsopplysningerVisitor {
         val arrayNode = serdeObjectMapper.createArrayNode()

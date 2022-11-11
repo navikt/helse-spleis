@@ -1,0 +1,165 @@
+{
+  "aktørId": "42",
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "id": "{id}",
+      "opprettet": "{opprettet}",
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-01-01",
+          "sykepengegrunnlag": {
+            "sykepengegrunnlag": 372000.0,
+            "inntektsgrunnlag": 372000.0,
+            "grunnbeløp": 561804.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "987654321",
+                "inntektsopplysning": {
+                  "id": "9334a017-0841-4087-be21-cd609dbda097",
+                  "dato": "2018-01-01",
+                  "hendelseId": "2c31e233-4634-4a22-b516-13e0632660df",
+                  "beløp": 31000.0,
+                  "kilde": "INNTEKTSMELDING",
+                  "tidsstempel": "2022-10-11T15:25:50.431157"
+                }
+              }
+            ],
+            "begrensning": "ER_IKKE_6G_BEGRENSET",
+            "deaktiverteArbeidsforhold": [],
+            "vurdertInfotrygd": false,
+            "minsteinntekt": 46817.0,
+            "oppfyllerMinsteinntektskrav": true
+          },
+          "vilkårsgrunnlagId": "300ecb2c-9635-4ed9-8dd7-b4c68a0e9e7b"
+        },
+        {
+          "skjæringstidspunkt": "2018-05-01",
+          "sykepengegrunnlag": {
+            "sykepengegrunnlag": 372000.0,
+            "inntektsgrunnlag": 372000.0,
+            "grunnbeløp": 561804.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "987654321",
+                "inntektsopplysning": {
+                  "id": "d51189af-b4fe-45e1-a950-da58d13d94e5",
+                  "dato": "2018-03-01",
+                  "hendelseId": "88a37f64-947c-4e33-8e22-5162989c390c",
+                  "beløp": 31000.0,
+                  "kilde": "INNTEKTSMELDING",
+                  "tidsstempel": "2022-10-11T15:25:50.572688"
+                },
+                "refusjonsopplysninger": [{
+                  "meldingsreferanseId": "88a37f64-947c-4e33-8e22-5162989c390c",
+                  "fom": "2018-05-01",
+                  "tom": null,
+                  "beløp": 31000.00
+                }]
+              }
+            ],
+            "begrensning": "ER_IKKE_6G_BEGRENSET",
+            "deaktiverteArbeidsforhold": [],
+            "vurdertInfotrygd": false,
+            "minsteinntekt": 46817.0,
+            "oppfyllerMinsteinntektskrav": true
+          },
+          "vilkårsgrunnlagId": "{nyVilkårsgrunnlagId1}"
+        }
+      ]
+    },
+    {
+      "id": "e03dbd13-0bd8-4c70-ad00-477f4d9d2b73",
+      "opprettet": "2022-11-11T15:25:50.594889",
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-01-01",
+          "sykepengegrunnlag": {
+            "sykepengegrunnlag": 372000.0,
+            "inntektsgrunnlag": 372000.0,
+            "grunnbeløp": 561804.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "987654321",
+                "inntektsopplysning": {
+                  "id": "9334a017-0841-4087-be21-cd609dbda097",
+                  "dato": "2018-01-01",
+                  "hendelseId": "2c31e233-4634-4a22-b516-13e0632660df",
+                  "beløp": 31000.0,
+                  "kilde": "INNTEKTSMELDING",
+                  "tidsstempel": "2022-10-11T15:25:50.431157"
+                }
+              }
+            ],
+            "begrensning": "ER_IKKE_6G_BEGRENSET",
+            "deaktiverteArbeidsforhold": [],
+            "vurdertInfotrygd": false,
+            "minsteinntekt": 46817.0,
+            "oppfyllerMinsteinntektskrav": true
+          },
+          "vilkårsgrunnlagId": "300ecb2c-9635-4ed9-8dd7-b4c68a0e9e7b"
+        }
+      ]
+    },
+    {
+      "id": "7f8c8c0f-e848-43c3-967c-871a5d255ede",
+      "opprettet": "2022-10-11T15:25:50.594889",
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-01-01",
+          "sykepengegrunnlag": {
+            "sykepengegrunnlag": 372000.0,
+            "inntektsgrunnlag": 372000.0,
+            "grunnbeløp": 561804.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "987654321",
+                "inntektsopplysning": {
+                  "id": "9334a017-0841-4087-be21-cd609dbda097",
+                  "dato": "2018-01-01",
+                  "hendelseId": "2c31e233-4634-4a22-b516-13e0632660df",
+                  "beløp": 31000.0,
+                  "kilde": "INNTEKTSMELDING",
+                  "tidsstempel": "2022-10-11T15:25:50.431157"
+                }
+              }
+            ],
+            "begrensning": "ER_IKKE_6G_BEGRENSET",
+            "deaktiverteArbeidsforhold": [],
+            "vurdertInfotrygd": false,
+            "minsteinntekt": 46817.0,
+            "oppfyllerMinsteinntektskrav": true
+          },
+          "vilkårsgrunnlagId": "300ecb2c-9635-4ed9-8dd7-b4c68a0e9e7b"
+        },
+        {
+          "skjæringstidspunkt": "2018-03-01",
+          "sykepengegrunnlag": {
+            "sykepengegrunnlag": 372000.0,
+            "inntektsgrunnlag": 372000.0,
+            "grunnbeløp": 561804.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "987654321",
+                "inntektsopplysning": {
+                  "id": "d51189af-b4fe-45e1-a950-da58d13d94e5",
+                  "dato": "2018-03-01",
+                  "hendelseId": "88a37f64-947c-4e33-8e22-5162989c390c",
+                  "beløp": 31000.0,
+                  "kilde": "INNTEKTSMELDING",
+                  "tidsstempel": "2022-10-11T15:25:50.572688"
+                }
+              }
+            ],
+            "begrensning": "ER_IKKE_6G_BEGRENSET",
+            "deaktiverteArbeidsforhold": [],
+            "vurdertInfotrygd": false,
+            "minsteinntekt": 46817.0,
+            "oppfyllerMinsteinntektskrav": true
+          },
+          "vilkårsgrunnlagId": "893e57bf-6377-47bf-b029-3fb0c625f877"
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 1337
+}
