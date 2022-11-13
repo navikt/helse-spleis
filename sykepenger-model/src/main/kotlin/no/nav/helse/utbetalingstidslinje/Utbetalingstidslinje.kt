@@ -36,7 +36,7 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
         internal fun periode(tidslinjer: List<Utbetalingstidslinje>) = tidslinjer
             .filter { it.utbetalingsdager.isNotEmpty() }
             .map { it.periode() }
-            .reduce(Periode::merge)
+            .reduce(Periode::plus)
 
         internal fun avvis(
             tidslinjer: List<Utbetalingstidslinje>,

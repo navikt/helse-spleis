@@ -19,29 +19,31 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
 
     companion object {
         internal val aldri = LocalDate.MIN til LocalDate.MIN
-
         private val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+        private val mergeOverHelg = { venstre: LocalDate, høyre: LocalDate ->
+            venstre.erRettFør(høyre)
+        }
+        private val mergeKantIKant = { venstre: LocalDate, høyre: LocalDate ->
+            venstre.nesteDag == høyre
+        }
 
         fun List<Periode>.slutterEtter(grense: LocalDate) = any { it.slutterEtter(grense) }
 
-        fun Iterable<LocalDate>.grupperSammenhengendePerioder() = this
-            .grupperSammenhengendePerioder { forrigeDag, dato -> forrigeDag.nesteDag != dato }
-        internal fun Iterable<Iterable<LocalDate>>.grupperSammenhengendePerioder() = flatten().grupperSammenhengendePerioder()
         internal fun Iterable<Periode>.periode() = if (!iterator().hasNext()) null else minOf { it.start } til maxOf { it.endInclusive }
-        fun List<Periode>.grupperSammenhengendePerioderMedHensynTilHelg() = this
-            .flatMap { periode -> periode.map { it } }
-            .grupperSammenhengendePerioder { forrigeDag, dato -> !forrigeDag.erRettFør(dato) }
+        internal fun Iterable<LocalDate>.grupperSammenhengendePerioder() = map(LocalDate::somPeriode).merge(mergeKantIKant)
+        internal fun List<Periode>.grupperSammenhengendePerioder() = merge(mergeKantIKant)
+        internal fun List<Periode>.grupperSammenhengendePerioderMedHensynTilHelg() = merge(mergeOverHelg)
 
-        private fun Iterable<LocalDate>.grupperSammenhengendePerioder(erNyPeriode: (forrigeDag: LocalDate, nesteDag: LocalDate) -> Boolean): List<Periode> {
-            val perioder = mutableListOf<Periode>()
-            toSortedSet().forEach { dato ->
-                val sistePeriode = perioder.lastOrNull()
-                when {
-                    sistePeriode == null || erNyPeriode(sistePeriode.endInclusive, dato) -> perioder.add(dato.somPeriode())
-                    else -> perioder[perioder.lastIndex] = sistePeriode.oppdaterTom(dato)
-                }
+        private fun Iterable<Periode>.merge(erForlengelse: (forrigeDag: LocalDate, nesteDag: LocalDate) -> Boolean = mergeKantIKant): List<Periode> {
+            val resultat = mutableListOf<Periode>()
+            val sortert = sortedBy { it.start }
+            sortert.forEachIndexed { index, periode ->
+                if (resultat.any { champion -> periode in champion }) return@forEachIndexed // en annen periode har spist opp denne
+                resultat.add(sortert.subList(index, sortert.size).reduce { champion, challenger ->
+                    champion.merge(challenger, erForlengelse)
+                })
             }
-            return perioder
+            return resultat
         }
 
         internal fun Collection<Periode>.sammenhengende(skjæringstidspunkt: LocalDate) = sortedByDescending { it.start }
@@ -109,7 +111,14 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
 
     override fun hashCode() = start.hashCode() * 37 + endInclusive.hashCode()
 
-    internal fun merge(annen: Periode?): Periode {
+    internal fun merge(other: Periode, erForlengelseStrategy: (LocalDate, LocalDate) -> Boolean): Periode {
+        if (this.overlapperMed(other) || erForlengelseStrategy(this.endInclusive, other.start) || erForlengelseStrategy(other.endInclusive, this.start)) {
+            return this + other
+        }
+        return this
+    }
+
+    internal operator fun plus(annen: Periode?): Periode {
         if (annen == null) return this
         return Periode(minOf(this.start, annen.start), maxOf(this.endInclusive, annen.endInclusive))
     }

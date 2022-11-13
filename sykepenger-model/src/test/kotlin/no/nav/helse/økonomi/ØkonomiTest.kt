@@ -101,7 +101,7 @@ internal class ØkonomiTest {
             `6G` = `6G`.beløp(1.januar),
             arbeidsgiverperiode = Arbeidsgiverperiode(listOf(arbeidsgiverperiode))
         )
-        assertEquals(arbeidsgiverperiode.merge(periode), listOf(økonomi).avgrensTilArbeidsgiverperiode(periode))
+        assertEquals(arbeidsgiverperiode.plus(periode), listOf(økonomi).avgrensTilArbeidsgiverperiode(periode))
         assertEquals(periode, periode) { "periode skal ikke muteres" }
     }
 

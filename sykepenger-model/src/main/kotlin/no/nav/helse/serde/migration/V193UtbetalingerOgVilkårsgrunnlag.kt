@@ -174,7 +174,7 @@ internal class V193UtbetalingerOgVilkårsgrunnlag: JsonMigration(193) {
             it.oppdaterFom(it.start.minusDays(1))
         }
 
-        val totalperiode = søkeperiode.merge(sykefraværstilfelle).merge(overlappendeSammenhengendePeriode)
+        val totalperiode = søkeperiode.plus(sykefraværstilfelle).plus(overlappendeSammenhengendePeriode)
 
         val tilInfotrygd = vedtaksperiode.path("tilstand").asText() == "TIL_INFOTRYGD"
 

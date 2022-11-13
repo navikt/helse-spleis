@@ -44,7 +44,7 @@ internal class Sykdomstidslinje private constructor(
     internal constructor(dager: Map<LocalDate, Dag> = emptyMap()) : this(dager.toSortedMap())
 
     internal constructor(original: Sykdomstidslinje, spanningPeriode: Periode) :
-        this(original.dager, original.periode?.merge(spanningPeriode), original.låstePerioder)
+        this(original.dager, original.periode?.plus(spanningPeriode), original.låstePerioder)
 
     internal fun periode() = periode
     internal fun førsteDag() = periode!!.start
@@ -62,7 +62,7 @@ internal class Sykdomstidslinje private constructor(
         other.dager.filter { it.key !in låstePerioder }.forEach { (dato, dag) -> nyeDager.merge(dato, dag, beste) }
         return Sykdomstidslinje(
             nyeDager.toSortedMap(),
-            this.periode?.merge(other.periode) ?: other.periode,
+            this.periode?.plus(other.periode) ?: other.periode,
             this.låstePerioder.toMutableList()
         )
     }
@@ -122,7 +122,7 @@ internal class Sykdomstidslinje private constructor(
     }
 
     internal fun forsøkUtvidelse(periode: Periode) =
-        Sykdomstidslinje(dager.toSortedMap(), periode.merge(this.periode), låstePerioder.toMutableList()).takeIf { it.periode != this.periode }
+        Sykdomstidslinje(dager.toSortedMap(), periode.plus(this.periode), låstePerioder.toMutableList()).takeIf { it.periode != this.periode }
 
     internal fun erLåst(periode: Periode) = låstePerioder.contains(periode)
 

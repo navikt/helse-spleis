@@ -1,16 +1,58 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.*
+import java.time.LocalDate
+import no.nav.helse.april
+import no.nav.helse.august
+import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
+import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.Periode.Companion.slutterEtter
-import org.junit.jupiter.api.Assertions.*
+import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.juni
+import no.nav.helse.mai
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
-import no.nav.helse.hendelser.Periode.Companion.overlapper
 
 internal class PeriodeTest {
     private val periode = Periode(1.juli, 10.juli)
+
+    @Test
+    fun `grupperer perioder`() {
+        val perioder = listOf(
+            1.januar til 31.januar,
+            5.januar til 6.januar,
+            1.desember(2017) til 10.desember(2017),
+            4.mai til 20.mai,
+            28.desember(2017) til 31.desember(2017),
+            1.mai til 3.mai
+        )
+
+        val forventet = listOf(
+            1.desember(2017) til 10.desember(2017),
+            28.desember(2017) til 31.januar,
+            1.mai til 20.mai
+        )
+
+        assertEquals(forventet, perioder.grupperSammenhengendePerioder())
+    }
+    @Test
+    fun `siste periode linker alle sammen`() {
+        val perioder = listOf(
+            1.januar til 2.januar,
+            4.januar til 4.januar,
+            3.januar til 3.januar
+        )
+        val forventet = listOf(1.januar til 4.januar)
+        assertEquals(forventet, perioder.grupperSammenhengendePerioderMedHensynTilHelg())
+    }
 
     @Test
     fun `periode mellom`() {
@@ -170,7 +212,7 @@ internal class PeriodeTest {
 
     @Test
     fun `kan gjennomløpe tidslinjen`() {
-        val actual = (1.januar til 5.januar).merge(15.januar til 19.januar)
+        val actual = (1.januar til 5.januar).plus(15.januar til 19.januar)
         assertSize(19, actual)
     }
 
@@ -191,7 +233,7 @@ internal class PeriodeTest {
     fun `strekk en periode for å dekke en annen periode`() {
         assertEquals(
             1.januar til 31.januar,
-            (15.januar til 31.januar).merge(1.januar til 20.januar)
+            (15.januar til 31.januar).plus(1.januar til 20.januar)
         )
     }
 
