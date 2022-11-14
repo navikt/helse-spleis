@@ -166,25 +166,28 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadHendelseId in it.hendelser })
     }
 
+    // PapirSøknad siden det ikke er støttet; kan være hva som helst som blir avvist av Spleis.
+    private fun håndterSøknadSomIkkeErStøttet() = håndterSøknad(Sykdom(11.april, 19.april, 80.prosent), Papirsykmelding(11.april, 19.april))
     @Test
-    fun `søknad som kommer inn i etterkant av en avvist utbetaling skal til vanlig kø`() {
+    fun `søknad som kommer inn i etterkant av en avvist utbetaling skal til nasjonal kø for sykepenger`() {
 
         tilGodkjenning(1.mars, 31.mars, ORGNUMMER)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
         håndterSykmelding(Sykmeldingsperiode(11.april, 19.april, 80.prosent))
-        val søknadHendelseId = håndterSøknad(Sykdom(11.april, 19.april, 80.prosent), Papirsykmelding(11.april, 19.april))
+
+        val søknadHendelseId = håndterSøknadSomIkkeErStøttet()
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
     }
 
     @Test
-    fun `søknad som kommer inn i etterkant av en annullert utbetaling skal til vanlig kø`() {
+    fun `søknad som kommer inn i etterkant av en annullert utbetaling skal til nasjonal kø for sykepenger`() {
 
         nyttVedtak(1.mars, 31.mars)
         håndterAnnullerUtbetaling()
         håndterSykmelding(Sykmeldingsperiode(11.april, 19.april, 80.prosent))
-        val søknadHendelseId = håndterSøknad(Sykdom(11.april, 19.april, 80.prosent), Papirsykmelding(11.april, 19.april))
 
+        val søknadHendelseId = håndterSøknadSomIkkeErStøttet()
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
     }
