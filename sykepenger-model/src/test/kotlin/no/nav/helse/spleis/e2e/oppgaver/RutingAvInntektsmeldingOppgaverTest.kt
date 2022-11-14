@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.oppgaver
 import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -56,7 +55,7 @@ internal class RutingAvInntektsmeldingOppgaverTest : AbstractEndToEndTest() {
     fun `dersom vi mottar inntektsmelding før søknad og søknaden feiler skal det opprettes oppgave for både søknad og inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
-        val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "FRILANSER")))
+        val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = true)
         assertEquals(listOf(søknadId, inntektsmeldingId), observatør.opprettOppgaveEvent().flatMap { it.hendelser })
     }
 
@@ -69,7 +68,7 @@ internal class RutingAvInntektsmeldingOppgaverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         val inntektsmeldingId2 = håndterInntektsmelding(listOf(1.januar til 16.januar))
-        val søknadId2 = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "FRILANSER")))
+        val søknadId2 = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = true)
         assertEquals(listOf(søknadId1, inntektsmeldingId1, søknadId2, inntektsmeldingId2), observatør.opprettOppgaveEvent().flatMap { it.hendelser })
     }
 
@@ -87,7 +86,7 @@ internal class RutingAvInntektsmeldingOppgaverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(7.februar, 28.februar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 7.februar)
-        val søknadId = håndterSøknad(Sykdom(7.februar, 28.februar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "FRILANSER")))
+        val søknadId = håndterSøknad(Sykdom(7.februar, 28.februar, 100.prosent), andreInntektskilder = true)
 
         assertEquals(listOf(søknadId, inntektsmeldingId), observatør.opprettOppgaveForSpeilsaksbehandlereEvent().flatMap { it.hendelser })
     }

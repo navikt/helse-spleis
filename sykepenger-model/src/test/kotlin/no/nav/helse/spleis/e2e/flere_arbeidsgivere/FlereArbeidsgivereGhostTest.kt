@@ -669,22 +669,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         håndterSøknad(
             Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent),
-            andreInntektskilder = listOf(Søknad.Inntektskilde(false, "Annen inntekt")),
+            andreInntektskilder = true,
             orgnummer = a1
         )
-        assertFunksjonellFeil(RV_SØ_10)
-    }
-
-    @Test
-    fun `bruker har fyllt inn ANDRE_ARBEIDSFORHOLD med sykmelding i søknad`() {
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-
-        håndterSøknad(
-            Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent),
-            andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")),
-            orgnummer = a1
-        )
-
         assertFunksjonellFeil(RV_SØ_10)
     }
 

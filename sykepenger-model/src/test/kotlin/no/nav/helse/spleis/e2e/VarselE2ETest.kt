@@ -154,7 +154,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     fun `varsel - Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden`() {
         håndterSøknad(
             Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
-            andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD"))
+            andreInntektskilder = true
         )
         assertFunksjonellFeil(RV_SØ_10.varseltekst, 1.vedtaksperiode.filter())
     }

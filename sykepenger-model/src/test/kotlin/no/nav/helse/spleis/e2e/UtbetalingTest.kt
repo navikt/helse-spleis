@@ -129,7 +129,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
     @Test
     fun `utbetaling_utbetalt tar med vedtaksperiode-ider for forkastede perioder`() {
         tilGodkjent(1.januar, 31.januar, 100.prosent, 1.januar)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "FRILANSER")))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), andreInntektskilder = true)
         håndterUtbetalt()
 
         val utbetalingEvent = observatør.utbetalingMedUtbetalingEventer.first()

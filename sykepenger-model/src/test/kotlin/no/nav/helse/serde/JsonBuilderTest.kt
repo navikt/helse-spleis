@@ -380,7 +380,7 @@ class JsonBuilderTest {
                         Sykdom(1.januar, 9.januar, 100.prosent)
                     ),
                     hendelseId = søknadhendelseId,
-                    andreInntektsKilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD"))
+                    andreInntektsKilder = true
                 )
             )
         }
@@ -671,7 +671,7 @@ class JsonBuilderTest {
         tom: LocalDate = 31.januar,
         sendtSøknad: LocalDate = tom.plusDays(5),
         perioder: List<Søknad.Søknadsperiode> = listOf(Sykdom(fom, tom, 100.prosent)),
-        andreInntektsKilder: List<Søknad.Inntektskilde> = emptyList()
+        andreInntektsKilder: Boolean = false
     ) = hendelsefabrikk.lagSøknad(
         id = hendelseId,
         perioder = perioder.toTypedArray(),

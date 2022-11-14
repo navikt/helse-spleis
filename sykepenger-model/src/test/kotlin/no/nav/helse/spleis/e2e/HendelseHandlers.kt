@@ -393,7 +393,7 @@ internal fun AbstractEndToEndTest.forlengPeriode(
 internal fun AbstractEndToEndTest.håndterSøknadMedValidering(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     vararg perioder: Søknadsperiode,
-    andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
+    andreInntektskilder: Boolean = false,
     sendtTilNAVEllerArbeidsgiver: LocalDate = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
@@ -413,7 +413,7 @@ internal fun AbstractEndToEndTest.håndterSøknadMedValidering(
 
 internal fun AbstractEndToEndTest.håndterSøknad(
     vararg perioder: Søknadsperiode,
-    andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
+    andreInntektskilder: Boolean = false,
     sendtTilNAVEllerArbeidsgiver: LocalDate = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
     id: UUID = UUID.randomUUID(),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,

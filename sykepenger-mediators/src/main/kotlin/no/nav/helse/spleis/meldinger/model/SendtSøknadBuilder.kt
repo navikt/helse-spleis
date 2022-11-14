@@ -1,19 +1,26 @@
 package no.nav.helse.spleis.meldinger.model
 
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.Søknad.*
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Merknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Papirsykmelding
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class SendtSøknadBuilder : SøknadBuilder() {
     private val perioder = mutableListOf<Søknadsperiode>()
     private val merkander = mutableListOf<Merknad>()
-    private val inntektskilder = mutableListOf<Inntektskilde>()
     private var korrigerer: UUID? = null
     private var opprinneligSendt: LocalDateTime? = null
+    private var harAndreInntektskilder: Boolean = false
 
     internal fun build() = Søknad(
         meldingsreferanseId = meldingsreferanseId,
@@ -22,7 +29,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         fødselsdato = fødselsdato,
         orgnummer = organisasjonsnummer,
         perioder = perioder,
-        andreInntektskilder = inntektskilder,
+        andreInntektskilder = harAndreInntektskilder,
         sendtTilNAVEllerArbeidsgiver = innsendt!!,
         permittert = permittert,
         merknaderFraSykmelding = merkander,
@@ -31,8 +38,8 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         opprinneligSendt = opprinneligSendt
     )
 
-    override fun inntektskilde(sykmeldt: Boolean, type: String) = apply {
-        inntektskilder.add(Inntektskilde(sykmeldt = sykmeldt, type = type))
+    override fun inntektskilde(andreInntektskilder: Boolean) = apply {
+        harAndreInntektskilder = andreInntektskilder
     }
 
     override fun utdanning(fom: LocalDate, tom: LocalDate) = apply {

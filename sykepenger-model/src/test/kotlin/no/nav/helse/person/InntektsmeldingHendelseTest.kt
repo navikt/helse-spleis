@@ -92,7 +92,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
 
     private fun søknad(vararg perioder: Søknadsperiode) = a1Hendelsefabrikk.lagSøknad(
         perioder = arrayOf(*perioder),
-        andreInntektskilder = emptyList(),
+        andreInntektskilder = false,
         sendtTilNAVEllerArbeidsgiver = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
         permittert = false,
         merknaderFraSykmelding = emptyList(),

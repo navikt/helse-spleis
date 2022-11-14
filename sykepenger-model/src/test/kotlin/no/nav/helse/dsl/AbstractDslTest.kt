@@ -190,7 +190,7 @@ internal abstract class AbstractDslTest {
         this { håndterSykmelding(*sykmeldingsperiode, sykmeldingSkrevet = sykmeldingSkrevet, mottatt = mottatt) }
     protected fun String.håndterSøknad(
         vararg perioder: Søknad.Søknadsperiode,
-        andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
+        andreInntektskilder: Boolean = false,
         sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
         sykmeldingSkrevet: LocalDateTime? = null,
     ) =
@@ -296,7 +296,7 @@ internal abstract class AbstractDslTest {
         bareÈnArbeidsgiver(a1).håndterSykmelding(*sykmeldingsperiode, sykmeldingSkrevet = sykmeldingSkrevet, mottatt = mottatt)
     protected fun håndterSøknad(
         vararg perioder: Søknad.Søknadsperiode,
-        andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
+        andreInntektskilder: Boolean = false,
         sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
         sykmeldingSkrevet: LocalDateTime? = null,
         orgnummer: String = a1

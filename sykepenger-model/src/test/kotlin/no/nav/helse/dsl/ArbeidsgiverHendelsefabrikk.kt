@@ -75,7 +75,7 @@ internal class ArbeidsgiverHendelsefabrikk(
 
     internal fun lagSøknad(
         vararg perioder: Søknad.Søknadsperiode,
-        andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
+        andreInntektskilder: Boolean = false,
         sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
         sykmeldingSkrevet: LocalDateTime? = null,
         id: UUID = UUID.randomUUID(),

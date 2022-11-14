@@ -539,7 +539,7 @@ internal class Vedtaksperiode private constructor(
         periode = periode.oppdaterFom(søknad.periode())
         oppdaterHistorikk(søknad)
         søknad.valider(periode, jurist())
-        søknad.validerInntektskilder(this.person.vilkårsgrunnlagFor(this.skjæringstidspunkt) != null)
+        søknad.validerInntektskilder(this.person.vilkårsgrunnlagFor(this.skjæringstidspunkt) == null)
         if (søknad.harFunksjonelleFeilEllerVerre()) {
             return forkast(søknad)
         }

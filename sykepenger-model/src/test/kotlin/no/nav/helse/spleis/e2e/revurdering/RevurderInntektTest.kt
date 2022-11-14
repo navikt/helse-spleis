@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -446,7 +445,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `utbetaling_utbetalt tar med vedtaksperiode-ider for forkastede perioder`() {
         tilGodkjent(1.januar, 31.januar, 100.prosent, 1.januar)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "FRILANSER")))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), andreInntektskilder = true)
         håndterUtbetalt()
 
         val utbetalingEvent = observatør.utbetalingMedUtbetalingEventer.first()

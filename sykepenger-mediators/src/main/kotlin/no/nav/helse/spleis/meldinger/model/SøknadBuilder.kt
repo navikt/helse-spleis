@@ -2,7 +2,7 @@ package no.nav.helse.spleis.meldinger.model
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 internal abstract class SøknadBuilder {
     protected lateinit var meldingsreferanseId: UUID
@@ -38,7 +38,7 @@ internal abstract class SøknadBuilder {
         }
     }
 
-    internal open fun inntektskilde(sykmeldt: Boolean, type: String) = apply {}
+    internal open fun inntektskilde(andreInntektskilder: Boolean) = apply {}
 
     internal abstract fun periode(fom: LocalDate, tom: LocalDate, grad: Int, arbeidshelse: Int?): SøknadBuilder
 

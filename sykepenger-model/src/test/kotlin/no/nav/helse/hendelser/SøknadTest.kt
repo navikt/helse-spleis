@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Søknad.Inntektskilde
 import no.nav.helse.hendelser.Søknad.Merknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
@@ -203,7 +202,7 @@ internal class SøknadTest {
 
     @Test
     fun `søknad uten andre inntektskilder`() {
-        søknad(Sykdom(5.januar, 12.januar, 100.prosent), andreInntektskilder = emptyList())
+        søknad(Sykdom(5.januar, 12.januar, 100.prosent), andreInntektskilder = false)
         assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).harFunksjonelleFeilEllerVerre())
     }
 
@@ -287,7 +286,7 @@ internal class SøknadTest {
 
     private fun søknad(
         vararg perioder: Søknadsperiode,
-        andreInntektskilder: List<Inntektskilde> = emptyList(),
+        andreInntektskilder: Boolean = false,
         permittert: Boolean = false,
         merknaderFraSykmelding: List<Merknad> = emptyList(),
         hendelsefabrikk: ArbeidsgiverHendelsefabrikk = ungPersonFnr2018Hendelsefabrikk,

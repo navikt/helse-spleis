@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
-import no.nav.helse.hendelser.Søknad.Inntektskilde.Companion.valider
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerEtter
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.subsumsjonsFormat
 import no.nav.helse.person.Aktivitetslogg
@@ -36,7 +35,7 @@ class Søknad(
     private val fødselsdato: LocalDate,
     orgnummer: String,
     private val perioder: List<Søknadsperiode>,
-    private val andreInntektskilder: List<Inntektskilde>,
+    private val andreInntektskilder: Boolean,
     private val sendtTilNAVEllerArbeidsgiver: LocalDateTime,
     private val permittert: Boolean,
     private val merknaderFraSykmelding: List<Merknad>,
@@ -83,8 +82,14 @@ class Søknad(
         return this
     }
 
-    internal fun validerInntektskilder(harVilkårsgrunnlag: Boolean): IAktivitetslogg{
-        andreInntektskilder.valider(!harVilkårsgrunnlag, this)
+    internal fun validerInntektskilder(manglerVilkårsgrunnlag: Boolean): IAktivitetslogg {
+        if(andreInntektskilder){
+            if(manglerVilkårsgrunnlag){
+                this.funksjonellFeil(RV_SØ_10)
+            } else {
+                this.varsel(RV_SØ_10)
+            }
+        }
         return this
     }
 
@@ -242,24 +247,6 @@ class Søknad(
             private fun alleUtlandsdagerErFerie(søknad:Søknad):Boolean {
                 val feriePerioder = søknad.perioder.filterIsInstance<Ferie>()
                 return this.periode.all { utlandsdag -> feriePerioder.any { ferie -> ferie.periode.contains(utlandsdag)} }
-            }
-        }
-    }
-
-    class Inntektskilde(
-        private val sykmeldt: Boolean,
-        private val type: String
-    ) {
-        companion object {
-            internal fun List<Inntektskilde>.valider(manglerVilkårsgrunnlag: Boolean, aktivitetslogg: IAktivitetslogg){
-                // error hvis førstegangsbehandling og varsel ved forlengelser
-                if(isNotEmpty()){
-                    if(manglerVilkårsgrunnlag){
-                        aktivitetslogg.funksjonellFeil(RV_SØ_10)
-                    } else {
-                        aktivitetslogg.varsel(RV_SØ_10)
-                    }
-                }
             }
         }
     }

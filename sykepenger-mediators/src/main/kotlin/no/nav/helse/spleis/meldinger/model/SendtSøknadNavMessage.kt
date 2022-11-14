@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ArrayNode
 import java.util.UUID
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -28,9 +29,11 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, private val builder: 
             packet["papirsykmeldinger"].forEach {
                 builder.papirsykmelding(fom = it.path("fom").asLocalDate(), tom = it.path("tom").asLocalDate())
             }
-            packet["andreInntektskilder"].forEach {
-                builder.inntektskilde(sykmeldt = it["sykmeldt"].asBoolean(), type = it["type"].asText())
+            when(val inntektskilder = packet["andreInntektskilder"]) {
+                is ArrayNode -> builder.inntektskilde(!inntektskilder.isEmpty)
+                else -> builder.inntektskilde(false)
             }
+
             packet["fravar"].forEach {
                 val fraværstype = it["type"].asText()
                 val fom = it.path("fom").asLocalDate()

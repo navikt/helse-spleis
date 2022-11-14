@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
@@ -748,12 +747,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     fun `out-of-order med error skal ikke medføre revurdering`() {
         nyttVedtak(1.mars, 31.mars)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = listOf(
-            Søknad.Inntektskilde(
-                true,
-                "FRILANSER"
-            )
-        ))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = true)
         assertFunksjonellFeil(RV_SØ_10.varseltekst, 2.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)

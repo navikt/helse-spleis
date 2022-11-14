@@ -122,7 +122,7 @@ internal fun AbstractEndToEndTest.sykmelding(
 internal fun AbstractEndToEndTest.søknad(
     id: UUID,
     vararg perioder: Søknadsperiode,
-    andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
+    andreInntektskilder: Boolean = false,
     sendtTilNAVEllerArbeidsgiver: LocalDate = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     sykmeldingSkrevet: LocalDateTime? = null,

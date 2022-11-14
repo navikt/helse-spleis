@@ -147,7 +147,7 @@ internal class TestPerson(
 
         internal fun håndterSøknad(
             vararg perioder: Søknad.Søknadsperiode,
-            andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
+            andreInntektskilder: Boolean = false,
             sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
             sykmeldingSkrevet: LocalDateTime? = null,
             orgnummer: String = ""

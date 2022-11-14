@@ -84,7 +84,7 @@ abstract class AbstractObservableTest {
     protected fun søknad(
         id: UUID = SØKNAD_ID,
         vararg perioder: Søknadsperiode = arrayOf(Sykdom(FOM, TOM, 100.prosent)),
-        andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
+        andreInntektskilder: Boolean = false,
         sendtTilNAVEllerArbeidsgiver: LocalDate = TOM.plusDays(1),
         orgnummer: String = ORGNUMMER,
         sykmeldingSkrevet: LocalDateTime = FOM.atStartOfDay(),

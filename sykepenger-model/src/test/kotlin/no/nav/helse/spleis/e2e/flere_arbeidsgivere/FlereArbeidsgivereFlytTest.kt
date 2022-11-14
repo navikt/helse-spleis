@@ -9,7 +9,6 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
@@ -690,12 +689,12 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(
             Sykdom(1.januar, 31.januar, 100.prosent),
-            andreInntektskilder = listOf(Søknad.Inntektskilde(true, "Annen inntekt")),
+            andreInntektskilder = true,
             orgnummer = a1
         )
         håndterSøknad(
             Sykdom(1.januar, 31.januar, 100.prosent),
-            andreInntektskilder = listOf(Søknad.Inntektskilde(true, "Annen inntekt")),
+            andreInntektskilder = true,
             orgnummer = a2
         )
 
@@ -709,7 +708,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(
             Sykdom(1.januar, 31.januar, 100.prosent),
-            andreInntektskilder = listOf(Søknad.Inntektskilde(true, "Annen inntekt")),
+            andreInntektskilder = true,
             orgnummer = a1
         )
 
