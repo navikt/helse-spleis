@@ -538,10 +538,11 @@ internal class Vedtaksperiode private constructor(
     private fun håndterSøknad(søknad: Søknad, nesteTilstand: () -> Vedtaksperiodetilstand? = { null }) {
         periode = periode.oppdaterFom(søknad.periode())
         oppdaterHistorikk(søknad)
-        if (!søknad.harProblemdager()){
-            søknad.validerInntektskilder(arbeidsgiver.erFørstegangsbehandling(periode))
-        }
         søknad.valider(periode, jurist())
+        if (søknad.harFunksjonelleFeilEllerVerre()) {
+            return forkast(søknad)
+        }
+        søknad.validerInntektskilder(arbeidsgiver.erFørstegangsbehandling(periode))
         if (søknad.harFunksjonelleFeilEllerVerre()) {
             return forkast(søknad)
         }
