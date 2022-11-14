@@ -83,8 +83,8 @@ class Søknad(
         return this
     }
 
-    internal fun validerInntektskilder(førstegangsbehandling: Boolean): IAktivitetslogg{
-        andreInntektskilder.valider(førstegangsbehandling, this)
+    internal fun validerInntektskilder(harVilkårsgrunnlag: Boolean): IAktivitetslogg{
+        andreInntektskilder.valider(!harVilkårsgrunnlag, this)
         return this
     }
 
@@ -125,9 +125,6 @@ class Søknad(
 
     internal fun dagerMellomPeriodenVarFerdigOgSøknadenVarSendt() = ChronoUnit.DAYS.between(sendtTilNAVEllerArbeidsgiver, sykdomsperiode.endInclusive.plusDays(1).atStartOfDay())
     internal fun dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet() = ChronoUnit.DAYS.between(sykmeldingSkrevet, sykdomsperiode.endInclusive.plusDays(1).atStartOfDay())
-    internal fun harProblemdager(): Boolean {
-        return sykdomstidslinje.harProblemdager()
-    }
 
     class Merknad(private val type: String) {
         internal fun valider(aktivitetslogg: IAktivitetslogg) {
@@ -254,10 +251,10 @@ class Søknad(
         private val type: String
     ) {
         companion object {
-            internal fun List<Inntektskilde>.valider(førstegangsbehandling: Boolean, aktivitetslogg: IAktivitetslogg){
+            internal fun List<Inntektskilde>.valider(manglerVilkårsgrunnlag: Boolean, aktivitetslogg: IAktivitetslogg){
                 // error hvis førstegangsbehandling og varsel ved forlengelser
                 if(isNotEmpty()){
-                    if(førstegangsbehandling){
+                    if(manglerVilkårsgrunnlag){
                         aktivitetslogg.funksjonellFeil(RV_SØ_10)
                     } else {
                         aktivitetslogg.varsel(RV_SØ_10)
