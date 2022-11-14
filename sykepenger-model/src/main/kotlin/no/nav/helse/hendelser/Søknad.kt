@@ -72,11 +72,6 @@ class Søknad(
 
     override fun sykdomstidslinje() = sykdomstidslinje
 
-    override fun validerIkkeOppgittFlereArbeidsforholdMedSykmelding(): IAktivitetslogg {
-        andreInntektskilder.forEach { it.validerIkkeSykmeldt(this) }
-        return this
-    }
-
     internal fun harArbeidsdager() = perioder.filterIsInstance<Søknadsperiode.Arbeid>().isNotEmpty()
 
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
@@ -269,19 +264,6 @@ class Søknad(
                     }
                 }
             }
-        }
-
-        // fjerne
-        fun valider(aktivitetslogg: IAktivitetslogg) {
-            if (type == "ANNET") {
-                aktivitetslogg.varsel(RV_SØ_9)
-            } else if (type != "ANDRE_ARBEIDSFORHOLD") {
-                aktivitetslogg.funksjonellFeil(RV_SØ_18)
-            }
-        }
-
-        fun validerIkkeSykmeldt(aktivitetslogg: IAktivitetslogg) {
-            aktivitetslogg.varsel(RV_SØ_10)
         }
     }
 }

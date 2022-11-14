@@ -32,11 +32,11 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.Varselkode.RV_SØ_10
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forkastAlle
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.grunnlag
@@ -714,7 +714,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         )
 
         assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
-        assertVarsel(RV_SØ_10)
+        assertFunksjonellFeil(RV_SØ_10)
     }
 
     @Test

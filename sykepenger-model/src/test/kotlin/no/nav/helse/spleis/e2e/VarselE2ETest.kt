@@ -156,7 +156,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
             Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
             andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD"))
         )
-        assertVarsel(RV_SØ_10, 1.vedtaksperiode.filter())
+        assertFunksjonellFeil(RV_SØ_10.varseltekst, 1.vedtaksperiode.filter())
     }
 
     @Test

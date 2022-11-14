@@ -678,8 +678,6 @@ class Person private constructor(
         }
     }
 
-    internal fun harFlereArbeidsgivereMedSykdom() = arbeidsgivere.count(Arbeidsgiver::harSykdomEllerForventerSøknad) > 1
-
     private fun arbeidsgivereMedSykdom() = arbeidsgivere.filter(Arbeidsgiver::harSykdom)
 
     internal fun sykdomshistorikkEndret(aktivitetslogg: IAktivitetslogg) {

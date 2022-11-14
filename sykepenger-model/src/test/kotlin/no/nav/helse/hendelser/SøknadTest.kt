@@ -19,12 +19,8 @@ import no.nav.helse.mai
 import no.nav.helse.november
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.AktivitetException
-import no.nav.helse.person.Varselkode.RV_SØ_9
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somPersonidentifikator
-import no.nav.helse.spleis.e2e.assertFunksjonellFeil
-import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
-import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
@@ -69,13 +65,6 @@ internal class SøknadTest {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent))
         assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).harFunksjonelleFeilEllerVerre())
         assertEquals(10, søknad.sykdomstidslinje().count())
-    }
-
-    @Test
-    fun `warning ved ANDRE_ARBEIDSFORHOLD hvor bruker er sykmeldt, men vi kun kjenner til sykmelding for en arbeidsgiver`() {
-        søknad(Sykdom(1.januar, 10.januar, 100.prosent), andreInntektskilder = listOf(Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")))
-        assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).harFunksjonelleFeilEllerVerre())
-        assertTrue(søknad.validerIkkeOppgittFlereArbeidsforholdMedSykmelding().harVarslerEllerVerre())
     }
 
     @Test
@@ -294,21 +283,6 @@ internal class SøknadTest {
         assertEquals(1, søknad.kontekster().size)
         assertTrue(søknad.harVarslerEllerVerre())
         assertFalse(søknad.harFunksjonelleFeilEllerVerre())
-    }
-
-    @Test
-    fun `inntektskilde med type ANNET skal gi warning istedenfor error`() {
-        søknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = listOf(Inntektskilde(true, "ANNET")))
-        søknad.valider(EN_PERIODE, MaskinellJurist())
-        aktivitetslogg.assertVarsel(RV_SØ_9)
-        aktivitetslogg.assertIngenFunksjonelleFeil()
-    }
-
-    @Test
-    fun `inntektskilde med type FRILANSER skal gi error`() {
-        søknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = listOf(Inntektskilde(true, "FRILANSER")))
-        søknad.valider(EN_PERIODE, MaskinellJurist())
-        aktivitetslogg.assertFunksjonellFeil("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD")
     }
 
     private fun søknad(

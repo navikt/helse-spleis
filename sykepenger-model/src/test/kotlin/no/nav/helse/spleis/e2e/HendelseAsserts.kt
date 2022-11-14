@@ -155,6 +155,7 @@ internal fun AbstractPersonTest.assertVarsel(varsel: Varselkode, vararg filtre: 
 internal fun AbstractPersonTest.assertIngenVarsel(warning: String, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertIngenVarsel(warning, *filtre)
 internal fun AbstractPersonTest.assertIngenVarsel(varselkode: Varselkode, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertIngenVarsel(varselkode, *filtre)
 internal fun AbstractPersonTest.assertFunksjonellFeil(error: String, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertFunksjonellFeil(error, *filtre)
+internal fun AbstractPersonTest.assertFunksjonellFeil(varselkode: Varselkode, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertFunksjonellFeil(varselkode.varseltekst, *filtre)
 internal fun AbstractPersonTest.assertFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertFunksjonelleFeil(*filtre)
 internal fun AbstractPersonTest.assertIngenFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertIngenFunksjonelleFeil(*filtre)
 internal fun AbstractPersonTest.assertLogiskFeil(severe: String, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertLogiskFeil(severe, *filtre)

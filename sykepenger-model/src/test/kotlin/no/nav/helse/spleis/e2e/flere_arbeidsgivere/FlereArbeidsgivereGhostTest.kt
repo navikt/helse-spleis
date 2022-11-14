@@ -25,7 +25,6 @@ import no.nav.helse.person.Varselkode.RV_VV_2
 import no.nav.helse.person.Varselkode.RV_VV_8
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
-import no.nav.helse.spleis.e2e.assertFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -673,9 +672,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             andreInntektskilder = listOf(Søknad.Inntektskilde(false, "Annen inntekt")),
             orgnummer = a1
         )
-        assertFunksjonelleFeil()
-        assertVarsel(RV_SØ_10)
-        assertFunksjonellFeil("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden.")
+        assertFunksjonellFeil(RV_SØ_10)
     }
 
     @Test
@@ -688,7 +685,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
 
-        assertVarsel(RV_SØ_10)
+        assertFunksjonellFeil(RV_SØ_10)
     }
 
     @Test
