@@ -20,18 +20,10 @@ import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenInfo
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.A
-import no.nav.helse.testhelpers.FRI
-import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.S
-import no.nav.helse.testhelpers.UTELATE
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
-import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fridag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -183,64 +175,6 @@ internal class InfotrygdhistorikkElementTest {
         )
         element.utbetalingstidslinje().also {
             assertEquals(1.januar til 20.januar, it.periode())
-        }
-    }
-
-    @Test
-    fun `fjerner historiske utbetalinger`() {
-        val element = nyttHistorikkelement(
-            listOf(
-                ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 10.januar, 100.prosent, 25000.månedlig),
-                Friperiode(11.januar, 20.januar),
-                ArbeidsgiverUtbetalingsperiode("ag1", 21.januar, 31.januar, 100.prosent, 25000.månedlig),
-                ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 28.februar, 100.prosent, 25000.månedlig)
-            )
-        )
-        element.fjernHistorikk(tidslinjeOf(10.NAV), "ag1").also { utbetalingstidslinje ->
-            assertTrue(utbetalingstidslinje.isEmpty())
-        }
-        element.fjernHistorikk(tidslinjeOf(10.NAV, 10.FRI, 11.NAV, 28.NAV, 31.NAV), "ag1").also { utbetalingstidslinje ->
-            assertEquals(11.januar til 31.mars, utbetalingstidslinje.periode())
-            assertTrue(utbetalingstidslinje.subset(11.januar til 20.januar).all { it is Fridag })
-            assertTrue(utbetalingstidslinje.subset(21.januar til 28.februar).all { it is UkjentDag })
-            assertTrue(utbetalingstidslinje.subset(1.mars til 31.mars).all { it is NavDag || it is NavHelgDag })
-        }
-        element.fjernHistorikk(tidslinjeOf(31.UTELATE, 28.NAV, 31.NAV), "ag1").also {
-            assertEquals(1.mars til 31.mars, it.periode())
-        }
-    }
-
-    @Test
-    fun `tar ikke med historiske fridager`() {
-        val element = nyttHistorikkelement(
-            listOf(
-                Friperiode(11.januar, 20.januar),
-                ArbeidsgiverUtbetalingsperiode("ag1", 21.januar, 31.januar, 100.prosent, 25000.månedlig),
-            )
-        )
-        element.fjernHistorikk(tidslinjeOf(10.NAV), "ag1").also { utbetalingstidslinje ->
-            assertEquals(1.januar til 10.januar, utbetalingstidslinje.periode())
-        }
-    }
-
-    @Test
-    fun `fjerner ikke historikk fra andre arbeidsgivere`() {
-        val element = nyttHistorikkelement(
-            listOf(
-                ArbeidsgiverUtbetalingsperiode("ag2", 1.januar, 10.januar, 100.prosent, 25000.månedlig),
-                Friperiode(11.januar, 20.januar)
-            )
-        )
-        element.fjernHistorikk(tidslinjeOf(10.NAV, 10.FRI, 11.NAV), "ag1").also { utbetalingstidslinje ->
-            assertEquals(1.januar til 31.januar, utbetalingstidslinje.periode())
-            assertTrue(utbetalingstidslinje.subset(1.januar til 5.januar).all { it is NavDag })
-            assertTrue(utbetalingstidslinje.subset(6.januar til 7.januar).all { it is NavHelgDag })
-            assertTrue(utbetalingstidslinje.subset(8.januar til 10.januar).all { it is NavDag })
-            assertTrue(utbetalingstidslinje.subset(11.januar til 20.januar).all { it is Fridag })
-            assertTrue(utbetalingstidslinje.subset(21.januar til 21.januar).all { it is NavHelgDag })
-            assertTrue(utbetalingstidslinje.subset(22.januar til 26.januar).all { it is NavDag })
-            assertTrue(utbetalingstidslinje.subset(27.januar til 28.januar).all { it is NavHelgDag })
-            assertTrue(utbetalingstidslinje.subset(29.januar til 31.januar).all { it is NavDag })
         }
     }
 

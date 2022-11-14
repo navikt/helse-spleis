@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Objects
 import java.util.UUID
-import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
@@ -21,9 +20,6 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Infotrygddekoratør
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fridag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 
 class InfotrygdhistorikkElement private constructor(
     private val id: UUID,
@@ -113,6 +109,8 @@ class InfotrygdhistorikkElement private constructor(
         historikkFor(organisasjonsnummer, sykdomstidslinje).accept(dekoratør)
     }
 
+    internal fun betaltePerioder(): List<Periode> = perioder.filterIsInstance<Utbetalingsperiode>()
+
     private data class Oppslagsnøkkel(
         val orgnummer: String,
         val sykdomstidslinje: Sykdomstidslinje
@@ -198,18 +196,6 @@ class InfotrygdhistorikkElement private constructor(
                 .map { it.utbetalingstidslinje() }
                 .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
         }
-
-    internal fun fjernHistorikk(utbetalingstidlinje: Utbetalingstidslinje, organisasjonsnummer: String): Utbetalingstidslinje {
-        return utbetalingstidlinje.plus(utbetalingstidslinje(organisasjonsnummer).subset(utbetalingstidlinje.periode())) { spleisDag: Utbetalingstidslinje.Utbetalingsdag, infotrygdDag: Utbetalingstidslinje.Utbetalingsdag ->
-            when {
-                // fjerner utbetalinger i ukedager (bevarer fridager)
-                !infotrygdDag.dato.erHelg() && infotrygdDag is NavDag -> UkjentDag(spleisDag.dato, spleisDag.økonomi)
-                // fjerner utbetalinger i helger (bevarer fridager)
-                infotrygdDag.dato.erHelg() && infotrygdDag !is Fridag -> UkjentDag(spleisDag.dato, spleisDag.økonomi)
-                else -> spleisDag
-            }
-        }
-    }
 
     internal fun harBetaltRettFør(periode: Periode): Boolean {
         return perioder.any {

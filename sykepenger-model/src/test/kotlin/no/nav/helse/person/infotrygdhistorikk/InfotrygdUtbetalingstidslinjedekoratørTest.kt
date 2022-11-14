@@ -1,12 +1,15 @@
 package no.nav.helse.person.infotrygdhistorikk
 
+import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.resetSeed
+import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilder
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
@@ -16,9 +19,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
 
 internal class InfotrygdUtbetalingstidslinjedekoratørTest {
 
@@ -37,9 +37,41 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
             regler = NormalArbeidstaker,
             subsumsjonObserver = MaskinellJurist()
         ))
-        val dekoratør = InfotrygdUtbetalingstidslinjedekoratør(builder, 1.februar)
-        val tidslinje = 31.S + 28.S
+        val dekoratør = InfotrygdUtbetalingstidslinjedekoratør(builder, 1.februar til 28.februar, emptyList())
+        val tidslinje = 31.S + 28.S + 31.S
         tidslinje.accept(ArbeidsgiverperiodeBuilder(Arbeidsgiverperiodeteller.NormalArbeidstaker, dekoratør, SubsumsjonObserver.NullObserver))
         assertEquals(1.februar til 28.februar, builder.result().periode())
+    }
+
+    @Test
+    fun `ekskluderer infotrygd-snuter`() {
+        val builder = UtbetalingstidslinjeBuilder(Inntekter(
+            vilkårsgrunnlagHistorikk = mapOf(
+                1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
+            ).somVilkårsgrunnlagHistorikk("a1"),
+            organisasjonsnummer = "a1",
+            regler = NormalArbeidstaker,
+            subsumsjonObserver = MaskinellJurist()
+        ))
+        val dekoratør = InfotrygdUtbetalingstidslinjedekoratør(builder, 1.februar til 28.februar, listOf(1.januar til 10.februar))
+        val tidslinje = 31.S + 28.S
+        tidslinje.accept(ArbeidsgiverperiodeBuilder(Arbeidsgiverperiodeteller.NormalArbeidstaker, dekoratør, SubsumsjonObserver.NullObserver))
+        assertEquals(11.februar til 28.februar, builder.result().periode())
+    }
+
+    @Test
+    fun `ekskluderer infotrygd-haler`() {
+        val builder = UtbetalingstidslinjeBuilder(Inntekter(
+            vilkårsgrunnlagHistorikk = mapOf(
+                1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
+            ).somVilkårsgrunnlagHistorikk("a1"),
+            organisasjonsnummer = "a1",
+            regler = NormalArbeidstaker,
+            subsumsjonObserver = MaskinellJurist()
+        ))
+        val dekoratør = InfotrygdUtbetalingstidslinjedekoratør(builder, 1.januar til 31.januar, listOf(20.januar til 28.februar))
+        val tidslinje = 31.S + 28.S
+        tidslinje.accept(ArbeidsgiverperiodeBuilder(Arbeidsgiverperiodeteller.NormalArbeidstaker, dekoratør, SubsumsjonObserver.NullObserver))
+        assertEquals(1.januar til 19.januar, builder.result().periode())
     }
 }

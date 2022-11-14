@@ -102,24 +102,23 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
         strategy: (Utbetalingsdag, Utbetalingsdag) -> Utbetalingsdag
     ) = Utbetalingstidslinje(
         this.utbetalingsdager.zip(other.utbetalingsdager, strategy).toMutableList()
-    ).trim()
-
-    private fun trim(): Utbetalingstidslinje {
-        val første = firstOrNull { it !is UkjentDag }?.dato ?: return Utbetalingstidslinje()
-        return subset(første til last { it !is UkjentDag }.dato)
-    }
+    )
 
     private fun trimLedendeFridager() = Utbetalingstidslinje(dropWhile { it is Fridag }.toMutableList())
 
+    private fun Builder.addUkjentDagHåndterHelg(dato: LocalDate) {
+        if (dato.erHelg()) return addFridag(dato, Økonomi.ikkeBetalt())
+        addUkjentDag(dato)
+    }
     private fun utvide(tidligsteDato: LocalDate, sisteDato: LocalDate): Utbetalingstidslinje {
         val original = this
         return Builder().apply {
             tidligsteDato.datesUntil(original.førsteDato)
-                .forEach { addUkjentDag(it) }
+                .forEach { addUkjentDagHåndterHelg(it) }
             original.utbetalingsdager.forEach { add(it) }
             original.sisteDato.plusDays(1)
                 .datesUntil(sisteDato.plusDays(1))
-                .forEach { addUkjentDag(it) }
+                .forEach { addUkjentDagHåndterHelg(it) }
         }.build()
     }
 
@@ -319,11 +318,7 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
         }
 
         internal fun addUkjentDag(dato: LocalDate) =
-            Økonomi.ikkeBetalt().let { økonomi ->
-                if (dato.erHelg()) addFridag(dato, økonomi) else {
-                    add(UkjentDag(dato, økonomi))
-                }
-            }
+            add(UkjentDag(dato, Økonomi.ikkeBetalt()))
 
         internal fun addAvvistDag(dato: LocalDate, økonomi: Økonomi, begrunnelser: List<Begrunnelse>) {
             add(AvvistDag(dato, økonomi, begrunnelser))
