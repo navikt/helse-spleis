@@ -400,8 +400,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             }),
             infotrygdhistorikk,
             null,
-            vilkårsgrunnlagHistorikk,
-            SubsumsjonObserver.NullObserver
+            vilkårsgrunnlagHistorikk
         ).also {
             it.beregn(
                 "88888888",

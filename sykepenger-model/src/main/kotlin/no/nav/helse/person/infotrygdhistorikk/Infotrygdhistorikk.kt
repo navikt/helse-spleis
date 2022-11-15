@@ -127,20 +127,12 @@ internal class Infotrygdhistorikk private constructor(
         subsumsjonObserver: SubsumsjonObserver
     ) {
         val teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
-        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, builder, subsumsjonObserver)
-        if (!harHistorikk()) return sykdomstidslinje.accept(arbeidsgiverperiodeBuilder)
+        if (!harHistorikk()) {
+            val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, builder, subsumsjonObserver)
+            return sykdomstidslinje.accept(arbeidsgiverperiodeBuilder)
+        }
+        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, InfotrygdUtbetalingstidslinjedekoratør(builder, sykdomstidslinje.periode()!!, siste.betaltePerioder()), subsumsjonObserver)
         siste.build(organisasjonsnummer, sykdomstidslinje, teller, arbeidsgiverperiodeBuilder)
-    }
-
-    internal fun build(
-        organisasjonsnummer: String,
-        sykdomstidslinje: Sykdomstidslinje,
-        builder: IUtbetalingstidslinjeBuilder,
-        subsumsjonObserver: SubsumsjonObserver
-    ): Utbetalingstidslinje {
-        val dekoratør = if (harHistorikk()) InfotrygdUtbetalingstidslinjedekoratør(builder, sykdomstidslinje.periode()!!, siste.betaltePerioder()) else builder
-        build(organisasjonsnummer, sykdomstidslinje, dekoratør, subsumsjonObserver)
-        return builder.result()
     }
 
     private fun oppfrisket(cutoff: LocalDateTime) =
