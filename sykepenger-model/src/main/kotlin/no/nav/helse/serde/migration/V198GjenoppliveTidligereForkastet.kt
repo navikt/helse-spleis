@@ -29,7 +29,9 @@ internal class V198GjenoppliveTidligereForkastet: JsonMigration(version = 198) {
                 if (tilstand in setOf("AVSLUTTET", "AVSLUTTET_UTEN_UTBETALING")) {
                     val utbetaling = utbetalinger.firstNotNullOfOrNull { (_, utbetalinger) ->
                         utbetalinger
-                            .filterNot { it.path("status").asText() == "FORKASTET" }
+                            .filterNot {
+                                it.path("status").asText() in setOf("GODKJENT_UTEN_UTBETALING", "FORKASTET", "IKKE_GODKJENT")
+                            }
                             .lastOrNull()
                             ?.takeUnless { utbetaling ->
                                 utbetaling.path("status").asText() == "ANNULLERT"
