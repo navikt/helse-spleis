@@ -1,6 +1,7 @@
 package no.nav.helse.serde.api
 
 import java.time.LocalDate
+import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -37,6 +38,7 @@ import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.speilApi
 import no.nav.helse.spleis.e2e.standardSimuleringsresultat
 import no.nav.helse.testhelpers.assertNotNull
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -207,12 +209,70 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `vilkårsgrunnlagId ligger i bøtta`() {
+    fun `beregnet periode peker på et vilkårsgrunnlag`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         val personDto = speilApi()
         val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-        val bøtteVilkårsgrunnlag = personDto.vilkårsgrunnlag.get(speilVilkårsgrunnlagId)
-        assertTrue(bøtteVilkårsgrunnlag is SpleisVilkårsgrunnlag)
+        val vilkårsgrunnlag = personDto.vilkårsgrunnlag.get(speilVilkårsgrunnlagId)
+        assertTrue(vilkårsgrunnlag is SpleisVilkårsgrunnlag)
+    }
 
+    @Test
+    fun `refusjon ligger på vilkårsgrunnlaget`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        val personDto = speilApi()
+        val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val vilkårsgrunnlag = personDto.vilkårsgrunnlag.get(speilVilkårsgrunnlagId) as? SpleisVilkårsgrunnlag
+        assertTrue(vilkårsgrunnlag!!.refusjonsopplysninger.isNotEmpty())
+        val arbeidsgiverrefusjon = vilkårsgrunnlag.refusjonsopplysninger.single()
+        assertEquals(ORGNUMMER, arbeidsgiverrefusjon.arbeidsgiver)
+        val refusjonsopplysning = arbeidsgiverrefusjon.refusjonsopplysninger.single()
+
+        assertEquals(1.januar, refusjonsopplysning.fom)
+        assertEquals(null, refusjonsopplysning.tom)
+        assertEquals(INNTEKT,refusjonsopplysning.beløp.månedlig)
+    }
+
+    @Test
+    fun `endring i refusjon`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT, null, endringerIRefusjon = listOf(
+            Inntektsmelding.Refusjon.EndringIRefusjon(Inntekt.INGEN, 1.februar))))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        val personDto = speilApi()
+        val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val vilkårsgrunnlag = personDto.vilkårsgrunnlag.get(speilVilkårsgrunnlagId) as? SpleisVilkårsgrunnlag
+        assertTrue(vilkårsgrunnlag!!.refusjonsopplysninger.isNotEmpty())
+        val arbeidsgiverrefusjon = vilkårsgrunnlag.refusjonsopplysninger.single()
+        assertEquals(ORGNUMMER, arbeidsgiverrefusjon.arbeidsgiver)
+        val refusjonsopplysninger = arbeidsgiverrefusjon.refusjonsopplysninger
+
+        assertEquals(2, refusjonsopplysninger.size)
+
+        assertEquals(1.januar, refusjonsopplysninger.first().fom)
+        assertEquals(31.januar, refusjonsopplysninger.first().tom)
+        assertEquals(INNTEKT,refusjonsopplysninger.first().beløp.månedlig)
+        assertEquals(1.februar, refusjonsopplysninger.last().fom)
+        assertEquals(null, refusjonsopplysninger.last().tom)
+        assertEquals(Inntekt.INGEN, refusjonsopplysninger.last().beløp.månedlig)
+    }
+
+    @Test
+    fun `korrigert inntektsmelding i Avsluttet, velger opprinnelig refusjon`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        val vilkårsgrunnlagId = (speilApi().arbeidsgivere.first().generasjoner.last().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val refusjon = (speilApi().arbeidsgivere.first().generasjoner.last().perioder.first() as BeregnetPeriode).refusjon
+        assertEquals(INNTEKT, refusjon?.beløp?.månedlig)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar),  refusjon = Inntektsmelding.Refusjon(20000.månedlig, null))
+        val vilkårsgrunnlagIdEtterIm = (speilApi().arbeidsgivere.first().generasjoner.last().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val refusjonEtterIm = (speilApi().arbeidsgivere.first().generasjoner.last().perioder.first() as BeregnetPeriode).refusjon
+        assertEquals(vilkårsgrunnlagId, vilkårsgrunnlagIdEtterIm)
+        assertEquals(INNTEKT, refusjonEtterIm?.beløp?.månedlig)
     }
 }

@@ -2,6 +2,7 @@ package no.nav.helse.serde.api.dto
 
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.UUID
 import no.nav.helse.serde.api.speil.builders.SykepengegrunnlagsgrenseDTO
 
 interface Vilkårsgrunnlag {
@@ -24,6 +25,7 @@ data class SpleisVilkårsgrunnlag(
     override val sammenligningsgrunnlag: Double,
     override val sykepengegrunnlag: Double,
     override val inntekter: List<Arbeidsgiverinntekt>,
+    val refusjonsopplysninger: List<Arbeidsgiverrefusjon>,
     val avviksprosent: Double?,
     val grunnbeløp: Int,
     val sykepengegrunnlagsgrense: SykepengegrunnlagsgrenseDTO,
@@ -51,6 +53,18 @@ data class Arbeidsgiverinntekt(
     val omregnetÅrsinntekt: OmregnetÅrsinntekt?,
     val sammenligningsgrunnlag: Double? = null,
     val deaktivert: Boolean
+)
+
+data class Arbeidsgiverrefusjon(
+    val arbeidsgiver: String,
+    val refusjonsopplysninger: List<Refusjonselement>
+)
+
+data class Refusjonselement(
+    val fom: LocalDate,
+    val tom: LocalDate?,
+    val beløp: Double,
+    val meldingsreferanseId: UUID
 )
 
 enum class Inntektkilde {

@@ -9,13 +9,10 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.AbstractBuilder
 import no.nav.helse.serde.api.BuilderState
-import no.nav.helse.serde.api.dto.ArbeidsgiverDTO
 import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.PersonDTO
-import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
 import no.nav.helse.serde.api.speil.builders.ArbeidsgiverBuilder.Companion.vilkårsgrunnlagSomPekesPåAvGhostPerioder
 import no.nav.helse.utbetalingstidslinje.Alder
-import org.slf4j.LoggerFactory
 
 internal class PersonBuilder(
     builder: AbstractBuilder,
@@ -34,8 +31,6 @@ internal class PersonBuilder(
         val arbeidsgivere = arbeidsgivere.map { it.build(hendelser, alder, vilkårsgrunnlagHistorikk) }
         val vilkårsgrunnlag = arbeidsgivere.vilkårsgrunnlagSomPekesPåAvGhostPerioder() + vilkårsgrunnlagHistorikk.vilkårsgrunnlagSomPekesPåAvBeregnedePerioder()
 
-        sjekkVilkårsgrunnlag(vilkårsgrunnlag, arbeidsgivere)
-
         return PersonDTO(
             fødselsnummer = personidentifikator.toString(),
             aktørId = aktørId,
@@ -45,18 +40,6 @@ internal class PersonBuilder(
             versjon = versjon,
             vilkårsgrunnlag = vilkårsgrunnlag
         )
-    }
-
-    private fun sjekkVilkårsgrunnlag(
-        vilkårsgrunnlag: Map<UUID, Vilkårsgrunnlag>,
-        arbeidsgivere: List<ArbeidsgiverDTO>
-    ) {
-        arbeidsgivere.vilkårsgrunnlagSomPekesPåAvGhostPerioder().keys
-            .forEach { ghostVilkårsgrunnlagId ->
-                if (!vilkårsgrunnlag.containsKey(ghostVilkårsgrunnlagId)) {
-                    sikkerlog.info("$aktørId har en arbeidsgiver med en ghostperiode med vilkårsgrunnlag $ghostVilkårsgrunnlagId som ikke ligger i vilkårsgrunnlag-lista, hvordan kan dette skje?")
-                }
-            }
     }
 
     override fun visitAlder(alder: Alder, fødselsdato: LocalDate) {
@@ -84,9 +67,5 @@ internal class PersonBuilder(
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {
         popState()
-    }
-
-    private companion object {
-        private val sikkerlog = LoggerFactory.getLogger("tjenestekall")
     }
 }

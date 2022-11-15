@@ -24,6 +24,7 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.Grunnlagsdata
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
+import no.nav.helse.serde.api.dto.Refusjonselement
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
 import no.nav.helse.økonomi.Inntekt
@@ -45,7 +46,8 @@ internal class ISykepengegrunnlag(
     val sykepengegrunnlag: Double,
     val oppfyllerMinsteinntektskrav: Boolean,
     val omregnetÅrsinntekt: Double,
-    val begrensning: SykepengegrunnlagsgrenseDTO
+    val begrensning: SykepengegrunnlagsgrenseDTO,
+    val refusjonsopplysningerPerArbeidsgiver: List<IArbeidsgiverrefusjon>
 )
 
 internal class IInntekt(
@@ -71,6 +73,7 @@ internal class ISpleisGrunnlag(
     override val inntekter: List<IArbeidsgiverinntekt>,
     override val sykepengegrunnlag: Double,
     override val id: UUID,
+    val refusjonsopplysningerPerArbeidsgiver: List<IArbeidsgiverrefusjon>,
     val avviksprosent: Double?,
     val grunnbeløp: Int,
     val sykepengegrunnlagsgrense: SykepengegrunnlagsgrenseDTO,
@@ -87,6 +90,7 @@ internal class ISpleisGrunnlag(
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             sykepengegrunnlag = sykepengegrunnlag,
             inntekter = inntekter.map { it.toDTO() },
+            refusjonsopplysninger = refusjonsopplysningerPerArbeidsgiver.map { it.toDTO() },
             avviksprosent = avviksprosent,
             grunnbeløp = grunnbeløp,
             sykepengegrunnlagsgrense = sykepengegrunnlagsgrense,
@@ -216,6 +220,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 omregnetÅrsinntekt = compositeSykepengegrunnlag.omregnetÅrsinntekt,
                 sammenligningsgrunnlag = InntektBuilder(sammenligningsgrunnlag.sammenligningsgrunnlag).build().årlig,
                 inntekter = compositeSykepengegrunnlag.inntekterPerArbeidsgiver,
+                refusjonsopplysningerPerArbeidsgiver = compositeSykepengegrunnlag.refusjonsopplysningerPerArbeidsgiver,
                 sykepengegrunnlag = compositeSykepengegrunnlag.sykepengegrunnlag,
                 avviksprosent = avviksprosent?.prosent(),
                 grunnbeløp = compositeSykepengegrunnlag.begrensning.grunnbeløp,
@@ -293,6 +298,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         ) : VilkårsgrunnlagHistorikkVisitor {
             private lateinit var `6G`: Inntekt
             private val inntekterPerArbeidsgiver = mutableListOf<IArbeidsgiverinntekt>()
+            private val refusjonsopplysningerPerArbeidsgiver = mutableListOf<IArbeidsgiverrefusjon>()
             private lateinit var sykepengegrunnlag: IInntekt
             private var omregnetÅrsinntekt by Delegates.notNull<Double>()
             private var oppfyllerMinsteinntektskrav by Delegates.notNull<Boolean>()
@@ -307,7 +313,8 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                     sykepengegrunnlag = sykepengegrunnlag.årlig,
                     oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav,
                     omregnetÅrsinntekt = omregnetÅrsinntekt,
-                    begrensning = SykepengegrunnlagsgrenseDTO.fra6GBegrensning(this.`6G`)
+                    begrensning = SykepengegrunnlagsgrenseDTO.fra6GBegrensning(this.`6G`),
+                    refusjonsopplysningerPerArbeidsgiver = refusjonsopplysningerPerArbeidsgiver.toList()
                 )
             }
 
@@ -343,13 +350,17 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             }
 
             override fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
+                val inntektsopplysningBuilder = InntektsopplysningBuilder(
+                    organisasjonsnummer = orgnummer,
+                    inntektsopplysning = arbeidsgiverInntektsopplysning,
+                    sammenligningsgrunnlagBuilder = sammenligningsgrunnlagBuilder,
+                    deaktivert = deaktivert
+                )
                 inntekterPerArbeidsgiver.addAll(
-                    InntektsopplysningBuilder(
-                        organisasjonsnummer = orgnummer,
-                        inntektsopplysning = arbeidsgiverInntektsopplysning,
-                        sammenligningsgrunnlagBuilder = sammenligningsgrunnlagBuilder,
-                        deaktivert = deaktivert
-                    ).build()
+                    inntektsopplysningBuilder.buildInntekter()
+                )
+                refusjonsopplysningerPerArbeidsgiver.add(
+                    inntektsopplysningBuilder.buildRefusjonsopplysninger()
                 )
             }
         }
@@ -362,12 +373,31 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             private val deaktivert: Boolean,
         ) : VilkårsgrunnlagHistorikkVisitor {
             private val inntekter = mutableListOf<IArbeidsgiverinntekt>()
+            private val refusjonsopplysninger = mutableListOf<Refusjonselement>()
 
             init {
                 inntektsopplysning.accept(this)
             }
 
-            fun build() = inntekter.toList()
+            fun buildInntekter() = inntekter.toList()
+
+            fun buildRefusjonsopplysninger() = IArbeidsgiverrefusjon(organisasjonsnummer, refusjonsopplysninger.toList())
+
+            override fun visitRefusjonsopplysning(
+                meldingsreferanseId: UUID,
+                fom: LocalDate,
+                tom: LocalDate?,
+                beløp: Inntekt
+            ) {
+                refusjonsopplysninger.add(
+                    Refusjonselement(
+                        fom = fom,
+                        tom = tom,
+                        beløp = beløp.reflection { _, månedlig, _, _ -> månedlig },
+                        meldingsreferanseId = meldingsreferanseId
+                    )
+                )
+            }
 
             private fun nyArbeidsgiverInntekt(
                 kilde: IInntektkilde,

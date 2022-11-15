@@ -2,9 +2,11 @@ package no.nav.helse.serde.api.speil.builders
 
 import java.time.YearMonth
 import no.nav.helse.serde.api.dto.Arbeidsgiverinntekt
+import no.nav.helse.serde.api.dto.Arbeidsgiverrefusjon
 import no.nav.helse.serde.api.dto.InntekterFraAOrdningen
 import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.serde.api.dto.OmregnetÅrsinntekt
+import no.nav.helse.serde.api.dto.Refusjonselement
 
 internal data class IArbeidsgiverinntekt(
     val arbeidsgiver: String,
@@ -18,6 +20,18 @@ internal data class IArbeidsgiverinntekt(
             omregnetÅrsinntekt = omregnetÅrsinntekt?.toDTO(),
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             deaktivert = deaktivert
+        )
+    }
+}
+
+internal data class IArbeidsgiverrefusjon(
+    val arbeidsgiver: String,
+    val refusjonsopplysninger: List<Refusjonselement>
+) {
+    internal fun toDTO(): Arbeidsgiverrefusjon {
+        return Arbeidsgiverrefusjon(
+            arbeidsgiver = arbeidsgiver,
+            refusjonsopplysninger = refusjonsopplysninger
         )
     }
 }
