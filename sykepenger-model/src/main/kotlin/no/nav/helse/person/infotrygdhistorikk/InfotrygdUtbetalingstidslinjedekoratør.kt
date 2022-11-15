@@ -13,7 +13,7 @@ internal class InfotrygdUtbetalingstidslinjedekoratør(
     utbetaltIInfotrygd: List<Periode>
 ) : ArbeidsgiverperiodeMediator by(other) {
 
-    private val ukjenteDager = utbetaltIInfotrygd.flatten()
+    private val ukjenteDager = utbetaltIInfotrygd.filter { it.overlapperMed(spleisPeriode) }.map { it.subset(spleisPeriode) }.flatten().toSet()
     private var forrigeIkkeUkjenteDag: LocalDate? = null
 
     override fun fridag(dato: LocalDate) {
