@@ -2,7 +2,6 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Inntektshistorikk
@@ -15,14 +14,8 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
-import no.nav.helse.testhelpers.ARB
-import no.nav.helse.testhelpers.AVV
-import no.nav.helse.testhelpers.FOR
-import no.nav.helse.testhelpers.FRI
-import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
-import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -30,6 +23,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import kotlin.reflect.KClass
@@ -43,7 +37,6 @@ internal abstract class HistorieTest {
         const val AG2 = "2345"
     }
 
-    private val tidligereUtbetalinger = mutableMapOf<String, Utbetalingstidslinje>()
     private val arbeidsgiverSykdomstidslinje = mutableMapOf<String, Sykdomstidslinje>()
     protected lateinit var infotrygdhistorikk: Infotrygdhistorikk
 
@@ -60,30 +53,8 @@ internal abstract class HistorieTest {
     protected fun ferie(fom: LocalDate, tom: LocalDate) =
         Friperiode(fom,  tom)
 
-    protected fun navdager(fom: LocalDate, tom: LocalDate) =
-        tidslinjeOf(fom.dagerMellom(tom).NAV, startDato = fom)
-
-    protected fun arbeidsdager(fom: LocalDate, tom: LocalDate) =
-        tidslinjeOf(fom.dagerMellom(tom).ARB, startDato = fom)
-
-    protected fun foreldetdager(fom: LocalDate, tom: LocalDate) =
-        tidslinjeOf(fom.dagerMellom(tom).FOR, startDato = fom)
-
-    protected fun avvistedager(fom: LocalDate, tom: LocalDate) =
-        tidslinjeOf(fom.dagerMellom(tom).AVV, startDato = fom)
-
-    protected fun feriedager(fom: LocalDate, tom: LocalDate) =
-        tidslinjeOf(fom.dagerMellom(tom).FRI, startDato = fom)
-
-    protected fun LocalDate.dagerMellom(tom: LocalDate) =
-        ChronoUnit.DAYS.between(this, tom).toInt() + 1
-
     protected fun sykedager(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, kilde: Hendelseskilde = INGEN) =
         Sykdomstidslinje.sykedager(fom, tom, grad, kilde)
-
-    protected fun addTidligereUtbetaling(orgnr: String, utbetalingstidslinje: Utbetalingstidslinje) {
-        tidligereUtbetalinger[orgnr] = tidligereUtbetalinger.getOrDefault(orgnr, Utbetalingstidslinje()) + utbetalingstidslinje
-    }
 
     protected fun addSykdomshistorikk(orgnr: String, sykdomstidslinje: Sykdomstidslinje) {
         arbeidsgiverSykdomstidslinje[orgnr] = arbeidsgiverSykdomstidslinje.getOrDefault(orgnr, Sykdomstidslinje()).merge(sykdomstidslinje, replace)
@@ -123,6 +94,7 @@ internal abstract class HistorieTest {
 
     protected fun assertAlleDager(utbetalingstidslinje: Utbetalingstidslinje, periode: Periode, vararg dager: KClass<out Utbetalingstidslinje.Utbetalingsdag>) {
         utbetalingstidslinje.subset(periode).also { tidslinje ->
+            assertFalse(tidslinje.isEmpty()) { "tidslinjen er tom" }
             assertTrue(tidslinje.all { it::class in dager }) {
                 val ulikeDager = tidslinje.filter { it::class !in dager }
                 "Forventet at alle dager skal være en av: ${dager.joinToString { it.simpleName ?: "UKJENT" }}.\n" +

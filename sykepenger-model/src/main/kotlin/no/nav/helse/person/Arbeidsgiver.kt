@@ -1009,7 +1009,7 @@ internal class Arbeidsgiver private constructor(
             if (sykdomstidslinje == null) Utbetalingstidslinje()
             else {
                 infotrygdhistorikk.build(organisasjonsnummer, sykdomstidslinje, builder, subsumsjonObserver)
-                builder.result()
+                builder.result().subset(sykdomstidslinje.periode()!!)
             }
         }
     }

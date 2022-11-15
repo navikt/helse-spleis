@@ -89,11 +89,6 @@ internal class HistorieSkjæringstidspunktTest : HistorieTest() {
             utbetaling(1.januar, 5.januar, 1000.daglig,  100.prosent,  AG1),
             ferie(8.januar, 12.januar)
         )
-        addTidligereUtbetaling(AG1, foreldetdager(15. januar, 19.januar))
-        addTidligereUtbetaling(AG1, feriedager(22. januar, 26.januar))
-        addTidligereUtbetaling(AG1, avvistedager(29. januar, 3.februar))
-        addTidligereUtbetaling(AG1, navdager(5.februar, 10.februar))
-
         assertEquals(1.januar, skjæringstidspunkt(28.februar))
     }
 

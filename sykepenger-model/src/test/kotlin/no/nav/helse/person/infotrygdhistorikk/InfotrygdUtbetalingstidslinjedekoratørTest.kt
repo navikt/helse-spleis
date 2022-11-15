@@ -31,7 +31,7 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
     }
 
     @Test
-    fun `ekskluderer dager før første dag`() {
+    fun `ekskluderer ikke dager før første dag`() {
         val builder = UtbetalingstidslinjeBuilder(Inntekter(
             vilkårsgrunnlagHistorikk = mapOf(
                 1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
@@ -43,11 +43,11 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
         val dekoratør = InfotrygdUtbetalingstidslinjedekoratør(builder, 1.februar til 28.februar, emptyList())
         val tidslinje = 31.S + 28.S + 31.S
         tidslinje.accept(ArbeidsgiverperiodeBuilder(Arbeidsgiverperiodeteller.NormalArbeidstaker, dekoratør, SubsumsjonObserver.NullObserver))
-        assertEquals(1.februar til 28.februar, builder.result().periode())
+        assertEquals(1.januar til 31.mars, builder.result().periode())
     }
 
     @Test
-    fun `ekskluderer infotrygd-snuter`() {
+    fun `ekskluderer ikke infotrygd-snuter`() {
         val builder = UtbetalingstidslinjeBuilder(Inntekter(
             vilkårsgrunnlagHistorikk = mapOf(
                 1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
@@ -59,11 +59,11 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
         val dekoratør = InfotrygdUtbetalingstidslinjedekoratør(builder, 1.februar til 28.februar, listOf(1.januar til 10.februar))
         val tidslinje = 31.S + 28.S
         tidslinje.accept(ArbeidsgiverperiodeBuilder(Arbeidsgiverperiodeteller.NormalArbeidstaker, dekoratør, SubsumsjonObserver.NullObserver))
-        assertEquals(11.februar til 28.februar, builder.result().periode())
+        assertEquals(1.januar til 28.februar, builder.result().periode())
     }
 
     @Test
-    fun `ekskluderer infotrygd-haler`() {
+    fun `ekskluderer ikke infotrygd-haler`() {
         val builder = UtbetalingstidslinjeBuilder(Inntekter(
             vilkårsgrunnlagHistorikk = mapOf(
                 1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
@@ -75,7 +75,7 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
         val dekoratør = InfotrygdUtbetalingstidslinjedekoratør(builder, 1.januar til 31.januar, listOf(20.januar til 28.februar))
         val tidslinje = 31.S + 28.S
         tidslinje.accept(ArbeidsgiverperiodeBuilder(Arbeidsgiverperiodeteller.NormalArbeidstaker, dekoratør, SubsumsjonObserver.NullObserver))
-        assertEquals(1.januar til 19.januar, builder.result().periode())
+        assertEquals(1.januar til 28.februar, builder.result().periode())
     }
 
     @Test

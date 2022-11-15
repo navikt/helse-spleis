@@ -360,7 +360,7 @@ internal class InfotrygdhistorikkTest {
     }
 
     @Test
-    fun `tar ikke med eldre historikk i beregning av utbetalingstidslinje`() {
+    fun `tar med eldre historikk i beregning av utbetalingstidslinje`() {
         historikk.oppdaterHistorikk(historikkelement(listOf(
             ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig),
             Friperiode(26.januar,  31.januar),
@@ -375,7 +375,7 @@ internal class InfotrygdhistorikkTest {
             subsumsjonObserver = SubsumsjonObserver.NullObserver
         ))
         val utbetalingstidslinje = historikk.build("ag1", sykdomstidslinje, builder, SubsumsjonObserver.NullObserver).let { builder.result() }
-        assertEquals(1.februar til 28.februar, utbetalingstidslinje.periode())
+        assertEquals(1.januar til 28.februar, utbetalingstidslinje.periode())
     }
 
     private fun utbetaling() = Utbetaling.lagUtbetaling(

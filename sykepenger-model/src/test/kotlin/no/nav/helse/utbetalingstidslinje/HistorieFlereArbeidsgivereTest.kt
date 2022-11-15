@@ -1,14 +1,15 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.hendelser.til
 import no.nav.helse.februar
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import org.junit.jupiter.api.Test
 
 internal class HistorieFlereArbeidsgivereTest : HistorieTest() {
-
     @Test
     fun `infotrygd ag1 - spleis ag 2 - spleis ag 1`() {
         historie(utbetaling(17.januar, 31.januar, orgnr = AG1))
