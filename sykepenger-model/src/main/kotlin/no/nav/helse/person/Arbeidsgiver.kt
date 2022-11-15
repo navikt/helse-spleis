@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.Period
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
@@ -77,9 +76,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeMediator
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
-import no.nav.helse.utbetalingstidslinje.IUtbetalingstidslinjeBuilder
 import no.nav.helse.utbetalingstidslinje.Inntekter
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -448,9 +445,6 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun nåværendeTidslinje() =
-        beregnetUtbetalingstidslinjer.lastOrNull()?.utbetalingstidslinje() ?: throw IllegalStateException("mangler utbetalinger")
-
     internal fun lagreUtbetalingstidslinjeberegning(
         organisasjonsnummer: String,
         utbetalingstidslinje: Utbetalingstidslinje,
@@ -649,7 +643,7 @@ internal class Arbeidsgiver private constructor(
             arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, reberegnetUtbetalingstidslinje, vilkårsgrunnlagHistorikk)
         }
 
-        return nåværendeTidslinje()
+        return checkNotNull(beregnetUtbetalingstidslinjer.lastOrNull()?.utbetalingstidslinje()) { "mangler utbetalinger" }
     }
 
     override fun utbetalingUtbetalt(
@@ -1022,16 +1016,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun lagreArbeidsforhold(arbeidsforhold: List<Arbeidsforholdhistorikk.Arbeidsforhold>, skjæringstidspunkt: LocalDate) {
         arbeidsforholdhistorikk.lagre(arbeidsforhold, skjæringstidspunkt)
-    }
-
-    internal fun build(
-        subsumsjonObserver: SubsumsjonObserver,
-        infotrygdhistorikk: Infotrygdhistorikk,
-        builder: ArbeidsgiverperiodeMediator,
-        kuttdato: LocalDate
-    ) {
-        val sykdomstidslinje = sykdomstidslinje().fremTilOgMed(kuttdato).takeUnless { it.count() == 0 } ?: return
-        infotrygdhistorikk.build(organisasjonsnummer, sykdomstidslinje, builder, subsumsjonObserver)
     }
 
     internal fun beregn(aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger, periode: Periode, perioder: Map<Periode, Pair<IAktivitetslogg, SubsumsjonObserver>>): Boolean {

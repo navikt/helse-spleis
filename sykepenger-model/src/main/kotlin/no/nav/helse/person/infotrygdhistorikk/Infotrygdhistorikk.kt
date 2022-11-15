@@ -16,7 +16,6 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeMediator
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
-import no.nav.helse.utbetalingstidslinje.IUtbetalingstidslinjeBuilder
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 internal class Infotrygdhistorikk private constructor(
@@ -131,8 +130,7 @@ internal class Infotrygdhistorikk private constructor(
             val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, builder, subsumsjonObserver)
             return sykdomstidslinje.accept(arbeidsgiverperiodeBuilder)
         }
-        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, InfotrygdUtbetalingstidslinjedekoratør(builder, sykdomstidslinje.periode()!!, siste.betaltePerioder()), subsumsjonObserver)
-        siste.build(organisasjonsnummer, sykdomstidslinje, teller, arbeidsgiverperiodeBuilder)
+        siste.build(organisasjonsnummer, sykdomstidslinje, teller, builder, subsumsjonObserver)
     }
 
     private fun oppfrisket(cutoff: LocalDateTime) =

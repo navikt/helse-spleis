@@ -8,15 +8,17 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Periodetype
-import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.Varselkode.RV_IT_14
 import no.nav.helse.person.Varselkode.RV_IT_15
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilder
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeMediator
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Infotrygddekoratør
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -104,12 +106,19 @@ class InfotrygdhistorikkElement private constructor(
         arbeidsgiverperiodecache.getOrPut(organisasjonsnummer) { mutableMapOf() }[sykdomshistorikkId] = resultat
     }
 
-    internal fun build(organisasjonsnummer: String, sykdomstidslinje: Sykdomstidslinje, teller: Arbeidsgiverperiodeteller, builder: SykdomstidslinjeVisitor) {
-        val dekoratør = Infotrygddekoratør(teller, builder, perioder.filterIsInstance<Utbetalingsperiode>().filter { it.gjelder(organisasjonsnummer) })
+    internal fun build(organisasjonsnummer: String, sykdomstidslinje: Sykdomstidslinje, teller: Arbeidsgiverperiodeteller, builder: ArbeidsgiverperiodeMediator, subsumsjonObserver: SubsumsjonObserver) {
+        val betalteDager = perioder.filterIsInstance<Utbetalingsperiode>().filter { it.gjelder(organisasjonsnummer) }
+        val dekoratør = Infotrygddekoratør(
+            teller = teller,
+            other = ArbeidsgiverperiodeBuilder(
+                arbeidsgiverperiodeteller = teller,
+                mediator = InfotrygdUtbetalingstidslinjedekoratør(builder, sykdomstidslinje.periode()!!, betalteDager),
+                subsumsjonObserver = subsumsjonObserver
+            ),
+            betalteDager = betalteDager
+        )
         historikkFor(organisasjonsnummer, sykdomstidslinje).accept(dekoratør)
     }
-
-    internal fun betaltePerioder(): List<Periode> = perioder.filterIsInstance<Utbetalingsperiode>()
 
     private data class Oppslagsnøkkel(
         val orgnummer: String,

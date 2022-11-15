@@ -404,7 +404,7 @@ class Person private constructor(
             arbeidsgivere = arbeidsgivereMedSykdom().associateWith {
                 it.builder(regler, vilkårsgrunnlagHistorikk, infotrygdhistorikk, subsumsjonObserver)
             },
-            infotrygdhistorikk = infotrygdhistorikk.utbetalingstidslinje(),
+            infotrygdtidslinje = infotrygdhistorikk.utbetalingstidslinje(),
             dødsdato = dødsdato,
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk
         )

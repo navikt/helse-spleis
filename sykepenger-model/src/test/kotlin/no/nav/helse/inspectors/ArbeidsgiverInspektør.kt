@@ -17,6 +17,7 @@ import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 
 internal val Arbeidsgiver.inspektør get() = ArbeidsgiverInspektør(this)
 
@@ -35,6 +36,8 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
     internal lateinit var arbeidsforholdhistorikk: Arbeidsforholdhistorikk
         private set
 
+    private lateinit var utbetalingstidslinjeberegninger: List<Utbetalingstidslinjeberegning>
+
     init {
         arbeidsgiver.accept(this)
     }
@@ -43,8 +46,14 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
     internal fun sisteVedtaksperiodeTilstander() = sisteVedtaksperiodeTilstander
     internal val inntektshistorikk get() = sisteInntektshistorikk!!
 
+    internal fun sisteUtbetalingstidslinjeberegning() = utbetalingstidslinjeberegninger.last().inspektør.utbetalingstidslinje
+
     override fun preVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {
         this.arbeidsforholdhistorikk = arbeidsforholdhistorikk
+    }
+
+    override fun preVisitUtbetalingstidslinjeberegninger(beregninger: List<Utbetalingstidslinjeberegning>) {
+        this.utbetalingstidslinjeberegninger = beregninger
     }
 
     override fun preVisitVedtaksperiode(

@@ -52,7 +52,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
@@ -297,7 +296,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             assertNull(it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
             assertEquals(0, it.utbetalinger(1.vedtaksperiode).size)
-            assertThrows<IllegalStateException> { it.arbeidsgiver.nåværendeTidslinje() }
         }
         assertTilstander(
             1.vedtaksperiode,
