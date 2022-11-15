@@ -569,6 +569,7 @@ internal class Vedtaksperiode private constructor(
         if (person.harSkjæringstidspunktSenereEnn(skjæringstidspunkt)) return søknad.funksjonellFeil(RV_SØ_14)
         if (søknad.harArbeidsdager()) return søknad.funksjonellFeil(RV_SØ_15)
         søknad.valider(periode, jurist())
+        søknad.validerInntektskilder(this.person.vilkårsgrunnlagFor(this.skjæringstidspunkt) == null)
     }
 
     private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {

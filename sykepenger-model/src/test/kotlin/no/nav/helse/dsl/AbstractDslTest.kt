@@ -166,6 +166,8 @@ internal abstract class AbstractDslTest {
         testArbeidsgiverAsserter.assertIngenFunksjonelleFeil(*filtre)
     protected fun TestPerson.TestArbeidsgiver.assertFunksjonellFeil(funksjonellFeil: String, vararg filtre: AktivitetsloggFilter) =
         testArbeidsgiverAsserter.assertFunksjonellFeil(funksjonellFeil, *filtre)
+    protected fun TestPerson.TestArbeidsgiver.assertFunksjonellFeil(funksjonellFeil: Varselkode, vararg filtre: AktivitetsloggFilter) =
+        testArbeidsgiverAsserter.assertFunksjonellFeil(funksjonellFeil.varseltekst, *filtre)
     protected fun TestPerson.TestArbeidsgiver.assertVarsler(vararg filtre: AktivitetsloggFilter) =
         testArbeidsgiverAsserter.assertVarsler(*filtre)
     protected fun TestPerson.TestArbeidsgiver.assertVarsel(warning: String, vararg filtre: AktivitetsloggFilter) =

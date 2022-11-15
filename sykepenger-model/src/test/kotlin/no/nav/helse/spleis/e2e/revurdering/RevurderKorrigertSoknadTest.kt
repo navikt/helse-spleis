@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -17,10 +18,13 @@ import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.Varselkode.RV_SØ_10
 import no.nav.helse.person.Varselkode.RV_SØ_4
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -41,6 +45,7 @@ import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
@@ -465,5 +470,40 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         assertFunksjonellFeil("Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag")
+    }
+
+    @Test
+    fun `andre inntektskilder i avsluttet på førstegangsbehandling - skal gi error`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent, 20.prosent), andreInntektskilder = true)
+
+        assertForventetFeil(
+            forklaring = "Produkteier ønsker warning, legal ønsker error. for øyeblikket warning",
+            nå = {
+                assertVarsel(RV_SØ_10)
+                assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            },
+            ønsket = {
+                assertFunksjonellFeil(RV_SØ_10)
+                assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            }
+        )
+    }
+
+    @Test
+    fun `andre inntektskilder til godkjenning på førstegangsbehandling - skal gi error`() {
+        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent, 20.prosent), andreInntektskilder = true)
+        assertForventetFeil(
+            forklaring = "Produkteier ønsker warning, legal ønsker error. for øyeblikket warning",
+            nå = {
+                assertVarsel(RV_SØ_10)
+                assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+            },
+            ønsket = {
+                assertFunksjonellFeil(RV_SØ_10)
+                assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            }
+        )
     }
 }

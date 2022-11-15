@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
+import java.time.LocalDate
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -13,6 +14,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -25,12 +27,14 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
@@ -1000,6 +1004,93 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 {
             assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        }
+    }
+
+    @Test
+    fun `andre inntektskilder på a2 før vilkårsprøving - error på a1 og a2`() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = true)
+        }
+        a1 {
+            assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            assertFunksjonellFeil(Varselkode.RV_SØ_10)
+        }
+        a2 {
+            assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            assertFunksjonellFeil(Varselkode.RV_SØ_10)
+        }
+    }
+
+    @Test
+    fun `andre inntektskilder på a2 etter vilkårsprøving på a1 - kun warning på a2`() {
+        val sammenligningsgrunnlag = Inntektsvurdering(
+            listOf(
+                sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
+                sammenligningsgrunnlag(a2, 1.januar, INNTEKT.repeat(12))
+            )
+        )
+        val arbeidsforhold = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+        )
+        val sykepengegrunnlag = InntektForSykepengegrunnlag(
+            inntekter = listOf(
+                grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                grunnlag(a2, 1.januar, INNTEKT.repeat(3))
+            ), arbeidsforhold = emptyList()
+        )
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterYtelser(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                inntektsvurdering = sammenligningsgrunnlag,
+                inntektsvurderingForSykepengegrunnlag = sykepengegrunnlag,
+                arbeidsforhold = arbeidsforhold
+                )
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(15.januar, 15.februar, 100.prosent))
+            håndterSøknad(Sykdom(15.januar, 15.februar, 100.prosent), andreInntektskilder = true)
+        }
+        a1 {
+            assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            assertIngenFunksjonelleFeil()
+        }
+        a2 {
+            assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+            assertIngenFunksjonelleFeil()
+            assertVarsel(Varselkode.RV_SØ_10)
+            håndterInntektsmelding(listOf(15.januar til 31.januar))
+            assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        }
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        }
+
+        a2 {
+            assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
         }
     }
 }
