@@ -319,7 +319,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 regler: ArbeidsgiverRegler,
                 subsumsjonObserver: SubsumsjonObserver
             ): Økonomi {
-                val vilkårsgrunnlag = requireNotNull(finnVilkårsgrunnlag(elementer, dato)) {
+                val vilkårsgrunnlag = checkNotNull(finnVilkårsgrunnlag(elementer, dato)) {
                     "Fant ikke vilkårsgrunnlag for $dato. Må ha et vilkårsgrunnlag for å legge til utbetalingsopplysninger. Har vilkårsgrunnlag på skjæringstidspunktene ${elementer.map { it.skjæringstidspunkt }}"
                 }
                 return vilkårsgrunnlag.medUtbetalingsopplysninger(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)

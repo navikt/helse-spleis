@@ -111,6 +111,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
@@ -1803,16 +1804,18 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 24.januar)
-        håndterYtelser(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
+        assertThrows<IllegalStateException> {
+            håndterYtelser(2.vedtaksperiode)
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
 
-        assertEquals(1, generasjoner.size)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) avType UTBETALING medTilstand TilGodkjenning
-            uberegnetPeriode(1) medTilstand IngenUtbetaling
+            assertEquals(1, generasjoner.size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) avType UTBETALING medTilstand TilGodkjenning
+                uberegnetPeriode(1) medTilstand IngenUtbetaling
+            }
         }
 
         håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 2.januar)
