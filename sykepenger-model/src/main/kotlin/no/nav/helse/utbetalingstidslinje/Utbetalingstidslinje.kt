@@ -75,7 +75,11 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
     }
 
     internal operator fun plus(other: Utbetalingstidslinje): Utbetalingstidslinje {
-        return this.plus(other) { venstre, høyre -> maxOf(venstre, høyre) }
+        if (other.isEmpty()) return this
+        if (this.isEmpty()) return other
+        val tidligsteDato = this.tidligsteDato(other)
+        val sisteDato = this.sisteDato(other)
+        return this.utvide(tidligsteDato, sisteDato).binde(other.utvide(tidligsteDato, sisteDato))
     }
 
     internal fun reverse(): Utbetalingstidslinje {
@@ -86,22 +90,10 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
 
     override fun iterator() = this.utbetalingsdager.iterator()
 
-    internal fun plus(
-        other: Utbetalingstidslinje,
-        plusstrategy: (Utbetalingsdag, Utbetalingsdag) -> Utbetalingsdag
-    ): Utbetalingstidslinje {
-        if (other.isEmpty()) return this
-        if (this.isEmpty()) return other
-        val tidligsteDato = this.tidligsteDato(other)
-        val sisteDato = this.sisteDato(other)
-        return this.utvide(tidligsteDato, sisteDato).binde(other.utvide(tidligsteDato, sisteDato), plusstrategy)
-    }
-
     private fun binde(
-        other: Utbetalingstidslinje,
-        strategy: (Utbetalingsdag, Utbetalingsdag) -> Utbetalingsdag
+        other: Utbetalingstidslinje
     ) = Utbetalingstidslinje(
-        this.utbetalingsdager.zip(other.utbetalingsdager, strategy).toMutableList()
+        this.utbetalingsdager.zip(other.utbetalingsdager) { venstre, høyre -> maxOf(venstre, høyre) }.toMutableList()
     )
 
     private fun trimLedendeFridager() = Utbetalingstidslinje(dropWhile { it is Fridag }.toMutableList())

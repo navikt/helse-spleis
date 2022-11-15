@@ -18,6 +18,7 @@ import no.nav.helse.testhelpers.FOR
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.HELG
 import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.UKJ
 import no.nav.helse.testhelpers.Utbetalingsdager
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
@@ -26,10 +27,6 @@ import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingslinjer.OppdragBuilderTest.Dagtype
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -81,7 +78,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `siste arbeidsgiverperiodedag er siste ukjent dag fra Infotrygd`() {
-        val oppdrag = tilArbeidsgiver(16.AP, 15.NAV, 10.NAV, 30.NAV, infotrygdtidslinje = tidslinjeOf(10.NAV, startDato = 1.februar))
+        val oppdrag = tilArbeidsgiver(16.AP, 15.NAV, 10.UKJ, 30.NAV)
         assertEquals(10.februar, oppdrag.sisteArbeidsgiverperiodedag)
     }
 
@@ -480,21 +477,16 @@ internal class OppdragBuilderTest {
         assertEquals(10.januar, oppdrag.last().tom)
     }
 
-    private fun tilArbeidsgiver(vararg dager: Utbetalingsdager, infotrygdtidslinje: Utbetalingstidslinje = Utbetalingstidslinje(), sisteDato: LocalDate? = null, startdato: LocalDate = 1.januar): Oppdrag =
-        opprett(dager = dager, infotrygdtidslinje, sisteDato, startdato, fagområde = SykepengerRefusjon)
+    private fun tilArbeidsgiver(vararg dager: Utbetalingsdager, sisteDato: LocalDate? = null, startdato: LocalDate = 1.januar): Oppdrag =
+        opprett(dager = dager, sisteDato, startdato, fagområde = SykepengerRefusjon)
 
-    private fun tilSykmeldte(vararg dager: Utbetalingsdager, infotrygdtidslinje: Utbetalingstidslinje = Utbetalingstidslinje(), sisteDato: LocalDate? = null, startdato: LocalDate = 1.januar): Oppdrag =
-        opprett(dager = dager, infotrygdtidslinje, sisteDato, startdato, fagområde = Fagområde.Sykepenger)
+    private fun tilSykmeldte(vararg dager: Utbetalingsdager, sisteDato: LocalDate? = null, startdato: LocalDate = 1.januar): Oppdrag =
+        opprett(dager = dager, sisteDato, startdato, fagområde = Fagområde.Sykepenger)
 
     private fun opprett(
-        vararg dager: Utbetalingsdager, infotrygdtidslinje: Utbetalingstidslinje, sisteDato: LocalDate? = null, startdato: LocalDate = 1.januar, fagområde: Fagområde
+        vararg dager: Utbetalingsdager, sisteDato: LocalDate? = null, startdato: LocalDate = 1.januar, fagområde: Fagområde
     ): Oppdrag {
-        val tidslinje = tidslinjeOf(*dager, startDato = startdato).plus(infotrygdtidslinje) { spleisdag, infotrygddag ->
-            when (infotrygddag) {
-                is NavDag, is NavHelgDag -> UkjentDag(spleisdag.dato, spleisdag.økonomi)
-                else -> spleisdag
-            }
-        }
+        val tidslinje = tidslinjeOf(*dager, startDato = startdato)
         MaksimumUtbetalingFilter().betal(
             listOf(tidslinje),
             tidslinje.periode(),

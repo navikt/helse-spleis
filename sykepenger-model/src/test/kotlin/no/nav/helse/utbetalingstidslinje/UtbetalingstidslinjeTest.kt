@@ -8,11 +8,9 @@ import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.FOR
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.UKJ
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -54,7 +52,7 @@ internal class UtbetalingstidslinjeTest {
 
     @Test
     fun `sammenhengende perioder brytes opp av ukjent dag`() {
-        val tidslinje = medInfotrygdtidslinje(tidslinjeOf(11.NAV), tidslinjeOf(1.NAV, startDato = 6.januar))
+        val tidslinje = tidslinjeOf(5.NAV, 1.UKJ, 5.NAV)
         val result = tidslinje.sammenhengendeUtbetalingsperioder()
         assertEquals(2, result.size)
         assertEquals(1.januar til 5.januar, result.first().periode())
@@ -83,12 +81,4 @@ internal class UtbetalingstidslinjeTest {
         assertEquals(1, result.size)
         assertEquals(1.januar til 10.januar, result.first().periode())
     }
-
-    private fun medInfotrygdtidslinje(tidslinje: Utbetalingstidslinje, other: Utbetalingstidslinje) =
-        tidslinje.plus(other) { actual, challenger ->
-            when (challenger) {
-                is NavDag, is NavHelgDag -> UkjentDag(actual.dato, actual.økonomi)
-                else -> actual
-            }
-        }
 }

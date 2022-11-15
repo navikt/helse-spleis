@@ -374,17 +374,7 @@ internal class LagUtbetalingForRevurderingTest {
         )
     }
 
-    private fun beregnUtbetalinger(tidslinje: Utbetalingstidslinje, infotrygdtidslinje: Utbetalingstidslinje = Utbetalingstidslinje()) = tidslinje.let {
-        tidslinje.plus(infotrygdtidslinje) { spleisdag, infotrygddag ->
-            when (infotrygddag) {
-                is Utbetalingstidslinje.Utbetalingsdag.NavDag, is Utbetalingstidslinje.Utbetalingsdag.NavHelgDag -> Utbetalingstidslinje.Utbetalingsdag.UkjentDag(
-                    spleisdag.dato,
-                    spleisdag.økonomi
-                )
-                else -> spleisdag
-            }
-        }
-    }.also { MaksimumUtbetalingFilter().betal(listOf(tidslinje), tidslinje.periode(), aktivitetslogg, MaskinellJurist()) }
+    private fun beregnUtbetalinger(tidslinje: Utbetalingstidslinje) = tidslinje.also { MaksimumUtbetalingFilter().betal(listOf(tidslinje), tidslinje.periode(), aktivitetslogg, MaskinellJurist()) }
 
     private fun vedtaksperiode(periode: Periode = 1.januar til 31.januar, organisasjonsnummer: String = ORGNUMMER): Vedtaksperiode {
         val søknad = søknad(periode)
