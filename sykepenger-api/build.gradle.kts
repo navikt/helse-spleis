@@ -9,6 +9,12 @@ val mainClass = "no.nav.helse.spleis.AppKt"
 dependencies {
     implementation(project(":sykepenger-model"))
 
+    implementation(libs.bundles.jackson)
+    implementation(libs.bundles.logging) {
+        exclude("com.fasterxml.jackson.core")
+        exclude("com.fasterxml.jackson.dataformat")
+    }
+
     implementation(libs.bundles.database)
     implementation(libs.cloudsql)
     implementation("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryPrometheusVersion")

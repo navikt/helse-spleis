@@ -1,8 +1,14 @@
 val commonsCodecVersion = "1.15"
 val jsonassertVersion = "1.5.0"
+val jacksonVersion = "2.14.0"
 
 dependencies {
-    implementation("commons-codec:commons-codec:$commonsCodecVersion")
+    api("commons-codec:commons-codec:$commonsCodecVersion")
+    implementation(libs.bundles.jackson)
+    implementation(libs.bundles.logging) {
+        exclude("com.fasterxml.jackson.core")
+        exclude("com.fasterxml.jackson.dataformat")
+    }
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
 }
 

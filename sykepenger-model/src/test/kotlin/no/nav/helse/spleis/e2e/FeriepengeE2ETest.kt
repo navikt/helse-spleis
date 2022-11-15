@@ -43,10 +43,12 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.Isolated
 import org.slf4j.LoggerFactory
 import kotlin.math.roundToInt
 
 @EnableToggle(Toggle.SendFeriepengeOppdrag::class)
+@Isolated
 internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     private fun fangLoggmeldinger(vararg filter: String, block: () -> Any): List<ILoggingEvent> {
         val logCollector = LogCollector()

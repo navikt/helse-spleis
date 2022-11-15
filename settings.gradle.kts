@@ -11,8 +11,17 @@ dependencyResolutionManagement {
             version("kotliquery", "1.9.0")
             version("cloudsql", "1.7.2")
             version("flyway", "9.7.0")
+            version("logback", "1.4.4")
+            version("logstash", "7.2")
+            version("jackson", "2.14.0")
 
             library("rapids-and-rivers", "com.github.navikt", "rapids-and-rivers").versionRef("rapids-and-rivers")
+
+            library("jackson-kotlin", "com.fasterxml.jackson.module", "jackson-module-kotlin").versionRef("jackson")
+            library("jackson-datatype", "com.fasterxml.jackson.datatype", "jackson-datatype-jsr310").versionRef("jackson")
+
+            library("logback", "ch.qos.logback", "logback-classic").versionRef("logback")
+            library("logstash", "net.logstash.logback", "logstash-logback-encoder").versionRef("logstash")
 
             library("postgresql", "org.postgresql", "postgresql").versionRef("postgres")
             library("hikari", "com.zaxxer", "HikariCP").versionRef("hikari")
@@ -24,6 +33,9 @@ dependencyResolutionManagement {
             library("testcontainers", "org.testcontainers", "postgresql").versionRef("testcontainers")
 
             bundle("database", listOf("postgresql", "hikari", "kotliquery"))
+
+            bundle("jackson", listOf("jackson-kotlin", "jackson-datatype"))
+            bundle("logging", listOf("logback", "logstash"))
         }
     }
 }

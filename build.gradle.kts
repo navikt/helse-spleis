@@ -2,10 +2,7 @@ plugins {
     kotlin("jvm") version "1.7.0"
 }
 
-val jacksonVersion = "2.13.4"
 val junitJupiterVersion = "5.9.0"
-val logbackClassicVersion = "1.2.11"
-val logstashVersion = "7.2"
 val jvmTargetVersion = "17"
 
 allprojects {
@@ -27,14 +24,6 @@ allprojects {
          dependencyResolutionManagement i settings.gradle.kts
      */
     dependencies {
-        implementation("ch.qos.logback:logback-classic:$logbackClassicVersion")
-        implementation("net.logstash.logback:logstash-logback-encoder:$logstashVersion") {
-            exclude("com.fasterxml.jackson.core")
-            exclude("com.fasterxml.jackson.dataformat")
-        }
-        implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-        implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
-
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
