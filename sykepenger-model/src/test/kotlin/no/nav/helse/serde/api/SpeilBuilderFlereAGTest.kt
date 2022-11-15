@@ -48,6 +48,7 @@ import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
+import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
@@ -931,6 +932,32 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         assertTrue(areEquals(expected, actual))
     }
 
+    @Test
+    fun `refusjon for flere arbeidsgivere`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+
+        val personDto = speilApi()
+        val speilVilkårsgrunnlagIdForAG1 = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val speilVilkårsgrunnlagIdForAG2 = (personDto.arbeidsgivere.last().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val vilkårsgrunnlag = personDto.vilkårsgrunnlag.get(speilVilkårsgrunnlagIdForAG1) as? SpleisVilkårsgrunnlag
+        val vilkårsgrunnlag2 = personDto.vilkårsgrunnlag.get(speilVilkårsgrunnlagIdForAG2) as? SpleisVilkårsgrunnlag
+        assertEquals(vilkårsgrunnlag, vilkårsgrunnlag2)
+
+        assertTrue(vilkårsgrunnlag!!.refusjonsopplysninger.isNotEmpty())
+        val arbeidsgiverrefusjonForAG1 = vilkårsgrunnlag.refusjonsopplysninger.find { it.arbeidsgiver == a1 }!!
+        val arbeidsgiverrefusjonForAG2 = vilkårsgrunnlag.refusjonsopplysninger.find { it.arbeidsgiver == a2 }!!
+
+        val refusjonsopplysningerForAG1 = arbeidsgiverrefusjonForAG1.refusjonsopplysninger.single()
+        val refusjonsopplysningerForAG2 = arbeidsgiverrefusjonForAG2.refusjonsopplysninger.single()
+
+        assertEquals(1.januar, refusjonsopplysningerForAG1.fom)
+        assertEquals(null, refusjonsopplysningerForAG1.tom)
+        assertEquals(20000.månedlig,refusjonsopplysningerForAG1.beløp.månedlig)
+        assertEquals(1.januar, refusjonsopplysningerForAG2.fom)
+        assertEquals(null, refusjonsopplysningerForAG2.tom)
+        assertEquals(20000.månedlig,refusjonsopplysningerForAG2.beløp.månedlig)
+    }
+
     private fun spleisVilkårsgrunnlag(
         skjæringstidpunkt: LocalDate = 1.januar(2018)) = SpleisVilkårsgrunnlag(
         skjæringstidspunkt = skjæringstidpunkt,
@@ -938,6 +965,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         sammenligningsgrunnlag = 500000.0,
         sykepengegrunnlag = 500000.0,
         inntekter = emptyList(),
+        refusjonsopplysninger = emptyList(),
         avviksprosent = 0.0,
         grunnbeløp = 500000,
         sykepengegrunnlagsgrense = SykepengegrunnlagsgrenseDTO(500000, 500000, skjæringstidpunkt),

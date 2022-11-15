@@ -131,6 +131,7 @@ internal class UtbetalingerBuilder(
                 omregnetÅrsinntekt = compositeSykepengegrunnlag.omregnetÅrsinntekt,
                 sammenligningsgrunnlag = InntektBuilder(sammenligningsgrunnlag.sammenligningsgrunnlag).build().årlig,
                 inntekter = compositeSykepengegrunnlag.inntekterPerArbeidsgiver,
+                refusjonsopplysningerPerArbeidsgiver = compositeSykepengegrunnlag.refusjonsopplysningerPerArbeidsgiver,
                 sykepengegrunnlag = compositeSykepengegrunnlag.sykepengegrunnlag,
                 avviksprosent = avviksprosent?.prosent(),
                 grunnbeløp = compositeSykepengegrunnlag.begrensning.grunnbeløp,
