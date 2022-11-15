@@ -403,7 +403,11 @@ internal class ArbeidsgiverUtbetalingerTest {
             vilkårsgrunnlagHistorikk,
             SubsumsjonObserver.NullObserver
         ).also {
-            it.beregn(aktivitetslogg, "88888888", Periode(1.januar, 31.desember(2019)), mapOf(Periode(1.januar, 31.desember(2019)) to (aktivitetslogg to SubsumsjonObserver.NullObserver)))
+            it.beregn(
+                "88888888",
+                Periode(1.januar, 31.desember(2019)),
+                mapOf(Periode(1.januar, 31.desember(2019)) to (aktivitetslogg to SubsumsjonObserver.NullObserver))
+            )
             maksdato = it.maksimumSykepenger.sisteDag()
             gjenståendeSykedager = it.maksimumSykepenger.gjenståendeDager()
             forbrukteSykedager = it.maksimumSykepenger.forbrukteDager()

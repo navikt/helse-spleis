@@ -97,7 +97,7 @@ internal class Arbeidsgiver private constructor(
     private val utbetalinger: MutableList<Utbetaling>,
     private val beregnetUtbetalingstidslinjer: MutableList<Utbetalingstidslinjeberegning>,
     private val feriepengeutbetalinger: MutableList<Feriepengeutbetaling>,
-    internal val refusjonshistorikk: Refusjonshistorikk,
+    private val refusjonshistorikk: Refusjonshistorikk,
     private val arbeidsforholdhistorikk: Arbeidsforholdhistorikk,
     private val inntektsmeldingInfo: InntektsmeldingInfoHistorikk,
     private val jurist: MaskinellJurist
@@ -509,7 +509,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID? = null) {
         inntektsmelding.kontekst(this)
-        inntektsmelding.cacheRefusjon(refusjonshistorikk)
         if (vedtaksperiodeId != null) inntektsmelding.info("Replayer inntektsmelding til påfølgende perioder som overlapper.")
         if (!noenHarHåndtert(inntektsmelding) { håndter(inntektsmelding, vedtaksperiodeId, vedtaksperioder.toList()) }) {
             if (vedtaksperiodeId != null) {
@@ -857,8 +856,6 @@ internal class Arbeidsgiver private constructor(
         return inntektsopplysning is Inntektshistorikk.SkattComposite || inntektsopplysning is Inntektshistorikk.Saksbehandler || inntektsopplysning is IkkeRapportert
     }
 
-    internal fun utbetalingstidslinje(infotrygdhistorikk: Infotrygdhistorikk) = infotrygdhistorikk.utbetalingstidslinje(organisasjonsnummer)
-
     internal fun tidligsteDato(): LocalDate {
         return sykdomstidslinje().førsteDag()
     }
@@ -893,6 +890,7 @@ internal class Arbeidsgiver private constructor(
     ): InntektsmeldingInfo {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
         if (førsteFraværsdag != null) inntektsmelding.addInntekt(inntektshistorikk, førsteFraværsdag, subsumsjonObserver)
+        inntektsmelding.cacheRefusjon(refusjonshistorikk)
         return inntektsmeldingInfo.opprett(skjæringstidspunkt, inntektsmelding)
     }
 
@@ -1027,7 +1025,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun beregn(aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger, periode: Periode, perioder: Map<Periode, Pair<IAktivitetslogg, SubsumsjonObserver>>): Boolean {
         try {
-            arbeidsgiverUtbetalinger.beregn(aktivitetslogg, organisasjonsnummer, periode, perioder)
+            arbeidsgiverUtbetalinger.beregn(organisasjonsnummer, periode, perioder)
         } catch (err: UtbetalingstidslinjeBuilderException) {
             err.logg(aktivitetslogg)
         }

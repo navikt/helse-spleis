@@ -58,7 +58,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         assertTrue(inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.isNotEmpty())
         inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
         assertTrue(inspektør.utbetalinger.last().inspektør.personOppdrag.isEmpty())
-        assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 1.januar til 16.januar)
+        assertUtbetalingsbeløp(1.vedtaksperiode, 0, 0, subset = 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
     }
 
@@ -82,8 +82,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
         assertTrue(inspektør.utbetalinger.last().inspektør.personOppdrag.isEmpty())
         assertUtbetalingsbeløp(2.vedtaksperiode, 1431, 1431, subset = 1.februar til 26.februar)
-        assertUtbetalingsbeløp(2.vedtaksperiode, 0, 1431, subset = 27.februar til 27.februar)
-        assertUtbetalingsbeløp(2.vedtaksperiode, 0, 0, subset = 28.februar til 28.februar)
+        assertUtbetalingsbeløp(2.vedtaksperiode, 0, 0, subset = 27.februar til 28.februar)
     }
 
     @Test
@@ -185,7 +184,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         assertTrue(inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.isNotEmpty())
         inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
         assertTrue(inspektør.utbetalinger.last().inspektør.personOppdrag.isEmpty())
-        assertUtbetalingsbeløp(2.vedtaksperiode, 0, 1431, subset = 1.mars til 16.mars)
+        assertUtbetalingsbeløp(2.vedtaksperiode, 0, 0, subset = 1.mars til 16.mars)
         assertUtbetalingsbeløp(2.vedtaksperiode, 1431, 1431, subset = 17.mars til 31.mars)
     }
 
@@ -256,7 +255,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
-        assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 1.januar til 16.januar)
+        assertUtbetalingsbeløp(1.vedtaksperiode, 0, 0, subset = 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
     }
 
@@ -286,290 +285,290 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
         assertTrue(inspektør.utbetalinger.last().inspektør.personOppdrag.isEmpty())
 
-        assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, 1.januar til 16.januar)
+        assertUtbetalingsbeløp(1.vedtaksperiode, 0, 0, 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, 17.januar til 24.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 0, 0, 25.januar til 31.januar)
     }
 
     @Test
     fun `to arbeidsgivere med ulik fom hvor den første har utbetalingsdager før arbeisdgiverperioden til den andre, ingen felles utbetalingsdager`() {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-            håndterSykmelding(Sykmeldingsperiode(21.januar, 10.februar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 10.februar, 100.prosent), orgnummer = a2)
 
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-            håndterSøknad(Sykdom(21.januar, 10.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(21.januar, 10.februar, 100.prosent), orgnummer = a2)
 
-            håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
 
-            håndterInntektsmelding(arbeidsgiverperioder = listOf(21.januar til 5.februar), orgnummer = a2)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(21.januar til 5.februar), orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-            håndterVilkårsgrunnlag(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                orgnummer = a1,
-                inntektsvurdering = Inntektsvurdering(
-                    listOf(
-                        sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12)),
-                        sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12))
-                    )
-                ),
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = listOf(
-                        grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
-                        grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3))
-                    )
-                , arbeidsforhold = emptyList())
-            )
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-            håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-            håndterUtbetalt(orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            orgnummer = a1,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12)),
+                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12))
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = listOf(
+                    grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
+                    grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3))
+                )
+            , arbeidsforhold = emptyList())
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
-            håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-            håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-            håndterUtbetalt(orgnummer = a2)
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 
-            assertUtbetalingsbeløp(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 0,
-                forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 1.januar til 16.januar,
-                orgnummer = a1
-            )
-            assertUtbetalingsbeløp(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 1080,
-                forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 17.januar til 31.januar,
-                orgnummer = a1
-            )
-            assertUtbetalingsbeløp(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 0,
-                forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 1.februar til 10.februar,
-                orgnummer = a1
-            )
-            assertUtbetalingsbeløp(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 0,
-                forventetArbeidsgiverRefusjonsbeløp = 0,
-                subset = 1.januar til 20.januar,
-                orgnummer = a2
-            )
-            assertUtbetalingsbeløp(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 0,
-                forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 21.januar til 5.februar,
-                orgnummer = a2
-            )
-            assertUtbetalingsbeløp(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 1080,
-                forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 6.februar til 10.februar,
-                orgnummer = a2
-            )
-        }
+        assertUtbetalingsbeløp(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 0,
+            forventetArbeidsgiverRefusjonsbeløp = 0,
+            subset = 1.januar til 16.januar,
+            orgnummer = a1
+        )
+        assertUtbetalingsbeløp(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 1080,
+            forventetArbeidsgiverRefusjonsbeløp = 1431,
+            subset = 17.januar til 31.januar,
+            orgnummer = a1
+        )
+        assertUtbetalingsbeløp(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 0,
+            forventetArbeidsgiverRefusjonsbeløp = 1431,
+            subset = 1.februar til 10.februar,
+            orgnummer = a1
+        )
+        assertUtbetalingsbeløp(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 0,
+            forventetArbeidsgiverRefusjonsbeløp = 0,
+            subset = 1.januar til 20.januar,
+            orgnummer = a2
+        )
+        assertUtbetalingsbeløp(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 0,
+            forventetArbeidsgiverRefusjonsbeløp = 0,
+            subset = 21.januar til 5.februar,
+            orgnummer = a2
+        )
+        assertUtbetalingsbeløp(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 1080,
+            forventetArbeidsgiverRefusjonsbeløp = 1431,
+            subset = 6.februar til 10.februar,
+            orgnummer = a2
+        )
+    }
 
     @Test
     fun `to arbeidsgivere med ulik fom hvor den første har utbetalingsdager før arbeisdgiverperioden til den andre`() {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 10.februar, 100.prosent), orgnummer = a1)
-            håndterSykmelding(Sykmeldingsperiode(21.januar, 10.februar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.februar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 10.februar, 100.prosent), orgnummer = a2)
 
-            håndterSøknad(Sykdom(1.januar, 10.februar, 100.prosent), orgnummer = a1)
-            håndterSøknad(Sykdom(21.januar, 10.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar, 10.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(21.januar, 10.februar, 100.prosent), orgnummer = a2)
 
-            håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
 
-            håndterInntektsmelding(arbeidsgiverperioder = listOf(21.januar til 5.februar), orgnummer = a2)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(21.januar til 5.februar), orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-            håndterVilkårsgrunnlag(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                orgnummer = a1,
-                inntektsvurdering = Inntektsvurdering(
-                    listOf(
-                        sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12)),
-                        sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12))
-                    )
-                ),
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = listOf(
-                        grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
-                        grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3))
-                    )
-                , arbeidsforhold = emptyList())
-            )
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-            håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-            håndterUtbetalt(orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            orgnummer = a1,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12)),
+                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12))
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = listOf(
+                    grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
+                    grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3))
+                )
+            , arbeidsforhold = emptyList())
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
-            håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-            håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-            håndterUtbetalt(orgnummer = a2)
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 
-            assertUtbetalingsbeløp(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 0,
-                forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 1.januar til 16.januar,
-                orgnummer = a1
-            )
-            assertUtbetalingsbeløp(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 1080,
-                forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 17.januar til 5.februar,
-                orgnummer = a1
-            )
-            assertUtbetalingsbeløp(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 1081,
-                forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 6.februar til 10.februar,
-                orgnummer = a1
-            )
-            assertUtbetalingsbeløp(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 0,
-                forventetArbeidsgiverRefusjonsbeløp = 0,
-                subset = 1.januar til 20.januar,
-                orgnummer = a2
-            )
-            assertUtbetalingsbeløp(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 0,
-                forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 21.januar til 5.februar,
-                orgnummer = a2
-            )
-            assertUtbetalingsbeløp(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 1080,
-                forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 6.februar til 10.februar,
-                orgnummer = a2
-            )
-        }
+        assertUtbetalingsbeløp(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 0,
+            forventetArbeidsgiverRefusjonsbeløp = 0,
+            subset = 1.januar til 16.januar,
+            orgnummer = a1
+        )
+        assertUtbetalingsbeløp(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 1080,
+            forventetArbeidsgiverRefusjonsbeløp = 1431,
+            subset = 17.januar til 5.februar,
+            orgnummer = a1
+        )
+        assertUtbetalingsbeløp(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 1081,
+            forventetArbeidsgiverRefusjonsbeløp = 1431,
+            subset = 6.februar til 10.februar,
+            orgnummer = a1
+        )
+        assertUtbetalingsbeløp(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 0,
+            forventetArbeidsgiverRefusjonsbeløp = 0,
+            subset = 1.januar til 20.januar,
+            orgnummer = a2
+        )
+        assertUtbetalingsbeløp(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 0,
+            forventetArbeidsgiverRefusjonsbeløp = 0,
+            subset = 21.januar til 5.februar,
+            orgnummer = a2
+        )
+        assertUtbetalingsbeløp(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 1080,
+            forventetArbeidsgiverRefusjonsbeløp = 1431,
+            subset = 6.februar til 10.februar,
+            orgnummer = a2
+        )
+    }
 
     @Test
     fun `to arbeidsgivere med ulik fom hvor den andre har utbetalingsdager før arbeidsgiverperioden til den første`() {
-            håndterSykmelding(Sykmeldingsperiode(21.januar, 10.februar, 100.prosent), orgnummer = a1)
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 10.februar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 10.februar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.februar, 100.prosent), orgnummer = a2)
 
-            håndterSøknad(Sykdom(21.januar, 10.februar, 100.prosent), orgnummer = a1)
-            håndterSøknad(Sykdom(1.januar, 10.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(21.januar, 10.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 10.februar, 100.prosent), orgnummer = a2)
 
-            håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a2)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
 
-            håndterInntektsmelding(arbeidsgiverperioder = listOf(21.januar til 5.februar), orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(21.januar til 5.februar), orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
-            håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-            håndterVilkårsgrunnlag(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                orgnummer = a2,
-                inntektsvurdering = Inntektsvurdering(
-                    listOf(
-                        sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12)),
-                        sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12))
-                    )
-                ),
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = listOf(
-                        grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
-                        grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3))
-                    ), arbeidsforhold = emptyList()
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            orgnummer = a2,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12)),
+                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12))
                 )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = listOf(
+                    grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
+                    grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3))
+                ), arbeidsforhold = emptyList()
             )
-            håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-            håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-            håndterUtbetalt(orgnummer = a2)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-            håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-            håndterUtbetalt(orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 
-            assertUtbetalingsbeløp(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 0,
-                forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 21.januar til 5.februar,
-                orgnummer = a1
-            )
-            assertUtbetalingsbeløp(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 1081,
-                forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 6.februar til 10.februar,
-                orgnummer = a1
-            )
-            assertUtbetalingsbeløp(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 0,
-                forventetArbeidsgiverRefusjonsbeløp = 0,
-                subset = 1.januar til 20.januar,
-                orgnummer = a1
-            )
-            assertUtbetalingsbeløp(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 0,
-                forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 1.januar til 16.januar,
-                orgnummer = a2
-            )
-            assertUtbetalingsbeløp(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 1080,
-                forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 17.januar til 20.januar,
-                orgnummer = a2
-            )
-            assertUtbetalingsbeløp(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 1080,
-                forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 21.januar til 5.februar,
-                orgnummer = a2
-            )
-            assertUtbetalingsbeløp(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 1080,
-                forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 6.februar til 10.februar,
-                orgnummer = a2
-            )
-        }
+        assertUtbetalingsbeløp(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 0,
+            forventetArbeidsgiverRefusjonsbeløp = 0,
+            subset = 21.januar til 5.februar,
+            orgnummer = a1
+        )
+        assertUtbetalingsbeløp(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 1081,
+            forventetArbeidsgiverRefusjonsbeløp = 1431,
+            subset = 6.februar til 10.februar,
+            orgnummer = a1
+        )
+        assertUtbetalingsbeløp(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 0,
+            forventetArbeidsgiverRefusjonsbeløp = 0,
+            subset = 1.januar til 20.januar,
+            orgnummer = a1
+        )
+        assertUtbetalingsbeløp(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 0,
+            forventetArbeidsgiverRefusjonsbeløp = 0,
+            subset = 1.januar til 16.januar,
+            orgnummer = a2
+        )
+        assertUtbetalingsbeløp(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 1080,
+            forventetArbeidsgiverRefusjonsbeløp = 1431,
+            subset = 17.januar til 20.januar,
+            orgnummer = a2
+        )
+        assertUtbetalingsbeløp(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 1080,
+            forventetArbeidsgiverRefusjonsbeløp = 1431,
+            subset = 21.januar til 5.februar,
+            orgnummer = a2
+        )
+        assertUtbetalingsbeløp(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 1080,
+            forventetArbeidsgiverRefusjonsbeløp = 1431,
+            subset = 6.februar til 10.februar,
+            orgnummer = a2
+        )
+    }
 
     @Test
     fun `gradert sykmelding med en arbeidsgiver`() {

@@ -56,11 +56,6 @@ internal class Infotrygdhistorikk private constructor(
         return siste.utbetalingstidslinje()
     }
 
-    internal fun utbetalingstidslinje(organisasjonsnummer: String): Utbetalingstidslinje {
-        if (!harHistorikk()) return Utbetalingstidslinje()
-        return siste.utbetalingstidslinje(organisasjonsnummer)
-    }
-
     internal fun harBetaltRettFør(periode: Periode): Boolean {
         if (!harHistorikk()) return false
         return siste.harBetaltRettFør(periode)

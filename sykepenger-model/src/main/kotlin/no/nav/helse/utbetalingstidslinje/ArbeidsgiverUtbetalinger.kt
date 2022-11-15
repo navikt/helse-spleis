@@ -31,13 +31,11 @@ internal class ArbeidsgiverUtbetalinger(
     internal val maksimumSykepenger by lazy { maksimumSykepengedagerfilter.maksimumSykepenger() }
 
     internal fun beregn(
-        aktivitetslogg: IAktivitetslogg,
         organisasjonsnummer: String,
         beregningsperiode: Periode,
         perioder: Map<Periode, Pair<IAktivitetslogg, SubsumsjonObserver>>
     ) {
         val tidslinjerPerArbeidsgiver = tidslinjer(beregningsperiode.endInclusive)
-        gjødsle(aktivitetslogg, beregningsperiode, tidslinjerPerArbeidsgiver)
         perioder.forEach { periode, (aktivitetslogg, subsumsjonObserver) ->
             filtrer(aktivitetslogg, tidslinjerPerArbeidsgiver.values.toList(), periode, subsumsjonObserver)
         }
@@ -54,7 +52,6 @@ internal class ArbeidsgiverUtbetalinger(
         utbetalingsperioder: Map<Arbeidsgiver, Vedtaksperiode>
     ) {
         val tidslinjerPerArbeidsgiver = tidslinjer(beregningsperiode.endInclusive)
-        revurderingUtbetalinger.gjødsle(tidslinjerPerArbeidsgiver, infotrygdhistorikk)
         revurderingUtbetalinger.filtrer(filtere, tidslinjerPerArbeidsgiver)
         tidslinjerPerArbeidsgiver.forEach { (arbeidsgiver, utbetalingstidslinje) ->
             arbeidsgiver.lagreUtbetalingstidslinjeberegning(orgnummer, utbetalingstidslinje, vilkårsgrunnlagHistorikk)
@@ -70,15 +67,6 @@ internal class ArbeidsgiverUtbetalinger(
     private fun tidslinjer(kuttdato: LocalDate) = arbeidsgivere
         .mapValues { (arbeidsgiver, builder) -> arbeidsgiver.build(subsumsjonObserver, infotrygdhistorikk, builder, kuttdato) }
         //.filterValues { it.isNotEmpty() }
-
-    private fun gjødsle(aktivitetslogg: IAktivitetslogg, periode: Periode, arbeidsgivere: Map<Arbeidsgiver, Utbetalingstidslinje>) {
-        arbeidsgivere.forEach { (arbeidsgiver, tidslinje) ->
-            Refusjonsgjødsler(
-                tidslinje = tidslinje + arbeidsgiver.utbetalingstidslinje(infotrygdhistorikk),
-                refusjonshistorikk = arbeidsgiver.refusjonshistorikk
-            ).gjødsle(aktivitetslogg, periode)
-        }
-    }
 
     private fun filtrer(
         aktivitetslogg: IAktivitetslogg,

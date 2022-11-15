@@ -187,16 +187,6 @@ class InfotrygdhistorikkElement private constructor(
             .map { it.utbetalingstidslinje() }
             .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
 
-    private val utbetalingstidslinjeoppslag = mutableMapOf<String, Utbetalingstidslinje>()
-
-    internal fun utbetalingstidslinje(organisasjonsnummer: String) =
-        utbetalingstidslinjeoppslag.computeIfAbsent(organisasjonsnummer) {
-            perioder
-                .filter { it.gjelder(organisasjonsnummer) }
-                .map { it.utbetalingstidslinje() }
-                .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
-        }
-
     internal fun harBetaltRettFør(periode: Periode): Boolean {
         return perioder.any {
             it !is UkjentInfotrygdperiode && it.erRettFør(periode)

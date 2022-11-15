@@ -4,7 +4,6 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Refusjonshistorikk
@@ -96,8 +95,6 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
         this.utbetalingsdager.zip(other.utbetalingsdager) { venstre, høyre -> maxOf(venstre, høyre) }.toMutableList()
     )
 
-    private fun trimLedendeFridager() = Utbetalingstidslinje(dropWhile { it is Fridag }.toMutableList())
-
     private fun Builder.addUkjentDagHåndterHelg(dato: LocalDate) {
         if (dato.erHelg()) return addFridag(dato, Økonomi.ikkeBetalt())
         addUkjentDag(dato)
@@ -127,14 +124,6 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
         val siste = utbetalingsdager.last { it is NavDag }.dato
         return første til siste
     }
-
-    internal fun sammenhengendeUtbetalingsperioder() =
-        filter { it !is Arbeidsdag && it !is UkjentDag }
-            .map(Utbetalingsdag::dato)
-            .grupperSammenhengendePerioder()
-            .map(::subset)
-            .map(Utbetalingstidslinje::trimLedendeFridager)
-            .filter { it.any { it is NavDag || it is ForeldetDag } }
 
     internal fun subset(periode: Periode): Utbetalingstidslinje {
         if (isEmpty()) return Utbetalingstidslinje()

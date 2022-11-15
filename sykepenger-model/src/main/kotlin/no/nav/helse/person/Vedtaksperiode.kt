@@ -110,7 +110,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
-import no.nav.helse.utbetalingstidslinje.Refusjonsgjødsler
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjerFilter
 import org.slf4j.LoggerFactory
@@ -2431,17 +2430,6 @@ internal class Vedtaksperiode private constructor(
             RevurderingFeilet
         )
 
-        private val FØR_AVSLUTTET_TILSTANDER = listOf(
-            Start,
-            AvventerInntektsmeldingEllerHistorikk,
-            AvventerBlokkerendePeriode,
-            AvventerHistorikk,
-            AvventerVilkårsprøving,
-            AvventerSimulering,
-            AvventerGodkjenning,
-            TilUtbetaling
-        )
-
         // Fredet funksjonsnavn
         internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
             // forkaster perioder som er før/overlapper med oppgitt periode, eller som er sammenhengende med
@@ -2456,10 +2444,6 @@ internal class Vedtaksperiode private constructor(
 
         internal val KLAR_TIL_BEHANDLING: VedtaksperiodeFilter = {
             it.tilstand == AvventerBlokkerendePeriode || it.tilstand == AvventerGodkjenning
-        }
-
-        internal val FØR_AVSLUTTET: VedtaksperiodeFilter = {
-            it.tilstand in FØR_AVSLUTTET_TILSTANDER
         }
 
         internal val IKKE_FERDIG_BEHANDLET: VedtaksperiodeFilter = { !it.tilstand.erFerdigBehandlet }
@@ -2694,16 +2678,6 @@ internal class Vedtaksperiode private constructor(
 
             internal fun utbetal(arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger) {
                 arbeidsgiverUtbetalinger.utbetal(hendelse, this, beregningsperioder.periode(), orgnummer, utbetalingsperioder)
-            }
-
-            internal fun gjødsle(tidslinjer: Map<Arbeidsgiver, Utbetalingstidslinje>, infotrygdhistorikk: Infotrygdhistorikk) {
-                val period = beregningsperioder.periode()
-                tidslinjer.forEach { (arbeidsgiver, tidslinje) ->
-                    Refusjonsgjødsler(
-                        tidslinje = tidslinje + arbeidsgiver.utbetalingstidslinje(infotrygdhistorikk),
-                        refusjonshistorikk = arbeidsgiver.refusjonshistorikk
-                    ).gjødsle(beregningsperioder.firstOrNull { it.arbeidsgiver == arbeidsgiver }?.aktivitetsloggkopi() ?: hendelse, period)
-                }
             }
 
             internal fun filtrer(filtere: List<UtbetalingstidslinjerFilter>, tidslinjer: Map<Arbeidsgiver, Utbetalingstidslinje>) {
