@@ -6,7 +6,7 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.økonomi.Økonomi
 
-internal class ArbeidsgiverperiodeBuilderBuilder() : ArbeidsgiverperiodeMediator {
+internal class ArbeidsgiverperiodeBuilderBuilder : ArbeidsgiverperiodeMediator {
     private val perioder = mutableListOf<Periode>()
     private val siste get() = perioder.last()
 

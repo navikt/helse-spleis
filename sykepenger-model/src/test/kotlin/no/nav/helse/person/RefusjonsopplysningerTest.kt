@@ -14,6 +14,8 @@ import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.Companion.gjennopprett
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.harNødvendigeRefusjonsopplysninger
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -290,12 +292,46 @@ internal class RefusjonsopplysningerTest {
         ).gjennopprett() }
     }
 
+    @Test
+    fun `Har ikke nødvendig refusjonsopplysninger etter oppholdsdager`() {
+        val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply {
+            (17.januar til 25.januar).forEach { utbetalingsdag(it) }
+            (26.januar til 31.januar).forEach { oppholdsdag(it) }
+            (1.februar til 28.februar).forEach { utbetalingsdag(it) }
+        }
+        val refusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 20000.månedlig).refusjonsopplysninger
+        assertTrue(harNødvendigeRefusjonsopplysninger(1.januar til 31.januar, refusjonsopplysninger, arbeidsgiverperiode))
+        assertFalse(harNødvendigeRefusjonsopplysninger(1.februar til 28.februar, refusjonsopplysninger, arbeidsgiverperiode))
+    }
+
+    @Test
+    fun `Har nødvendige refusjonsopplysninger når vi får nye refusjonsopplysninger for perioden etter oppholdet`() {
+        val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply {
+            (17.januar til 25.januar).forEach { utbetalingsdag(it) }
+            (26.januar til 31.januar).forEach { oppholdsdag(it) }
+            (1.februar til 28.februar).forEach { utbetalingsdag(it) }
+        }
+        // IM: FF = 1.januar, AGP = 1.januar - 16.januar
+        val refusjonsopplysningerJanuar = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 20000.månedlig).refusjonsopplysninger
+        assertTrue(harNødvendigeRefusjonsopplysninger(1.januar til 31.januar, refusjonsopplysningerJanuar, arbeidsgiverperiode))
+        assertFalse(harNødvendigeRefusjonsopplysninger(1.februar til 28.februar, refusjonsopplysningerJanuar, arbeidsgiverperiode))
+
+        // IM: FF = 1.februar, AGP = 1.januar - 16.januar
+        val refusjonsopplysningerFebruar = Refusjonsopplysning(UUID.randomUUID(), 1.februar, null, 25000.månedlig).refusjonsopplysninger
+
+        val oppdaterteRefusjonsopplysninger = refusjonsopplysningerJanuar.merge(refusjonsopplysningerFebruar)
+        assertTrue(harNødvendigeRefusjonsopplysninger(1.januar til 31.januar, oppdaterteRefusjonsopplysninger, arbeidsgiverperiode))
+        assertTrue(harNødvendigeRefusjonsopplysninger(1.februar til 28.februar, oppdaterteRefusjonsopplysninger, arbeidsgiverperiode))
+    }
+
     internal companion object {
+        private fun harNødvendigeRefusjonsopplysninger(periode: Periode, refusjonsopplysninger: Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode) =
+            harNødvendigeRefusjonsopplysninger(periode, refusjonsopplysninger, arbeidsgiverperiode, Aktivitetslogg(), "")
         private fun assertGjenopprettetRefusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>) {
             assertEquals(refusjonsopplysninger, refusjonsopplysninger.gjennopprett().inspektør.refusjonsopplysninger)
         }
-        private fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(dager: List<LocalDate>) = harNødvendigRefusjonsopplysninger(dager, Aktivitetslogg(), "")
-        private fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(periode: Periode) = harNødvendigRefusjonsopplysninger(periode.toList(), Aktivitetslogg(), "")
+        private fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(dager: List<LocalDate>) = harNødvendigRefusjonsopplysninger(dager, null, Aktivitetslogg(), "")
+        private fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(periode: Periode) = harNødvendigRefusjonsopplysninger(periode.toList(), null, Aktivitetslogg(), "")
         private fun List<Refusjonsopplysning>.refusjonsopplysninger() = Refusjonsopplysninger(this, LocalDateTime.now())
 
         private fun Refusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>, tidsstempel: LocalDateTime): Refusjonsopplysninger{

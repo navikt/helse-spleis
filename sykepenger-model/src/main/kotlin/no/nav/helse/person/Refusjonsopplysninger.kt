@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.person.Varselkode.RV_RE_2
 import no.nav.helse.økonomi.Inntekt
 
 class Refusjonsopplysning(
@@ -50,6 +49,11 @@ class Refusjonsopplysning(
         val snute = oppdatertTom(overlapp.start.forrigeDag)
         val hale = oppdatertFom(overlapp.endInclusive.nesteDag)
         return listOfNotNull(snute, hale)
+    }
+
+    private fun begrensTil(dato: LocalDate): Refusjonsopplysning? {
+        return if (dekker(dato)) oppdatertTom(dato.forrigeDag)
+        else this
     }
 
     private fun dekker(dag: LocalDate): Boolean {
@@ -127,16 +131,27 @@ class Refusjonsopplysning(
 
         override fun toString() = validerteRefusjonsopplysninger.toString()
 
-        internal fun harNødvendigRefusjonsopplysninger(
-            dager: List<LocalDate>,
+        private fun hensyntattSisteOppholdagFørUtbetalingsdager(sisteOppholdsdagFørUtbetalingsdager: LocalDate?) = when (sisteOppholdsdagFørUtbetalingsdager) {
+            null -> this
+            else -> Refusjonsopplysninger(validerteRefusjonsopplysninger.mapNotNull { it.begrensTil(sisteOppholdsdagFørUtbetalingsdager )})
+        }
+
+        private fun harNødvendigRefusjonsopplysninger(
+            utbetalingsdager: List<LocalDate>,
             hendelse: IAktivitetslogg,
             organisasjonsnummer: String
         ): Boolean {
-            val dekkesIkke = dager.toMutableList().filterNot(::dekker).takeUnless { it.isEmpty() } ?: return true
+            val dekkesIkke = utbetalingsdager.toMutableList().filterNot(::dekker).takeUnless { it.isEmpty() } ?: return true
             hendelse.info("Mangler refusjonsopplysninger på orgnummer $organisasjonsnummer for periodene ${dekkesIkke.grupperSammenhengendePerioder()}")
-            hendelse.funksjonellFeil(RV_RE_2)
             return false
         }
+
+        internal fun harNødvendigRefusjonsopplysninger(
+            utbetalingsdager: List<LocalDate>,
+            sisteOppholdsdagFørUtbetalingsdager: LocalDate?,
+            hendelse: IAktivitetslogg,
+            organisasjonsnummer: String
+        ) = hensyntattSisteOppholdagFørUtbetalingsdager(sisteOppholdsdagFørUtbetalingsdager).harNødvendigRefusjonsopplysninger(utbetalingsdager, hendelse, organisasjonsnummer)
 
         internal fun refusjonsbeløp(dag: LocalDate) = validerteRefusjonsopplysninger.singleOrNull { it.dekker(dag) }?.beløp
             ?: throw IllegalStateException("Fant ikke refusjonsbeløp for $dag. Har refusjonsopplysninger for ${validerteRefusjonsopplysninger.map { "${it.fom}-${it.tom}" }}")

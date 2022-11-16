@@ -73,6 +73,7 @@ import no.nav.helse.person.Varselkode.RV_AY_10
 import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.Varselkode.RV_OO_1
 import no.nav.helse.person.Varselkode.RV_OO_2
+import no.nav.helse.person.Varselkode.RV_RE_2
 import no.nav.helse.person.Varselkode.RV_RV_1
 import no.nav.helse.person.Varselkode.RV_RV_2
 import no.nav.helse.person.Varselkode.RV_RV_3
@@ -1394,15 +1395,14 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun nyPeriodeTidligereEllerOverlappende(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
-            hendelse.info("Som følge av out of order-periode trenger vi å replaye inntektsmelding")
-            vedtaksperiode.trengerInntektsmeldingReplay()
-
-            /*if (!vedtaksperiode.arbeidsgiver.kanBeregneSykepengegrunnlag(vedtaksperiode.skjæringstidspunkt)) return
-            if (!vedtaksperiode.arbeidsgiver.harNødvendigRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, hendelse)) return
-                hendelse.info("Som følge av out of order-periode har vi avklart inntekt-spørsmålet")
-                vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
-            }*/
+            if (!harNødvendigOpplysningerFraArbeidsgiver(vedtaksperiode, hendelse)) return
+            hendelse.info("Som følge av out of order-periode har vi nå nødvendige opplysninger fra arbeidsgiver")
+            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
+
+        private fun harNødvendigOpplysningerFraArbeidsgiver(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) =
+            vedtaksperiode.arbeidsgiver.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) &&
+            vedtaksperiode.arbeidsgiver.harNødvendigRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, hendelse)
 
         override fun startRevurdering(
             arbeidsgivere: List<Arbeidsgiver>,
@@ -1434,6 +1434,9 @@ internal class Vedtaksperiode private constructor(
                         vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
                     } else if (person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) is InfotrygdVilkårsgrunnlag) {
                         info("Oppdaget at perioden startet i infotrygd")
+                        vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
+                    } else if (harNødvendigOpplysningerFraArbeidsgiver(vedtaksperiode, hendelse)) {
+                        info("Har nå nødvendige opplysninger fra arbeidsgiver")
                         vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
                     }
                 }
@@ -1493,6 +1496,7 @@ internal class Vedtaksperiode private constructor(
                     "Gjenopptar ikke behandling fordi minst én overlappende periode venter på nødvendig opplysninger fra arbeidsgiver"
                 )
                 !arbeidsgivere.harNødvendigRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, hendelse) -> {
+                    hendelse.funksjonellFeil(RV_RE_2)
                     vedtaksperiode.forkast(hendelse)
                 }
                 else -> {
