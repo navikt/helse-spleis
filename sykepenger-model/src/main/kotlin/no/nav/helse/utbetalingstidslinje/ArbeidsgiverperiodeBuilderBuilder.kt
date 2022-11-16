@@ -38,8 +38,13 @@ internal class ArbeidsgiverperiodeBuilderBuilder() : ArbeidsgiverperiodeMediator
     override fun fridag(dato: LocalDate) {
         aktivArbeidsgiverperiode?.kjentDag(dato)
     }
+
+    override fun fridagOppholdsdag(dato: LocalDate) {
+        aktivArbeidsgiverperiode?.oppholdsdag(dato)
+    }
+
     override fun arbeidsdag(dato: LocalDate) {
-        aktivArbeidsgiverperiode?.kjentDag(dato)
+        aktivArbeidsgiverperiode?.oppholdsdag(dato)
     }
     override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
         // lager en fiktig arbeidsgiverperiode for Infotrygd-perioder, eller
@@ -50,10 +55,10 @@ internal class ArbeidsgiverperiodeBuilderBuilder() : ArbeidsgiverperiodeMediator
         }
     }
     override fun foreldetDag(dato: LocalDate, økonomi: Økonomi) {
-        aktivArbeidsgiverperiode?.kjentDag(dato)
+        aktivArbeidsgiverperiode?.utbetalingsdag(dato)
     }
     override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse) {
-        aktivArbeidsgiverperiode?.kjentDag(dato)
+        aktivArbeidsgiverperiode?.oppholdsdag(dato)
     }
 
     private fun nyDag(dagen: LocalDate) {

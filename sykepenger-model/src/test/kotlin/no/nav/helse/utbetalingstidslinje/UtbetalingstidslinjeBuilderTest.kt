@@ -594,6 +594,9 @@ internal class UtbetalingstidslinjeBuilderTest {
         override fun fridag(dato: LocalDate) {
             mediators.forEach { it.fridag(dato) }
         }
+        override fun fridagOppholdsdag(dato: LocalDate) {
+            mediators.forEach { it.fridagOppholdsdag(dato) }
+        }
 
         override fun arbeidsdag(dato: LocalDate) {
             mediators.forEach { it.arbeidsdag(dato) }

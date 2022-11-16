@@ -30,7 +30,7 @@ internal class ArbeidsgiverperiodeBuilder(
     }
 
     override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: MutableList<Periode>) {
-        fridager.somFeriedager()
+        fridager.somFerieOppholdsdager()
     }
 
     private fun tilstand(tilstand: Tilstand) {
@@ -67,10 +67,10 @@ internal class ArbeidsgiverperiodeBuilder(
         }.clear()
     }
 
-    private fun MutableList<LocalDate>.somFeriedager() {
+    private fun MutableList<LocalDate>.somFerieOppholdsdager() {
         onEach {
             arbeidsgiverperiodeteller.dec()
-            mediator.fridag(it)
+            mediator.fridagOppholdsdag(it)
         }.clear()
     }
 
@@ -118,14 +118,14 @@ internal class ArbeidsgiverperiodeBuilder(
 
     override fun visitDag(dag: Dag.Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) {
         tilstand(Initiell)
-        fridager.somFeriedager()
+        fridager.somFerieOppholdsdager()
         arbeidsgiverperiodeteller.dec()
         mediator.arbeidsdag(dato)
     }
 
     override fun visitDag(dag: Dag.FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) {
         tilstand(Initiell)
-        fridager.somFeriedager()
+        fridager.somFerieOppholdsdager()
         arbeidsgiverperiodeteller.dec()
         mediator.arbeidsdag(dato)
     }
@@ -133,7 +133,7 @@ internal class ArbeidsgiverperiodeBuilder(
     override fun visitDag(dag: Dag.UkjentDag, dato: LocalDate, kilde: Hendelseskilde) {
         if (dato.erHelg()) return tilstand.feriedag(this, dato)
         tilstand(Initiell)
-        fridager.somFeriedager()
+        fridager.somFerieOppholdsdager()
         arbeidsgiverperiodeteller.dec()
         mediator.arbeidsdag(dato)
     }
@@ -180,7 +180,7 @@ internal class ArbeidsgiverperiodeBuilder(
     private object Initiell : Tilstand {
         override fun feriedag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate) {
             builder.arbeidsgiverperiodeteller.dec()
-            builder.mediator.fridag(dato)
+            builder.mediator.fridagOppholdsdag(dato)
         }
 
         override fun feriedagSomSyk(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, kilde: Hendelseskilde) {

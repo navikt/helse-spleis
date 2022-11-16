@@ -1,16 +1,20 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
+import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
+import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -28,7 +32,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
         undersøke(31.S)
         assertEquals(1, perioder.size)
         assertEquals(listOf(1.januar til 16.januar), perioder.first())
-        assertTrue(perioder.first().erFørsteUtbetalingsdagFørEllerLik(31.januar))
+        assertTrue(perioder.first().erFørsteUtbetalingsdagFørEllerLik(1.januar til 31.januar))
         assertTrue(perioder.first().hørerTil(17.januar til 31.januar))
         assertTrue(17.januar til 31.januar in perioder.first())
     }
@@ -40,7 +44,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
         }
         assertEquals(1, perioder.size)
         assertEquals(emptyList<LocalDate>(), perioder.first())
-        assertTrue(perioder.first().erFørsteUtbetalingsdagFørEllerLik(31.januar))
+        assertTrue(perioder.first().erFørsteUtbetalingsdagFørEllerLik(1.januar til 31.januar))
         assertTrue(perioder.first().hørerTil(17.januar til 31.januar))
         assertTrue(17.januar til 31.januar in perioder.first())
     }
@@ -52,10 +56,54 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
         }
         assertEquals(1, perioder.size)
         assertEquals(listOf(1.januar til 16.januar), perioder.first())
-        assertTrue(perioder.first().erFørsteUtbetalingsdagFørEllerLik(31.januar))
+        assertTrue(perioder.first().erFørsteUtbetalingsdagFørEllerLik(1.januar til 31.januar))
         assertTrue(perioder.first().hørerTil(17.januar til 31.januar))
         assertTrue(17.januar til 31.januar in perioder.first())
     }
+
+    @Test
+    fun `ferie i agp`() {
+        undersøke(5.S + 5.F + 10.S)
+        assertEquals(1, perioder.size)
+        assertEquals(listOf(1.januar til 16.januar), perioder.first())
+        assertTrue(perioder.first().forventerInntekt(17.januar til 31.januar, Sykdomstidslinje(), NullObserver))
+    }
+
+    @Test
+    fun `arbeid etter ferie i agp`() {
+        undersøke(5.S + 5.F + 5.A + 11.S + 1.F + 13.S)
+        assertEquals(1, perioder.size)
+        assertEquals(listOf(1.januar til 5.januar, 16.januar til 26.januar), perioder.first())
+        assertTrue(perioder.first().forventerInntekt(29.januar til 31.januar, Sykdomstidslinje(), NullObserver))
+    }
+
+    @Test
+    fun `opphold direkte etter fullført agp`() {
+        undersøke(16.S + 15.A)
+        assertEquals(1, perioder.size)
+        assertEquals(listOf(1.januar til 16.januar), perioder.first())
+        assertFalse(perioder.first().forventerInntekt(17.januar til 31.januar, Sykdomstidslinje(), NullObserver))
+    }
+
+    @Test
+    fun `opphold etter litt utbetaling`() {
+        undersøke(17.S + 15.A)
+        assertEquals(1, perioder.size)
+        assertEquals(listOf(1.januar til 16.januar), perioder.first())
+        assertTrue(perioder.first().forventerInntekt(17.januar til 31.januar, Sykdomstidslinje(), NullObserver))
+        assertFalse(perioder.first().forventerInntekt(18.januar til 31.januar, Sykdomstidslinje(), NullObserver))
+        assertFalse(perioder.first().forventerInntekt(19.januar til 31.januar, Sykdomstidslinje(), NullObserver))
+    }
+
+    @Test
+    fun `ferie etter opphold etter fullført agp`() {
+        undersøke(17.S + 1.A + 16.F + 16.S)
+        assertEquals(2, perioder.size)
+        assertEquals(listOf(1.januar til 16.januar), perioder.first())
+        assertEquals(listOf(4.februar til 19.februar), perioder.last())
+        assertFalse(perioder.first().forventerInntekt(18.januar til 31.januar, Sykdomstidslinje(), NullObserver))
+    }
+
 
     private lateinit var teller: Arbeidsgiverperiodeteller
 

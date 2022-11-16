@@ -10,7 +10,6 @@ import no.nav.helse.erRettFør
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
-import no.nav.helse.nesteDag
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.Varselkode.RV_ST_1
@@ -181,15 +180,10 @@ internal class Sykdomstidslinje private constructor(
     private fun erSisteDagArbeidsdag() = this.dager.keys.lastOrNull()?.let(::erArbeidsdag) ?: true
 
     internal fun harSykedager() = any { it is Sykedag || it is SykHelgedag || it is ForeldetSykedag }
-    internal fun harIngenSykeUkedager() = none { it is Sykedag || it is ForeldetSykedag }
-
-    internal fun harProblemdager() = any { it is ProblemDag }
 
     internal fun harForeldedeDager() = any { it is ForeldetSykedag }
 
-    internal fun harForeldedeDagerEtter(dato: LocalDate) = fraOgMed(dato.nesteDag).any { it is ForeldetSykedag }
     private fun sisteOppholdsdag() = periode?.lastOrNull { erOppholdsdag(it) }
-
     private fun sisteOppholdsdag(før: LocalDate) = periode?.filter { erOppholdsdag(it) }?.lastOrNull { it.isBefore(før) }
 
     private fun erOppholdsdag(dato: LocalDate): Boolean {
@@ -246,6 +240,7 @@ internal class Sykdomstidslinje private constructor(
                 }
         }?.trim() ?: "Tom tidslinje"
     }
+
     internal fun sykdomsperiode() = kuttEtterSisteSykedag().periode
 
     internal companion object {

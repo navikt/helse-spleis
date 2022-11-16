@@ -1,10 +1,12 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.opphold
@@ -13,8 +15,6 @@ import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 
 internal class ArbeidsgiverperiodesubsumsjonTest {
     @Test
@@ -252,6 +252,10 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         var avvistdager = 0
 
         override fun fridag(dato: LocalDate) {
+            fridager += 1
+        }
+
+        override fun fridagOppholdsdag(dato: LocalDate) {
             fridager += 1
         }
 
