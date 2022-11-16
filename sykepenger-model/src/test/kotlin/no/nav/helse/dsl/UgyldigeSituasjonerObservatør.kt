@@ -17,6 +17,9 @@ import no.nav.helse.økonomi.Inntekt
 
 internal class UgyldigeSituasjonerObservatør(private val person: Person): PersonObserver {
 
+    private val arbeidsgivereMap = mutableMapOf<String, Arbeidsgiver>()
+    private val arbeidsgivere get() = arbeidsgivereMap.values
+
     init {
         person.addObserver(this)
     }
@@ -25,13 +28,21 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         hendelseskontekst: Hendelseskontekst,
         event: PersonObserver.VedtaksperiodeEndretEvent
     ) {
-        bekreftIngenOverlappende()
-        validerInntektshistorikk()
-        validerSykdomshistorikk()
+        val detaljer = mutableMapOf<String, String>()
+        hendelseskontekst.appendTo(detaljer::put)
+        val orgnr = detaljer.getValue("organisasjonsnummer")
+        arbeidsgivereMap.getOrPut(orgnr) { person.arbeidsgiver(orgnr) }
+        bekreftIngenUgyldigeSituasjoner()
     }
 
-    internal fun validerSykdomshistorikk() {
-        arbeidsgivere().forEach { arbeidsgiver ->
+    internal fun bekreftIngenUgyldigeSituasjoner() {
+        bekreftIngenOverlappende()
+        validerSykdomshistorikk()
+        validerInntektshistorikk()
+    }
+
+    private fun validerSykdomshistorikk() {
+        arbeidsgivere.forEach { arbeidsgiver ->
             val hendelseIder = arbeidsgiver.inspektør.sykdomshistorikk.inspektør.hendelseIder()
             check(hendelseIder.size == hendelseIder.toSet().size) {
                 "Sykdomshistorikken inneholder duplikate hendelseIder"
@@ -39,7 +50,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         }
     }
 
-    internal fun bekreftIngenOverlappende() {
+    private fun bekreftIngenOverlappende() {
         person.inspektør.vedtaksperioder()
             .filterValues { it.size > 1 }
             .forEach { (orgnr, perioder) ->
@@ -54,15 +65,16 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
             }
     }
 
-    internal fun validerInntektshistorikk() {
-        arbeidsgivere().forEach { arbeidsgiver  ->
+    private fun validerInntektshistorikk() {
+        arbeidsgivere.forEach { arbeidsgiver  ->
             validerInntektshistorikk(arbeidsgiver)
         }
     }
 
     private fun validerInntektshistorikk(arbeidsgiver: Arbeidsgiver) {
-        val forrige = arbeidsgiver.inspektør.inntektshistorikk.inspektør.inntekterForrigeInnslag()
-        val siste = arbeidsgiver.inspektør.inntektshistorikk.inspektør.inntekterSisteInnslag()
+        val inntektshistorikkInspektør = arbeidsgiver.inspektør.inntektshistorikk.inspektør
+        val forrige = inntektshistorikkInspektør.inntekterForrigeInnslag()
+        val siste = inntektshistorikkInspektør.inntekterSisteInnslag()
         if (siste != null) {
             check(siste.size == siste.toSet().size) {
                 "Siste innslag i inntektshistorikken inneholder duplikate opplysninger:\n\t${siste.joinToString {"\n${siste.fremhevDuplikat(it)}\t$it"}}"
@@ -77,12 +89,6 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
             }
         }
     }
-
-    private fun arbeidsgivere() = person
-        .inspektør
-        .vedtaksperioder()
-        .keys
-        .map { orgnummer -> person.arbeidsgiver(orgnummer) }
 
     private val Inntektshistorikk.inspektør get() = InntektshistorikkInspektør(this)
 

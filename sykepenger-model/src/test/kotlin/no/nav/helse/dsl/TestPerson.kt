@@ -120,16 +120,8 @@ internal class TestPerson(
         behovsamler.bekreftBehovOppfylt()
     }
 
-    internal fun bekreftIngenOverlappende() {
-        ugyldigeSituasjonerObservatør.bekreftIngenOverlappende()
-    }
-
-    internal fun validerInntektshistorikk() {
-        ugyldigeSituasjonerObservatør.validerInntektshistorikk()
-    }
-
-    internal fun validerSykdomshistorikk() {
-        ugyldigeSituasjonerObservatør.validerSykdomshistorikk()
+    internal fun bekreftIngenUgyldigeSituasjoner() {
+        ugyldigeSituasjonerObservatør.bekreftIngenUgyldigeSituasjoner()
     }
 
     internal fun håndterOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: ArbeidsforholdOverstyrt) {
