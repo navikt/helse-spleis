@@ -1,18 +1,19 @@
 package no.nav.helse.person.etterlevelse
 
+import java.time.LocalDate
 import no.nav.helse.person.Bokstav
 import no.nav.helse.person.Ledd
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum
-import no.nav.helse.person.etterlevelse.MaskinellJurist.*
+import no.nav.helse.person.etterlevelse.MaskinellJurist.KontekstType
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class EnkelSubsumsjonTest {
 
@@ -43,6 +44,27 @@ internal class EnkelSubsumsjonTest {
         nyVurdering(VILKAR_IKKE_OPPFYLT)
 
         assertEquals(2, vurderinger.size)
+    }
+
+    @Test
+    fun equality() {
+        val utfall = VILKAR_OPPFYLT
+        val versjon = LocalDate.MAX
+        val paragraf = Paragraf.PARAGRAF_8_2
+        val ledd  = 1.ledd
+        val punktum: Punktum = Punktum.PUNKTUM_1
+        val bokstav = Bokstav.BOKSTAV_A
+        val input = mapOf("foo" to "bar")
+        val output = mapOf("bar" to "baz")
+        val kontekster = emptyMap<String, KontekstType>()
+
+        val enkel = EnkelSubsumsjon(utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
+        val enkelKopi = EnkelSubsumsjon(utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
+        val betinget = BetingetSubsumsjon(true, utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
+
+        assertEquals(enkel, enkel)
+        assertEquals(enkel, enkelKopi)
+        assertNotEquals(enkel, betinget)
     }
 
     private fun nyVurdering(

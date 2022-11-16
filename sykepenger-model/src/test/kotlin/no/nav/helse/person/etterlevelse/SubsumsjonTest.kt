@@ -1,5 +1,6 @@
 package no.nav.helse.person.etterlevelse
 
+import java.time.LocalDate
 import no.nav.helse.person.Bokstav
 import no.nav.helse.person.Bokstav.BOKSTAV_A
 import no.nav.helse.person.Bokstav.BOKSTAV_B
@@ -11,14 +12,13 @@ import no.nav.helse.person.Paragraf.PARAGRAF_8_16
 import no.nav.helse.person.Punktum
 import no.nav.helse.person.Punktum.PUNKTUM_1
 import no.nav.helse.person.Punktum.PUNKTUM_2
-import no.nav.helse.person.etterlevelse.MaskinellJurist.*
+import no.nav.helse.person.etterlevelse.MaskinellJurist.KontekstType
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class SubsumsjonTest {
 
@@ -123,14 +123,12 @@ internal class SubsumsjonTest {
         override val utfall = utfall
         override val versjon = versjon
         override val paragraf = paragraf
-        override val ledd: Ledd? = ledd
+        override val ledd: Ledd = ledd
         override val bokstav: Bokstav? = bokstav
         override val punktum: Punktum? = punktum
         override val input = input
         override val output = output
         override val kontekster = kontekster
-
-        override fun sammenstill(subsumsjoner: List<Subsumsjon>): List<Subsumsjon> = emptyList()
 
         override fun acceptSpesifikk(visitor: SubsumsjonVisitor) {}
     }

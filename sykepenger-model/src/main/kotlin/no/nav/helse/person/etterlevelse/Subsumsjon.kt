@@ -1,5 +1,6 @@
 package no.nav.helse.person.etterlevelse
 
+import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.til
@@ -7,10 +8,7 @@ import no.nav.helse.person.Bokstav
 import no.nav.helse.person.Ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum
-import no.nav.helse.person.etterlevelse.MaskinellJurist.*
-import java.time.LocalDate
-
-internal typealias SammenstillingStrategi<T> = (other: T) -> List<Subsumsjon>
+import no.nav.helse.person.etterlevelse.MaskinellJurist.KontekstType
 
 internal abstract class Subsumsjon {
 
@@ -35,32 +33,33 @@ internal abstract class Subsumsjon {
         visitor.postVisitSubsumsjon(utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
     }
 
-    abstract fun acceptSpesifikk(visitor: SubsumsjonVisitor)
+    protected abstract fun acceptSpesifikk(visitor: SubsumsjonVisitor)
 
-    abstract fun sammenstill(subsumsjoner: List<Subsumsjon>): List<Subsumsjon>
-
-    protected inline fun <reified T : Subsumsjon> sammenstill(
-        subsumsjoner: List<Subsumsjon>,
-        strategi: SammenstillingStrategi<T>
-    ): List<Subsumsjon> {
-        val tidligereSubsumsjon = subsumsjoner.filterIsInstance<T>().firstOrNull { it == this }
-        if (tidligereSubsumsjon != null) return strategi(tidligereSubsumsjon)
-        return subsumsjoner + this
+    internal fun sammenstill(subsumsjoner: List<Subsumsjon>): List<Subsumsjon> {
+        if (!skalSammenstille()) return subsumsjoner
+        val (medSammeDatagrunnlag, utenSammeDatagrunnlag) = subsumsjoner.partition { subsumsjon -> subsumsjon == this }
+        if (medSammeDatagrunnlag.isEmpty()) return subsumsjoner + this
+        return utenSammeDatagrunnlag + sammenstillMed(medSammeDatagrunnlag)
     }
+
+    protected open fun sammenstillMed(medSammeDatagrunnlag: List<Subsumsjon>) = this
+    protected open fun skalSammenstille() = true
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-
-        return other is Subsumsjon &&
-            utfall == other.utfall &&
-            versjon == other.versjon &&
+        if (other !is Subsumsjon) return false
+        if (other::class != this::class) return false
+        return ekstraEquals(other) && utfall == other.utfall &&
             paragraf == other.paragraf &&
             ledd == other.ledd &&
             punktum == other.punktum &&
             bokstav == other.bokstav &&
             input == other.input &&
-            output == other.output &&
             kontekster == other.kontekster
+    }
+
+    protected open fun ekstraEquals(other: Subsumsjon): Boolean {
+        return other.versjon == this.versjon && other.output == this.output
     }
 
     override fun hashCode(): Int {
@@ -79,15 +78,6 @@ internal abstract class Subsumsjon {
     override fun toString(): String {
         return "$paragraf $ledd ${if (punktum == null) "" else punktum} ${if (bokstav == null) "" else bokstav} [$utfall]"
     }
-
-    internal companion object {
-        fun List<Subsumsjon>.erstatt(replacee: Subsumsjon, replacement: Subsumsjon): List<Subsumsjon> {
-            return this.toMutableList().apply {
-                remove(replacee)
-                add(replacement)
-            }
-        }
-    }
 }
 
 internal class EnkelSubsumsjon(
@@ -101,9 +91,6 @@ internal class EnkelSubsumsjon(
     override val output: Map<String, Any>,
     override val kontekster: Map<String, KontekstType>
 ) : Subsumsjon() {
-    override fun sammenstill(subsumsjoner: List<Subsumsjon>) =
-        sammenstill<EnkelSubsumsjon>(subsumsjoner) { subsumsjoner.erstatt(it, this) }
-
     override fun acceptSpesifikk(visitor: SubsumsjonVisitor) {}
 }
 
@@ -145,29 +132,17 @@ internal class GrupperbarSubsumsjon private constructor(
         visitor.visitGrupperbarSubsumsjon(perioder)
     }
 
-    private fun harSammeDatagrunnlag(other: GrupperbarSubsumsjon) =
-        paragraf == other.paragraf &&
-            ledd == other.ledd &&
-            punktum == other.punktum &&
-            bokstav == other.bokstav &&
-            kontekster == other.kontekster &&
-            input == other.input &&
-            originalOutput == other.originalOutput &&
-            utfall == other.utfall
+    override fun ekstraEquals(other: Subsumsjon): Boolean {
+        if (other !is GrupperbarSubsumsjon) return false
+        return originalOutput == other.originalOutput
+    }
 
-    override fun sammenstill(subsumsjoner: List<Subsumsjon>): List<Subsumsjon> {
-        val sammenstiltePerioder = (subsumsjoner + this)
-            .filterIsInstance<GrupperbarSubsumsjon>()
-            .filter { it.harSammeDatagrunnlag(this) }
-            .flatMap { it.perioder }
+    override fun sammenstillMed(medSammeDatagrunnlag: List<Subsumsjon>): Subsumsjon {
+        val sammenstiltePerioder = (medSammeDatagrunnlag + this)
+            .flatMap { (it as GrupperbarSubsumsjon).perioder }
             .grupperSammenhengendePerioderMedHensynTilHelg()
 
-        val gruppertSubsumsjon = GrupperbarSubsumsjon(sammenstiltePerioder, utfall, versjon, paragraf, ledd, punktum, bokstav, originalOutput, input, kontekster)
-
-        return subsumsjoner.toMutableList().let { it ->
-            it.removeAll { subsumsjon -> subsumsjon is GrupperbarSubsumsjon && subsumsjon.harSammeDatagrunnlag(this) }
-            it + gruppertSubsumsjon
-        }
+        return GrupperbarSubsumsjon(sammenstiltePerioder, utfall, versjon, paragraf, ledd, punktum, bokstav, originalOutput, input, kontekster)
     }
 }
 
@@ -183,10 +158,7 @@ internal class BetingetSubsumsjon(
     override val output: Map<String, Any>,
     override val kontekster: Map<String, KontekstType>
 ) : Subsumsjon() {
-    override fun sammenstill(subsumsjoner: List<Subsumsjon>): List<Subsumsjon> {
-        if (!funnetRelevant) return subsumsjoner
-        return sammenstill<BetingetSubsumsjon>(subsumsjoner) { subsumsjoner.erstatt(it, this) }
-    }
+    override fun skalSammenstille() = funnetRelevant
 
     override fun acceptSpesifikk(visitor: SubsumsjonVisitor) {
         visitor.visitBetingetSubsumsjon(funnetRelevant)
