@@ -34,6 +34,12 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
     private lateinit var status: Utbetaling.Tilstand
     internal lateinit var type: Utbetalingtype
         private set
+    internal var forbrukteSykedager by Delegates.notNull<Int>()
+        private set
+    internal var gjenståendeSykedager by Delegates.notNull<Int>()
+        private set
+    internal lateinit var maksdato: LocalDate
+        private set
     var avstemmingsnøkkel: Long? = null
     val erUbetalt get() = status == Utbetaling.Ubetalt
     val erForkastet get() = status == Utbetaling.Forkastet
@@ -73,6 +79,9 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
         this.status = tilstand
         this.avstemmingsnøkkel = avstemmingsnøkkel
         this.nettobeløp = arbeidsgiverNettoBeløp + personNettoBeløp
+        this.forbrukteSykedager = forbrukteSykedager ?: -1
+        this.gjenståendeSykedager = gjenståendeSykedager ?: -1
+        this.maksdato = maksdato
     }
 
     override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {

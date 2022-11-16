@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.april
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -8,11 +10,13 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
+import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.serde.serialize
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbruktOver67
@@ -22,6 +26,40 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
 internal class MaksdatoE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `hensyntar tidligere arbeidsgivere fra IT`() {
+        nyPeriode(1.mars til 31.mars, a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar, 100.prosent, INNTEKT))
+        håndterInntektsmelding(listOf(1.mars til 16.mars))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        val utbetalingInspektør = inspektør(a1).utbetaling(0).inspektør
+        assertEquals(33, utbetalingInspektør.forbrukteSykedager)
+        assertEquals(215, utbetalingInspektør.gjenståendeSykedager)
+        assertEquals(25.januar(2019), utbetalingInspektør.maksdato)
+    }
+
+    @Test
+    fun `hensyntar senere arbeidsgivere fra IT`() {
+        nyPeriode(1.mars til 31.mars, a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(a2, 1.april, 30.april, 100.prosent, INNTEKT))
+        håndterInntektsmelding(listOf(1.mars til 16.mars))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        val utbetalingInspektør = inspektør(a1).utbetaling(0).inspektør
+        assertEquals(31, utbetalingInspektør.forbrukteSykedager)
+        assertEquals(217, utbetalingInspektør.gjenståendeSykedager)
+        assertEquals(27.februar(2019), utbetalingInspektør.maksdato)
+    }
 
     @Test
     fun `syk etter maksdato`() {
