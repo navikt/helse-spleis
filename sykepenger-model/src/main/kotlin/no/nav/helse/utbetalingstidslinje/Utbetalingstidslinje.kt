@@ -6,7 +6,6 @@ import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
@@ -191,10 +190,6 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
 
         internal abstract fun accept(visitor: UtbetalingsdagVisitor)
 
-        internal open fun gjødsle(refusjon: Refusjonshistorikk.Refusjon?) {
-            økonomi.arbeidsgiverRefusjon(refusjon?.beløp(dato))
-        }
-
         internal open fun erAvvistMed(begrunnelse: Begrunnelse): AvvistDag? = null
 
         internal class ArbeidsgiverperiodeDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
@@ -253,10 +248,6 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
             override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
             internal fun navDag(): Utbetalingsdag =
                 if (EgenmeldingUtenforArbeidsgiverperiode in begrunnelser) this else NavDag(dato, økonomi.låsOpp())
-
-            override fun gjødsle(refusjon: Refusjonshistorikk.Refusjon?) {
-                /* noop */
-            }
 
             override fun erAvvistMed(begrunnelse: Begrunnelse) = takeIf { begrunnelse in begrunnelser }
         }
