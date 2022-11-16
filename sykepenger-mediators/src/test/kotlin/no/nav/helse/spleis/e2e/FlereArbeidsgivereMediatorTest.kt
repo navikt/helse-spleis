@@ -3,14 +3,14 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildetypeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.TestMessageFactory
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildetypeDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -25,7 +25,7 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a2)
         sendSøknad(
             listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
-            andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.FOSTERHJEMGODTGJORELSE, true)),
+            andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.FOSTERHJEMGODTGJORELSE)),
             sendtNav = LocalDateTime.MAX,
             orgnummer = a2
         )
