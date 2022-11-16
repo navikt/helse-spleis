@@ -237,7 +237,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     fun `endring i refusjon`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT, null, endringerIRefusjon = listOf(
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT, null, endringerIRefusjon = listOf(
             Inntektsmelding.Refusjon.EndringIRefusjon(Inntekt.INGEN, 1.februar))))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -256,10 +256,12 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
         assertEquals(1.januar, refusjonsopplysninger.first().fom)
         assertEquals(31.januar, refusjonsopplysninger.first().tom)
-        assertEquals(INNTEKT,refusjonsopplysninger.first().beløp.månedlig)
+        assertEquals(INNTEKT, refusjonsopplysninger.first().beløp.månedlig)
+        assertEquals(inntektsmeldingId, refusjonsopplysninger.first().meldingsreferanseId)
         assertEquals(1.februar, refusjonsopplysninger.last().fom)
         assertEquals(null, refusjonsopplysninger.last().tom)
         assertEquals(Inntekt.INGEN, refusjonsopplysninger.last().beløp.månedlig)
+        assertEquals(inntektsmeldingId, refusjonsopplysninger.last().meldingsreferanseId)
     }
 
     @Test

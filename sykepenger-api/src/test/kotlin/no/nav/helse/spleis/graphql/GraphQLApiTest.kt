@@ -417,7 +417,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     }
 
     @Test
-    fun `vilkårsgrunnlag med person-resolver`() {
+    fun `vilkårsgrunnlaghistorikk med person-resolver`() {
         val query = """
             {
                 person(fnr: \"$UNG_PERSON_FNR\") {
@@ -470,6 +470,58 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                 assertEquals(1, vilkårsgrunnlaghistorikk.size())
                 assertEquals(vilkårsId, vilkårsgrunnlaghistorikk.get(0).get("id").asText())
                 assertEquals(6, vilkårsgrunnlaghistorikk.get(0).get("grunnlag").get(0).size())
+            }
+        }
+    }
+
+    @Test
+    fun `refusjonsopplysninger på vilkårsgrunnlag med person-resolver`() {
+        val query = """
+            {
+                person(fnr: \"$UNG_PERSON_FNR\") {
+                    arbeidsgivere {
+                        generasjoner {
+                            perioder {
+                                ... on GraphQLBeregnetPeriode {
+                                    vilkarsgrunnlagId
+                                }
+                            }
+                        }
+                    },
+                    vilkarsgrunnlag {
+                            ... on GraphQLSpleisVilkarsgrunnlag {
+                                id,
+                                skjaeringstidspunkt,
+                                arbeidsgiverrefusjoner {
+                                    arbeidsgiver
+                                    refusjonsopplysninger {
+                                        fom
+                                        tom
+                                        belop
+                                        meldingsreferanseId
+                                    }
+                                }
+                                vilkarsgrunnlagtype
+                            }
+                        }
+                }
+            }
+        """.trimIndent()
+
+        testServer.httpPost(
+            path = "/graphql",
+            body = """{"query": "$query"}"""
+        ) {
+            objectMapper.readTree(this).get("data").get("person").let { person ->
+                val vilkårsgrunnlagId: String =
+                    person.get("arbeidsgivere").get(0).get("generasjoner").get(0).get("perioder").get(0).get("vilkarsgrunnlagId").asText()
+                val vilkårsgrunnlårsgrunnlag = person.get("vilkarsgrunnlag")
+                assertEquals(1, vilkårsgrunnlårsgrunnlag.size())
+                assertEquals(vilkårsgrunnlagId, vilkårsgrunnlårsgrunnlag.get(0).get("id").asText())
+                assertEquals(1, vilkårsgrunnlårsgrunnlag.get(0).get("arbeidsgiverrefusjoner").size())
+                assertEquals(1, vilkårsgrunnlårsgrunnlag.get(0).get("arbeidsgiverrefusjoner")[0].get("refusjonsopplysninger").size())
+                val refusjonselement = vilkårsgrunnlårsgrunnlag.get(0).get("arbeidsgiverrefusjoner")[0].get("refusjonsopplysninger")[0]
+                assertEquals("2018-01-01", refusjonselement.get("fom").asText())
             }
         }
     }

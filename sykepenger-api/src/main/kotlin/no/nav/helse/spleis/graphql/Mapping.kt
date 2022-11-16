@@ -4,6 +4,7 @@ import java.util.UUID
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.api.dto.Arbeidsgiverinntekt
+import no.nav.helse.serde.api.dto.Arbeidsgiverrefusjon
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.HendelseDTO
@@ -27,6 +28,7 @@ import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
 import no.nav.helse.serde.api.speil.builders.SykepengegrunnlagsgrenseDTO
 import no.nav.helse.spleis.graphql.dto.GraphQLAktivitet
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiverinntekt
+import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiverrefusjon
 import no.nav.helse.spleis.graphql.dto.GraphQLBegrunnelse
 import no.nav.helse.spleis.graphql.dto.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLDag
@@ -43,6 +45,7 @@ import no.nav.helse.spleis.graphql.dto.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodetype
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodevilkar
 import no.nav.helse.spleis.graphql.dto.GraphQLRefusjon
+import no.nav.helse.spleis.graphql.dto.GraphQLRefusjonselement
 import no.nav.helse.spleis.graphql.dto.GraphQLSammenligningsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLSimulering
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsdetaljer
@@ -357,6 +360,18 @@ private fun mapTilstand(tilstand: Periodetilstand) = when (tilstand) {
     Periodetilstand.UtbetaltVenterPåAnnenPeriode -> GraphQLPeriodetilstand.UtbetaltVenterPaAnnenPeriode
 }
 
+private fun mapArbeidsgiverRefusjon(arbeidsgiverrefusjon: Arbeidsgiverrefusjon) = GraphQLArbeidsgiverrefusjon(
+    arbeidsgiver = arbeidsgiverrefusjon.arbeidsgiver,
+    refusjonsopplysninger = arbeidsgiverrefusjon.refusjonsopplysninger.map {
+        GraphQLRefusjonselement(
+            fom = it.fom,
+            tom = it.tom,
+            belop = it.beløp,
+            meldingsreferanseId = it.meldingsreferanseId
+        )
+    }
+)
+
 private fun mapInntekt(inntekt: Arbeidsgiverinntekt) = GraphQLArbeidsgiverinntekt(
     arbeidsgiver = inntekt.organisasjonsnummer,
     omregnetArsinntekt = inntekt.omregnetÅrsinntekt?.let { omregnetÅrsinntekt ->
@@ -414,7 +429,8 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: Vilkårsgrunnlag) =
                 opptjeningFra = vilkårsgrunnlag.opptjeningFra,
                 oppfyllerKravOmMinstelonn = vilkårsgrunnlag.oppfyllerKravOmMinstelønn,
                 oppfyllerKravOmOpptjening = vilkårsgrunnlag.oppfyllerKravOmOpptjening,
-                oppfyllerKravOmMedlemskap = vilkårsgrunnlag.oppfyllerKravOmMedlemskap
+                oppfyllerKravOmMedlemskap = vilkårsgrunnlag.oppfyllerKravOmMedlemskap,
+                arbeidsgiverrefusjoner = vilkårsgrunnlag.arbeidsgiverrefusjoner.map{ refusjon -> mapArbeidsgiverRefusjon(refusjon)}
             )
             is InfotrygdVilkårsgrunnlag -> GraphQLInfotrygdVilkarsgrunnlag(
                 id = id,
