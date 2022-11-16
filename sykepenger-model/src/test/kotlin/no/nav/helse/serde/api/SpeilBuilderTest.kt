@@ -276,5 +276,9 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val refusjonEtterIm = (speilApi().arbeidsgivere.first().generasjoner.last().perioder.first() as BeregnetPeriode).refusjon
         assertEquals(vilkårsgrunnlagId, vilkårsgrunnlagIdEtterIm)
         assertEquals(INNTEKT, refusjonEtterIm?.beløp?.månedlig)
+
+        val speilVilkårsgrunnlagId = (speilApi().arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val vilkårsgrunnlag = speilApi().vilkårsgrunnlag.get(speilVilkårsgrunnlagId) as? SpleisVilkårsgrunnlag
+        assertEquals(INNTEKT, vilkårsgrunnlag!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.single().beløp.månedlig)
     }
 }

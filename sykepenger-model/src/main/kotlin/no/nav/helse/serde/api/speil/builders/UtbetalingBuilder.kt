@@ -53,7 +53,7 @@ internal class UtbetalingerBuilder(
             if (utbetalingId in vilkårsgrunnlag.keys) {
                 vilkårsgrunnlagTilUtbetaling.add(vilkårsgrunnlag[utbetalingId] to utbetaling)
             } else {
-                sikkerlog.info("Fant ikke vilkårsgrunnlag for utbetaling med utbetalingId=$utbetalingId for vedtaksperiodeId=$vedtaksperiodeId")
+                sikkerlog.error("Fant ikke vilkårsgrunnlag for utbetaling med utbetalingId=$utbetalingId for vedtaksperiodeId=$vedtaksperiodeId")
                 vilkårsgrunnlagTilUtbetaling.add(null to utbetaling)
             }
         }
