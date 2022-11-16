@@ -24,7 +24,7 @@ enum class Varselkode(
     RV_SØ_7("Søknaden inneholder Arbeidsdager utenfor sykdomsvindu"),
     RV_SØ_8("Utenlandsopphold oppgitt i perioden i søknaden."),
     RV_SØ_9("Det er oppgitt annen inntektskilde i søknaden. Vurder inntekt.", avviklet = true),
-    RV_SØ_10("Den sykmeldte har fått et nytt inntektsforhold."),
+    RV_SØ_10("Den sykmeldte har fått et nytt arbeidsforhold."),
     RV_SØ_11("Mottatt søknad out of order"),
     RV_SØ_12("Mottatt overlappende søknad"),
     RV_SØ_13("Overlappende søknad starter før, eller slutter etter, opprinnelig periode"),
