@@ -152,11 +152,16 @@ internal class TestPerson(
             sykmeldingSkrevet: LocalDateTime? = null,
             orgnummer: String = ""
         ) =
-            vedtaksperiodesamler.fangVedtaksperiode {
-                arbeidsgiverHendelsefabrikk.lagSøknad(*perioder, andreInntektskilder = andreInntektskilder, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet).håndter(Person::håndter)
-            }?.also { vedtaksperiodeId ->
-                if (!behovsamler.harBedtOmReplay(vedtaksperiodeId)) return@also
-                håndterInntektsmeldingReplay(vedtaksperiodeId)
+            behovsamler.fangInntektsmeldingReplay({
+                vedtaksperiodesamler.fangVedtaksperiode {
+                    arbeidsgiverHendelsefabrikk.lagSøknad(*perioder, andreInntektskilder = andreInntektskilder, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet)
+                        .håndter(Person::håndter)
+                }
+            }) { vedtaksperioderSomHarBedtOmReplay ->
+                vedtaksperioderSomHarBedtOmReplay.forEach { vedtaksperiodeId ->
+                    // TODO: bør kanskje replaye for -alle- arbeidsgivere?
+                    håndterInntektsmeldingReplay(vedtaksperiodeId)
+                }
             }
 
         internal fun håndterInntektsmelding(

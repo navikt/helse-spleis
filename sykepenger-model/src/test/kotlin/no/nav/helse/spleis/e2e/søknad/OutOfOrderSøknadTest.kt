@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.søknad
 
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -8,6 +9,7 @@ import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.START
@@ -21,6 +23,7 @@ import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.nyPeriode
+import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.spleis.e2e.tilSimulering
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -49,5 +52,17 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
         assertFunksjonellFeil("Mangler inntekt for sykepengegrunnlag som følge av at skjæringstidspunktet har endret seg")
+    }
+
+    @Test
+    fun `out-of-order med senere periode i Avventer inntektsmelding eller historikk`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        nyPeriode(1.mars til 20.mars, ORGNUMMER)
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+        nullstillTilstandsendringer()
+        nyPeriode(1.februar til 28.februar, ORGNUMMER)
+
+        assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
     }
 }

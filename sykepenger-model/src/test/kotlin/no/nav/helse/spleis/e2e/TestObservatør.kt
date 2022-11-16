@@ -43,6 +43,12 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     val avvisteRevurderinger = mutableListOf<PersonObserver.RevurderingAvvistEvent>()
 
+    internal fun replayInntektsmeldinger(block: () -> Unit): Set<UUID> {
+        val replaysFør = inntektsmeldingReplayEventer.toSet()
+        block()
+        return inntektsmeldingReplayEventer.toSet() - replaysFør
+    }
+
     fun hendelseider(vedtaksperiodeId: UUID) =
         vedtaksperiodeendringer[vedtaksperiodeId]?.last()?.hendelser ?: fail { "VedtaksperiodeId $vedtaksperiodeId har ingen hendelser tilknyttet" }
 
@@ -52,7 +58,9 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     fun sisteVedtaksperiodeIdOrNull(orgnummer: String) = vedtaksperioder[orgnummer]?.last()
     fun vedtaksperiode(orgnummer: String, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
     fun bedtOmInntektsmeldingReplay(vedtaksperiodeId: UUID) = vedtaksperiodeId in inntektsmeldingReplayEventer
-
+    fun kvitterInntektsmeldingReplay(vedtaksperiodeId: UUID) {
+        inntektsmeldingReplayEventer.remove(vedtaksperiodeId)
+    }
     fun forkastedePerioder() = forkastedeEventer.size
     fun forkastet(vedtaksperiodeId: UUID) = forkastedeEventer.getValue(vedtaksperiodeId)
     fun opprettOppgaveForSpeilsaksbehandlereEvent() = opprettOppgaverTilSpeilsaksbehandlerEventer.toList()
@@ -85,7 +93,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     override fun vedtaksperiodeEndret(hendelseskontekst: Hendelseskontekst, event: VedtaksperiodeEndretEvent) {
         sisteVedtaksperiode = hendelseskontekst.vedtaksperiodeId()
-        vedtaksperiodeendringer.getOrPut(hendelseskontekst.vedtaksperiodeId()) { mutableListOf(event) }.add(event)
+        vedtaksperiodeendringer.getOrPut(hendelseskontekst.vedtaksperiodeId()) { mutableListOf() }.add(event)
         vedtaksperioder.getOrPut(hendelseskontekst.orgnummer()) { mutableSetOf() }.add(sisteVedtaksperiode)
         tilstandsendringer.getOrPut(hendelseskontekst.vedtaksperiodeId()) { mutableListOf(event.forrigeTilstand) }.add(event.gjeldendeTilstand)
         inntektsmeldingReplayEventer.remove(sisteVedtaksperiode)

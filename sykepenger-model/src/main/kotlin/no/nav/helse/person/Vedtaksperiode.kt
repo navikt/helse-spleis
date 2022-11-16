@@ -1393,7 +1393,16 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
         }
 
-        override fun nyPeriodeTidligereEllerOverlappende(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {}
+        override fun nyPeriodeTidligereEllerOverlappende(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
+            hendelse.info("Som følge av out of order-periode trenger vi å replaye inntektsmelding")
+            vedtaksperiode.trengerInntektsmeldingReplay()
+
+            /*if (!vedtaksperiode.arbeidsgiver.kanBeregneSykepengegrunnlag(vedtaksperiode.skjæringstidspunkt)) return
+            if (!vedtaksperiode.arbeidsgiver.harNødvendigRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, hendelse)) return
+                hendelse.info("Som følge av out of order-periode har vi avklart inntekt-spørsmålet")
+                vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
+            }*/
+        }
 
         override fun startRevurdering(
             arbeidsgivere: List<Arbeidsgiver>,

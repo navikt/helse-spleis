@@ -33,6 +33,13 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
         return behovtyper.all { behovtype -> behovtype in behover }
     }
 
+    internal fun <R> fangInntektsmeldingReplay(block: () -> R, behandleReplays: (Set<UUID>) -> Unit): R {
+        val før = replays.toSet()
+        val retval = block()
+        behandleReplays(replays.toSet() - før)
+        return retval
+    }
+
     internal fun bekreftBehovOppfylt() {
         val ubesvarte = behov.filterNot { it.type == Behovtype.Sykepengehistorikk }.takeUnless { it.isEmpty() } ?: return
         log.log("Etter testen er det ${behov.size} behov uten svar: [${behov.joinToString { it.type.toString() }}]")

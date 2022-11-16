@@ -235,6 +235,31 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         }
+
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioderForSammenligningsgrunnlag {
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt INNTEKT
+                        a2 inntekt INNTEKT
+                    }
+                }
+            ))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        a1 {
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        }
+        a2 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) // sitter fast her fordi overlappende periode hos arbeidsgiver 1 mangler refusjonsopplysninger
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        }
     }
 
     @Test
