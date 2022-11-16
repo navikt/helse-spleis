@@ -52,16 +52,16 @@ internal class ArbeidsgiverperiodeTest {
 
     @Test
     fun `har betalt`() {
-        assertFalse(agp(1.januar til 16.januar).erFørsteUtbetalingsdagFørEllerLik(17.januar))
-        assertTrue(agp(1.januar til 16.januar).utbetalingsdag(17.januar).erFørsteUtbetalingsdagFørEllerLik(17.januar))
-        assertTrue(agp(1.januar til 16.januar).utbetalingsdag(17.januar).erFørsteUtbetalingsdagFørEllerLik(18.januar))
-        assertFalse(agp(1.januar til 16.januar).utbetalingsdag(18.januar).erFørsteUtbetalingsdagFørEllerLik(17.januar))
+        assertFalse(agp(1.januar til 16.januar).erFørsteUtbetalingsdagFørEllerLik(1.januar til 17.januar))
+        assertTrue(agp(1.januar til 16.januar).utbetalingsdag(17.januar).erFørsteUtbetalingsdagFørEllerLik(1.januar til 17.januar))
+        assertTrue(agp(1.januar til 16.januar).utbetalingsdag(17.januar).erFørsteUtbetalingsdagFørEllerLik(1.januar til 18.januar))
+        assertFalse(agp(1.januar til 16.januar).utbetalingsdag(18.januar).erFørsteUtbetalingsdagFørEllerLik(1.januar til 17.januar))
     }
 
     @Test
     fun `helg regnes ikke som betalt`() {
-        assertFalse(agp(1.januar til 16.januar).utbetalingsdag(20.januar).erFørsteUtbetalingsdagFørEllerLik(20.januar))
-        assertFalse(Arbeidsgiverperiode.fiktiv(20.januar).erFørsteUtbetalingsdagFørEllerLik(20.januar))
+        assertFalse(agp(1.januar til 16.januar).utbetalingsdag(20.januar).erFørsteUtbetalingsdagFørEllerLik(1.januar til 20.januar))
+        assertFalse(Arbeidsgiverperiode.fiktiv(20.januar).erFørsteUtbetalingsdagFørEllerLik(1.januar til 20.januar))
     }
 
     @Test

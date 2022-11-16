@@ -384,6 +384,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             mapOf(person.arbeidsgiver(ORGNUMMER) to object : IUtbetalingstidslinjeBuilder {
                 override fun result() = arbeidsgiverTidslinje
                 override fun fridag(dato: LocalDate) {}
+                override fun fridagOppholdsdag(dato: LocalDate) {}
                 override fun arbeidsdag(dato: LocalDate) {}
                 override fun arbeidsgiverperiodedag(
                     dato: LocalDate,

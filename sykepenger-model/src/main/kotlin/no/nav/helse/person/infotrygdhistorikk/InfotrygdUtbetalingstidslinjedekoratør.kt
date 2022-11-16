@@ -20,6 +20,10 @@ internal class InfotrygdUtbetalingstidslinjedekoratør(
         leggTil(dato) { other.fridag(dato) }
     }
 
+    override fun fridagOppholdsdag(dato: LocalDate) {
+        leggTil(dato) { other.fridagOppholdsdag(dato) }
+    }
+
     override fun arbeidsdag(dato: LocalDate) {
         leggTil(dato) { other.arbeidsdag(dato) }
     }

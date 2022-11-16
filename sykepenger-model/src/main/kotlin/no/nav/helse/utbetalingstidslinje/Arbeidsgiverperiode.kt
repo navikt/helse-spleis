@@ -20,6 +20,7 @@ internal class Arbeidsgiverperiode private constructor(internal val perioder: Li
 
     private val kjenteDager = mutableListOf<Periode>()
     private val utbetalingsdager = mutableListOf<Periode>()
+    private val oppholdsdager = mutableListOf<Periode>()
 
     init {
         check(perioder.isNotEmpty() || førsteUtbetalingsdag != null) {
@@ -53,14 +54,9 @@ internal class Arbeidsgiverperiode private constructor(internal val perioder: Li
         sykdomstidslinje: Sykdomstidslinje,
         subsumsjonObserver: SubsumsjonObserver
     ): Boolean {
-        if (!dekker(periode)) return erFørsteUtbetalingsdagFørEllerLik(periode.endInclusive) || harForeledeDagerEtterArbeidsgiverperioden(sykdomstidslinje)
+        if (!dekker(periode)) return erFørsteUtbetalingsdagFørEllerLik(periode)
         subsumsjonObserver.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(this, sykdomstidslinje.subsumsjonsformat())
         return false
-    }
-
-    private fun harForeledeDagerEtterArbeidsgiverperioden(sykdomstidslinje: Sykdomstidslinje): Boolean {
-        if (fiktiv()) return false
-        return sykdomstidslinje.harForeldedeDagerEtter(arbeidsgiverperioden.endInclusive)
     }
 
     internal fun dekker(periode: Periode): Boolean {
@@ -79,7 +75,13 @@ internal class Arbeidsgiverperiode private constructor(internal val perioder: Li
         return otherSiste == thisSiste || (thisSiste.erHelg() && otherSiste.erRettFør(thisSiste)) || (otherSiste.erHelg() && thisSiste.erRettFør(otherSiste))
     }
 
-    internal fun erFørsteUtbetalingsdagFørEllerLik(dato: LocalDate) = utbetalingsdager.firstOrNull()?.start?.let { dato >= it } ?: false
+    internal fun erFørsteUtbetalingsdagFørEllerLik(periode: Periode): Boolean {
+        // forventer inntekt dersom vi overlapper med en utbetalingsperiode…
+        if (utbetalingsdager.any { periode.overlapperMed(it) }) return true
+        // …eller dersom det ikke har vært gap siden forrige utbetaling
+        val forrigeUtbetaling = utbetalingsdager.lastOrNull { other -> other.endInclusive < periode.endInclusive } ?: return false
+        return oppholdsdager.none { it.overlapperMed(forrigeUtbetaling.endInclusive til periode.endInclusive) }
+    }
 
     internal fun periodetype(organisasjonsnummer: String, other: Periode, skjæringstidspunkt: LocalDate, infotrygdhistorikk: Infotrygdhistorikk): Periodetype {
         val førsteUtbetalingsdag = utbetalingsdager.firstOrNull()?.start
@@ -111,6 +113,11 @@ internal class Arbeidsgiverperiode private constructor(internal val perioder: Li
 
     internal fun utbetalingsdag(dato: LocalDate) = apply {
         if (!dato.erHelg()) this.utbetalingsdager.add(dato)
+        kjentDag(dato)
+    }
+
+    internal fun oppholdsdag(dato: LocalDate) = apply {
+        this.oppholdsdager.add(dato)
         kjentDag(dato)
     }
 

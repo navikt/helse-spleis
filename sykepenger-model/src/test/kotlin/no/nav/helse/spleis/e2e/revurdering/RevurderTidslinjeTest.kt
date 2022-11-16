@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -1334,31 +1333,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
-        )
-    }
-
-    @Test
-    fun `Forlengelse med kun helg og arbeid hvor en arbeidsdag blir overstyrt til ferie`() {
-        nyttVedtak(1.januar, 19.januar)
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent), Arbeid(22.januar, 31.januar))
-        håndterYtelser(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(24.januar, Dagtype.Feriedag)))
-        håndterYtelser(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_GODKJENNING,
-            AVSLUTTET,
-            AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_GODKJENNING_REVURDERING,
-            AVSLUTTET
         )
     }
 

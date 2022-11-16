@@ -41,6 +41,12 @@ internal class Arbeidsgiverperiodesubsumsjon(
         other.fridag(dato)
     }
 
+    override fun fridagOppholdsdag(dato: LocalDate) {
+        subsumsjonObserver.`§ 8-17 ledd 2`(dato, sykdomstidslinjesubsumsjon)
+        tilstand.oppholdsdag(this, dato)
+        other.fridagOppholdsdag(dato)
+    }
+
     override fun arbeidsgiverperiodedag(
         dato: LocalDate,
         økonomi: Økonomi,

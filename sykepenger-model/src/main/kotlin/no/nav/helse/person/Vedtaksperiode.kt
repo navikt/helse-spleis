@@ -837,7 +837,6 @@ internal class Vedtaksperiode private constructor(
         ) // TODO: skal vi logge ved beregning av agp?
 
     private fun forventerInntekt(): Boolean {
-        if (Toggle.RevurderOutOfOrder.enabled && arbeidsgiver.harIngenSykeUkedagerFor(skjæringstidspunkt til periode.endInclusive)) return false
         return Arbeidsgiverperiode.forventerInntekt(finnArbeidsgiverperiode(), periode, sykdomstidslinje, jurist())
     }
 

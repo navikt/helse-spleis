@@ -40,6 +40,10 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter) : I
         builder.addFridag(dato, inntekter.medInntekt(dato, nåværendeArbeidsgiverperiode))
     }
 
+    override fun fridagOppholdsdag(dato: LocalDate) {
+        builder.addFridag(dato, inntekter.medInntekt(dato, nåværendeArbeidsgiverperiode))
+    }
+
     override fun arbeidsdag(dato: LocalDate) {
         builder.addArbeidsdag(dato, inntekter.medInntekt(dato, nåværendeArbeidsgiverperiode))
     }
