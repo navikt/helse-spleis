@@ -90,7 +90,7 @@ internal class ISpleisGrunnlag(
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             sykepengegrunnlag = sykepengegrunnlag,
             inntekter = inntekter.map { it.toDTO() },
-            refusjonsopplysninger = refusjonsopplysningerPerArbeidsgiver.map { it.toDTO() },
+            arbeidsgiverrefusjoner = refusjonsopplysningerPerArbeidsgiver.map { it.toDTO() },
             avviksprosent = avviksprosent,
             grunnbeløp = grunnbeløp,
             sykepengegrunnlagsgrense = sykepengegrunnlagsgrense,

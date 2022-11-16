@@ -62,7 +62,7 @@ internal class GraphQLVilkårsgrunnlagTest {
         sammenligningsgrunnlag = 500000.0,
         sykepengegrunnlag = 500000.0,
         inntekter = emptyList(),
-        refusjonsopplysninger = emptyList(),
+        arbeidsgiverrefusjoner = emptyList(),
         avviksprosent = avviksprosent,
         grunnbeløp = 500000,
         sykepengegrunnlagsgrense = SykepengegrunnlagsgrenseDTO(500000, 500000, skjæringstidpunkt),

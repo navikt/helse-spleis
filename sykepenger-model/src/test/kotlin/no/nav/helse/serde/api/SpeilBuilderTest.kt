@@ -223,8 +223,8 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val personDto = speilApi()
         val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag.get(speilVilkårsgrunnlagId) as? SpleisVilkårsgrunnlag
-        assertTrue(vilkårsgrunnlag!!.refusjonsopplysninger.isNotEmpty())
-        val arbeidsgiverrefusjon = vilkårsgrunnlag.refusjonsopplysninger.single()
+        assertTrue(vilkårsgrunnlag!!.arbeidsgiverrefusjoner.isNotEmpty())
+        val arbeidsgiverrefusjon = vilkårsgrunnlag.arbeidsgiverrefusjoner.single()
         assertEquals(ORGNUMMER, arbeidsgiverrefusjon.arbeidsgiver)
         val refusjonsopplysning = arbeidsgiverrefusjon.refusjonsopplysninger.single()
 
@@ -247,8 +247,8 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val personDto = speilApi()
         val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag.get(speilVilkårsgrunnlagId) as? SpleisVilkårsgrunnlag
-        assertTrue(vilkårsgrunnlag!!.refusjonsopplysninger.isNotEmpty())
-        val arbeidsgiverrefusjon = vilkårsgrunnlag.refusjonsopplysninger.single()
+        assertTrue(vilkårsgrunnlag!!.arbeidsgiverrefusjoner.isNotEmpty())
+        val arbeidsgiverrefusjon = vilkårsgrunnlag.arbeidsgiverrefusjoner.single()
         assertEquals(ORGNUMMER, arbeidsgiverrefusjon.arbeidsgiver)
         val refusjonsopplysninger = arbeidsgiverrefusjon.refusjonsopplysninger
 

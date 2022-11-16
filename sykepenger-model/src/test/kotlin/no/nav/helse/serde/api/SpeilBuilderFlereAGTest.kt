@@ -943,9 +943,9 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         val vilkårsgrunnlag2 = personDto.vilkårsgrunnlag.get(speilVilkårsgrunnlagIdForAG2) as? SpleisVilkårsgrunnlag
         assertEquals(vilkårsgrunnlag, vilkårsgrunnlag2)
 
-        assertTrue(vilkårsgrunnlag!!.refusjonsopplysninger.isNotEmpty())
-        val arbeidsgiverrefusjonForAG1 = vilkårsgrunnlag.refusjonsopplysninger.find { it.arbeidsgiver == a1 }!!
-        val arbeidsgiverrefusjonForAG2 = vilkårsgrunnlag.refusjonsopplysninger.find { it.arbeidsgiver == a2 }!!
+        assertTrue(vilkårsgrunnlag!!.arbeidsgiverrefusjoner.isNotEmpty())
+        val arbeidsgiverrefusjonForAG1 = vilkårsgrunnlag.arbeidsgiverrefusjoner.find { it.arbeidsgiver == a1 }!!
+        val arbeidsgiverrefusjonForAG2 = vilkårsgrunnlag.arbeidsgiverrefusjoner.find { it.arbeidsgiver == a2 }!!
 
         val refusjonsopplysningerForAG1 = arbeidsgiverrefusjonForAG1.refusjonsopplysninger.single()
         val refusjonsopplysningerForAG2 = arbeidsgiverrefusjonForAG2.refusjonsopplysninger.single()
@@ -965,7 +965,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         sammenligningsgrunnlag = 500000.0,
         sykepengegrunnlag = 500000.0,
         inntekter = emptyList(),
-        refusjonsopplysninger = emptyList(),
+        arbeidsgiverrefusjoner = emptyList(),
         avviksprosent = 0.0,
         grunnbeløp = 500000,
         sykepengegrunnlagsgrense = SykepengegrunnlagsgrenseDTO(500000, 500000, skjæringstidpunkt),

@@ -25,7 +25,7 @@ data class SpleisVilkårsgrunnlag(
     override val sammenligningsgrunnlag: Double,
     override val sykepengegrunnlag: Double,
     override val inntekter: List<Arbeidsgiverinntekt>,
-    val refusjonsopplysninger: List<Arbeidsgiverrefusjon>,
+    val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>,
     val avviksprosent: Double?,
     val grunnbeløp: Int,
     val sykepengegrunnlagsgrense: SykepengegrunnlagsgrenseDTO,
