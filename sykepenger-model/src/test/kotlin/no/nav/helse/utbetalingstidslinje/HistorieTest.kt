@@ -111,7 +111,7 @@ internal abstract class HistorieTest {
             regler = regler,
             subsumsjonObserver = SubsumsjonObserver.NullObserver
         )
-        val utbetalingstidslinjebuilder = UtbetalingstidslinjeBuilder(inntekter)
+        val utbetalingstidslinjebuilder = UtbetalingstidslinjeBuilder(inntekter, sykdomstidslinje.periode()!!)
         return infotrygdhistorikk.buildUtbetalingstidslinje(orgnr, sykdomstidslinje, utbetalingstidslinjebuilder, SubsumsjonObserver.NullObserver).let { utbetalingstidslinjebuilder.result() }
     }
 

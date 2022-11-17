@@ -30,8 +30,7 @@ internal fun tidslinjeOf(
         repeat(antallDager) {
             val skjæringstidspunkt = finnSkjæringstidspunktFor(dato)
             val økonomi = Økonomi.sykdomsgrad(grad.prosent)
-                .inntekt(dekningsgrunnlag, skjæringstidspunkt = skjæringstidspunkt, `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt))
-                .arbeidsgiverRefusjon(arbeidsgiverbeløp)
+                .inntekt(dekningsgrunnlag, skjæringstidspunkt = skjæringstidspunkt, `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt), refusjonsbeløp = arbeidsgiverbeløp)
             if (helgedag != null && dato.erHelg()) this.helgedag(dato, økonomi)
             else this.utbetalingsdag(dato, økonomi)
             dato = dato.plusDays(1)

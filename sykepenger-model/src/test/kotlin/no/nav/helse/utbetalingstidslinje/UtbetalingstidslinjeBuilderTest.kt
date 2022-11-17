@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
@@ -563,7 +564,7 @@ internal class UtbetalingstidslinjeBuilderTest {
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonObserver = SubsumsjonObserver.NullObserver
         )
-        val builder = UtbetalingstidslinjeBuilder(inntekter)
+        val builder = UtbetalingstidslinjeBuilder(inntekter, tidslinje.periode() ?: Periode.aldri)
         val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
         val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller,
             Komposittmediator(periodebuilder, builder), SubsumsjonObserver.NullObserver)

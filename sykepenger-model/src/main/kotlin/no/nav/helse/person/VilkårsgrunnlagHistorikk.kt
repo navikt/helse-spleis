@@ -336,7 +336,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                     dekningsgrunnlag = INGEN,
                     skjæringstidspunkt = dato,
                     `6G` = INGEN,
-                    arbeidsgiverperiode = arbeidsgiverperiode
+                    arbeidsgiverperiode = arbeidsgiverperiode,
+                    refusjonsbeløp = INGEN
                 )
             }
 

@@ -59,7 +59,7 @@ internal class Sykepengegrunnlag(
     private val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (beregningsgrunnlag > this.`6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
 
     private val forhøyetInntektskrav = alder.forhøyetInntektskrav(skjæringstidspunkt)
-    private val minsteinntekt = (if (forhøyetInntektskrav) Grunnbeløp.`2G` else halvG).minsteinntekt(skjæringstidspunkt)
+    private val minsteinntekt = (if (forhøyetInntektskrav) `2G` else halvG).minsteinntekt(skjæringstidspunkt)
     private val oppfyllerMinsteinntektskrav = beregningsgrunnlag >= minsteinntekt
 
     internal constructor(
@@ -254,7 +254,8 @@ internal class Sykepengegrunnlag(
             dekningsgrunnlag = INGEN,
             skjæringstidspunkt = skjæringstidspunkt,
             `6G` = `6G`,
-            arbeidsgiverperiode = arbeidsgiverperiode
+            arbeidsgiverperiode = arbeidsgiverperiode,
+            refusjonsbeløp = INGEN
         )
     }
     internal fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {

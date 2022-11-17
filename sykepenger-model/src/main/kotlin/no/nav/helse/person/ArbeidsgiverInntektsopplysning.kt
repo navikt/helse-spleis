@@ -127,19 +127,23 @@ internal class ArbeidsgiverInntektsopplysning(
             fold(INGEN) { acc, item -> item.omregnetÅrsinntekt(acc)}
 
         internal fun List<ArbeidsgiverInntektsopplysning>.medInntekt(organisasjonsnummer: String, `6G`: Inntekt, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi? {
-            return singleOrNull { it.orgnummer == organisasjonsnummer }?.inntektsopplysning?.omregnetÅrsinntekt()?.let { inntekt ->
+            return singleOrNull { it.orgnummer == organisasjonsnummer }?.let { arbeidsgiverInntektsopplysning ->
+                val inntekt = arbeidsgiverInntektsopplysning.inntektsopplysning.omregnetÅrsinntekt()
+                val refusjonsbeløp = arbeidsgiverInntektsopplysning.refusjonsopplysninger.refusjonsbeløpOrNull(dato) ?: inntekt
                 økonomi.inntekt(
                     aktuellDagsinntekt = inntekt,
                     dekningsgrunnlag = inntekt.dekningsgrunnlag(dato, regler, subsumsjonObserver),
                     skjæringstidspunkt = skjæringstidspunkt,
                     `6G` = `6G`,
-                    arbeidsgiverperiode = arbeidsgiverperiode
+                    arbeidsgiverperiode = arbeidsgiverperiode,
+                    refusjonsbeløp = refusjonsbeløp
                 )
             }
         }
 
-        private fun List<ArbeidsgiverInntektsopplysning>.arbeidsgiverInntektsopplysning(organisasjonsnummer: String) = singleOrNull { it.orgnummer == organisasjonsnummer }
-            ?: throw IllegalStateException("Fant ikke arbeidsgiver $organisasjonsnummer i sykepengegrunnlaget. Arbeidsgiveren må være i sykepengegrunnlaget for å legge til utbetalingsopplysninger. Arbeidsgiverne i sykepengegrunlaget er ${map { it.orgnummer }}")
+        private fun List<ArbeidsgiverInntektsopplysning>.arbeidsgiverInntektsopplysning(organisasjonsnummer: String) = checkNotNull(singleOrNull { it.orgnummer == organisasjonsnummer }) {
+            "Fant ikke arbeidsgiver $organisasjonsnummer i sykepengegrunnlaget. Arbeidsgiveren må være i sykepengegrunnlaget for å legge til utbetalingsopplysninger. Arbeidsgiverne i sykepengegrunlaget er ${map { it.orgnummer }}"
+        }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.medUtbetalingsopplysninger(organisasjonsnummer: String, `6G`: Inntekt, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
             val arbeidsgiverInntektsopplysning = arbeidsgiverInntektsopplysning(organisasjonsnummer)
@@ -150,8 +154,9 @@ internal class ArbeidsgiverInntektsopplysning(
                 dekningsgrunnlag = inntekt.dekningsgrunnlag(dato, regler, subsumsjonObserver),
                 skjæringstidspunkt = skjæringstidspunkt,
                 `6G` = `6G`,
-                arbeidsgiverperiode = arbeidsgiverperiode
-            ).arbeidsgiverRefusjon(refusjonsbeløp)
+                arbeidsgiverperiode = arbeidsgiverperiode,
+                refusjonsbeløp = refusjonsbeløp
+            )
         }
     }
 }

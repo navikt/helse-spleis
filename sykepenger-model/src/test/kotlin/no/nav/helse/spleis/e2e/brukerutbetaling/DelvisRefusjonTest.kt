@@ -58,7 +58,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         assertTrue(inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.isNotEmpty())
         inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
         assertTrue(inspektør.utbetalinger.last().inspektør.personOppdrag.isEmpty())
-        assertUtbetalingsbeløp(1.vedtaksperiode, 0, 0, subset = 1.januar til 16.januar)
+        assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
     }
 
@@ -82,7 +82,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
         assertTrue(inspektør.utbetalinger.last().inspektør.personOppdrag.isEmpty())
         assertUtbetalingsbeløp(2.vedtaksperiode, 1431, 1431, subset = 1.februar til 26.februar)
-        assertUtbetalingsbeløp(2.vedtaksperiode, 0, 0, subset = 27.februar til 28.februar)
+        assertUtbetalingsbeløp(2.vedtaksperiode, 0, 1431, subset = 27.februar til 27.februar)
+        assertUtbetalingsbeløp(2.vedtaksperiode, 0, 0, subset = 28.februar til 28.februar)
     }
 
     @Test
@@ -184,7 +185,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         assertTrue(inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.isNotEmpty())
         inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
         assertTrue(inspektør.utbetalinger.last().inspektør.personOppdrag.isEmpty())
-        assertUtbetalingsbeløp(2.vedtaksperiode, 0, 0, subset = 1.mars til 16.mars)
+        assertUtbetalingsbeløp(2.vedtaksperiode, 0, 1431, subset = 1.mars til 16.mars)
         assertUtbetalingsbeløp(2.vedtaksperiode, 1431, 1431, subset = 17.mars til 31.mars)
     }
 
@@ -255,7 +256,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
-        assertUtbetalingsbeløp(1.vedtaksperiode, 0, 0, subset = 1.januar til 16.januar)
+        assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
     }
 
@@ -285,7 +286,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
         assertTrue(inspektør.utbetalinger.last().inspektør.personOppdrag.isEmpty())
 
-        assertUtbetalingsbeløp(1.vedtaksperiode, 0, 0, 1.januar til 16.januar)
+        assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, 17.januar til 24.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 0, 0, 25.januar til 31.januar)
     }
@@ -340,7 +341,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         assertUtbetalingsbeløp(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             forventetArbeidsgiverbeløp = 0,
-            forventetArbeidsgiverRefusjonsbeløp = 0,
+            forventetArbeidsgiverRefusjonsbeløp = 1431,
             subset = 1.januar til 16.januar,
             orgnummer = a1
         )
@@ -368,7 +369,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         assertUtbetalingsbeløp(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             forventetArbeidsgiverbeløp = 0,
-            forventetArbeidsgiverRefusjonsbeløp = 0,
+            forventetArbeidsgiverRefusjonsbeløp = 1431,
             subset = 21.januar til 5.februar,
             orgnummer = a2
         )
@@ -431,7 +432,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         assertUtbetalingsbeløp(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             forventetArbeidsgiverbeløp = 0,
-            forventetArbeidsgiverRefusjonsbeløp = 0,
+            forventetArbeidsgiverRefusjonsbeløp = 1431,
             subset = 1.januar til 16.januar,
             orgnummer = a1
         )
@@ -459,7 +460,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         assertUtbetalingsbeløp(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             forventetArbeidsgiverbeløp = 0,
-            forventetArbeidsgiverRefusjonsbeløp = 0,
+            forventetArbeidsgiverRefusjonsbeløp = 1431,
             subset = 21.januar til 5.februar,
             orgnummer = a2
         )
@@ -522,7 +523,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         assertUtbetalingsbeløp(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             forventetArbeidsgiverbeløp = 0,
-            forventetArbeidsgiverRefusjonsbeløp = 0,
+            forventetArbeidsgiverRefusjonsbeløp = 1431,
             subset = 21.januar til 5.februar,
             orgnummer = a1
         )
@@ -543,7 +544,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         assertUtbetalingsbeløp(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             forventetArbeidsgiverbeløp = 0,
-            forventetArbeidsgiverRefusjonsbeløp = 0,
+            forventetArbeidsgiverRefusjonsbeløp = 1431,
             subset = 1.januar til 16.januar,
             orgnummer = a2
         )

@@ -957,7 +957,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonObserver = SubsumsjonObserver.NullObserver
         )
-        val builder = UtbetalingstidslinjeBuilder(inntekter)
+        val builder = UtbetalingstidslinjeBuilder(inntekter, this.periode()!!)
         val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, builder, SubsumsjonObserver.NullObserver)
         val dekoratør = Infotrygddekoratør(teller, arbeidsgiverperiodeBuilder, betalteInfotrygddager)
         this.accept(dekoratør)

@@ -24,7 +24,7 @@ import kotlin.properties.Delegates
 internal class Økonomi private constructor(
     private val grad: Prosentdel,
     private var totalGrad: Prosentdel = grad,
-    private var arbeidsgiverRefusjonsbeløp: Inntekt = INGEN,
+    private val arbeidsgiverRefusjonsbeløp: Inntekt = INGEN,
     private var arbeidsgiverperiode: Arbeidsgiverperiode? = null,
     private val aktuellDagsinntekt: Inntekt = INGEN,
     private val dekningsgrunnlag: Inntekt = INGEN,
@@ -137,11 +137,8 @@ internal class Økonomi private constructor(
         require(dekningsgrunnlag >= INGEN) { "dekningsgrunnlag kan ikke være negativ." }
     }
 
-    internal fun inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, skjæringstidspunkt: LocalDate, `6G`: Inntekt, arbeidsgiverperiode: Arbeidsgiverperiode? = null): Økonomi =
-        tilstand.inntekt(this, aktuellDagsinntekt, dekningsgrunnlag, skjæringstidspunkt, arbeidsgiverperiode, `6G`)
-
-    internal fun arbeidsgiverRefusjon(refusjonsbeløp: Inntekt?) =
-        tilstand.arbeidsgiverRefusjon(this, refusjonsbeløp)
+    internal fun inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, skjæringstidspunkt: LocalDate, `6G`: Inntekt, arbeidsgiverperiode: Arbeidsgiverperiode? = null, refusjonsbeløp: Inntekt): Økonomi =
+        tilstand.inntekt(this, aktuellDagsinntekt, refusjonsbeløp, dekningsgrunnlag, skjæringstidspunkt, arbeidsgiverperiode, `6G`)
 
     internal fun lås() = tilstand.lås(this)
 
@@ -340,6 +337,7 @@ internal class Økonomi private constructor(
         internal open fun inntekt(
             økonomi: Økonomi,
             aktuellDagsinntekt: Inntekt,
+            refusjonsbeløp: Inntekt,
             dekningsgrunnlag: Inntekt,
             skjæringstidspunkt: LocalDate,
             arbeidsgiverperiode: Arbeidsgiverperiode?,
@@ -364,10 +362,6 @@ internal class Økonomi private constructor(
             throw IllegalStateException("Kan ikke låse opp Økonomi i tilstand ${this::class.simpleName}")
         }
 
-        internal open fun arbeidsgiverRefusjon(økonomi: Økonomi, refusjonsbeløp: Inntekt?): Økonomi {
-            throw IllegalStateException("Kan ikke sette arbeidsgiverrefusjonsbeløp i tilstand ${this::class.simpleName}")
-        }
-
         internal object KunGrad : Tilstand() {
 
             override fun lås(økonomi: Økonomi) = økonomi
@@ -376,11 +370,10 @@ internal class Økonomi private constructor(
                 økonomi._buildKunGrad(builder)
             }
 
-            override fun arbeidsgiverRefusjon(økonomi: Økonomi, refusjonsbeløp: Inntekt?) = økonomi
-
             override fun inntekt(
                 økonomi: Økonomi,
                 aktuellDagsinntekt: Inntekt,
+                refusjonsbeløp: Inntekt,
                 dekningsgrunnlag: Inntekt,
                 skjæringstidspunkt: LocalDate,
                 arbeidsgiverperiode: Arbeidsgiverperiode?,
@@ -389,7 +382,7 @@ internal class Økonomi private constructor(
                 grad = økonomi.grad,
                 totalGrad = økonomi.totalGrad,
                 arbeidsgiverperiode = arbeidsgiverperiode ?: økonomi.arbeidsgiverperiode,
-                arbeidsgiverRefusjonsbeløp = økonomi.arbeidsgiverRefusjonsbeløp,
+                arbeidsgiverRefusjonsbeløp = refusjonsbeløp,
                 aktuellDagsinntekt = aktuellDagsinntekt,
                 dekningsgrunnlag = dekningsgrunnlag,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -424,10 +417,6 @@ internal class Økonomi private constructor(
             }
 
             override fun <R> medData(økonomi: Økonomi, lambda: MedØkonomiData<R>) = økonomi.medDataFraInntekt(lambda)
-
-            override fun arbeidsgiverRefusjon(økonomi: Økonomi, refusjonsbeløp: Inntekt?) = økonomi.apply {
-                økonomi.arbeidsgiverRefusjonsbeløp = refusjonsbeløp ?: økonomi.aktuellDagsinntekt
-            }
 
             override fun betal(økonomi: Økonomi) {
                 økonomi._betal()

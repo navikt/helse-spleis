@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 import no.nav.helse.erHelg
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Varselkode.RV_UT_3
@@ -21,7 +22,7 @@ internal sealed class UtbetalingstidslinjeBuilderException(message: String) : Ru
 
 }
 
-internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter) : ArbeidsgiverperiodeMediator {
+internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, private val beregningsperiode: Periode) : ArbeidsgiverperiodeMediator {
     private val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
     private var sisteArbeidsgiverperiode: Arbeidsgiverperiode? = null
     private val nåværendeArbeidsgiverperiode: Arbeidsgiverperiode? get() = sisteArbeidsgiverperiode ?: periodebuilder.build()
@@ -61,7 +62,11 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter) : A
     override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
         check(!kilde.erAvType(Sykmelding::class)) { "Kan ikke opprette utbetalingsdag for $dato med kilde Sykmelding" }
         if (dato.erHelg()) return builder.addHelg(dato, inntekter.utenInntekt(dato, økonomi, nåværendeArbeidsgiverperiode))
-        builder.addNAVdag(dato, inntekter.medUtbetalingsopplysninger(dato, nåværendeArbeidsgiverperiode, økonomi))
+        val medUtbetalingsopplysninger = when (dato in beregningsperiode) {
+            true -> inntekter.medUtbetalingsopplysninger(dato, nåværendeArbeidsgiverperiode, økonomi)
+            false -> inntekter.medInntekt(dato, nåværendeArbeidsgiverperiode, økonomi)
+        }
+        builder.addNAVdag(dato, medUtbetalingsopplysninger)
     }
 
     override fun foreldetDag(dato: LocalDate, økonomi: Økonomi) {

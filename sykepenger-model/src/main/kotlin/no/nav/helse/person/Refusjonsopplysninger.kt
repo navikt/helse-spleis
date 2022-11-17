@@ -153,9 +153,10 @@ class Refusjonsopplysning(
             organisasjonsnummer: String
         ) = hensyntattSisteOppholdagFørUtbetalingsdager(sisteOppholdsdagFørUtbetalingsdager).harNødvendigRefusjonsopplysninger(utbetalingsdager, hendelse, organisasjonsnummer)
 
-        internal fun refusjonsbeløp(dag: LocalDate) = validerteRefusjonsopplysninger.singleOrNull { it.dekker(dag) }?.beløp
-            ?: throw IllegalStateException("Fant ikke refusjonsbeløp for $dag. Har refusjonsopplysninger for ${validerteRefusjonsopplysninger.map { "${it.fom}-${it.tom}" }}")
-
+        internal fun refusjonsbeløpOrNull(dag: LocalDate) = validerteRefusjonsopplysninger.singleOrNull { it.dekker(dag) }?.beløp
+        internal fun refusjonsbeløp(dag: LocalDate) = checkNotNull(refusjonsbeløpOrNull(dag)) {
+            "Fant ikke refusjonsbeløp for $dag. Har refusjonsopplysninger for ${validerteRefusjonsopplysninger.map { "${it.fom}-${it.tom}" }}"
+        }
         private fun dekker(dag: LocalDate) = validerteRefusjonsopplysninger.any { it.dekker(dag) }
 
         internal companion object {

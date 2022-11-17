@@ -1006,7 +1006,7 @@ internal class Arbeidsgiver private constructor(
             val sykdomstidslinje = sykdomstidslinje().fremTilOgMed(periode.endInclusive).takeUnless { it.count() == 0 }
             if (sykdomstidslinje == null) Utbetalingstidslinje()
             else {
-                val builder = UtbetalingstidslinjeBuilder(inntekter)
+                val builder = UtbetalingstidslinjeBuilder(inntekter, periode)
                 infotrygdhistorikk.buildUtbetalingstidslinje(organisasjonsnummer, sykdomstidslinje, builder, subsumsjonObserver)
                 builder.result()
             }
