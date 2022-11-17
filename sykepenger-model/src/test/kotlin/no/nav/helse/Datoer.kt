@@ -2,6 +2,8 @@ package no.nav.helse
 
 import java.time.LocalDate
 import java.time.YearMonth
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 
 // 2018 har blitt valgt fordi det starter på en mandag og er ikke et skuddår
 private const val startår = 2018
@@ -39,3 +41,6 @@ fun september(år: Int) = YearMonth.of(år, 9)
 fun oktober(år: Int) = YearMonth.of(år, 10)
 fun november(år: Int) = YearMonth.of(år, 11)
 fun desember(år: Int) = YearMonth.of(år, 12)
+
+infix fun LocalDate.i(år: Int) = withYear(år)
+infix fun Periode.i(år: Int) = (start i år) til (endInclusive i år)
