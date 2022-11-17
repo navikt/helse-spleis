@@ -355,7 +355,7 @@ internal class InfotrygdhistorikkTest {
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonObserver = SubsumsjonObserver.NullObserver
         ))
-        val utbetalingstidslinje = historikk.build("ag1", sykdomstidslinje, builder, SubsumsjonObserver.NullObserver)
+        val utbetalingstidslinje = historikk.buildUtbetalingstidslinje("ag1", sykdomstidslinje, builder, SubsumsjonObserver.NullObserver).let { builder.result() }
         assertEquals(1.januar til 31.januar, utbetalingstidslinje.periode())
     }
 
@@ -374,7 +374,7 @@ internal class InfotrygdhistorikkTest {
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonObserver = SubsumsjonObserver.NullObserver
         ))
-        val utbetalingstidslinje = historikk.build("ag1", sykdomstidslinje, builder, SubsumsjonObserver.NullObserver)
+        val utbetalingstidslinje = historikk.buildUtbetalingstidslinje("ag1", sykdomstidslinje, builder, SubsumsjonObserver.NullObserver).let { builder.result()}
         assertEquals(1.februar til 28.februar, utbetalingstidslinje.periode())
     }
 

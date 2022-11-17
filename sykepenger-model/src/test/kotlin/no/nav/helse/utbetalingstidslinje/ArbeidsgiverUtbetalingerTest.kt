@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
@@ -21,7 +20,6 @@ import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
-import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
@@ -30,12 +28,8 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.assertInfo
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
@@ -50,7 +44,6 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -364,45 +357,15 @@ internal class ArbeidsgiverUtbetalingerTest {
         )
         aktivitetslogg = Aktivitetslogg()
 
-        val infotrygdhistorikk = Infotrygdhistorikk().apply {
-            this.oppdaterHistorikk(
-                InfotrygdhistorikkElement.opprett(
-                    oppdatert = LocalDateTime.now(),
-                    hendelseId = UUID.randomUUID(),
-                    perioder = historiskTidslinje.takeIf(Utbetalingstidslinje::isNotEmpty)?.let { listOf(infotrygdperiodeMockMed(it)) } ?: emptyList(),
-                    inntekter = emptyList(),
-                    arbeidskategorikoder = emptyMap(),
-                    ugyldigePerioder = emptyList(),
-                    harStatslønn = false
-                )
-            )
-        }
-
         ArbeidsgiverUtbetalinger(
             NormalArbeidstaker,
             fødselsdato.alder,
-            mapOf(person.arbeidsgiver(ORGNUMMER) to object : IUtbetalingstidslinjeBuilder {
-                override fun result() = arbeidsgiverTidslinje
-                override fun fridag(dato: LocalDate) {}
-                override fun fridagOppholdsdag(dato: LocalDate) {}
-                override fun arbeidsdag(dato: LocalDate) {}
-                override fun arbeidsgiverperiodedag(
-                    dato: LocalDate,
-                    økonomi: Økonomi,
-                    kilde: SykdomstidslinjeHendelse.Hendelseskilde
-                ) {}
-                override fun utbetalingsdag(
-                    dato: LocalDate,
-                    økonomi: Økonomi,
-                    kilde: SykdomstidslinjeHendelse.Hendelseskilde
-                ) {}
-                override fun foreldetDag(dato: LocalDate, økonomi: Økonomi) {}
-                override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse) {}
+            mapOf(person.arbeidsgiver(ORGNUMMER) to {
+                arbeidsgiverTidslinje
             }),
-            infotrygdhistorikk,
+            historiskTidslinje,
             null,
-            vilkårsgrunnlagHistorikk,
-            SubsumsjonObserver.NullObserver
+            vilkårsgrunnlagHistorikk
         ).also {
             it.beregn(
                 "88888888",
@@ -415,12 +378,6 @@ internal class ArbeidsgiverUtbetalingerTest {
         }
         inspektør = person.arbeidsgiver(ORGNUMMER).nåværendeTidslinje().inspektør
     }
-
-    private fun infotrygdperiodeMockMed(historiskTidslinje: Utbetalingstidslinje) =
-        object : Infotrygdperiode(historiskTidslinje.periode().start, historiskTidslinje.periode().endInclusive) {
-            override fun accept(visitor: InfotrygdhistorikkVisitor) {}
-            override fun utbetalingstidslinje() = historiskTidslinje
-        }
 
     private fun sammenligningsgrunnlag(inntekt: Inntekt) = Sammenligningsgrunnlag(
         arbeidsgiverInntektsopplysninger = listOf(

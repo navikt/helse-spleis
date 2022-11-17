@@ -21,18 +21,14 @@ internal sealed class UtbetalingstidslinjeBuilderException(message: String) : Ru
 
 }
 
-internal interface IUtbetalingstidslinjeBuilder : ArbeidsgiverperiodeMediator {
-    fun result(): Utbetalingstidslinje
-}
-
-internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter) : IUtbetalingstidslinjeBuilder {
+internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter) : ArbeidsgiverperiodeMediator {
     private val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
     private var sisteArbeidsgiverperiode: Arbeidsgiverperiode? = null
     private val nåværendeArbeidsgiverperiode: Arbeidsgiverperiode? get() = sisteArbeidsgiverperiode ?: periodebuilder.build()
 
     private val builder = Utbetalingstidslinje.Builder()
 
-    override fun result(): Utbetalingstidslinje {
+    internal fun result(): Utbetalingstidslinje {
         return builder.build()
     }
 

@@ -77,7 +77,6 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
-import no.nav.helse.utbetalingstidslinje.IUtbetalingstidslinjeBuilder
 import no.nav.helse.utbetalingstidslinje.Inntekter
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -972,10 +971,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harSykdom() = sykdomshistorikk.harSykdom() || sykdomstidslinje().harSykedager()
 
-    internal fun harSykdomEllerForventerSøknad() = sykdomshistorikk.harSykdom()
-            || sykdomstidslinje().harSykedager()
-            || (sykmeldingsperioder.harSykmeldingsperiode())
-
     internal fun harSpleisSykdom() = sykdomshistorikk.harSykdom()
 
     internal fun harSykdomFor(skjæringstidspunkt: LocalDate) =
@@ -998,29 +993,28 @@ internal class Arbeidsgiver private constructor(
     internal fun builder(
         regler: ArbeidsgiverRegler,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
+        infotrygdhistorikk: Infotrygdhistorikk,
         subsumsjonObserver: SubsumsjonObserver
-    ): UtbetalingstidslinjeBuilder {
+    ): (Periode) -> Utbetalingstidslinje {
         val inntekter = Inntekter(
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
             regler = regler,
             subsumsjonObserver = subsumsjonObserver,
             organisasjonsnummer = organisasjonsnummer
         )
-        return UtbetalingstidslinjeBuilder(inntekter)
+        return { periode ->
+            val sykdomstidslinje = sykdomstidslinje().fremTilOgMed(periode.endInclusive).takeUnless { it.count() == 0 }
+            if (sykdomstidslinje == null) Utbetalingstidslinje()
+            else {
+                val builder = UtbetalingstidslinjeBuilder(inntekter)
+                infotrygdhistorikk.buildUtbetalingstidslinje(organisasjonsnummer, sykdomstidslinje, builder, subsumsjonObserver)
+                builder.result()
+            }
+        }
     }
 
     internal fun lagreArbeidsforhold(arbeidsforhold: List<Arbeidsforholdhistorikk.Arbeidsforhold>, skjæringstidspunkt: LocalDate) {
         arbeidsforholdhistorikk.lagre(arbeidsforhold, skjæringstidspunkt)
-    }
-
-    internal fun build(
-        subsumsjonObserver: SubsumsjonObserver,
-        infotrygdhistorikk: Infotrygdhistorikk,
-        builder: IUtbetalingstidslinjeBuilder,
-        kuttdato: LocalDate
-    ): Utbetalingstidslinje {
-        val sykdomstidslinje = sykdomstidslinje().fremTilOgMed(kuttdato).takeUnless { it.count() == 0 } ?: return Utbetalingstidslinje()
-        return infotrygdhistorikk.build(organisasjonsnummer, sykdomstidslinje, builder, subsumsjonObserver)
     }
 
     internal fun beregn(aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger, periode: Periode, perioder: Map<Periode, Pair<IAktivitetslogg, SubsumsjonObserver>>): Boolean {

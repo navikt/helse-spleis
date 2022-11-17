@@ -8,19 +8,16 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.RevurderingUtbetalinger
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 
 internal class ArbeidsgiverUtbetalinger(
     regler: ArbeidsgiverRegler,
     alder: Alder,
-    private val arbeidsgivere: Map<Arbeidsgiver, IUtbetalingstidslinjeBuilder>,
-    private val infotrygdhistorikk: Infotrygdhistorikk,
+    private val arbeidsgivere: Map<Arbeidsgiver, (Periode) -> Utbetalingstidslinje>,
+    infotrygdUtbetalingstidslinje: Utbetalingstidslinje,
     private val dødsdato: LocalDate?,
-    private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
-    private val subsumsjonObserver: SubsumsjonObserver
+    private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
 ) {
-    private val infotrygdtidslinje = infotrygdhistorikk.utbetalingstidslinje()
-    private val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(alder, regler, infotrygdtidslinje)
+    private val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(alder, regler, infotrygdUtbetalingstidslinje)
     private val filtere = listOf(
         Sykdomsgradfilter,
         AvvisDagerEtterDødsdatofilter(dødsdato),
@@ -35,7 +32,7 @@ internal class ArbeidsgiverUtbetalinger(
         beregningsperiode: Periode,
         perioder: Map<Periode, Pair<IAktivitetslogg, SubsumsjonObserver>>
     ) {
-        val tidslinjerPerArbeidsgiver = tidslinjer(beregningsperiode.endInclusive)
+        val tidslinjerPerArbeidsgiver = tidslinjer(beregningsperiode)
         perioder.forEach { periode, (aktivitetslogg, subsumsjonObserver) ->
             filtrer(aktivitetslogg, tidslinjerPerArbeidsgiver.values.toList(), periode, subsumsjonObserver)
         }
@@ -51,7 +48,7 @@ internal class ArbeidsgiverUtbetalinger(
         orgnummer: String,
         utbetalingsperioder: Map<Arbeidsgiver, Vedtaksperiode>
     ) {
-        val tidslinjerPerArbeidsgiver = tidslinjer(beregningsperiode.endInclusive)
+        val tidslinjerPerArbeidsgiver = tidslinjer(beregningsperiode)
         revurderingUtbetalinger.filtrer(filtere, tidslinjerPerArbeidsgiver)
         tidslinjerPerArbeidsgiver.forEach { (arbeidsgiver, utbetalingstidslinje) ->
             arbeidsgiver.lagreUtbetalingstidslinjeberegning(orgnummer, utbetalingstidslinje, vilkårsgrunnlagHistorikk)
@@ -64,9 +61,8 @@ internal class ArbeidsgiverUtbetalinger(
             }
     }
 
-    private fun tidslinjer(kuttdato: LocalDate) = arbeidsgivere
-        .mapValues { (arbeidsgiver, builder) -> arbeidsgiver.build(subsumsjonObserver, infotrygdhistorikk, builder, kuttdato) }
-        //.filterValues { it.isNotEmpty() }
+    private fun tidslinjer(periode: Periode) = arbeidsgivere
+        .mapValues { (_, builder) -> builder(periode) }
 
     private fun filtrer(
         aktivitetslogg: IAktivitetslogg,

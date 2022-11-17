@@ -402,12 +402,11 @@ class Person private constructor(
             regler = regler,
             alder = alder,
             arbeidsgivere = arbeidsgivereMedSykdom().associateWith {
-                it.builder(regler, vilkårsgrunnlagHistorikk, subsumsjonObserver)
+                it.builder(regler, vilkårsgrunnlagHistorikk, infotrygdhistorikk, subsumsjonObserver)
             },
-            infotrygdhistorikk = infotrygdhistorikk,
+            infotrygdUtbetalingstidslinje = infotrygdhistorikk.utbetalingstidslinje(),
             dødsdato = dødsdato,
-            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
-            subsumsjonObserver = subsumsjonObserver
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk
         )
     }
 
@@ -669,13 +668,6 @@ class Person private constructor(
         val sammenligningsgrunnlag = Sammenligningsgrunnlag(arbeidsgiverInntektsopplysninger)
         subsumsjonObserver.`§ 8-30 ledd 2`(skjæringstidspunkt, sammenligningsgrunnlag.subsumsjonsformat())
         return sammenligningsgrunnlag
-    }
-
-    private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, aktivitetslogg: IAktivitetslogg): Arbeidsgiver {
-        return arbeidsgivere.finnEllerOpprett(arbeidsgiver) {
-            aktivitetslogg.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", arbeidsgiver)
-            Arbeidsgiver(this, arbeidsgiver, jurist)
-        }
     }
 
     private fun arbeidsgivereMedSykdom() = arbeidsgivere.filter(Arbeidsgiver::harSykdom)

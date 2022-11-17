@@ -112,7 +112,7 @@ internal abstract class HistorieTest {
             subsumsjonObserver = SubsumsjonObserver.NullObserver
         )
         val utbetalingstidslinjebuilder = UtbetalingstidslinjeBuilder(inntekter)
-        return infotrygdhistorikk.build(orgnr, sykdomstidslinje, utbetalingstidslinjebuilder, SubsumsjonObserver.NullObserver)
+        return infotrygdhistorikk.buildUtbetalingstidslinje(orgnr, sykdomstidslinje, utbetalingstidslinjebuilder, SubsumsjonObserver.NullObserver).let { utbetalingstidslinjebuilder.result() }
     }
 
     protected fun skjæringstidspunkt(fom: LocalDate) = infotrygdhistorikk.skjæringstidspunkt(Periode(fom, fom), arbeidsgiverSykdomstidslinje.values.toList())

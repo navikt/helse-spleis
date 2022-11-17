@@ -16,7 +16,6 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeMediator
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
-import no.nav.helse.utbetalingstidslinje.IUtbetalingstidslinjeBuilder
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 internal class Infotrygdhistorikk private constructor(
@@ -132,15 +131,14 @@ internal class Infotrygdhistorikk private constructor(
         siste.build(organisasjonsnummer, sykdomstidslinje, teller, arbeidsgiverperiodeBuilder)
     }
 
-    internal fun build(
+    internal fun buildUtbetalingstidslinje(
         organisasjonsnummer: String,
         sykdomstidslinje: Sykdomstidslinje,
-        builder: IUtbetalingstidslinjeBuilder,
+        builder: ArbeidsgiverperiodeMediator,
         subsumsjonObserver: SubsumsjonObserver
-    ): Utbetalingstidslinje {
+    ) {
         val dekoratør = if (harHistorikk()) InfotrygdUtbetalingstidslinjedekoratør(builder, sykdomstidslinje.periode()!!, siste.betaltePerioder()) else builder
         build(organisasjonsnummer, sykdomstidslinje, dekoratør, subsumsjonObserver)
-        return builder.result()
     }
 
     private fun oppfrisket(cutoff: LocalDateTime) =
