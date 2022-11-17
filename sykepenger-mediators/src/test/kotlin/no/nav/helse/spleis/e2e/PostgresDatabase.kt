@@ -1,6 +1,8 @@
 package no.nav.helse.spleis.e2e
 
 import com.zaxxer.hikari.HikariDataSource
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import no.nav.helse.spleis.e2e.SpleisDataSource.migratedDb
 import org.flywaydb.core.Flyway
 import org.testcontainers.containers.PostgreSQLContainer
@@ -31,15 +33,18 @@ object SpleisDataSource {
 
 private val tabeller = listOf("person", "person_kopi", "melding", "unike_person")
 fun resetDatabase() {
-    migrate(migratedDb)
+    //migrate(migratedDb)
+    sessionOf(migratedDb).use { session ->
+        tabeller.forEach {  table ->
+            session.run(queryOf("truncate table $table cascade").asExecute)
+        }
+    }
 }
 
-private fun migrate(dataSource: HikariDataSource, initSql: String = "") =
+private fun migrate(dataSource: HikariDataSource) =
     Flyway.configure()
         .dataSource(dataSource)
-        .baselineOnMigrate(true)
         .cleanDisabled(false)
-        .initSql(initSql)
         .load()
         .also { it.clean() }
         .migrate()
