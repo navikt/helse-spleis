@@ -203,6 +203,9 @@ spec:
           application: sparsom
           access: readwrite
         - team: tbd
+          application: sparsom-opprydding
+          access: readwrite
+        - team: tbd
           application: speaker-kafka
           access: readwrite
         - team: tbd
