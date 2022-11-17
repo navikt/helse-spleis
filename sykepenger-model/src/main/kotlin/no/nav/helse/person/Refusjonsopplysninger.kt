@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.erRettFør
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -158,6 +159,7 @@ class Refusjonsopplysning(
             "Fant ikke refusjonsbeløp for $dag. Har refusjonsopplysninger for ${validerteRefusjonsopplysninger.map { "${it.fom}-${it.tom}" }}"
         }
         private fun dekker(dag: LocalDate) = validerteRefusjonsopplysninger.any { it.dekker(dag) }
+        private fun dekker(periode: Periode) = periode.all { dag -> dekker(dag) }
 
         internal companion object {
             private fun List<Refusjonsopplysning>.overlapper() = map { it.fom til (it.tom ?: LocalDate.MAX) }.overlapper()
@@ -168,14 +170,32 @@ class Refusjonsopplysning(
             internal val Refusjonsopplysning.refusjonsopplysninger get() = Refusjonsopplysninger(listOf(this))
         }
 
-        internal class RefusjonsopplysningerBuilder {
+        internal class RefusjonsopplysningerBuilder(
+            private val eksisterendeRefusjonsopplysninger: Refusjonsopplysninger = Refusjonsopplysninger()
+        ) {
             private val refusjonsopplysninger = mutableListOf<Pair<LocalDateTime, Refusjonsopplysning>>()
             internal fun leggTil(refusjonsopplysning: Refusjonsopplysning, tidsstempel: LocalDateTime) = apply {
                 refusjonsopplysninger.add(tidsstempel to refusjonsopplysning)
             }
 
-            internal fun build(): Refusjonsopplysninger{
-                return Refusjonsopplysninger(refusjonsopplysninger.sortedWith(compareBy({ it.first }, { it.second.fom })).map { it.second })
+            private fun sorterteRefusjonsopplysninger() = refusjonsopplysninger.sortedWith(compareBy({ it.first }, { it.second.fom })).map { it.second }
+
+            private fun buildIngenGråsone() = Refusjonsopplysninger(sorterteRefusjonsopplysninger())
+
+            internal fun build(gråsonen: Periode? = null): Refusjonsopplysninger {
+                val utenGråsonenHensyntatt = buildIngenGråsone()
+                // Om det ikke er noen gråsone betyr det at `første dag i siste del av arbeidsgiverperioden` == `første fraværsdag`.
+                if (gråsonen == null) return utenGråsonenHensyntatt
+                // Om de eksiterende refusjonsopplysingene allerede dekker gråsonen betyr det at de nye refusjonsopplysnignene korrigerer eksisterende refusjonsopplysninger.
+                // I disse tilfellene lar vi gråsonene være uendret (beholder refusjonsopplysningene som allerede finnes i eksisterende refusjonsopplysninger for gråsonen)
+                if (eksisterendeRefusjonsopplysninger.dekker(gråsonen)) return utenGråsonenHensyntatt
+                // Dette virker sprøtt, men man skal aldri si aldri med inntektsmeldingen
+                if (utenGråsonenHensyntatt.dekker(gråsonen)) return utenGråsonenHensyntatt
+                // Om vi ikke sitter med noen refusjonsopplysninger om gråsonen fra før strekker vi de nye refusjonsopplysningne tilbake til å dekke den.
+                val sortertRefusjonsopplysninger = sorterteRefusjonsopplysninger()
+                val rettFørGråsonen = sortertRefusjonsopplysninger.singleOrNull { gråsonen.endInclusive.erRettFør(it.fom) } ?: return utenGråsonenHensyntatt
+                val dekkerGråsonen = rettFørGråsonen.oppdatertFom(gråsonen.start)!!
+                return Refusjonsopplysninger(sortertRefusjonsopplysninger.minus(rettFørGråsonen).plus(dekkerGråsonen))
             }
         }
     }
