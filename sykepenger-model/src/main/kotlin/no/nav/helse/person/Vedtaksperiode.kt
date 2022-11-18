@@ -342,15 +342,8 @@ internal class Vedtaksperiode private constructor(
         return tilstand.håndter(this, overstyrArbeidsforhold)
     }
 
-    internal fun håndterOverstyringAvGhostInntekt(overstyrInntekt: OverstyrInntekt): Boolean {
-        if (!kanHåndtereOverstyring(overstyrInntekt)) return false
-        kontekst(overstyrInntekt)
-        overstyrInntekt.leggTil(hendelseIder)
-        return tilstand.håndterOverstyringAvGhostInntekt(this, overstyrInntekt)
-    }
-
     internal fun håndter(hendelse: OverstyrInntekt, vedtaksperioder: Iterable<Vedtaksperiode>): Boolean {
-        if (!kanHåndtereOverstyring(hendelse)) return false
+        if (hendelse.skjæringstidspunkt != this.skjæringstidspunkt || tilstand == AvsluttetUtenUtbetaling) return false
         kontekst(hendelse)
         vedtaksperioder.filter(MED_SKJÆRINGSTIDSPUNKT(hendelse.skjæringstidspunkt)).forEach {
             hendelse.leggTil(it.hendelseIder)
@@ -365,9 +358,6 @@ internal class Vedtaksperiode private constructor(
         kontekst(hendelse)
         tilstand.nyPeriodeTidligereEllerOverlappende(this, ny, hendelse)
     }
-
-    internal fun blokkererOverstyring(skjæringstidspunkt: LocalDate) =
-        skjæringstidspunkt == this.skjæringstidspunkt && !tilstand.kanReberegnes
 
     internal fun håndterRevurdertUtbetaling(revurdertUtbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg, other: Vedtaksperiode) {
         kontekst(aktivitetslogg)
@@ -390,10 +380,6 @@ internal class Vedtaksperiode private constructor(
 
     internal fun erSykeperiodeAvsluttetUtenUtbetalingRettFør(other: Vedtaksperiode) =
         this.sykdomstidslinje.erRettFør(other.sykdomstidslinje) && this.tilstand == AvsluttetUtenUtbetaling
-
-    private fun kanHåndtereOverstyring(hendelse: OverstyrInntekt): Boolean {
-        return utbetalingstidslinje.isNotEmpty() && hendelse.skjæringstidspunkt == this.skjæringstidspunkt
-    }
 
     private fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() =
         person.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt)
@@ -853,11 +839,6 @@ internal class Vedtaksperiode private constructor(
         val type: TilstandType
         val erFerdigBehandlet: Boolean get() = false
 
-        /**
-         *  en periode som kan reberegnes er en periode hvor vi ikke har kommet med forslag til en utbetaling, dvs. alle tilstander før AvventerGodkjenning
-         */
-        val kanReberegnes: Boolean get() = true
-
         fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
         fun makstid(tilstandsendringstidspunkt: LocalDateTime): LocalDateTime = LocalDateTime.MAX
@@ -963,8 +944,6 @@ internal class Vedtaksperiode private constructor(
         ) = false
 
         fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {}
-
-        fun håndterOverstyringAvGhostInntekt(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) = false
 
         fun håndterRevurdertUtbetaling(
             vedtaksperiode: Vedtaksperiode,
@@ -1664,7 +1643,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerSimulering : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_SIMULERING
-        override val kanReberegnes = false
 
         override fun makstid(
             tilstandsendringstidspunkt: LocalDateTime
@@ -1723,7 +1701,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerSimuleringRevurdering : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_SIMULERING_REVURDERING
-        override val kanReberegnes = false
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.utbetalinger.simuler(hendelse)
@@ -1825,26 +1802,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            if (vedtaksperiode.person.harPeriodeSomBlokkererOverstyring(hendelse.skjæringstidspunkt)) return
-            vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-                hendelse,
-                vedtaksperiode.skjæringstidspunkt,
-                vedtaksperiode.jurist()
-            )
-            vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
-        }
-
-        override fun håndterOverstyringAvGhostInntekt(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: OverstyrInntekt
-        ): Boolean {
-            vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-                hendelse,
-                vedtaksperiode.skjæringstidspunkt,
-                vedtaksperiode.jurist()
-            )
-            vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
-            return true
+            vedtaksperiode.revurderInntekt(hendelse)
         }
 
         override fun håndter(
@@ -1956,7 +1914,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_GODKJENNING_REVURDERING
-        override val kanReberegnes = false
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.trengerGodkjenning(hendelse)
@@ -2038,7 +1995,6 @@ internal class Vedtaksperiode private constructor(
     // TODO: slett tilstand
     internal object AvventerArbeidsgivereRevurdering : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_ARBEIDSGIVERE_REVURDERING
-        override val kanReberegnes = false
 
         // Skal denne trigge polling i Speil? Se VenterPåKiling
 
@@ -2056,7 +2012,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object TilUtbetaling : Vedtaksperiodetilstand {
         override val type = TIL_UTBETALING
-        override val kanReberegnes = false
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
@@ -2103,7 +2058,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object UtbetalingFeilet : Vedtaksperiodetilstand {
         override val type = UTBETALING_FEILET
-        override val kanReberegnes = false
 
         override fun håndter(
             person: Person,
@@ -2232,7 +2186,6 @@ internal class Vedtaksperiode private constructor(
         override val type = AVSLUTTET
 
         override val erFerdigBehandlet = true
-        override val kanReberegnes = false
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.lås()
@@ -2269,12 +2222,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-                hendelse,
-                vedtaksperiode.skjæringstidspunkt,
-                vedtaksperiode.jurist()
-            )
-            vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
+            vedtaksperiode.revurderInntekt(hendelse)
         }
 
         override fun håndter(
@@ -2305,7 +2253,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object RevurderingFeilet : Vedtaksperiodetilstand {
         override val type: TilstandType = REVURDERING_FEILET
-        override val kanReberegnes = false
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
@@ -2339,7 +2286,6 @@ internal class Vedtaksperiode private constructor(
     internal object TilInfotrygd : Vedtaksperiodetilstand {
         override val type = TIL_INFOTRYGD
         override val erFerdigBehandlet = true
-        override val kanReberegnes = false
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             hendelse.info("Sykdom for denne personen kan ikke behandles automatisk.")

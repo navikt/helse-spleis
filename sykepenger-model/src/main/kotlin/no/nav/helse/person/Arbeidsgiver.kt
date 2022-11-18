@@ -142,9 +142,6 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.kanStarteRevurdering(vedtaksperiode: Vedtaksperiode) =
             flatMap { it.vedtaksperioder }.kanStarteRevurdering(this, vedtaksperiode)
 
-        internal fun List<Arbeidsgiver>.harPeriodeSomBlokkererOverstyring(skjæringstidspunkt: LocalDate) =
-            flatMap { it.vedtaksperioder }.any { vedtaksperiode -> vedtaksperiode.blokkererOverstyring(skjæringstidspunkt) }
-
         internal fun List<Arbeidsgiver>.nyPeriode(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             flatMap { it.vedtaksperioder }.forEach {
                 it.nyPeriode(vedtaksperiode, søknad)
@@ -154,8 +151,15 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold) =
             any { it.håndter(overstyrArbeidsforhold) }
 
-        internal fun List<Arbeidsgiver>.håndterOverstyringAvGhostInntekt(overstyrInntekt: OverstyrInntekt) =
-            any { it.håndterOverstyringAvGhostInntekt(overstyrInntekt) }
+        internal fun List<Arbeidsgiver>.håndterOverstyrInntekt(overstyrInntekt: OverstyrInntekt) {
+            val arbeidsgiver = firstOrNull {
+                it.organisasjonsnummer == overstyrInntekt.organisasjonsnummer() && it.harSykdomFor(overstyrInntekt.skjæringstidspunkt)
+            } ?: firstOrNull {
+                it.harSykdomFor(overstyrInntekt.skjæringstidspunkt)
+            }
+
+            arbeidsgiver?.håndter(overstyrInntekt) ?: overstyrInntekt.logiskFeil("Kan ikke overstyre inntekt hvis vi ikke har en arbeidsgiver med sykdom for skjæringstidspunktet")
+        }
 
         internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
             mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode(filter) }
@@ -800,7 +804,7 @@ internal class Arbeidsgiver private constructor(
         håndter(hendelse, Vedtaksperiode::håndter)
     }
 
-    internal fun håndter(hendelse: OverstyrInntekt) {
+    private fun håndter(hendelse: OverstyrInntekt) {
         hendelse.kontekst(this)
         énHarHåndtert(hendelse) { håndter(it, vedtaksperioder) }
     }
@@ -813,11 +817,6 @@ internal class Arbeidsgiver private constructor(
             }
         }
         return false
-    }
-
-    internal fun håndterOverstyringAvGhostInntekt(overstyrInntekt: OverstyrInntekt): Boolean {
-        overstyrInntekt.kontekst(this)
-        return énHarHåndtert(overstyrInntekt, Vedtaksperiode::håndterOverstyringAvGhostInntekt)
     }
 
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {

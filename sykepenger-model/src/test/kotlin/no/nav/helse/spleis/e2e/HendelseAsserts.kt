@@ -6,6 +6,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
@@ -21,11 +22,19 @@ import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
 import kotlin.reflect.KClass
 
 
-internal fun assertInntektForDato(forventetInntekt: Inntekt?, dato: LocalDate, førsteFraværsdag: LocalDate = dato, inspektør: TestArbeidsgiverInspektør) {
+internal fun assertInntektshistorikkForDato(forventetInntekt: Inntekt?, dato: LocalDate, førsteFraværsdag: LocalDate = dato, inspektør: TestArbeidsgiverInspektør) {
     assertEquals(forventetInntekt, inspektør.inntektInspektør.omregnetÅrsinntekt(dato, førsteFraværsdag)?.omregnetÅrsinntekt())
+}
+internal fun assertInntektForDato(forventetInntekt: Inntekt?, dato: LocalDate, inspektør: TestArbeidsgiverInspektør) {
+    val grunnlagsdataInspektør = inspektør.vilkårsgrunnlagHistorikkInnslag().firstOrNull()?.vilkårsgrunnlagFor(dato)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag for $dato" }
+    val sykepengegrunnlagInspektør = grunnlagsdataInspektør.sykepengegrunnlag.inspektør
+    sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[inspektør.orgnummer]?.inspektør.also {
+        assertEquals(forventetInntekt, it?.inntektsopplysning?.omregnetÅrsinntekt())
+    }
 }
 
 internal fun AbstractEndToEndTest.erEtterspurt(type: Aktivitetslogg.Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String, tilstand: TilstandType): Boolean {

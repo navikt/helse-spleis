@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -414,26 +413,10 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterOverstyrInntekt(1.januar, 32000.månedlig)
-            assertForventetFeil(
-                forklaring = "Feature ikke støttet enda: https://trello.com/c/aiYZO1VK",
-                nå = {
-                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-                },
-                ønsket = {
-                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-                }
-            )
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
         a1 {
-            assertForventetFeil(
-                forklaring = "Feature ikke støttet enda: https://trello.com/c/aiYZO1VK",
-                nå = {
-                    assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-                },
-                ønsket = {
-                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-                }
-            )
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         }
     }
 

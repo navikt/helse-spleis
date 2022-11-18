@@ -2,8 +2,6 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.Arbeidsgiver.Companion.harPeriodeSomBlokkererOverstyring
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.PersonObserver
@@ -31,15 +29,6 @@ class OverstyrInntekt(
 
     internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
         hendelseIder.add(Dokumentsporing.overstyrInntekt(meldingsreferanseId()))
-    }
-
-    internal fun valider(arbeidsgivere: MutableList<Arbeidsgiver>) {
-        if (arbeidsgivere.none { it.harSykdomFor(skjæringstidspunkt) }) {
-            logiskFeil("Kan ikke overstyre inntekt hvis vi ikke har en arbeidsgiver med sykdom for skjæringstidspunktet")
-        }
-        if (arbeidsgivere.harPeriodeSomBlokkererOverstyring(skjæringstidspunkt)) {
-            logiskFeil("Kan ikke overstyre inntekt for ghost for en pågående behandling der én eller flere perioder er behandlet ferdig")
-        }
     }
 
     internal fun overstyr(builder: Sykepengegrunnlag.SaksbehandlerOverstyringer) {

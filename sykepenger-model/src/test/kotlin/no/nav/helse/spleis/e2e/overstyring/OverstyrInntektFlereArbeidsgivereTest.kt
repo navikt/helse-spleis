@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -13,7 +12,6 @@ import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Inntektskilde.FLERE_ARBEIDSGIVERE
-import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -174,38 +172,28 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterOverstyrInntekt(19000.månedlig, a2, 1.januar)
-        assertForventetFeil(
-            forklaring = "Dette burde støttes av at vi går inn i et revurderingsløp",
-            nå = {
-                assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-                assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a2)
-                assertInntektForDato(20000.månedlig, 1.januar, inspektør = inspektør(a2))
-            },
-            ønsket = {
-                assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
-                assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
-                assertInntektForDato(19000.månedlig, 1.januar, inspektør = inspektør(a2))
-            }
-        )
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertInntektForDato(19000.månedlig, 1.januar, inspektør = inspektør(a2))
         assertInntektForDato(20000.månedlig, 1.januar, inspektør = inspektør(a1))
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
         val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
 
-        assertEquals(480000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-        assertEquals(480000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+        assertEquals(468000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+        assertEquals(468000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
         assertEquals(480000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+        assertEquals(3, vilkårsgrunnlag.avviksprosent?.roundToInt())
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(20000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
             assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(20000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-            assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+            assertEquals(19000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+            assertEquals(Inntektshistorikk.Saksbehandler::class, it.inntektsopplysning::class)
         }
 
         assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)

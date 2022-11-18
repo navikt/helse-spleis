@@ -17,7 +17,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -36,15 +35,17 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
+import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.Varselkode.RV_OS_1
 import no.nav.helse.person.Varselkode.RV_SV_1
+import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertHarHendelseIder
 import no.nav.helse.spleis.e2e.assertHarIkkeHendelseIder
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
-import no.nav.helse.spleis.e2e.assertLogiskFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -80,7 +81,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class RevurderInntektTest : AbstractEndToEndTest() {
 
@@ -176,28 +176,12 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `revurder inntekt ukjent skjæringstidspunkt`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
-        assertThrows<Aktivitetslogg.AktivitetException> {
-            håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 2.januar)
-        }
-        assertLogiskFeil("Kan ikke overstyre inntekt hvis vi ikke har en arbeidsgiver med sykdom for skjæringstidspunktet",
-            AktivitetsloggFilter.person()
-        )
-
-        assertTilstander(
-            0,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-        )
-
+        nullstillTilstandsendringer()
+        håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 2.januar)
+        assertFunksjonellFeil(Varselkode.RV_VV_12, AktivitetsloggFilter.person())
+        assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertEquals(1, inspektør.utbetalinger.size)
+        assertEquals(Varselkode.RV_VV_12.varseltekst, observatør.avvisteRevurderinger.single().errors.single())
     }
 
     @Test

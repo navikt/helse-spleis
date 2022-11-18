@@ -61,6 +61,7 @@ import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertInntektForDato
+import no.nav.helse.spleis.e2e.assertInntektshistorikkForDato
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -1494,7 +1495,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.februar)
         assertFalse(inspektør.sykdomstidslinje[30.januar] is Dag.Arbeidsdag)
         assertFalse(inspektør.sykdomstidslinje[31.januar] is Dag.Arbeidsdag)
-        assertInntektForDato(INNTEKT, 30.januar, inspektør = inspektør)
+        assertInntektshistorikkForDato(INNTEKT, 30.januar, inspektør = inspektør)
         assertForkastetPeriodeTilstander(
             2.vedtaksperiode,
             START,

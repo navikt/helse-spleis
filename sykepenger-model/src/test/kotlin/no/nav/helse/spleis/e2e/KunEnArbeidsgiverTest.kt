@@ -109,7 +109,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertIngenFunksjonelleFeil()
         assertActivities()
         inspektør.also {
-            assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
+            assertInntektshistorikkForDato(INNTEKT, 3.januar, inspektør = it)
             assertEquals(2, it.sykdomshistorikk.size)
             assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(2, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
@@ -180,6 +180,9 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
         håndterInntektsmelding(listOf(3.januar til 4.januar, 8.januar til 21.januar), INNTEKT)
 
+        håndterYtelser(3.vedtaksperiode)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+
         assertIngenFunksjonelleFeil()
         assertActivities()
         inspektør.also {
@@ -207,6 +210,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK
         )
     }
@@ -220,7 +225,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
         assertActivities()
         inspektør.also {
-            assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
+            assertInntektshistorikkForDato(INNTEKT, 3.januar, inspektør = it)
             assertEquals(2, it.sykdomshistorikk.size)
             assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(2, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
@@ -289,6 +294,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         assertIngenFunksjonelleFeil()
         assertActivities()
         inspektør.also {
@@ -304,6 +311,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK
         )
     }
@@ -362,7 +371,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertIngenVarsler()
         assertActivities()
         inspektør.also {
-            assertInntektForDato(null, 2.januar, inspektør = it)
+            assertInntektshistorikkForDato(null, 2.januar, inspektør = it)
             assertEquals(1, it.sykdomshistorikk.size)
             assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])

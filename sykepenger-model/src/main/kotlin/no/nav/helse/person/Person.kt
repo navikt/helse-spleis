@@ -37,9 +37,8 @@ import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.harForkastetVedtaksperiodeSomBlokkerBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
-import no.nav.helse.person.Arbeidsgiver.Companion.harPeriodeSomBlokkererOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
-import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvGhostInntekt
+import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyrInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.inntekterForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.kanStarteRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.lagRevurdering
@@ -313,15 +312,10 @@ class Person private constructor(
     fun håndter(hendelse: OverstyrInntekt) {
         hendelse.kontekst(this)
 
-        val erOverstyringAvGhostInntekt = !finnArbeidsgiver(hendelse).harSykdomFor(hendelse.skjæringstidspunkt)
-        if (erOverstyringAvGhostInntekt) {
-            return håndterOverstyringAvGhostInntekt(hendelse)
-        }
-
         val vilkårsgrunnlag = vilkårsgrunnlagFor(hendelse.skjæringstidspunkt)
         if (vilkårsgrunnlag != null) {
             if (vilkårsgrunnlag.valider(hendelse)) {
-                finnArbeidsgiver(hendelse).håndter(hendelse)
+                arbeidsgivere.håndterOverstyrInntekt(hendelse)
             }
         } else {
             hendelse.funksjonellFeil(RV_VV_12)
@@ -334,15 +328,6 @@ class Person private constructor(
                     hendelse.tilRevurderingAvvistEvent()
                 )
             }
-        }
-        håndterGjenoppta(hendelse)
-    }
-
-    private fun håndterOverstyringAvGhostInntekt(hendelse: OverstyrInntekt) {
-        sikkerLogg.info("Ship-o-hoy nå er vi i overstyring av ghost-inntekt-flyten for $aktørId")
-        hendelse.valider(arbeidsgivere)
-        if (!arbeidsgivere.håndterOverstyringAvGhostInntekt(hendelse)) {
-            hendelse.logiskFeil("Kan ikke overstyre ghost-inntekt fordi ingen vedtaksperioder håndterte hendelsen")
         }
         håndterGjenoppta(hendelse)
     }
@@ -826,9 +811,6 @@ class Person private constructor(
 
     internal fun skjæringstidspunktperiode(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.skjæringstidspunktperiode(skjæringstidspunkt)
-
-    internal fun harPeriodeSomBlokkererOverstyring(skjæringstidspunkt: LocalDate) =
-        arbeidsgivere.harPeriodeSomBlokkererOverstyring(skjæringstidspunkt)
 
     internal fun nyPeriode(vedtaksperiode: Vedtaksperiode, søknad: Søknad) =
         arbeidsgivere.nyPeriode(vedtaksperiode, søknad)
