@@ -1326,7 +1326,7 @@ internal class Vedtaksperiode private constructor(
         override val type: TilstandType = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 
         override fun makstid(tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
-            tilstandsendringstidspunkt.plusDays(110)
+            tilstandsendringstidspunkt.plusDays(180)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             if(Toggle.Splarbeidsbros.enabled) {
@@ -1428,9 +1428,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_BLOKKERENDE_PERIODE
-
-        override fun makstid(tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
-            tilstandsendringstidspunkt.plusDays(110)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
@@ -1783,9 +1780,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerGodkjenning : Vedtaksperiodetilstand {
         override val type = AVVENTER_GODKJENNING
-
-        override fun makstid(tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
-            tilstandsendringstidspunkt.plusDays(110)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.trengerGodkjenning(hendelse)
