@@ -18,13 +18,19 @@ class Påminnelse(
     private val tilstandsendringstidspunkt: LocalDateTime,
     private val påminnelsestidspunkt: LocalDateTime,
     private val nestePåminnelsestidspunkt: LocalDateTime,
-    private val ønskerReberegning: Boolean = false
+    private val ønskerReberegning: Boolean = false,
+    private val nå: LocalDateTime = LocalDateTime.now()
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, Aktivitetslogg()) {
     fun antallGangerPåminnet() = antallGangerPåminnet
     fun tilstand() = tilstand
     fun tilstandsendringstidspunkt() = tilstandsendringstidspunkt
     fun påminnelsestidspunkt() = påminnelsestidspunkt
     fun nestePåminnelsestidspunkt() = nestePåminnelsestidspunkt
+
+    internal fun nåddMakstid(makstid: (tilstandsendringstidspunkt: LocalDateTime) -> LocalDateTime): Boolean {
+        val beregnetMakstid = makstid(tilstandsendringstidspunkt)
+        return nå >= beregnetMakstid
+    }
 
     internal fun erRelevant(vedtaksperiodeId: UUID) = vedtaksperiodeId.toString() == this.vedtaksperiodeId
 
