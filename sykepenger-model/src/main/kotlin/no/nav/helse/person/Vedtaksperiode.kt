@@ -76,7 +76,6 @@ import no.nav.helse.person.Varselkode.RV_OO_2
 import no.nav.helse.person.Varselkode.RV_RE_2
 import no.nav.helse.person.Varselkode.RV_RV_1
 import no.nav.helse.person.Varselkode.RV_RV_2
-import no.nav.helse.person.Varselkode.RV_RV_3
 import no.nav.helse.person.Varselkode.RV_SI_2
 import no.nav.helse.person.Varselkode.RV_SV_2
 import no.nav.helse.person.Varselkode.RV_SV_3
@@ -394,14 +393,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun kanHåndtereOverstyring(hendelse: OverstyrInntekt): Boolean {
         return utbetalingstidslinje.isNotEmpty() && hendelse.skjæringstidspunkt == this.skjæringstidspunkt
-    }
-
-    private fun kanRevurdereInntektForFlereArbeidsgivere(hendelse: OverstyrInntekt): Boolean {
-        if (Toggle.RevurdereInntektMedFlereArbeidsgivere.disabled && inntektskilde == Inntektskilde.FLERE_ARBEIDSGIVERE) {
-            hendelse.funksjonellFeil(RV_RV_3)
-            return false
-        }
-        return true
     }
 
     private fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() =
@@ -1197,7 +1188,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
             vedtaksperiode.emitVedtaksperiodeEndret(hendelse)
             vedtaksperiode.revurderInntekt(hendelse)
         }
@@ -1245,7 +1235,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
             vedtaksperiode.revurderInntekt(hendelse)
         }
 
@@ -1339,7 +1328,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
             FunksjonelleFeilTilVarsler.wrap(hendelse) {
                 vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
                     hendelse,
@@ -1796,7 +1784,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
             vedtaksperiode.revurderInntekt(hendelse)
         }
 
@@ -2039,7 +2026,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
             vedtaksperiode.revurderInntekt(hendelse)
         }
 
@@ -2272,7 +2258,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
         }
     }
 
@@ -2320,7 +2305,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
             vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
                 hendelse,
                 vedtaksperiode.skjæringstidspunkt,

@@ -23,7 +23,6 @@ import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.Varselkode.RV_SV_1
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertInntektForDato
 import no.nav.helse.spleis.e2e.assertTilstand
@@ -39,7 +38,6 @@ import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
-import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.tilGodkjenning
@@ -420,13 +418,6 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
             }
             assertTrue(utbetaling.inspektør.personOppdrag.isEmpty())
         }
-    }
-
-    @Test
-    fun `Skal ikke revurdere inntekt for flere arbeidsgivere`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
-        håndterOverstyrInntekt(19000.månedlig, skjæringstidspunkt = 1.januar, orgnummer = a1)
-        assertFunksjonellFeil("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
     }
 
     private fun tilOverstyring(

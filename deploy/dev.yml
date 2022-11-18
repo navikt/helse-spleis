@@ -55,8 +55,6 @@ spec:
     value: earliest
   - name: GraphQLPlayground
     value: "true"
-  - name: RevurdereInntektMedFlereArbeidsgivere
-    value: "true"
   - name: UtbetalingtypeAuu
     value: "true"
   - name: RevurderKorrigertSoknad
