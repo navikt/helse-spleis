@@ -62,6 +62,7 @@ internal interface IVilkårsgrunnlag {
     val sammenligningsgrunnlag: Double?
     val sykepengegrunnlag: Double
     val inntekter: List<IArbeidsgiverinntekt>
+    val refusjonsopplysningerPerArbeidsgiver: List<IArbeidsgiverrefusjon>
     val id: UUID
     fun toDTO(): Vilkårsgrunnlag
 }
@@ -73,7 +74,7 @@ internal class ISpleisGrunnlag(
     override val inntekter: List<IArbeidsgiverinntekt>,
     override val sykepengegrunnlag: Double,
     override val id: UUID,
-    val refusjonsopplysningerPerArbeidsgiver: List<IArbeidsgiverrefusjon>,
+    override val refusjonsopplysningerPerArbeidsgiver: List<IArbeidsgiverrefusjon>,
     val avviksprosent: Double?,
     val grunnbeløp: Int,
     val sykepengegrunnlagsgrense: SykepengegrunnlagsgrenseDTO,
@@ -125,6 +126,7 @@ internal class IInfotrygdGrunnlag(
     override val omregnetÅrsinntekt: Double,
     override val sammenligningsgrunnlag: Double?,
     override val inntekter: List<IArbeidsgiverinntekt>,
+    override val refusjonsopplysningerPerArbeidsgiver: List<IArbeidsgiverrefusjon>,
     override val sykepengegrunnlag: Double,
     override val id: UUID
 ) : IVilkårsgrunnlag {
@@ -134,7 +136,8 @@ internal class IInfotrygdGrunnlag(
             omregnetÅrsinntekt = omregnetÅrsinntekt,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             sykepengegrunnlag = sykepengegrunnlag,
-            inntekter = inntekter.map { it.toDTO() }
+            inntekter = inntekter.map { it.toDTO() },
+            arbeidsgiverrefusjoner = refusjonsopplysningerPerArbeidsgiver.map { it.toDTO() },
         )
     }
 }
@@ -247,6 +250,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 omregnetÅrsinntekt = byggetSykepengegrunnlag.omregnetÅrsinntekt,
                 sammenligningsgrunnlag = null,
                 inntekter = byggetSykepengegrunnlag.inntekterPerArbeidsgiver,
+                refusjonsopplysningerPerArbeidsgiver = byggetSykepengegrunnlag.refusjonsopplysningerPerArbeidsgiver,
                 sykepengegrunnlag = byggetSykepengegrunnlag.sykepengegrunnlag,
                 id = vilkårsgrunnlagId
             )

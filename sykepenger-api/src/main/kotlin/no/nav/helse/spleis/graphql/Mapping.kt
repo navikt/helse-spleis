@@ -438,7 +438,8 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: Vilkårsgrunnlag) =
                 omregnetArsinntekt = vilkårsgrunnlag.omregnetÅrsinntekt,
                 sammenligningsgrunnlag = vilkårsgrunnlag.sammenligningsgrunnlag,
                 sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag,
-                inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) }
+                inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) },
+                arbeidsgiverrefusjoner = vilkårsgrunnlag.arbeidsgiverrefusjoner.map{ refusjon -> mapArbeidsgiverRefusjon(refusjon)}
             )
             else -> object : GraphQLVilkarsgrunnlag {
                 override val id = id
@@ -447,6 +448,7 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: Vilkårsgrunnlag) =
                 override val sammenligningsgrunnlag = vilkårsgrunnlag.sammenligningsgrunnlag
                 override val sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag
                 override val inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) }
+                override val arbeidsgiverrefusjoner = vilkårsgrunnlag.arbeidsgiverrefusjoner.map{ refusjon -> mapArbeidsgiverRefusjon(refusjon)}
                 override val vilkarsgrunnlagtype = GraphQLVilkarsgrunnlagtype.Ukjent
             }
         }

@@ -16,6 +16,7 @@ import no.nav.helse.november
 import no.nav.helse.person.Varselkode.RV_SI_3
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.dto.BeregnetPeriode
+import no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -223,6 +224,23 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val personDto = speilApi()
         val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag.get(speilVilkårsgrunnlagId) as? SpleisVilkårsgrunnlag
+        assertTrue(vilkårsgrunnlag!!.arbeidsgiverrefusjoner.isNotEmpty())
+        val arbeidsgiverrefusjon = vilkårsgrunnlag.arbeidsgiverrefusjoner.single()
+        assertEquals(ORGNUMMER, arbeidsgiverrefusjon.arbeidsgiver)
+        val refusjonsopplysning = arbeidsgiverrefusjon.refusjonsopplysninger.single()
+
+        assertEquals(1.januar, refusjonsopplysning.fom)
+        assertEquals(null, refusjonsopplysning.tom)
+        assertEquals(INNTEKT,refusjonsopplysning.beløp.månedlig)
+    }
+
+    @Test
+    fun `refusjon ligger på vilkårsgrunnlaget - også for infotrygd`() {
+        createOvergangFraInfotrygdPerson()
+        forlengVedtak(1.mars, 31.mars, 100.prosent)
+        val personDto = speilApi()
+        val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val vilkårsgrunnlag = personDto.vilkårsgrunnlag.get(speilVilkårsgrunnlagId) as? InfotrygdVilkårsgrunnlag
         assertTrue(vilkårsgrunnlag!!.arbeidsgiverrefusjoner.isNotEmpty())
         val arbeidsgiverrefusjon = vilkårsgrunnlag.arbeidsgiverrefusjoner.single()
         assertEquals(ORGNUMMER, arbeidsgiverrefusjon.arbeidsgiver)

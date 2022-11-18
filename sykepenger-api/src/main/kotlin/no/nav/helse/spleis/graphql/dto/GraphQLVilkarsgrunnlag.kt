@@ -26,6 +26,7 @@ interface GraphQLVilkarsgrunnlag {
     val sammenligningsgrunnlag: Double?
     val sykepengegrunnlag: Double
     val inntekter: List<GraphQLArbeidsgiverinntekt>
+    val arbeidsgiverrefusjoner: List<GraphQLArbeidsgiverrefusjon>
     val vilkarsgrunnlagtype: GraphQLVilkarsgrunnlagtype
 }
 
@@ -36,7 +37,7 @@ data class GraphQLSpleisVilkarsgrunnlag(
     override val sammenligningsgrunnlag: Double?,
     override val sykepengegrunnlag: Double,
     override val inntekter: List<GraphQLArbeidsgiverinntekt>,
-    val arbeidsgiverrefusjoner: List<GraphQLArbeidsgiverrefusjon>,
+    override val arbeidsgiverrefusjoner: List<GraphQLArbeidsgiverrefusjon>,
     val avviksprosent: Double?,
     val grunnbelop: Int,
     val sykepengegrunnlagsgrense: GraphQLSykepengegrunnlagsgrense,
@@ -55,6 +56,7 @@ data class GraphQLInfotrygdVilkarsgrunnlag(
     override val omregnetArsinntekt: Double,
     override val sammenligningsgrunnlag: Double?,
     override val sykepengegrunnlag: Double,
+    override val arbeidsgiverrefusjoner: List<GraphQLArbeidsgiverrefusjon>,
     override val inntekter: List<GraphQLArbeidsgiverinntekt>
 ) : GraphQLVilkarsgrunnlag {
     override val vilkarsgrunnlagtype = GraphQLVilkarsgrunnlagtype.Infotrygd

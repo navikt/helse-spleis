@@ -161,6 +161,7 @@ internal class UtbetalingerBuilder(
                 omregnetÅrsinntekt = byggetSykepengegrunnlag.omregnetÅrsinntekt,
                 sammenligningsgrunnlag = null,
                 inntekter = byggetSykepengegrunnlag.inntekterPerArbeidsgiver,
+                refusjonsopplysningerPerArbeidsgiver = byggetSykepengegrunnlag.refusjonsopplysningerPerArbeidsgiver,
                 sykepengegrunnlag = byggetSykepengegrunnlag.sykepengegrunnlag,
                 id = vilkårsgrunnlagId
             )

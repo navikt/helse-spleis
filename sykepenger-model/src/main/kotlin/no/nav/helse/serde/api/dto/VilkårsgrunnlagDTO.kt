@@ -11,6 +11,7 @@ interface Vilkårsgrunnlag {
     val sammenligningsgrunnlag: Double?
     val sykepengegrunnlag: Double
     val inntekter: List<Arbeidsgiverinntekt>
+    val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>
     val vilkårsgrunnlagtype: Vilkårsgrunnlagtype
 }
 
@@ -25,7 +26,7 @@ data class SpleisVilkårsgrunnlag(
     override val sammenligningsgrunnlag: Double,
     override val sykepengegrunnlag: Double,
     override val inntekter: List<Arbeidsgiverinntekt>,
-    val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>,
+    override val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>,
     val avviksprosent: Double?,
     val grunnbeløp: Int,
     val sykepengegrunnlagsgrense: SykepengegrunnlagsgrenseDTO,
@@ -43,7 +44,8 @@ data class InfotrygdVilkårsgrunnlag(
     override val omregnetÅrsinntekt: Double,
     override val sammenligningsgrunnlag: Double?,
     override val sykepengegrunnlag: Double,
-    override val inntekter: List<Arbeidsgiverinntekt>
+    override val inntekter: List<Arbeidsgiverinntekt>,
+    override val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>
 ) : Vilkårsgrunnlag {
     override val vilkårsgrunnlagtype = Vilkårsgrunnlagtype.INFOTRYGD
 }
