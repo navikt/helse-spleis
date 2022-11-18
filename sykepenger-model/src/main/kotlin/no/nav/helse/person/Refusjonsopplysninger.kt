@@ -3,7 +3,6 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.erRettFør
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -193,9 +192,9 @@ class Refusjonsopplysning(
                 if (utenGråsonenHensyntatt.dekker(gråsonen)) return utenGråsonenHensyntatt
                 // Om vi ikke sitter med noen refusjonsopplysninger om gråsonen fra før strekker vi de nye refusjonsopplysningne tilbake til å dekke den.
                 val sortertRefusjonsopplysninger = sorterteRefusjonsopplysninger()
-                val rettFørGråsonen = sortertRefusjonsopplysninger.singleOrNull { gråsonen.endInclusive.erRettFør(it.fom) } ?: return utenGråsonenHensyntatt
-                val dekkerGråsonen = rettFørGråsonen.oppdatertFom(gråsonen.start)!!
-                return Refusjonsopplysninger(sortertRefusjonsopplysninger.minus(rettFørGråsonen).plus(dekkerGråsonen))
+                val rettEtterGråsonen = sortertRefusjonsopplysninger.firstOrNull()?.takeIf { gråsonen.endInclusive.nesteDag == it.fom } ?: return utenGråsonenHensyntatt
+                val dekkerGråsonen = rettEtterGråsonen.oppdatertFom(gråsonen.start) ?: return utenGråsonenHensyntatt
+                return Refusjonsopplysninger(sortertRefusjonsopplysninger.minus(rettEtterGråsonen).plus(dekkerGråsonen))
             }
         }
     }
