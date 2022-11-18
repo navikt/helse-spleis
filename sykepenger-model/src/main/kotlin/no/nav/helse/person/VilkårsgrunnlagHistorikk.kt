@@ -87,6 +87,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         return forrigeInnslag()?.vilkårsgrunnlagFor(skjæringstidspunkt)?.er6GBegrenset() == false
     }
 
+    internal fun ghostPeriode(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, periode: Periode): GhostPeriode? {
+        return vilkårsgrunnlagFor(skjæringstidspunkt)?.ghostPeriode(sisteId(), organisasjonsnummer, periode)
+    }
+
     internal class Innslag private constructor(
         internal val id: UUID,
         private val opprettet: LocalDateTime,
@@ -279,6 +283,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun refusjonsopplysninger(organisasjonsnummer: String) =
             sykepengegrunnlag.refusjonsopplysninger(organisasjonsnummer)
 
+        internal abstract fun ghostPeriode(sisteId: UUID, organisasjonsnummer: String, periode: Periode): GhostPeriode?
+
         internal companion object {
             internal fun skjæringstidspunktperioder(elementer: Collection<VilkårsgrunnlagElement>): List<Periode> {
                 val skjæringstidspunkter = elementer
@@ -365,6 +371,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag) {
         override fun valider(aktivitetslogg: IAktivitetslogg, erForlengelse: Boolean) {
             sykepengegrunnlag.validerAvvik(aktivitetslogg, sammenligningsgrunnlag)
+        }
+
+        override fun ghostPeriode(sisteId: UUID, organisasjonsnummer: String, periode: Periode): GhostPeriode? {
+            return sykepengegrunnlag.ghostPeriode(sisteId, vilkårsgrunnlagId, organisasjonsnummer, periode)
         }
 
         override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
@@ -463,6 +473,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun validerOverstyrInntekt(overstyrInntekt: OverstyrInntekt) {
             overstyrInntekt.funksjonellFeil(RV_IT_17)
         }
+
+        override fun ghostPeriode(sisteId: UUID, organisasjonsnummer: String, periode: Periode) = null
 
         override fun valider(aktivitetslogg: IAktivitetslogg, erForlengelse: Boolean) {
             if (erForlengelse) {

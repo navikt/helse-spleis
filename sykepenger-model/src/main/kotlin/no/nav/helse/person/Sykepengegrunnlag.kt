@@ -153,12 +153,14 @@ internal class Sykepengegrunnlag(
 
     internal fun aktiver(orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserver) =
         deaktiverteArbeidsforhold.aktiver(arbeidsgiverInntektsopplysninger, orgnummer, forklaring, subsumsjonObserver)
-            .let {(deaktiverte, aktiverte) -> kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger = aktiverte, deaktiverteArbeidsforhold = deaktiverte)
-        }
+            .let { (deaktiverte, aktiverte) ->
+                kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger = aktiverte, deaktiverteArbeidsforhold = deaktiverte)
+            }
 
     internal fun deaktiver(orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserver) =
         arbeidsgiverInntektsopplysninger.deaktiver(deaktiverteArbeidsforhold, orgnummer, forklaring, subsumsjonObserver)
-            .let {(aktiverte, deaktiverte) -> kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger = aktiverte, deaktiverteArbeidsforhold = deaktiverte)
+            .let { (aktiverte, deaktiverte) ->
+                kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger = aktiverte, deaktiverteArbeidsforhold = deaktiverte)
             }
 
     internal fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
@@ -292,6 +294,21 @@ internal class Sykepengegrunnlag(
     }
     override fun compareTo(other: Inntekt) = this.sykepengegrunnlag.compareTo(other)
     internal fun er6GBegrenset() = begrensning == ER_6G_BEGRENSET
+
+    internal fun ghostPeriode(sisteId: UUID, vilkårsgrunnlagId: UUID, organisasjonsnummer: String, periode: Periode): GhostPeriode? {
+        val opplysning = arbeidsgiverInntektsopplysninger.firstOrNull { it.gjelder(organisasjonsnummer) }
+            ?: deaktiverteArbeidsforhold.firstOrNull { it.gjelder(organisasjonsnummer) }
+        if (opplysning == null || opplysning.ikkeGhost()) return null
+        val erDeaktivert = deaktiverteArbeidsforhold.any { it === opplysning }
+        return GhostPeriode(
+            fom = periode.start,
+            tom = periode.endInclusive,
+            skjæringstidspunkt = skjæringstidspunkt,
+            vilkårsgrunnlagHistorikkInnslagId = sisteId,
+            vilkårsgrunnlagId = vilkårsgrunnlagId,
+            deaktivert = erDeaktivert
+        )
+    }
 
     enum class Begrensning {
         ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD

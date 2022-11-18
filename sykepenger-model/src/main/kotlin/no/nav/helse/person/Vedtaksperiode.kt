@@ -1809,12 +1809,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             overstyrArbeidsforhold: OverstyrArbeidsforhold
         ): Boolean {
-            vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-                overstyrArbeidsforhold,
-                vedtaksperiode.skjæringstidspunkt,
-                vedtaksperiode.jurist()
-            )
-            vedtaksperiode.tilstand(overstyrArbeidsforhold, AvventerHistorikk)
+            vedtaksperiode.revurderArbeidsforhold(overstyrArbeidsforhold)
             return true
         }
 

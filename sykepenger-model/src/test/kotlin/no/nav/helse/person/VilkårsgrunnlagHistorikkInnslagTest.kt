@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrInntekt
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
@@ -165,6 +166,8 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                 hendelse: OverstyrInntekt,
                 subsumsjonObserver: SubsumsjonObserver
             ): VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
+
+            override fun ghostPeriode(sisteId: UUID, organisasjonsnummer: String, periode: Periode) = null
 
             override fun overstyrArbeidsforhold(
                 hendelse: OverstyrArbeidsforhold,

@@ -334,8 +334,6 @@ class Person private constructor(
 
     fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold) {
         overstyrArbeidsforhold.kontekst(this)
-        overstyrArbeidsforhold.valider(arbeidsgivere)
-
         if (!arbeidsgivere.håndter(overstyrArbeidsforhold)) {
             overstyrArbeidsforhold.logiskFeil("Kan ikke overstyre arbeidsforhold fordi ingen vedtaksperioder håndterte hendelsen")
         }
@@ -581,12 +579,11 @@ class Person private constructor(
         arbeidsgivere.lagRevurdering(vedtaksperiode, arbeidsgiverUtbetalinger, hendelse)
     }
 
-    internal fun ghostPeriode(skjæringstidspunkt: LocalDate, deaktivert: Boolean) =
+    internal fun ghostPeriode(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver) =
         arbeidsgivere.ghostPeriode(
             skjæringstidspunkt = skjæringstidspunkt,
-            vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikk.sisteId(),
-            vilkårsgrunnlagId = vilkårsgrunnlagHistorikk.vilkårsgrunnlagIdFor(skjæringstidspunkt),
-            deaktivert = deaktivert
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
+            arbeidsgiver = arbeidsgiver
         )
 
     private fun harNærliggendeUtbetaling(periode: Periode): Boolean {

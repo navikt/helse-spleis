@@ -81,50 +81,6 @@ internal class ArbeidsforholdhistorikkTest {
     }
 
     @Test
-    fun `skal kunne markere et arbeidsforhold som deaktivert for et skjæringstidspunkt`() {
-        val arbeidsforhold = listOf(Arbeidsforhold(ansattFom = 31.januar(2010), ansattTom = null, deaktivert = false))
-        val historikk = Arbeidsforholdhistorikk()
-        historikk.lagre(arbeidsforhold, 1.januar)
-        assertFalse(historikk.harDeaktivertArbeidsforhold(1.januar))
-        assertTrue(historikk.harRelevantArbeidsforhold(1.januar))
-        historikk.deaktiverArbeidsforhold(1.januar)
-        assertTrue(historikk.harDeaktivertArbeidsforhold(1.januar))
-        assertFalse(historikk.harRelevantArbeidsforhold(1.januar))
-    }
-
-    @Test
-    fun `skal kunne markere et arbeidsforhold som aktivt for et skjæringstidspunkt`() {
-        val arbeidsforhold = listOf(Arbeidsforhold(ansattFom = 31.januar(2010), ansattTom = null, deaktivert = false))
-        val historikk = Arbeidsforholdhistorikk()
-        historikk.lagre(arbeidsforhold, 1.januar)
-        historikk.deaktiverArbeidsforhold(1.januar)
-        historikk.aktiverArbeidsforhold(1.januar)
-        assertFalse(historikk.harDeaktivertArbeidsforhold(1.januar))
-        assertTrue(historikk.harRelevantArbeidsforhold(1.januar))
-    }
-
-    @Test
-    fun `duplikatsjekk skal fange opp forsøk på deaktivering av deaktivert arbeidsforhold`() {
-        val arbeidsforhold = listOf(Arbeidsforhold(ansattFom = 31.januar(2010), ansattTom = null, deaktivert = false))
-        val historikk = Arbeidsforholdhistorikk()
-        historikk.lagre(arbeidsforhold, 1.januar)
-        historikk.deaktiverArbeidsforhold(1.januar)
-        val historikkinnslag = historikk.hentArbeidsforholdhistorikkinnslagIder()
-        historikk.deaktiverArbeidsforhold(1.januar)
-        assertEquals(historikkinnslag, historikk.hentArbeidsforholdhistorikkinnslagIder())
-    }
-
-    @Test
-    fun `duplikatsjekk skal fange opp forsøk på aktivering av aktivt arbeidsforhold`() {
-        val arbeidsforhold = listOf(Arbeidsforhold(ansattFom = 31.januar(2010), ansattTom = null, deaktivert = false))
-        val historikk = Arbeidsforholdhistorikk()
-        historikk.lagre(arbeidsforhold, 1.januar)
-        val historikkinnslag = historikk.hentArbeidsforholdhistorikkinnslagIder()
-        historikk.aktiverArbeidsforhold(1.januar)
-        assertEquals(historikkinnslag, historikk.hentArbeidsforholdhistorikkinnslagIder())
-    }
-
-    @Test
     fun `harRelevantArbeidsforhold fungerer for eldre innslag i arbeidsforholdhistorikken`() {
         val arbeidsforhold1 = listOf(Arbeidsforhold(ansattFom = 31.januar(2010), ansattTom = null, deaktivert = false))
         val arbeidsforhold2 = listOf(Arbeidsforhold(ansattFom = 31.januar(2010), ansattTom = 30.april(2022), deaktivert = false))

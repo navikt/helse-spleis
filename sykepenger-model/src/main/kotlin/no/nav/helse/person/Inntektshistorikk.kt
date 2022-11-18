@@ -257,6 +257,15 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
 
         override fun rapportertInntekt(): Inntekt = error("Infotrygd har ikke grunnlag for sammenligningsgrunnlag")
 
+        override fun subsumerArbeidsforhold(
+            subsumsjonObserver: SubsumsjonObserver,
+            organisasjonsnummer: String,
+            forklaring: String,
+            oppfylt: Boolean
+        ) {
+            throw IllegalStateException("Kan ikke overstyre arbeidsforhold for en arbeidsgiver som har sykdom")
+        }
+
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Infotrygd && this.dato == other.dato
 
@@ -276,6 +285,15 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
 
         override fun accept(visitor: InntekthistorikkVisitor) {
             visitor.visitInntektsmelding(this, id, dato, hendelseId, beløp, tidsstempel)
+        }
+
+        override fun subsumerArbeidsforhold(
+            subsumsjonObserver: SubsumsjonObserver,
+            organisasjonsnummer: String,
+            forklaring: String,
+            oppfylt: Boolean
+        ) {
+            throw IllegalStateException("Kan ikke overstyre arbeidsforhold for en arbeidsgiver som har sykdom")
         }
 
         override fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? {

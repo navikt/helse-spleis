@@ -75,6 +75,10 @@ internal class ArbeidsgiverInntektsopplysning(
         return result
     }
 
+    internal fun ikkeGhost(): Boolean {
+        return inntektsopplysning is Inntektshistorikk.Inntektsmelding
+    }
+
     internal companion object {
         internal fun List<ArbeidsgiverInntektsopplysning>.deaktiver(deaktiverte: List<ArbeidsgiverInntektsopplysning>, orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserver) =
             this.fjernInntekt(deaktiverte, orgnummer, forklaring, true, subsumsjonObserver)
@@ -85,7 +89,9 @@ internal class ArbeidsgiverInntektsopplysning(
         // flytter inntekt for *orgnummer* fra *this* til *deaktiverte*
         // aktive.deaktiver(deaktiverte, orgnummer) er direkte motsetning til deaktiverte.deaktiver(aktive, orgnummer)
         private fun List<ArbeidsgiverInntektsopplysning>.fjernInntekt(deaktiverte: List<ArbeidsgiverInntektsopplysning>, orgnummer: String, forklaring: String, oppfylt: Boolean, subsumsjonObserver: SubsumsjonObserver): Pair<List<ArbeidsgiverInntektsopplysning>, List<ArbeidsgiverInntektsopplysning>> {
-            val fjernet = this.single { it.orgnummer == orgnummer }
+            val fjernet = checkNotNull(this.singleOrNull { it.orgnummer == orgnummer }) {
+                "Kan ikke overstyre arbeidsforhold for en arbeidsgiver vi ikke kjenner til"
+            }
             val aktive = this.filterNot { it.orgnummer == orgnummer }
             fjernet.subsummerArbeidsforhold(forklaring, oppfylt, subsumsjonObserver)
             return aktive to (deaktiverte + fjernet)

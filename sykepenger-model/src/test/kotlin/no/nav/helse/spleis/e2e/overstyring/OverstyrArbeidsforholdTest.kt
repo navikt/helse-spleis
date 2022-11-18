@@ -220,12 +220,9 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        assertThrows<Aktivitetslogg.AktivitetException> {
+        assertThrows<IllegalStateException>("Kan ikke overstyre arbeidsforhold for en arbeidsgiver vi ikke kjenner til") {
             håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, true, "forklaring")))
         }
-        assertLogiskFeil("Kan ikke overstyre arbeidsforhold for en arbeidsgiver vi ikke kjenner til",
-            AktivitetsloggFilter.person()
-        )
     }
 
     @Test
@@ -263,12 +260,9 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        assertThrows<Aktivitetslogg.AktivitetException> {
+        assertThrows<IllegalStateException>("Kan ikke overstyre arbeidsforhold for en arbeidsgiver som har sykdom") {
             håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
         }
-        assertLogiskFeil("Kan ikke overstyre arbeidsforhold for en arbeidsgiver som har sykdom",
-            AktivitetsloggFilter.person()
-        )
     }
 
     @Test

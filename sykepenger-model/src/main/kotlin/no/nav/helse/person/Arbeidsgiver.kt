@@ -31,7 +31,6 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.harAvsluttedePerioder
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.håndterInntektsmeldingReplay
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
-import no.nav.helse.person.Inntektshistorikk.IkkeRapportert
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.Vedtaksperiode.Companion.ER_ELLER_HAR_VÆRT_AVSLUTTET
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
@@ -208,20 +207,12 @@ internal class Arbeidsgiver private constructor(
 
         internal fun Iterable<Arbeidsgiver>.ghostPeriode(
             skjæringstidspunkt: LocalDate,
-            vilkårsgrunnlagHistorikkInnslagId: UUID?,
-            vilkårsgrunnlagId: UUID?,
-            deaktivert: Boolean
+            vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
+            arbeidsgiver: Arbeidsgiver
         ): GhostPeriode? {
-            val relevanteVedtaksperioder = flatMap { it.vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt) }
-            if (relevanteVedtaksperioder.isEmpty()) return null
-            return GhostPeriode(
-                fom = relevanteVedtaksperioder.minOf { it.periode().start },
-                tom = relevanteVedtaksperioder.maxOf { it.periode().endInclusive },
-                skjæringstidspunkt = skjæringstidspunkt,
-                vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikkInnslagId,
-                vilkårsgrunnlagId = vilkårsgrunnlagId,
-                deaktivert = deaktivert
-            )
+            val perioder = flatMap { it.vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).map { it.periode() } }
+            if (perioder.isEmpty()) return null
+            return vilkårsgrunnlagHistorikk.ghostPeriode(skjæringstidspunkt, arbeidsgiver.organisasjonsnummer, perioder.reduce(Periode::plus))
         }
 
         internal fun Iterable<Arbeidsgiver>.beregnFeriepengerForAlleArbeidsgivere(
@@ -809,14 +800,9 @@ internal class Arbeidsgiver private constructor(
         énHarHåndtert(hendelse) { håndter(it, vedtaksperioder) }
     }
 
-    internal fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
+    private fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
         overstyrArbeidsforhold.kontekst(this)
-        vedtaksperioder.forEach { vedtaksperiode ->
-            if (vedtaksperiode.håndter(overstyrArbeidsforhold)) {
-                return true
-            }
-        }
-        return false
+        return énHarHåndtert(overstyrArbeidsforhold, Vedtaksperiode::håndter)
     }
 
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
@@ -845,14 +831,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun ghostPerioder(): List<GhostPeriode> = person.skjæringstidspunkterFraSpleis()
         .filter { skjæringstidspunkt -> vedtaksperioder.none(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt)) }
-        .filter(::erGhost)
-        .mapNotNull { skjæringstidspunkt -> person.ghostPeriode(skjæringstidspunkt, arbeidsforholdhistorikk.harDeaktivertArbeidsforhold(skjæringstidspunkt)) }
-
-    private fun erGhost(skjæringstidspunkt: LocalDate): Boolean {
-        val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
-        val inntektsopplysning = inntektshistorikk.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag, arbeidsforholdhistorikk)
-        return inntektsopplysning is Inntektshistorikk.SkattComposite || inntektsopplysning is Inntektshistorikk.Saksbehandler || inntektsopplysning is IkkeRapportert
-    }
+        .mapNotNull { skjæringstidspunkt -> person.ghostPeriode(skjæringstidspunkt, this) }
 
     internal fun tidligsteDato(): LocalDate {
         return sykdomstidslinje().førsteDag()
@@ -890,10 +869,6 @@ internal class Arbeidsgiver private constructor(
         if (førsteFraværsdag != null) inntektsmelding.addInntekt(inntektshistorikk, førsteFraværsdag, subsumsjonObserver)
         inntektsmelding.cacheRefusjon(refusjonshistorikk)
         return inntektsmeldingInfo.opprett(skjæringstidspunkt, inntektsmelding)
-    }
-
-    internal fun lagreOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, overstyring: OverstyrArbeidsforhold.ArbeidsforholdOverstyrt) {
-        overstyring.lagre(skjæringstidspunkt, arbeidsforholdhistorikk)
     }
 
     internal fun lagreInntekter(inntekter: List<Inntektshistorikk.SkattComposite>) {
@@ -972,7 +947,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harSpleisSykdom() = sykdomshistorikk.harSykdom()
 
-    internal fun harSykdomFor(skjæringstidspunkt: LocalDate) =
+    private fun harSykdomFor(skjæringstidspunkt: LocalDate) =
         vedtaksperioder.any(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
 
     internal fun finnFørsteFraværsdag(skjæringstidspunkt: LocalDate): LocalDate? {
@@ -1066,14 +1041,6 @@ internal class Arbeidsgiver private constructor(
         !harRelevantArbeidsforhold(skjæringstidspunkt) && harSykdomFor(skjæringstidspunkt)
 
     internal fun harFerdigstiltPeriode() = vedtaksperioder.any(ER_ELLER_HAR_VÆRT_AVSLUTTET) || forkastede.harAvsluttedePerioder()
-
-    internal fun <T> arbeidsforhold(
-        skjæringstidspunkt: LocalDate,
-        creator: (orgnummer: String, ansattFom: LocalDate, ansattTom: LocalDate?, erAktiv: Boolean) -> T
-    ) =
-        arbeidsforholdhistorikk.sisteArbeidsforhold(skjæringstidspunkt) { ansattFom: LocalDate, ansattTom: LocalDate?, erAktiv: Boolean ->
-            creator(organisasjonsnummer, ansattFom, ansattTom, erAktiv)
-        }
 
     internal fun harSykmeldingsperiodeFør(dato: LocalDate) = sykmeldingsperioder.harSykmeldingsperiodeFør(dato)
     internal fun kanForkastes(vedtaksperiodeUtbetalinger: VedtaksperiodeUtbetalinger) =
