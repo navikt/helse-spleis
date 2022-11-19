@@ -348,9 +348,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVSLUTTET,
-                AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING
+                AVSLUTTET
             )
             assertTilstander(
                 2.vedtaksperiode,
@@ -362,9 +360,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
                 AVSLUTTET,
-                AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVVENTER_HISTORIKK_REVURDERING
+                AVVENTER_REVURDERING
             )
         }
         inspektør(AG2) {
@@ -373,7 +369,8 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVVENTER_REVURDERING
+                AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING
             )
             assertTilstander(
                 2.vedtaksperiode,
@@ -381,8 +378,21 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
                 AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
-                AVVENTER_REVURDERING
+                AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING
             )
+        }
+        håndterYtelser(2.vedtaksperiode, orgnummer = AG2)
+        nullstillTilstandsendringer()
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = AG2)
+        inspektør(AG1) {
+            assertTilstander(1.vedtaksperiode, AVSLUTTET)
+            assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        }
+        inspektør(AG2) {
+            assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVSLUTTET)
+            assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
         }
     }
 }

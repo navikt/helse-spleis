@@ -50,7 +50,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.senerePerioderPågående
 import no.nav.helse.person.Vedtaksperiode.Companion.skjæringstidspunktperiode
-import no.nav.helse.person.Vedtaksperiode.Companion.startRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.validerYtelser
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -134,8 +133,12 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.senerePerioderPågående(vedtaksperiode: Vedtaksperiode) =
             any { it.vedtaksperioder.senerePerioderPågående(vedtaksperiode) }
 
-        internal fun List<Arbeidsgiver>.startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            associateWith { it.vedtaksperioder.toList() }.startRevurdering(this, vedtaksperiode, hendelse)
+        internal fun List<Arbeidsgiver>.startRevurdering(overstyrtVedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            forEach { arbeidsgiver ->
+                arbeidsgiver.vedtaksperioder.forEach { vedtaksperiode ->
+                    vedtaksperiode.startRevurdering(this, hendelse, overstyrtVedtaksperiode)
+                }
+            }
         }
 
         internal fun List<Arbeidsgiver>.kanStarteRevurdering(vedtaksperiode: Vedtaksperiode) =

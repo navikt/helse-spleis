@@ -781,8 +781,8 @@ class Person private constructor(
         }
     }
 
-    internal fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-        arbeidsgivere.startRevurdering(vedtaksperiode, hendelse)
+    internal fun startRevurdering(overstyrtVedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        arbeidsgivere.startRevurdering(overstyrtVedtaksperiode, hendelse)
     }
 
     internal fun kanStarteRevurdering(vedtaksperiode: Vedtaksperiode) =
