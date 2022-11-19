@@ -133,22 +133,16 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.senerePerioderPågående(vedtaksperiode: Vedtaksperiode) =
             any { it.vedtaksperioder.senerePerioderPågående(vedtaksperiode) }
 
-        internal fun List<Arbeidsgiver>.startRevurdering(overstyrtVedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        internal fun List<Arbeidsgiver>.startRevurdering(overstyrtVedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, hvorfor: RevurderingÅrsak) {
             forEach { arbeidsgiver ->
                 arbeidsgiver.vedtaksperioder.forEach { vedtaksperiode ->
-                    vedtaksperiode.startRevurdering(this, hendelse, overstyrtVedtaksperiode)
+                    vedtaksperiode.startRevurdering(this, hendelse, overstyrtVedtaksperiode, hvorfor)
                 }
             }
         }
 
         internal fun List<Arbeidsgiver>.kanStarteRevurdering(vedtaksperiode: Vedtaksperiode) =
             flatMap { it.vedtaksperioder }.kanStarteRevurdering(this, vedtaksperiode)
-
-        internal fun List<Arbeidsgiver>.nyPeriode(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            flatMap { it.vedtaksperioder }.forEach {
-                it.nyPeriode(vedtaksperiode, søknad)
-            }
-        }
 
 
         internal fun List<Arbeidsgiver>.nekterOpprettelseAvPeriode(vedtaksperiode: Vedtaksperiode, søknad: Søknad): Boolean {
@@ -508,7 +502,7 @@ internal class Arbeidsgiver private constructor(
         registrerNyVedtaksperiode(vedtaksperiode)
         vedtaksperiode.håndter(søknad)
         if (!søknad.harFunksjonelleFeilEllerVerre()) {
-            person.nyPeriode(vedtaksperiode, søknad)
+            person.startRevurdering(vedtaksperiode, søknad, RevurderingÅrsak.NY_PERIODE)
         }
         if (søknad.harFunksjonelleFeilEllerVerre()) {
             person.søppelbøtte(søknad, TIDLIGERE_OG_ETTERGØLGENDE(vedtaksperiode))

@@ -707,40 +707,30 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         nyPeriode(1.februar til 25.februar)
-        assertForventetFeil(
-            forklaring = "Støtter ikke out-of-order med mindre enn 16 dagers gap",
-            nå = {
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
-            },
-            ønsket = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
-                assertInfo("Revurdering førte til at sykefraværstilfellet trenger inntektsmelding", 1.vedtaksperiode.filter())
-                håndterInntektsmelding(listOf(1.februar til 16.februar))
-                håndterYtelser(2.vedtaksperiode)
-                håndterVilkårsgrunnlag(2.vedtaksperiode)
-                håndterYtelser(2.vedtaksperiode)
-                håndterSimulering(2.vedtaksperiode)
-                håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-                håndterUtbetalt()
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+        assertInfo("Revurdering førte til at sykefraværstilfellet trenger inntektsmelding", 1.vedtaksperiode.filter())
+        håndterInntektsmelding(listOf(1.februar til 16.februar))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
 
-                håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars)
-                håndterYtelser(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars)
+        håndterYtelser(1.vedtaksperiode)
 
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
-                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
-                håndterVilkårsgrunnlag(1.vedtaksperiode)
-                håndterYtelser(1.vedtaksperiode)
-                håndterSimulering(1.vedtaksperiode)
-                håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-                håndterUtbetalt()
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
 
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-            }
-
-        )
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
     }
 
     @Test
@@ -844,36 +834,25 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
-        assertForventetFeil(
-            forklaring = "støtter ikke out-of-order med mindre enn 16 dagers gap",
-            nå = {
-                nyPeriode(1.februar til 25.februar)
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
-            },
-            ønsket = {
-                nyttVedtak(1.februar, 25.februar)
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
-                assertEquals(2, observatør.manglendeInntektsmeldingVedtaksperioder.size) // For 1. februar og 1.mars
-                assertInfo("Revurdering førte til at sykefraværstilfellet trenger inntektsmelding", 1.vedtaksperiode.filter())
+        nyttVedtak(1.februar, 25.februar)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+        assertEquals(2, observatør.manglendeInntektsmeldingVedtaksperioder.size) // For 1. februar og 1.mars
+        assertInfo("Revurdering førte til at sykefraværstilfellet trenger inntektsmelding", 1.vedtaksperiode.filter())
 
-                håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars)
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
 
-                håndterYtelser(2.vedtaksperiode)
-                håndterVilkårsgrunnlag(2.vedtaksperiode)
-                håndterYtelser(2.vedtaksperiode)
-                håndterSimulering(2.vedtaksperiode)
-                håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-                håndterUtbetalt()
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
 
-                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            }
-        )
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
     }
 
     @Test
@@ -902,23 +881,13 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyPeriode(1.mars til 15.mars)
         håndterUtbetalingshistorikk(1.vedtaksperiode)
 
-        assertForventetFeil(
-            forklaring = "støtter ikke out-of-order med mindre enn 16 dagers gap",
-            nå = {
-                nyPeriode(1.februar til 20.februar)
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
-            },
-            ønsket = {
-                nyttVedtak(1.februar, 20.februar)
-                assertEquals(2, observatør.manglendeInntektsmeldingVedtaksperioder.size)
-                assertEquals(2, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
+        nyttVedtak(1.februar, 20.februar)
+        assertEquals(2, observatør.manglendeInntektsmeldingVedtaksperioder.size)
+        assertEquals(2, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
 
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
-                håndterPåminnelse(1.vedtaksperiode, AVVENTER_REVURDERING)
-                assertEquals(3, observatør.manglendeInntektsmeldingVedtaksperioder.size)
-            }
-        )
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_REVURDERING)
+        assertEquals(3, observatør.manglendeInntektsmeldingVedtaksperioder.size)
     }
 
     @Test

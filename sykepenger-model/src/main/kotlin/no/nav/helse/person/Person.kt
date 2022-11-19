@@ -43,7 +43,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.kanStarteRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.lagRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.nekterOpprettelseAvPeriode
-import no.nav.helse.person.Arbeidsgiver.Companion.nyPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.skjæringstidspunktperiode
@@ -778,8 +777,8 @@ class Person private constructor(
         }
     }
 
-    internal fun startRevurdering(overstyrtVedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-        arbeidsgivere.startRevurdering(overstyrtVedtaksperiode, hendelse)
+    internal fun startRevurdering(overstyrtVedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, hvorfor: RevurderingÅrsak) {
+        arbeidsgivere.startRevurdering(overstyrtVedtaksperiode, hendelse, hvorfor)
     }
 
     internal fun kanStarteRevurdering(vedtaksperiode: Vedtaksperiode) =
@@ -805,9 +804,6 @@ class Person private constructor(
 
     internal fun skjæringstidspunktperiode(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.skjæringstidspunktperiode(skjæringstidspunkt)
-
-    internal fun nyPeriode(vedtaksperiode: Vedtaksperiode, søknad: Søknad) =
-        arbeidsgivere.nyPeriode(vedtaksperiode, søknad)
 
     internal fun nekterOpprettelseAvPeriode(vedtaksperiode: Vedtaksperiode, søknad: Søknad): Boolean {
         return arbeidsgivere.nekterOpprettelseAvPeriode(vedtaksperiode, søknad)
