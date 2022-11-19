@@ -150,6 +150,22 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
+
+        internal fun List<Arbeidsgiver>.nekterOpprettelseAvPeriode(vedtaksperiode: Vedtaksperiode, søknad: Søknad): Boolean {
+            return harPeriodeSomNekterOpprettelseAvNyPeriode(vedtaksperiode, søknad) || harForkastetVedtaksperiodeSomBlokkerBehandling(søknad)
+        }
+
+        private fun Iterable<Arbeidsgiver>.harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse: SykdomstidslinjeHendelse) =
+            any { it.harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse) }
+
+        private fun List<Arbeidsgiver>.harPeriodeSomNekterOpprettelseAvNyPeriode(nyVedtaksperiode: Vedtaksperiode, søknad: Søknad) =
+            any { arbeidsgiver ->
+                arbeidsgiver.vedtaksperioder.any { vedtaksperiode ->
+                    vedtaksperiode.nekterOpprettelseAvNyPeriode(nyVedtaksperiode, søknad)
+                    søknad.harFunksjonelleFeilEllerVerre()
+                }
+            }
+
         internal fun List<Arbeidsgiver>.håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold) =
             any { it.håndter(overstyrArbeidsforhold) }
 
@@ -169,8 +185,6 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.vedtaksperioder(filter: VedtaksperiodeFilter) =
             map { it.vedtaksperioder.filter(filter) }.flatten()
 
-        internal fun Iterable<Arbeidsgiver>.harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse: SykdomstidslinjeHendelse) =
-            any { it.harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse) }
 
         internal fun List<Arbeidsgiver>.lagRevurdering(
             vedtaksperiode: Vedtaksperiode,
@@ -486,7 +500,7 @@ internal class Arbeidsgiver private constructor(
             if (!søknad.harFunksjonelleFeilEllerVerre()) return person.emitUtsettOppgaveEvent(søknad)
         }
         val vedtaksperiode = søknad.lagVedtaksperiode(person, this, jurist)
-        if (søknad.harFunksjonelleFeilEllerVerre() || person.harForkastetVedtaksperiodeSomBlokkerBehandling(søknad)) {
+        if (person.nekterOpprettelseAvPeriode(vedtaksperiode, søknad)) {
             registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
             person.søppelbøtte(søknad, TIDLIGERE_OG_ETTERGØLGENDE(vedtaksperiode))
             return

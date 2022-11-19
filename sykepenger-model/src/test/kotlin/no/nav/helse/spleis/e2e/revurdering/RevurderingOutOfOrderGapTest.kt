@@ -607,14 +607,14 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             forklaring = """Forventer at periode som går fra til utbetaling til avsluttet blir sendt videre til 
                     avventer revurdering dersom tidligere periode gjenopptar behandling""",
             nå = {
-                assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
+                assertTilstander(1.vedtaksperiode, AVSLUTTET)
                 assertTilstander(2.vedtaksperiode, TIL_UTBETALING)
                 assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
 
                 håndterUtbetalt()
 
-                assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
-                assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+                assertTilstander(1.vedtaksperiode, AVSLUTTET)
+                assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
                 assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
             },
             ønsket = {
@@ -981,7 +981,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD, a2)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a2)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
-        assertFunksjonellFeil("Mottatt søknad out of order")
         assertFunksjonellFeil("Mottatt overlappende søknad")
     }
 }

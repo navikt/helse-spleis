@@ -35,7 +35,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.beregnSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
-import no.nav.helse.person.Arbeidsgiver.Companion.harForkastetVedtaksperiodeSomBlokkerBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyrInntekt
@@ -43,6 +42,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.inntekterForSammenligningsgrun
 import no.nav.helse.person.Arbeidsgiver.Companion.kanStarteRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.lagRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
+import no.nav.helse.person.Arbeidsgiver.Companion.nekterOpprettelseAvPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.nyPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsgivere
@@ -604,9 +604,6 @@ class Person private constructor(
         }
     }
 
-    internal fun harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse: SykdomstidslinjeHendelse) =
-        arbeidsgivere.harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse)
-
     internal fun lagreDødsdato(dødsdato: LocalDate) {
         this.dødsdato = dødsdato
     }
@@ -812,6 +809,10 @@ class Person private constructor(
     internal fun nyPeriode(vedtaksperiode: Vedtaksperiode, søknad: Søknad) =
         arbeidsgivere.nyPeriode(vedtaksperiode, søknad)
 
+    internal fun nekterOpprettelseAvPeriode(vedtaksperiode: Vedtaksperiode, søknad: Søknad): Boolean {
+        return arbeidsgivere.nekterOpprettelseAvPeriode(vedtaksperiode, søknad)
+    }
+
     internal fun harSkjæringstidspunktSenereEnn(skjæringstidspunkt: LocalDate) =
         skjæringstidspunkter().any { it.isAfter(skjæringstidspunkt) }
 
@@ -820,9 +821,9 @@ class Person private constructor(
 
     internal fun finnesEnVedtaksperiodeSomOverlapperOgStarterFør(ny: Vedtaksperiode) =
         arbeidsgivere.any { it.finnVedtaksperiodeSomOverlapperOgStarterFør(ny) != null }
-
     internal fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt)
+
     internal fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt)
 }

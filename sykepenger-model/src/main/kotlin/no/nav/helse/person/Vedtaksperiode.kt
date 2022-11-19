@@ -357,6 +357,29 @@ internal class Vedtaksperiode private constructor(
         tilstand.nyPeriodeTidligereEllerOverlappende(this, ny, hendelse)
     }
 
+    internal fun nekterOpprettelseAvNyPeriode(ny: Vedtaksperiode, hendelse: Søknad) {
+        if (ny.periode.start > this.periode.endInclusive) return
+        kontekst(hendelse)
+        val ikkeUtbetalt = setOf(
+            AvventerInntektsmeldingEllerHistorikk,
+            AvventerBlokkerendePeriode,
+            AvventerGodkjenning,
+            AvventerHistorikk,
+            AvventerInntektsmeldingEllerHistorikk,
+            AvventerSimulering,
+            AvventerVilkårsprøving
+        )
+        if (tilstand in ikkeUtbetalt) return // tillater nye perioder så lenge vi ikke er utbetalt
+        if (tilstand == AvsluttetUtenUtbetaling && ny.organisasjonsnummer != this.organisasjonsnummer) return
+
+        // årsaker til hvorfor vi ikke ønsker å opprette en ny periode
+        if (Toggle.RevurderOutOfOrder.disabled) return nyPeriodeTidligereEllerOverlappendeIkkeStøttet(hendelse, ny)
+        if (tilstand in setOf(RevurderingFeilet, TilUtbetaling, UtbetalingFeilet)) return nyPeriodeTidligereEllerOverlappendeIkkeStøttet(hendelse, ny)
+        if (this.person.finnesEnVedtaksperiodeSomOverlapperOgStarterFør(ny)) return nyPeriodeTidligereEllerOverlappendeIkkeStøttet(hendelse, ny)
+        if (this.arbeidsgiver.harEnVedtaksperiodeMedMindreEnn16DagersGapEtter(ny)) return nyPeriodeTidligereEllerOverlappendeIkkeStøttet(hendelse, ny)
+        if (this.person.finnesEnVedtaksperiodeRettEtter(ny)) return nyPeriodeTidligereEllerOverlappendeIkkeStøttet(hendelse, ny)
+    }
+
     internal fun håndterRevurdertUtbetaling(revurdertUtbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg, other: Vedtaksperiode) {
         kontekst(aktivitetslogg)
         tilstand.håndterRevurdertUtbetaling(this, revurdertUtbetaling, aktivitetslogg, other)
@@ -753,47 +776,10 @@ internal class Vedtaksperiode private constructor(
         hendelse: Søknad,
         ny: Vedtaksperiode
     ) {
-        val harForeldedeDager = hendelse.sykdomstidslinje().harForeldedeDager()
-        val dagerMellomPeriodenVarFerdigOgSøknadenVarSendt = hendelse.dagerMellomPeriodenVarFerdigOgSøknadenVarSendt()
-        val dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet = hendelse.dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet()
-        sikkerlogg.info(
-            "Søknaden hadde trigget en revurdering fordi det er en tidligere eller overlappende periode: {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}",
-            keyValue("fodselsnummer", this.fødselsnummer),
-            keyValue("aktorId", this.aktørId),
-            keyValue("vedtaksperiodeId", this.id),
-            keyValue("fom", this.periode.start.toString()),
-            keyValue("tom", this.periode.endInclusive.toString()),
-            keyValue("søknadFom", ny.periode.endInclusive.toString()),
-            keyValue("søknadTom", ny.periode.endInclusive.toString()),
-            keyValue("skjæringstidspunkt", this.skjæringstidspunkt),
-            keyValue("harForeldedeDager", harForeldedeDager),
-            keyValue("dagerMellomPeriodenVarFerdigOgSøknadenVarSendt", dagerMellomPeriodenVarFerdigOgSøknadenVarSendt),
-            keyValue("dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet", dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet)
-        )
-        if (Toggle.RevurderOutOfOrder.disabled) return nyPeriodeTidligereEllerOverlappendeIkkeStøttet(hendelse, ny)
-        if (this.person.finnesEnVedtaksperiodeSomOverlapperOgStarterFør(ny)) return nyPeriodeTidligereEllerOverlappendeIkkeStøttet(hendelse, ny)
-        if (this.arbeidsgiver.harEnVedtaksperiodeMedMindreEnn16DagersGapEtter(ny)) return nyPeriodeTidligereEllerOverlappendeIkkeStøttet(hendelse, ny)
-        if (this.person.finnesEnVedtaksperiodeRettEtter(ny)) return nyPeriodeTidligereEllerOverlappendeIkkeStøttet(hendelse, ny)
         if (!ny.forventerInntekt()) return
         // AUU revurderes ikke som følge av out-of-order
         if (Toggle.RevurderOutOfOrder.enabled && !this.forventerInntekt()) return
-
         hendelse.varsel(RV_OO_2)
-
-        sikkerlogg.info(
-            "Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode: {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}",
-            keyValue("fodselsnummer", this.fødselsnummer),
-            keyValue("aktorId", this.aktørId),
-            keyValue("vedtaksperiodeId", this.id),
-            keyValue("fom", this.periode.start.toString()),
-            keyValue("tom", this.periode.endInclusive.toString()),
-            keyValue("søknadFom", ny.periode.endInclusive.toString()),
-            keyValue("søknadTom", ny.periode.endInclusive.toString()),
-            keyValue("skjæringstidspunkt", this.skjæringstidspunkt),
-            keyValue("harForeldedeDager", harForeldedeDager),
-            keyValue("dagerMellomPeriodenVarFerdigOgSøknadenVarSendt", dagerMellomPeriodenVarFerdigOgSøknadenVarSendt),
-            keyValue("dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet", dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet)
-        )
         hendelse.info("Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode")
         this.person.startRevurdering(this, hendelse)
     }
