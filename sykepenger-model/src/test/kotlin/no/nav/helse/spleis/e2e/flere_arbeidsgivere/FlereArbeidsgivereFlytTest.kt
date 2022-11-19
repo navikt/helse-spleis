@@ -28,10 +28,13 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_SØ_10
+import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
@@ -239,23 +242,26 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         utbetalPeriodeEtterVilkårsprøving(1.vedtaksperiode, a2)
         assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 
+        nullstillTilstandsendringer()
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         assertForventetFeil(
             forklaring = "Må revurdere fordi søknad overlapper med utbetalt periode hos annen arbeidsgiver" +
                     "Er det rart at ag2 blir trukket ut til gå gjennom revurdering før ag1?",
             nå = {
-                assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-                assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+                assertFunksjonellFeil(Varselkode.RV_SØ_12)
+                assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+                assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 
-                assertTilstand(2.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
-                assertTilstand(2.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
+                assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD, orgnummer = a1)
+                assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD, orgnummer = a2)
             },
             ønsket = {
-                assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
-                assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
+                assertIngenFunksjonelleFeil()
+                assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+                assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
 
-                assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-                assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+                assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+                assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
             }
         )
     }
