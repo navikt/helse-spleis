@@ -50,7 +50,6 @@ import no.nav.helse.person.InntektsmeldingInfo.Companion.ider
 import no.nav.helse.person.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -61,7 +60,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
@@ -1513,18 +1511,6 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    // TODO: slett tilstand
-    internal object AvventerUferdig : Vedtaksperiodetilstand {
-        override val type = AVVENTER_UFERDIG
-        override fun nyPeriodeTidligereEllerOverlappende(
-            vedtaksperiode: Vedtaksperiode,
-            ny: Vedtaksperiode,
-            hendelse: Søknad
-        ) {
-            throw IllegalStateException("denne perioden er ikke i bruk")
-        }
-    }
-
     internal object AvventerHistorikk : Vedtaksperiodetilstand {
         override val type = AVVENTER_HISTORIKK
 
@@ -1996,31 +1982,6 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    // TODO: slett tilstand
-    internal object AvventerArbeidsgivereRevurdering : Vedtaksperiodetilstand {
-        override val type: TilstandType = AVVENTER_ARBEIDSGIVERE_REVURDERING
-
-        // Skal denne trigge polling i Speil? Se VenterPåKiling
-        override fun nyPeriodeTidligereEllerOverlappende(
-            vedtaksperiode: Vedtaksperiode,
-            ny: Vedtaksperiode,
-            hendelse: Søknad
-        ) {
-            throw IllegalStateException("denne perioden er ikke i bruk")
-        }
-
-        override fun makstid(
-            tilstandsendringstidspunkt: LocalDateTime
-        ): LocalDateTime = tilstandsendringstidspunkt
-            .plusDays(15)
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-        }
-    }
-
     internal object TilUtbetaling : Vedtaksperiodetilstand {
         override val type = TIL_UTBETALING
 
@@ -2357,7 +2318,6 @@ internal class Vedtaksperiode private constructor(
             Avsluttet,
             AvventerRevurdering,
             AvventerGjennomførtRevurdering,
-            AvventerArbeidsgivereRevurdering,
             AvventerHistorikkRevurdering,
             AvventerVilkårsprøvingRevurdering,
             AvventerSimuleringRevurdering,

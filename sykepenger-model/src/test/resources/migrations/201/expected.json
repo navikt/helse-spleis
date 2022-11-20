@@ -1,0 +1,29 @@
+{
+  "arbeidsgivere": [
+    {
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "tilstand": "TIL_INFOTRYGD"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVVENTER_BLOKKERENDE_PERIODE"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "TIL_INFOTRYGD"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVSLUTTET"
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 201
+}

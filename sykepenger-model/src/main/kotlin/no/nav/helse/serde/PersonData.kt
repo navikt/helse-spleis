@@ -954,13 +954,11 @@ internal data class PersonData(
                 TilstandType.AVVENTER_VILKÅRSPRØVING -> Vedtaksperiode.AvventerVilkårsprøving
                 TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK -> Vedtaksperiode.AvventerInntektsmeldingEllerHistorikk
                 TilstandType.AVVENTER_BLOKKERENDE_PERIODE -> Vedtaksperiode.AvventerBlokkerendePeriode
-                TilstandType.AVVENTER_UFERDIG -> Vedtaksperiode.AvventerUferdig
                 TilstandType.AVVENTER_REVURDERING -> Vedtaksperiode.AvventerRevurdering
                 TilstandType.AVVENTER_HISTORIKK_REVURDERING -> Vedtaksperiode.AvventerHistorikkRevurdering
                 TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING -> Vedtaksperiode.AvventerVilkårsprøvingRevurdering
                 TilstandType.AVVENTER_SIMULERING_REVURDERING -> Vedtaksperiode.AvventerSimuleringRevurdering
                 TilstandType.AVVENTER_GODKJENNING_REVURDERING -> Vedtaksperiode.AvventerGodkjenningRevurdering
-                TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING -> Vedtaksperiode.AvventerArbeidsgivereRevurdering
                 TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING -> Vedtaksperiode.AvventerGjennomførtRevurdering
             }
 

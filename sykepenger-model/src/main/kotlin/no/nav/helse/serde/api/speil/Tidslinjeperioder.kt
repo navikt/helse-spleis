@@ -13,7 +13,6 @@ import no.nav.helse.person.Vedtaksperiode.AvventerGodkjenning
 import no.nav.helse.person.Vedtaksperiode.AvventerGodkjenningRevurdering
 import no.nav.helse.person.Vedtaksperiode.AvventerHistorikk
 import no.nav.helse.person.Vedtaksperiode.AvventerRevurdering
-import no.nav.helse.person.Vedtaksperiode.AvventerUferdig
 import no.nav.helse.person.Vedtaksperiode.AvventerVilkårsprøving
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.serde.api.dto.BeregnetPeriode
@@ -212,7 +211,6 @@ internal class Tidslinjeperioder(
             skjæringstidspunkt = periode.skjæringstidspunkt,
             periodetilstand = when (periode.tilstand) {
                 is AvsluttetUtenUtbetaling -> IngenUtbetaling
-                is AvventerUferdig,
                 is AvventerRevurdering,
                 is AvventerBlokkerendePeriode -> VenterPåAnnenPeriode
                 is AvventerHistorikk,
