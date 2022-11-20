@@ -1038,6 +1038,10 @@ internal class Vedtaksperiode private constructor(
         ) {
             if (!vedtaksperiode.person.kanStarteRevurdering(vedtaksperiode))
                 return hendelse.info("Kan ikke gjenoppta revurdering ettersom det ikke er vedtaksperioden sin tur.")
+            if (!vedtaksperiode.utbetalinger.harUtbetaling() && !vedtaksperiode.forventerInntekt()) {
+                hendelse.info("Lukker perioden i Avsluttet uten utbetaling da perioden ikke skulle være i Avventer revurdering i utgangspunktet, men skyldes en bug vi hadde i august 2022.")
+                return vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
+            }
             if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving())
                 return hendelse.info("Mangler nødvendig inntekt for vilkårsprøving og kan derfor ikke gjenoppta revurdering.")
             vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
