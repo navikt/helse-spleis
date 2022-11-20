@@ -1036,7 +1036,10 @@ internal class Vedtaksperiode private constructor(
             arbeidsgivere: Iterable<Arbeidsgiver>,
             hendelse: IAktivitetslogg
         ) {
-            if (!vedtaksperiode.person.kanStarteRevurdering(vedtaksperiode)) return
+            if (!vedtaksperiode.person.kanStarteRevurdering(vedtaksperiode))
+                return hendelse.info("Kan ikke gjenoppta revurdering ettersom det ikke er vedtaksperioden sin tur.")
+            if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving())
+                return hendelse.info("Mangler nødvendig inntekt for vilkårsprøving og kan derfor ikke gjenoppta revurdering.")
             vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
             vedtaksperiode.arbeidsgiver.gjenopptaRevurdering(vedtaksperiode, hendelse)
         }
@@ -1068,8 +1071,19 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             super.håndter(vedtaksperiode, påminnelse)
             if(Toggle.RevurderOutOfOrder.enabled && !vedtaksperiode.harNødvendigInntektForVilkårsprøving()) {
+                påminnelse.info("Varsler arbeidsgiver at vi har behov for inntektsmelding.")
                 vedtaksperiode.trengerInntektsmelding(påminnelse.hendelseskontekst())
             }
+        }
+
+        override fun håndter(
+            person: Person,
+            arbeidsgiver: Arbeidsgiver,
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            infotrygdhistorikk: Infotrygdhistorikk
+        ) {
+            vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
 
         override fun håndterRevurdertUtbetaling(
@@ -2466,7 +2480,7 @@ internal class Vedtaksperiode private constructor(
         // Finner eldste vedtaksperiode, foretrekker eldste arbeidsgiver ved likhet (ag1 før ag2)
         internal fun List<Vedtaksperiode>.kanStarteRevurdering(arbeidsgivere: List<Arbeidsgiver>, vedtaksperiode: Vedtaksperiode): Boolean {
             val pågående = pågående() ?: nesteRevurderingsperiode(arbeidsgivere, vedtaksperiode)
-            return vedtaksperiode == pågående && vedtaksperiode.harNødvendigInntektForVilkårsprøving()
+            return vedtaksperiode == pågående
         }
 
         private fun List<Vedtaksperiode>.nesteRevurderingsperiode(arbeidsgivere: List<Arbeidsgiver>, other: Vedtaksperiode) =
