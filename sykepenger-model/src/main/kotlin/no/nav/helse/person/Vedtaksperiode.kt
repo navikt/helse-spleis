@@ -1896,14 +1896,7 @@ internal class Vedtaksperiode private constructor(
         tilstand.startRevurdering(arbeidsgivere, this, hendelse)
     }
 
-    private fun ikkeAktivRevurdering() =
-        this.tilstand !in setOf(
-            AvventerGjennomførtRevurdering,
-            AvventerHistorikkRevurdering,
-            AvventerVilkårsprøvingRevurdering,
-            AvventerSimuleringRevurdering,
-            AvventerGodkjenningRevurdering
-        )
+    private fun ikkeAktivRevurdering() = this.tilstand !in Tilstandssjekk.AktivRevurdering
 
     private fun validerYtelser(ytelser: Ytelser, skjæringstidspunkt: LocalDate, infotrygdhistorikk: Infotrygdhistorikk) {
         kontekst(ytelser)
@@ -2488,13 +2481,7 @@ internal class Vedtaksperiode private constructor(
 
         private fun Iterable<Vedtaksperiode>.pågående() =
             firstOrNull {
-                it.tilstand in setOf(
-                    AvventerHistorikkRevurdering,
-                    AvventerSimuleringRevurdering,
-                    AvventerGodkjenningRevurdering,
-                    TilUtbetaling,
-                    UtbetalingFeilet
-                )
+                it.tilstand in Tilstandssjekk.PågåendeRevurdering
             }
 
         internal fun ferdigVedtaksperiode(
