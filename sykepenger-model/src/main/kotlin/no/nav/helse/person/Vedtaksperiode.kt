@@ -1068,12 +1068,6 @@ internal class Vedtaksperiode private constructor(
     internal object AvventerGjennomførtRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_GJENNOMFØRT_REVURDERING
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            sikkerlogg.info("Vedtaksperiode {} i tilstand {} overlappet med inntektsmelding {}",
-                keyValue("vedtaksperiodeId", vedtaksperiode.id), keyValue("tilstand", type), keyValue("meldingsreferanseId", inntektsmelding.meldingsreferanseId()))
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding) {this}
-            vedtaksperiode.person.startRevurdering(vedtaksperiode, inntektsmelding, RevurderingÅrsak.ARBEIDSGIVERPERIODE)
-        }
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
@@ -1667,6 +1661,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(simulering, AvventerGodkjenningRevurdering)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding) { AvventerHistorikkRevurdering }
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
             vedtaksperiode.revurderInntekt(hendelse)
         }
@@ -1846,6 +1844,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.utbetalinger.forkast(aktivitetslogg)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding) { AvventerHistorikkRevurdering }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -2356,7 +2358,7 @@ internal class Vedtaksperiode private constructor(
         // Ny revurderingsflyt
         // Finner eldste vedtaksperiode, foretrekker eldste arbeidsgiver ved likhet (ag1 før ag2)
         internal fun List<Vedtaksperiode>.kanStarteRevurdering(arbeidsgivere: List<Arbeidsgiver>, vedtaksperiode: Vedtaksperiode): Boolean {
-            val pågående = pågående() ?: nesteRevurderingsperiode(arbeidsgivere, vedtaksperiode)
+            val pågående = nesteRevurderingsperiode(arbeidsgivere, vedtaksperiode)
             return vedtaksperiode == pågående
         }
 
