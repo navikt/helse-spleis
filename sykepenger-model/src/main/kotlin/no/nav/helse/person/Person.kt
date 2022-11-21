@@ -39,7 +39,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkår
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyrInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.inntekterForSammenligningsgrunnlag
-import no.nav.helse.person.Arbeidsgiver.Companion.kanStarteRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.lagRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.nekterOpprettelseAvPeriode
@@ -780,9 +779,6 @@ class Person private constructor(
     internal fun startRevurdering(overstyrtVedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, hvorfor: RevurderingÅrsak) {
         arbeidsgivere.startRevurdering(overstyrtVedtaksperiode, hendelse, hvorfor)
     }
-
-    internal fun kanStarteRevurdering(vedtaksperiode: Vedtaksperiode) =
-        arbeidsgivere.kanStarteRevurdering(vedtaksperiode)
 
     internal fun slettUtgåtteSykmeldingsperioder(tom: LocalDate) {
         arbeidsgivere.slettUtgåtteSykmeldingsperioder(tom)

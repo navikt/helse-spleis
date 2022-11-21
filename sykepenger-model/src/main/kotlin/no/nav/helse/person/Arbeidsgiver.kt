@@ -38,17 +38,15 @@ import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
+import no.nav.helse.person.Vedtaksperiode.Companion.PÅGÅENDE_REVURDERING
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
 import no.nav.helse.person.Vedtaksperiode.Companion.TIDLIGERE_OG_ETTERGØLGENDE
 import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_REFUSJONSOPPLYSNINGER
-import no.nav.helse.person.Vedtaksperiode.Companion.avventerRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.feiletRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
-import no.nav.helse.person.Vedtaksperiode.Companion.kanStarteRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.lagRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
-import no.nav.helse.person.Vedtaksperiode.Companion.senerePerioderPågående
 import no.nav.helse.person.Vedtaksperiode.Companion.skjæringstidspunktperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.validerYtelser
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
@@ -130,9 +128,6 @@ internal class Arbeidsgiver private constructor(
                        || arbeidsgiver.vedtaksperioder.nåværendeVedtaksperiode(KLAR_TIL_BEHANDLING) != null
            }.map { it.organisasjonsnummer }
 
-        internal fun Iterable<Arbeidsgiver>.senerePerioderPågående(vedtaksperiode: Vedtaksperiode) =
-            any { it.vedtaksperioder.senerePerioderPågående(vedtaksperiode) }
-
         internal fun List<Arbeidsgiver>.startRevurdering(overstyrtVedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, hvorfor: RevurderingÅrsak) {
             forEach { arbeidsgiver ->
                 arbeidsgiver.vedtaksperioder.forEach { vedtaksperiode ->
@@ -140,10 +135,6 @@ internal class Arbeidsgiver private constructor(
                 }
             }
         }
-
-        internal fun List<Arbeidsgiver>.kanStarteRevurdering(vedtaksperiode: Vedtaksperiode) =
-            flatMap { it.vedtaksperioder }.kanStarteRevurdering(this, vedtaksperiode)
-
 
         internal fun List<Arbeidsgiver>.nekterOpprettelseAvPeriode(vedtaksperiode: Vedtaksperiode, søknad: Søknad): Boolean {
             return harPeriodeSomNekterOpprettelseAvNyPeriode(vedtaksperiode, søknad) || harForkastetVedtaksperiodeSomBlokkerBehandling(søknad)
@@ -272,10 +263,14 @@ internal class Arbeidsgiver private constructor(
 
         internal fun Iterable<Arbeidsgiver>.gjenopptaBehandling(aktivitetslogg: IAktivitetslogg) {
             if (nåværendeVedtaksperioder(HAR_PÅGÅENDE_UTBETALINGER).isNotEmpty()) return aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående utbetaling")
-            val førstePeriode = (nåværendeVedtaksperioder(IKKE_FERDIG_REVURDERT).takeUnless { it.isEmpty() } ?: nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET))
-                .minOrNull() ?: return
-            førstePeriode.gjenopptaBehandling(aktivitetslogg, this)
+            val periodeSomSkalGjenopptas = (pågåendeRevurderingsperiode().takeUnless { it.isEmpty() } ?: førsteIkkeFerdigBehandletPeriode()).minOrNull() ?: return
+            periodeSomSkalGjenopptas.gjenopptaBehandling(aktivitetslogg, this)
         }
+
+        private fun Iterable<Arbeidsgiver>.pågåendeRevurderingsperiode(): List<Vedtaksperiode> {
+            return nåværendeVedtaksperioder(PÅGÅENDE_REVURDERING).takeUnless { it.isEmpty() } ?: nåværendeVedtaksperioder(IKKE_FERDIG_REVURDERT)
+        }
+        private fun Iterable<Arbeidsgiver>.førsteIkkeFerdigBehandletPeriode() = nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET)
 
         internal fun Iterable<Arbeidsgiver>.slettUtgåtteSykmeldingsperioder(tom: LocalDate) = forEach {
             it.sykmeldingsperioder.fjern(tom.minusDays(1))
@@ -332,7 +327,6 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun avventerRevurdering() = vedtaksperioder.avventerRevurdering()
     internal fun feiletRevurdering(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.feiletRevurdering(vedtaksperiode)
 
     internal fun gjenopptaRevurdering(første: Vedtaksperiode, hendelse: IAktivitetslogg) {

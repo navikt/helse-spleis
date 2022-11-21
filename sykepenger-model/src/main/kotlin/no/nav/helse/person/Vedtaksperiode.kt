@@ -40,7 +40,6 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigOpplysningerFraArbeidsgiver
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigRefusjonsopplysninger
-import no.nav.helse.person.Arbeidsgiver.Companion.senerePerioderPågående
 import no.nav.helse.person.Arbeidsgiver.Companion.trengerSøknadFør
 import no.nav.helse.person.Arbeidsgiver.Companion.trengerSøknadISammeMåned
 import no.nav.helse.person.Dokumentsporing.Companion.ider
@@ -994,8 +993,6 @@ internal class Vedtaksperiode private constructor(
             arbeidsgivere: Iterable<Arbeidsgiver>,
             hendelse: IAktivitetslogg
         ) {
-            if (!vedtaksperiode.person.kanStarteRevurdering(vedtaksperiode))
-                return hendelse.info("Kan ikke gjenoppta revurdering ettersom det ikke er vedtaksperioden sin tur.")
             if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving())
                 return hendelse.info("Mangler nødvendig inntekt for vilkårsprøving og kan derfor ikke gjenoppta revurdering.")
             vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
@@ -1089,7 +1086,6 @@ internal class Vedtaksperiode private constructor(
             arbeidsgivere: Iterable<Arbeidsgiver>,
             hendelse: IAktivitetslogg
         ) {
-            if (vedtaksperiode.arbeidsgiver.avventerRevurdering()) return
             if (feiletRevurdering(vedtaksperiode)) {
                 hendelse.info("Går til revurdering feilet fordi revurdering er avvist")
                 return vedtaksperiode.tilstand(hendelse, RevurderingFeilet)
@@ -1374,9 +1370,6 @@ internal class Vedtaksperiode private constructor(
                 )
                 arbeidsgivere.trengerSøknadFør(vedtaksperiode.periode) -> return hendelse.info(
                     "Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding i samme måned som skjæringstidspunktet"
-                )
-                arbeidsgivere.senerePerioderPågående(vedtaksperiode) -> return hendelse.info(
-                    "Gjenopptar ikke behandling fordi det finnes pågående revurderinger."
                 )
                 !vedtaksperiode.forventerInntekt() -> vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
                 vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() -> {
@@ -2227,6 +2220,14 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal val IKKE_FERDIG_REVURDERT: VedtaksperiodeFilter = { it.tilstand == AvventerGjennomførtRevurdering }
+        internal val PÅGÅENDE_REVURDERING: VedtaksperiodeFilter = {
+            it.tilstand in setOf(
+                AvventerVilkårsprøvingRevurdering,
+                AvventerHistorikkRevurdering,
+                AvventerSimuleringRevurdering,
+                AvventerGodkjenningRevurdering
+            )
+        }
 
         internal val HAR_PÅGÅENDE_UTBETALINGER: VedtaksperiodeFilter = { it.utbetalinger.utbetales() }
 
@@ -2348,33 +2349,8 @@ internal class Vedtaksperiode private constructor(
             )
         }
 
-        internal fun List<Vedtaksperiode>.avventerRevurdering() = pågående() != null
         internal fun List<Vedtaksperiode>.feiletRevurdering(other: Vedtaksperiode) =
             any { it.tilstand == RevurderingFeilet && it.skjæringstidspunkt == other.skjæringstidspunkt }
-
-        internal fun Iterable<Vedtaksperiode>.senerePerioderPågående(vedtaksperiode: Vedtaksperiode) =
-            this.pågående()?.let { it etter vedtaksperiode } ?: false
-
-        // Ny revurderingsflyt
-        // Finner eldste vedtaksperiode, foretrekker eldste arbeidsgiver ved likhet (ag1 før ag2)
-        internal fun List<Vedtaksperiode>.kanStarteRevurdering(arbeidsgivere: List<Arbeidsgiver>, vedtaksperiode: Vedtaksperiode): Boolean {
-            val pågående = nesteRevurderingsperiode(arbeidsgivere, vedtaksperiode)
-            return vedtaksperiode == pågående
-        }
-
-        private fun List<Vedtaksperiode>.nesteRevurderingsperiode(arbeidsgivere: List<Arbeidsgiver>, other: Vedtaksperiode) =
-            sortedWith(compareBy({ it }, { arbeidsgivere.indexOf(it.arbeidsgiver) })).firstOrNull(IKKE_FERDIG_BEHANDLET) ?: other
-
-        private fun Iterable<Vedtaksperiode>.pågående() =
-            firstOrNull {
-                it.tilstand in setOf(
-                    AvventerHistorikkRevurdering,
-                    AvventerSimuleringRevurdering,
-                    AvventerGodkjenningRevurdering,
-                    TilUtbetaling,
-                    UtbetalingFeilet
-                )
-            }
 
         internal fun ferdigVedtaksperiode(
             person: Person,
