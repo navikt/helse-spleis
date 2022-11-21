@@ -141,7 +141,7 @@ class Refusjonsopplysning(
             hendelse: IAktivitetslogg,
             organisasjonsnummer: String
         ): Boolean {
-            val dekkesIkke = utbetalingsdager.toMutableList().filterNot(::dekker).takeUnless { it.isEmpty() } ?: return true
+            val dekkesIkke = utbetalingsdager.toMutableList().filterNot(this::dekker).takeUnless { it.isEmpty() } ?: return true
             hendelse.info("Mangler refusjonsopplysninger på orgnummer $organisasjonsnummer for periodene ${dekkesIkke.grupperSammenhengendePerioder()}")
             return false
         }

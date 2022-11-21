@@ -111,11 +111,13 @@ internal class Refusjonshistorikk {
                     if (førsteFraværsdag == null) return arbeidsgiverperioder.maxOf { it.start }
                     return arbeidsgiverperioder.map { it.start }.plus(førsteFraværsdag).max()
                 }
-                internal fun Refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt: LocalDate): Refusjonsopplysninger {
-                    val refusjonsopplysningBuilder = RefusjonsopplysningerBuilder()
-                    refusjoner.filter { it.startskuddet() >= skjæringstidspunkt }.leggTilRefusjonsopplysninger(refusjonsopplysningBuilder)
-                    return refusjonsopplysningBuilder.build()
-                }
+                internal fun Refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt: LocalDate) = refusjoner
+                    .filter { it.startskuddet() >= skjæringstidspunkt }
+                    .sortedBy { it.tidsstempel }
+                    .fold(Refusjonsopplysninger()) { eksistrendeRefusjonsopplysninger, refusjon ->
+                        val nyeRefusjonsopplysninger = refusjon.refusjonsopplysninger(eksistrendeRefusjonsopplysninger)
+                        eksistrendeRefusjonsopplysninger.merge(nyeRefusjonsopplysninger)
+                    }
 
                 internal fun Refusjonshistorikk.erTom() = refusjoner.isEmpty()
                 internal fun Refusjon.gråsonen(): Periode? {
@@ -125,14 +127,11 @@ internal class Refusjonshistorikk {
                     return null
                 }
 
-                internal fun Refusjon.refusjonsopplysninger(): Refusjonsopplysninger {
-                    val refusjonsopplysningBuilder = RefusjonsopplysningerBuilder()
+                internal fun Refusjon.refusjonsopplysninger(eksisterendeRefusjonsopplysninger: Refusjonsopplysninger): Refusjonsopplysninger {
+                    val refusjonsopplysningBuilder = RefusjonsopplysningerBuilder(eksisterendeRefusjonsopplysninger)
                     leggTilRefusjoneropplysninger(refusjonsopplysningBuilder)
-                    return refusjonsopplysningBuilder.build()
+                    return refusjonsopplysningBuilder.build(gråsonen())
                 }
-
-                private fun List<Refusjon>.leggTilRefusjonsopplysninger(refusjonsopplysningerBuilder: RefusjonsopplysningerBuilder) =
-                    forEach { it.leggTilRefusjoneropplysninger(refusjonsopplysningerBuilder) }
 
                 private fun Refusjon.leggTilRefusjoneropplysninger(refusjonsopplysningerBuilder: RefusjonsopplysningerBuilder) {
                     val hovedRefusjonsopplysning = EndringIRefusjon(beløp ?: INGEN, startskuddet())

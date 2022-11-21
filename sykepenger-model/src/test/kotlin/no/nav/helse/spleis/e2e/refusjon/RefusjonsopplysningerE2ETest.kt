@@ -16,6 +16,7 @@ import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.oktober
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
@@ -155,19 +156,14 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
                 håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag = 22.september i 2022)
             }
 
-            assertForventetFeil(
-                forklaring = "Starter revurdering på grunnlag av en inntektsmelding som mangler refusjonsopplysninger",
-                nå = {
-                    sendInntektsmelding()
-                    håndterYtelser(treffesAvInntektsmelding)
-                    håndterVilkårsgrunnlag(treffesAvInntektsmelding)
-                    assertThrows<IllegalStateException> { håndterYtelser(treffesAvInntektsmelding) } // Mangler refusjonsopplysninger for 21.September
-                },
-                ønsket = {
-                    sendInntektsmelding()
-                    fail("""\_(ツ)_/¯""")
-                }
-            )
+            sendInntektsmelding()
+            håndterYtelser(treffesAvInntektsmelding)
+            håndterVilkårsgrunnlag(treffesAvInntektsmelding)
+            håndterYtelser(treffesAvInntektsmelding)
+            håndterSimulering(treffesAvInntektsmelding)
+            håndterUtbetalingsgodkjenning(treffesAvInntektsmelding)
+            håndterUtbetalt()
+            assertSisteTilstand(treffesAvInntektsmelding, AVSLUTTET)
         }
     }
 

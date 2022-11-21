@@ -179,9 +179,10 @@ internal class Sykepengegrunnlag(
         arbeidsgiverInntektsopplysninger.refusjonsopplysninger(organisasjonsnummer)
 
     internal fun nyeRefusjonsopplysninger(inntektsmelding: Inntektsmelding): Sykepengegrunnlag? {
-        val builder = NyeRefusjonsopplysninger()
-        inntektsmelding.nyeRefusjonsopplysninger(builder)
-        val resultat = builder.resultat()
+        val organisasjonsnummer = inntektsmelding.organisasjonsnummer()
+        val eksisterendeRefusjonsopplysninger = refusjonsopplysninger(organisasjonsnummer)
+        val nyeRefusjonsopplysninger = inntektsmelding.nyeRefusjonsopplysninger(eksisterendeRefusjonsopplysninger)
+        val resultat = arbeidsgiverInntektsopplysninger.nyeRefusjonsopplysninger(organisasjonsnummer, nyeRefusjonsopplysninger)
         if (resultat == arbeidsgiverInntektsopplysninger) return null // ingen endring
         return kopierSykepengegrunnlag(resultat, deaktiverteArbeidsforhold)
     }
@@ -306,17 +307,5 @@ internal class Sykepengegrunnlag(
         }
 
         internal fun resultat() = arbeidsgiverInntektsopplysninger.overstyrInntekter(opptjening, nyeInntektsopplysninger, subsumsjonObserver)
-    }
-
-    inner class NyeRefusjonsopplysninger() {
-        private lateinit var organisasjonsnummer: String
-        private lateinit var refusjonsopplysninger: Refusjonsopplysninger
-
-        internal fun leggTilRefusjonsopplysninger(organisasjonsnummer: String, refusjonsopplysninger: Refusjonsopplysninger) {
-            this.organisasjonsnummer = organisasjonsnummer
-            this.refusjonsopplysninger = refusjonsopplysninger
-        }
-
-        internal fun resultat() = arbeidsgiverInntektsopplysninger.nyeRefusjonsopplysninger(organisasjonsnummer, refusjonsopplysninger)
     }
 }

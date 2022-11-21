@@ -20,7 +20,6 @@ import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.person.Sykepengegrunnlag.NyeRefusjonsopplysninger
 import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_3
@@ -189,8 +188,8 @@ class Inntektsmelding(
         hendelseIder.add(Dokumentsporing.inntektsmelding(meldingsreferanseId()))
     }
 
-    internal fun nyeRefusjonsopplysninger(builder: NyeRefusjonsopplysninger) {
-        builder.leggTilRefusjonsopplysninger(organisasjonsnummer, refusjon.refusjonsopplysninger(meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder))
+    internal fun nyeRefusjonsopplysninger(eksisterendeRefusjonsopplysninger: Refusjonsopplysninger): Refusjonsopplysninger {
+        return refusjon.refusjonsopplysninger(meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder, eksisterendeRefusjonsopplysninger)
     }
 
     class Refusjon(
@@ -199,8 +198,8 @@ class Inntektsmelding(
         private val endringerIRefusjon: List<EndringIRefusjon> = emptyList()
     ) {
 
-        internal fun refusjonsopplysninger(meldingsreferanseId: UUID, førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>): Refusjonsopplysninger {
-            return endringerIRefusjon.refusjonshistorikkRefusjon(meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, opphørsdato).refusjonsopplysninger()
+        internal fun refusjonsopplysninger(meldingsreferanseId: UUID, førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>, eksisterendeRefusjonsopplysninger: Refusjonsopplysninger): Refusjonsopplysninger {
+            return endringerIRefusjon.refusjonshistorikkRefusjon(meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, opphørsdato).refusjonsopplysninger(eksisterendeRefusjonsopplysninger)
         }
 
         class EndringIRefusjon(
