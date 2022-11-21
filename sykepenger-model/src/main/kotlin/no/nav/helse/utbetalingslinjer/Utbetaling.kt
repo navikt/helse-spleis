@@ -344,7 +344,7 @@ internal class Utbetaling private constructor(
         private fun List<Utbetaling>.sisteAktiveMedSammeKorrelasjonsId(forrige: Utbetaling?) =
             forrige?.let { aktive().lastOrNull { it.korrelasjonsId == forrige.korrelasjonsId } }
         private fun List<Utbetaling>.sisteAktiveFør(sisteDato: LocalDate) =
-            aktive().lastOrNull { it.periode.endInclusive <= sisteDato }
+            aktive().lastOrNull { it.periode.endInclusive <= sisteDato || (sisteDato in it.periode && it.periode.start != LocalDate.MIN) }
 
         internal fun lagUtbetaling(
             utbetalinger: List<Utbetaling>,
