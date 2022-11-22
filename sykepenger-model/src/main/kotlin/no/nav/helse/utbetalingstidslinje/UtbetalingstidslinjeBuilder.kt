@@ -3,8 +3,11 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.ManglerRefusjonsopplysning
+import no.nav.helse.person.Varselkode.RV_RE_1
 import no.nav.helse.person.Varselkode.RV_UT_3
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -22,14 +25,23 @@ internal sealed class UtbetalingstidslinjeBuilderException(message: String) : Ru
 
 }
 
-internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, private val beregningsperiode: Periode) : ArbeidsgiverperiodeMediator {
+internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, private val beregningsperiode: Periode, private val hendelse: IAktivitetslogg) : ArbeidsgiverperiodeMediator {
     private val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
     private var sisteArbeidsgiverperiode: Arbeidsgiverperiode? = null
     private val nåværendeArbeidsgiverperiode: Arbeidsgiverperiode? get() = sisteArbeidsgiverperiode ?: periodebuilder.build()
 
     private val builder = Utbetalingstidslinje.Builder()
 
+    private val manglerRefusjonsopplysninger = mutableSetOf<LocalDate>()
+    private val manglerRefusjonsopplysning: ManglerRefusjonsopplysning = { dag, _ ->
+       manglerRefusjonsopplysninger.add(dag)
+    }
+
     internal fun result(): Utbetalingstidslinje {
+        if (manglerRefusjonsopplysninger.isNotEmpty()) {
+            hendelse.varsel(RV_RE_1)
+            hendelse.info("Manglet refusjonsopplysninger ved beregning av utbetalingstidslinje. Manglet for periodene ${manglerRefusjonsopplysninger.grupperSammenhengendePerioder()}")
+        }
         return builder.build()
     }
 
@@ -63,7 +75,7 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
         check(!kilde.erAvType(Sykmelding::class)) { "Kan ikke opprette utbetalingsdag for $dato med kilde Sykmelding" }
         if (dato.erHelg()) return builder.addHelg(dato, inntekter.utenInntekt(dato, økonomi, nåværendeArbeidsgiverperiode))
         val medUtbetalingsopplysninger = when (dato in beregningsperiode) {
-            true -> inntekter.medUtbetalingsopplysninger(dato, nåværendeArbeidsgiverperiode, økonomi)
+            true -> inntekter.medUtbetalingsopplysninger(dato, nåværendeArbeidsgiverperiode, økonomi, manglerRefusjonsopplysning)
             false -> inntekter.medInntekt(dato, nåværendeArbeidsgiverperiode, økonomi)
         }
         builder.addNAVdag(dato, medUtbetalingsopplysninger)

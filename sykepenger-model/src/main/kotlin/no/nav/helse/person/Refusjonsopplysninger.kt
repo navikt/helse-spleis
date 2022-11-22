@@ -61,6 +61,9 @@ class Refusjonsopplysning(
         return dag in periode
     }
 
+    private fun aksepterer(skjæringstidspunkt: LocalDate, dag: LocalDate) =
+        dag >= skjæringstidspunkt && dag < fom
+
     internal fun accept(visitor: RefusjonsopplysningerVisitor) {
         visitor.visitRefusjonsopplysning(meldingsreferanseId, fom, tom, beløp)
     }
@@ -137,30 +140,38 @@ class Refusjonsopplysning(
         }
 
         private fun harNødvendigRefusjonsopplysninger(
+            skjæringstidspunkt: LocalDate,
             utbetalingsdager: List<LocalDate>,
             hendelse: IAktivitetslogg,
             organisasjonsnummer: String
         ): Boolean {
-            val dekkesIkke = utbetalingsdager.toMutableList().filterNot(::dekker).takeUnless { it.isEmpty() } ?: return true
-            hendelse.info("Mangler refusjonsopplysninger på orgnummer $organisasjonsnummer for periodene ${dekkesIkke.grupperSammenhengendePerioder()}")
+            val førsteRefusjonsopplysning = førsteRefusjonsopplysning() ?: return false
+            val dekkes =  utbetalingsdager.filter { utbetalingsdag -> dekker(utbetalingsdag) }
+            val aksepteres = utbetalingsdager.filter { utbetalingsdag -> førsteRefusjonsopplysning.aksepterer(skjæringstidspunkt, utbetalingsdag) }
+            val mangler = (utbetalingsdager - dekkes - aksepteres).takeUnless { it.isEmpty() } ?: return true
+            hendelse.info("Mangler refusjonsopplysninger på orgnummer $organisasjonsnummer for periodene ${mangler.grupperSammenhengendePerioder()}")
             return false
         }
 
         internal fun harNødvendigRefusjonsopplysninger(
+            skjæringstidspunkt: LocalDate,
             utbetalingsdager: List<LocalDate>,
             sisteOppholdsdagFørUtbetalingsdager: LocalDate?,
             hendelse: IAktivitetslogg,
             organisasjonsnummer: String
-        ) = hensyntattSisteOppholdagFørUtbetalingsdager(sisteOppholdsdagFørUtbetalingsdager).harNødvendigRefusjonsopplysninger(utbetalingsdager, hendelse, organisasjonsnummer)
+        ) = hensyntattSisteOppholdagFørUtbetalingsdager(sisteOppholdsdagFørUtbetalingsdager).harNødvendigRefusjonsopplysninger(skjæringstidspunkt, utbetalingsdager, hendelse, organisasjonsnummer)
 
         internal fun refusjonsbeløpOrNull(dag: LocalDate) = validerteRefusjonsopplysninger.singleOrNull { it.dekker(dag) }?.beløp
         internal fun refusjonsbeløp(dag: LocalDate) = checkNotNull(refusjonsbeløpOrNull(dag)) {
             "Fant ikke refusjonsbeløp for $dag. Har refusjonsopplysninger for ${validerteRefusjonsopplysninger.map { "${it.fom}-${it.tom}" }}"
         }
-        internal fun refusjonsbeløp(skjæringstidspunkt: LocalDate, dag: LocalDate, manglerRefusjonsopplysning: (LocalDate, Inntekt) -> Unit): Inntekt {
+
+        private fun førsteRefusjonsopplysning() = validerteRefusjonsopplysninger.minByOrNull { it.fom }
+
+        internal fun refusjonsbeløp(skjæringstidspunkt: LocalDate, dag: LocalDate, manglerRefusjonsopplysning: ManglerRefusjonsopplysning): Inntekt {
             val lagretRefusjonsbeløp = refusjonsbeløpOrNull(dag)
             if (lagretRefusjonsbeløp != null) return lagretRefusjonsbeløp
-            val førsteRefusjonsopplysning = checkNotNull(validerteRefusjonsopplysninger.minByOrNull { it.fom }) {
+            val førsteRefusjonsopplysning = checkNotNull(førsteRefusjonsopplysning()) {
                 "Har ingen refusjonsopplysninger på vilkårsgrunnlag med skjæringstidspunkt $skjæringstidspunkt"
             }
             check(dag >= skjæringstidspunkt && dag < førsteRefusjonsopplysning.fom) {
@@ -217,3 +228,5 @@ interface RefusjonsopplysningerVisitor {
     fun visitRefusjonsopplysning(meldingsreferanseId: UUID, fom: LocalDate, tom: LocalDate?, beløp: Inntekt) {}
     fun postVisitRefusjonsopplysninger(refusjonsopplysninger: Refusjonsopplysninger) {}
 }
+
+typealias ManglerRefusjonsopplysning = (LocalDate, Inntekt) -> Unit

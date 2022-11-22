@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.refusjon
 
 import java.util.UUID
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -17,18 +16,15 @@ import no.nav.helse.juli
 import no.nav.helse.oktober
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.Varselkode.RV_RE_1
 import no.nav.helse.september
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
 
@@ -54,7 +50,11 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(4.januar, 31.januar, 100.prosent))
             håndterSøknad(Sykdom(4.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(4.januar til 19.januar), førsteFraværsdag = 23.januar)
-            assertInfo("Mangler refusjonsopplysninger på orgnummer $a1 for periodene [22-01-2018 til 22-01-2018]")
+            håndterYtelser(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
+            assertVarsel(RV_RE_1)
         }
     }
 
@@ -64,7 +64,11 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 18.januar)
-            assertInfo("Mangler refusjonsopplysninger på orgnummer $a1 for periodene [17-01-2018 til 17-01-2018]")
+            håndterYtelser(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
+            assertVarsel(RV_RE_1)
         }
     }
 
@@ -124,16 +128,18 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `forkastet periode som mangler refusjonsopplysninger`(){
+    fun `bruker først refusjonsopplysning også i gråsonen`(){
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar)
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
-            assertFunksjonellFeil("Mangler refusjonsopplysninger")
+            håndterYtelser(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
+            assertVarsel(RV_RE_1)
         }
     }
-
 
     @Test
     fun `Automatisk revurdering av AUU ved inntektsmelding som mangler refusjonsopplysninger`() {
@@ -145,29 +151,18 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             val treffesAvInntektsmelding = (12.september til 23.september i 2022).avsluttUtenUtbetaling()
             (24.oktober til 28.oktober i 2022).avsluttUtenUtbetaling()
 
-            val sendInntektsmelding = {
-                val arbeidsgiverperioder = listOf(
-                    (17.august til 17.august i 2022),
-                    (22.august til 26.august i 2022),
-                    (7.september til 7.september i 2022),
-                    (12.september til 20.september i 2022)
-                )
-                håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag = 22.september i 2022)
-            }
-
-            assertForventetFeil(
-                forklaring = "Starter revurdering på grunnlag av en inntektsmelding som mangler refusjonsopplysninger",
-                nå = {
-                    sendInntektsmelding()
-                    håndterYtelser(treffesAvInntektsmelding)
-                    håndterVilkårsgrunnlag(treffesAvInntektsmelding)
-                    assertThrows<IllegalStateException> { håndterYtelser(treffesAvInntektsmelding) } // Mangler refusjonsopplysninger for 21.September
-                },
-                ønsket = {
-                    sendInntektsmelding()
-                    fail("""\_(ツ)_/¯""")
-                }
+            val arbeidsgiverperioder = listOf(
+                (17.august til 17.august i 2022),
+                (22.august til 26.august i 2022),
+                (7.september til 7.september i 2022),
+                (12.september til 20.september i 2022)
             )
+            håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag = 22.september i 2022)
+            håndterYtelser(treffesAvInntektsmelding)
+            håndterVilkårsgrunnlag(treffesAvInntektsmelding)
+            håndterYtelser(treffesAvInntektsmelding)
+            assertSisteTilstand(treffesAvInntektsmelding, AVVENTER_SIMULERING_REVURDERING)
+            assertVarsel(RV_RE_1)
         }
     }
 

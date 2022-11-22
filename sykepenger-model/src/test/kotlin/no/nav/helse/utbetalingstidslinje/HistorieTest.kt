@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -111,7 +112,7 @@ internal abstract class HistorieTest {
             regler = regler,
             subsumsjonObserver = SubsumsjonObserver.NullObserver
         )
-        val utbetalingstidslinjebuilder = UtbetalingstidslinjeBuilder(inntekter, sykdomstidslinje.periode()!!)
+        val utbetalingstidslinjebuilder = UtbetalingstidslinjeBuilder(inntekter, sykdomstidslinje.periode()!!, Aktivitetslogg())
         return infotrygdhistorikk.buildUtbetalingstidslinje(orgnr, sykdomstidslinje, utbetalingstidslinjebuilder, SubsumsjonObserver.NullObserver).let { utbetalingstidslinjebuilder.result() }
     }
 

@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.februar
+import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -255,16 +256,19 @@ internal class RefusjonsopplysningerTest {
     @Test
     fun `har refusjonsopplysninger for forventede dager`() {
         val januar = Refusjonsopplysning(UUID.randomUUID(), 2.januar, 31.januar, 2000.daglig)
+        val skjæringstidspunkt = 1.januar
         val refusjonsopplysninger = januar.refusjonsopplysninger
-        assertFalse(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(listOf(1.januar)))
-        assertTrue(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(listOf(2.januar)))
-        assertTrue(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(listOf(31.januar)))
-        assertFalse(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(listOf(1.februar)))
-        assertTrue(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(2.januar til 31.januar))
-        assertTrue(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(3.januar til 30.januar))
-        assertFalse(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(1.januar til 31.januar))
-        assertFalse(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(2.januar til 1.februar))
-        assertFalse(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(31.januar til 28.februar))
+
+        assertFalse(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, listOf(skjæringstidspunkt.forrigeDag)))
+        assertTrue(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, listOf(1.januar)))
+        assertTrue(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, listOf(2.januar)))
+        assertTrue(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, listOf(31.januar)))
+        assertFalse(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, listOf(1.februar)))
+        assertTrue(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, 2.januar til 31.januar))
+        assertTrue(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, 3.januar til 30.januar))
+        assertTrue(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, 1.januar til 31.januar))
+        assertFalse(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, 2.januar til 1.februar))
+        assertFalse(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, 31.januar til 28.februar))
     }
 
     @Test
@@ -301,8 +305,8 @@ internal class RefusjonsopplysningerTest {
             (1.februar til 28.februar).forEach { utbetalingsdag(it) }
         }
         val refusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 20000.månedlig).refusjonsopplysninger
-        assertTrue(harNødvendigeRefusjonsopplysninger(1.januar til 31.januar, refusjonsopplysninger, arbeidsgiverperiode))
-        assertFalse(harNødvendigeRefusjonsopplysninger(1.februar til 28.februar, refusjonsopplysninger, arbeidsgiverperiode))
+        assertTrue(harNødvendigeRefusjonsopplysninger(1.januar, 1.januar til 31.januar, refusjonsopplysninger, arbeidsgiverperiode))
+        assertFalse(harNødvendigeRefusjonsopplysninger(1.januar, 1.februar til 28.februar, refusjonsopplysninger, arbeidsgiverperiode))
     }
 
     @Test
@@ -314,28 +318,28 @@ internal class RefusjonsopplysningerTest {
         }
         // IM: FF = 1.januar, AGP = 1.januar - 16.januar
         val refusjonsopplysningerJanuar = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 20000.månedlig).refusjonsopplysninger
-        assertTrue(harNødvendigeRefusjonsopplysninger(1.januar til 31.januar, refusjonsopplysningerJanuar, arbeidsgiverperiode))
-        assertFalse(harNødvendigeRefusjonsopplysninger(1.februar til 28.februar, refusjonsopplysningerJanuar, arbeidsgiverperiode))
+        assertTrue(harNødvendigeRefusjonsopplysninger(1.januar, 1.januar til 31.januar, refusjonsopplysningerJanuar, arbeidsgiverperiode))
+        assertFalse(harNødvendigeRefusjonsopplysninger(1.januar, 1.februar til 28.februar, refusjonsopplysningerJanuar, arbeidsgiverperiode))
 
         // IM: FF = 1.februar, AGP = 1.januar - 16.januar
         val refusjonsopplysningerFebruar = Refusjonsopplysning(UUID.randomUUID(), 1.februar, null, 25000.månedlig).refusjonsopplysninger
 
         val oppdaterteRefusjonsopplysninger = refusjonsopplysningerJanuar.merge(refusjonsopplysningerFebruar)
-        assertTrue(harNødvendigeRefusjonsopplysninger(1.januar til 31.januar, oppdaterteRefusjonsopplysninger, arbeidsgiverperiode))
-        assertTrue(harNødvendigeRefusjonsopplysninger(1.februar til 28.februar, oppdaterteRefusjonsopplysninger, arbeidsgiverperiode))
+        assertTrue(harNødvendigeRefusjonsopplysninger(1.januar, 1.januar til 31.januar, oppdaterteRefusjonsopplysninger, arbeidsgiverperiode))
+        assertTrue(harNødvendigeRefusjonsopplysninger(1.januar, 1.februar til 28.februar, oppdaterteRefusjonsopplysninger, arbeidsgiverperiode))
     }
 
     @Test
     fun `Tomme refusjonsopplysninger skal feile ved oppslag på dato`() {
         val refusjonsopplysninger = Refusjonsopplysninger()
-        val manglerRefusjonsopplysning: (LocalDate, Inntekt) -> Unit = { _,_ -> }
+        val manglerRefusjonsopplysning: ManglerRefusjonsopplysning = { _, _ -> }
         assertThrows<IllegalStateException> { refusjonsopplysninger.refusjonsbeløp(skjæringstidspunkt = 1.januar, dag = 1.januar, manglerRefusjonsopplysning) }
     }
 
     @Test
     fun `Oppslag på dato før skjæringstidspunktet skal feile`() {
         val refusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 2.januar, null, 1000.daglig).refusjonsopplysninger
-        val manglerRefusjonsopplysning: (LocalDate, Inntekt) -> Unit = { _,_ -> }
+        val manglerRefusjonsopplysning: ManglerRefusjonsopplysning = { _, _ -> }
         assertThrows<IllegalStateException> { refusjonsopplysninger.refusjonsbeløp(skjæringstidspunkt = 2.januar, dag = 1.januar, manglerRefusjonsopplysning) }
     }
 
@@ -351,7 +355,7 @@ internal class RefusjonsopplysningerTest {
             .build()
 
         val manglerRefusjonsopplysninger = mutableMapOf<LocalDate, Inntekt>()
-        val manglerRefusjonsopplysning: (LocalDate, Inntekt) -> Unit = { dag, inntekt ->
+        val manglerRefusjonsopplysning: ManglerRefusjonsopplysning = { dag, inntekt ->
             check(manglerRefusjonsopplysninger[dag] == null) { "$dag mangler allerede refusjonsopplysning" }
             manglerRefusjonsopplysninger[dag] = inntekt
         }
@@ -364,14 +368,23 @@ internal class RefusjonsopplysningerTest {
         assertEquals(forventetManglerRefusjonsopplysninger, manglerRefusjonsopplysninger)
     }
 
+    @Test
+    fun `Spør om refusjonsopplysninger utelukkende i gråsonen`() {
+        val skjæringstidspunkt = 1.januar
+        val førsteDagMedRefusjonsopplysning = 20.januar
+        val refusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), førsteDagMedRefusjonsopplysning, null, 1000.daglig).refusjonsopplysninger
+        val gråsonen = skjæringstidspunkt til førsteDagMedRefusjonsopplysning.forrigeDag
+        assertTrue(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt = skjæringstidspunkt, periode = gråsonen))
+    }
+
     internal companion object {
-        private fun harNødvendigeRefusjonsopplysninger(periode: Periode, refusjonsopplysninger: Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode) =
-            harNødvendigeRefusjonsopplysninger(periode, refusjonsopplysninger, arbeidsgiverperiode, Aktivitetslogg(), "")
+        private fun harNødvendigeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode) =
+            harNødvendigeRefusjonsopplysninger(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, Aktivitetslogg(), "")
         private fun assertGjenopprettetRefusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>) {
             assertEquals(refusjonsopplysninger, refusjonsopplysninger.gjennopprett().inspektør.refusjonsopplysninger)
         }
-        private fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(dager: List<LocalDate>) = harNødvendigRefusjonsopplysninger(dager, null, Aktivitetslogg(), "")
-        private fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(periode: Periode) = harNødvendigRefusjonsopplysninger(periode.toList(), null, Aktivitetslogg(), "")
+        private fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, dager: List<LocalDate>) = harNødvendigRefusjonsopplysninger(skjæringstidspunkt, dager, null, Aktivitetslogg(), "")
+        private fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode) = harNødvendigRefusjonsopplysninger(skjæringstidspunkt, periode.toList(), null, Aktivitetslogg(), "")
         private fun List<Refusjonsopplysning>.refusjonsopplysninger() = Refusjonsopplysninger(this, LocalDateTime.now())
 
         private fun Refusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>, tidsstempel: LocalDateTime): Refusjonsopplysninger{

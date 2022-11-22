@@ -151,11 +151,11 @@ internal class Arbeidsgiverperiode private constructor(internal val perioder: Li
             }
         }
 
-        internal fun harNødvendigeRefusjonsopplysninger(periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg, organisasjonsnummer: String): Boolean {
+        internal fun harNødvendigeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg, organisasjonsnummer: String): Boolean {
             val utbetalingsdager = periode.filter { dag -> arbeidsgiverperiode.utbetalingsdager.any { utbetalingsperiode -> dag in utbetalingsperiode }}
             val førsteUtbetalingsdag = utbetalingsdager.firstOrNull() ?: return true
             val sisteOppholdsdagFørUtbetalingsdager = arbeidsgiverperiode.oppholdsdager.lastOrNull { it.endInclusive < førsteUtbetalingsdag }?.endInclusive
-            return refusjonsopplysninger.harNødvendigRefusjonsopplysninger(utbetalingsdager, sisteOppholdsdagFørUtbetalingsdager, hendelse, organisasjonsnummer)
+            return refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, utbetalingsdager, sisteOppholdsdagFørUtbetalingsdager, hendelse, organisasjonsnummer)
         }
     }
 }

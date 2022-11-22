@@ -46,6 +46,7 @@ import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_3
 import no.nav.helse.person.Varselkode.RV_IM_4
+import no.nav.helse.person.Varselkode.RV_RE_1
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -1496,12 +1497,25 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertFalse(inspektør.sykdomstidslinje[30.januar] is Dag.Arbeidsdag)
         assertFalse(inspektør.sykdomstidslinje[31.januar] is Dag.Arbeidsdag)
         assertInntektshistorikkForDato(INNTEKT, 30.januar, inspektør = inspektør)
-        assertForkastetPeriodeTilstander(
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+        assertVarsel(RV_RE_1)
+        assertTilstander(
             2.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            TIL_INFOTRYGD
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
     }
 

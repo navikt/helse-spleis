@@ -151,10 +151,14 @@ internal class ArbeidsgiverInntektsopplysning(
             "Fant ikke arbeidsgiver $organisasjonsnummer i sykepengegrunnlaget. Arbeidsgiveren må være i sykepengegrunnlaget for å legge til utbetalingsopplysninger. Arbeidsgiverne i sykepengegrunlaget er ${map { it.orgnummer }}"
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.medUtbetalingsopplysninger(organisasjonsnummer: String, `6G`: Inntekt, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
+        internal fun List<ArbeidsgiverInntektsopplysning>.medUtbetalingsopplysninger(organisasjonsnummer: String, `6G`: Inntekt, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver, manglerRefusjonsopplysning: ManglerRefusjonsopplysning): Økonomi {
             val arbeidsgiverInntektsopplysning = arbeidsgiverInntektsopplysning(organisasjonsnummer)
             val inntekt = arbeidsgiverInntektsopplysning.inntektsopplysning.omregnetÅrsinntekt()
-            val refusjonsbeløp = arbeidsgiverInntektsopplysning.refusjonsopplysninger.refusjonsbeløp(dato)
+            val refusjonsbeløp = arbeidsgiverInntektsopplysning.refusjonsopplysninger.refusjonsbeløp(
+                skjæringstidspunkt = skjæringstidspunkt,
+                dag = dato,
+                manglerRefusjonsopplysning = manglerRefusjonsopplysning
+            )
             return økonomi.inntekt(
                 aktuellDagsinntekt = inntekt,
                 dekningsgrunnlag = inntekt.dekningsgrunnlag(dato, regler, subsumsjonObserver),

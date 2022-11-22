@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -957,7 +958,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonObserver = SubsumsjonObserver.NullObserver
         )
-        val builder = UtbetalingstidslinjeBuilder(inntekter, this.periode()!!)
+        val builder = UtbetalingstidslinjeBuilder(inntekter, this.periode()!!, Aktivitetslogg())
         val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, builder, SubsumsjonObserver.NullObserver)
         val dekoratør = Infotrygddekoratør(teller, arbeidsgiverperiodeBuilder, betalteInfotrygddager)
         this.accept(dekoratør)

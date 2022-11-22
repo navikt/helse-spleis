@@ -229,7 +229,7 @@ class Person private constructor(
         ytelser.lagreDødsdato(this)
 
         finnArbeidsgiver(ytelser).håndter(ytelser, infotrygdhistorikk) { subsumsjonObserver ->
-            arbeidsgiverUtbetalinger(subsumsjonObserver = subsumsjonObserver)
+            arbeidsgiverUtbetalinger(subsumsjonObserver = subsumsjonObserver, hendelse = ytelser)
         }
         håndterGjenoppta(ytelser)
     }
@@ -377,13 +377,14 @@ class Person private constructor(
     }
 
     private fun arbeidsgiverUtbetalinger(
-        subsumsjonObserver: SubsumsjonObserver
+        subsumsjonObserver: SubsumsjonObserver,
+        hendelse: IAktivitetslogg
     ): ArbeidsgiverUtbetalinger {
         return ArbeidsgiverUtbetalinger(
             regler = regler,
             alder = alder,
             arbeidsgivere = arbeidsgivereMedSykdom().associateWith {
-                it.builder(regler, vilkårsgrunnlagHistorikk, infotrygdhistorikk, subsumsjonObserver)
+                it.builder(regler, vilkårsgrunnlagHistorikk, infotrygdhistorikk, subsumsjonObserver, hendelse)
             },
             infotrygdUtbetalingstidslinje = infotrygdhistorikk.utbetalingstidslinje(),
             dødsdato = dødsdato,

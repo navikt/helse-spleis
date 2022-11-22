@@ -10,6 +10,7 @@ import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -564,7 +565,7 @@ internal class UtbetalingstidslinjeBuilderTest {
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonObserver = SubsumsjonObserver.NullObserver
         )
-        val builder = UtbetalingstidslinjeBuilder(inntekter, tidslinje.periode() ?: Periode.aldri)
+        val builder = UtbetalingstidslinjeBuilder(inntekter, tidslinje.periode() ?: Periode.aldri, Aktivitetslogg())
         val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
         val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller,
             Komposittmediator(periodebuilder, builder), SubsumsjonObserver.NullObserver)

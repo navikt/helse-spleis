@@ -310,7 +310,7 @@ internal class Arbeidsgiver private constructor(
             null -> refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
             else -> vilkårsgrunnlag.refusjonsopplysninger(organisasjonsnummer)
         }
-        return Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(periode, refusjonsopplysninger, arbeidsgiverperiode, hendelse, organisasjonsnummer)
+        return Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, hendelse, organisasjonsnummer)
     }
 
     private fun harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
@@ -973,7 +973,8 @@ internal class Arbeidsgiver private constructor(
         regler: ArbeidsgiverRegler,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
         infotrygdhistorikk: Infotrygdhistorikk,
-        subsumsjonObserver: SubsumsjonObserver
+        subsumsjonObserver: SubsumsjonObserver,
+        hendelse: IAktivitetslogg
     ): (Periode) -> Utbetalingstidslinje {
         val inntekter = Inntekter(
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
@@ -985,7 +986,7 @@ internal class Arbeidsgiver private constructor(
             val sykdomstidslinje = sykdomstidslinje().fremTilOgMed(periode.endInclusive).takeUnless { it.count() == 0 }
             if (sykdomstidslinje == null) Utbetalingstidslinje()
             else {
-                val builder = UtbetalingstidslinjeBuilder(inntekter, periode)
+                val builder = UtbetalingstidslinjeBuilder(inntekter, periode, hendelse)
                 infotrygdhistorikk.buildUtbetalingstidslinje(organisasjonsnummer, sykdomstidslinje, builder, subsumsjonObserver)
                 builder.result()
             }
