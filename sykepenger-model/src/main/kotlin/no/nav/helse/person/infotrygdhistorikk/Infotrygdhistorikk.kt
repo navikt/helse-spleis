@@ -66,7 +66,15 @@ internal class Infotrygdhistorikk private constructor(
     }
 
     internal fun skjæringstidspunkt(organisasjonsnummer: String, periode: Periode, tidslinje: Sykdomstidslinje): LocalDate {
-        return Sykdomstidslinje.sisteRelevanteSkjæringstidspunktForPerioden(periode, listOf(tidslinje) + listOf(sykdomstidslinje(organisasjonsnummer))) ?: periode.start
+        val infotrygdtidslinje = sykdomstidslinje(organisasjonsnummer)
+        val arbeidsgivertidslinje = listOf(tidslinje, infotrygdtidslinje)
+        return Sykdomstidslinje.sisteRelevanteSkjæringstidspunktForPerioden(periode, arbeidsgivertidslinje, arbeidsgivertidslinje) ?: periode.start
+    }
+
+    internal fun skjæringstidspunkt(periode: Periode, organisasjonsnummer: String, tidslinje: Sykdomstidslinje, andreTidslinjer: List<Sykdomstidslinje>): LocalDate {
+        val infotrygdtidslinje = sykdomstidslinje(organisasjonsnummer)
+        val arbeidsgivertidslinje = listOf(tidslinje, infotrygdtidslinje)
+        return Sykdomstidslinje.sisteRelevanteSkjæringstidspunktForPerioden(periode, arbeidsgivertidslinje, andreTidslinjer + listOf(sykdomstidslinje())) ?: periode.start
     }
 
     internal fun skjæringstidspunkt(periode: Periode, tidslinjer: List<Sykdomstidslinje>): LocalDate {

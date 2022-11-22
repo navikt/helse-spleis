@@ -133,7 +133,7 @@ internal class Vedtaksperiode private constructor(
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode> {
 
     private val jurist = jurist.medVedtaksperiode(id, hendelseIder, sykmeldingsperiode)
-    private val skjæringstidspunkt get() = person.skjæringstidspunkt(periode)
+    private val skjæringstidspunkt get() = arbeidsgiver.skjæringstidspunkt(periode)
     private val periodetype get() = arbeidsgiver.periodetype(periode)
     private val vilkårsgrunnlag get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)
     private val inntektskilde get() = vilkårsgrunnlag?.inntektskilde() ?: Inntektskilde.EN_ARBEIDSGIVER

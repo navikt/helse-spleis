@@ -4,20 +4,38 @@ import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.økonomi.Økonomi
 
-internal fun Sykdomstidslinje.skjæringstidspunkt(periode: Periode) =
-    Skjæringstidspunkt(periode, this).result()
+internal fun Sykdomstidslinje.skjæringstidspunkt(periode: Periode, andreTidslinjer: List<Sykdomstidslinje> = listOf(this)) =
+    Skjæringstidspunkt(periode, this, andreTidslinjer).result()
 internal fun Sykdomstidslinje.sisteSkjæringstidspunkt() =
     periode()?.let { skjæringstidspunkt(it) }
 
 // Finner skjæringstidspunkt ved å ta utgangspunkt i siste dag i Periode, og går bakover på sykdomstidslinjen.
-internal class Skjæringstidspunkt(private val søkeperiode: Periode, sykdomstidslinje: Sykdomstidslinje) : SykdomstidslinjeVisitor {
+internal class Skjæringstidspunkt(private val søkeperiode: Periode, arbeidsgiverSykdomstidslinje: Sykdomstidslinje, andreTidslinjer: List<Sykdomstidslinje>) : SykdomstidslinjeVisitor {
     private var tilstand: Tilstand = HarIkkeBegynt
     private var forrigeSkjæringstidspunkt: LocalDate? = null
 
     init {
-        sykdomstidslinje.fremTilOgMed(søkeperiode.endInclusive).acceptReversed(this)
+        // for å håndtere 'arbeid gjenopptatt' sikkelig (på tvers av AG),
+        // så må vi endre søkeperiode.endInclusive til å være "vedtaksperiodens fom" til "siste sykedag i perioden ?: vedtaksperiodens fom"
+
+        // 1. først finne skjæringstidspunkt på Arbeidsgiver sin tidslinje, isolert fra alle andre
+        // 2. Så finne skjæringstidspunkt på tvers, men bruke resultatet fra 1) som søkeperiode.endInclusive.
+        // Dersom 1) gir `null`, så vil svaret være `null`
+        arbeidsgiverSykdomstidslinje.fremTilOgMed(søkeperiode.endInclusive).acceptReversed(this)
+        val resultat = forrigeSkjæringstidspunkt
+        if (resultat != null) {
+            reset()
+            val samletTidslinje = andreTidslinjer.merge(sammenhengendeSykdom)
+            samletTidslinje.fremTilOgMed(resultat).acceptReversed(this)
+        }
+    }
+
+    private fun reset() {
+        tilstand = HarIkkeBegynt
+        forrigeSkjæringstidspunkt = null
     }
 
     internal fun result() = forrigeSkjæringstidspunkt
@@ -42,7 +60,6 @@ internal class Skjæringstidspunkt(private val søkeperiode: Periode, sykdomstid
 
         override fun ikkeOppholdsdag(skjæringstidspunkt: Skjæringstidspunkt, dato: LocalDate) {
             skjæringstidspunkt.forrigeSkjæringstidspunkt = dato
-            if (dato.erHelg()) return
             skjæringstidspunkt.tilstand = HarBegynt
         }
     }

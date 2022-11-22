@@ -212,6 +212,14 @@ internal class Sykdomstidslinje private constructor(
 
         internal fun sisteRelevanteSkjæringstidspunktForPerioden(periode: Periode, tidslinjer: List<Sykdomstidslinje>) =
             samletTidslinje(tidslinjer).skjæringstidspunkt(periode)
+        internal fun sisteRelevanteSkjæringstidspunktForPerioden(periode: Periode, arbeidsgiverTidslinje: List<Sykdomstidslinje>, tidslinjer: List<Sykdomstidslinje>) =
+            arbeidsgiverTidslinje
+                .map { Sykdomstidslinje(it.dager, it.periode) } // fjerner evt. låser først
+                .merge(sammenhengendeSykdom)
+                .skjæringstidspunkt(
+                    periode = periode,
+                    andreTidslinjer = tidslinjer.map { Sykdomstidslinje(it.dager, it.periode) } // fjerner evt. låser først
+                )
 
         internal fun skjæringstidspunkter(tidslinjer: List<Sykdomstidslinje>) = samletTidslinje(tidslinjer)
             .skjæringstidspunkter()

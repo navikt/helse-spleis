@@ -492,6 +492,8 @@ class Person private constructor(
 
     internal fun skjæringstidspunkt(periode: Periode) =
         Arbeidsgiver.skjæringstidspunkt(arbeidsgivere, periode, infotrygdhistorikk)
+    internal fun skjæringstidspunkt(arbeidsgiver: Arbeidsgiver, periode: Periode) =
+        Arbeidsgiver.skjæringstidspunkt(arbeidsgiver, arbeidsgivere, periode, infotrygdhistorikk)
 
     internal fun skjæringstidspunkter() =
         Arbeidsgiver.skjæringstidspunkter(arbeidsgivere, infotrygdhistorikk)

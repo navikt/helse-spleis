@@ -195,6 +195,9 @@ internal class Arbeidsgiver private constructor(
         internal fun skjæringstidspunkt(arbeidsgivere: List<Arbeidsgiver>, periode: Periode, infotrygdhistorikk: Infotrygdhistorikk) =
             infotrygdhistorikk.skjæringstidspunkt(periode, arbeidsgivere.map(Arbeidsgiver::sykdomstidslinje))
 
+        internal fun skjæringstidspunkt(arbeidsgiver: Arbeidsgiver, arbeidsgivere: List<Arbeidsgiver>, periode: Periode, infotrygdhistorikk: Infotrygdhistorikk) =
+            infotrygdhistorikk.skjæringstidspunkt(periode, arbeidsgiver.organisasjonsnummer, arbeidsgiver.sykdomstidslinje(), arbeidsgivere.map(Arbeidsgiver::sykdomstidslinje))
+
         internal fun skjæringstidspunkter(arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) =
             infotrygdhistorikk.skjæringstidspunkter(arbeidsgivere.map(Arbeidsgiver::sykdomstidslinje))
 
@@ -964,11 +967,12 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun periodetype(periode: Periode): Periodetype {
-        return arbeidsgiverperiode(periode, NullObserver)?.let { person.periodetype(organisasjonsnummer, it, periode, skjæringstidspunkt(periode)) } ?: Periodetype.FØRSTEGANGSBEHANDLING
+        return arbeidsgiverperiode(periode, NullObserver)?.let { person.periodetype(organisasjonsnummer, it, periode, skjæringstidspunktArbeidsgiver(periode)) } ?: Periodetype.FØRSTEGANGSBEHANDLING
     }
 
     internal fun erFørstegangsbehandling(periode: Periode) = periodetype(periode) == Periodetype.FØRSTEGANGSBEHANDLING
-    private fun skjæringstidspunkt(periode: Periode) = person.skjæringstidspunkt(organisasjonsnummer, sykdomstidslinje(), periode)
+    internal fun skjæringstidspunkt(periode: Periode) = person.skjæringstidspunkt(this, periode)
+    private fun skjæringstidspunktArbeidsgiver(periode: Periode) = person.skjæringstidspunkt(organisasjonsnummer, sykdomstidslinje(), periode)
 
     internal fun builder(
         regler: ArbeidsgiverRegler,
