@@ -64,9 +64,6 @@ internal class NyesteVilkårsgrunnlagTest {
 
         val alder = Alder(LocalDate.of(1970, 1, 1))
         val grunnlagMap = vilkårsgrunnlagInnslag.grunnlagMap(alder)
-        val forventet = mapOf(vilkårsgrunnlagId to vilkårsgrunnlagElementData2.parseDataForVilkårsvurdering(alder).second)
         assertEquals(10.prosent, grunnlagMap.entries.single().value.inspektør.avviksprosent)
-
-        //assertEquals(forventet, grunnlagMap)
     }
 }
