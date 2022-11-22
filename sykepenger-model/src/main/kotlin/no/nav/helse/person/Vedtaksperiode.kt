@@ -133,7 +133,7 @@ internal class Vedtaksperiode private constructor(
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode> {
 
     private val jurist = jurist.medVedtaksperiode(id, hendelseIder, sykmeldingsperiode)
-    private val skjæringstidspunkt get() = person.skjæringstidspunkt(sykdomstidslinje.sykdomsperiode() ?: periode)
+    private val skjæringstidspunkt get() = person.skjæringstidspunkt(periode)
     private val periodetype get() = arbeidsgiver.periodetype(periode)
     private val vilkårsgrunnlag get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)
     private val inntektskilde get() = vilkårsgrunnlag?.inntektskilde() ?: Inntektskilde.EN_ARBEIDSGIVER
@@ -947,12 +947,13 @@ internal class Vedtaksperiode private constructor(
         override val type = START
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            val harSenereUtbetalinger = vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING(vedtaksperiode)).isNotEmpty()
-            val harSenereAUU = vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_UTEN_UTBETALING(vedtaksperiode)).isNotEmpty()
-            if (Toggle.RevurderOutOfOrder.enabled && (harSenereUtbetalinger || harSenereAUU)) {
-                søknad.varsel(RV_OO_1)
-            }
             vedtaksperiode.håndterSøknad(søknad) {
+                val harSenereUtbetalinger = vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING(vedtaksperiode)).isNotEmpty()
+                val harSenereAUU = vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_UTEN_UTBETALING(vedtaksperiode)).isNotEmpty()
+                if (Toggle.RevurderOutOfOrder.enabled && (harSenereUtbetalinger || harSenereAUU)) {
+                    søknad.varsel(RV_OO_1)
+                }
+
                 val rettFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)
                 when {
                     rettFør != null && rettFør.tilstand !in setOf(AvsluttetUtenUtbetaling, AvventerInntektsmeldingEllerHistorikk) -> AvventerBlokkerendePeriode
@@ -1483,7 +1484,7 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.forkast(ytelser)
                 }
                 onSuccess {
-                    vedtaksperiode.skjæringstidspunktFraInfotrygd = person.skjæringstidspunkt(vedtaksperiode.sykdomstidslinje.sykdomsperiode() ?: vedtaksperiode.periode)
+                    vedtaksperiode.skjæringstidspunktFraInfotrygd = person.skjæringstidspunkt(vedtaksperiode.periode)
                 }
                 valider {
                     infotrygdhistorikk.valider(
@@ -2083,7 +2084,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-            vedtaksperiode.skjæringstidspunktFraInfotrygd = vedtaksperiode.person.skjæringstidspunkt(vedtaksperiode.sykdomstidslinje.sykdomsperiode() ?: vedtaksperiode.periode)
+            vedtaksperiode.skjæringstidspunktFraInfotrygd = vedtaksperiode.person.skjæringstidspunkt(vedtaksperiode.periode)
             vedtaksperiode.låsOpp()
         }
 

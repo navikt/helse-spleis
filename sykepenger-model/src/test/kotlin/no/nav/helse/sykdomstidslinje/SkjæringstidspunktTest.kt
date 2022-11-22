@@ -70,6 +70,13 @@ internal class SkjæringstidspunktTest {
     }
 
     @Test
+    fun `arbeid gjenopptatt med syk helg på slutten`() {
+        assertFørsteDagErSkjæringstidspunkt(10.S + 2.A + 2.S)
+        resetSeed(1.januar)
+        assertDagenErSkjæringstidspunkt(13.januar, 12.A + 2.S)
+    }
+
+    @Test
     fun `skjæringstidspunkt er første arbeidsgiverdag, sykedag eller syk helgedag i en sammenhengende periode`() {
         assertFørsteDagErSkjæringstidspunkt(2.S)
         assertFørsteDagErSkjæringstidspunkt(2.U)
@@ -90,6 +97,7 @@ internal class SkjæringstidspunktTest {
         perioder(2.S, 2.P, 2.S) { periode1, _, _ ->
             assertFørsteDagErSkjæringstidspunkt(periode1, this)
         }
+        resetSeed(2.januar)
         perioder(2.S, 2.opphold, 1.H) { _, _, sisteSykedager ->
             assertFørsteDagErSkjæringstidspunkt(sisteSykedager, this)
         }
@@ -437,7 +445,7 @@ internal class SkjæringstidspunktTest {
             dagen: LocalDate,
             sykdomstidslinje: Sykdomstidslinje
         ) {
-            val skjæringstidspunkt = sykdomstidslinje.sisteSkjæringstidspunkt()
+            val skjæringstidspunkt = Skjæringstidspunkt(sykdomstidslinje.periode()!!, sykdomstidslinje).result()
             assertEquals(
                 dagen,
                 skjæringstidspunkt

@@ -115,7 +115,8 @@ internal abstract class HistorieTest {
         return infotrygdhistorikk.buildUtbetalingstidslinje(orgnr, sykdomstidslinje, utbetalingstidslinjebuilder, SubsumsjonObserver.NullObserver).let { utbetalingstidslinjebuilder.result() }
     }
 
-    protected fun skjæringstidspunkt(fom: LocalDate) = infotrygdhistorikk.skjæringstidspunkt(Periode(fom, fom), arbeidsgiverSykdomstidslinje.values.toList())
+    protected fun skjæringstidspunkt(fom: LocalDate) = infotrygdhistorikk.skjæringstidspunkt(Periode(LocalDate.MIN, fom), arbeidsgiverSykdomstidslinje.values.toList())
+        .takeUnless { it == LocalDate.MIN } ?: fom
 
     protected fun assertSkjæringstidspunkter(vararg datoer: LocalDate) {
         assertEquals(datoer.toList(), infotrygdhistorikk.skjæringstidspunkter(arbeidsgiverSykdomstidslinje.values.toList()))

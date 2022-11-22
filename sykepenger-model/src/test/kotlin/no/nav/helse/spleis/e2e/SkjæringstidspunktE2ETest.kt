@@ -111,6 +111,9 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, orgnummer = a2)
+        assertEquals(1.januar, inspektør(a1).skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(24.februar, inspektør(a1).skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
     }
 
     @Test
@@ -122,6 +125,10 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(23.februar, 24.mars, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent), Arbeid(20.februar, 25.februar), orgnummer = a2)
+
+        assertEquals(1.januar, inspektør(a1).skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(23.februar, inspektør(a1).skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, beregnetInntekt = 15000.månedlig)
         håndterInntektsmelding(listOf(25.januar til 10.februar), orgnummer = a2, beregnetInntekt = 16000.månedlig)
@@ -169,5 +176,9 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, orgnummer = a2)
+
+        assertEquals(1.januar, inspektør(a1).skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(23.februar, inspektør(a1).skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
     }
 }

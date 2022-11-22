@@ -19,6 +19,7 @@ import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenInfo
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.sisteSkjæringstidspunkt
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.opphold

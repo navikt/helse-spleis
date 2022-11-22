@@ -58,6 +58,7 @@ import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.skjæringstidspunkt
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling.Companion.gjelderFeriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -959,7 +960,7 @@ internal class Arbeidsgiver private constructor(
         val førstePeriodeMedUtbetaling = vedtaksperioder.firstOrNull(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt))
             ?: vedtaksperioder.firstOrNull(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             ?: return null
-        return sykdomstidslinje().subset(førstePeriodeMedUtbetaling.periode().oppdaterFom(skjæringstidspunkt)).sisteSkjæringstidspunkt()
+        return sykdomstidslinje().skjæringstidspunkt(førstePeriodeMedUtbetaling.periode().oppdaterFom(skjæringstidspunkt))
     }
 
     internal fun periodetype(periode: Periode): Periodetype {

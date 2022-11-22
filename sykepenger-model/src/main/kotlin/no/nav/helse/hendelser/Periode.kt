@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import no.nav.helse.erRettFør
+import no.nav.helse.forrigeDag
 import no.nav.helse.nesteArbeidsdag
 import no.nav.helse.nesteDag
 
@@ -125,11 +126,14 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
 
     override operator fun iterator() = object : Iterator<LocalDate> {
         private var currentDate: LocalDate = start
-
         override fun hasNext() = endInclusive >= currentDate
+        override fun next() = currentDate.also { currentDate = it.nesteDag }
+    }
 
-        override fun next() =
-            currentDate.also { currentDate = it.plusDays(1) }
+    internal fun reversedIterator() = object : Iterator<LocalDate> {
+        private var currentDate: LocalDate = endInclusive
+        override fun hasNext() = start <= currentDate
+        override fun next() = currentDate.also { currentDate = it.forrigeDag }
     }
 
     internal fun subset(periode: Periode) =

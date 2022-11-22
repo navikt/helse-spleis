@@ -26,6 +26,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class PeriodetypeTest : AbstractEndToEndTest() {
@@ -239,6 +240,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
     }
 
     @Test
+    @Disabled("gir ikke mening å teste siden vi ikke støtter OVERGANG_FRA_IT: periodene forkastes, og sykdomstidslinjen tømmes")
     fun `infotrygd - spleis - infotrygd - spleis`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent))
