@@ -40,6 +40,7 @@ import no.nav.helse.spleis.e2e.speilApi
 import no.nav.helse.spleis.e2e.standardSimuleringsresultat
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -299,4 +300,34 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val vilkårsgrunnlag = speilApi().vilkårsgrunnlag.get(speilVilkårsgrunnlagId) as? SpleisVilkårsgrunnlag
         assertEquals(INNTEKT, vilkårsgrunnlag!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.single().beløp.månedlig)
     }
+
+    @Test
+    fun `Endring til ingen refusjon i forlengelsen`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), 1.februar, refusjon = Inntektsmelding.Refusjon(INGEN, null))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+
+        val januarVilkårsgrunnlagId = (speilApi().arbeidsgivere.first().generasjoner.last().perioder.last() as BeregnetPeriode).vilkårsgrunnlagId
+        val februarVilkårsgrunnlagId = (speilApi().arbeidsgivere.first().generasjoner.last().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val vilkårsgrunnlag = speilApi().vilkårsgrunnlag
+
+        assertEquals(1, vilkårsgrunnlag[januarVilkårsgrunnlagId]!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.size)
+        assertEquals(2, vilkårsgrunnlag[februarVilkårsgrunnlagId]!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.size)
+
+        val førsteRefusjonsopplysning = vilkårsgrunnlag[februarVilkårsgrunnlagId]!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.first()
+        val sisteRefusjonsopplysning = vilkårsgrunnlag[februarVilkårsgrunnlagId]!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.last()
+
+        assertEquals(1.januar, førsteRefusjonsopplysning.fom)
+        assertEquals(31.januar, førsteRefusjonsopplysning.tom)
+        assertEquals(INNTEKT, førsteRefusjonsopplysning.beløp.månedlig)
+
+        assertEquals(1.februar, sisteRefusjonsopplysning.fom)
+        assertEquals(null, sisteRefusjonsopplysning.tom)
+        assertEquals(INGEN, sisteRefusjonsopplysning.beløp.månedlig)
+
+    }
+
 }

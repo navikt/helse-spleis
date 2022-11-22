@@ -278,7 +278,8 @@ internal data class PersonData(
     ) {
         companion object {
             fun List<VilkårsgrunnlagElementData>.grunnlagMap(alder: Alder) = this
-                .associateBy({ it.vilkårsgrunnlagId }) { it.parseDataForVilkårsvurdering(alder).second }
+                .groupBy({ it.vilkårsgrunnlagId }) { it.parseDataForVilkårsvurdering(alder).second }
+                .mapValues { (_, vilkårsgrunnlag) -> vilkårsgrunnlag.first() }
 
         }
         internal fun parseDataForVilkårsvurdering(alder: Alder): Pair<LocalDate, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement> = skjæringstidspunkt to when (type) {
