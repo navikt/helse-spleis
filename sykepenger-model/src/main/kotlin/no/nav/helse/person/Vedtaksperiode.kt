@@ -1598,7 +1598,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerHistorikk) {
+            if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode) {
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
             }
             trengerSimulering(vedtaksperiode, påminnelse)
@@ -1689,7 +1689,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             super.håndter(vedtaksperiode, inntektsmelding)
-            vedtaksperiode.tilstand(inntektsmelding, AvventerHistorikk)
+            vedtaksperiode.tilstand(inntektsmelding, AvventerBlokkerendePeriode)
         }
 
         override fun håndter(
@@ -1710,7 +1710,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.oppdaterHistorikk(hendelse)
-            vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
@@ -1726,7 +1726,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerHistorikk) {
+            if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode) {
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
             }
             vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
@@ -1742,10 +1742,7 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.vilkårsgrunnlag == null) return vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode) {
                 hendelse.info("Mangler vilkårsgrunnlag for ${vedtaksperiode.skjæringstidspunkt}")
             }
-            if (vedtaksperiode.utbetalinger.erHistorikkEndretSidenBeregning(infotrygdhistorikk)) return vedtaksperiode.tilstand(
-                hendelse,
-                AvventerHistorikk
-            ) {
+            if (vedtaksperiode.utbetalinger.erHistorikkEndretSidenBeregning(infotrygdhistorikk)) return vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode) {
                 hendelse.info("Infotrygdhistorikken har endret seg, reberegner periode")
             }
 
@@ -1943,7 +1940,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             when {
-                vedtaksperiode.utbetalinger.erUbetalt() -> vedtaksperiode.tilstand(påminnelse, AvventerHistorikk)
+                vedtaksperiode.utbetalinger.erUbetalt() -> vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode)
                 vedtaksperiode.utbetalinger.erUtbetalt() -> vedtaksperiode.tilstand(påminnelse, Avsluttet)
                 vedtaksperiode.utbetalinger.harFeilet() -> vedtaksperiode.tilstand(påminnelse, UtbetalingFeilet)
             }
@@ -1971,7 +1968,7 @@ internal class Vedtaksperiode private constructor(
                 return vedtaksperiode.utbetalinger.reberegnUtbetaling(påminnelse, {
                     vedtaksperiode.tilstand(påminnelse, AvventerHistorikkRevurdering)
                 }) {
-                    vedtaksperiode.tilstand(påminnelse, AvventerHistorikk) {
+                    vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode) {
                         påminnelse.info("Reberegner periode ettersom utbetaling er avvist og ikke kan forsøkes på nytt")
                     }
                 }

@@ -58,7 +58,7 @@ internal class ArbeidsgiverperiodeBuilderBuilder : ArbeidsgiverperiodeMediator {
         aktivArbeidsgiverperiode?.utbetalingsdag(dato)
     }
     override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse) {
-        aktivArbeidsgiverperiode?.oppholdsdag(dato)
+        aktivArbeidsgiverperiode?.kjentDag(dato)
     }
 
     private fun nyDag(dagen: LocalDate) {

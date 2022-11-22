@@ -191,6 +191,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
+            "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_HISTORIKK"
         )
     }
@@ -219,6 +220,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
+            "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
@@ -258,6 +260,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
+            "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",

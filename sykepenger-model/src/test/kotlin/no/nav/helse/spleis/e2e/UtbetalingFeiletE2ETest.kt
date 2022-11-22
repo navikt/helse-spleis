@@ -100,6 +100,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
     fun `utbetaling feilet med ett oppdrag status avvist`() {
         tilGodkjent(1.januar, 31.januar, 100.prosent, 1.januar)
         håndterUtbetalt(status = Oppdragstatus.AVVIST)
+        nullstillTilstandsendringer()
         håndterPåminnelse(1.vedtaksperiode, UTBETALING_FEILET)
         håndterYtelser(1.vedtaksperiode)
         assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
@@ -114,7 +115,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
             assertEquals(31.januar, utbetalingInspektør.arbeidsgiverOppdrag[0].tom)
             assertTrue(utbetalingInspektør.arbeidsgiverOppdrag[0].erForskjell())
         }
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALING_FEILET, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertTilstander(1.vedtaksperiode, UTBETALING_FEILET, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 
     @Test
@@ -122,6 +123,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengTilGodkjentVedtak(1.februar, 28.februar)
         håndterUtbetalt(status = Oppdragstatus.AVVIST)
+        nullstillTilstandsendringer()
         håndterPåminnelse(2.vedtaksperiode, UTBETALING_FEILET)
         håndterYtelser(2.vedtaksperiode)
         val første = inspektør.utbetaling(0)
@@ -134,8 +136,8 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
             assertEquals(28.februar, utbetalingInspektør.arbeidsgiverOppdrag[0].tom)
             assertTrue(utbetalingInspektør.arbeidsgiverOppdrag[0].erForskjell())
         }
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALING_FEILET, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, UTBETALING_FEILET, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 
     @Test
@@ -150,6 +152,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT, fagsystemId = inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         håndterUtbetalt(status = Oppdragstatus.AVVIST, fagsystemId = inspektør.utbetaling(0).inspektør.personOppdrag.inspektør.fagsystemId())
+        nullstillTilstandsendringer()
         håndterPåminnelse(1.vedtaksperiode, UTBETALING_FEILET)
         håndterYtelser(1.vedtaksperiode)
         val første = inspektør.utbetaling(0)
@@ -170,8 +173,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
             assertEquals(31.januar, utbetalingInspektør.personOppdrag[0].tom)
             assertTrue(utbetalingInspektør.personOppdrag[0].erForskjell())
         }
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALING_FEILET, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
+        assertTilstander(1.vedtaksperiode, UTBETALING_FEILET, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
     }
 
     @Test
@@ -186,6 +188,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(status = Oppdragstatus.AVVIST, fagsystemId = inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT, fagsystemId = inspektør.utbetaling(0).inspektør.personOppdrag.inspektør.fagsystemId())
+        nullstillTilstandsendringer()
         håndterPåminnelse(1.vedtaksperiode, UTBETALING_FEILET)
         håndterYtelser(1.vedtaksperiode)
         val første = inspektør.utbetaling(0)
@@ -206,8 +209,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
             assertEquals(31.januar, utbetalingInspektør.personOppdrag[0].tom)
             assertFalse(utbetalingInspektør.personOppdrag[0].erForskjell())
         }
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALING_FEILET, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
+        assertTilstander(1.vedtaksperiode, UTBETALING_FEILET, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
     }
 
     @Test
