@@ -3,7 +3,6 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
@@ -118,12 +117,6 @@ internal class Refusjonshistorikk {
                 }
 
                 internal fun Refusjonshistorikk.erTom() = refusjoner.isEmpty()
-                internal fun Refusjon.gråsonen(): Periode? {
-                    val førsteDagEtterArbeidsgiverperioden = arbeidsgiverperioder.maxOfOrNull { it.endInclusive }?.nesteDag ?: return null
-                    val dagenFørFørsteFraværsdag = førsteFraværsdag?.forrigeDag ?: return null
-                    if (dagenFørFørsteFraværsdag >= førsteDagEtterArbeidsgiverperioden) return Periode(førsteDagEtterArbeidsgiverperioden, dagenFørFørsteFraværsdag)
-                    return null
-                }
 
                 internal fun Refusjon.refusjonsopplysninger(): Refusjonsopplysninger {
                     val refusjonsopplysningBuilder = RefusjonsopplysningerBuilder()
