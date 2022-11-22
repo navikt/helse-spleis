@@ -518,7 +518,7 @@ internal class Vedtaksperiode private constructor(
         periode = periode.oppdaterFom(søknad.periode())
         oppdaterHistorikk(søknad)
         søknad.valider(periode, jurist())
-        søknad.validerInntektskilder(this.person.vilkårsgrunnlagFor(this.skjæringstidspunkt) == null)
+        søknad.validerInntektskilder(vilkårsgrunnlag == null)
         if (søknad.harFunksjonelleFeilEllerVerre()) {
             return forkast(søknad)
         }
@@ -548,7 +548,7 @@ internal class Vedtaksperiode private constructor(
         if (person.harSkjæringstidspunktSenereEnn(skjæringstidspunkt)) return søknad.funksjonellFeil(RV_SØ_14)
         if (søknad.harArbeidsdager()) return søknad.funksjonellFeil(RV_SØ_15)
         søknad.valider(periode, jurist())
-        søknad.validerInntektskilder(this.person.vilkårsgrunnlagFor(this.skjæringstidspunkt) == null)
+        søknad.validerInntektskilder(vilkårsgrunnlag == null)
     }
 
     private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
@@ -1167,10 +1167,9 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiverUtbetalingerFun: (SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
         ) {
 
-            val vilkårsgrunnlag = vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)
-                ?: return vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøvingRevurdering) {
-                    ytelser.info("Trenger å utføre vilkårsprøving før vi kan beregne utbetaling for revurderingen.")
-                }
+            val vilkårsgrunnlag = vedtaksperiode.vilkårsgrunnlag ?: return vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøvingRevurdering) {
+                ytelser.info("Trenger å utføre vilkårsprøving før vi kan beregne utbetaling for revurderingen.")
+            }
 
             FunksjonelleFeilTilVarsler.wrap(ytelser) {
                 vedtaksperiode.validerYtelserForSkjæringstidspunkt(ytelser)
@@ -1328,7 +1327,7 @@ internal class Vedtaksperiode private constructor(
                 onSuccess {
                     if (!vedtaksperiode.forventerInntekt()) {
                         vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
-                    } else if (person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) is InfotrygdVilkårsgrunnlag) {
+                    } else if (vedtaksperiode.vilkårsgrunnlag is InfotrygdVilkårsgrunnlag) {
                         info("Oppdaget at perioden startet i infotrygd")
                         vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
                     } else if (harNødvendigOpplysningerFraArbeidsgiver(vedtaksperiode, hendelse)) {
@@ -1496,7 +1495,7 @@ internal class Vedtaksperiode private constructor(
                 valider { ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
 
                 onSuccess {
-                    if (person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null) {
+                    if (vedtaksperiode.vilkårsgrunnlag == null) {
                         return@håndter vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøving) {
                             // TODO: Mangler ofte vilkårsgrunnlag for perioder (https://logs.adeo.no/goto/844ac8a834ecd9c7ee5022ba0f89e569).
                             info("Mangler vilkårsgrunnlag for ${vedtaksperiode.skjæringstidspunkt}")
@@ -1506,7 +1505,7 @@ internal class Vedtaksperiode private constructor(
 
                 lateinit var vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
                 onSuccess {
-                    vilkårsgrunnlag = requireNotNull(person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt))
+                    vilkårsgrunnlag = requireNotNull(vedtaksperiode.vilkårsgrunnlag)
                     ytelser.kontekst(vilkårsgrunnlag)
                 }
                 valider {
@@ -1740,7 +1739,7 @@ internal class Vedtaksperiode private constructor(
             hendelse: IAktivitetslogg,
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
-            if (person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null) return vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode) {
+            if (vedtaksperiode.vilkårsgrunnlag == null) return vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode) {
                 hendelse.info("Mangler vilkårsgrunnlag for ${vedtaksperiode.skjæringstidspunkt}")
             }
             if (vedtaksperiode.utbetalinger.erHistorikkEndretSidenBeregning(infotrygdhistorikk)) return vedtaksperiode.tilstand(
@@ -1847,7 +1846,7 @@ internal class Vedtaksperiode private constructor(
             if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerHistorikkRevurdering) {
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
             }
-            if (vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null) return vedtaksperiode.tilstand(påminnelse, AvventerHistorikkRevurdering) {
+            if (vedtaksperiode.vilkårsgrunnlag == null) return vedtaksperiode.tilstand(påminnelse, AvventerHistorikkRevurdering) {
                 påminnelse.info("Reberegner perioden ettersom skjæringstidspunktet har flyttet seg")
             }
             vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
