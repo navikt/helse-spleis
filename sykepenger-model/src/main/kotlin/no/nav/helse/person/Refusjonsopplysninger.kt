@@ -157,6 +157,18 @@ class Refusjonsopplysning(
         internal fun refusjonsbeløp(dag: LocalDate) = checkNotNull(refusjonsbeløpOrNull(dag)) {
             "Fant ikke refusjonsbeløp for $dag. Har refusjonsopplysninger for ${validerteRefusjonsopplysninger.map { "${it.fom}-${it.tom}" }}"
         }
+        internal fun refusjonsbeløp(skjæringstidspunkt: LocalDate, dag: LocalDate, manglerRefusjonsopplysning: (LocalDate, Inntekt) -> Unit): Inntekt {
+            val lagretRefusjonsbeløp = refusjonsbeløpOrNull(dag)
+            if (lagretRefusjonsbeløp != null) return lagretRefusjonsbeløp
+            val førsteRefusjonsopplysning = checkNotNull(validerteRefusjonsopplysninger.minByOrNull { it.fom }) {
+                "Har ingen refusjonsopplysninger på vilkårsgrunnlag med skjæringstidspunkt $skjæringstidspunkt"
+            }
+            check(dag >= skjæringstidspunkt && dag < førsteRefusjonsopplysning.fom) {
+                "Har ingen refusjonsopplysninger på vilkårsgrunnlag md skjæringstidspunkt $skjæringstidspunkt som dekker $dag"
+            }
+            manglerRefusjonsopplysning(dag, førsteRefusjonsopplysning.beløp)
+            return førsteRefusjonsopplysning.beløp
+        }
         private fun dekker(dag: LocalDate) = validerteRefusjonsopplysninger.any { it.dekker(dag) }
         private fun dekker(periode: Periode) = periode.all { dag -> dekker(dag) }
 
