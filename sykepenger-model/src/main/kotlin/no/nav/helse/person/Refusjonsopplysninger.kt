@@ -146,7 +146,7 @@ class Refusjonsopplysning(
             organisasjonsnummer: String
         ): Boolean {
             val førsteRefusjonsopplysning = førsteRefusjonsopplysning() ?: return false
-            val dekkes =  utbetalingsdager.filter { utbetalingsdag -> dekker(utbetalingsdag) }
+            val dekkes = utbetalingsdager.filter { utbetalingsdag -> dekker(utbetalingsdag) }
             val aksepteres = utbetalingsdager.filter { utbetalingsdag -> førsteRefusjonsopplysning.aksepterer(skjæringstidspunkt, utbetalingsdag) }
             val mangler = (utbetalingsdager - dekkes - aksepteres).takeUnless { it.isEmpty() } ?: return true
             hendelse.info("Mangler refusjonsopplysninger på orgnummer $organisasjonsnummer for periodene ${mangler.grupperSammenhengendePerioder()}")
@@ -162,10 +162,6 @@ class Refusjonsopplysning(
         ) = hensyntattSisteOppholdagFørUtbetalingsdager(sisteOppholdsdagFørUtbetalingsdager).harNødvendigRefusjonsopplysninger(skjæringstidspunkt, utbetalingsdager, hendelse, organisasjonsnummer)
 
         internal fun refusjonsbeløpOrNull(dag: LocalDate) = validerteRefusjonsopplysninger.singleOrNull { it.dekker(dag) }?.beløp
-        internal fun refusjonsbeløp(dag: LocalDate) = checkNotNull(refusjonsbeløpOrNull(dag)) {
-            "Fant ikke refusjonsbeløp for $dag. Har refusjonsopplysninger for ${validerteRefusjonsopplysninger.map { "${it.fom}-${it.tom}" }}"
-        }
-
         private fun førsteRefusjonsopplysning() = validerteRefusjonsopplysninger.minByOrNull { it.fom }
 
         internal fun refusjonsbeløp(skjæringstidspunkt: LocalDate, dag: LocalDate, manglerRefusjonsopplysning: ManglerRefusjonsopplysning): Inntekt {
@@ -174,11 +170,12 @@ class Refusjonsopplysning(
             val førsteRefusjonsopplysning = checkNotNull(førsteRefusjonsopplysning()) {
                 "Har ingen refusjonsopplysninger på vilkårsgrunnlag med skjæringstidspunkt $skjæringstidspunkt"
             }
-            check(dag >= skjæringstidspunkt && dag < førsteRefusjonsopplysning.fom) {
+            check(førsteRefusjonsopplysning.aksepterer(skjæringstidspunkt, dag)) {
                 "Har ingen refusjonsopplysninger på vilkårsgrunnlag md skjæringstidspunkt $skjæringstidspunkt som dekker $dag"
             }
-            manglerRefusjonsopplysning(dag, førsteRefusjonsopplysning.beløp)
-            return førsteRefusjonsopplysning.beløp
+            return førsteRefusjonsopplysning.beløp.also { benyttetRefusjonsbeløp ->
+                manglerRefusjonsopplysning(dag, benyttetRefusjonsbeløp)
+            }
         }
         private fun dekker(dag: LocalDate) = validerteRefusjonsopplysninger.any { it.dekker(dag) }
 

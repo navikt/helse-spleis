@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.refusjon
 
+import java.time.LocalDate
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -42,7 +43,7 @@ internal class SerialiseringAvRefusjonsopplysningerE2ETest : AbstractEndToEndTes
 
     private fun Refusjonsopplysninger.assertRefusjonsbeløp(periode: Periode, beløp: Inntekt) {
         periode.forEach { dag ->
-            assertEquals(beløp, refusjonsbeløp(dag))
+            assertEquals(beløp, refusjonsbeløp(skjæringstidspunkt = LocalDate.MAX, dag = dag, manglerRefusjonsopplysning = {_,_->}))
         }
     }
 }
