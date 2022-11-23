@@ -802,11 +802,6 @@ class Person private constructor(
     internal fun harSkjæringstidspunktSenereEnn(skjæringstidspunkt: LocalDate) =
         skjæringstidspunkter().any { it.isAfter(skjæringstidspunkt) }
 
-    internal fun finnesEnVedtaksperiodeRettEtter(ny: Vedtaksperiode) =
-        arbeidsgivere.any { it.finnVedtaksperiodeRettEtter(ny) != null }
-
-    internal fun finnesEnVedtaksperiodeSomOverlapperOgStarterFør(ny: Vedtaksperiode) =
-        arbeidsgivere.any { it.finnVedtaksperiodeSomOverlapperOgStarterFør(ny) != null }
     internal fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt)
 

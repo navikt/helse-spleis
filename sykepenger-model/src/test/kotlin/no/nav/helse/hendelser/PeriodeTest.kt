@@ -275,6 +275,12 @@ internal class PeriodeTest {
         assertTrue(listOf(1.januar til 31.januar, 1.januar til 1.januar).overlapper())
     }
 
+    @Test
+    fun `antall dager`() {
+        val periode = 1.januar til 31.januar
+        assertEquals(31, periode.count())
+    }
+
     private fun assertSize(expected: Int, periode: Periode) {
         var count = 0
         periode.forEach { _ -> count++ }

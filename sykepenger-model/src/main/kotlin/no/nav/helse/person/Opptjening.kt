@@ -26,14 +26,14 @@ internal class Opptjening private constructor(
             skjæringstidspunkt = skjæringstidspunkt,
             tilstrekkeligAntallOpptjeningsdager = TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER,
             arbeidsforhold = arbeidsforholdForJurist,
-            antallOpptjeningsdager = opptjeningsperiode.dagerMellom().toInt()
+            antallOpptjeningsdager = opptjeningsperiode.dagerMellom()
         )
     }
 
     internal fun ansattVedSkjæringstidspunkt(orgnummer: String) =
         arbeidsforhold.any { it.ansattVedSkjæringstidspunkt(orgnummer, skjæringstidspunkt) }
 
-    internal fun opptjeningsdager() = opptjeningsperiode.dagerMellom().toInt()
+    internal fun opptjeningsdager() = opptjeningsperiode.dagerMellom()
     internal fun erOppfylt(): Boolean = opptjeningsperiode.dagerMellom() >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
 
     internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
@@ -108,6 +108,7 @@ internal class Opptjening private constructor(
     }
 
     companion object {
+        private fun Periode.dagerMellom() = count() - 1 // 😭
         private const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
 
         internal fun gjenopprett(skjæringstidspunkt: LocalDate, arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) =

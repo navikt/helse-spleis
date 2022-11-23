@@ -351,13 +351,25 @@ internal class Vedtaksperiode private constructor(
     internal fun nekterOpprettelseAvNyPeriode(ny: Vedtaksperiode, hendelse: Søknad) {
         if (ny.periode.start > this.periode.endInclusive) return
         kontekst(hendelse)
+        if (this.arbeidsgiver === ny.arbeidsgiver && this.periode.overlapperMed(ny.periode)) return hendelse.funksjonellFeil(RV_SØ_12)
+
+        // Vi er litt runde i kantene før perioden er utbetalt
         if (!this.utbetalinger.harAvsluttede() && !this.utbetalinger.utbetales()) return
+        // Vi er litt strengere etter perioden er utbetalt
+        if (this.arbeidsgiver === ny.arbeidsgiver && this.erMindreEnn16DagerEtter(ny)) return hendelse.funksjonellFeil(RV_SØ_11)
+
+        // Guarder med å ikke endre skjæringstidspunkt tilbake i tid.
+        // 🗯 At skjæringstidspunktet flyttes tilbake er ikke farlig ettersom vi da starter revurdering og vil vilkårsprøve på nytt
+        // Det som faktisk kan bli feil er perioder som overlapper og skjæringstidspunktet ikke endres, for da endres ikke sykepengegrunnlaget seg
+        // og vi kommer til å utbetale basert på skatteopplysninger for den ny arbeidsgiveren
+        if (ny.starterFørOgOverlapperMed(this)) return hendelse.funksjonellFeil(RV_SØ_12)
+        if (this.periode.erRettFør(ny.periode)) return hendelse.funksjonellFeil(RV_SØ_11)
+
         // TODO: kan støtte nye perioder mens vi utbetaler dersom TilUtbetaling håndterer startRevurdering
-        if (this.utbetalinger.utbetales()) return nyPeriodeTidligereEllerOverlappendeIkkeStøttet(hendelse, ny)
-        // årsaker til hvorfor vi ikke ønsker å opprette en ny periode
-        if (this.person.finnesEnVedtaksperiodeSomOverlapperOgStarterFør(ny)) return nyPeriodeTidligereEllerOverlappendeIkkeStøttet(hendelse, ny)
-        if (this.arbeidsgiver.harEnVedtaksperiodeMedMindreEnn16DagersGapEtter(ny)) return nyPeriodeTidligereEllerOverlappendeIkkeStøttet(hendelse, ny)
-        if (this.person.finnesEnVedtaksperiodeRettEtter(ny)) return nyPeriodeTidligereEllerOverlappendeIkkeStøttet(hendelse, ny)
+        if (this.utbetalinger.utbetales()) return hendelse.funksjonellFeil(when (ny.periode.overlapperMed(this.periode)) {
+            true -> RV_SØ_12
+            false -> RV_SØ_11
+        })
     }
 
     internal fun håndterRevurdertUtbetaling(revurdertUtbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg, other: Vedtaksperiode) {
@@ -376,7 +388,7 @@ internal class Vedtaksperiode private constructor(
     internal fun erVedtaksperiodeRettFør(other: Vedtaksperiode) =
         this.sykdomstidslinje.erRettFør(other.sykdomstidslinje)
 
-    internal fun starterFørOgOverlapperMed(other: Vedtaksperiode) =
+    private fun starterFørOgOverlapperMed(other: Vedtaksperiode) =
         this.periode.overlapperMed(other.periode) && this før other
 
     internal fun erSykeperiodeAvsluttetUtenUtbetalingRettFør(other: Vedtaksperiode) =
@@ -782,15 +794,6 @@ internal class Vedtaksperiode private constructor(
                 arbeidsgiver.finnSammenhengendePeriode(skjæringstidspunkt)
                     .any { it.inntektsmeldingInfo != null } ||
                 sykdomstidslinje.any { it.kommerFra(Søknad::class) }
-
-    private fun nyPeriodeTidligereEllerOverlappendeIkkeStøttet(hendelse: IAktivitetslogg, ny: Vedtaksperiode) {
-        val feilkode = when (ny.periode.overlapperMed(this.periode)) {
-            true -> RV_SØ_12
-            false -> RV_SØ_11
-        }
-        hendelse.funksjonellFeil(feilkode)
-        forkast(hendelse)
-    }
 
     // Gang of four State pattern
     internal sealed interface Vedtaksperiodetilstand : Aktivitetskontekst {
@@ -1818,10 +1821,9 @@ internal class Vedtaksperiode private constructor(
         tilstand.valider(this, periode, skjæringstidspunkt, arbeidsgiver, ytelser, infotrygdhistorikk)
     }
 
-    internal fun erMindreEnn16DagerEtter(ny: Vedtaksperiode): Boolean {
-        val dagenEtterNy = ny.sykdomstidslinje.sisteDag().plusDays(1)
-        val førsteDagPåDenne = this.sykdomstidslinje.førsteDag()
-        return (dagenEtterNy til førsteDagPåDenne).dagerMellom().toInt() < 16
+    private fun erMindreEnn16DagerEtter(ny: Vedtaksperiode): Boolean {
+        val dagerMellom = ny.periode.periodeMellom(this.periode.start)?.count() ?: return false
+        return dagerMellom < 16L
     }
 
     internal object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {

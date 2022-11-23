@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 import no.nav.helse.erRettFør
 import no.nav.helse.nesteArbeidsdag
 import no.nav.helse.nesteDag
@@ -75,7 +74,6 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
     internal fun erRettFør(other: LocalDate) = this.endInclusive.erRettFør(other)
 
     private fun rettFørEllerOverlapper(dato: LocalDate) = start < dato && endInclusive.nesteArbeidsdag() >= dato
-    internal fun dagerMellom() = ChronoUnit.DAYS.between(start, endInclusive)
 
     internal fun periodeMellom(other: LocalDate): Periode? {
         val enDagFør = other.minusDays(1)

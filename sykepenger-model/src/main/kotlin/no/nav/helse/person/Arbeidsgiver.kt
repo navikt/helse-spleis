@@ -910,11 +910,6 @@ internal class Arbeidsgiver private constructor(
             vedtaksperiode.erVedtaksperiodeRettFør(other)
         }
 
-    internal fun finnVedtaksperiodeSomOverlapperOgStarterFør(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperioder.firstOrNull { other ->
-            vedtaksperiode.starterFørOgOverlapperMed(other)
-        }
-
     internal fun finnSykeperioderAvsluttetUtenUtbetalingRettFør(vedtaksperiode: Vedtaksperiode) =
         finnSykeperioderAvsluttetUtenUtbetalingRettFør(vedtaksperiode, emptyList())
 
@@ -1050,9 +1045,6 @@ internal class Arbeidsgiver private constructor(
     internal fun harSykmeldingsperiodeFør(dato: LocalDate) = sykmeldingsperioder.harSykmeldingsperiodeFør(dato)
     internal fun kanForkastes(vedtaksperiodeUtbetalinger: VedtaksperiodeUtbetalinger) =
         vedtaksperiodeUtbetalinger.kanForkastes(utbetalinger)
-
-    internal fun harEnVedtaksperiodeMedMindreEnn16DagersGapEtter(ny: Vedtaksperiode) =
-        vedtaksperioder.filter { it etter ny }.any { it.erMindreEnn16DagerEtter(ny) }
 
     internal class JsonRestorer private constructor() {
         internal companion object {
