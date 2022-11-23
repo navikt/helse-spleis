@@ -479,14 +479,6 @@ internal class Utbetaling private constructor(
             return overlappendeUtbetalingsperioder.isEmpty()
         }
 
-        internal fun List<Utbetaling>.harOverlappendeUtbetalinger(): Boolean {
-            val perioder = aktiveMedUtbetaling().flatMap { overlappendeUtbetalingsperioder(it) }.toSet()
-            if (perioder.isNotEmpty()) {
-                sikkerlogg.warn("Fant overlappende utbetalinger innenfor periodene $perioder")
-            }
-            return perioder.isNotEmpty()
-        }
-
         private fun List<Utbetaling>.overlappendeUtbetalingsperioder(other: Utbetaling): List<Periode> {
             if (other.oppdragsperiode == null) return emptyList()
             return aktiveMedUtbetaling()
