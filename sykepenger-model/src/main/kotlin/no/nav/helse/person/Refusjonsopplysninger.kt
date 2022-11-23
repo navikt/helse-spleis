@@ -73,6 +73,9 @@ class Refusjonsopplysning(
         return meldingsreferanseId == other.meldingsreferanseId && fom == other.fom && tom == other.tom && beløp == other.beløp
     }
 
+    private fun funksjoneltLik(other: Refusjonsopplysning) =
+        fom == other.fom && tom == other.tom && beløp == other.beløp
+
     override fun toString() = "$fom - $tom, ${beløp.reflection { _, _, dagligDouble, _ -> dagligDouble }} ($meldingsreferanseId)"
 
     override fun hashCode(): Int {
@@ -80,7 +83,6 @@ class Refusjonsopplysning(
         result = 31 * result + fom.hashCode()
         result = 31 * result + (tom?.hashCode() ?: 0)
         result = 31 * result + beløp.hashCode()
-        result = 31 * result + periode.hashCode()
         return result
     }
 
@@ -124,6 +126,9 @@ class Refusjonsopplysning(
         internal fun merge(nyeRefusjonsopplysninger: Refusjonsopplysninger): Refusjonsopplysninger {
             return Refusjonsopplysninger(validerteRefusjonsopplysninger.merge(nyeRefusjonsopplysninger.validerteRefusjonsopplysninger))
         }
+        private fun funksjoneltInneholder(other: Refusjonsopplysning) = validerteRefusjonsopplysninger.any { it.funksjoneltLik(other) }
+        internal operator fun minus(other: Refusjonsopplysninger) =
+            Refusjonsopplysninger(other.validerteRefusjonsopplysninger.filterNot { funksjoneltInneholder(it) })
 
         override fun equals(other: Any?): Boolean {
             if (other !is Refusjonsopplysninger) return false

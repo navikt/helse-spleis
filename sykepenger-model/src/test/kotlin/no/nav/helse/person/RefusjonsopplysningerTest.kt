@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.Companion.gjennopprett
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
 internal class RefusjonsopplysningerTest {
@@ -377,6 +379,46 @@ internal class RefusjonsopplysningerTest {
         assertTrue(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt = skjæringstidspunkt, periode = gråsonen))
     }
 
+    @Test
+    fun `hashCode skal fungere også for en åpen periode`() {
+        val refusjonsopplysning = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 1000.daglig)
+        assertDoesNotThrow { refusjonsopplysning.hashCode() }
+        assertDoesNotThrow { refusjonsopplysning.refusjonsopplysninger.hashCode() }
+    }
+
+    @Test
+    fun `Trekke to funksjonelt like refusjonsopplysninger fra hverandre gir tomme Refusjonsopplysninger`() {
+        val eksisterendeRefusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 1000.daglig).refusjonsopplysninger
+        val ønskedeRefusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 1000.daglig).refusjonsopplysninger
+        assertEquals(Refusjonsopplysninger(), eksisterendeRefusjonsopplysninger - ønskedeRefusjonsopplysninger)
+    }
+
+    @Test
+    fun `Identifisere nye refusjonsopplysninger`() {
+        val eksisterendeRefusjonsopplysninger = RefusjonsopplysningerBuilder()
+            .leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, 31.januar, 1500.daglig))
+            .leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.februar, 28.februar, 1200.daglig))
+            .leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.mars, 31.mars, 0.daglig))
+            .leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.april, 30.april, 1600.daglig))
+            .leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.mai, null, 1700.daglig))
+            .build()
+
+        val overstyringId = UUID.randomUUID()
+        val ønskedeRefusjonsopplysninger = RefusjonsopplysningerBuilder()
+            .leggTil(Refusjonsopplysning(overstyringId, 1.januar, 31.januar, 1500.daglig))
+            .leggTil(Refusjonsopplysning(overstyringId, 1.februar, 27.februar, 1200.daglig)) // 28.mars -> 27.februar
+            .leggTil(Refusjonsopplysning(overstyringId, 28.februar, 31.mars, 10.daglig)) // 1.mars -> 28.februar
+            .leggTil(Refusjonsopplysning(overstyringId, 1.april, 30.april, 1599.daglig)) // 1600.daglig -> 1599.dalig
+            .leggTil(Refusjonsopplysning(overstyringId, 1.mai, null, 1700.daglig))
+            .build()
+
+        assertEquals(listOf(
+            Refusjonsopplysning(overstyringId, 1.februar, 27.februar, 1200.daglig),
+            Refusjonsopplysning(overstyringId, 28.februar, 31.mars, 10.daglig),
+            Refusjonsopplysning(overstyringId, 1.april, 30.april, 1599.daglig)
+        ), (eksisterendeRefusjonsopplysninger - ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger)
+    }
+
     internal companion object {
         private fun harNødvendigeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode) =
             harNødvendigeRefusjonsopplysninger(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, Aktivitetslogg(), "")
@@ -392,5 +434,7 @@ internal class RefusjonsopplysningerTest {
             refusjonsopplysninger.forEach { refusjonsopplysningerBuilder.leggTil(it, tidsstempel) }
             return refusjonsopplysningerBuilder.build()
         }
+
+        private fun RefusjonsopplysningerBuilder.leggTil(refusjonsopplysning: Refusjonsopplysning) = leggTil(refusjonsopplysning, LocalDateTime.now())
     }
 }
