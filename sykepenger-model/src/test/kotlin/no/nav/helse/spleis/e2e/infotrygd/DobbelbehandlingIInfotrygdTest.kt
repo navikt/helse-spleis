@@ -26,6 +26,7 @@ import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
+import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -129,13 +130,14 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `utbetalt i infotrygd mens vi venter på inntektsmelding - oppdaget i AVVENTER_HISTORIKK`() {
-        håndterSykmelding(Sykmeldingsperiode(9.november(2020), 4.desember(2020), 100.prosent))
-        håndterSøknad(Sykdom(9.november(2020), 4.desember(2020), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(9.november, 4.desember, 100.prosent))
+        håndterSøknad(Sykdom(9.november, 4.desember, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
-        håndterInntektsmelding(listOf(9.november(2020) til 24.november(2020)))
-        val historikk = arrayOf(ArbeidsgiverUtbetalingsperiode("456789123", 1.desember(2020),   4.desember(2020), 100.prosent, 1000.daglig))
+        håndterInntektsmelding(listOf(9.november til 24.november))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        val historikk = arrayOf(ArbeidsgiverUtbetalingsperiode("456789123", 1.desember,   4.desember, 100.prosent, 1000.daglig))
         val inntektshistorikk = listOf(
-            Inntektsopplysning("456789123", 1.desember(2020), 1000.daglig, true)
+            Inntektsopplysning("456789123", 1.desember, 1000.daglig, true)
         )
         håndterYtelser(1.vedtaksperiode, *historikk, inntektshistorikk = inntektshistorikk)
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))

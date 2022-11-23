@@ -81,7 +81,6 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a2)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -89,7 +88,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 
@@ -185,7 +184,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
+           AVVENTER_VILKÅRSPRØVING,
             orgnummer = a1
         )
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -279,7 +278,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
         utbetalPeriode(1.vedtaksperiode, a1, 1.januar)
@@ -310,7 +309,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 20.januar, orgnummer = a2)
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
@@ -346,7 +345,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a2)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
     }
 
@@ -368,7 +367,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
 
         håndterInntektsmelding(listOf(18.januar til 2.februar), orgnummer = a2)
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
@@ -396,11 +395,10 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(25.januar til 9.februar), orgnummer = a1)
         håndterInntektsmelding(listOf(25.januar til 9.februar), orgnummer = a2)
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         utbetalPeriodeEtterVilkårsprøving(1.vedtaksperiode, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
@@ -426,7 +424,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 
@@ -442,7 +440,6 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             førsteFraværsdag = 1.januar(2021),
             orgnummer = a1
         )
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             orgnummer = a1,
@@ -497,7 +494,6 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             førsteFraværsdag = 1.januar,
             orgnummer = a1
         )
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             orgnummer = a1,
@@ -568,7 +564,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(periode3.start, periode3.endInclusive, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(periode3.start, periode3.endInclusive, 100.prosent), orgnummer = a2)
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
@@ -606,7 +602,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a2)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)
     }
 
     @Test
@@ -630,7 +626,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a2)
 
         håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a1)
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
     }
 
     @Test
@@ -654,7 +650,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
     }
 
     @Test
@@ -675,7 +671,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
+           AVVENTER_VILKÅRSPRØVING,
             TIL_INFOTRYGD,
             orgnummer = a1
         )
@@ -730,7 +726,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(5.februar, 28.februar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(5.februar til 20.februar), orgnummer = a2)
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)
     }
 
     @Test
@@ -743,8 +739,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -756,8 +751,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -791,7 +785,6 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     }
 
     private fun vilkårsprøv(vedtaksperiode: IdInnhenter, orgnummer: String, skjæringstidspunkt: LocalDate) {
-        håndterYtelser(vedtaksperiode, orgnummer = orgnummer)
         håndterVilkårsgrunnlag(
             vedtaksperiode, orgnummer = orgnummer,
             inntektsvurdering = Inntektsvurdering(

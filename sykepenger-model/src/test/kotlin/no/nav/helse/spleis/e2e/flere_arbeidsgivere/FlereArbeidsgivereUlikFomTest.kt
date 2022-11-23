@@ -58,7 +58,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
         nyPeriode(5.januar til 20.januar, a2)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -77,7 +76,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 20.januar, a2)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT/2, orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT/2, orgnummer = a2)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -106,8 +104,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
             grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 20000.månedlig.repeat(3))
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -183,8 +179,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
             grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 20000.månedlig.repeat(3))
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -250,8 +244,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
             grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 20000.månedlig.repeat(2) + 23000.månedlig)
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -331,8 +323,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3)),
             grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 20000.månedlig.repeat(3))
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -394,8 +384,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
             grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -464,7 +452,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
             grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -526,7 +513,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
             grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -609,7 +595,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             grunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 33000.månedlig.repeat(3)),
             grunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 34000.månedlig.repeat(3))
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(
@@ -718,7 +703,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             grunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 33500.månedlig.repeat(3)),
             grunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 34500.månedlig.repeat(3))
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -821,7 +805,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             grunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 33500.månedlig.repeat(3)),
             grunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 34500.månedlig.repeat(3))
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -932,7 +915,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             grunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 33500.månedlig.repeat(3)),
             grunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 34500.månedlig.repeat(3))
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -1027,7 +1009,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null)
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -1087,7 +1068,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null)
         )
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             orgnummer = a1,
@@ -1127,8 +1107,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
             grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -1191,8 +1169,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
             grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -1244,8 +1220,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
             grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 20000.månedlig.repeat(3))
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -1304,8 +1278,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
             grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 20000.månedlig.repeat(3))
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -1372,7 +1344,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             ), arbeidsforhold = emptyList()
         )
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = sammenligningsgrunnlag,
@@ -1397,7 +1368,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 21.januar, orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 22.januar, beregnetInntekt = 32000.månedlig, orgnummer = a2)
 
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             2.vedtaksperiode,
             inntektsvurdering = sammenligningsgrunnlag,

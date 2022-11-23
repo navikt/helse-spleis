@@ -66,10 +66,11 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
         ))
-        assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
     }
 
     @Test
@@ -109,9 +110,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 2.februar)
         val historikk = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, 1000.daglig))
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar(2018), 1000.daglig, true))
-        håndterYtelser(2.vedtaksperiode, *historikk, inntektshistorikk = inntektshistorikk)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
-        håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode, *historikk, inntektshistorikk = inntektshistorikk)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
@@ -120,7 +120,6 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
@@ -144,8 +143,9 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = inntektshistorikk)
         håndterInntektsmelding(listOf(1.januar til 31.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = inntektshistorikk)
-        assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
     }
 
     @Test

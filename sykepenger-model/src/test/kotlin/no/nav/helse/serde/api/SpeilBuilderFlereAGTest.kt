@@ -69,7 +69,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
@@ -129,7 +128,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterInntektsmelding(listOf(4.januar til 19.januar), orgnummer = a2, beregnetInntekt = 5000.månedlig)
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
@@ -189,7 +187,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
@@ -198,7 +195,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
@@ -251,7 +247,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2017), 20.januar(2017), 100.prosent), orgnummer = a3)
         håndterSøknad(Sykdom(1.januar(2017), 20.januar(2017), 100.prosent), orgnummer = a3)
         håndterInntektsmelding(listOf(1.januar(2017) til 16.januar(2017)), orgnummer = a3)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a3)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a3)
         håndterYtelser(1.vedtaksperiode, orgnummer = a3)
         håndterSimulering(1.vedtaksperiode, orgnummer = a3)
@@ -261,7 +256,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
@@ -321,7 +315,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(3.januar til 18.januar), førsteFraværsdag = 3.januar, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
@@ -385,7 +378,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
             inntektshistorikk = inntektshistorikk
         )
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(
@@ -417,7 +409,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(
@@ -476,7 +467,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(
@@ -516,7 +506,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(
@@ -561,7 +550,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
@@ -620,7 +608,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(
@@ -658,7 +645,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(
@@ -694,7 +680,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
@@ -745,7 +730,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
@@ -802,7 +786,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
 
         nyPeriode(17.januar til 31.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
@@ -839,7 +822,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {

@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.desember
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.spleis.TestMessageFactory.InstitusjonsoppholdTestdata
@@ -9,7 +10,6 @@ import no.nav.helse.spleis.TestMessageFactory.OpplæringspengerTestdata
 import no.nav.helse.spleis.TestMessageFactory.PleiepengerTestdata
 import no.nav.helse.spleis.TestMessageFactory.UtbetalingshistorikkTestdata
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import org.junit.jupiter.api.Test
 
 internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
@@ -19,12 +19,14 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendVilkårsgrunnlag(0)
         sendYtelser(vedtaksperiodeIndeks = 0, pleiepenger = listOf(PleiepengerTestdata(3.januar, 26.januar, 100)))
 
         assertTilstander(
             0,
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -35,6 +37,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendVilkårsgrunnlag(0)
         sendYtelser(
             vedtaksperiodeIndeks = 0,
             omsorgspenger = listOf(OmsorgspengerTestdata(3.januar, 26.januar, 100))
@@ -44,6 +47,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -54,12 +58,14 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendVilkårsgrunnlag(0)
         sendYtelser(vedtaksperiodeIndeks = 0, opplæringspenger = listOf(OpplæringspengerTestdata(3.januar, 26.januar, 100)))
 
         assertTilstander(
             0,
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -70,6 +76,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendVilkårsgrunnlag(0)
         sendYtelser(
             vedtaksperiodeIndeks = 0,
             institusjonsoppholdsperioder = listOf(
@@ -86,6 +93,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -96,6 +104,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendVilkårsgrunnlag(0)
         sendYtelser(
             vedtaksperiodeIndeks = 0,
             sykepengehistorikk = listOf(UtbetalingshistorikkTestdata(
@@ -127,6 +136,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -186,7 +196,6 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             utbetalteSykeperioder = emptyList(),
             inntektsopplysninger = emptyList()
         ))
-        sendYtelser(vedtaksperiodeIndeks = 0, sykepengehistorikk = historikk)
         sendVilkårsgrunnlag(0)
         sendYtelser(vedtaksperiodeIndeks = 0, sykepengehistorikk = historikk)
 
@@ -194,7 +203,6 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVVENTER_BLOKKERENDE_PERIODE",
-            "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING"
@@ -231,12 +239,14 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
         ))
 
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendVilkårsgrunnlag(0)
         sendYtelser(0, sykepengehistorikk = historikk)
 
         assertTilstander(
             0,
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -288,14 +298,16 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
         ))
 
         sendInntektsmelding(listOf(Periode(fom = 9.januar, tom = 25.januar)), førsteFraværsdag = 9.januar)
+        sendVilkårsgrunnlag(0)
         sendYtelser(0, sykepengehistorikk = historikk)
 
         assertTilstander(
             0,
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
-            "AVVENTER_VILKÅRSPRØVING"
+            "AVVENTER_SIMULERING"
         )
     }
 }

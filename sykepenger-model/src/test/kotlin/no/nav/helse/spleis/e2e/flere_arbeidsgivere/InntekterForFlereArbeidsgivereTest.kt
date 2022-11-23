@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -289,7 +288,6 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         )
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = inntektsvurdering)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -348,12 +346,6 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             beregnetInntekt = inntekt,
             førsteFraværsdag = periode.start,
             orgnummer = orgnummer
-        ).håndter(Person::håndter)
-        ytelser(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            orgnummer = orgnummer,
-            inntektshistorikk = emptyList(),
-            besvart = LocalDateTime.now().minusHours(24)
         ).håndter(Person::håndter)
     }
 

@@ -123,7 +123,6 @@ internal abstract class AbstractDslTest {
             håndterInntektsmelding(listOf(periode.start til periode.start.plusDays(15)), beregnetInntekt = inntekt)
         }}
         (first()){
-            håndterYtelser(observatør.sisteVedtaksperiodeId(orgnummer))
             håndterVilkårsgrunnlag(observatør.sisteVedtaksperiodeId(orgnummer), inntektsvurdering = Inntektsvurdering(
                 inntektperioderForSammenligningsgrunnlag {
                     inntekterBlock()

@@ -35,7 +35,6 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 17.januar, tom = 16.februar, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 17.januar, tom = 16.februar, sykmeldingsgrad = 100)))
         sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 17.januar)
-        sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelserUtenSykepengehistorikk(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -45,7 +44,6 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
             0,
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVVENTER_BLOKKERENDE_PERIODE",
-            "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
@@ -71,7 +69,6 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
-        sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelserUtenSykepengehistorikk(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)

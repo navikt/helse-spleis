@@ -55,6 +55,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
         håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = fom.plusDays(1))
         håndterInntektsmelding(listOf(fom til fom.plusDays(15)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, dødsdato = 1.januar)
 
         assertEquals(1.januar, serializePersonForSpeil(person).dødsdato)
@@ -65,7 +66,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode, simuleringsresultat = standardSimuleringsresultat(ORGNUMMER, totalbeløp = -1))
@@ -86,7 +86,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -102,11 +101,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-
-        håndterYtelser(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            orgnummer = a1,
-        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(
@@ -231,7 +225,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT, null, endringerIRefusjon = listOf(
             Inntektsmelding.Refusjon.EndringIRefusjon(INGEN, 1.februar))))
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

@@ -371,8 +371,6 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, beregnetInntekt = INNTEKT /4)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, beregnetInntekt = INNTEKT /4)
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
         val inntektsvurdering = Inntektsvurdering(
             listOf(
                 sammenligningsgrunnlag(a1, 1.januar, (INNTEKT /4).repeat(12)),
@@ -419,8 +417,6 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(fom til fom.plusDays(15)), beregnetInntekt = beregnetInntekt, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
         val inntektsvurdering = sammenligningsgrunnlag.keys.map { orgnummer ->
             sammenligningsgrunnlag(orgnummer, fom, sammenligningsgrunnlag[orgnummer]!!.repeat(12))
         }

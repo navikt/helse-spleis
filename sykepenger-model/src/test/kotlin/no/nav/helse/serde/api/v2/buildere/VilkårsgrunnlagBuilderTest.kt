@@ -60,7 +60,6 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt)
-        håndterYtelser()
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = inntekt)
 
         val vilkårsgrunnlagGenerasjoner = vilkårsgrunnlag.build().toDTO()
@@ -236,7 +235,6 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterInntektsmelding(listOf(1.mars til 16.mars))
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.VetIkke)
 
         val generasjoner = vilkårsgrunnlag.build().toDTO()
@@ -291,7 +289,6 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
             Arbeidsforhold(AG2, LocalDate.EPOCH, null)
         )
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(

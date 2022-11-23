@@ -25,6 +25,7 @@ internal class NødnummerE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.februar, 28.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.februar til 16.februar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = listOf(Inntektsopplysning(nødnummer, 1.januar, 500.daglig, false)))
         assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertFalse(person.inspektør.harArbeidsgiver(nødnummer))
@@ -36,6 +37,7 @@ internal class NødnummerE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.februar, 28.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.februar til 16.februar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, PersonUtbetalingsperiode(nødnummer, 1.januar, 14.januar, 100.prosent, 500.daglig), inntektshistorikk = listOf(Inntektsopplysning(nødnummer, 1.januar, 500.daglig, false)))
         assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertFalse(person.inspektør.harArbeidsgiver(nødnummer))
@@ -46,6 +48,7 @@ internal class NødnummerE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.februar, 28.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar), førsteFraværsdag = 1.februar)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 18.januar, 100.prosent, 500.daglig), inntektshistorikk = listOf(
             Inntektsopplysning(nødnummer, 17.januar, 500.daglig, false),
             Inntektsopplysning(ORGNUMMER, 17.januar, 500.daglig, true)
@@ -58,6 +61,7 @@ internal class NødnummerE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.februar, 28.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar), førsteFraværsdag = 1.februar)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, PersonUtbetalingsperiode(nødnummer, 17.januar, 18.januar, 100.prosent, 500.daglig), inntektshistorikk = listOf(Inntektsopplysning(nødnummer, 17.januar, 500.daglig, false)))
         assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode)) { person.personLogg.toString() }
         assertFalse(person.inspektør.harArbeidsgiver(nødnummer))

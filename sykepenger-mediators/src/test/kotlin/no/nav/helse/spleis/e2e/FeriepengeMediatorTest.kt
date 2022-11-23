@@ -28,7 +28,6 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
             listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))),
             førsteFraværsdag = 1.juni(2020)
         )
-        sendYtelser(0)
         sendVilkårsgrunnlag(0, skjæringstidspunkt = 1.juni(2020))
         sendYtelserUtenSykepengehistorikk(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -90,7 +89,6 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
             listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))),
             førsteFraværsdag = 1.juni(2020)
         )
-        sendYtelser(0)
         sendVilkårsgrunnlag(0, skjæringstidspunkt = 1.juni(2020))
         sendYtelserUtenSykepengehistorikk(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -166,7 +164,6 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
             listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))),
             førsteFraværsdag = 1.juni(2020)
         )
-        sendYtelser(0)
         sendVilkårsgrunnlag(0, skjæringstidspunkt = 1.juni(2020))
         sendYtelserUtenSykepengehistorikk(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -242,7 +239,6 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
             listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))),
             førsteFraværsdag = 1.juni(2020)
         )
-        sendYtelser(0)
         sendVilkårsgrunnlag(0, skjæringstidspunkt = 1.juni(2020))
         sendYtelserUtenSykepengehistorikk(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)

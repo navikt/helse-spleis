@@ -201,7 +201,6 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(11.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(11.januar, 20.januar, 100.prosent))
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -240,7 +239,6 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(11.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(11.januar, 20.januar, 100.prosent))
 
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
@@ -256,7 +254,6 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(18.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -276,7 +273,6 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(11.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(11.januar, 20.januar, 100.prosent))
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -290,7 +286,6 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

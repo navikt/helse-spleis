@@ -48,7 +48,6 @@ internal class FriskmeldtE2ETest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 20.januar)
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

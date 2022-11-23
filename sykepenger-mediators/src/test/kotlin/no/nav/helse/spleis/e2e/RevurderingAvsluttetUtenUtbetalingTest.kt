@@ -99,7 +99,6 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
             ), førsteFraværsdag = 9.januar
         )
 
-        sendYtelserUtenSykepengehistorikk(1)
         sendVilkårsgrunnlag(1)
         sendYtelserUtenSykepengehistorikk(1)
         sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)

@@ -74,7 +74,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
         )
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(
@@ -129,7 +128,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
         )
 
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(
@@ -190,7 +188,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null)
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(
@@ -238,7 +235,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(a2, 2.januar, null)
         )
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -286,7 +282,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), 31.desember(2017))
         )
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -335,8 +330,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null)
         )
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
@@ -390,8 +383,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null)
         )
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -441,8 +432,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null)
         )
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
@@ -498,7 +487,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = 31.desember(2017), ansattTom = null)
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(
@@ -556,7 +544,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = 2.januar, ansattTom = null)
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(
@@ -622,7 +609,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null)
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(
@@ -697,8 +683,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null)
         )
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -750,7 +734,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null)
         )
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(
@@ -800,7 +783,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = 1.november(2017), ansattTom = null)
         )
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(
@@ -869,7 +851,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = 1.november(2017), ansattTom = null)
         )
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(
@@ -978,7 +959,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),

@@ -46,7 +46,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(6.februar, 28.februar, 100.prosent), orgnummer = a2)
         håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a2)
         håndterInntektsmelding(listOf(21.januar til 21.januar, 6.februar til 20.februar), orgnummer = a2)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             orgnummer = a2,
             inntektsvurdering = Inntektsvurdering(
@@ -93,7 +92,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
@@ -124,7 +122,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 31.januar))
 
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -143,7 +140,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 31.januar))
 
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(emptyList()))
         håndterYtelser(1.vedtaksperiode)
 
@@ -161,7 +157,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             1.januar til 16.januar
         )
         håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag = 1.januar)
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -176,7 +171,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             TIL_INFOTRYGD
@@ -207,8 +201,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(1000.månedlig, null, emptyList())
         )
 
-        håndterYtelser(1.vedtaksperiode)
-
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -225,8 +217,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
         )
 
@@ -242,8 +233,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
-
-        håndterYtelser(1.vedtaksperiode)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -265,7 +254,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -301,7 +289,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         nyPeriode(17.januar til 31.januar)
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

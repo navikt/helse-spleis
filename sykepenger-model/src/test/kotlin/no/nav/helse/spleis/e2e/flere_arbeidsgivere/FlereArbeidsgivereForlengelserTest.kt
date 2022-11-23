@@ -54,7 +54,6 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
             førsteFraværsdag = 1.januar(2021),
             orgnummer = a2
         )
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2020) til 1.desember(2020) inntekter {
@@ -137,8 +136,6 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null)
         )
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(

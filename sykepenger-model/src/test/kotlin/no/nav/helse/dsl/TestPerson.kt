@@ -427,7 +427,6 @@ internal fun TestPerson.TestArbeidsgiver.nyttVedtak(
 ) {
     val vedtaksperiode = nyPeriode(fom til tom, grad)
     håndterInntektsmelding(arbeidsgiverperiode, beregnetInntekt, førsteFraværsdag, refusjon)
-    håndterYtelser(vedtaksperiode)
     håndterVilkårsgrunnlag(vedtaksperiode, beregnetInntekt, inntektsvurdering = Inntektsvurdering(
         inntekter = inntektperioderForSammenligningsgrunnlag(inntekterBlock)
     ))

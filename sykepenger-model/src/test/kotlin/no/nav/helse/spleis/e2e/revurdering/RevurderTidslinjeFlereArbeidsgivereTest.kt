@@ -75,7 +75,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterSykmelding(Sykmeldingsperiode(17.januar, 25.januar, 100.prosent), orgnummer = haandtverkerne)
         håndterSøknad(Sykdom(17.januar, 25.januar, 100.prosent), orgnummer = haandtverkerne)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 20000.månedlig, orgnummer = haandtverkerne)
-        håndterYtelser(2.vedtaksperiode, orgnummer = haandtverkerne)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
             orgnummer = haandtverkerne,
@@ -135,8 +134,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             beregnetInntekt = 20000.månedlig,
             orgnummer = haandtverkerne
         )
-
-        håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = aadvokatene)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = aadvokatene,

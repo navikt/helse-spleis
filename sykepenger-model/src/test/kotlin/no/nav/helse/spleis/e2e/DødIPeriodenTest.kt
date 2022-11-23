@@ -18,7 +18,6 @@ internal class DødIPeriodenTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
-        håndterYtelser(1.vedtaksperiode, dødsdato = 18.januar)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, dødsdato = 18.januar)
         assertEquals(9, inspektør.utbetalinger.first().utbetalingstidslinje().inspektør.avvistDagTeller)
@@ -29,7 +28,6 @@ internal class DødIPeriodenTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
-        håndterYtelser(1.vedtaksperiode, dødsdato = 1.februar)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, dødsdato = 1.februar)
         assertEquals(0, inspektør.utbetalinger.first().utbetalingstidslinje().inspektør.avvistDagTeller)
@@ -40,7 +38,6 @@ internal class DødIPeriodenTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
-        håndterYtelser(1.vedtaksperiode, dødsdato = 31.desember(2017))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, dødsdato = 31.desember(2017))
         inspektør.utbetalinger.first().utbetalingstidslinje().inspektør.also {

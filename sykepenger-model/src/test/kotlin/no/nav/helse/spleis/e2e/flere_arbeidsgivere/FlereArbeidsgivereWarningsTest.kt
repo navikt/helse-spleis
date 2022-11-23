@@ -53,15 +53,14 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
 
     @Test
     fun `En arbeidsgiver med inntekter fra flere arbeidsgivere de siste tre månedene - får ikke warning om at det er flere arbeidsgivere, får warning om at det er flere inntektskilder enn arbeidsforhold`() {
-        val periode = 1.januar(2021) til 31.januar(2021)
+        val periode = 1.januar til 31.januar
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2020) til 1.desember(2020) inntekter {
+                1.januar(2017) til 1.desember(2017) inntekter {
                     a1 inntekt INNTEKT
                     a2 inntekt 1000.månedlig
                 }
@@ -78,18 +77,17 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
 
     @Test
     fun `En arbeidsgiver og sykepenger fra Nav - får ingen warnings da dette ikke er en reell arbeidsgiver`() {
-        val periode = 1.januar(2021) til 31.januar(2021)
+        val periode = 1.januar til 31.januar
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2020) til 1.desember(2020) inntekter {
+                1.januar(2017) til 1.desember(2017) inntekter {
                     a1 inntekt INNTEKT
                 }
-                1.januar(2020) til 1.desember(2020) sykepenger {
+                1.januar(2017) til 1.desember(2017) sykepenger {
                     a2 inntekt 1000.månedlig
                 }
             }
@@ -104,18 +102,17 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
 
     @Test
     fun `Første arbeidsgiver har blitt sendt til godkjenning før vi mottar sykmelding på neste arbeidsgiver`() {
-        val periode = 1.januar(2021) til 31.januar(2021)
+        val periode = 1.januar til 31.januar
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioderForSammenligningsgrunnlag {
-                    1.januar(2020) til 1.desember(2020) inntekter {
+                    1.januar(2017) til 1.desember(2017) inntekter {
                         a1 inntekt INNTEKT
                         a2 inntekt 1000.månedlig
                     }
@@ -123,8 +120,8 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(
-                    grunnlag(a1, 1.januar(2021), INNTEKT.repeat(3)),
-                    grunnlag(a2, 1.januar(2021), 1000.månedlig.repeat(3))
+                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                    grunnlag(a2, 1.januar, 1000.månedlig.repeat(3))
                 ), arbeidsforhold = emptyList()
             ),
             arbeidsforhold = listOf(
@@ -135,27 +132,20 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        assertVarsel(
-            RV_VV_2,
-            AktivitetsloggFilter.person()
-        )
+        assertVarsel(RV_VV_2, AktivitetsloggFilter.person())
 
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a2)
 
-        assertVarsel(
-            RV_VV_2,
-            AktivitetsloggFilter.person()
-        )
+        assertVarsel(RV_VV_2, AktivitetsloggFilter.person())
         assertTilstander(
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,

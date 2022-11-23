@@ -97,7 +97,6 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
 
@@ -180,7 +179,6 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = fom, tom = tom, sykmeldingsgrad = 100), orgnummer = a1)
         sendSøknad(listOf(SoknadsperiodeDTO(fom = fom, tom = tom, sykmeldingsgrad = 100)), orgnummer = a1)
         sendInntektsmelding(listOf(Periode(fom, fom.plusDays(15))), fom, orgnummer = a1)
-        sendYtelser(0, orgnummer = a1)
         sendVilkårsgrunnlag(
             vedtaksperiodeIndeks = 0,
             skjæringstidspunkt = fom,

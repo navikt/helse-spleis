@@ -1234,7 +1234,7 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.jurist()
                 )
             }
-            vedtaksperiode.tilstand(hendelse, AvventerHistorikkRevurdering)
+            vedtaksperiode.tilstand(hendelse, AvventerVilkårsprøvingRevurdering)
         }
     }
 
@@ -1390,7 +1390,7 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.forkast(hendelse)
                 }
                 else -> {
-                    vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+                    vedtaksperiode.tilstand(hendelse, if (vedtaksperiode.vilkårsgrunnlag == null) AvventerVilkårsprøving else AvventerHistorikk)
                 }
             }
         }
@@ -1455,6 +1455,7 @@ internal class Vedtaksperiode private constructor(
             .plusDays(4)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            checkNotNull(vedtaksperiode.vilkårsgrunnlag) { "Forventer vilkårsgrunnlag for å beregne utbetaling" }
             vedtaksperiode.loggInnenforArbeidsgiverperiode()
             vedtaksperiode.trengerYtelser(hendelse)
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
@@ -1494,12 +1495,11 @@ internal class Vedtaksperiode private constructor(
                 }
                 valider { ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
 
-                onSuccess {
-                    if (vedtaksperiode.vilkårsgrunnlag == null) {
-                        return@håndter vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøving) {
-                            // TODO: Mangler ofte vilkårsgrunnlag for perioder (https://logs.adeo.no/goto/844ac8a834ecd9c7ee5022ba0f89e569).
-                            info("Mangler vilkårsgrunnlag for ${vedtaksperiode.skjæringstidspunkt}")
-                        }
+                // skal ikke mangle vilkårsgrunnlag her med mindre skjæringstidspunktet har endret seg som følge
+                // av historikk fra IT
+                valider(Varselkode.RV_IT_33) {
+                    (vedtaksperiode.vilkårsgrunnlag != null).also {
+                        if (!it) info("Mangler vilkårsgrunnlag for ${vedtaksperiode.skjæringstidspunkt}")
                     }
                 }
 

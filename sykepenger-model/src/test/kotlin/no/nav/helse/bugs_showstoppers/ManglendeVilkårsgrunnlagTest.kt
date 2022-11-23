@@ -53,7 +53,6 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
                 29.januar til 29.januar
             ), 29.januar
         )
-        håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
 
@@ -64,7 +63,6 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
@@ -100,8 +98,6 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
             ), 24.januar
         )
 
-        håndterYtelser(3.vedtaksperiode)
-
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -121,7 +117,6 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING
         )
 

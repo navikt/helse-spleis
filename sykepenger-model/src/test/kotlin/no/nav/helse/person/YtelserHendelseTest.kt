@@ -156,13 +156,12 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
             ugyldigePerioder = ugyldigePerioder
         )
 
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         ytelser.håndter(Person::håndter)
         return ytelser
     }
 
     private fun ferdigstill(ytelser: Ytelser) {
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        ytelser.håndter(Person::håndter)
         håndterSimulering(1.vedtaksperiode)
     }
 
@@ -170,6 +169,7 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         person.håndter(
             ytelser(
                 vedtaksperiodeIdInnhenter = 1.vedtaksperiode,

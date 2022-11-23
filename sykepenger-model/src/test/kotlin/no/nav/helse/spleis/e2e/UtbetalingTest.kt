@@ -25,6 +25,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(
             1.vedtaksperiode,
             ArbeidsgiverUtbetalingsperiode(ANNET_ORGNUMMER, 1.januar(2016), 31.januar(2016), 100.prosent, 1000.daglig),
@@ -32,8 +33,6 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
                 Inntektsopplysning(ANNET_ORGNUMMER, 1.januar(2016), 1000.daglig, true)
             )
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar, 100.prosent))
@@ -49,7 +48,6 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent, 80.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -65,7 +63,6 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(4.januar til 19.januar))
         håndterSykmelding(Sykmeldingsperiode(23.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(23.januar, 31.januar, 100.prosent))
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

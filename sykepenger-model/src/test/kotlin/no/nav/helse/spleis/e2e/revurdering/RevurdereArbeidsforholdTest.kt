@@ -56,7 +56,6 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -127,7 +126,6 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -217,7 +215,6 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -342,7 +339,6 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -451,7 +447,6 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -562,7 +557,6 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -609,7 +603,6 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -619,7 +612,6 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
             håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
             håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = INNTEKT)
-            håndterYtelser(2.vedtaksperiode)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(2.vedtaksperiode, skjæringstidspunkt = 1.mars)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -730,7 +722,6 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
         a2 { håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT) }
 
         a1 {
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 arbeidsforhold = listOf(
@@ -880,7 +871,6 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt)
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode, inntekt = inntekt)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -919,7 +909,6 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
         a2 { håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt) }
 
         a1 {
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 arbeidsforhold = listOf(

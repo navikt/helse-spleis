@@ -61,7 +61,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -84,8 +83,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -130,7 +128,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSøknad(Sykdom(11.januar, 22.januar, 100.prosent))
 
         håndterInntektsmelding(arbeidsgiverperioder = listOf(3.januar til 18.januar), INNTEKT)
-        håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
 
         assertIngenFunksjonelleFeil()
@@ -160,8 +157,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK
         )
     }
@@ -180,7 +176,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
         håndterInntektsmelding(listOf(3.januar til 4.januar, 8.januar til 21.januar), INNTEKT)
 
-        håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(3.vedtaksperiode)
 
         assertIngenFunksjonelleFeil()
@@ -210,8 +205,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK
         )
     }
@@ -244,7 +238,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -264,8 +257,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -294,7 +286,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         assertIngenFunksjonelleFeil()
         assertActivities()
@@ -311,8 +302,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK
         )
     }
@@ -327,7 +317,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             inntektshistorikk = listOf(Inntektsopplysning(a1, 1.desember(2017), INNTEKT, true))
         )
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -347,8 +336,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -390,7 +378,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             beregnetInntekt = INNTEKT,
             førsteFraværsdag = 21.september(2020)
         ) // 20. september er en søndag
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.september(2019) til 1.august(2020) inntekter {
@@ -415,7 +402,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 22.januar, 100.prosent))
         håndterSøknad(Sykdom(4.januar, 22.januar, 100.prosent))
         håndterInntektsmelding(listOf(4.januar til 19.januar), INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -429,7 +415,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             beregnetInntekt = INNTEKT,
             førsteFraværsdag = 24.januar
         )
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -471,7 +456,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -481,7 +465,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertActivities()
         håndterSøknad(Sykdom(1.februar, 23.februar, 100.prosent))
         håndterInntektsmelding(listOf(1.februar til 16.februar), INNTEKT)
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -497,8 +480,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -510,8 +492,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -528,14 +509,12 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSøknad(Sykdom(1.februar, 23.februar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
         håndterInntektsmelding(listOf(1.februar til 16.februar), INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         assertActivities()
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -556,8 +535,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -569,8 +547,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -584,7 +561,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 50.prosent))
         håndterSøknad(Sykdom(1.januar, 21.januar, 50.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -599,8 +575,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -613,8 +588,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -628,7 +602,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -643,8 +616,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -661,8 +633,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -679,7 +650,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
         håndterSøknad(Sykdom(8.januar, 23.februar, 100.prosent))
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -695,8 +665,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -711,7 +680,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -737,8 +705,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -762,7 +729,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -778,8 +744,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -798,7 +763,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 50.prosent))
         håndterSøknad(Sykdom(3.januar, 26.januar, 50.prosent, 50.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -812,8 +776,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -826,7 +789,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT)
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_HISTORIKK, LocalDateTime.now().minusDays(200))
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, LocalDateTime.now().minusDays(200))
         assertEquals(0, inspektør.sykdomshistorikk.sykdomstidslinje().count())
     }
 
@@ -835,7 +798,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -861,7 +823,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT)
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.januar(2017) til 1.desember(2017) inntekter {
@@ -878,9 +839,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 START,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
                 AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_HISTORIKK,
-                AVVENTER_VILKÅRSPRØVING,
-                AVVENTER_HISTORIKK,
+               AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING
             )
         }
@@ -892,7 +852,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT)
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.januar(2017) til 1.desember(2017) inntekter {
@@ -909,8 +868,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 START,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
                 AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_HISTORIKK,
-                AVVENTER_VILKÅRSPRØVING,
+               AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING
             )
@@ -952,7 +910,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(1.desember(2020), 31.desember(2020), 100.prosent))
         håndterSøknad(Sykdom(1.desember(2020), 31.desember(2020), 100.prosent))
         håndterInntektsmelding(listOf(1.desember(2020) til 16.desember(2020)), INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.desember(2019) til 1.november(2020) inntekter {
@@ -972,7 +929,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -1000,7 +956,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             ), INNTEKT
         )
 
-        håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2020) til 1.desember(2020) inntekter {
@@ -1036,7 +991,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             ), INNTEKT
         )
 
-        håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2020) til 1.desember(2020) inntekter {
@@ -1072,9 +1026,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 20.januar(2021) til 25.januar(2021)
             ), INNTEKT, førsteFraværsdag = 5.februar(2021)
         )
-
-        håndterYtelser(3.vedtaksperiode)
-
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2020) til 1.desember(2020) inntekter {
@@ -1102,9 +1053,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         val utbetalinger = ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 28.desember, 100.prosent, INNTEKT)
         val inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true))
 
-        håndterYtelser(1.vedtaksperiode, listOf(utbetalinger), inntektshistorikk)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, listOf(utbetalinger), inntektshistorikk)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -1124,7 +1074,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSøknad(Sykdom(22.februar, 14.mars, 50.prosent), sendtTilNAVEllerArbeidsgiver = 8.august)
 
         håndterInntektsmelding(listOf(22.februar til 14.mars), INNTEKT)
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
@@ -1149,10 +1098,9 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
         håndterInntektsmelding(listOf(12.oktober(2021) til 27.oktober(2021)), INNTEKT)
 
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

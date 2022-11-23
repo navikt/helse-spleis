@@ -34,7 +34,6 @@ internal class MinimumInntektE2E : AbstractDslTest() {
             nyPeriode(1.januar til 31.januar, a1)
             håndterUtbetalingshistorikk(1.vedtaksperiode)
             håndterInntektsmelding(listOf(1.januar til 16.januar), inntekt)
-            håndterYtelser(1.vedtaksperiode,)
             håndterVilkårsgrunnlag(1.vedtaksperiode,
                 inntektsvurdering = Inntektsvurdering(
                     listOf(
@@ -70,7 +69,6 @@ internal class MinimumInntektE2E : AbstractDslTest() {
             nyPeriode(22.januar til 28.februar, a1)
             håndterUtbetalingshistorikk(1.vedtaksperiode)
             håndterInntektsmelding(listOf(22.januar til 6.februar), inntekt)
-            håndterYtelser(1.vedtaksperiode,)
             håndterVilkårsgrunnlag(1.vedtaksperiode,
                 inntektsvurdering = Inntektsvurdering(
                     listOf(
@@ -106,7 +104,6 @@ internal class MinimumInntektE2E : AbstractDslTest() {
             nyPeriode(1.februar til 28.februar, a1)
             håndterUtbetalingshistorikk(1.vedtaksperiode)
             håndterInntektsmelding(listOf(1.februar til 16.februar), inntekt)
-            håndterYtelser(1.vedtaksperiode,)
             håndterVilkårsgrunnlag(1.vedtaksperiode,
                 inntektsvurdering = Inntektsvurdering(
                     listOf(
@@ -142,7 +139,6 @@ internal class MinimumInntektE2E : AbstractDslTest() {
             nyPeriode(15.januar til 28.februar, a1)
             håndterUtbetalingshistorikk(1.vedtaksperiode)
             håndterInntektsmelding(listOf(15.januar til 30.januar), inntekt)
-            håndterYtelser(1.vedtaksperiode,)
             håndterVilkårsgrunnlag(1.vedtaksperiode,
                 inntektsvurdering = Inntektsvurdering(
                     listOf(

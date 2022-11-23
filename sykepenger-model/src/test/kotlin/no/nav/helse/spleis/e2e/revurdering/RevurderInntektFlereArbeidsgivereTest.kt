@@ -255,7 +255,6 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
         }
         (a1 og a2) { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
         a1 {
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                     inntekter = listOf(
@@ -385,7 +384,6 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
         a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
         a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
         a1 {
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                     inntekter = listOf(
@@ -595,7 +593,6 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                     inntekter = listOf(

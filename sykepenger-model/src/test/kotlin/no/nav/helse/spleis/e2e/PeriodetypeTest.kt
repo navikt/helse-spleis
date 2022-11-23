@@ -79,7 +79,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(20.januar, 4.februar)),
             førsteFraværsdag = 20.januar
         )
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
@@ -104,7 +103,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(4.januar til 19.januar))
         håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -144,7 +142,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             beregnetInntekt = 1000.månedlig
         )
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
@@ -170,7 +167,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             beregnetInntekt = 1000.månedlig
         )
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
@@ -196,7 +192,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             beregnetInntekt = 1000.månedlig
         )
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {

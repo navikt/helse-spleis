@@ -29,13 +29,12 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
 
     @Test
     fun `Periode for person der det ikke foreligger opplæringspengerytelse blir behandlet og sendt til godkjenning`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2020), 16.januar(2020))))
-        håndterYtelser(1.vedtaksperiode, opplæringspenger = emptyList())
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2019) til 1.desember(2019) inntekter {
+                1.januar(2017) til 1.desember(2017) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
             }
@@ -50,7 +49,6 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
-            TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_SIMULERING,
@@ -62,16 +60,18 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
 
     @Test
     fun `Periode som overlapper med opplæringspengerytelse blir sendt til Infotrygd`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2020), 16.januar(2020))))
-        håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(1.januar(2020) til 31.januar(2020)))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(1.januar til 31.januar))
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             TilstandType.START,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
+            TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.TIL_INFOTRYGD
         )
@@ -79,16 +79,18 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
 
     @Test
     fun `Periode som overlapper med opplæringspengerytelse i starten av perioden blir sendt til Infotrygd`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2020), 16.januar(2020))))
-        håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(1.desember(2019) til 1.januar(2020)))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(1.desember(2017) til 1.januar))
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             TilstandType.START,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
+            TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.TIL_INFOTRYGD
         )
@@ -96,16 +98,18 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
 
     @Test
     fun `Periode som overlapper med opplæringspengerytelse i slutten av perioden blir sendt til Infotrygd`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2020), 16.januar(2020))))
-        håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(31.januar(2020) til 14.februar(2020)))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(31.januar til 14.februar))
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             TilstandType.START,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
+            TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.TIL_INFOTRYGD
         )
@@ -113,21 +117,17 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
 
     @Test
     fun `Periode som ikke overlapper med opplæringspengerytelse blir behandlet og sendt til godkjenning`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2020), 16.januar(2020))))
-        val opplæringspenger = listOf(1.desember(2019) til 31.desember(2019), 1.februar(2020) til 29.februar(2020))
-        håndterYtelser(
-            1.vedtaksperiode,
-            opplæringspenger = opplæringspenger
-        )
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2019) til 1.desember(2019) inntekter {
+                1.januar(2017) til 1.desember(2017) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
             }
         ))
+        val opplæringspenger = listOf(1.desember(2017) til 31.desember(2017), 1.februar til 28.februar)
         håndterYtelser(
             1.vedtaksperiode,
             opplæringspenger = opplæringspenger
@@ -141,7 +141,6 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
-            TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_SIMULERING,

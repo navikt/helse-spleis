@@ -95,7 +95,6 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
                 arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar))
             )
         )
-        person.håndter(ytelser())
         val inntektsberegningStart =
             hendelse.etterspurtBehov<String>(
                 1.vedtaksperiode.id(ORGNUMMER),

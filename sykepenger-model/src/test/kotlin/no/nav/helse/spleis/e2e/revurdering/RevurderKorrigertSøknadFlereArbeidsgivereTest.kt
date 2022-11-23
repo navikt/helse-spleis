@@ -78,7 +78,6 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         }
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 20000.månedlig)
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 inntektsvurdering = listOf(a1, a2).lagStandardSammenligningsgrunnlag(20000.månedlig, 1.januar)
@@ -125,7 +124,6 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         }
         a1 {
             håndterInntektsmelding(listOf(periodeAg1.start til periodeAg1.start.plusDays(15)), beregnetInntekt = 20000.månedlig)
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 inntektsvurdering = listOf(a1, a2).lagStandardSammenligningsgrunnlag(20000.månedlig, periodeAg1.start),
@@ -191,8 +189,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterInntektsmelding(listOf(25.januar til 9.februar), beregnetInntekt = TestPerson.INNTEKT)
         }
         a1 {
-            håndterYtelser(1.vedtaksperiode)
-            håndterVilkårsgrunnlag(  1.vedtaksperiode,
+            håndterVilkårsgrunnlag(1.vedtaksperiode,
                 arbeidsforhold = listOf(
                     Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
                     Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
@@ -416,7 +413,6 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterInntektsmelding(listOf(25.januar til 9.februar), beregnetInntekt = TestPerson.INNTEKT)
         }
         a1 {
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(  1.vedtaksperiode,
                 arbeidsforhold = listOf(
                     Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
@@ -512,7 +508,6 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterInntektsmelding(listOf(25.januar til 9.februar), beregnetInntekt = TestPerson.INNTEKT)
         }
         a1 {
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(  1.vedtaksperiode,
                 arbeidsforhold = listOf(
                     Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),

@@ -19,7 +19,6 @@ internal class AvstemmingMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelserUtenSykepengehistorikk(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -32,7 +31,6 @@ internal class AvstemmingMediatorTest : AbstractEndToEndMediatorTest() {
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.april, tom = 30.april, sykmeldingsgrad = 100)))
         sendInntektsmelding(listOf(Periode(fom = 1.april, tom = 16.april)), førsteFraværsdag = 1.april)
-        sendYtelserUtenSykepengehistorikk(3)
         sendVilkårsgrunnlag(3, skjæringstidspunkt = 1.april)
         sendYtelserUtenSykepengehistorikk(3)
 

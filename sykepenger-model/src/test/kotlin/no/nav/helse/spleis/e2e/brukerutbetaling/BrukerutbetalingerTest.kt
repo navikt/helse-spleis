@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.brukerutbetaling
 
-import java.time.LocalDateTime
 import no.nav.helse.desember
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -50,7 +49,6 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni, 100.prosent))
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.juni)
-        håndterYtelser(1.vedtaksperiode, *historikk.toTypedArray(), inntektshistorikk = inntektsopplysning)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2017) til 1.mai(2018) inntekter {
@@ -58,7 +56,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, *historikk.toTypedArray(), inntektshistorikk = inntektsopplysning)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
@@ -82,7 +80,6 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni, 100.prosent))
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.juni)
-        håndterYtelser(1.vedtaksperiode, *historikk.toTypedArray(), inntektshistorikk = inntektsopplysning, besvart = LocalDateTime.now().minusHours(24))
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2017) til 1.mai(2018) inntekter {
@@ -107,7 +104,6 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
             førsteFraværsdag = 1.januar,
             arbeidsgiverperioder = listOf(1.januar til 16.januar)
         )
-        håndterYtelser()
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser()
         håndterSimulering()
@@ -126,7 +122,6 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
             førsteFraværsdag = 1.januar,
             arbeidsgiverperioder = listOf(1.januar til 16.januar)
         )
-        håndterYtelser()
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser()
 
@@ -149,7 +144,6 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
             førsteFraværsdag = 1.januar,
             arbeidsgiverperioder = listOf(1.januar til 16.januar)
         )
-        håndterYtelser()
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser()
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = ORGNUMMER)

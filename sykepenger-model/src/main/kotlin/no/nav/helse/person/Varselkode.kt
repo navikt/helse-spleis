@@ -107,6 +107,7 @@ enum class Varselkode(
     RV_IT_30("Perioden er lagt inn i Infotrygd, men ikke utbetalt. Fjern fra Infotrygd hvis det utbetales via speil.", avviklet = true),
     RV_IT_31("Perioden forlenger en behandling i Infotrygd, og har historikk fra ny løsning: Undersøk at antall dager igjen er beregnet riktig.", avviklet = true),
     RV_IT_32("Perioden forlenger en behandling i ny løsning, og har historikk i Infotrygd også: Undersøk at antall dager igjen er beregnet riktig.", avviklet = true),
+    RV_IT_33("Skjæringstidspunktet har endret seg som følge av historikk fra Infotrygd"),
 
     // VV: Vilkårsvurdering
     RV_VV_1("Arbeidsgiver er ikke registrert i Aa-registeret."),

@@ -144,7 +144,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.april)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-        håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(1.januar.minusDays(60) til 31.januar.minusDays(60)))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(1.januar.minusDays(60) til 31.januar.minusDays(60)))
         håndterSimulering(1.vedtaksperiode)
@@ -191,7 +190,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(10.januar, 25.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -216,7 +214,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(15.januar, 25.januar, 100.prosent))
         håndterSøknad(Sykdom(15.januar, 25.januar, 100.prosent))
 
-        håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -261,7 +258,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
@@ -305,7 +301,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
@@ -349,7 +344,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
@@ -812,7 +806,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(16.januar, 15.februar, 100.prosent))
         håndterSøknad(Sykdom(16.januar, 15.februar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
@@ -833,7 +826,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(16.januar, 15.februar, 100.prosent))
         håndterSøknad(Sykdom(16.januar, 15.februar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -1073,7 +1065,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             førsteFraværsdag = 1.januar,
             arbeidsgiverperioder = listOf(1.januar til 16.januar)
         )
-        håndterYtelser()
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser()
         håndterSimulering()
@@ -1109,7 +1100,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             ),
             beregnetInntekt = 1000.månedlig
         )
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
@@ -1169,7 +1159,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         )
 
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
@@ -1239,13 +1228,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         }
 
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
-            uberegnetPeriode(1) medTilstand ForberederGodkjenning
-        }
-
-        håndterYtelser(1.vedtaksperiode)
         0.generasjon {
             assertEquals(2, perioder.size)
             uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
@@ -1854,7 +1836,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

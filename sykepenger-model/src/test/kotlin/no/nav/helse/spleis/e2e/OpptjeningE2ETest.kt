@@ -95,7 +95,6 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), 31.desember(2017))
         )
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -140,7 +139,6 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(fom, tom, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(fom til fom.plusDays(15)), orgnummer = a1)
-        håndterYtelser(vedtaksperiodeIdInnhenter, orgnummer = a1)
         håndterVilkårsgrunnlag(vedtaksperiodeIdInnhenter, arbeidsforhold = arbeidsforhold.toList(), orgnummer = a1)
     }
 

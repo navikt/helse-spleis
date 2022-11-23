@@ -114,7 +114,6 @@ internal fun AbstractEndToEndTest.tilGodkjenning(fom: LocalDate, tom: LocalDate,
 
     organisasjonsnummere.first().let { organisasjonsnummer ->
         val vedtaksperiode = observatør.sisteVedtaksperiode()
-        håndterYtelser(vedtaksperiodeIdInnhenter = vedtaksperiode, orgnummer = organisasjonsnummer)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = vedtaksperiode,
             inntekt = beregnetInntekt,
@@ -185,7 +184,6 @@ internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
     val vedtaksperiode = observatør.sisteVedtaksperiode()
 
     organisasjonsnummere.first().let { organisasjonsnummer ->
-        håndterYtelser(vedtaksperiodeIdInnhenter = vedtaksperiode, orgnummer = organisasjonsnummer)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = vedtaksperiode,
             orgnummer = organisasjonsnummer,
@@ -314,7 +312,6 @@ internal fun AbstractEndToEndTest.tilYtelser(
     )
     val id = observatør.sisteVedtaksperiode()
 
-    håndterYtelser(id, fnr = fnr, orgnummer = orgnummer, besvart = LocalDate.EPOCH.atStartOfDay())
     håndterVilkårsgrunnlag(
         vedtaksperiodeIdInnhenter = id,
         inntekt = beregnetInntekt,

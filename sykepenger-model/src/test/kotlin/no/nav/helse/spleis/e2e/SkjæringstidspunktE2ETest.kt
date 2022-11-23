@@ -61,8 +61,6 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
             grunnlag(a1, 1.januar, 15000.månedlig.repeat(3)),
             grunnlag(a2, 1.januar, 16000.månedlig.repeat(3))
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -89,7 +87,6 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             2.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -130,8 +127,6 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
             grunnlag(a1, 1.januar, 15000.månedlig.repeat(3)),
             grunnlag(a2, 1.januar, 16000.månedlig.repeat(3))
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -164,10 +159,8 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, orgnummer = a2)
     }
 }

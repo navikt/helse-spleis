@@ -96,7 +96,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 29.november(2017), 3.desember(2017), 100.prosent, 100.daglig),
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 13.november(2017), 28.november(2017), 100.prosent, 100.daglig)
         )
-        håndterYtelser(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2019) til 1.desember(2019) inntekter {
@@ -104,7 +103,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk)
         håndterSimulering(1.vedtaksperiode)
         assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
@@ -112,7 +111,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
@@ -186,7 +184,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(2.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
     }
 
     @Test
@@ -243,7 +241,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK
+            AVVENTER_VILKÅRSPRØVING
         )
     }
 
@@ -332,7 +330,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(3.februar(2020) til 18.februar(2020)), førsteFraværsdag = 3.januar(2020))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
     }
 
     @Test
@@ -381,7 +379,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(1.januar(2020), 16.januar(2020))),
             førsteFraværsdag = 1.januar(2020)
         )
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2019) til 1.desember(2019) inntekter {
@@ -406,16 +403,25 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         assertTilstander(
             1.vedtaksperiode,
-            START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
         assertTilstander(
             2.vedtaksperiode,
             START,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
 
         inspektør.also {
@@ -439,7 +445,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             førsteFraværsdag = 28.januar(2020)
         )
 
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2019) til 1.desember(2019) inntekter {
@@ -455,7 +460,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
@@ -472,7 +476,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(17.januar(2020), 2.februar(2020))),
             førsteFraværsdag = 17.januar(2020)
         )
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2019) til 1.desember(2019) inntekter {
@@ -491,7 +494,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
@@ -517,7 +519,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(1.januar(2020), 16.januar(2020))),
             førsteFraværsdag = 1.januar(2020)
         )
-        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2019) til 1.desember(2019) inntekter {
@@ -543,8 +544,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+           AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -597,7 +597,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             førsteFraværsdag = 11.januar(2020)
         )
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), Ferie(3.januar(2020), 10.januar(2020)), sendtTilNAVEllerArbeidsgiver = 1.februar(2020))
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2019) til 1.desember(2019) inntekter {
@@ -626,7 +625,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
@@ -644,7 +642,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             førsteFraværsdag = 11.januar(2020)
         )
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.februar(2020))
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2019) til 1.desember(2019) inntekter {
@@ -671,7 +668,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
@@ -687,7 +683,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.juli(2020), 31.juli(2020), 100.prosent))
         håndterSøknad(Sykdom(1.juli(2020), 31.juli(2020), 100.prosent))
 
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -722,7 +717,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.august(2020), 31.august(2020), 50.prosent))
         håndterSøknad(Sykdom(1.august(2020), 31.august(2020), 50.prosent))
 
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -760,7 +754,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 Periode(1.januar, 16.januar)
             ), førsteFraværsdag = 1.januar, refusjon = Refusjon(INNTEKT, null, emptyList())
         )
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             INNTEKT,
@@ -774,7 +767,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_GODKJENNING,
@@ -801,7 +793,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 Periode(1.januar, 16.januar)
             ), førsteFraværsdag = 1.januar, refusjon = Refusjon(INNTEKT, null, emptyList())
         )
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             INNTEKT,
@@ -817,7 +808,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
@@ -842,7 +832,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 Periode(1.januar(2020), 16.januar(2020))
             ), førsteFraværsdag = 1.januar(2020), refusjon = Refusjon(INNTEKT, null, emptyList())
         )
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(
             2.vedtaksperiode,
             INNTEKT,
@@ -863,7 +852,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_GODKJENNING,
@@ -897,7 +885,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 Periode(1.januar, 16.januar)
             ), førsteFraværsdag = 1.januar, refusjon = Refusjon(INNTEKT, null, emptyList())
         )
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             INNTEKT,
@@ -911,7 +898,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_GODKJENNING,
@@ -934,7 +920,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 Periode(1.januar(2020), 16.januar(2020))
             ), førsteFraværsdag = 1.januar(2020), refusjon = Refusjon(INNTEKT, null, emptyList())
         )
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(
             2.vedtaksperiode,
             INNTEKT,
@@ -955,7 +940,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_GODKJENNING,
@@ -990,7 +974,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             førsteFraværsdag = 1.januar,
             beregnetInntekt = lavInntekt
         )
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             lavInntekt,
@@ -1011,7 +994,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_GODKJENNING,
@@ -1034,7 +1016,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 Periode(1.januar(2020), 16.januar(2020))
             ), førsteFraværsdag = 1.januar(2020), refusjon = Refusjon(INNTEKT, null, emptyList())
         )
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(
             2.vedtaksperiode,
             INNTEKT,
@@ -1056,7 +1037,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
@@ -1092,7 +1072,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             førsteFraværsdag = 16.mars(2020),
             refusjon = Refusjon(INNTEKT, null, emptyList())
         )
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.mars(2019) til 1.februar(2020) inntekter {
@@ -1109,7 +1088,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
@@ -1132,7 +1110,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(4.juni(2020), 19.juni(2020))),
             førsteFraværsdag = 4.juni(2020)
         )
-        håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
         håndterSykmelding(Sykmeldingsperiode(26.juni(2020), 17.juli(2020), 100.prosent))
         håndterSøknad(
@@ -1148,7 +1125,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.juni, 16.juni)), førsteFraværsdag = 1.juni)
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent))
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2017) til 1.mai(2018) inntekter {
@@ -1175,7 +1151,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar)
         håndterSøknad(Sykdom(1.januar, 30.januar, 100.prosent))
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

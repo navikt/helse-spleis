@@ -81,7 +81,6 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
@@ -127,7 +126,6 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, beregnetInntekt = a1Inntekt, refusjon = Inntektsmelding.Refusjon(a1Inntekt, null, emptyList()))
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, beregnetInntekt = a2Inntekt, refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList()))
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a1,

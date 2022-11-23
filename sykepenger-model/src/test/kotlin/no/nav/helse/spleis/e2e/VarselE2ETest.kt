@@ -21,6 +21,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.Varselkode
@@ -42,6 +43,7 @@ import no.nav.helse.person.Varselkode.RV_IT_12
 import no.nav.helse.person.Varselkode.RV_IT_13
 import no.nav.helse.person.Varselkode.RV_IT_14
 import no.nav.helse.person.Varselkode.RV_IT_15
+import no.nav.helse.person.Varselkode.RV_IT_33
 import no.nav.helse.person.Varselkode.RV_IT_4
 import no.nav.helse.person.Varselkode.RV_IV_1
 import no.nav.helse.person.Varselkode.RV_IV_2
@@ -193,7 +195,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             orgnummer = a1,
@@ -232,7 +233,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             orgnummer = a1,
@@ -276,7 +276,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
             Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
             Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null)
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 listOf(
@@ -300,7 +299,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 19.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 19.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         assertVarsel(RV_VV_4, 1.vedtaksperiode.filter(a1))
@@ -314,7 +312,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         nyPeriode(11.januar til 31.januar)
         nyPeriode(1.februar til 28.februar)
         håndterUtbetalingshistorikk(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         assertVarsel(RV_RE_1, 2.vedtaksperiode.filter())
@@ -337,7 +334,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     fun `varsel - Perioden er avslått på grunn av manglende opptjening`() {
         nyPeriode(1.januar til 31.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser()
         håndterVilkårsgrunnlag(arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, ansattFom = 31.desember(2017), ansattTom = null)))
         assertVarsel(RV_OV_1, 1.vedtaksperiode.filter())
     }
@@ -346,7 +342,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     fun `varsel revurdering - Perioden er avslått på grunn av manglende opptjening`() {
         nyPeriode(1.januar til 31.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser()
         håndterVilkårsgrunnlag(
             arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, 31.desember(2017), null), Arbeidsforhold(a2, LocalDate.EPOCH, 5.januar)),
             inntektsvurdering = Inntektsvurdering(listOf(sammenligningsgrunnlag(a2, 1.januar, INNTEKT.repeat(12)))),
@@ -369,7 +364,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser()
         håndterVilkårsgrunnlag(medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.VetIkke)
 
         assertVarsel(RV_MV_1, 1.vedtaksperiode.filter())
@@ -380,7 +374,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser()
         håndterVilkårsgrunnlag(medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei)
 
         assertVarsel(RV_MV_2, 1.vedtaksperiode.filter())
@@ -392,7 +385,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1)
-        håndterYtelser(inntektshistorikk = emptyList(), orgnummer = a1)
         håndterVilkårsgrunnlag(orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -414,7 +406,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(besvart = LocalDateTime.now().minusYears(1))
         håndterVilkårsgrunnlag()
         håndterYtelser(besvart = LocalDateTime.now().minusYears(1))
         håndterSimulering()
@@ -439,7 +430,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(besvart = LocalDateTime.now().minusYears(1))
         håndterVilkårsgrunnlag()
         håndterYtelser(besvart = LocalDateTime.now().minusYears(1))
         håndterSimulering()
@@ -457,7 +447,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 100.månedlig)
-        håndterYtelser()
         håndterVilkårsgrunnlag(inntekt = 100.månedlig)
         håndterYtelser()
         assertVarsel(RV_SV_1)
@@ -467,7 +456,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     fun `varsel - Minst en arbeidsgiver inngår ikke i sykepengegrunnlaget`() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -517,7 +505,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode, simuleringsresultat = standardSimuleringsresultat(ORGNUMMER, totalbeløp = -1))
@@ -528,9 +515,8 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     fun `varsel - Har mer enn 25 prosent avvik`() {
         nyPeriode(1.januar til 31.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser()
         håndterVilkårsgrunnlag(inntekt = INNTEKT * 2)
-        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser()
         assertIngenVarsel(RV_IV_2, 1.vedtaksperiode.filter())
         assertFunksjonellFeil("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
     }
@@ -599,7 +585,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     fun `varsel - Bruker har mottatt AAP innenfor 6 måneder før skjæringstidspunktet - Kontroller at brukeren har rett til sykepenger`() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1, arbeidsavklaringspenger = listOf(1.desember(2017) til 15.desember(2017)))
 
@@ -610,7 +595,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     fun `varsel - Bruker har mottatt dagpenger innenfor 4 uker før skjæringstidspunktet - Kontroller om bruker er dagpengemottaker - Kombinerte ytelser støttes foreløpig ikke av systemet`() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1, dagpenger = listOf(1.desember(2017) til 15.desember(2017)))
 
@@ -702,7 +686,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode)
 
         håndterInntektsmelding(listOf(31.januar til 15.februar))
-
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
@@ -737,7 +720,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(inntektshistorikk = listOf(Inntektsopplysning.ferdigInntektsopplysning("973626108", 1.januar, inntekt = INNTEKT, true, null, null)))
         assertIngenVarsel(RV_IT_11, 1.vedtaksperiode.filter())
     }
@@ -756,7 +739,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(inntektshistorikk = listOf(Inntektsopplysning.ferdigInntektsopplysning("", 1.januar, inntekt = INNTEKT, true, null, null)))
         assertIngenVarsel(RV_IT_12, 1.vedtaksperiode.filter())
     }
@@ -827,6 +810,33 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
 
         assertIngenVarsel(RV_RV_2, 1.vedtaksperiode.filter())
         assertFunksjonellFeil("Forkaster avvist revurdering ettersom vedtaksperioden ikke har tidligere utbetalte utbetalinger.", 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel - skjæringstidspunkt endres som følge av historikk fra IT`() {
+        nyPeriode(10.januar til 25.januar)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.now().minusDays(2))
+        nyPeriode(26.januar til 31.januar)
+        håndterInntektsmelding(listOf(10.januar til 25.januar))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 9.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)
+        ))
+        assertFunksjonellFeil(RV_IT_33, 2.vedtaksperiode.filter(ORGNUMMER))
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `varsel - skjæringstidspunkt endres som følge av historikk fra IT - forlengelse`() {
+        nyttVedtak(10.februar, 28.februar)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.februar, 9.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 5.februar, INNTEKT, true)
+        ))
+        håndterYtelser(2.vedtaksperiode)
+        assertFunksjonellFeil(RV_IT_33, 2.vedtaksperiode.filter(ORGNUMMER))
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
     }
 
 }

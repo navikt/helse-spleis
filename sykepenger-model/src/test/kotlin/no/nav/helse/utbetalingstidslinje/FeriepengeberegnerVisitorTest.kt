@@ -377,7 +377,6 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         )
         håndterUtbetalingshistorikk(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = orgnummer)
-        håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterVilkårsgrunnlag(observatør.sisteVedtaksperiode(), inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 arbeidsgiverperiode.start.minusYears(1) til arbeidsgiverperiode.start.withDayOfMonth(1).minusMonths(1) inntekter {
@@ -404,7 +403,6 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         )
         håndterUtbetalingshistorikk(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = orgnummer)
-        håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterVilkårsgrunnlag(observatør.sisteVedtaksperiode(), inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 arbeidsgiverperiode.start.minusYears(1) til arbeidsgiverperiode.start.withDayOfMonth(1).minusMonths(1) inntekter {
@@ -432,7 +430,6 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a2)
         håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = a1)
         håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = a2)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 arbeidsgiverperiode.start.minusYears(1) til arbeidsgiverperiode.start.withDayOfMonth(1).minusMonths(1) inntekter {
