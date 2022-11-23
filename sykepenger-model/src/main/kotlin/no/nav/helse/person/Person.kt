@@ -482,6 +482,10 @@ class Person private constructor(
         observers.forEach { it.vedtakFattet(hendelseskontekst, vedtakFattetEvent) }
     }
 
+    internal fun sendRevurderingIgangsattEvent(event: PersonObserver.RevurderingIgangsattEvent) {
+        observers.forEach { it.revurderingIgangsatt(event) }
+    }
+
     internal fun feriepengerUtbetalt(
         hendelseskontekst: Hendelseskontekst,
         feriepengerUtbetaltEvent: PersonObserver.FeriepengerUtbetaltEvent
@@ -794,7 +798,11 @@ class Person private constructor(
     }
 
     internal fun startRevurdering(overstyrtVedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, hvorfor: RevurderingÅrsak) {
-        arbeidsgivere.startRevurdering(overstyrtVedtaksperiode, hendelse, hvorfor)
+        val revurdering = Revurderingseventyr(hvorfor)
+        arbeidsgivere.startRevurdering(overstyrtVedtaksperiode, hendelse, revurdering)
+        if (revurdering.eventyr()) {
+            overstyrtVedtaksperiode.sendRevurderingIgangsattEvent(revurdering)
+        }
     }
 
     internal fun slettUtgåtteSykmeldingsperioder(tom: LocalDate) {
@@ -831,4 +839,14 @@ class Person private constructor(
     internal fun nyVedtaksperiodeUtbetaling(organisasjonsnummer: String, utbetalingId: UUID, vedtaksperiodeId: UUID) {
         observers.forEach { it.nyVedtaksperiodeUtbetaling(personidentifikator, aktørId, organisasjonsnummer, utbetalingId, vedtaksperiodeId) }
     }
+}
+
+class Revurderingseventyr(private val hvorfor: RevurderingÅrsak) {
+    private val vedtaksperioder = mutableListOf<UUID>()
+    internal fun årsak() = hvorfor
+    internal fun bliMedPåEventyr(vedtaksperiodeId: UUID) = vedtaksperioder.add(vedtaksperiodeId)
+
+    internal fun eventyr() = vedtaksperioder.isNotEmpty()
+
+    internal fun berørteVedtaksperioder() = vedtaksperioder
 }
