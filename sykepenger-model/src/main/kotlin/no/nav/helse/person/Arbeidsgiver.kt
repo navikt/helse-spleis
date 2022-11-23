@@ -488,7 +488,7 @@ internal class Arbeidsgiver private constructor(
             if (!søknad.harFunksjonelleFeilEllerVerre()) return person.emitUtsettOppgaveEvent(søknad)
         }
         val vedtaksperiode = søknad.lagVedtaksperiode(person, this, jurist)
-        if (person.nekterOpprettelseAvPeriode(vedtaksperiode, søknad)) {
+        if (søknad.harFunksjonelleFeilEllerVerre() || person.nekterOpprettelseAvPeriode(vedtaksperiode, søknad)) {
             registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
             person.søppelbøtte(søknad, TIDLIGERE_OG_ETTERGØLGENDE(vedtaksperiode))
             return
