@@ -257,7 +257,6 @@ internal class Tidslinjeperioder(
             gjenståendeSykedager = utbetaling.gjenståendeSykedager,
             forbrukteSykedager = utbetaling.forbrukteSykedager,
             utbetaling = utbetalingDTO,
-            vilkårsgrunnlagshistorikkId = tidslinjeberegning.vilkårsgrunnlagshistorikkId,
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             aktivitetslogg = varsler,
             refusjon = refusjon,

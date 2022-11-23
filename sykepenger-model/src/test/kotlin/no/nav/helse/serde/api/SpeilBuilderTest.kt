@@ -39,7 +39,6 @@ import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.speilApi
 import no.nav.helse.spleis.e2e.standardSimuleringsresultat
 import no.nav.helse.testhelpers.assertNotNull
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -136,7 +135,8 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(listOf(a1, a2).map(String::toString), personDto.arbeidsgivere.map { it.organisasjonsnummer })
 //        assertEquals(listOf(a1, a2).map(String::toString), personDto.inntektsgrunnlag.single().inntekter.map { it.arbeidsgiver })
 
-        val arbeidsgiverInntektA2 = personDto.vilkårsgrunnlagHistorikk.values.last()[1.januar]?.inntekter?.first { it.organisasjonsnummer == a2 }
+        val vilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val arbeidsgiverInntektA2 = personDto.vilkårsgrunnlag[vilkårsgrunnlagId]?.inntekter?.first { it.organisasjonsnummer == a2 }
 
         assertEquals(0.0, arbeidsgiverInntektA2?.omregnetÅrsinntekt?.beløp)
         assertEquals(Inntektkilde.IkkeRapportert, arbeidsgiverInntektA2?.omregnetÅrsinntekt?.kilde)
@@ -257,7 +257,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT, null, endringerIRefusjon = listOf(
-            Inntektsmelding.Refusjon.EndringIRefusjon(Inntekt.INGEN, 1.februar))))
+            Inntektsmelding.Refusjon.EndringIRefusjon(INGEN, 1.februar))))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -279,7 +279,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(inntektsmeldingId, refusjonsopplysninger.first().meldingsreferanseId)
         assertEquals(1.februar, refusjonsopplysninger.last().fom)
         assertEquals(null, refusjonsopplysninger.last().tom)
-        assertEquals(Inntekt.INGEN, refusjonsopplysninger.last().beløp.månedlig)
+        assertEquals(INGEN, refusjonsopplysninger.last().beløp.månedlig)
         assertEquals(inntektsmeldingId, refusjonsopplysninger.last().meldingsreferanseId)
     }
 

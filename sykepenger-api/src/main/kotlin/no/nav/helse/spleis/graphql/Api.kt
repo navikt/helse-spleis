@@ -113,9 +113,6 @@ private fun mapTilDto(person: PersonDTO) =
                 }
             )
         },
-        vilkarsgrunnlaghistorikk = person.vilkårsgrunnlagHistorikk.entries.map { (id, dateMap) ->
-            mapVilkårsgrunnlagHistorikk(id, dateMap.values.toList())
-        },
         dodsdato = person.dødsdato,
         versjon = person.versjon,
         vilkarsgrunnlag = person.vilkårsgrunnlag.map { (id, vilkårsgrunnlag) -> mapVilkårsgrunnlag(id, vilkårsgrunnlag) }

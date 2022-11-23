@@ -35,7 +35,6 @@ internal class PersonBuilder(
             fødselsnummer = personidentifikator.toString(),
             aktørId = aktørId,
             arbeidsgivere = arbeidsgivere,
-            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.toDTO(),
             dødsdato = dødsdato,
             versjon = versjon,
             vilkårsgrunnlag = vilkårsgrunnlag

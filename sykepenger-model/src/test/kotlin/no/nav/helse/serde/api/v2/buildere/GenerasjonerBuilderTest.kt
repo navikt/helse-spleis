@@ -334,15 +334,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         0.generasjon(a1) {
             val periode = beregnetPeriode(0)
-            val vilkårsgrunnlagFraVilkårsgrunnlagHistorikk = periode.vilkårsgrunnlagFraVilkårsgrunnlaghistorikk()
             val vilkårsgrunnlag = periode.vilkårsgrunnlag()
-
-            var omregnetÅrsinntekt = vilkårsgrunnlagFraVilkårsgrunnlagHistorikk.inntekter.first { it.organisasjonsnummer == a2 }.omregnetÅrsinntekt
-            assertEquals(3, omregnetÅrsinntekt?.inntekterFraAOrdningen?.size)
-            assertTrue(omregnetÅrsinntekt?.inntekterFraAOrdningen?.all { it.sum == 1000.0 } ?: false)
-
-            // tester dobbelt opp frem til speil er over på "den nye bøtta" med vilkårsgrunnlag
-            omregnetÅrsinntekt = vilkårsgrunnlag.inntekter.first { it.organisasjonsnummer == a2 }.omregnetÅrsinntekt
+            val omregnetÅrsinntekt = vilkårsgrunnlag.inntekter.first { it.organisasjonsnummer == a2 }.omregnetÅrsinntekt
             assertEquals(3, omregnetÅrsinntekt?.inntekterFraAOrdningen?.size)
             assertTrue(omregnetÅrsinntekt?.inntekterFraAOrdningen?.all { it.sum == 1000.0 } ?: false)
         }
@@ -381,21 +374,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         0.generasjon(a1) {
-            val vilkårsgrunnlagFraVilkårsgrunnlagHistorikk = beregnetPeriode(0).vilkårsgrunnlagFraVilkårsgrunnlaghistorikk()
-            var inntektsgrunnlag = vilkårsgrunnlagFraVilkårsgrunnlagHistorikk.inntekter.firstOrNull { it.organisasjonsnummer == a2 }
-            assertEquals(
-                OmregnetÅrsinntekt(
-                    Inntektkilde.IkkeRapportert,
-                    0.0,
-                    0.0,
-                    null
-                ),
-                inntektsgrunnlag?.omregnetÅrsinntekt
-            )
-
-            // tester dobbelt opp frem til speil er over på "den nye bøtta" med vilkårsgrunnlag
-            val vilkårsgrunnlag = beregnetPeriode(0).vilkårsgrunnlagFraVilkårsgrunnlaghistorikk()
-            inntektsgrunnlag = vilkårsgrunnlag.inntekter.firstOrNull { it.organisasjonsnummer == a2 }
+            val vilkårsgrunnlag = beregnetPeriode(0).vilkårsgrunnlag()
+            val inntektsgrunnlag = vilkårsgrunnlag.inntekter.firstOrNull { it.organisasjonsnummer == a2 }
             assertEquals(
                 OmregnetÅrsinntekt(
                     Inntektkilde.IkkeRapportert,
@@ -2003,10 +1983,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertEquals(periodeUtenHelg.toList().size, tidslinjedager.size)
         assertTrue(tidslinjedager.all { it.sykdomstidslinjedagtype == dagtype })
         return this
-    }
-
-    private fun BeregnetPeriode.vilkårsgrunnlagFraVilkårsgrunnlaghistorikk(): Vilkårsgrunnlag {
-        return requireNotNull(vilkårsgrunnlagHistorikk[this.vilkårsgrunnlagshistorikkId]?.get(this.skjæringstidspunkt)) { "Forventet å finne vilkårsgrunnlag for periode" }
     }
 
     private fun BeregnetPeriode.vilkårsgrunnlag(): Vilkårsgrunnlag {

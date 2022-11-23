@@ -157,7 +157,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                                             rapportertDato
                                         }
                                     },
-                                    vilkarsgrunnlaghistorikkId,
+                                    vilkarsgrunnlagId,
                                     periodevilkar {
                                         sykepengedager {
                                             skjaeringstidspunkt,
@@ -371,7 +371,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                                             rapportertDato
                                         }
                                     },
-                                    vilkarsgrunnlaghistorikkId,
+                                    vilkarsgrunnlagId,
                                     periodevilkar {
                                         sykepengedager {
                                             skjaeringstidspunkt,
@@ -412,64 +412,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             objectMapper.readTree(this).get("data").get("person").get("arbeidsgivere").get(0).get("generasjoner").get(0).let { generasjon ->
                 assertEquals(2, generasjon.size())
                 assertEquals(1, generasjon.get("perioder").size())
-            }
-        }
-    }
-
-    @Test
-    fun `vilkårsgrunnlaghistorikk med person-resolver`() {
-        val query = """
-            {
-                person(fnr: \"$UNG_PERSON_FNR\") {
-                    arbeidsgivere {
-                        generasjoner {
-                            perioder {
-                                ... on GraphQLBeregnetPeriode {
-                                    vilkarsgrunnlaghistorikkId
-                                }
-                            }
-                        }
-                    },
-                    vilkarsgrunnlaghistorikk {
-                        id,
-                        grunnlag {
-                            skjaeringstidspunkt,
-                            omregnetArsinntekt,
-                            sammenligningsgrunnlag,
-                            sykepengegrunnlag,
-                            inntekter {
-                                arbeidsgiver,
-                                omregnetArsinntekt {
-                                    kilde,
-                                    belop,
-                                    manedsbelop,
-                                    inntekterFraAOrdningen {
-                                        maned,
-                                        sum
-                                    }
-                                },
-                                sammenligningsgrunnlag {
-                                    belop
-                                }
-                            },
-                            vilkarsgrunnlagtype
-                        }
-                    }
-                }
-            }
-        """.trimIndent()
-
-        testServer.httpPost(
-            path = "/graphql",
-            body = """{"query": "$query"}"""
-        ) {
-            objectMapper.readTree(this).get("data").get("person").let { person ->
-                val vilkårsId: String =
-                    person.get("arbeidsgivere").get(0).get("generasjoner").get(0).get("perioder").get(0).get("vilkarsgrunnlaghistorikkId").asText()
-                val vilkårsgrunnlaghistorikk = person.get("vilkarsgrunnlaghistorikk")
-                assertEquals(1, vilkårsgrunnlaghistorikk.size())
-                assertEquals(vilkårsId, vilkårsgrunnlaghistorikk.get(0).get("id").asText())
-                assertEquals(6, vilkårsgrunnlaghistorikk.get(0).get("grunnlag").get(0).size())
             }
         }
     }
@@ -602,22 +544,19 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                         generasjoner {
                             perioder {
                                 ... on GraphQLBeregnetPeriode {
-                                    vilkarsgrunnlaghistorikkId
+                                    vilkarsgrunnlagId
                                 }
                             }
                         }
                     },
-                    vilkarsgrunnlaghistorikk {
-                        id,
-                        grunnlag {
-                            
-                            ... on GraphQLSpleisVilkarsgrunnlag {
-                                sykepengegrunnlagsgrense {
-                                    grunnbelop,
-                                    grense,
-                                    virkningstidspunkt
-                                }                            
-                            }
+                    vilkarsgrunnlag {
+                        id, 
+                        ... on GraphQLSpleisVilkarsgrunnlag {
+                            sykepengegrunnlagsgrense {
+                                grunnbelop,
+                                grense,
+                                virkningstidspunkt
+                            }                            
                         }
                     }
                 }
@@ -629,15 +568,14 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             body = """{"query": "$query"}"""
         ) {
             objectMapper.readTree(this).get("data").get("person").let { person ->
-                val vilkårsId: String =
-                    person.get("arbeidsgivere").get(0).get("generasjoner").get(0).get("perioder").get(0).get("vilkarsgrunnlaghistorikkId").asText()
-                val vilkårsgrunnlaghistorikk = person.get("vilkarsgrunnlaghistorikk")
-                assertEquals(1, vilkårsgrunnlaghistorikk.size())
-                assertEquals(vilkårsId, vilkårsgrunnlaghistorikk.get(0).get("id").asText())
-                assertEquals(1, vilkårsgrunnlaghistorikk.get(0).get("grunnlag").get(0).size())
-                assertEquals(93634, vilkårsgrunnlaghistorikk.get(0).get("grunnlag").get(0).get("sykepengegrunnlagsgrense").get("grunnbelop").asInt())
-                assertEquals( 561804, vilkårsgrunnlaghistorikk.get(0).get("grunnlag").get(0).get("sykepengegrunnlagsgrense").get("grense").asInt())
-                assertEquals("2017-05-01", vilkårsgrunnlaghistorikk.get(0).get("grunnlag").get(0).get("sykepengegrunnlagsgrense").get("virkningstidspunkt").asText())
+                val vilkårsgrunnlagId: String =
+                    person.get("arbeidsgivere").get(0).get("generasjoner").get(0).get("perioder").get(0).get("vilkarsgrunnlagId").asText()
+                val vilkårsgrunnlag = person.get("vilkarsgrunnlag")
+                assertEquals(1, vilkårsgrunnlag.size())
+                assertEquals(vilkårsgrunnlagId, vilkårsgrunnlag.get(0).get("id").asText())
+                assertEquals(93634, vilkårsgrunnlag.get(0).get("sykepengegrunnlagsgrense").get("grunnbelop").asInt())
+                assertEquals( 561804, vilkårsgrunnlag.get(0).get("sykepengegrunnlagsgrense").get("grense").asInt())
+                assertEquals("2017-05-01", vilkårsgrunnlag.get(0).get("sykepengegrunnlagsgrense").get("virkningstidspunkt").asText())
             }
         }
     }

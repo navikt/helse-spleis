@@ -300,7 +300,6 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
             forbrukteSykedager = periode.forbrukteSykedager,
             skjaeringstidspunkt = periode.skjæringstidspunkt,
             maksdato = periode.maksdato,
-            vilkarsgrunnlaghistorikkId = periode.vilkårsgrunnlagshistorikkId,
             utbetaling = mapUtbetaling(periode.utbetaling),
             hendelser = periode.hendelser.map { mapHendelse(it) },
             periodevilkar = mapPeriodevilkår(periode.periodevilkår),

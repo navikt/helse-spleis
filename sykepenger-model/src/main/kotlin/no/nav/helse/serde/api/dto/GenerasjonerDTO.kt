@@ -100,7 +100,6 @@ data class BeregnetPeriode(
     val maksdato: LocalDate,
     val utbetaling: Utbetaling,
     val hendelser: List<HendelseDTO>,
-    val vilkårsgrunnlagshistorikkId: UUID,
     val periodevilkår: Vilkår,
     val aktivitetslogg: List<AktivitetDTO>,
     val refusjon: Refusjon?,
