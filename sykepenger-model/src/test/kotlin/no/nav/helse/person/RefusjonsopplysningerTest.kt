@@ -406,7 +406,7 @@ internal class RefusjonsopplysningerTest {
         val overstyringId = UUID.randomUUID()
         val ønskedeRefusjonsopplysninger = RefusjonsopplysningerBuilder()
             .leggTil(Refusjonsopplysning(overstyringId, 1.januar, 31.januar, 1500.daglig))
-            .leggTil(Refusjonsopplysning(overstyringId, 1.februar, 27.februar, 1200.daglig)) // 28.mars -> 27.februar
+            .leggTil(Refusjonsopplysning(overstyringId, 1.februar, 27.februar, 1200.daglig)) // 28.februar -> 27.februar
             .leggTil(Refusjonsopplysning(overstyringId, 28.februar, 31.mars, 10.daglig)) // 1.mars -> 28.februar
             .leggTil(Refusjonsopplysning(overstyringId, 1.april, 30.april, 1599.daglig)) // 1600.daglig -> 1599.dalig
             .leggTil(Refusjonsopplysning(overstyringId, 1.mai, null, 1700.daglig))
@@ -417,6 +417,35 @@ internal class RefusjonsopplysningerTest {
             Refusjonsopplysning(overstyringId, 28.februar, 31.mars, 10.daglig),
             Refusjonsopplysning(overstyringId, 1.april, 30.april, 1599.daglig)
         ), (eksisterendeRefusjonsopplysninger - ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger)
+    }
+
+    @Test
+    fun `Merger nye refusjonsopplysninger`() {
+        val inntektsmeldingId = UUID.randomUUID()
+        val eksisterendeRefusjonsopplysninger = RefusjonsopplysningerBuilder()
+            .leggTil(Refusjonsopplysning(inntektsmeldingId, 1.januar, 31.januar, 1500.daglig))
+            .leggTil(Refusjonsopplysning(inntektsmeldingId, 1.februar, 28.februar, 1200.daglig))
+            .leggTil(Refusjonsopplysning(inntektsmeldingId, 1.mars, 31.mars, 0.daglig))
+            .leggTil(Refusjonsopplysning(inntektsmeldingId, 1.april, 30.april, 1600.daglig))
+            .leggTil(Refusjonsopplysning(inntektsmeldingId, 1.mai, null, 1700.daglig))
+            .build()
+
+        val overstyringId = UUID.randomUUID()
+        val ønskedeRefusjonsopplysninger = RefusjonsopplysningerBuilder()
+            .leggTil(Refusjonsopplysning(overstyringId, 1.januar, 31.januar, 1500.daglig))
+            .leggTil(Refusjonsopplysning(overstyringId, 1.februar, 27.februar, 1200.daglig)) // 28.februar -> 27.februar
+            .leggTil(Refusjonsopplysning(overstyringId, 28.februar, 31.mars, 10.daglig)) // 1.mars -> 28.februar
+            .leggTil(Refusjonsopplysning(overstyringId, 1.april, 30.april, 1599.daglig)) // 1600.daglig -> 1599.dalig
+            .leggTil(Refusjonsopplysning(overstyringId, 1.mai, null, 1700.daglig))
+            .build()
+
+        assertEquals(listOf(
+            Refusjonsopplysning(inntektsmeldingId, 1.januar, 31.januar, 1500.daglig),
+            Refusjonsopplysning(overstyringId, 1.februar, 27.februar, 1200.daglig),
+            Refusjonsopplysning(overstyringId, 28.februar, 31.mars, 10.daglig),
+            Refusjonsopplysning(overstyringId, 1.april, 30.april, 1599.daglig),
+            Refusjonsopplysning(inntektsmeldingId, 1.mai, null, 1700.daglig)
+        ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger)
     }
 
     internal companion object {

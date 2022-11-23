@@ -123,7 +123,9 @@ class Refusjonsopplysning(
             return merged
         }
 
-        internal fun merge(nyeRefusjonsopplysninger: Refusjonsopplysninger): Refusjonsopplysninger {
+        internal fun merge(other: Refusjonsopplysninger): Refusjonsopplysninger {
+            val nyeRefusjonsopplysninger = this - other
+            if (nyeRefusjonsopplysninger.validerteRefusjonsopplysninger.isEmpty()) return this // Ingen endring
             return Refusjonsopplysninger(validerteRefusjonsopplysninger.merge(nyeRefusjonsopplysninger.validerteRefusjonsopplysninger))
         }
         private fun funksjoneltInneholder(other: Refusjonsopplysning) = validerteRefusjonsopplysninger.any { it.funksjoneltLik(other) }
