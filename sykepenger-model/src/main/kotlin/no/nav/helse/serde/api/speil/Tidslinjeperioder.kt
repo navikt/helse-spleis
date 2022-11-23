@@ -29,7 +29,6 @@ import no.nav.helse.serde.api.dto.Periodetilstand.TilGodkjenning
 import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
 import no.nav.helse.serde.api.dto.Periodetilstand.UtbetaltVenterPåAnnenPeriode
 import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
-import no.nav.helse.serde.api.dto.Refusjon
 import no.nav.helse.serde.api.dto.SammenslåttDag
 import no.nav.helse.serde.api.dto.SpeilOppdrag
 import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
@@ -156,7 +155,6 @@ internal class Generasjoner(perioder: Tidslinjeperioder) {
 internal class Tidslinjeperioder(
     private val alder: Alder,
     private val forkastetVedtaksperiodeIder: List<UUID>,
-    private val refusjoner: Map<InntektsmeldingId, Refusjon>,
     vedtaksperioder: List<IVedtaksperiode>,
     tidslinjeberegninger: Tidslinjeberegninger,
     vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
@@ -176,7 +174,6 @@ internal class Tidslinjeperioder(
                 )
                 else -> periode.utbetalinger.map { (vilkårsgrunnlag, utbetaling) ->
                     val tidslinjeberegning = tidslinjeberegninger.finn(utbetaling.beregningId)
-                    val refusjon = refusjoner[periode.inntektsmeldingId()]
                     utbetaling.settTilGodkjenning(vedtaksperioder)
                     beregnetPeriode(
                         periode = periode,
@@ -184,7 +181,6 @@ internal class Tidslinjeperioder(
                         utbetalinger = periode.utbetalinger.map { it.second },
                         tidslinjeberegning = tidslinjeberegning,
                         erForkastet = erForkastet(periode.vedtaksperiodeId),
-                        refusjon = refusjon,
                         vilkårsgrunnlaghistorikk = vilkårsgrunnlaghistorikk
                     )
                 }
@@ -226,7 +222,6 @@ internal class Tidslinjeperioder(
         utbetalinger: List<IUtbetaling>,
         tidslinjeberegning: ITidslinjeberegning,
         erForkastet: Boolean,
-        refusjon: Refusjon?,
         vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
     ): BeregnetPeriode {
         val utbetaling = vilkårsgrunnlagTilutbetaling.second
@@ -259,7 +254,6 @@ internal class Tidslinjeperioder(
             utbetaling = utbetalingDTO,
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             aktivitetslogg = varsler,
-            refusjon = refusjon,
             periodetilstand = when {
                 utbetalingDTO.erAnnullering() -> if (utbetalingDTO.status != Utbetalingstatus.Annullert) TilAnnullering else Annullert
                 utbetalingDTO.revurderingFeilet(periode.tilstand) -> when {

@@ -7,7 +7,6 @@ import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -53,7 +52,6 @@ import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.speilApi
-import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -689,52 +687,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         val vilkårsgrunnlagId = (personDto.arbeidsgivere.find { it.organisasjonsnummer == a1 }!!.generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag[vilkårsgrunnlagId]
         assertNull(vilkårsgrunnlag?.inntekter?.firstOrNull { it.organisasjonsnummer == a2 }?.omregnetÅrsinntekt)
-    }
-
-    @Test
-    fun `tar med refusjonshistorikk pr arbeidsgiver`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            orgnummer = a1,
-            refusjon = Inntektsmelding.Refusjon(
-                beløp = INNTEKT,
-                opphørsdato = null,
-                endringerIRefusjon = listOf(
-                    Inntektsmelding.Refusjon.EndringIRefusjon(beløp = INNTEKT.plus(1000.månedlig), 19.januar),
-                    Inntektsmelding.Refusjon.EndringIRefusjon(beløp = INNTEKT.plus(2000.månedlig), 23.januar),
-                )
-            )
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterVilkårsgrunnlag(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt 10000.månedlig
-                }
-            }),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
-            )
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-
-        val personDto = speilApi()
-
-        personDto.arbeidsgivere.first().generasjoner.first().perioder.filterIsInstance(BeregnetPeriode::class.java)
-            .first().refusjon.let {
-                assertNotNull(it)
-                assertEquals(2, it.endringer.size)
-                assertEquals(32000.0, it.endringer.first().beløp)
-                assertEquals(19.januar, it.endringer.first().dato)
-                assertEquals(33000.0, it.endringer.last().beløp)
-                assertEquals(23.januar, it.endringer.last().dato)
-            }
     }
 
     @Test

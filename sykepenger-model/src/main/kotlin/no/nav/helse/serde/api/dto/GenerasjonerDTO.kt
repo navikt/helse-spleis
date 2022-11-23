@@ -102,7 +102,6 @@ data class BeregnetPeriode(
     val hendelser: List<HendelseDTO>,
     val periodevilkår: Vilkår,
     val aktivitetslogg: List<AktivitetDTO>,
-    val refusjon: Refusjon?,
     val vilkårsgrunnlagId: UUID?
 ) : Tidslinjeperiode, Comparable<BeregnetPeriode> {
     override val tidslinjeperiodeId: UUID = UUID.randomUUID()

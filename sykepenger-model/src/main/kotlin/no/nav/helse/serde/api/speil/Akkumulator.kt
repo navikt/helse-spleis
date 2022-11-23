@@ -11,12 +11,10 @@ import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
-import no.nav.helse.serde.api.dto.Refusjon
 import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
 import no.nav.helse.serde.api.speil.IUtbetaling.Companion.leggTil
 import no.nav.helse.serde.api.speil.builders.BeregningId
 import no.nav.helse.serde.api.speil.builders.GenerasjonIder
-import no.nav.helse.serde.api.speil.builders.InntektsmeldingId
 import no.nav.helse.serde.api.speil.builders.KorrelasjonsId
 import no.nav.helse.serde.api.speil.builders.SykdomshistorikkId
 
@@ -94,14 +92,4 @@ internal class SykdomshistorikkAkkumulator {
     internal fun finnTidslinje(sykdomshistorikkId: SykdomshistorikkId): List<Sykdomstidslinjedag>? {
         return elementer[sykdomshistorikkId]
     }
-}
-
-internal class RefusjonerAkkumulator {
-    private val refusjoner = mutableMapOf<InntektsmeldingId, Refusjon>()
-
-    internal fun leggTil(refusjoner: Map<InntektsmeldingId, Refusjon>) {
-        this.refusjoner.putAll(refusjoner)
-    }
-
-    internal fun getRefusjoner(): Map<InntektsmeldingId, Refusjon> = refusjoner
 }

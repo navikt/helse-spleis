@@ -12,7 +12,6 @@ import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Periodetype
-import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.api.dto.Generasjon
 import no.nav.helse.serde.api.dto.HendelseDTO
@@ -21,7 +20,6 @@ import no.nav.helse.serde.api.speil.ForkastetVedtaksperiodeAkkumulator
 import no.nav.helse.serde.api.speil.GenerasjonIderAkkumulator
 import no.nav.helse.serde.api.speil.Generasjoner
 import no.nav.helse.serde.api.speil.IVedtaksperiode
-import no.nav.helse.serde.api.speil.RefusjonerAkkumulator
 import no.nav.helse.serde.api.speil.SykdomshistorikkAkkumulator
 import no.nav.helse.serde.api.speil.Tidslinjeberegninger
 import no.nav.helse.serde.api.speil.Tidslinjeperioder
@@ -55,7 +53,6 @@ internal class GenerasjonerBuilder(
     private val generasjonIderAkkumulator = GenerasjonIderAkkumulator()
     private val sykdomshistorikkAkkumulator = SykdomshistorikkAkkumulator()
     private val annulleringer = AnnulleringerAkkumulator()
-    private val refusjonerAkkumulator = RefusjonerAkkumulator()
 
     init {
         arbeidsgiver.accept(this)
@@ -67,7 +64,6 @@ internal class GenerasjonerBuilder(
         val tidslinjeperioder = Tidslinjeperioder(
             alder = alder,
             forkastetVedtaksperiodeIder = forkastetVedtaksperiodeAkkumulator.toList(),
-            refusjoner = refusjonerAkkumulator.getRefusjoner(),
             vedtaksperioder = vedtaksperiodeAkkumulator.toList(),
             tidslinjeberegninger = tidslinjeberegninger,
             vilkårsgrunnlaghistorikk = vilkårsgrunnlaghistorikk
@@ -157,11 +153,4 @@ internal class GenerasjonerBuilder(
             sykdomshistorikkAkkumulator.leggTil(id, tidslinje)
         }
     }
-
-    override fun preVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {
-        RefusjonerBuilder(refusjonshistorikk).build().also {
-            refusjonerAkkumulator.leggTil(it)
-        }
-    }
-
 }

@@ -143,33 +143,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `tar med refusjonshistorikk pr arbeidsgiver`() {
-        nyttVedtak(
-            fom = 1.januar,
-            tom = 31.januar,
-            grad = 100.prosent,
-            refusjon = Inntektsmelding.Refusjon(
-                beløp = INNTEKT,
-                opphørsdato = null,
-                endringerIRefusjon = listOf(
-                    Inntektsmelding.Refusjon.EndringIRefusjon(beløp = INNTEKT.plus(1000.månedlig), 19.januar),
-                    Inntektsmelding.Refusjon.EndringIRefusjon(beløp = INNTEKT.plus(2000.månedlig), 23.januar),
-                )
-            )
-        )
-
-        val personDto = speilApi()
-        val periode: BeregnetPeriode = personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode
-        val refusjon = requireNotNull(periode.refusjon)
-
-        assertEquals(2, refusjon.endringer.size)
-        assertEquals(32000.0, refusjon.endringer.first().beløp)
-        assertEquals(19.januar, refusjon.endringer.first().dato)
-        assertEquals(33000.0, refusjon.endringer.last().beløp)
-        assertEquals(23.januar, refusjon.endringer.last().dato)
-    }
-
-    @Test
     fun `beregnet periode peker på vilkårsgrunnlagid`() {
         nyttVedtak(1.januar, 31.januar)
         val personDto = speilApi()
@@ -287,14 +260,10 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     fun `korrigert inntektsmelding i Avsluttet, velger opprinnelig refusjon`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         val vilkårsgrunnlagId = (speilApi().arbeidsgivere.first().generasjoner.last().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-        val refusjon = (speilApi().arbeidsgivere.first().generasjoner.last().perioder.first() as BeregnetPeriode).refusjon
-        assertEquals(INNTEKT, refusjon?.beløp?.månedlig)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar),  refusjon = Inntektsmelding.Refusjon(20000.månedlig, null))
         val vilkårsgrunnlagIdEtterIm = (speilApi().arbeidsgivere.first().generasjoner.last().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-        val refusjonEtterIm = (speilApi().arbeidsgivere.first().generasjoner.last().perioder.first() as BeregnetPeriode).refusjon
         assertEquals(vilkårsgrunnlagId, vilkårsgrunnlagIdEtterIm)
-        assertEquals(INNTEKT, refusjonEtterIm?.beløp?.månedlig)
 
         val speilVilkårsgrunnlagId = (speilApi().arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = speilApi().vilkårsgrunnlag.get(speilVilkårsgrunnlagId) as? SpleisVilkårsgrunnlag

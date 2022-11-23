@@ -44,7 +44,6 @@ import no.nav.helse.spleis.graphql.dto.GraphQLOppdrag
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodetype
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodevilkar
-import no.nav.helse.spleis.graphql.dto.GraphQLRefusjon
 import no.nav.helse.spleis.graphql.dto.GraphQLRefusjonselement
 import no.nav.helse.spleis.graphql.dto.GraphQLSammenligningsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLSimulering
@@ -309,20 +308,6 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
                     alvorlighetsgrad = it.alvorlighetsgrad,
                     melding = it.melding,
                     tidsstempel = it.tidsstempel
-                )
-            },
-            refusjon = periode.refusjon?.let { refusjon ->
-                GraphQLRefusjon(
-                    arbeidsgiverperioder = refusjon.arbeidsgiverperioder.map {
-                        GraphQLRefusjon.GraphQLRefusjonsperiode(
-                            it.fom,
-                            it.tom
-                        )
-                    },
-                    endringer = refusjon.endringer.map { GraphQLRefusjon.GraphQLRefusjonsendring(it.beløp, it.dato) },
-                    forsteFravaersdag = refusjon.førsteFraværsdag,
-                    sisteRefusjonsdag = refusjon.sisteRefusjonsdag,
-                    belop = refusjon.beløp
                 )
             },
             periodetilstand = mapTilstand(periode.periodetilstand),
