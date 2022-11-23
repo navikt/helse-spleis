@@ -100,7 +100,7 @@ internal object RefusjonsopplysningerIVilkårsgrunnlag {
             }
         }
         val refusjonsopplysningerPåSkjæringstidspunkt = refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
-        if (refusjonsopplysningerPåSkjæringstidspunkt.isNotEmpty()) return refusjonsopplysningerPåSkjæringstidspunkt.also {
+        if (refusjonsopplysningerPåSkjæringstidspunkt.harOpplysninger) return refusjonsopplysningerPåSkjæringstidspunkt.also {
             sikkerlogg.info("Fant refusjonsopplysninger på skjæringstidspunkt for vilkårsgrunnlag. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
                 keyValue("aktørId", aktørId),
                 keyValue("organisasjonsnummer", organisasjonsnummer)
@@ -116,7 +116,7 @@ internal object RefusjonsopplysningerIVilkårsgrunnlag {
 
         (1..19).forEach { i ->
             val refusjonsopplysninger = refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt.minusDays(i.toLong()))
-            if (refusjonsopplysninger.isNotEmpty()) return refusjonsopplysninger.also {
+            if (refusjonsopplysninger.harOpplysninger) return refusjonsopplysninger.also {
                 sikkerlogg.info("Fant refusjonsopplysninger for vilkårsgrunnlag ved å gå $i dager tilbake fra skjæringstidspunktet. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
                     keyValue("aktørId", aktørId),
                     keyValue("organisasjonsnummer", organisasjonsnummer)
@@ -134,6 +134,7 @@ internal object RefusjonsopplysningerIVilkårsgrunnlag {
 
     private val SPLEIS = "Vilkårsprøving"
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+    private val Refusjonsopplysninger.harOpplysninger get() = this != Refusjonsopplysninger()
 
     internal val Refusjonsopplysninger.arrayNode get() = RefusjonsopplysningerToArrayNode(this).arrayNode
     private class RefusjonsopplysningerToArrayNode(refusjonsopplysninger: Refusjonsopplysninger):
