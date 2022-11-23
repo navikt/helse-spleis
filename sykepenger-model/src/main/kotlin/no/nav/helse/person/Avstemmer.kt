@@ -87,7 +87,8 @@ internal class Avstemmer(person: Person) {
                 "id" to id,
                 "type" to type.name,
                 "status" to Utbetalingstatus.fraTilstand(tilstand),
-                "tidsstempel" to oppdatert
+                "opprettet" to tidsstempel,
+                "oppdatert" to oppdatert
             ))
         }
 
@@ -97,6 +98,7 @@ internal class Avstemmer(person: Person) {
     }
 
     private inner class HarPerioder(private val perioder: MutableList<Map<String, Any>>) : PersonVisitor {
+        private val utbetalinger: MutableMap<UUID, MutableList<UUID>> = mutableMapOf()
         override fun preVisitVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
             id: UUID,
@@ -113,11 +115,34 @@ internal class Avstemmer(person: Person) {
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: () -> Inntektskilde
         ) {
-            perioder.add(mapOf(
-                "id" to id,
-                "tilstand" to tilstand.type,
-                "tidsstempel" to oppdatert
-            ))
+            push(HarVedtaksperiodeUtbetalinger(utbetalinger, id))
+        }
+
+        override fun postVisitVedtaksperiode(
+            vedtaksperiode: Vedtaksperiode,
+            id: UUID,
+            tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+            opprettet: LocalDateTime,
+            oppdatert: LocalDateTime,
+            periode: Periode,
+            opprinneligPeriode: Periode,
+            periodetype: () -> Periodetype,
+            skjæringstidspunkt: () -> LocalDate,
+            skjæringstidspunktFraInfotrygd: LocalDate?,
+            forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
+            hendelseIder: Set<Dokumentsporing>,
+            inntektsmeldingInfo: InntektsmeldingInfo?,
+            inntektskilde: () -> Inntektskilde
+        ) {
+            perioder.add(
+                mapOf(
+                    "id" to id,
+                    "tilstand" to tilstand.type,
+                    "opprettet" to opprettet,
+                    "oppdatert" to oppdatert,
+                    "utbetalinger" to (utbetalinger[id]?.toList() ?: emptyList())
+                )
+            )
         }
 
         override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
@@ -125,6 +150,39 @@ internal class Avstemmer(person: Person) {
         }
 
         override fun postVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {
+            pop()
+        }
+    }
+
+    private inner class HarVedtaksperiodeUtbetalinger(
+        private val utbetalinger: MutableMap<UUID, MutableList<UUID>>,
+        private val vedtaksperiodeId: UUID
+    ): PersonVisitor {
+
+        override fun preVisitUtbetaling(
+            utbetaling: Utbetaling,
+            id: UUID,
+            korrelasjonsId: UUID,
+            type: Utbetalingtype,
+            tilstand: Utbetaling.Tilstand,
+            periode: Periode,
+            tidsstempel: LocalDateTime,
+            oppdatert: LocalDateTime,
+            arbeidsgiverNettoBeløp: Int,
+            personNettoBeløp: Int,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int?,
+            gjenståendeSykedager: Int?,
+            stønadsdager: Int,
+            beregningId: UUID,
+            overføringstidspunkt: LocalDateTime?,
+            avsluttet: LocalDateTime?,
+            avstemmingsnøkkel: Long?
+        ) {
+            if (tilstand != Utbetaling.Forkastet) utbetalinger.getOrPut(vedtaksperiodeId) { mutableListOf() }.add(id)
+        }
+
+        override fun postVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Pair<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, Utbetaling>>) {
             pop()
         }
     }

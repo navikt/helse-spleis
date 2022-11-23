@@ -3,6 +3,8 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Avstemming
+import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
@@ -19,13 +21,18 @@ import org.junit.jupiter.api.Test
 internal class AvstemmingTest : AbstractEndToEndTest() {
 
     @Test
-    fun `avstemmer`() {
+    fun avstemmer() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 3.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 2.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 3.januar, 100.prosent))
         nyttVedtak(5.januar, 26.januar, 100.prosent)
         nyttVedtak(1.mars, 31.mars, 100.prosent)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.mars, Dagtype.Feriedag)))
+        håndterYtelser(4.vedtaksperiode)
+        håndterSimulering(4.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(4.vedtaksperiode)
+        håndterUtbetalt()
         tilYtelser(1.mai, 30.mai, 100.prosent, 1.mai)
         val avstemming = Avstemming(
             meldingsreferanseId = UUID.randomUUID(),
@@ -44,35 +51,53 @@ internal class AvstemmingTest : AbstractEndToEndTest() {
         assertEquals(ORGNUMMER, arbeidsgivere[0]["organisasjonsnummer"])
         assertEquals(2, forkastede.size)
         assertEquals(3, aktive.size)
-        assertEquals(3, utbetalinger.size)
+        assertEquals(4, utbetalinger.size)
         assertEquals(1.vedtaksperiode.id(ORGNUMMER), forkastede[0]["id"])
         assertEquals(TilstandType.TIL_INFOTRYGD, forkastede[0]["tilstand"])
-        assertTrue(forkastede[0]["tidsstempel"] is LocalDateTime)
+        assertTrue(forkastede[0]["opprettet"] is LocalDateTime)
+        assertTrue(forkastede[0]["oppdatert"] is LocalDateTime)
+        assertEquals(0, forkastede[0]["utbetalinger"].castAsList<String>().size)
         assertEquals(2.vedtaksperiode.id(ORGNUMMER), forkastede[1]["id"])
         assertEquals(TilstandType.TIL_INFOTRYGD, forkastede[1]["tilstand"])
-        assertTrue(forkastede[1]["tidsstempel"] is LocalDateTime)
+        assertTrue(forkastede[1]["opprettet"] is LocalDateTime)
+        assertTrue(forkastede[1]["oppdatert"] is LocalDateTime)
+        assertEquals(0, forkastede[1]["utbetalinger"].castAsList<String>().size)
 
         assertEquals(3.vedtaksperiode.id(ORGNUMMER), aktive[0]["id"])
         assertEquals(TilstandType.AVSLUTTET, aktive[0]["tilstand"])
-        assertTrue(aktive[0]["tidsstempel"] is LocalDateTime)
+        assertTrue(aktive[0]["opprettet"] is LocalDateTime)
+        assertTrue(aktive[0]["oppdatert"] is LocalDateTime)
+        assertEquals(1, aktive[0]["utbetalinger"].castAsList<String>().size)
         assertEquals(4.vedtaksperiode.id(ORGNUMMER), aktive[1]["id"])
         assertEquals(TilstandType.AVSLUTTET, aktive[1]["tilstand"])
-        assertTrue(aktive[1]["tidsstempel"] is LocalDateTime)
+        assertTrue(aktive[1]["opprettet"] is LocalDateTime)
+        assertTrue(aktive[1]["oppdatert"] is LocalDateTime)
+        assertEquals(2, aktive[1]["utbetalinger"].castAsList<String>().size)
         assertEquals(5.vedtaksperiode.id(ORGNUMMER), aktive[2]["id"])
         assertEquals(TilstandType.AVVENTER_SIMULERING, aktive[2]["tilstand"])
-        assertTrue(aktive[2]["tidsstempel"] is LocalDateTime)
+        assertTrue(aktive[2]["opprettet"] is LocalDateTime)
+        assertTrue(aktive[2]["oppdatert"] is LocalDateTime)
+        assertEquals(1, aktive[2]["utbetalinger"].castAsList<String>().size)
 
         assertEquals(1.utbetaling(ORGNUMMER), utbetalinger[0]["id"])
         assertEquals(Utbetalingstatus.UTBETALT, utbetalinger[0]["status"])
         assertEquals("UTBETALING", utbetalinger[0]["type"])
-        assertTrue(utbetalinger[0]["tidsstempel"] is LocalDateTime)
+        assertTrue(utbetalinger[0]["opprettet"] is LocalDateTime)
+        assertTrue(utbetalinger[0]["oppdatert"] is LocalDateTime)
         assertEquals(2.utbetaling(ORGNUMMER), utbetalinger[1]["id"])
         assertEquals(Utbetalingstatus.UTBETALT, utbetalinger[1]["status"])
         assertEquals("UTBETALING", utbetalinger[1]["type"])
-        assertTrue(utbetalinger[1]["tidsstempel"] is LocalDateTime)
+        assertTrue(utbetalinger[1]["opprettet"] is LocalDateTime)
+        assertTrue(utbetalinger[1]["oppdatert"] is LocalDateTime)
         assertEquals(3.utbetaling(ORGNUMMER), utbetalinger[2]["id"])
-        assertEquals(Utbetalingstatus.IKKE_UTBETALT, utbetalinger[2]["status"])
-        assertEquals("UTBETALING", utbetalinger[2]["type"])
-        assertTrue(utbetalinger[2]["tidsstempel"] is LocalDateTime)
+        assertEquals(Utbetalingstatus.UTBETALT, utbetalinger[2]["status"])
+        assertEquals("REVURDERING", utbetalinger[2]["type"])
+        assertTrue(utbetalinger[2]["opprettet"] is LocalDateTime)
+        assertTrue(utbetalinger[2]["oppdatert"] is LocalDateTime)
+        assertEquals(4.utbetaling(ORGNUMMER), utbetalinger[3]["id"])
+        assertEquals(Utbetalingstatus.IKKE_UTBETALT, utbetalinger[3]["status"])
+        assertEquals("UTBETALING", utbetalinger[3]["type"])
+        assertTrue(utbetalinger[3]["opprettet"] is LocalDateTime)
+        assertTrue(utbetalinger[3]["oppdatert"] is LocalDateTime)
     }
 }
