@@ -686,7 +686,7 @@ internal class Vedtaksperiode private constructor(
             "krever vilkårsgrunnlag for $skjæringstidspunkt, men har ikke. Lages det utbetaling for en periode som " +
                     "ikke skal lage utbetaling?"
         }
-        utbetalingstidslinje = utbetalinger.lagUtbetaling(fødselsnummer, periode, grunnlagsdata, maksimumSykepenger, hendelse)
+        utbetalingstidslinje = utbetalinger.lagUtbetaling(fødselsnummer, id, periode, grunnlagsdata, maksimumSykepenger, hendelse)
     }
 
     private fun høstingsresultater(hendelse: ArbeidstakerHendelse) {
@@ -754,7 +754,7 @@ internal class Vedtaksperiode private constructor(
             "krever vilkårsgrunnlag for $skjæringstidspunkt, men har ikke. Tildeles det utbetaling til " +
                     "en vedtaksperiode som ikke skal ha utbetaling?"
         }
-        utbetalingstidslinje = utbetalinger.mottaRevurdering(grunnlagsdata, utbetaling, periode)
+        utbetalingstidslinje = utbetalinger.mottaRevurdering(id, grunnlagsdata, utbetaling, periode)
     }
 
     private fun Vedtaksperiodetilstand.påminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {

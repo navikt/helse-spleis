@@ -66,21 +66,23 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
     }
 
     internal fun mottaRevurdering(
+        vedtaksperiodeId: UUID,
         grunnlagsdata: VilkårsgrunnlagElement,
         utbetaling: Utbetaling,
         periode: Periode
     ): Utbetalingstidslinje {
-        return nyUtbetaling(grunnlagsdata, periode) { utbetaling }
+        return nyUtbetaling(vedtaksperiodeId, grunnlagsdata, periode) { utbetaling }
     }
 
     internal fun lagUtbetaling(
         fødselsnummer: String,
+        vedtaksperiodeId: UUID,
         periode: Periode,
         grunnlagsdata: VilkårsgrunnlagElement,
         maksimumSykepenger: Alder.MaksimumSykepenger,
         hendelse: ArbeidstakerHendelse
     ): Utbetalingstidslinje {
-        return nyUtbetaling(grunnlagsdata, periode) {
+        return nyUtbetaling(vedtaksperiodeId, grunnlagsdata, periode) {
             arbeidsgiver.lagUtbetaling(
                 aktivitetslogg = hendelse,
                 fødselsnummer = fødselsnummer,
@@ -94,11 +96,15 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
     }
 
     private fun nyUtbetaling(
+        vedtaksperiodeId: UUID,
         grunnlagsdata: VilkårsgrunnlagElement,
         periode: Periode,
         generator: () -> Utbetaling
     ): Utbetalingstidslinje {
-        return generator().also { utbetalinger.add(grunnlagsdata to it) }.utbetalingstidslinje(periode)
+        return generator().also {
+            it.nyVedtaksperiodeUtbetaling(vedtaksperiodeId)
+            utbetalinger.add(grunnlagsdata to it)
+        }.utbetalingstidslinje(periode)
     }
 
     fun lagRevurdering(

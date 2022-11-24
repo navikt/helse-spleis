@@ -807,4 +807,8 @@ class Person private constructor(
 
     internal fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt)
+
+    internal fun nyVedtaksperiodeUtbetaling(organisasjonsnummer: String, utbetalingId: UUID, vedtaksperiodeId: UUID) {
+        observers.forEach { it.nyVedtaksperiodeUtbetaling(personidentifikator, aktørId, organisasjonsnummer, utbetalingId, vedtaksperiodeId) }
+    }
 }

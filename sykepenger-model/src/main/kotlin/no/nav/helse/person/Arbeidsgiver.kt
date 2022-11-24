@@ -758,6 +758,10 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
+    override fun nyVedtaksperiodeUtbetaling(utbetalingId: UUID, vedtaksperiodeId: UUID) {
+        person.nyVedtaksperiodeUtbetaling(organisasjonsnummer, utbetalingId, vedtaksperiodeId)
+    }
+
     override fun utbetalingAnnullert(
         hendelseskontekst: Hendelseskontekst,
         id: UUID,

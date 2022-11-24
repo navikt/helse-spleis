@@ -4,9 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.ForventetFeil
+import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
+import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.rapids_rivers.isMissingOrNull
@@ -29,6 +32,51 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendYtelser(0)
         val utbetalingEndret = testRapid.inspektør.siste("utbetaling_endret")
         assertUtbetalingEndret(utbetalingEndret, "NY", "IKKE_UTBETALT")
+        val nyUtbetaling = testRapid.inspektør.siste("vedtaksperiode_ny_utbetaling")
+        assertNyUtbetaling(nyUtbetaling)
+    }
+
+    @Test
+    fun `tildeler utbetaling til vedtaksperioder som treffes av revurderingen`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0)
+        sendUtbetaling()
+        sendNySøknad(SoknadsperiodeDTO(fom = 27.januar, tom = 26.februar, sykmeldingsgrad = 100))
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 26.februar, sykmeldingsgrad = 100)))
+        sendYtelserUtenSykepengehistorikk(1)
+        sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(1)
+        sendUtbetaling()
+
+        assertEquals(2, testRapid.inspektør.meldinger("vedtaksperiode_ny_utbetaling").size)
+
+        sendOverstyringTidslinje(listOf(ManuellOverskrivingDag(25.januar, Dagtype.Feriedag)))
+        sendYtelserUtenSykepengehistorikk(1)
+
+        val revurdering = testRapid.inspektør.siste("utbetaling_endret")
+
+        val utbetalingId = revurdering.path("utbetalingId").asText()
+        val vedtaksperiodeId1 = testRapid.inspektør.vedtaksperiodeId(0)
+        val vedtaksperiodeId2 = testRapid.inspektør.vedtaksperiodeId(1)
+
+        val nyeUtbetalinger = testRapid.inspektør.meldinger("vedtaksperiode_ny_utbetaling")
+        assertEquals(4, nyeUtbetalinger.size)
+
+        val fordelteRevurderinger = nyeUtbetalinger.takeLast(2)
+
+        fordelteRevurderinger.first().also { førsteTildeling ->
+            assertEquals(utbetalingId, førsteTildeling.path("utbetalingId").asText())
+            assertEquals(vedtaksperiodeId1.toString(), førsteTildeling.path("vedtaksperiodeId").asText())
+        }
+        fordelteRevurderinger.last().also { andreTildeling ->
+            assertEquals(utbetalingId, andreTildeling.path("utbetalingId").asText())
+            assertEquals(vedtaksperiodeId2.toString(), andreTildeling.path("vedtaksperiodeId").asText())
+        }
     }
 
     @Test
@@ -253,6 +301,14 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
             assertTrue(avvisteDager.isNotEmpty())
             assertTrue(avvisteDager.all { it.hasNonNull("begrunnelser") })
         }
+    }
+
+    private fun assertNyUtbetaling(melding: JsonNode) {
+        assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
+        assertTrue(melding.path("aktørId").asText().isNotEmpty())
+        assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
+        assertTrue(melding.path("vedtaksperiodeId").asText().isNotEmpty())
+        assertTrue(melding.path("utbetalingId").asText().isNotEmpty())
     }
 
     private fun assertUtbetalingEndret(melding: JsonNode, fra: String, til: String, annullering: Boolean = false) {

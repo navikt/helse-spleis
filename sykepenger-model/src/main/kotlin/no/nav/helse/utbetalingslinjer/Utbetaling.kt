@@ -641,10 +641,13 @@ internal class Utbetaling private constructor(
         tilstand(nesteTilstand, hendelse)
     }
 
+    internal fun nyVedtaksperiodeUtbetaling(vedtaksperiodeId: UUID) {
+        observers.forEach { it.nyVedtaksperiodeUtbetaling(this.id, vedtaksperiodeId) }
+    }
+
     internal fun overlapperMed(other: Utbetaling): Boolean {
         return this.periode.overlapperMed(other.periode)
     }
-
     internal fun erEldreEnn(other: LocalDateTime): Boolean {
         return other > tidsstempel
     }

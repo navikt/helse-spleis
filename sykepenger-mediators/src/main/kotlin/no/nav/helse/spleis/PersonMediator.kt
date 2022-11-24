@@ -124,6 +124,23 @@ internal class PersonMediator(
         )))
     }
 
+    override fun nyVedtaksperiodeUtbetaling(
+        personidentifikator: Personidentifikator,
+        aktørId: String,
+        organisasjonsnummer: String,
+        utbetalingId: UUID,
+        vedtaksperiodeId: UUID
+    ) {
+        val eventName = "vedtaksperiode_ny_utbetaling"
+        queueMessage(personidentifikator.toString(), eventName, JsonMessage.newMessage(eventName, mapOf(
+            "fødselsnummer" to personidentifikator.toString(),
+            "aktørId" to aktørId,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "utbetalingId" to utbetalingId
+        )).toJson())
+    }
+
     override fun utbetalingUtbetalt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingUtbetaltEvent) {
         queueMessage(hendelseskontekst, utbetalingAvsluttet("utbetaling_utbetalt", event))
     }

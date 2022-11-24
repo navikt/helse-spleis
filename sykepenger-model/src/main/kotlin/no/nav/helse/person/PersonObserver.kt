@@ -222,4 +222,11 @@ interface PersonObserver {
     fun avstemt(hendelseskontekst: Hendelseskontekst, result: Map<String, Any>) {}
     fun vedtakFattet(hendelseskontekst: Hendelseskontekst, event: VedtakFattetEvent) {}
     fun revurderingAvvist(hendelseskontekst: Hendelseskontekst, event: RevurderingAvvistEvent) {}
+    fun nyVedtaksperiodeUtbetaling(
+        personidentifikator: Personidentifikator,
+        aktørId: String,
+        organisasjonsnummer: String,
+        utbetalingId: UUID,
+        vedtaksperiodeId: UUID
+    ) {}
 }

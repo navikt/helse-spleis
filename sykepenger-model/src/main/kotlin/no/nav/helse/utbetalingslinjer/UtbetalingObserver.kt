@@ -1,12 +1,12 @@
 package no.nav.helse.utbetalingslinjer
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal interface UtbetalingObserver {
     fun utbetalingAnnullert(
@@ -71,4 +71,6 @@ internal interface UtbetalingObserver {
         nesteTilstand: Utbetaling.Tilstand
     ) {
     }
+
+    fun nyVedtaksperiodeUtbetaling(utbetalingId: UUID, vedtaksperiodeId: UUID) {}
 }
