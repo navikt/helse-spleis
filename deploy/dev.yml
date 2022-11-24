@@ -55,11 +55,5 @@ spec:
     value: earliest
   - name: GraphQLPlayground
     value: "true"
-  - name: UtbetalingtypeAuu
-    value: "true"
-  - name: RevurderKorrigertSoknad
-    value: "true"
-  - name: RevurderOutOfOrder
-    value: "true"
   - name: Splarbeidsbros
     value: "true"

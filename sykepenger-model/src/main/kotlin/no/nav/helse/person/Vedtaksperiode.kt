@@ -950,7 +950,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             val harSenereUtbetalinger = vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING(vedtaksperiode)).isNotEmpty()
             val harSenereAUU = vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_UTEN_UTBETALING(vedtaksperiode)).isNotEmpty()
-            if (Toggle.RevurderOutOfOrder.enabled && (harSenereUtbetalinger || harSenereAUU)) {
+            if (harSenereUtbetalinger || harSenereAUU) {
                 søknad.varsel(RV_OO_1)
             }
             vedtaksperiode.håndterSøknad(søknad) {
@@ -979,12 +979,8 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             if(!vedtaksperiode.harNødvendigInntektForVilkårsprøving()) {
-                if (Toggle.RevurderOutOfOrder.enabled) {
-                    hendelse.info("Revurdering førte til at sykefraværstilfellet trenger inntektsmelding")
-                    vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
-                } else {
-                    sikkerlogg.info("Revurdering førte til at sykefraværstilfellet trenger inntektsmelding: id=${vedtaksperiode.id}")
-                }
+                hendelse.info("Revurdering førte til at sykefraværstilfellet trenger inntektsmelding")
+                vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
             }
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
@@ -1022,7 +1018,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             super.håndter(vedtaksperiode, påminnelse)
-            if(Toggle.RevurderOutOfOrder.enabled && !vedtaksperiode.harNødvendigInntektForVilkårsprøving()) {
+            if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving()) {
                 påminnelse.info("Varsler arbeidsgiver at vi har behov for inntektsmelding.")
                 vedtaksperiode.trengerInntektsmelding(påminnelse.hendelseskontekst())
             }

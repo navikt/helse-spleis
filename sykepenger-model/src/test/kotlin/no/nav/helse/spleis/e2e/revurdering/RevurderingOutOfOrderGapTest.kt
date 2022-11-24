@@ -1,8 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
-import no.nav.helse.EnableToggle
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
@@ -82,7 +80,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-@EnableToggle(Toggle.RevurderOutOfOrder::class)
 internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
     @Test
@@ -287,7 +284,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Burde revurdere utbetalt periode dersom det kommer en eldre periode fra en annen AG`() = Toggle.RevurderOutOfOrder.enable {
+    fun `Burde revurdere utbetalt periode dersom det kommer en eldre periode fra en annen AG`() {
         nyttVedtak(1.mars, 31.mars, orgnummer = a2)
         nyPeriode(1.januar til 31.januar, a1)
 
@@ -314,7 +311,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `To arbeidsgivere gikk inn i en bar - og første arbeidsgiver ble ferdig behandlet før vi mottok sykmelding på neste arbeidsgiver`() = Toggle.RevurderOutOfOrder.enable {
+    fun `To arbeidsgivere gikk inn i en bar - og første arbeidsgiver ble ferdig behandlet før vi mottok sykmelding på neste arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 30000.månedlig, orgnummer = a1)

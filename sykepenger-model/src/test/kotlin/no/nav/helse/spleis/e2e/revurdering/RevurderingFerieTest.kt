@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import no.nav.helse.EnableToggle
-import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -34,7 +32,6 @@ import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
-@EnableToggle(Toggle.RevurderOutOfOrder::class)
 internal class RevurderingFerieTest : AbstractEndToEndTest() {
 
     @Test

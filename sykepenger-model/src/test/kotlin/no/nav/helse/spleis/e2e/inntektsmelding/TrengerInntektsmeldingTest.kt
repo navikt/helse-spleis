@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -17,7 +16,7 @@ import org.junit.jupiter.api.Test
 internal class TrengerInntektsmeldingTest : AbstractEndToEndTest() {
 
     @Test
-    fun `Kort periode ber om inntektsmelding når den går inn i AvventerRevurdering, og sier fra om at inntektsmelding ikke trengs etter at den er mottatt`() = Toggle.RevurderOutOfOrder.enable {
+    fun `Kort periode ber om inntektsmelding når den går inn i AvventerRevurdering, og sier fra om at inntektsmelding ikke trengs etter at den er mottatt`() {
         nyPeriode(5.januar til 17.januar)
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         nyPeriode(20.januar til 22.januar)

@@ -3,7 +3,6 @@ package no.nav.helse.serde.api.v2.buildere
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.erHelg
@@ -1865,7 +1864,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `out of order med gap`() = Toggle.RevurderOutOfOrder.enable {
+    fun `out of order med gap`() {
         nyttVedtak(1.mars, 31.mars, orgnummer = a1)
         tilGodkjenning(1.januar, 31.januar, a1)
 

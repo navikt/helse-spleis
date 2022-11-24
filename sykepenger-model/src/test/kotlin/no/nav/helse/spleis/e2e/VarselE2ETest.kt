@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -666,14 +665,14 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `varsel - Det er behandlet en søknad i Speil for en senere periode enn denne`() = Toggle.RevurderOutOfOrder.enable {
+    fun `varsel - Det er behandlet en søknad i Speil for en senere periode enn denne`() {
         nyttVedtak(1.mars, 31.mars)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         assertVarsel(RV_OO_1, 2.vedtaksperiode.filter())
     }
 
     @Test
-    fun `varsel - Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning`() = Toggle.RevurderOutOfOrder.enable {
+    fun `varsel - Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning`() {
         nyttVedtak(1.mars, 31.mars)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         assertVarsel(RV_OO_2, 1.vedtaksperiode.filter())

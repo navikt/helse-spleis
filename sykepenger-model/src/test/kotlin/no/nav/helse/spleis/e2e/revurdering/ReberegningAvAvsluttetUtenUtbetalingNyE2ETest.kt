@@ -116,7 +116,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    fun `inntektsmelding på kort periode gjør at en nyere kort periode skal utbetales`() = Toggle.RevurderOutOfOrder.enable {
+    fun `inntektsmelding på kort periode gjør at en nyere kort periode skal utbetales`() {
         håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(10.januar, 20.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -646,7 +646,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    fun `avsluttet periode trenger egen inntektsmelding etter at inntektsmelding treffer forrige`() = Toggle.RevurderOutOfOrder.enable {
+    fun `avsluttet periode trenger egen inntektsmelding etter at inntektsmelding treffer forrige`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
