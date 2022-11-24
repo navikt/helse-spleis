@@ -78,7 +78,6 @@ import no.nav.helse.person.Varselkode.RV_SV_3
 import no.nav.helse.person.Varselkode.RV_SØ_11
 import no.nav.helse.person.Varselkode.RV_SØ_12
 import no.nav.helse.person.Varselkode.RV_SØ_13
-import no.nav.helse.person.Varselkode.RV_SØ_14
 import no.nav.helse.person.Varselkode.RV_SØ_15
 import no.nav.helse.person.Varselkode.RV_SØ_16
 import no.nav.helse.person.Varselkode.RV_SØ_19
@@ -548,19 +547,18 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterOverlappendeSøknadRevurdering(søknad: Søknad) {
-        validerOverlappendeSøknadRevurdering(søknad)
-        if (søknad.harFunksjonelleFeilEllerVerre()) return forkast(søknad)
-        søknad.info("Søknad har trigget en revurdering")
-        oppdaterHistorikk(søknad)
-        person.startRevurdering(this, søknad, RevurderingÅrsak.KORRIGERT_SØKNAD)
-    }
+        if (!søknad.omsluttesAv(periode())) søknad.varsel(RV_SØ_13)
+        else if (søknad.harArbeidsdager()) søknad.varsel(RV_SØ_15)
+        else {
+            søknad.valider(periode, jurist())
+            søknad.validerInntektskilder(vilkårsgrunnlag == null)
+            søknad.info("Søknad har trigget en revurdering")
+            if (tilstand == Avsluttet) låsOpp()
+            oppdaterHistorikk(søknad)
+            if (tilstand == Avsluttet) lås()
+        }
 
-    private fun validerOverlappendeSøknadRevurdering(søknad: Søknad){
-        if (!søknad.omsluttesAv(periode())) return søknad.funksjonellFeil(RV_SØ_13)
-        if (person.harSkjæringstidspunktSenereEnn(skjæringstidspunkt)) return søknad.funksjonellFeil(RV_SØ_14)
-        if (søknad.harArbeidsdager()) return søknad.funksjonellFeil(RV_SØ_15)
-        søknad.valider(periode, jurist())
-        søknad.validerInntektskilder(vilkårsgrunnlag == null)
+        person.startRevurdering(this, søknad, RevurderingÅrsak.KORRIGERT_SØKNAD)
     }
 
     private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
@@ -2117,13 +2115,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.validerOverlappendeSøknadRevurdering(søknad)
-            if (søknad.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(søknad)
-            søknad.info("Søknad har trigget en revurdering")
-            vedtaksperiode.låsOpp()
-            vedtaksperiode.oppdaterHistorikk(søknad)
-            vedtaksperiode.lås()
-            vedtaksperiode.person.startRevurdering(vedtaksperiode, søknad, RevurderingÅrsak.KORRIGERT_SØKNAD)
+            vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
     }
 

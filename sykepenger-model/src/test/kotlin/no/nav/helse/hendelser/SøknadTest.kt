@@ -218,9 +218,7 @@ internal class SøknadTest {
 
     @Test
     fun `angitt arbeidsgrad kan ikke føre til sykegrad høyere enn graden fra sykmelding`() {
-        søknad(Sykdom(1.januar, 31.januar, 20.prosent, 79.prosent))
-        søknad.valider(EN_PERIODE, MaskinellJurist())
-        assertTrue(søknad.harFunksjonelleFeilEllerVerre())
+        assertThrows<IllegalStateException> { Sykdom(1.januar, 31.januar, 20.prosent, 79.prosent) }
     }
 
     @Test

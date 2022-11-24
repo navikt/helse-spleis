@@ -799,9 +799,6 @@ class Person private constructor(
         return arbeidsgivere.nekterOpprettelseAvPeriode(vedtaksperiode, søknad)
     }
 
-    internal fun harSkjæringstidspunktSenereEnn(skjæringstidspunkt: LocalDate) =
-        skjæringstidspunkter().any { it.isAfter(skjæringstidspunkt) }
-
     internal fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt)
 

@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -37,7 +36,10 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.Varselkode.*
+import no.nav.helse.person.Varselkode.RV_OO_1
+import no.nav.helse.person.Varselkode.RV_OO_2
+import no.nav.helse.person.Varselkode.RV_SØ_10
+import no.nav.helse.person.Varselkode.RV_SØ_13
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
@@ -73,7 +75,8 @@ import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.spleis.e2e.tilGodkjent
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
-import no.nav.helse.utbetalingslinjer.Endringskode.*
+import no.nav.helse.utbetalingslinjer.Endringskode.NY
+import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -306,8 +309,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyttVedtak(1.mars, 31.mars, orgnummer = a1)
         nyPeriode(20.februar til 15.mars, a1)
 
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+        assertVarsel(RV_SØ_13)
     }
 
     @Test
@@ -918,8 +921,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
                 ), arbeidsforhold = emptyList()
             ),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+                Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Arbeidsforhold(a2, LocalDate.EPOCH, null)
             )
         )
 

@@ -4,8 +4,6 @@ import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
-import no.nav.helse.mars
-import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -28,40 +26,6 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
         sendUtbetalingshistorikk(0)
         val melding = testRapid.inspektør.siste("trenger_inntektsmelding")
         assertEquals(søknadId, UUID.fromString(melding["søknadIder"].toList().single().asText()))
-    }
-
-    @Test
-    fun `sender ikke trenger_inntektsmelding hvor inntektsmelding har førsteFraværsdag i perioden, men arbeidsgiverperioden er før`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 17.januar, tom = 16.februar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 17.januar, tom = 16.februar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 17.januar)
-        sendVilkårsgrunnlag(0)
-        sendYtelserUtenSykepengehistorikk(0)
-        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
-        sendUtbetalingsgodkjenning(0, true)
-        sendUtbetaling()
-        assertTilstander(
-            0,
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
-            "AVVENTER_BLOKKERENDE_PERIODE",
-            "AVVENTER_VILKÅRSPRØVING",
-            "AVVENTER_HISTORIKK",
-            "AVVENTER_SIMULERING",
-            "AVVENTER_GODKJENNING",
-            "TIL_UTBETALING",
-            "AVSLUTTET"
-        )
-
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)))
-
-        sendNySøknad(SoknadsperiodeDTO(fom = 28.februar, tom = 16.mars, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 28.februar, tom = 16.mars, sykmeldingsgrad = 100)))
-        assertTilstander(1, "TIL_INFOTRYGD")
-        assertTilstander(2, "TIL_INFOTRYGD")
-
-        assertEquals(1, testRapid.inspektør.meldinger("trenger_inntektsmelding").size)
-        assertEquals(17.januar, testRapid.inspektør.siste("trenger_inntektsmelding")["fom"].asLocalDate())
     }
 
     @Test

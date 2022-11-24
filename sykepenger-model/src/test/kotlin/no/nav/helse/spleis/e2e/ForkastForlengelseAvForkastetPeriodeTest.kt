@@ -185,18 +185,6 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `forkaster ikke overlappende perioder som er avsluttet`(){
-        nyPeriode(1.januar til 31.januar)
-        forkastAlle(hendelselogg)
-
-        nyttVedtak(1.mars, 31.mars)
-        nyPeriode(1.februar til 31.mars)
-
-        assertTilstand(2.vedtaksperiode, AVSLUTTET)
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
-    }
-
-    @Test
     fun `forkaster ikke etterfølgende perioder som er avsluttet`(){
         nyPeriode(1.januar til 31.januar)
         forkastAlle(hendelselogg)

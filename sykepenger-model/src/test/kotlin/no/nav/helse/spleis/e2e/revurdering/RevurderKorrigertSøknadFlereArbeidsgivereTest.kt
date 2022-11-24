@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
@@ -30,12 +31,14 @@ import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
+import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -66,7 +69,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
     }
 
     @Test
-    fun `Overlappende søknad som strekker seg forbi vedtaksperioden - setter ikke i gang revurdering`() {
+    fun `Overlappende søknad som strekker seg forbi vedtaksperioden`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -95,17 +98,18 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         }
         a1 {
             håndterSykmelding(Sykmeldingsperiode(15.januar, 15.februar, 50.prosent))
-            håndterSøknad(
-                Sykdom(15.januar, 15.februar, 50.prosent)
-            )
-            assertTilstand(1.vedtaksperiode, AVSLUTTET)
-            (17..31).forEach {
-                assertEquals(100.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+            assertRevurderingUtenEndring(1.vedtaksperiode) {
+                håndterSøknad(Sykdom(15.januar, 15.februar, 50.prosent))
+                håndterYtelser(1.vedtaksperiode)
+            }
+            val utbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode)
+            (17.januar til 31.januar).forEach {
+                assertEquals(100.prosent, utbetalingstidslinje[it].økonomi.inspektør.grad)
             }
         }
 
         a2 {
-            assertTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
         }
     }
 
@@ -262,19 +266,44 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
     }
 
     @Test
-    fun `Korrigerende søknad for tidligere skjæringstidspunkt - setter ikke i gang en revurdering`() {
+    fun `Korrigerende søknad for tidligere skjæringstidspunkt`() {
         listOf(a1, a2).nyeVedtak(1.januar til 31.januar)
         listOf(a1, a2).nyeVedtak(1.mars til 31.mars)
 
         a2 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(18.januar, 19.januar))
-            assertTilstand(1.vedtaksperiode, AVSLUTTET)
-            assertTilstand(2.vedtaksperiode, AVSLUTTET)
+        }
+
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        }
+
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            assertEquals(Feriedag::class, inspektør.sykdomstidslinje[18.januar]::class)
+            assertEquals(Feriedag::class, inspektør.sykdomstidslinje[19.januar]::class)
+            val arbeidsgiverOppdrag = inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag
+            assertEquals(2, arbeidsgiverOppdrag.size)
+            arbeidsgiverOppdrag[0].inspektør.let { utbetalingslinjeInspektør ->
+                assertEquals(17.januar, utbetalingslinjeInspektør.fom)
+                assertEquals(17.januar, utbetalingslinjeInspektør.tom)
+                assertEquals(Endringskode.ENDR, utbetalingslinjeInspektør.endringskode)
+                assertNull(utbetalingslinjeInspektør.datoStatusFom)
+            }
+            arbeidsgiverOppdrag[1].inspektør.let { utbetalingslinjeInspektør ->
+                assertEquals(20.januar, utbetalingslinjeInspektør.fom)
+                assertEquals(31.januar, utbetalingslinjeInspektør.tom)
+                assertEquals(Endringskode.NY, utbetalingslinjeInspektør.endringskode)
+                assertNull(utbetalingslinjeInspektør.datoStatusFom)
+            }
+            assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+            assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         }
 
         a1 {
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
-            assertTilstand(2.vedtaksperiode, AVSLUTTET)
+            assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         }
     }
 
@@ -786,5 +815,17 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
                 assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar] is Utbetalingsdag.Fridag)
             }
         }
+    }
+
+    private fun TestPerson.TestArbeidsgiver.assertRevurderingUtenEndring(vedtakperiodeId: UUID, block:() -> Unit) {
+        val sykdomsHistorikkElementerFør = inspektør.sykdomshistorikk.inspektør.elementer()
+        val utbetalingerFør = inspektør.utbetalinger(vedtakperiodeId)
+        block()
+        val utbetalingerEtter = inspektør.utbetalinger(vedtakperiodeId)
+        val sykdomsHistorikkElementerEtter = inspektør.sykdomshistorikk.inspektør.elementer()
+        assertEquals(1, utbetalingerEtter.size - utbetalingerFør.size) { "Forventet at det skal være opprettet en utbetaling" }
+        assertEquals(Endringskode.UEND, utbetalingerEtter.last().inspektør.arbeidsgiverOppdrag.inspektør.endringskode)
+        assertEquals(0, utbetalingerEtter.last().inspektør.personOppdrag.size)
+        assertEquals(sykdomsHistorikkElementerFør, sykdomsHistorikkElementerEtter) { "Forventet at sykdomshistorikken skal være uendret" }
     }
 }

@@ -46,6 +46,7 @@ import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IT_1
 import no.nav.helse.person.Varselkode.RV_IT_3
 import no.nav.helse.person.Varselkode.RV_IV_2
+import no.nav.helse.person.Varselkode.RV_OS_2
 import no.nav.helse.person.Varselkode.RV_RV_1
 import no.nav.helse.person.Varselkode.RV_SØ_13
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -55,11 +56,9 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
-import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
-import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -1340,22 +1339,12 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
 
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
-        assertSisteForkastetPeriodeTilstand(a1, 3.vedtaksperiode, TIL_INFOTRYGD)
 
-        assertForventetFeil(
-            forklaring = "Forkaster vedtaksperioder i revurdering om de ikke hadde utbetaling fra før",
-            nå = {
-                assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
-                assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
-                assertSisteForkastetPeriodeTilstand(a1, 2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            },
-            ønsket = {
-                assertVarsel(RV_SØ_13, 1.vedtaksperiode.filter())
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            }
-        )
+        assertVarsel(RV_SØ_13, 1.vedtaksperiode.filter())
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
+
     @Test
     fun `Skal ikke forkaste vedtaksperioder i revurdering hvor en vedtaksperiode har utbetaling`() = Toggle.InntektsmeldingKanTriggeRevurdering.enable {
         håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar, 100.prosent))
@@ -1375,6 +1364,9 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
+        assertEquals(5.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(5.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+
         håndterInntektsmelding(listOf(2.januar til 17.januar))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
@@ -1383,23 +1375,17 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
 
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
-        assertSisteForkastetPeriodeTilstand(a1, 3.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
 
-        assertForventetFeil(
-            forklaring = "Forkaster vedtaksperioder i revurdering om de ikke hadde utbetaling fra før",
-            nå = {
-                assertEquals(21.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-                assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
-                assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
-            },
-            ønsket = {
-                assertVarsel(RV_SØ_13, 1.vedtaksperiode.filter())
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
-                assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-                assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-            }
-        )
+        assertVarsel(RV_SØ_13, 1.vedtaksperiode.filter())
+        assertVarsel(RV_OS_2, 2.vedtaksperiode.filter())
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
     }
 }

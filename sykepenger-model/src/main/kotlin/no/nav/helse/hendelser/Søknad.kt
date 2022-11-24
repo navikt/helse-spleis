@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import java.io.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerEtter
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.subsumsjonsFormat
@@ -39,7 +38,7 @@ class Søknad(
     private val sendtTilNAVEllerArbeidsgiver: LocalDateTime,
     private val permittert: Boolean,
     private val merknaderFraSykmelding: List<Merknad>,
-    private val sykmeldingSkrevet: LocalDateTime,
+    sykmeldingSkrevet: LocalDateTime,
     private val korrigerer: UUID?,
     private val opprinneligSendt: LocalDateTime?,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
@@ -128,9 +127,6 @@ class Søknad(
         person.slettUtgåtteSykmeldingsperioder(sisteDag)
     }
 
-    internal fun dagerMellomPeriodenVarFerdigOgSøknadenVarSendt() = ChronoUnit.DAYS.between(sendtTilNAVEllerArbeidsgiver, sykdomsperiode.endInclusive.plusDays(1).atStartOfDay())
-    internal fun dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet() = ChronoUnit.DAYS.between(sykmeldingSkrevet, sykdomsperiode.endInclusive.plusDays(1).atStartOfDay())
-
     class Merknad(private val type: String) {
         internal fun valider(aktivitetslogg: IAktivitetslogg) {
             if (type == "UGYLDIG_TILBAKEDATERING" || type == "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER") {
@@ -180,14 +176,14 @@ class Søknad(
         class Sykdom(
             fom: LocalDate,
             tom: LocalDate,
-            private val sykmeldingsgrad: Prosentdel,
+            sykmeldingsgrad: Prosentdel,
             arbeidshelse: Prosentdel? = null
         ) : Søknadsperiode(fom, tom, "sykdom") {
             private val søknadsgrad = arbeidshelse?.not()
             private val sykdomsgrad = søknadsgrad ?: sykmeldingsgrad
 
-            override fun valider(søknad: Søknad) {
-                if (søknadsgrad != null && søknadsgrad > sykmeldingsgrad) søknad.funksjonellFeil(RV_SØ_21)
+            init {
+                if (søknadsgrad != null && søknadsgrad > sykmeldingsgrad) throw IllegalStateException("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
             }
 
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =

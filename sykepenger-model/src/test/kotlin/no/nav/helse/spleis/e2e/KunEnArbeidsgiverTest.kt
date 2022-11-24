@@ -557,47 +557,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Sender ikke avsluttet periode til infotrygd når man mottar en ugyldig søknad i etterkant`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 50.prosent))
-        håndterSøknad(Sykdom(1.januar, 21.januar, 50.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-
-        assertIngenFunksjonelleFeil()
-        assertActivities()
-        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-        håndterSøknad(Sykdom(1.januar, 21.januar, 50.prosent, 20.prosent))
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-    }
-
-    @Test
     fun `Sender ikke periode som allerede har behandlet inntektsmelding til infotrygd når man mottar en ny ugyldig inntektsmelding i etterkant`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
