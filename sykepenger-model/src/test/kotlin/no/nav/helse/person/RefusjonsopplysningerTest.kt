@@ -525,6 +525,28 @@ internal class RefusjonsopplysningerTest {
             Refusjonsopplysning(overstyringId, 10.februar, 28.februar, 1200.daglig)
         ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger)
     }
+    @Test
+    fun `saksbehandler rydder opp i rotete refusjonsopplysninger`() {
+        val beløp = 1500.daglig
+        val eksisterendeRefusjonsopplysninger = RefusjonsopplysningerBuilder()
+            .leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, 31.januar, beløp))
+            .leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.februar, 28.februar, beløp))
+            .leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.mars, 31.mars, beløp))
+            .leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.april, 30.april, beløp))
+            .leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.mai, null, beløp))
+            .build()
+
+        val overstyringId = UUID.randomUUID()
+        val ønskedeRefusjonsopplysninger = Refusjonsopplysning(overstyringId, 1.januar, null, beløp).refusjonsopplysninger
+
+        assertEquals(ønskedeRefusjonsopplysninger, eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger))
+    }
+    @Test
+    fun `saksbehandler forsøker å fjerne alle refusjonsopplysninger`() {
+        val eksisterendeRefusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 1000.daglig).refusjonsopplysninger
+        val ønskedeRefusjonsopplysninger = Refusjonsopplysninger()
+        assertEquals(eksisterendeRefusjonsopplysninger, eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger))
+    }
 
     internal companion object {
         private fun harNødvendigeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode) =
