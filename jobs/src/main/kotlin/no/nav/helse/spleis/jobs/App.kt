@@ -42,7 +42,8 @@ fun main(args: Array<String>) {
 
     when (val task = args[0].trim().lowercase()) {
         "vacuum" -> vacuumTask()
-        "avstemming" -> avstemmingTask(ConsumerProducerFactory(AivenConfig.default), args.getOrNull(1)?.toIntOrNull())
+        "avstemming" -> avstemmingDayOfMonthTask(ConsumerProducerFactory(AivenConfig.default), args.getOrNull(1)?.toIntOrNull())
+        "avstemming_full" -> avstemmingFullTask(ConsumerProducerFactory(AivenConfig.default))
         "migrate" -> migrateTask(ConsumerProducerFactory(AivenConfig.default))
         "migrate_v2" -> migrateV2Task(args[1].trim().toInt())
         else -> log.error("Unknown task $task")
@@ -121,12 +122,12 @@ private fun migrateTask(factory: ConsumerProducerFactory) {
 }
 
 @ExperimentalTime
-private fun avstemmingTask(factory: ConsumerProducerFactory, customDayOfMonth: Int? = null) {
-    // Håndter on-prem og gcp database tilkobling forskjellig
-    val ds = DataSourceConfiguration(DbUser.AVSTEMMING).dataSource()
-    val dayOfMonth = customDayOfMonth ?: LocalDate.now().dayOfMonth
-    log.info("Commencing avstemming for dayOfMonth=$dayOfMonth")
+private fun avstemmingDayOfMonthTask(factory: ConsumerProducerFactory, customDayOfMonth: Int? = null) {
+    val dataSource = DataSourceConfiguration(DbUser.AVSTEMMING).dataSource()
     val producer = factory.createProducer()
+    val dayOfMonth = customDayOfMonth ?: LocalDate.now().dayOfMonth
+
+    log.info("Commencing avstemming for dayOfMonth=$dayOfMonth")
     // spørringen funker slik at den putter alle personer opp i 27 (*) ulike "bøtter" (fnr % 27 gir tall mellom 0 og 26, også plusser vi på én slik at vi starter fom. 1)
     // hvor én bøtte tilsvarer én dag i måneden. Tallet 27 (for februar) ble valgt slik at vi sikrer oss at vi avstemmer
     // alle personer hver måned. Dag 28, 29, 30, 31 avstemmes 0 personer siden det er umulig å ha disse rest-verdiene
@@ -138,14 +139,40 @@ private fun avstemmingTask(factory: ConsumerProducerFactory, customDayOfMonth: I
         "(1 + mod(fnr, 27)) = :dayOfMonth AND (sist_avstemt is null or sist_avstemt < now() - interval '1 day')"
     )
     val duration = measureTime {
-        paginated.run(ds, mapOf("dayOfMonth" to dayOfMonth)) { row ->
+        paginated.run(dataSource, mapOf("dayOfMonth" to dayOfMonth)) { row ->
             val fnr = row.string("fnr").padStart(11, '0')
             producer.send(ProducerRecord("tbd.rapid.v1", fnr, lagAvstemming(fnr, row.string("aktor_id"))))
         }
     }
     producer.flush()
     log.info(
-        "Avstemming completed after {} hour(s), {} minute(s) and {} second(s)",
+        "Avstemming for dayOfMonth=$dayOfMonth completed after {} hour(s), {} minute(s) and {} second(s)",
+        duration.toInt(DurationUnit.HOURS),
+        duration.toInt(DurationUnit.MINUTES) % 60,
+        duration.toInt(DurationUnit.SECONDS) % 60
+    )
+}
+
+@ExperimentalTime
+private fun avstemmingFullTask(factory: ConsumerProducerFactory) {
+    val dataSource = DataSourceConfiguration(DbUser.AVSTEMMING).dataSource()
+    val producer = factory.createProducer()
+
+    log.info("Commencing avstemming for all persons")
+    val paginated = PaginatedQuery(
+        "fnr,aktor_id",
+        "unike_person",
+        "true"
+    )
+    val duration = measureTime {
+        paginated.run(dataSource, mapOf()) { row ->
+            val fnr = row.string("fnr").padStart(11, '0')
+            producer.send(ProducerRecord("tbd.rapid.v1", fnr, lagAvstemming(fnr, row.string("aktor_id"))))
+        }
+    }
+    producer.flush()
+    log.info(
+        "Avstemming for all persons completed after {} hour(s), {} minute(s) and {} second(s)",
         duration.toInt(DurationUnit.HOURS),
         duration.toInt(DurationUnit.MINUTES) % 60,
         duration.toInt(DurationUnit.SECONDS) % 60
@@ -181,7 +208,7 @@ private class PaginatedQuery(private val select: String, private val table: Stri
             session.run(queryOf("SELECT COUNT(1) FROM $table WHERE $where", params).map { it.long(1) }.asSingle) ?: 0
     }
 
-    internal fun run(dataSource: DataSource, params: Map<String, Any>, handler: (Row) -> Unit) {
+    fun run(dataSource: DataSource, params: Map<String, Any>, handler: (Row) -> Unit) {
         sessionOf(dataSource).use { session ->
             count(session, params)
             val pages = ceil(count / resultsPerPage.toDouble()).toInt()
@@ -230,7 +257,7 @@ private class DataSourceConfiguration(dbUsername: DbUser) {
         idleTimeout = Duration.ofMinutes(10).toMillis()
     }
 
-    internal fun dataSource() = HikariDataSource(hikariConfig)
+    fun dataSource() = HikariDataSource(hikariConfig)
 }
 
 private enum class DbUser(private val dbUserPrefix: String) {

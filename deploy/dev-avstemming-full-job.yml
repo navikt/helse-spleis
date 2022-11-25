@@ -1,0 +1,29 @@
+apiVersion: nais.io/v1
+kind: Naisjob
+metadata:
+  labels:
+    team: tbd
+  name: spleis-avstemming-full
+  namespace: tbd
+spec:
+  image: <INSERT_IMAGE_NAME_HERE>
+  kafka:
+    pool: nav-dev
+  secureLogs:
+    enabled: true
+  envFrom:
+    - secret: google-sql-helse-spleis-spleis-spleis-avstemming-038f9535
+  gcp:
+    permissions:
+      - resource:
+          apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+          kind: Project
+          name: tbd-dev-7ff9
+        role: roles/cloudsql.client
+  env:
+    - name: DATABASE_REGION
+      value: "europe-north1"
+    - name: DATABASE_INSTANCE
+      value: "helse-spleis"
+    - name: RUNTIME_OPTS
+      value: "avstemming_full"
