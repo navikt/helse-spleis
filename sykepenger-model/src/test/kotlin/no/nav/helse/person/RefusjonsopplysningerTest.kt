@@ -448,6 +448,84 @@ internal class RefusjonsopplysningerTest {
         ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger)
     }
 
+    @Test
+    fun `saksbehandler forkorter refusjonsopplysningens snute`() {
+        val inntektsmeldingId = UUID.randomUUID()
+        val eksisterendeRefusjonsopplysninger = Refusjonsopplysning(inntektsmeldingId, 1.januar, null, 1000.daglig).refusjonsopplysninger
+
+        val overstyringId = UUID.randomUUID()
+        val ønskedeRefusjonsopplysninger = Refusjonsopplysning(overstyringId, 10.januar, null, 1000.daglig).refusjonsopplysninger
+
+        assertEquals(listOf(
+            Refusjonsopplysning(inntektsmeldingId, 1.januar, 9.januar, 1000.daglig),
+            Refusjonsopplysning(overstyringId, 10.januar, null, 1000.daglig)
+        ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger)
+    }
+
+    @Test
+    fun `saksbehandler forkorter refusjonsopplysningens hale`() {
+        val inntektsmeldingId = UUID.randomUUID()
+        val eksisterendeRefusjonsopplysninger = Refusjonsopplysning(inntektsmeldingId, 1.januar, 31.januar, 1000.daglig).refusjonsopplysninger
+
+        val overstyringId = UUID.randomUUID()
+        val ønskedeRefusjonsopplysninger = Refusjonsopplysning(overstyringId, 1.januar, 20.januar, 1000.daglig).refusjonsopplysninger
+
+        assertEquals(listOf(
+            Refusjonsopplysning(overstyringId, 1.januar, 20.januar, 1000.daglig),
+            Refusjonsopplysning(inntektsmeldingId, 21.januar, 31.januar, 1000.daglig)
+        ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger)
+    }
+
+    @Test
+    fun `saksbehandler forkorter refusjonsopplysningens åpne hale`() {
+        val inntektsmeldingId = UUID.randomUUID()
+        val eksisterendeRefusjonsopplysninger = Refusjonsopplysning(inntektsmeldingId, 1.januar, null, 1000.daglig).refusjonsopplysninger
+
+        val overstyringId = UUID.randomUUID()
+        val ønskedeRefusjonsopplysninger = Refusjonsopplysning(overstyringId, 1.januar, 20.januar, 1000.daglig).refusjonsopplysninger
+
+        assertEquals(listOf(
+            Refusjonsopplysning(overstyringId, 1.januar, 20.januar, 1000.daglig),
+            Refusjonsopplysning(inntektsmeldingId, 21.januar, null, 1000.daglig)
+        ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger)
+    }
+
+    @Test
+    fun `saksbehandler forkorter refusjonsopplysningens snute og hale`() {
+        val inntektsmeldingId = UUID.randomUUID()
+        val eksisterendeRefusjonsopplysninger = Refusjonsopplysning(inntektsmeldingId, 1.januar, 31.januar, 1000.daglig).refusjonsopplysninger
+
+        val overstyringId = UUID.randomUUID()
+        val ønskedeRefusjonsopplysninger = Refusjonsopplysning(overstyringId, 2.januar, 30.januar, 1000.daglig).refusjonsopplysninger
+
+        assertEquals(listOf(
+            Refusjonsopplysning(inntektsmeldingId, 1.januar, 1.januar, 1000.daglig),
+            Refusjonsopplysning(overstyringId, 2.januar, 30.januar, 1000.daglig),
+            Refusjonsopplysning(inntektsmeldingId, 31.januar, 31.januar, 1000.daglig)
+        ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger)
+    }
+
+    @Test
+    fun `saksbehandler lager hull i refusjonsopplysningene`() {
+        val inntektsmeldingId = UUID.randomUUID()
+        val eksisterendeRefusjonsopplysninger = RefusjonsopplysningerBuilder()
+            .leggTil(Refusjonsopplysning(inntektsmeldingId, 1.januar, 31.januar, 1500.daglig))
+            .leggTil(Refusjonsopplysning(inntektsmeldingId, 1.februar, 28.februar, 1200.daglig))
+            .build()
+
+        val overstyringId = UUID.randomUUID()
+        val ønskedeRefusjonsopplysninger = RefusjonsopplysningerBuilder()
+            .leggTil(Refusjonsopplysning(overstyringId, 1.januar, 31.januar, 1500.daglig))
+            .leggTil(Refusjonsopplysning(overstyringId, 10.februar, 28.februar, 1200.daglig)) // Hull 1-9.februar
+            .build()
+
+        assertEquals(listOf(
+            Refusjonsopplysning(inntektsmeldingId, 1.januar, 31.januar, 1500.daglig),
+            Refusjonsopplysning(inntektsmeldingId, 1.februar, 9.februar, 1200.daglig),
+            Refusjonsopplysning(overstyringId, 10.februar, 28.februar, 1200.daglig)
+        ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger)
+    }
+
     internal companion object {
         private fun harNødvendigeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode) =
             harNødvendigeRefusjonsopplysninger(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, Aktivitetslogg(), "")
