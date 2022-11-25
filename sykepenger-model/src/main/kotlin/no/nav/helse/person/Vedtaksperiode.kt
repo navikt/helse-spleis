@@ -66,6 +66,9 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
+import no.nav.helse.person.Varselkode.Companion.`Mottatt søknad out of order`
+import no.nav.helse.person.Varselkode.Companion.`Mottatt søknad som delvis overlapper`
+import no.nav.helse.person.Varselkode.Companion.`Mottatt søknad som overlapper helt`
 import no.nav.helse.person.Varselkode.RV_AY_10
 import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.Varselkode.RV_OO_1
@@ -75,9 +78,6 @@ import no.nav.helse.person.Varselkode.RV_RV_2
 import no.nav.helse.person.Varselkode.RV_SI_2
 import no.nav.helse.person.Varselkode.RV_SV_2
 import no.nav.helse.person.Varselkode.RV_SV_3
-import no.nav.helse.person.Varselkode.RV_SØ_11
-import no.nav.helse.person.Varselkode.RV_SØ_12
-import no.nav.helse.person.Varselkode.RV_SØ_13
 import no.nav.helse.person.Varselkode.RV_SØ_15
 import no.nav.helse.person.Varselkode.RV_SØ_16
 import no.nav.helse.person.Varselkode.RV_SØ_19
@@ -350,24 +350,24 @@ internal class Vedtaksperiode private constructor(
     internal fun nekterOpprettelseAvNyPeriode(ny: Vedtaksperiode, hendelse: Søknad) {
         if (ny.periode.start > this.periode.endInclusive) return
         kontekst(hendelse)
-        if (this.arbeidsgiver === ny.arbeidsgiver && this.periode.overlapperMed(ny.periode)) return hendelse.funksjonellFeil(RV_SØ_12)
+        if (this.arbeidsgiver === ny.arbeidsgiver && this.periode.overlapperMed(ny.periode)) return hendelse.funksjonellFeil(`Mottatt søknad som overlapper helt`)
 
         // Vi er litt runde i kantene før perioden er utbetalt
         if (!this.utbetalinger.harAvsluttede() && !this.utbetalinger.utbetales()) return
         // Vi er litt strengere etter perioden er utbetalt
-        if (this.arbeidsgiver === ny.arbeidsgiver && this.erMindreEnn16DagerEtter(ny)) return hendelse.funksjonellFeil(RV_SØ_11)
+        if (this.arbeidsgiver === ny.arbeidsgiver && this.erMindreEnn16DagerEtter(ny)) return hendelse.funksjonellFeil(`Mottatt søknad out of order`)
 
         // Guarder med å ikke endre skjæringstidspunkt tilbake i tid.
         // 🗯 At skjæringstidspunktet flyttes tilbake er ikke farlig ettersom vi da starter revurdering og vil vilkårsprøve på nytt
         // Det som faktisk kan bli feil er perioder som overlapper og skjæringstidspunktet ikke endres, for da endres ikke sykepengegrunnlaget seg
         // og vi kommer til å utbetale basert på skatteopplysninger for den ny arbeidsgiveren
-        if (ny.starterFørOgOverlapperMed(this)) return hendelse.funksjonellFeil(RV_SØ_12)
-        if (this.periode.erRettFør(ny.periode)) return hendelse.funksjonellFeil(RV_SØ_11)
+        if (ny.starterFørOgOverlapperMed(this)) return hendelse.funksjonellFeil(`Mottatt søknad som overlapper helt`)
+        if (this.periode.erRettFør(ny.periode)) return hendelse.funksjonellFeil(`Mottatt søknad out of order`)
 
         // TODO: kan støtte nye perioder mens vi utbetaler dersom TilUtbetaling håndterer startRevurdering
         if (this.utbetalinger.utbetales()) return hendelse.funksjonellFeil(when (ny.periode.overlapperMed(this.periode)) {
-            true -> RV_SØ_12
-            false -> RV_SØ_11
+            true -> `Mottatt søknad som overlapper helt`
+            false -> `Mottatt søknad out of order`
         })
     }
 
@@ -541,13 +541,15 @@ internal class Vedtaksperiode private constructor(
         forkast(søknad)
     }
 
+    private fun Periode.delvisOverlappMed(other: Periode) = overlapperMed(other) && !inneholder(other)
+
     private fun håndterOverlappendeSøknad(søknad: Søknad, nesteTilstand: Vedtaksperiodetilstand? = null) {
-        if (søknad.periode().utenfor(periode)) return overlappendeSøknadIkkeStøttet(søknad, RV_SØ_13)
+        if (periode.delvisOverlappMed(søknad.periode())) return overlappendeSøknadIkkeStøttet(søknad, `Mottatt søknad som delvis overlapper`)
         håndterSøknad(søknad) { nesteTilstand }
     }
 
     private fun håndterOverlappendeSøknadRevurdering(søknad: Søknad) {
-        if (!søknad.omsluttesAv(periode())) søknad.varsel(RV_SØ_13)
+        if (periode.delvisOverlappMed(søknad.periode())) søknad.varsel(`Mottatt søknad som delvis overlapper`)
         else if (søknad.harArbeidsdager()) søknad.varsel(RV_SØ_15)
         else {
             søknad.valider(periode, jurist())

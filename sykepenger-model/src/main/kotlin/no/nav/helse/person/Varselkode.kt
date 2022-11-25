@@ -226,5 +226,9 @@ enum class Varselkode(
 
     internal companion object {
         internal val aktiveVarselkoder = values().filterNot { it.avviklet }
+
+        internal val `Mottatt søknad out of order` = RV_SØ_11
+        internal val `Mottatt søknad som overlapper helt` = RV_SØ_12
+        internal val `Mottatt søknad som delvis overlapper` = RV_SØ_13
     }
 }

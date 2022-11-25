@@ -99,7 +99,5 @@ abstract class SykdomstidslinjeHendelse(
     override fun hashCode(): Int {
         return meldingsreferanseId().hashCode()
     }
-
-    internal fun omsluttesAv(periode: Periode) = periode.start <= periode().start && periode.endInclusive >= periode().endInclusive
 }
 
