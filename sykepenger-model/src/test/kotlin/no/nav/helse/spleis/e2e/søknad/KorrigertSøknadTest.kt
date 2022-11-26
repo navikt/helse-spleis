@@ -19,6 +19,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
@@ -41,6 +42,7 @@ import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.spleis.e2e.tilGodkjent
 import no.nav.helse.spleis.e2e.tilSimulering
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
@@ -88,6 +90,14 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
                 }
             }
         )
+    }
+
+    @Test
+    fun `korrigert søknad i til utbetaling - utbetaler først, så revurdere`() {
+        tilGodkjent(3.januar, 26.januar, 100.prosent, 3.januar)
+        nullstillTilstandsendringer()
+        håndterSøknad(Sykdom(3.januar, 26.januar, 80.prosent))
+        assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
     }
 
     @Test

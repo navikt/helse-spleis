@@ -34,6 +34,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.Varselkode.RV_OO_1
 import no.nav.helse.person.Varselkode.RV_OO_2
 import no.nav.helse.person.Varselkode.RV_SØ_10
@@ -72,9 +73,11 @@ import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.spleis.e2e.tilGodkjent
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -620,78 +623,95 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         forlengTilGodkjenning(1.juni, 30.juni)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
+        nullstillTilstandsendringer()
         nyPeriode(1.januar til 31.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+        assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
+
         nullstillTilstandsendringer()
+        håndterUtbetalt()
 
-        assertForventetFeil(
-            forklaring = """Forventer at periode som går fra til utbetaling til avsluttet blir sendt videre til 
-                    avventer revurdering dersom tidligere periode gjenopptar behandling""",
-            nå = {
-                assertTilstander(1.vedtaksperiode, AVSLUTTET)
-                assertTilstander(2.vedtaksperiode, TIL_UTBETALING)
-                assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt()
 
-                håndterUtbetalt()
+        håndterYtelser(2.vedtaksperiode)
 
-                assertTilstander(1.vedtaksperiode, AVSLUTTET)
-                assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
-                assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
-            },
-            ønsket = {
-                assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
-                assertTilstander(2.vedtaksperiode, TIL_UTBETALING)
-                assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-
-                håndterUtbetalt()
-
-                assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
-                assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
-                assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
-            }
+        assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+        assertTilstander(
+            3.vedtaksperiode,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
+        assertNotNull(observatør.vedtakFattetEvent[2.vedtaksperiode.id(ORGNUMMER)])
     }
 
     @Test
     fun `første periode i til utbetaling når det dukker opp en out of order-periode`() {
         tilGodkjent(1.mars, 31.mars, 100.prosent, 1.mars)
+        nullstillTilstandsendringer()
+        nyPeriode(1.januar til 31.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
+        håndterUtbetalt()
+
+        assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        assertNotNull(observatør.vedtakFattetEvent[1.vedtaksperiode.id(ORGNUMMER)])
+
+        nullstillTilstandsendringer()
+
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+        assertTilstander(
+            2.vedtaksperiode,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+        assertTilstander(
+            1.vedtaksperiode,
+            AVVENTER_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            AVSLUTTET
+        )
+    }
+
+    @Test
+    fun `første periode i til utbetaling når det dukker opp en out of order-periode - utbetalingen feiler`() {
+        tilGodkjent(1.mars, 31.mars, 100.prosent, 1.mars)
         nyPeriode(1.januar til 31.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         nullstillTilstandsendringer()
+        håndterUtbetalt(status = Oppdragstatus.AVVIST)
 
-        assertTilstander(1.vedtaksperiode, TIL_UTBETALING)
-        håndterUtbetalt()
-
-        assertForventetFeil(
-            forklaring = """Forventer at periode som går fra til utbetaling til avsluttet blir sendt videre til 
-                    avventer revurdering dersom tidligere periode gjenopptar behandling""",
-            nå = {
-                assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
-                assertForkastetPeriodeTilstander(2.vedtaksperiode, TIL_INFOTRYGD)
-            },
-            ønsket = {
-                assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, AVVENTER_REVURDERING)
-                assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-
-                håndterYtelser(2.vedtaksperiode)
-                håndterVilkårsgrunnlag(2.vedtaksperiode)
-                håndterYtelser(2.vedtaksperiode)
-                håndterSimulering(2.vedtaksperiode)
-                håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-                håndterUtbetalt()
-
-                assertTilstander(
-                    2.vedtaksperiode,
-                    AVVENTER_BLOKKERENDE_PERIODE,
-                   AVVENTER_VILKÅRSPRØVING,
-                    AVVENTER_HISTORIKK,
-                    AVVENTER_SIMULERING,
-                    AVVENTER_GODKJENNING,
-                    TIL_UTBETALING,
-                    AVSLUTTET
-                )
-            }
-        )
+        assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, UTBETALING_FEILET)
+        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        assertNull(observatør.vedtakFattetEvent[1.vedtaksperiode.id(ORGNUMMER)])
     }
 
     @Test

@@ -363,12 +363,6 @@ internal class Vedtaksperiode private constructor(
         // og vi kommer til å utbetale basert på skatteopplysninger for den ny arbeidsgiveren
         if (ny.starterFørOgOverlapperMed(this)) return hendelse.funksjonellFeil(`Mottatt søknad som overlapper helt`)
         if (this.periode.erRettFør(ny.periode)) return hendelse.funksjonellFeil(`Mottatt søknad out of order`)
-
-        // TODO: kan støtte nye perioder mens vi utbetaler dersom TilUtbetaling håndterer startRevurdering
-        if (this.utbetalinger.utbetales()) return hendelse.funksjonellFeil(when (ny.periode.overlapperMed(this.periode)) {
-            true -> `Mottatt søknad som overlapper helt`
-            false -> `Mottatt søknad out of order`
-        })
     }
 
     internal fun håndterRevurdertUtbetaling(revurdertUtbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg, other: Vedtaksperiode) {
@@ -582,6 +576,22 @@ internal class Vedtaksperiode private constructor(
         }
         vilkårsgrunnlag.info("Vilkårsgrunnlag vurdert")
         tilstand(vilkårsgrunnlag, nesteTilstand)
+    }
+
+    private fun håndterUtbetalingHendelse(hendelse: UtbetalingHendelse, onUtbetalt: () -> Unit) {
+        when {
+            utbetalinger.harFeilet() -> tilstand(hendelse, UtbetalingFeilet) {
+                hendelse.funksjonellFeil(RV_UT_5)
+            }
+            utbetalinger.erUtbetalt() -> {
+                onUtbetalt()
+            }
+        }
+    }
+
+    private fun ferdigstillVedtak(hendelse: IAktivitetslogg) {
+        sendVedtakFattet(hendelse)
+        person.gjenopptaBehandling(hendelse)
     }
 
     private fun trengerYtelser(hendelse: IAktivitetslogg, periode: Periode = periode()) {
@@ -998,9 +1008,14 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.arbeidsgiver.gjenopptaRevurdering(vedtaksperiode, hendelse)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse) {
+            vedtaksperiode.håndterUtbetalingHendelse(hendelse) {
+                vedtaksperiode.ferdigstillVedtak(hendelse)
+            }
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            vedtaksperiode.oppdaterHistorikk(hendelse)
-            vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse, RevurderingÅrsak.SYKDOMSTIDSLINJE)
+            vedtaksperiode.revurderTidslinje(hendelse)
         }
 
         override fun håndter(
@@ -1905,23 +1920,20 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            hendelse.info("Overstyrer ikke en vedtaksperiode som har gått til utbetaling")
+            vedtaksperiode.revurderTidslinje(hendelse)
         }
 
-        override fun startRevurdering(
-            arbeidsgivere: List<Arbeidsgiver>,
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
-            overstyrt: Vedtaksperiode,
-            hvorfor: RevurderingÅrsak
-        ) {}
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
+            vedtaksperiode.revurderInntekt(hendelse)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse) {
-            when {
-                vedtaksperiode.utbetalinger.harFeilet() -> vedtaksperiode.tilstand(hendelse, UtbetalingFeilet) {
-                    hendelse.funksjonellFeil(RV_UT_5)
-                }
-                vedtaksperiode.utbetalinger.erUtbetalt() -> vedtaksperiode.tilstand(hendelse, Avsluttet) {
+            vedtaksperiode.håndterUtbetalingHendelse(hendelse) {
+                vedtaksperiode.tilstand(hendelse, Avsluttet) {
                     hendelse.info("OK fra Oppdragssystemet")
                 }
             }
@@ -2001,8 +2013,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             check(!vedtaksperiode.utbetalinger.harUtbetaling()) { "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. " }
-            vedtaksperiode.sendVedtakFattet(hendelse)
-            vedtaksperiode.person.gjenopptaBehandling(hendelse)
+            vedtaksperiode.ferdigstillVedtak(hendelse)
         }
 
         override fun startRevurdering(
@@ -2072,8 +2083,7 @@ internal class Vedtaksperiode private constructor(
             check(vedtaksperiode.utbetalinger.erAvsluttet()) {
                 "forventer at utbetaling skal være avsluttet"
             }
-            vedtaksperiode.sendVedtakFattet(hendelse)
-            vedtaksperiode.person.gjenopptaBehandling(hendelse)
+            vedtaksperiode.ferdigstillVedtak(hendelse)
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {

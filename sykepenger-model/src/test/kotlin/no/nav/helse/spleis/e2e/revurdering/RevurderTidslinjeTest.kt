@@ -75,7 +75,9 @@ import no.nav.helse.spleis.e2e.manuellPermisjonsdag
 import no.nav.helse.spleis.e2e.manuellSykedag
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
+import no.nav.helse.spleis.e2e.tilGodkjent
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -83,6 +85,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -91,13 +94,34 @@ import org.junit.jupiter.api.assertThrows
 internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
-    fun `revurdere mens en periode er til utbetaling`() {
+    fun `revurdere mens en forlengelse er til utbetaling`() {
         nyttVedtak(1.januar, 31.januar)
         forlengTilGodkjentVedtak(1.februar, 28.februar)
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-        assertTilstander(2.vedtaksperiode, TIL_UTBETALING)
+        håndterUtbetalt()
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertNotNull(observatør.vedtakFattetEvent[2.vedtaksperiode.id(ORGNUMMER)])
+    }
+    @Test
+    fun `revurdere mens en førstegangsbehandling er til utbetaling`() {
+        tilGodkjent(1.januar, 31.januar, 100.prosent, 1.januar)
+        nullstillTilstandsendringer()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+        håndterUtbetalt()
+        assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertNotNull(observatør.vedtakFattetEvent[1.vedtaksperiode.id(ORGNUMMER)])
+    }
+
+    @Test
+    fun `revurdere mens en førstegangsbehandling er til utbetaling - utbetalingen feiler`() {
+        tilGodkjent(1.januar, 31.januar, 100.prosent, 1.januar)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+        nullstillTilstandsendringer()
+        håndterUtbetalt(status = Oppdragstatus.AVVIST)
+        assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, UTBETALING_FEILET)
+        assertNull(observatør.vedtakFattetEvent[1.vedtaksperiode.id(ORGNUMMER)])
     }
 
     @Test
