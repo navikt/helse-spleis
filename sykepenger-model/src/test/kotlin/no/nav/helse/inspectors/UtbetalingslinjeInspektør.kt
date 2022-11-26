@@ -34,6 +34,9 @@ internal class UtbetalingslinjeInspektør(utbetalingslinje: Utbetalingslinje) : 
     internal var datoStatusFom: LocalDate? = null
         private set
 
+    internal var statuskode: String? = null
+        private set
+
     init {
         utbetalingslinje.accept(this)
     }
@@ -64,5 +67,6 @@ internal class UtbetalingslinjeInspektør(utbetalingslinje: Utbetalingslinje) : 
         this.datoStatusFom = datoStatusFom
         this.refFagsystemId = refFagsystemId
         this.beløp = beløp
+        this.statuskode = statuskode
     }
 }

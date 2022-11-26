@@ -5,8 +5,12 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.juni
 import no.nav.helse.mai
+import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -17,6 +21,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.Varselkode.RV_SØ_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -31,6 +36,7 @@ import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
 internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
@@ -115,5 +121,102 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(2.vedtaksperiode)
         assertVarsel(RV_SØ_2)
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
+    }
+
+    @Test
+    fun `foreldet søknad forlenger annen foreldet søknad - deler korrelasjonsId`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 19.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar, 100.prosent))
+
+        // foreldet søknad :(
+        håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+        // foreldet søknad :(
+        håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
+        val førsteUtbetaling = inspektør.utbetaling(0).inspektør
+        val andreUtbetaling = inspektør.utbetaling(1).inspektør
+
+        assertEquals(førsteUtbetaling.korrelasjonsId, andreUtbetaling.korrelasjonsId)
+        assertEquals(0, førsteUtbetaling.arbeidsgiverOppdrag.size)
+        assertEquals(0, førsteUtbetaling.personOppdrag.size)
+        assertEquals(0, andreUtbetaling.arbeidsgiverOppdrag.size)
+        assertEquals(0, andreUtbetaling.personOppdrag.size)
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+    }
+
+    @Test
+    fun `foreldet søknad etter annen foreldet søknad - samme arbeidsgiverperiode - deler korrelasjonsId`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 19.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(24.januar, 31.januar, 100.prosent))
+
+        // foreldet søknad :(
+        håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+        // foreldet søknad :(
+        håndterSøknad(Sykdom(24.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 24.januar)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
+        val førsteUtbetaling = inspektør.utbetaling(0).inspektør
+        val andreUtbetaling = inspektør.utbetaling(1).inspektør
+
+        assertEquals(førsteUtbetaling.korrelasjonsId, andreUtbetaling.korrelasjonsId)
+        assertEquals(0, førsteUtbetaling.arbeidsgiverOppdrag.size)
+        assertEquals(0, førsteUtbetaling.personOppdrag.size)
+        assertEquals(0, andreUtbetaling.arbeidsgiverOppdrag.size)
+        assertEquals(0, andreUtbetaling.personOppdrag.size)
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+    }
+
+    @Test
+    fun `foreldet søknad etter annen foreldet søknad - ulike arbeidsgiverperioder - deler ikke korrelasjonsId`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 19.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(19.februar, 12.mars, 100.prosent))
+
+        // foreldet søknad :(
+        håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.juni)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+        // foreldet søknad :(
+        håndterSøknad(Sykdom(19.februar, 12.mars, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.juli)
+        håndterInntektsmelding(listOf(19.februar til 6.mars))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
+        val førsteUtbetaling = inspektør.utbetaling(0).inspektør
+        val andreUtbetaling = inspektør.utbetaling(1).inspektør
+
+        assertNotEquals(førsteUtbetaling.korrelasjonsId, andreUtbetaling.korrelasjonsId)
+        assertEquals(0, førsteUtbetaling.arbeidsgiverOppdrag.size)
+        assertEquals(0, førsteUtbetaling.personOppdrag.size)
+        assertEquals(0, andreUtbetaling.arbeidsgiverOppdrag.size)
+        assertEquals(0, andreUtbetaling.personOppdrag.size)
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
     }
 }
