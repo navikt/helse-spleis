@@ -86,6 +86,8 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 
 internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
@@ -617,6 +619,39 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(2, inspektør.utbetalinger.size)
         assertEquals(6, inspektør.forbrukteSykedager(0))
         assertEquals(0, inspektør.forbrukteSykedager(1))
+    }
+
+    @Test
+    fun `revurderer siste utbetalte periode med bare ferie og permisjon - med tidligere utbetaling`() {
+        nyttVedtak(3.januar, 26.januar)
+        nyttVedtak(3.mars, 26.mars)
+        nullstillTilstandsendringer()
+
+        håndterOverstyrTidslinje((3.mars til 20.mars).map { manuellFeriedag(it) } + (21.mars til 26.mars).map { manuellPermisjonsdag(it) })
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        assertForventetFeil(
+            forklaring = "Har laget en overlappende utbetaling fordi det ikke er noen ArbeidsgiverperiodeDag før januar." +
+                    "OppdragBuilder stopper først ved ArbeidsgiverperiodeDag eller UkjentDag",
+            nå = {
+                assertThrows<IllegalStateException>("Har laget en overlappende utbetaling") {
+                    håndterYtelser(2.vedtaksperiode)
+                }
+            },
+            ønsket = {
+                assertDoesNotThrow { håndterYtelser(2.vedtaksperiode) }
+                val andreUtbetaling = inspektør.utbetaling(1).inspektør
+                val tredjeUtbetaling = inspektør.utbetaling(2).inspektør
+                assertEquals(andreUtbetaling.korrelasjonsId, tredjeUtbetaling.korrelasjonsId)
+                assertEquals(1, tredjeUtbetaling.arbeidsgiverOppdrag.size)
+                tredjeUtbetaling.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+                    assertEquals(18.mars, linje.fom)
+                    assertEquals(26.mars, linje.tom)
+                    assertEquals(18.mars, linje.datoStatusFom)
+                    assertEquals("OPPH", linje.statuskode)
+                }
+            }
+        )
     }
 
     @Test
