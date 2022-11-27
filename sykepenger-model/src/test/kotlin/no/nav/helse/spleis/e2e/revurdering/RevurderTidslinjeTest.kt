@@ -4,11 +4,13 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.antallEtterspurteBehov
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -64,6 +66,7 @@ import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
@@ -80,6 +83,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -951,6 +955,13 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
+        val førsteUtbetaling = inspektør.utbetaling(0).inspektør
+        val andreUtbetaling = inspektør.utbetaling(1).inspektør
+        val tredjeUtbetaling = inspektør.utbetaling(2).inspektør
+
+        assertEquals(førsteUtbetaling.korrelasjonsId, andreUtbetaling.korrelasjonsId)
+        assertEquals(andreUtbetaling.korrelasjonsId, tredjeUtbetaling.korrelasjonsId)
+
         assertTilstander(
             2.vedtaksperiode,
             START,
@@ -961,6 +972,56 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
+    }
+
+    @Test
+    fun `revurdering endrer arbeidsgiverperioden`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
+        håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent), Arbeid(25.januar, 26.januar))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(3.januar til 18.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        // for at ferie skal regnes som del av arbeidsgiverperioden, må det være sykdom
+        // på begge sider av feriedagene. i utgangspunktet er arbeidsgiverperioden 3. - 18. januar,
+        // men for at feriedagene 16. - 18. januar skal telle med, må det være sykdom 27. januar.
+        // Siden 27. januar hittil er ukjent for oss, regnes det som antatt arbeidsdag.
+        // Altså blir arbeidsgiverperioden 1. januar - 15.januar med denne overstyringen, med 16. januar-26.januar
+        // tellende som oppholdsdager
+        håndterOverstyrTidslinje((16.januar til 26.januar).map { manuellFeriedag(it) })
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        // registrerer sykdomsdag 27. januar som gjør at arbeidsgiverperioden blir 3.januar - 18.januar,
+        // siden det nå er sykdom på begge sider av feriedagene
+        håndterSykmelding(Sykmeldingsperiode(27.januar, 5.februar, 100.prosent))
+        håndterSøknad(Sykdom(27.januar, 5.februar, 100.prosent))
+
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        val førsteUtbetaling = inspektør.utbetaling(0).inspektør
+        val andreUtbetaling = inspektør.utbetaling(1).inspektør
+        val tredjeUtbetaling = inspektør.utbetaling(2).inspektør
+
+        assertEquals(førsteUtbetaling.korrelasjonsId, andreUtbetaling.korrelasjonsId)
+        assertEquals(18.januar, førsteUtbetaling.arbeidsgiverOppdrag.inspektør.sisteArbeidsgiverdag)
+        assertForventetFeil(
+            forklaring = "Oppdrag hensyntar ikke sisteArbeidsgiverdag for å se etter overlapp",
+            nå = { assertNotEquals(andreUtbetaling.korrelasjonsId, tredjeUtbetaling.korrelasjonsId) },
+            ønsket = { assertEquals(andreUtbetaling.korrelasjonsId, tredjeUtbetaling.korrelasjonsId) }
+        )
+        assertEquals(15.januar, andreUtbetaling.arbeidsgiverOppdrag.inspektør.sisteArbeidsgiverdag)
+        assertEquals(18.januar, tredjeUtbetaling.arbeidsgiverOppdrag.inspektør.sisteArbeidsgiverdag)
     }
 
     @Test

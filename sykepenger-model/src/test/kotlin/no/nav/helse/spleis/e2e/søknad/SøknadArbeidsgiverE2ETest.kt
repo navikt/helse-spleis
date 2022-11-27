@@ -42,6 +42,53 @@ import org.junit.jupiter.api.Test
 internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
 
     @Test
+    fun `avslutter søknad utenfor arbeidsgiverperioden dersom det kun er ferie`() {
+        håndterSykmelding(Sykmeldingsperiode(4.januar, 21.januar, 100.prosent))
+        håndterSøknad(Sykdom(4.januar, 21.januar, 100.prosent), Ferie(19.januar, 21.januar))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
+    fun `avslutter forlengelse utenfor arbeidsgiverperioden dersom det kun er friskmelding - etter utbetaling`() {
+        nyttVedtak(1.januar, 23.januar)
+        håndterSykmelding(Sykmeldingsperiode(24.januar, 25.januar, 100.prosent))
+        håndterSøknad(Sykdom(24.januar, 25.januar, 100.prosent), Arbeid(24.januar, 25.januar))
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
+    fun `avslutter forlengelse utenfor arbeidsgiverperioden dersom det kun er friskmelding og helg`() {
+        håndterSykmelding(Sykmeldingsperiode(4.januar, 19.januar, 100.prosent))
+        håndterSøknad(Sykdom(4.januar, 19.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 25.januar, 100.prosent))
+        håndterSøknad(Sykdom(20.januar, 25.januar, 100.prosent), Arbeid(22.januar, 25.januar))
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
+    fun `avslutter forlengelse utenfor arbeidsgiverperioden dersom det kun er friskmelding`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 25.januar, 100.prosent))
+        håndterSøknad(Sykdom(17.januar, 25.januar, 100.prosent), Arbeid(17.januar, 25.januar))
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
+    fun `avslutter forlengelse utenfor arbeidsgiverperioden dersom det kun er ferie og friskmelding`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Ferie(16.januar, 20.januar))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 25.januar, 100.prosent))
+        håndterSøknad(Sykdom(21.januar, 25.januar, 100.prosent), Arbeid(21.januar, 25.januar))
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
     fun `avslutter søknad utenfor arbeidsgiverperioden dersom det kun er helg`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 21.januar, 100.prosent))
         håndterSøknad(Sykdom(4.januar, 21.januar, 100.prosent))
