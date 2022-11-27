@@ -14,7 +14,7 @@ internal class ArbeidsgiverperiodeBuilderBuilder : ArbeidsgiverperiodeMediator {
     private var aktivArbeidsgiverperiode: Arbeidsgiverperiode? = null
 
     internal fun result(): List<Arbeidsgiverperiode> {
-        reset()
+        aktivArbeidsgiverperiode?.also { results.add(it) }
         return results.toList()
     }
 
@@ -28,6 +28,7 @@ internal class ArbeidsgiverperiodeBuilderBuilder : ArbeidsgiverperiodeMediator {
 
     override fun arbeidsgiverperiodeAvbrutt() {
         reset()
+        aktivArbeidsgiverperiode?.also { results.add(it) }
         aktivArbeidsgiverperiode = null
     }
 
@@ -50,7 +51,6 @@ internal class ArbeidsgiverperiodeBuilderBuilder : ArbeidsgiverperiodeMediator {
         // lager en fiktig arbeidsgiverperiode for Infotrygd-perioder, eller
         // andre tilfeller hvor arbeidsgiverperioden består av 0 dager
         aktivArbeidsgiverperiode?.utbetalingsdag(dato) ?: Arbeidsgiverperiode.fiktiv(dato).also {
-            results.add(it)
             aktivArbeidsgiverperiode = it
         }
     }
@@ -67,19 +67,16 @@ internal class ArbeidsgiverperiodeBuilderBuilder : ArbeidsgiverperiodeMediator {
         } else {
             perioder.add(dagen.somPeriode())
         }
-        build()?.also { aktivArbeidsgiverperiode = it }
+        val nyArbeidsgiverperiode = Arbeidsgiverperiode(perioder.toList())
+        aktivArbeidsgiverperiode?.let { nyArbeidsgiverperiode.kopierMed(it) }
+        aktivArbeidsgiverperiode = nyArbeidsgiverperiode
     }
 
     private fun reset() {
-        build()?.also {
-            results.add(it)
-            aktivArbeidsgiverperiode = it
-        }
         perioder.clear()
     }
 
     internal fun build(): Arbeidsgiverperiode? {
-        if (perioder.isEmpty()) return null
-        return Arbeidsgiverperiode(perioder.toList())
+        return aktivArbeidsgiverperiode
     }
 }

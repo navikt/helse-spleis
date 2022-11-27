@@ -96,6 +96,6 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
 
     override fun arbeidsgiverperiodeFerdig() {
         periodebuilder.arbeidsgiverperiodeFerdig()
-        sisteArbeidsgiverperiode = periodebuilder.result().lastOrNull()
+        sisteArbeidsgiverperiode = periodebuilder.build()
     }
 }

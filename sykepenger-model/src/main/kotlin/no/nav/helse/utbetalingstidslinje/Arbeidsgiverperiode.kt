@@ -121,6 +121,13 @@ internal class Arbeidsgiverperiode private constructor(internal val perioder: Li
         kjentDag(dato)
     }
 
+    internal fun kopierMed(other: Arbeidsgiverperiode): Arbeidsgiverperiode {
+        this.kjenteDager.addAll(other.kjenteDager)
+        this.utbetalingsdager.addAll(other.utbetalingsdager)
+        this.oppholdsdager.addAll(other.oppholdsdager)
+        return this
+    }
+
     internal companion object {
 
         internal fun fiktiv(førsteUtbetalingsdag: LocalDate) = Arbeidsgiverperiode(emptyList(), førsteUtbetalingsdag)

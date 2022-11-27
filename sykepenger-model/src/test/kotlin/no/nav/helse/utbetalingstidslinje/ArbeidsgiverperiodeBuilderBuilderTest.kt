@@ -5,7 +5,6 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
@@ -70,6 +69,14 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
     }
 
     @Test
+    fun `ferie i nesten fullført agp`() {
+        undersøke(15.S + 5.F)
+        assertEquals(1, perioder.size)
+        assertEquals(listOf(1.januar til 15.januar), perioder.first())
+        assertTrue(16.januar til 20.januar in perioder.first())
+    }
+
+    @Test
     fun `arbeid etter ferie i agp`() {
         undersøke(5.S + 5.F + 5.A + 11.S + 1.F + 13.S)
         assertEquals(1, perioder.size)
@@ -83,6 +90,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
         assertEquals(1, perioder.size)
         assertEquals(listOf(1.januar til 16.januar), perioder.first())
         assertFalse(perioder.first().forventerInntekt(17.januar til 31.januar, Sykdomstidslinje(), NullObserver))
+        assertTrue(17.januar til 31.januar in perioder.first())
     }
 
     @Test
@@ -118,7 +126,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
 
     private fun undersøke(tidslinje: Sykdomstidslinje, delegator: ((Arbeidsgiverperiodeteller, SykdomstidslinjeVisitor) -> SykdomstidslinjeVisitor)? = null) {
         val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
-        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, periodebuilder, SubsumsjonObserver.NullObserver)
+        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, periodebuilder, NullObserver)
         tidslinje.accept(delegator?.invoke(teller, arbeidsgiverperiodeBuilder) ?: arbeidsgiverperiodeBuilder)
         perioder.addAll(periodebuilder.result())
     }
