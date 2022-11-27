@@ -1,21 +1,35 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.*
-import no.nav.helse.hendelser.til
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
-import no.nav.helse.utbetalingslinjer.Endringskode.*
-import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
-import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
+import no.nav.helse.august
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.hendelser.somPeriode
+import no.nav.helse.hendelser.til
+import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.juni
+import no.nav.helse.mars
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.AktivitetsloggVisitor
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_OS_2
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
+import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
+import no.nav.helse.utbetalingslinjer.Endringskode.NY
+import no.nav.helse.utbetalingslinjer.Endringskode.UEND
+import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
+import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import kotlin.math.roundToInt
 
 internal class UtbetalingslinjeForskjellTest {
@@ -33,24 +47,36 @@ internal class UtbetalingslinjeForskjellTest {
     }
 
     @Test
-    fun periode() {
-        val oppdrag1 = linjer(1.januar to 5.januar)
-        val oppdrag2 = linjer(1.februar to 28.februar)
-        assertEquals(1.januar til 28.februar, Oppdrag.periode(oppdrag1, oppdrag2))
+    fun `periode uten siste arbeidsgiverdag`() {
+        val oppdrag1 = linjer(2.januar to 5.januar, sisteArbeidsgiverdag = null)
+        val oppdrag2 = linjer(1.februar to 28.februar, sisteArbeidsgiverdag = null)
+        assertEquals(2.januar til 28.februar, Oppdrag.periode(oppdrag1, oppdrag2))
+    }
+
+    @Test
+    fun `periode med siste arbeidsgiverdag`() {
+        val oppdrag1 = linjer(2.januar to 5.januar, sisteArbeidsgiverdag = 1.januar)
+        val oppdrag2 = linjer(1.februar to 28.februar, sisteArbeidsgiverdag = 1.januar)
+        assertEquals(2.januar til 28.februar, Oppdrag.periode(oppdrag1, oppdrag2))
     }
 
     @Test
     fun `periode med tomt oppdrag`() {
-        val oppdrag1 = linjer(1.januar to 5.januar)
-        val oppdrag2 = linjer()
-        assertEquals(1.januar til 5.januar, Oppdrag.periode(oppdrag1, oppdrag2))
+        val oppdrag1 = linjer(2.januar to 5.januar, sisteArbeidsgiverdag = 1.januar)
+        val oppdrag2 = linjer(sisteArbeidsgiverdag = 1.januar)
+        val oppdrag3 = linjer(sisteArbeidsgiverdag = null)
+        assertEquals(2.januar til 5.januar, Oppdrag.periode(oppdrag1, oppdrag2))
+        assertEquals(2.januar til 5.januar, Oppdrag.periode(oppdrag1, oppdrag3))
+        assertEquals(2.januar.somPeriode(), Oppdrag.periode(oppdrag2, oppdrag3))
     }
 
     @Test
     fun `periode med bare tomme oppdrag`() {
         assertNull(Oppdrag.periode())
-        assertNull(Oppdrag.periode(linjer()))
-        assertNull(Oppdrag.periode(linjer(), linjer()))
+        assertNull(Oppdrag.periode(linjer(sisteArbeidsgiverdag = null)))
+        assertNull(Oppdrag.periode(linjer(sisteArbeidsgiverdag = null), linjer(sisteArbeidsgiverdag = null)))
+        assertEquals(2.januar.somPeriode(), Oppdrag.periode(linjer(sisteArbeidsgiverdag = 1.januar)))
+        assertEquals(2.januar til 3.januar, Oppdrag.periode(linjer(sisteArbeidsgiverdag = 2.januar), linjer(sisteArbeidsgiverdag = 1.januar)))
     }
 
     @Test
@@ -1036,7 +1062,7 @@ internal class UtbetalingslinjeForskjellTest {
         }
     }
 
-    private fun linjer(vararg linjer: TestUtbetalingslinje, other: Oppdrag? = null, sisteArbeidsgiverdag: LocalDate = 31.desember(2017)) =
+    private fun linjer(vararg linjer: TestUtbetalingslinje, other: Oppdrag? = null, sisteArbeidsgiverdag: LocalDate? = 31.desember(2017)) =
         Oppdrag(ORGNUMMER, SykepengerRefusjon, linjer.map { it.asUtbetalingslinje() }, fagsystemId = other?.fagsystemId() ?: genererUtbetalingsreferanse(UUID.randomUUID()), sisteArbeidsgiverdag = sisteArbeidsgiverdag).also { oppdrag ->
             oppdrag.forEach { if(it.refId != null) it.refFagsystemId = oppdrag.fagsystemId() }
         }

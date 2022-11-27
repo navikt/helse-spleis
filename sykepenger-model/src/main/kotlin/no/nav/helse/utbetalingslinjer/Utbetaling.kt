@@ -886,7 +886,7 @@ internal class Utbetaling private constructor(
             )
                 .takeIf { it.arbeidsgiverOppdrag.harUtbetalinger() }
                 ?.also {
-                    if (it.arbeidsgiverOppdrag.sistedato != utbetaling.arbeidsgiverOppdrag.sistedato)
+                    if (it.arbeidsgiverOppdrag.lastOrNull()?.tom != utbetaling.arbeidsgiverOppdrag.lastOrNull()?.tom)
                         hendelse.logiskFeil("Etterutbetaling har utvidet eller kortet ned oppdraget")
                 }
     }

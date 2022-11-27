@@ -168,10 +168,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 assertEquals(Dag.Sykedag::class, inspektør.sykdomstidslinje[10.januar]::class)
                 assertEquals(Dag.SykHelgedag::class, inspektør.sykdomstidslinje[20.januar]::class)
                 assertEquals(Dag.Sykedag::class, inspektør.sykdomstidslinje[30.januar]::class)
-                assertEquals(13.februar, inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.førstedato)
+                assertEquals(13.februar, inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.first().inspektør.fom)
             },
             ønsket = {
-                assertEquals(1.februar, inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.førstedato)
+                assertEquals(1.februar, inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.first().inspektør.fom)
                 fail("""\_(ツ)_/¯""")
             }
         )
@@ -279,7 +279,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                     "De spredte sykedagene er innenfor 16 dager fra hverandre, slik at de teller med i samme arbeidsgiverperiodetelling." +
                     "Dette medfører at vi starter utbetaling tidligere enn det arbeidsgiver har ment å fortelle oss er riktig.",
             nå = {
-                assertEquals(19.januar, inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.førstedato)
+                assertEquals(19.januar, inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.first().inspektør.fom)
                 assertTilstander(
                     2.vedtaksperiode,
                     START,

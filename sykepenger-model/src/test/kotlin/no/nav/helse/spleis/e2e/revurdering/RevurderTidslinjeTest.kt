@@ -83,7 +83,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -1050,11 +1049,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         assertEquals(førsteUtbetaling.korrelasjonsId, andreUtbetaling.korrelasjonsId)
         assertEquals(18.januar, førsteUtbetaling.arbeidsgiverOppdrag.inspektør.sisteArbeidsgiverdag)
-        assertForventetFeil(
-            forklaring = "Oppdrag hensyntar ikke sisteArbeidsgiverdag for å se etter overlapp",
-            nå = { assertNotEquals(andreUtbetaling.korrelasjonsId, tredjeUtbetaling.korrelasjonsId) },
-            ønsket = { assertEquals(andreUtbetaling.korrelasjonsId, tredjeUtbetaling.korrelasjonsId) }
-        )
+        assertEquals(andreUtbetaling.korrelasjonsId, tredjeUtbetaling.korrelasjonsId)
         assertEquals(15.januar, andreUtbetaling.arbeidsgiverOppdrag.inspektør.sisteArbeidsgiverdag)
         assertEquals(18.januar, tredjeUtbetaling.arbeidsgiverOppdrag.inspektør.sisteArbeidsgiverdag)
     }

@@ -1,21 +1,24 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
-import no.nav.helse.person.*
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
-import no.nav.helse.utbetalingslinjer.Oppdragstatus.FEIL
-import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import java.time.LocalDate
 import java.time.LocalDate.MIN
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.somPeriode
+import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
+import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
+import no.nav.helse.nesteDag
+import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Varselkode.RV_OS_1
 import no.nav.helse.person.Varselkode.RV_OS_2
 import no.nav.helse.person.Varselkode.RV_OS_3
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.FEIL
+import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 
 internal class Oppdrag private constructor(
     private val mottaker: String,
@@ -35,9 +38,9 @@ internal class Oppdrag private constructor(
     internal companion object {
         internal fun periode(vararg oppdrag: Oppdrag): Periode? {
             return oppdrag
-                .filter(Oppdrag::isNotEmpty)
+                .mapNotNull { it.linjeperiode ?: it.sisteArbeidsgiverdag?.nesteDag?.somPeriode() }
                 .takeIf(List<*>::isNotEmpty)
-                ?.let { liste -> Periode(liste.minOf { it.førstedato }, liste.maxOf { it.sistedato }) }
+                ?.reduce(Periode::plus)
         }
 
         internal fun List<Oppdrag>.trekkerTilbakePenger() = sumOf { it.nettoBeløp() } < 0
@@ -84,8 +87,12 @@ internal class Oppdrag private constructor(
         )
     }
 
-    internal val førstedato get() = linjer.firstOrNull()?.let { it.datoStatusFom() ?: it.fom } ?: MIN
-    internal val sistedato get() = linjer.lastOrNull()?.tom ?: MIN
+    private val overlapperiode get() = when {
+        sisteArbeidsgiverdag == null && isEmpty() -> null
+        sisteArbeidsgiverdag == null -> linjeperiode
+        else -> linjeperiode?.oppdaterFom(sisteArbeidsgiverdag)
+    }
+    private val linjeperiode get() = firstOrNull()?.let { (it.datoStatusFom() ?: it.fom) til last().tom }
 
     internal constructor(
         mottaker: String,
@@ -109,8 +116,6 @@ internal class Oppdrag private constructor(
             fagområde,
             fagsystemId,
             mottaker,
-            førstedato,
-            sistedato,
             sisteArbeidsgiverdag,
             stønadsdager(),
             totalbeløp(),
@@ -129,8 +134,6 @@ internal class Oppdrag private constructor(
             fagområde,
             fagsystemId,
             mottaker,
-            førstedato,
-            sistedato,
             sisteArbeidsgiverdag,
             stønadsdager(),
             totalbeløp(),
@@ -150,7 +153,8 @@ internal class Oppdrag private constructor(
     private operator fun contains(other: Oppdrag) = this.tilhører(other) || this.overlapperMed(other) || sammenhengendeUtbetalingsperiode(other)
 
     internal fun tilhører(other: Oppdrag) = this.fagsystemId == other.fagsystemId && this.fagområde == other.fagområde
-    private fun overlapperMed(other: Oppdrag) = !erTomt() && maxOf(this.førstedato, other.førstedato) <= minOf(this.sistedato, other.sistedato)
+    private fun overlapperMed(other: Oppdrag) =
+        this.overlapperiode?.let { other.overlapperiode?.overlapperMed(it) } ?: false
 
     private fun sammenhengendeUtbetalingsperiode(other: Oppdrag) =
         this.sisteArbeidsgiverdag != null && this.sisteArbeidsgiverdag == other.sisteArbeidsgiverdag
@@ -261,10 +265,10 @@ internal class Oppdrag private constructor(
     private fun erTomt() = this.isEmpty()
 
     // Vi har oppdaget utbetalingsdager tidligere i tidslinjen
-    private fun fomHarFlyttetSegBakover(eldre: Oppdrag) = this.førstedato < eldre.førstedato
+    private fun fomHarFlyttetSegBakover(eldre: Oppdrag) = this.first().fom < eldre.first().fom
 
     // Vi har endret tidligere utbetalte dager til ikke-utbetalte dager i starten av tidslinjen
-    private fun fomHarFlyttetSegFremover(eldre: Oppdrag) = this.førstedato > eldre.førstedato
+    private fun fomHarFlyttetSegFremover(eldre: Oppdrag) = this.first().fom > eldre.first().fom
 
     // man opphører (annullerer) et annet oppdrag ved å lage en opphørslinje som dekker hele perioden som er utbetalt
     private fun annulleringsoppdrag(tidligere: Oppdrag) = this.also { nåværende ->
@@ -321,7 +325,7 @@ internal class Oppdrag private constructor(
     }
 
     private fun opphørOppdrag(tidligere: Oppdrag) =
-        tidligere.last().opphørslinje(tidligere.førstedato)
+        tidligere.last().opphørslinje(tidligere.first().fom)
 
     private fun kopierMed(linjer: List<Utbetalingslinje>) = Oppdrag(
         mottaker,
@@ -337,7 +341,7 @@ internal class Oppdrag private constructor(
     )
 
     private fun kopierLikeLinjer(tidligere: Oppdrag, aktivitetslogg: IAktivitetslogg) {
-        tilstand = if (tidligere.sistedato > this.sistedato) Slett() else Identisk()
+        tilstand = if (tidligere.last().tom > this.last().tom) Slett() else Identisk()
         sisteLinjeITidligereOppdrag = tidligere.last()
         this.zip(tidligere).forEach { (a, b) -> tilstand.håndterForskjell(a, b, aktivitetslogg) }
     }
@@ -383,8 +387,8 @@ internal class Oppdrag private constructor(
         "avstemmingsnøkkel" to avstemmingsnøkkel?.let { "$it" },
         "status" to status?.let { "$it" },
         "overføringstidspunkt" to overføringstidspunkt,
-        "fom" to førstedato,
-        "tom" to sistedato,
+        "fom" to (linjeperiode?.start ?: MIN),
+        "tom" to (linjeperiode?.endInclusive ?: MIN),
         "simuleringsResultat" to simuleringsResultat?.toMap()
     )
 

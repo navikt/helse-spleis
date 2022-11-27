@@ -262,8 +262,6 @@ internal class Feriepengeberegner(
                 fagområde: Fagområde,
                 fagsystemId: String,
                 mottaker: String,
-                førstedato: LocalDate,
-                sistedato: LocalDate,
                 sisteArbeidsgiverdag: LocalDate?,
                 stønadsdager: Int,
                 totalBeløp: Int,

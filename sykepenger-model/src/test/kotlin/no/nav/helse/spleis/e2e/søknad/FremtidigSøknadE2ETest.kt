@@ -70,8 +70,12 @@ internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertEquals(sisteArbeidsgiverdag.plusDays(1), inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag.førstedato)
-        assertEquals(tom, inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag.sistedato)
+        val arbeidsgiverOppdrag = inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag
+        val oppdragInspektør = arbeidsgiverOppdrag.inspektør
+        assertEquals(sisteArbeidsgiverdag.plusDays(1), arbeidsgiverOppdrag.first().inspektør.fom)
+        assertEquals(tom, arbeidsgiverOppdrag.last().inspektør.tom)
+        assertEquals(sisteArbeidsgiverdag, oppdragInspektør.periode.start)
+        assertEquals(tom, oppdragInspektør.periode.endInclusive)
     }
 
 }

@@ -230,8 +230,6 @@ internal class TestArbeidsgiverInspektør(
         fagområde: Fagområde,
         fagsystemId: String,
         mottaker: String,
-        førstedato: LocalDate,
-        sistedato: LocalDate,
         sisteArbeidsgiverdag: LocalDate?,
         stønadsdager: Int,
         totalBeløp: Int,

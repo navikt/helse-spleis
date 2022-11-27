@@ -393,8 +393,10 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         val annullering = inspektør.utbetaling(2)
         sisteBehovErAnnullering(1.vedtaksperiode)
         assertTrue(annullering.inspektør.erAnnullering)
-        assertEquals(19.januar, annullering.inspektør.arbeidsgiverOppdrag.førstedato)
-        assertEquals(26.januar, annullering.inspektør.arbeidsgiverOppdrag.sistedato)
+        assertEquals(18.januar, annullering.inspektør.arbeidsgiverOppdrag.inspektør.periode.start)
+        assertEquals(26.januar, annullering.inspektør.arbeidsgiverOppdrag.inspektør.periode.endInclusive)
+        assertEquals(19.januar, annullering.inspektør.arbeidsgiverOppdrag.first().inspektør.fom)
+        assertEquals(26.januar, annullering.inspektør.arbeidsgiverOppdrag.last().inspektør.tom)
     }
 
     @Test

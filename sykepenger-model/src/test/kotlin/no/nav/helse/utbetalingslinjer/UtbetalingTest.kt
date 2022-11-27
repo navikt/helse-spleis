@@ -168,9 +168,13 @@ internal class UtbetalingTest {
         val tredje = opprettUtbetaling(tidslinje, andre, 2.februar)
         val annullering = annuller(tredje)
         no.nav.helse.testhelpers.assertNotNull(annullering)
-        assertEquals(første.inspektør.korrelasjonsId, annullering.inspektør.korrelasjonsId)
-        assertEquals(17.januar til 2.februar, annullering.inspektør.periode)
-        assertEquals(17.januar, annullering.inspektør.arbeidsgiverOppdrag.førstedato)
+        val utbetalingInspektør = annullering.inspektør
+        assertEquals(første.inspektør.korrelasjonsId, utbetalingInspektør.korrelasjonsId)
+        assertEquals(17.januar til 2.februar, utbetalingInspektør.periode)
+        assertEquals(16.januar, utbetalingInspektør.arbeidsgiverOppdrag.inspektør.periode.start)
+        assertEquals(30.januar, utbetalingInspektør.arbeidsgiverOppdrag.first().inspektør.fom)
+        assertEquals(17.januar, utbetalingInspektør.arbeidsgiverOppdrag.first().inspektør.datoStatusFom)
+        assertEquals(2.februar, utbetalingInspektør.arbeidsgiverOppdrag.last().inspektør.tom)
     }
 
     @Test
@@ -198,7 +202,9 @@ internal class UtbetalingTest {
         assertTrue(andre.inspektør.arbeidsgiverOppdrag[0].erOpphør())
         assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), tredje.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertEquals(første.inspektør.korrelasjonsId, tredje.inspektør.korrelasjonsId)
-        assertEquals(17.januar, tredje.inspektør.arbeidsgiverOppdrag.førstedato)
+        assertEquals(17.januar, tredje.inspektør.arbeidsgiverOppdrag.first().inspektør.fom)
+        assertEquals(26.januar, tredje.inspektør.arbeidsgiverOppdrag.last().inspektør.tom)
+        assertEquals(16.januar, tredje.inspektør.arbeidsgiverOppdrag.inspektør.periode.start)
     }
 
     @Test
@@ -232,7 +238,11 @@ internal class UtbetalingTest {
         assertTrue(andre.inspektør.arbeidsgiverOppdrag[0].erOpphør())
         assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), tredje.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertEquals(første.inspektør.korrelasjonsId, tredje.inspektør.korrelasjonsId)
-        assertEquals(27.januar, tredje.inspektør.arbeidsgiverOppdrag.førstedato)
+        assertEquals(27.januar, tredje.inspektør.arbeidsgiverOppdrag.first().inspektør.fom)
+        assertNull(tredje.inspektør.arbeidsgiverOppdrag.first().inspektør.datoStatusFom)
+        assertEquals(5.februar, tredje.inspektør.arbeidsgiverOppdrag.last().inspektør.tom)
+        assertEquals(16.januar, tredje.inspektør.arbeidsgiverOppdrag.inspektør.sisteArbeidsgiverdag)
+        assertEquals(16.januar, tredje.inspektør.arbeidsgiverOppdrag.inspektør.periode.start)
     }
 
     @Test
