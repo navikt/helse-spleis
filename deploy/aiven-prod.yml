@@ -38,7 +38,7 @@ spec:
           application: spare
           access: readwrite
         - team: tbd
-          application: sparke-feriepenger
+          application: helse-sparker-feriepenger
           access: write
         - team: tbd
           application: sparker-alt
