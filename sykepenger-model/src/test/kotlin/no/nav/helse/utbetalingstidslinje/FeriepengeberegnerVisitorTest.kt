@@ -20,6 +20,7 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.november
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.håndterAnnullerUtbetaling
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -101,7 +102,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
                     1.desember(2017),
                     31.januar(2018),
                     1000,
-                    20.august(2022)
+                    27.november(2022)
                 )
             )
         )
