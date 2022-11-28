@@ -222,14 +222,14 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
             override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
         }
 
-        internal class Arbeidsdag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
+        internal class Fridag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
             override val prioritet = 20
-            override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
+            override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
         }
 
-        internal class Fridag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
+        internal class Arbeidsdag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
             override val prioritet = 10
-            override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
+            override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
         }
 
         internal class AvvistDag(

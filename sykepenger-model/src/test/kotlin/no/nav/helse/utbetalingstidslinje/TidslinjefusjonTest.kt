@@ -1,7 +1,13 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.AP
+import no.nav.helse.testhelpers.ARB
+import no.nav.helse.testhelpers.FRI
+import no.nav.helse.testhelpers.HELG
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.UTELATE
+import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -72,6 +78,12 @@ internal class TidslinjefusjonTest {
     }
 
     @Test
+    fun `feriedag vs arbeidsdag`() {
+        val result = tidslinjeOf(1.FRI) + tidslinjeOf(1.ARB)
+        assertEquals(Utbetalingstidslinje.Utbetalingsdag.Fridag::class, result.single()::class)
+    }
+
+    @Test
     fun `dagens forrang`() {
         val inspektør = (tidslinjeOf(1.FRI, 1.ARB, 1.AP, 1.HELG, 1.NAV) +
             tidslinjeOf(
@@ -111,8 +123,8 @@ internal class TidslinjefusjonTest {
         assertEquals(3, inspektør.navDagTeller)
         assertEquals(3, inspektør.navHelgDagTeller)
         assertEquals(1, inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(1, inspektør.arbeidsdagTeller)
-        assertEquals(1, inspektør.fridagTeller)
+        assertEquals(0, inspektør.arbeidsdagTeller)
+        assertEquals(2, inspektør.fridagTeller)
     }
 
     @Test

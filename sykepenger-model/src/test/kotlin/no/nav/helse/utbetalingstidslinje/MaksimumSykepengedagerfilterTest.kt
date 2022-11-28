@@ -442,6 +442,23 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     @Test
+    fun `ferie hos ag1 og arbeidsdag hos ag2 - treårsvindu forskyves ikke`() {
+        val ag1 = tidslinjeOf(11.AP, 52.ARB, 12.NAV, 109.ARB, 8.NAV, 66.ARB, 1.FRI, 15.AP, 1.ARB, 13.NAV, 87.ARB,
+            16.AP, 34.NAV, 36.ARB, 1.FRI, 1.AP, 1.ARB, 1.AP, 7.ARB, 1.AP, 6.ARB, 13.AP, 13.NAV, 26.FRI, 51.NAV, 12.FRI, 30.NAV, startDato = 1.mars(2021))
+        // 3. oktober er fridag hos ag1; utfallet skal ikke være at vi teller dagen som Arbeidsdag, da det vil medføre at vi går inn i en
+        // opphold-situasjon, som vi ville gått ut av 17. oktober (ved neste Nav-dag).
+        // Når man går ut av en Opphold-situasjon så vil vi sette et nytt starttidspunkt for treårsvinduet, og da beregne
+        // forbrukte dager annerledes.
+        val ag2 = tidslinjeOf(20.ARB, startDato = 3.oktober(2022))
+        val infotrygd = tidslinjeOf(6.NAV, 62.ARB, 124.NAV, 151.ARB, 21.NAV, 12.ARB, 3.NAV, 116.ARB, 19.NAV,
+            163.ARB, 14.NAV, 108.ARB, 8.NAV, 83.ARB, 13.NAV, 103.ARB, 34.NAV, startDato = 25.juni(2019))
+
+        assertTrue(listOf(ag1, ag2).utbetalingsavgrenser(UNG_PERSON_FNR_2018, personTidslinje = infotrygd).isEmpty())
+        assertEquals(236, maksimumSykepenger.forbrukteDager())
+        assertEquals(12, maksimumSykepenger.gjenståendeDager())
+    }
+
+    @Test
     fun `nødvendig opphold nådd nesten ved ferie, fullført med én arbeidsdag`() {
         val tidslinje = tidslinjeOf(247.NAVDAGER, 181.FRI, 1.ARB, 1.NAVDAGER)
         assertTrue(tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).isEmpty())
@@ -598,14 +615,23 @@ internal class MaksimumSykepengedagerfilterTest {
         periode: Periode? = null,
         personTidslinje: Utbetalingstidslinje = Utbetalingstidslinje()
     ): List<LocalDate> {
+        return listOf(this).utbetalingsavgrenser(fødselsdato, periode, personTidslinje)
+    }
+
+    private fun List<Utbetalingstidslinje>.utbetalingsavgrenser(
+        fødselsdato: LocalDate,
+        periode: Periode? = null,
+        personTidslinje: Utbetalingstidslinje = Utbetalingstidslinje()
+    ): List<LocalDate> {
+        val filterperiode = periode ?: (this + listOf(personTidslinje)).filterNot { it.isEmpty() }.map(Utbetalingstidslinje::periode).reduce(Periode::plus)
         maksimumSykepenger = MaksimumSykepengedagerfilter(
             fødselsdato.alder,
             NormalArbeidstaker,
             personTidslinje
         ).let {
-            it.filter(listOf(this), periode ?: (this + personTidslinje).periode(), aktivitetslogg, NullObserver)
+            it.filter(this, filterperiode, aktivitetslogg, NullObserver)
             it.maksimumSykepenger()
         }
-        return inspektør.avvistedatoer
+        return flatMap { it.inspektør.avvistedatoer }
     }
 }
