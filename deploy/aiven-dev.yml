@@ -39,7 +39,7 @@ spec:
           access: readwrite
         - team: tbd
           application: helse-sparker-feriepenger
-          access: write
+          access: readwrite
         - team: tbd
           application: sparker-alt
           access: write
