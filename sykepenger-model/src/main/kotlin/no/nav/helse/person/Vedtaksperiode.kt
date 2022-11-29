@@ -949,7 +949,7 @@ internal class Vedtaksperiode private constructor(
             revurdering: Revurderingseventyr
         ) {
             if (revurdering.kanStarteRevurderingIDefaultTilstand(hendelse, overstyrt.forventerInntekt())) {
-                revurdering.inngåIRevurdering(vedtaksperiode.id)
+                revurdering.inngåIRevurdering(vedtaksperiode.organisasjonsnummer, vedtaksperiode.id)
                 vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
             }
         }
@@ -1338,7 +1338,7 @@ internal class Vedtaksperiode private constructor(
                     harNødvendigOpplysningerFraArbeidsgiver(vedtaksperiode, hendelse)
                 )
             ) {
-                revurdering.inngåIRevurdering(vedtaksperiode.id)
+                revurdering.inngåIRevurdering(vedtaksperiode.organisasjonsnummer, vedtaksperiode.id)
                 vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
             }
         }
@@ -1478,7 +1478,7 @@ internal class Vedtaksperiode private constructor(
             overstyrt: Vedtaksperiode,
             revurdering: Revurderingseventyr
         ) {
-            revurdering.inngåIRevurdering(vedtaksperiode.id)
+            revurdering.inngåIRevurdering(vedtaksperiode.organisasjonsnummer, vedtaksperiode.id)
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
     }
@@ -1585,7 +1585,7 @@ internal class Vedtaksperiode private constructor(
             overstyrt: Vedtaksperiode,
             revurdering: Revurderingseventyr
         ) {
-            revurdering.inngåIRevurdering(vedtaksperiode.id)
+            revurdering.inngåIRevurdering(vedtaksperiode.organisasjonsnummer, vedtaksperiode.id)
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
     }
@@ -1621,7 +1621,7 @@ internal class Vedtaksperiode private constructor(
             overstyrt: Vedtaksperiode,
             revurdering: Revurderingseventyr
         ) {
-            revurdering.inngåIRevurdering(vedtaksperiode.id)
+            revurdering.inngåIRevurdering(vedtaksperiode.organisasjonsnummer, vedtaksperiode.id)
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
@@ -1798,7 +1798,7 @@ internal class Vedtaksperiode private constructor(
             overstyrt: Vedtaksperiode,
             revurdering: Revurderingseventyr
         ) {
-            revurdering.inngåIRevurdering(vedtaksperiode.id)
+            revurdering.inngåIRevurdering(vedtaksperiode.organisasjonsnummer, vedtaksperiode.id)
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
@@ -2072,7 +2072,7 @@ internal class Vedtaksperiode private constructor(
             if (overstyrt.periode.starterEtter(vedtaksperiode.periode)) return
             if (!vedtaksperiode.forventerInntekt()) return hendelse.info("Revurderingen påvirker ikke denne perioden i AvsluttetUtenUtbetaling")
             hendelse.varsel(RV_RV_1)
-            revurdering.inngåIRevurdering(vedtaksperiode.id)
+            revurdering.inngåIRevurdering(vedtaksperiode.organisasjonsnummer, vedtaksperiode.id)
             vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
         }
 

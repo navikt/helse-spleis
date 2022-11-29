@@ -18,9 +18,15 @@ class Revurderingseventyr private constructor(private val hvorfor: List<Revurder
         fun arbeidsgiverperiode() = Revurderingseventyr(RevurderingÅrsak.ARBEIDSGIVERPERIODE)
     }
 
-    private val vedtaksperioder = mutableListOf<UUID>()
+    private val vedtaksperioder = mutableMapOf<String, MutableList<UUID>>()
 
-    internal fun inngåIRevurdering(vedtaksperiodeId: UUID) = vedtaksperioder.add(vedtaksperiodeId)
+    internal fun inngåIRevurdering(orgnummer: String, vedtaksperiodeId: UUID) {
+        if (vedtaksperioder.contains(orgnummer)) {
+            vedtaksperioder[orgnummer]!!.add(vedtaksperiodeId)
+        } else {
+            vedtaksperioder[orgnummer] = mutableListOf(vedtaksperiodeId)
+        }
+    }
 
     internal fun kanStarteRevurderingIDefaultTilstand(
         hendelse: IAktivitetslogg,
@@ -67,7 +73,7 @@ class Revurderingseventyr private constructor(private val hvorfor: List<Revurder
         person.sendRevurderingIgangsattEvent(
             PersonObserver.RevurderingIgangsattEvent(
                 revurderingsÅrsak = hvorfor.map { it.name },
-                berørtePerioder = vedtaksperioder,
+                berørtePerioder = vedtaksperioder.toMap(),
                 kilde = kilde.meldingsreferanseId(),
                 initiertAvVedtaksperiode = initertAvVedtaksperiode,
                 skjæringstidspunkt = skjæringstidspunkt

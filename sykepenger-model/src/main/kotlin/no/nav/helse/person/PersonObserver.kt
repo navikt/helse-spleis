@@ -206,7 +206,7 @@ interface PersonObserver {
         val kilde: UUID,
         val initiertAvVedtaksperiode: UUID,
         val skjæringstidspunkt: LocalDate,
-        val berørtePerioder: List<UUID>
+        val berørtePerioder: Map<String, List<UUID>>
     )
 
     fun inntektsmeldingReplay(personidentifikator: Personidentifikator, vedtaksperiodeId: UUID) {}
