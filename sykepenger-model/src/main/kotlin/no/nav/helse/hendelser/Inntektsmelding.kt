@@ -24,6 +24,7 @@ import no.nav.helse.person.Sykepengegrunnlag.NyeRefusjonsopplysninger
 import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_3
+import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.Varselkode.RV_IM_6
 import no.nav.helse.person.Varselkode.RV_IM_7
 import no.nav.helse.person.Varselkode.RV_IM_8
@@ -52,6 +53,7 @@ class Inntektsmelding(
     private val arbeidsforholdId: String?,
     private val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
     private val harOpphørAvNaturalytelser: Boolean = false,
+    private val harFlereInntektsmeldinger: Boolean,
     mottatt: LocalDateTime,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fødselsnummer, aktørId, orgnummer, mottatt, aktivitetslogg = aktivitetslogg) {
@@ -138,6 +140,7 @@ class Inntektsmelding(
             funksjonellFeil(RV_IM_8)
         }
         if (harOpphørAvNaturalytelser) funksjonellFeil(RV_IM_7)
+        if (harFlereInntektsmeldinger) varsel(RV_IM_4)
         return this
     }
 

@@ -42,7 +42,8 @@ internal open class InntektsmeldingerRiver(
             "refusjon.beloepPrMnd",
             "arbeidsforholdId",
             "begrunnelseForReduksjonEllerIkkeUtbetalt",
-            "opphoerAvNaturalytelser"
+            "opphoerAvNaturalytelser",
+            "harFlereInntektsmeldinger"
         )
     }
 

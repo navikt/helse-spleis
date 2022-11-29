@@ -116,7 +116,8 @@ abstract class AbstractObservableTest {
         harOpphørAvNaturalytelser: Boolean = false,
         arbeidsforholdId: String? = null,
         fnr: String = UNG_PERSON_FNR,
-        fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO
+        fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
+        harFlereInntektsmeldinger: Boolean = false
     ): Inntektsmelding = Inntektsmelding(
         meldingsreferanseId = id,
         refusjon = refusjon,
@@ -130,7 +131,8 @@ abstract class AbstractObservableTest {
         arbeidsforholdId = arbeidsforholdId,
         begrunnelseForReduksjonEllerIkkeUtbetalt = null,
         harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-        mottatt = LocalDateTime.now()
+        mottatt = LocalDateTime.now(),
+        harFlereInntektsmeldinger = harFlereInntektsmeldinger
     )
 
     protected fun vilkårsgrunnlag(

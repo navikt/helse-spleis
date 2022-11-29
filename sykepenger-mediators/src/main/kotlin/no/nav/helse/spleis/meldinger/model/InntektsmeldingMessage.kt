@@ -37,6 +37,7 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
     private val begrunnelseForReduksjonEllerIkkeUtbetalt =
         packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val harOpphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].size() > 0
+    private val harFlereInntektsmeldinger = packet["harFlereInntektsmeldinger"].asBoolean(false)
 
     protected val inntektsmelding
         get() = Inntektsmelding(
@@ -52,7 +53,8 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
             mottatt = mottatt,
-            fødselsdato = fødselsdato
+            fødselsdato = fødselsdato,
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger
         )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {

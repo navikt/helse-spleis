@@ -160,7 +160,8 @@ internal class RestApiTest {
             arbeidsgiverperioder = listOf(Periode(LocalDate.of(2018, 9, 10), LocalDate.of(2018, 9, 10).plusDays(16))),
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-            mottatt = LocalDateTime.now()
+            mottatt = LocalDateTime.now(),
+            harFlereInntektsmeldinger = false
         )
         val person = sykmelding.person(MaskinellJurist())
         person.håndter(sykmelding)

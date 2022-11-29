@@ -111,6 +111,15 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
     }
 
+    @Test
+    fun `inntektsmelding med harFlereInntektsmeldinger flagg satt`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), harFlereInntektsmeldinger = true)
+        assertVarsel(RV_IM_4)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+    }
+
 
     @Test
     fun `to korte perioder og en lang rett etter foreldrepenger - ag sier med rette at det ikke er noen AGP`() {

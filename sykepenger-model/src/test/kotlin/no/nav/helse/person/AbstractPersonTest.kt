@@ -62,7 +62,8 @@ internal abstract class AbstractPersonTest {
                     arbeidsgiverperioder = listOf(1.januar til 16.januar),
                     arbeidsforholdId = null,
                     begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-                    mottatt = LocalDateTime.now()
+                    mottatt = LocalDateTime.now(),
+                    harFlereInntektsmeldinger = false
                 )
             )
             person.håndter(
