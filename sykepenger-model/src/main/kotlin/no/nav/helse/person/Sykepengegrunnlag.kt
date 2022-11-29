@@ -181,10 +181,9 @@ internal class Sykepengegrunnlag(
         arbeidsgiverInntektsopplysninger.refusjonsopplysninger(organisasjonsnummer)
 
     internal fun nyeRefusjonsopplysninger(inntektsmelding: Inntektsmelding): Sykepengegrunnlag? {
-        val builder = NyeRefusjonsopplysninger()
+        val builder = NyeRefusjonsopplysninger(arbeidsgiverInntektsopplysninger)
         inntektsmelding.nyeRefusjonsopplysninger(builder)
-        val resultat = builder.resultat()
-        if (resultat == arbeidsgiverInntektsopplysninger) return null // ingen endring
+        val resultat = builder.resultat() ?: return  null // ingen endring
         return kopierSykepengegrunnlag(resultat, deaktiverteArbeidsforhold)
     }
 
@@ -325,15 +324,13 @@ internal class Sykepengegrunnlag(
         internal fun resultat() = arbeidsgiverInntektsopplysninger.overstyrInntekter(opptjening, nyeInntektsopplysninger, subsumsjonObserver)
     }
 
-    inner class NyeRefusjonsopplysninger() {
-        private lateinit var organisasjonsnummer: String
-        private lateinit var refusjonsopplysninger: Refusjonsopplysninger
+}
+internal class NyeRefusjonsopplysninger(private val opprinneligArbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>) {
+    private var nyeOpplysninger = opprinneligArbeidsgiverInntektsopplysninger
 
-        internal fun leggTilRefusjonsopplysninger(organisasjonsnummer: String, refusjonsopplysninger: Refusjonsopplysninger) {
-            this.organisasjonsnummer = organisasjonsnummer
-            this.refusjonsopplysninger = refusjonsopplysninger
-        }
-
-        internal fun resultat() = arbeidsgiverInntektsopplysninger.nyeRefusjonsopplysninger(organisasjonsnummer, refusjonsopplysninger)
+    internal fun leggTilRefusjonsopplysninger(organisasjonsnummer: String, refusjonsopplysninger: Refusjonsopplysninger) {
+        nyeOpplysninger = nyeOpplysninger.nyeRefusjonsopplysninger(organisasjonsnummer, refusjonsopplysninger)
     }
+
+    internal fun resultat() = nyeOpplysninger.takeUnless { nyeOpplysninger == opprinneligArbeidsgiverInntektsopplysninger }
 }

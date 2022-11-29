@@ -16,11 +16,11 @@ import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.InntektsmeldingInfo
+import no.nav.helse.person.NyeRefusjonsopplysninger
 import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.person.Sykepengegrunnlag.NyeRefusjonsopplysninger
 import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_3

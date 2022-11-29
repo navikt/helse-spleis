@@ -881,6 +881,7 @@ class MaskinellJurist private constructor(
         Dokumentsporing.Type.Inntektsmelding -> KontekstType.Inntektsmelding
         Dokumentsporing.Type.OverstyrTidslinje -> KontekstType.OverstyrTidslinje
         Dokumentsporing.Type.OverstyrInntekt -> KontekstType.OverstyrInntekt
+        Dokumentsporing.Type.OverstyrRefusjon -> KontekstType.OverstyrRefusjon
         Dokumentsporing.Type.OverstyrArbeidsforhold -> KontekstType.OverstyrArbeidsforhold
     }
 
@@ -893,6 +894,7 @@ class MaskinellJurist private constructor(
         Inntektsmelding,
         OverstyrTidslinje,
         OverstyrInntekt,
+        OverstyrRefusjon,
         OverstyrArbeidsforhold,
     }
 }

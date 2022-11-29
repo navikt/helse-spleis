@@ -10,6 +10,7 @@ data class Dokumentsporing private constructor(private val id: UUID, private val
         internal fun inntektsmelding(id: UUID) = Dokumentsporing(id, Type.Inntektsmelding)
         internal fun overstyrTidslinje(id: UUID) = Dokumentsporing(id, Type.OverstyrTidslinje)
         internal fun overstyrInntekt(id: UUID) = Dokumentsporing(id, Type.OverstyrInntekt)
+        internal fun overstyrRefusjon(id: UUID) = Dokumentsporing(id, Type.OverstyrRefusjon)
         internal fun overstyrArbeidsforhold(id: UUID) = Dokumentsporing(id, Type.OverstyrArbeidsforhold)
 
         internal fun Iterable<Dokumentsporing>.toMap() = associate { it.id to it.type }
@@ -24,6 +25,7 @@ data class Dokumentsporing private constructor(private val id: UUID, private val
         Inntektsmelding,
         OverstyrTidslinje,
         OverstyrInntekt,
+        OverstyrRefusjon,
         OverstyrArbeidsforhold,
     }
 
