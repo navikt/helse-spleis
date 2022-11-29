@@ -49,7 +49,7 @@ internal class RevurderingHendelseTest : AbstractEndToEndTest() {
     }
 
     private infix fun PersonObserver.RevurderingIgangsattEvent.bleInitertAv(vedtaksperiodeId: UUID): PersonObserver.RevurderingIgangsattEvent {
-        assertEquals(vedtaksperiodeId, this.initertAvVedtaksperiode)
+        assertEquals(vedtaksperiodeId, this.initiertAvVedtaksperiode)
         return this
     }
 
@@ -59,7 +59,7 @@ internal class RevurderingHendelseTest : AbstractEndToEndTest() {
     }
 
     private infix fun PersonObserver.RevurderingIgangsattEvent.grunnet(hendelseId: UUID): PersonObserver.RevurderingIgangsattEvent {
-        assertEquals(hendelseId, hendelseId) // TODO
+        assertEquals(hendelseId, this.kilde)
         return this
     }
 

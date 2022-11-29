@@ -1867,12 +1867,12 @@ internal class Vedtaksperiode private constructor(
         return dagerMellom < 16L
     }
 
-    internal fun sendRevurderingIgangsattEvent(revurderingseventyr: Revurderingseventyr, initertAvHendelse: IAktivitetslogg) {
+    internal fun sendRevurderingIgangsattEvent(revurderingseventyr: Revurderingseventyr, kilde: PersonHendelse) {
         revurderingseventyr.sendRevurderingIgangsattEvent(
             person = person,
             initertAvVedtaksperiode = id,
             skjæringstidspunkt = skjæringstidspunkt,
-            initertAvHendelse = initertAvHendelse
+            kilde = kilde,
         )
     }
 

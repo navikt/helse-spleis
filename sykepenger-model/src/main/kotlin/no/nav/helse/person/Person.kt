@@ -797,7 +797,7 @@ class Person private constructor(
         }
     }
 
-    internal fun startRevurdering(overstyrtVedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
+    internal fun startRevurdering(overstyrtVedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse, revurdering: Revurderingseventyr) {
         arbeidsgivere.startRevurdering(overstyrtVedtaksperiode, hendelse, revurdering)
         overstyrtVedtaksperiode.sendRevurderingIgangsattEvent(revurdering, hendelse)
     }

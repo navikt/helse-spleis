@@ -59,16 +59,17 @@ class Revurderingseventyr private constructor(private val hvorfor: List<Revurder
         person: Person,
         initertAvVedtaksperiode: UUID,
         skjæringstidspunkt: LocalDate,
-        initertAvHendelse: IAktivitetslogg,
+        kilde: PersonHendelse,
     ) {
         if (vedtaksperioder.isEmpty()) {
-            return initertAvHendelse.info("Sendte ikke ut et revurdering-igangsatt-event fordi ingen vedtaksperioder inngikk i revurderingen")
+            return kilde.info("Sendte ikke ut et revurdering-igangsatt-event fordi ingen vedtaksperioder inngikk i revurderingen")
         }
         person.sendRevurderingIgangsattEvent(
             PersonObserver.RevurderingIgangsattEvent(
                 revurderingsÅrsak = hvorfor.map { it.name },
                 berørtePerioder = vedtaksperioder,
-                initertAvVedtaksperiode = initertAvVedtaksperiode,
+                kilde = kilde.meldingsreferanseId(),
+                initiertAvVedtaksperiode = initertAvVedtaksperiode,
                 skjæringstidspunkt = skjæringstidspunkt
             )
         )
