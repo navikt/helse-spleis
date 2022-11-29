@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.januar
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.RevurderingÅrsak
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
@@ -24,7 +23,7 @@ internal class RevurderingHendelseTest : AbstractEndToEndTest() {
         val vedtaksperiode = observatør.utbetalteVedtaksperioder.single()
 
         revurderingIgangsattEvent {
-            this bleForårsaketAv RevurderingÅrsak.SYKDOMSTIDSLINJE grunnet overstyring
+            this bleForårsaketAv "SYKDOMSTIDSLINJE" grunnet overstyring
             this bleInitertAv vedtaksperiode medSkjæringstidspunkt 1.januar
         }
     }
@@ -38,7 +37,7 @@ internal class RevurderingHendelseTest : AbstractEndToEndTest() {
         val februar = observatør.utbetalteVedtaksperioder.last()
 
         revurderingIgangsattEvent {
-            this bleForårsaketAv RevurderingÅrsak.SYKDOMSTIDSLINJE grunnet overstyring
+            this bleForårsaketAv "SYKDOMSTIDSLINJE" grunnet overstyring
             this bleInitertAv januar medSkjæringstidspunkt 1.januar
             this medførteRevurderingAv (januar og februar)
         }
@@ -54,8 +53,8 @@ internal class RevurderingHendelseTest : AbstractEndToEndTest() {
         return this
     }
 
-    private infix fun PersonObserver.RevurderingIgangsattEvent.bleForårsaketAv(årsak: RevurderingÅrsak): PersonObserver.RevurderingIgangsattEvent {
-        assertEquals(årsak, this.revurderingÅrsak)
+    private infix fun PersonObserver.RevurderingIgangsattEvent.bleForårsaketAv(årsak: String): PersonObserver.RevurderingIgangsattEvent {
+        assertEquals(listOf(årsak), this.revurderingsÅrsak)
         return this
     }
 

@@ -797,12 +797,9 @@ class Person private constructor(
         }
     }
 
-    internal fun startRevurdering(overstyrtVedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, hvorfor: RevurderingÅrsak) {
-        val revurdering = Revurderingseventyr(hvorfor)
+    internal fun startRevurdering(overstyrtVedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
         arbeidsgivere.startRevurdering(overstyrtVedtaksperiode, hendelse, revurdering)
-        if (revurdering.eventyr()) {
-            overstyrtVedtaksperiode.sendRevurderingIgangsattEvent(revurdering)
-        }
+        overstyrtVedtaksperiode.sendRevurderingIgangsattEvent(revurdering, hendelse)
     }
 
     internal fun slettUtgåtteSykmeldingsperioder(tom: LocalDate) {
@@ -841,12 +838,3 @@ class Person private constructor(
     }
 }
 
-class Revurderingseventyr(private val hvorfor: RevurderingÅrsak) {
-    private val vedtaksperioder = mutableListOf<UUID>()
-    internal fun årsak() = hvorfor
-    internal fun bliMedPåEventyr(vedtaksperiodeId: UUID) = vedtaksperioder.add(vedtaksperiodeId)
-
-    internal fun eventyr() = vedtaksperioder.isNotEmpty()
-
-    internal fun berørteVedtaksperioder() = vedtaksperioder
-}

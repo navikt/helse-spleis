@@ -202,7 +202,7 @@ interface PersonObserver {
     )
 
     data class RevurderingIgangsattEvent(
-        val revurderingÅrsak: RevurderingÅrsak,
+        val revurderingsÅrsak: List<String>,
         val initertAvVedtaksperiode: UUID,
         val skjæringstidspunkt: LocalDate,
         val berørtePerioder: List<UUID>
