@@ -1,0 +1,60 @@
+{
+  "arbeidsgivere": [
+    {
+      "utbetalinger": [
+        {
+          "arbeidsgiverOppdrag": {
+            "sisteArbeidsgiverdag": null
+          },
+          "personOppdrag": {
+            "sisteArbeidsgiverdag": "-999999999-01-01"
+          }
+        },
+        {
+          "arbeidsgiverOppdrag": {
+            "sisteArbeidsgiverdag": "2022-01-01"
+          },
+          "personOppdrag": {
+            "sisteArbeidsgiverdag": "2022-01-01"
+          }
+        },
+        {
+          "arbeidsgiverOppdrag": {
+            "sisteArbeidsgiverdag": "-999999999-01-01"
+          },
+          "personOppdrag": {
+            "sisteArbeidsgiverdag": null
+          }
+        }
+      ]
+    },
+    {
+      "utbetalinger": [
+        {
+          "arbeidsgiverOppdrag": {
+            "sisteArbeidsgiverdag": null
+          },
+          "personOppdrag": {
+            "sisteArbeidsgiverdag": "-999999999-01-01"
+          }
+        },
+        {
+          "arbeidsgiverOppdrag": {
+            "sisteArbeidsgiverdag": "2022-01-01"
+          },
+          "personOppdrag": {
+            "sisteArbeidsgiverdag": "2022-01-01"
+          }
+        },
+        {
+          "arbeidsgiverOppdrag": {
+            "sisteArbeidsgiverdag": "-999999999-01-01"
+          },
+          "personOppdrag": {
+            "sisteArbeidsgiverdag": null
+          }
+        }
+      ]
+    }
+  ]
+}

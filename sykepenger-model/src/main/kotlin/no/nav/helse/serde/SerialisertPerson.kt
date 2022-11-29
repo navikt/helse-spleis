@@ -125,6 +125,7 @@ import no.nav.helse.serde.migration.V19KlippOverlappendeVedtaksperioder
 import no.nav.helse.serde.migration.V1EndreKunArbeidsgiverSykedagEnum
 import no.nav.helse.serde.migration.V200FikseStuckPeriode
 import no.nav.helse.serde.migration.V201FjerneUbruktTilstand
+import no.nav.helse.serde.migration.V202NullstilleSisteArbeidsgiverdag
 import no.nav.helse.serde.migration.V20AvgrensVedtaksperiode
 import no.nav.helse.serde.migration.V21FjernGruppeId
 import no.nav.helse.serde.migration.V22FjernFelterFraSykdomstidslinje
@@ -425,7 +426,8 @@ class SerialisertPerson(val json: String) {
             V198GjenoppliveTidligereForkastet(),
             V199InfotrygdDefaultRefusjon(),
             V200FikseStuckPeriode(),
-            V201FjerneUbruktTilstand()
+            V201FjerneUbruktTilstand(),
+            V202NullstilleSisteArbeidsgiverdag()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
