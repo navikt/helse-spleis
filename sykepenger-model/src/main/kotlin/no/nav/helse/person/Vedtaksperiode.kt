@@ -1822,10 +1822,9 @@ internal class Vedtaksperiode private constructor(
     internal fun gjenopptaRevurdering(hendelse: IAktivitetslogg, første: Vedtaksperiode) {
         hendelse.kontekst(arbeidsgiver)
         kontekst(hendelse)
-        if (this før første) return
-        if (this.tilstand !in setOf(AvventerRevurdering, Avsluttet)) return
-        if (this.skjæringstidspunkt != første.skjæringstidspunkt) return tilstand(hendelse, AvventerRevurdering)
-        if (this.utbetalinger.hørerIkkeSammenMed(første.utbetalinger)) return tilstand(hendelse, AvventerRevurdering)
+        if (this.tilstand != AvventerRevurdering) return
+        if (this.skjæringstidspunkt != første.skjæringstidspunkt) return
+        if (this.utbetalinger.hørerIkkeSammenMed(første.utbetalinger)) return
         hendelse.info("$this blir med i revurderingen igangsatt av $første")
         tilstand(hendelse, AvventerGjennomførtRevurdering)
     }
