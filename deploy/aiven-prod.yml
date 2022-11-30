@@ -185,5 +185,5 @@ spec:
           application: sparsom
           access: readwrite
         - team: tbd
-          application: speaker
+          application: speaker-kafka
           access: readwrite
