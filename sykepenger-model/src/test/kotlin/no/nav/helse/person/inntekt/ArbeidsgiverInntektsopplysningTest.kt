@@ -3,7 +3,7 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Grunnbeløp.Companion
+import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.hendelser.Subsumsjon
