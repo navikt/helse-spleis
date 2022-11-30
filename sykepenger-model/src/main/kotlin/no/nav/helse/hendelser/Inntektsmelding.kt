@@ -14,13 +14,8 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IAktivitetslogg
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.InntektsmeldingInfo
-import no.nav.helse.person.NyeRefusjonsopplysninger
 import no.nav.helse.person.Personopplysninger
-import no.nav.helse.person.Refusjonshistorikk
-import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_3
@@ -29,6 +24,11 @@ import no.nav.helse.person.Varselkode.RV_IM_6
 import no.nav.helse.person.Varselkode.RV_IM_7
 import no.nav.helse.person.Varselkode.RV_IM_8
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.inntekt.Inntektshistorikk
+import no.nav.helse.person.inntekt.NyeRefusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonshistorikk
+import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje

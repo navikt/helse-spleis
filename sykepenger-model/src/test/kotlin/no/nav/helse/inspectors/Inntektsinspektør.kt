@@ -6,7 +6,12 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.InntekthistorikkVisitor
-import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.inntekt.Infotrygd
+import no.nav.helse.person.inntekt.Inntektshistorikk
+import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.Inntektsopplysning
+import no.nav.helse.person.inntekt.Saksbehandler
+import no.nav.helse.person.inntekt.Skatt
 import no.nav.helse.økonomi.Inntekt
 
 internal class Inntektsinspektør(historikk: Inntektshistorikk) : InntekthistorikkVisitor {
@@ -25,7 +30,7 @@ internal class Inntektsinspektør(historikk: Inntektshistorikk) : Inntekthistori
     }
 
     override fun visitInntekt(
-        inntektsopplysning: Inntektshistorikk.Inntektsopplysning,
+        inntektsopplysning: Inntektsopplysning,
         id: UUID,
         fom: LocalDate,
         tidsstempel: LocalDateTime
@@ -51,7 +56,7 @@ internal class Inntektsinspektør(historikk: Inntektshistorikk) : Inntekthistori
     }
 
     override fun visitSaksbehandler(
-        saksbehandler: Inntektshistorikk.Saksbehandler,
+        saksbehandler: Saksbehandler,
         id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
@@ -64,7 +69,7 @@ internal class Inntektsinspektør(historikk: Inntektshistorikk) : Inntekthistori
     }
 
     override fun visitInntektsmelding(
-        inntektsmelding: Inntektshistorikk.Inntektsmelding,
+        inntektsmelding: Inntektsmelding,
         id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
@@ -75,7 +80,7 @@ internal class Inntektsinspektør(historikk: Inntektshistorikk) : Inntekthistori
     }
 
     override fun visitInfotrygd(
-        infotrygd: Inntektshistorikk.Infotrygd,
+        infotrygd: Infotrygd,
         id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
@@ -86,12 +91,12 @@ internal class Inntektsinspektør(historikk: Inntektshistorikk) : Inntekthistori
     }
 
     override fun visitSkattSykepengegrunnlag(
-        sykepengegrunnlag: Inntektshistorikk.Skatt.Sykepengegrunnlag,
+        sykepengegrunnlag: Skatt.Sykepengegrunnlag,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
         måned: YearMonth,
-        type: Inntektshistorikk.Skatt.Inntekttype,
+        type: Skatt.Inntekttype,
         fordel: String,
         beskrivelse: String,
         tidsstempel: LocalDateTime
@@ -100,12 +105,12 @@ internal class Inntektsinspektør(historikk: Inntektshistorikk) : Inntekthistori
     }
 
     override fun visitSkattRapportertInntekt(
-        rapportertInntekt: Inntektshistorikk.Skatt.RapportertInntekt,
+        rapportertInntekt: Skatt.RapportertInntekt,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
         måned: YearMonth,
-        type: Inntektshistorikk.Skatt.Inntekttype,
+        type: Skatt.Inntekttype,
         fordel: String,
         beskrivelse: String,
         tidsstempel: LocalDateTime

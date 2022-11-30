@@ -16,23 +16,15 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.tilSporing
 import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.ForlengelseFraInfotrygd
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.InntektsmeldingInfoHistorikk
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
-import no.nav.helse.person.Refusjonshistorikk
-import no.nav.helse.person.Refusjonsopplysning
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.Companion.gjennopprett
-import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.SpesifikkKontekst
-import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Varselkode
@@ -48,6 +40,20 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
+import no.nav.helse.person.inntekt.IkkeRapportert
+import no.nav.helse.person.inntekt.Infotrygd
+import no.nav.helse.person.inntekt.Inntektshistorikk
+import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.Refusjonshistorikk
+import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.gjennopprett
+import no.nav.helse.person.inntekt.Saksbehandler
+import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
+import no.nav.helse.person.inntekt.Skatt
+import no.nav.helse.person.inntekt.SkattComposite
+import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.ArbeidsforholdhistorikkInnslagData.Companion.tilArbeidsforholdhistorikk
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingInfoHistorikkElementData.Companion.finn
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingInfoHistorikkElementData.Companion.tilInntektsmeldingInfoHistorikk
@@ -619,7 +625,7 @@ internal data class PersonData(
             internal fun tilModellobjekt() =
                 when (kilde?.let(Inntektsopplysningskilde::valueOf)) {
                     Inntektsopplysningskilde.INFOTRYGD ->
-                        Inntektshistorikk.Infotrygd(
+                        Infotrygd(
                             id = requireNotNull(id),
                             dato = requireNotNull(dato),
                             hendelseId = requireNotNull(hendelseId),
@@ -627,7 +633,7 @@ internal data class PersonData(
                             tidsstempel = requireNotNull(tidsstempel)
                         )
                     Inntektsopplysningskilde.INNTEKTSMELDING ->
-                        Inntektshistorikk.Inntektsmelding(
+                        Inntektsmelding(
                             id = requireNotNull(id),
                             dato = requireNotNull(dato),
                             hendelseId = requireNotNull(hendelseId),
@@ -635,13 +641,13 @@ internal data class PersonData(
                             tidsstempel = requireNotNull(tidsstempel)
                         )
                     Inntektsopplysningskilde.IKKE_RAPPORTERT ->
-                        Inntektshistorikk.IkkeRapportert(
+                        IkkeRapportert(
                             id = requireNotNull(id),
                             dato = requireNotNull(dato),
                             tidsstempel = requireNotNull(tidsstempel)
                         )
                     Inntektsopplysningskilde.SAKSBEHANDLER ->
-                        Inntektshistorikk.Saksbehandler(
+                        Saksbehandler(
                             id = requireNotNull(id),
                             dato = requireNotNull(dato),
                             hendelseId = requireNotNull(hendelseId),
@@ -650,12 +656,12 @@ internal data class PersonData(
                             subsumsjon = subsumsjon?.tilModellobjekt(),
                             tidsstempel = requireNotNull(tidsstempel)
                         )
-                    null -> Inntektshistorikk.SkattComposite(
+                    null -> SkattComposite(
                         id = requireNotNull(id),
                         inntektsopplysninger = requireNotNull(skatteopplysninger).map { skatteData ->
                             when (skatteData.kilde?.let(Inntektsopplysningskilde::valueOf)) {
                                 Inntektsopplysningskilde.SKATT_SAMMENLIGNINGSGRUNNLAG ->
-                                    Inntektshistorikk.Skatt.RapportertInntekt(
+                                    Skatt.RapportertInntekt(
                                         dato = requireNotNull(skatteData.dato),
                                         hendelseId = requireNotNull(skatteData.hendelseId),
                                         beløp = requireNotNull(skatteData.beløp).månedlig,
@@ -666,7 +672,7 @@ internal data class PersonData(
                                         tidsstempel = requireNotNull(skatteData.tidsstempel)
                                     )
                                 Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG ->
-                                    Inntektshistorikk.Skatt.Sykepengegrunnlag(
+                                    Skatt.Sykepengegrunnlag(
                                         dato = requireNotNull(skatteData.dato),
                                         hendelseId = requireNotNull(skatteData.hendelseId),
                                         beløp = requireNotNull(skatteData.beløp).månedlig,

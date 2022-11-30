@@ -8,7 +8,12 @@ import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverVisitor
-import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.inntekt.Infotrygd
+import no.nav.helse.person.inntekt.Inntektshistorikk
+import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.Saksbehandler
+import no.nav.helse.person.inntekt.Skatt
+import no.nav.helse.person.inntekt.SkattComposite
 import no.nav.helse.økonomi.Inntekt
 
 internal enum class Kilde {
@@ -59,7 +64,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
     }
 
     override fun visitInntektsmelding(
-        inntektsmelding: Inntektshistorikk.Inntektsmelding,
+        inntektsmelding: Inntektsmelding,
         id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
@@ -77,7 +82,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
     }
 
     override fun visitInfotrygd(
-        infotrygd: Inntektshistorikk.Infotrygd,
+        infotrygd: Infotrygd,
         id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
@@ -97,12 +102,12 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
     private lateinit var skattedato: LocalDate
 
     override fun visitSkattSykepengegrunnlag(
-        sykepengegrunnlag: Inntektshistorikk.Skatt.Sykepengegrunnlag,
+        sykepengegrunnlag: Skatt.Sykepengegrunnlag,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
         måned: YearMonth,
-        type: Inntektshistorikk.Skatt.Inntekttype,
+        type: Skatt.Inntekttype,
         fordel: String,
         beskrivelse: String,
         tidsstempel: LocalDateTime
@@ -111,12 +116,12 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
     }
 
     override fun visitSkattRapportertInntekt(
-        rapportertInntekt: Inntektshistorikk.Skatt.RapportertInntekt,
+        rapportertInntekt: Skatt.RapportertInntekt,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
         måned: YearMonth,
-        type: Inntektshistorikk.Skatt.Inntekttype,
+        type: Skatt.Inntekttype,
         fordel: String,
         beskrivelse: String,
         tidsstempel: LocalDateTime
@@ -124,7 +129,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
         skattedato = dato
     }
 
-    override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
+    override fun postVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
         inntektsopplysninger.add(
             Opplysning(
                 skattedato,
@@ -136,7 +141,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
     }
 
     override fun visitSaksbehandler(
-        saksbehandler: Inntektshistorikk.Saksbehandler,
+        saksbehandler: Saksbehandler,
         id: UUID,
         dato: LocalDate,
         hendelseId: UUID,

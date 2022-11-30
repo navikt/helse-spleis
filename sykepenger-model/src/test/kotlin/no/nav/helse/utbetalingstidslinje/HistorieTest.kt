@@ -6,12 +6,12 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
+import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
@@ -108,7 +108,7 @@ internal abstract class HistorieTest {
         val sykdomstidslinje = arbeidsgiverSykdomstidslinje.getValue(orgnr)
         val inntekter = Inntekter(
             organisasjonsnummer = orgnr,
-            vilkårsgrunnlagHistorikk = inntektsdatoer.associateWith { Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), it, UUID.randomUUID(), 25000.månedlig) }.somVilkårsgrunnlagHistorikk(orgnr),
+            vilkårsgrunnlagHistorikk = inntektsdatoer.associateWith { Inntektsmelding(UUID.randomUUID(), it, UUID.randomUUID(), 25000.månedlig) }.somVilkårsgrunnlagHistorikk(orgnr),
             regler = regler,
             subsumsjonObserver = SubsumsjonObserver.NullObserver
         )

@@ -31,7 +31,6 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.harAvsluttedePerioder
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.håndterInntektsmeldingReplay
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
-import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.Vedtaksperiode.Companion.ER_ELLER_HAR_VÆRT_AVSLUTTET
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
@@ -54,6 +53,12 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
+import no.nav.helse.person.inntekt.Inntektshistorikk
+import no.nav.helse.person.inntekt.Refusjonshistorikk
+import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
+import no.nav.helse.person.inntekt.SkattComposite
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -879,7 +884,7 @@ internal class Arbeidsgiver private constructor(
         return inntektsmeldingInfo.opprett(skjæringstidspunkt, inntektsmelding)
     }
 
-    internal fun lagreInntekter(inntekter: List<Inntektshistorikk.SkattComposite>) {
+    internal fun lagreInntekter(inntekter: List<SkattComposite>) {
         inntektshistorikk.leggTil(inntekter)
     }
 

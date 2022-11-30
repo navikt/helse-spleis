@@ -58,6 +58,9 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
+import no.nav.helse.person.inntekt.SkattComposite
+import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Alder
@@ -618,7 +621,7 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
 
-    internal fun lagreInntekter(hendelse: IAktivitetslogg, orgnummer: String, inntekter: List<Inntektshistorikk.SkattComposite>) {
+    internal fun lagreInntekter(hendelse: IAktivitetslogg, orgnummer: String, inntekter: List<SkattComposite>) {
         finnEllerOpprettArbeidsgiver(orgnummer, hendelse).lagreInntekter(inntekter)
     }
 

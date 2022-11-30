@@ -15,7 +15,7 @@ import no.nav.helse.i
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.oktober
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING

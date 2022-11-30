@@ -1,4 +1,4 @@
-package no.nav.helse.person
+package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -12,10 +12,11 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.Companion.gjennopprett
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.gjennopprett
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.harNødvendigeRefusjonsopplysninger
 import no.nav.helse.økonomi.Inntekt
@@ -229,7 +230,8 @@ internal class RefusjonsopplysningerTest {
         val nyttTidspunkt = eksisterendeTidspunkt.plusSeconds(1)
         val eksisterende = Refusjonsopplysning(eksisterendeId, 1.mars, 31.mars, 2000.daglig)
         val ny = Refusjonsopplysning(UUID.randomUUID(), 1.januar, 1.mars, 1000.daglig)
-        val refusjonsopplysning = RefusjonsopplysningerBuilder().leggTil(eksisterende, eksisterendeTidspunkt).leggTil(ny, nyttTidspunkt).build()
+        val refusjonsopplysning = RefusjonsopplysningerBuilder()
+            .leggTil(eksisterende, eksisterendeTidspunkt).leggTil(ny, nyttTidspunkt).build()
         assertEquals(listOf(ny, Refusjonsopplysning(eksisterendeId, 2.mars, 31.mars, 2000.daglig)), refusjonsopplysning.inspektør.refusjonsopplysninger)
 
     }
@@ -558,7 +560,7 @@ internal class RefusjonsopplysningerTest {
         private fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode) = harNødvendigRefusjonsopplysninger(skjæringstidspunkt, periode.toList(), null, Aktivitetslogg(), "")
         private fun List<Refusjonsopplysning>.refusjonsopplysninger() = Refusjonsopplysninger(this, LocalDateTime.now())
 
-        private fun Refusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>, tidsstempel: LocalDateTime): Refusjonsopplysninger{
+        private fun Refusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>, tidsstempel: LocalDateTime): Refusjonsopplysninger {
             val refusjonsopplysningerBuilder = RefusjonsopplysningerBuilder()
             refusjonsopplysninger.forEach { refusjonsopplysningerBuilder.leggTil(it, tidsstempel) }
             return refusjonsopplysningerBuilder.build()

@@ -1,4 +1,4 @@
-package no.nav.helse.person
+package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -6,13 +6,15 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
-import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.leggTilRefusjon
-import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.somOverlapperMedArbeidsgiverperiode
-import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.somTilstøterArbeidsgiverperiode
-import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.somTrefferFørsteFraværsdag
-import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.beløp
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
+import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.RefusjonshistorikkVisitor
+import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.Companion.leggTilRefusjon
+import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.Companion.somOverlapperMedArbeidsgiverperiode
+import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.Companion.somTilstøterArbeidsgiverperiode
+import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.Companion.somTrefferFørsteFraværsdag
+import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.beløp
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 

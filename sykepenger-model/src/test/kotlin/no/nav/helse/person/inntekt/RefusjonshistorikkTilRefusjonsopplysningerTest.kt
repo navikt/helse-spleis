@@ -1,4 +1,4 @@
-package no.nav.helse.person
+package no.nav.helse.person.inntekt
 
 import java.util.UUID
 import no.nav.helse.april
@@ -8,9 +8,9 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon
-import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon
+import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals

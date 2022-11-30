@@ -7,13 +7,13 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.Opptjening
-import no.nav.helse.person.Sammenligningsgrunnlag
-import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeUtbetalingVisitor
 import no.nav.helse.person.VedtaksperiodeVisitor
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
+import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.serde.api.dto.EndringskodeDTO.Companion.dto
 import no.nav.helse.serde.api.dto.SpeilOppdrag
 import no.nav.helse.serde.api.dto.Utbetaling

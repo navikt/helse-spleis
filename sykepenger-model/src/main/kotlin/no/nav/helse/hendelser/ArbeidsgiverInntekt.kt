@@ -9,9 +9,11 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.nyl
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.utenOffentligeYtelser
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.YTELSE_FRA_OFFENTLIGE
 import no.nav.helse.person.IAktivitetslogg
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
+import no.nav.helse.person.inntekt.Inntektshistorikk
+import no.nav.helse.person.inntekt.Skatt
+import no.nav.helse.person.inntekt.SkattComposite
 import no.nav.helse.økonomi.Inntekt
 
 typealias InntektCreator = (
@@ -49,7 +51,7 @@ class ArbeidsgiverInntekt(
 
         private fun List<ArbeidsgiverInntekt>.tilSkatt(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) = this
             .groupBy({ it.arbeidsgiver }) { opplysning ->
-                Inntektshistorikk.SkattComposite(UUID.randomUUID(), opplysning.inntekter.map {
+                SkattComposite(UUID.randomUUID(), opplysning.inntekter.map {
                     it.somInntekt(skjæringstidspunkt, meldingsreferanseId)
                 })
             }
@@ -78,7 +80,7 @@ class ArbeidsgiverInntekt(
         protected val fordel: String,
         protected val beskrivelse: String
     ) {
-        internal abstract fun somInntekt(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID): Inntektshistorikk.Skatt
+        internal abstract fun somInntekt(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID): Skatt
 
         class RapportertInntekt(
             yearMonth: YearMonth,
@@ -87,8 +89,8 @@ class ArbeidsgiverInntekt(
             fordel: String,
             beskrivelse: String
         ) : MånedligInntekt(yearMonth, inntekt, type, fordel, beskrivelse) {
-            override fun somInntekt(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID): Inntektshistorikk.Skatt {
-                return Inntektshistorikk.Skatt.RapportertInntekt(
+            override fun somInntekt(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID): Skatt {
+                return Skatt.RapportertInntekt(
                     skjæringstidspunkt,
                     meldingsreferanseId,
                     inntekt,
@@ -107,8 +109,8 @@ class ArbeidsgiverInntekt(
             fordel: String,
             beskrivelse: String
         ) : MånedligInntekt(yearMonth, inntekt, type, fordel, beskrivelse) {
-            override fun somInntekt(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID): Inntektshistorikk.Skatt {
-                return Inntektshistorikk.Skatt.Sykepengegrunnlag(
+            override fun somInntekt(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID): Skatt {
+                return Skatt.Sykepengegrunnlag(
                     skjæringstidspunkt,
                     meldingsreferanseId,
                     inntekt,

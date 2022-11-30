@@ -9,13 +9,13 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverVisitor
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.ForlengelseFraInfotrygd
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Periodetype
-import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.inntekt.Inntektshistorikk
+import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 
 internal val Arbeidsgiver.inspektør get() = ArbeidsgiverInspektør(this)

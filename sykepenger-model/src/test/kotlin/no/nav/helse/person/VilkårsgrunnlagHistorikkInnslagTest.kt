@@ -10,9 +10,13 @@ import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.inntekt.Saksbehandler
+import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
+import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.assertNotNull
@@ -129,7 +133,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                 ALDER, listOf(
                     ArbeidsgiverInntektsopplysning(
                         "orgnr",
-                        Inntektshistorikk.Saksbehandler(
+                        Saksbehandler(
                             UUID.randomUUID(),
                             skjæringstidspunkt,
                             UUID.randomUUID(),

@@ -5,14 +5,14 @@ import java.util.UUID
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.Opptjening
-import no.nav.helse.person.Sammenligningsgrunnlag
+import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.økonomi.Prosent
 
-internal fun Map<LocalDate, Inntektshistorikk.Inntektsopplysning>.somVilkårsgrunnlagHistorikk(organisasjonsnummer: String) = VilkårsgrunnlagHistorikk().also { vilkårsgrunnlagHistorikk ->
+internal fun Map<LocalDate, Inntektsopplysning>.somVilkårsgrunnlagHistorikk(organisasjonsnummer: String) = VilkårsgrunnlagHistorikk().also { vilkårsgrunnlagHistorikk ->
     forEach { (skjæringstidspunkt, inntektsopplysning) ->
         vilkårsgrunnlagHistorikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,

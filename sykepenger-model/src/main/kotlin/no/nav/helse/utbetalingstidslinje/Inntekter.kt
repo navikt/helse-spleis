@@ -1,9 +1,9 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
-import no.nav.helse.person.ManglerRefusjonsopplysning
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.inntekt.ManglerRefusjonsopplysning
 import no.nav.helse.økonomi.Økonomi
 
 internal class Inntekter(

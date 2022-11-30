@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.serde.migration.RefusjonsopplysningerIVilkårsgrunnlag.arrayNode
 import no.nav.helse.serde.serdeObjectMapper
 

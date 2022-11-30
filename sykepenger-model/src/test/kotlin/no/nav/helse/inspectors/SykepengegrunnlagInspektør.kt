@@ -1,9 +1,9 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDate
-import no.nav.helse.person.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.Inntektskilde
-import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.økonomi.Inntekt
 import kotlin.properties.Delegates

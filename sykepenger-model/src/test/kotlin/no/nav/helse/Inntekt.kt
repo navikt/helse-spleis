@@ -3,13 +3,13 @@ package no.nav.helse
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.person.AbstractPersonTest
-import no.nav.helse.person.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Refusjonsopplysning
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
-import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
+import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.økonomi.Inntekt
@@ -27,7 +27,7 @@ internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringsti
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysning(
                 orgnr,
-                Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), this),
+                Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), this),
                 Refusjonsopplysninger()
             )
         ),
@@ -41,7 +41,7 @@ internal fun Inntekt.sykepengegrunnlag(orgnr: String, skjæringstidspunkt: Local
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysning(
                 orgnr,
-                Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), this),
+                Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), this),
                 Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, this).refusjonsopplysninger
             )
         ),

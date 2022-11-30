@@ -5,7 +5,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest

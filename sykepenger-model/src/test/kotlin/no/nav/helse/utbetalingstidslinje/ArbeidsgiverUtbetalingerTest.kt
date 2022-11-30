@@ -19,15 +19,16 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsforholdhistorikk
-import no.nav.helse.person.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
-import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
+import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
+import no.nav.helse.person.inntekt.Skatt
+import no.nav.helse.person.inntekt.SkattComposite
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.sykepengegrunnlag
@@ -382,13 +383,13 @@ internal class ArbeidsgiverUtbetalingerTest {
     private fun sammenligningsgrunnlag(inntekt: Inntekt) = Sammenligningsgrunnlag(
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag("orgnummer",
-                Inntektshistorikk.SkattComposite(UUID.randomUUID(), (0 until 12).map {
-                    Inntektshistorikk.Skatt.RapportertInntekt(
+                SkattComposite(UUID.randomUUID(), (0 until 12).map {
+                    Skatt.RapportertInntekt(
                         dato = LocalDate.now(),
                         hendelseId = UUID.randomUUID(),
                         beløp = inntekt,
                         måned = YearMonth.of(2017, it + 1),
-                        type = Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT,
+                        type = Skatt.Inntekttype.LØNNSINNTEKT,
                         fordel = "fordel",
                         beskrivelse = "beskrivelse"
                     )

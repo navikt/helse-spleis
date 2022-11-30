@@ -28,7 +28,6 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -49,6 +48,7 @@ import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.Varselkode.RV_RE_1
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.inntekt.SkattComposite
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.september
 import no.nav.helse.sisteBehov
@@ -1135,11 +1135,11 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(INNTEKT, it.inntektsopplysning.omregnetÅrsinntekt())
-            assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+            assertEquals(no.nav.helse.person.inntekt.Inntektsmelding::class, it.inntektsopplysning::class)
         }
         assertEquals(1, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
         }
     }
 

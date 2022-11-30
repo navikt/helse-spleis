@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
+import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.GrunnlagsdataType.Vilkårsprøving
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.OpptjeningData
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.SammenligningsgrunnlagData

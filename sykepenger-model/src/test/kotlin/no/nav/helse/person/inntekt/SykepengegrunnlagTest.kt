@@ -1,4 +1,4 @@
-package no.nav.helse.person
+package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -13,7 +13,9 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.AbstractPersonTest
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
@@ -323,7 +325,7 @@ internal class SykepengegrunnlagTest {
             alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
             skjæringstidspunkt = 1.januar,
             arbeidsgiverInntektsopplysninger = listOf(
-                ArbeidsgiverInntektsopplysning("orgnr", Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), inntekt), Refusjonsopplysninger())
+                ArbeidsgiverInntektsopplysning("orgnr", Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), inntekt), Refusjonsopplysninger())
             ),
             deaktiverteArbeidsforhold = emptyList(),
             vurdertInfotrygd = false,
@@ -345,7 +347,7 @@ internal class SykepengegrunnlagTest {
             arbeidsgiverInntektsopplysninger = listOf(
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = "orgnummer",
-                    inntektsopplysning = Inntektshistorikk.Infotrygd(
+                    inntektsopplysning = Infotrygd(
                         id = inntektID,
                         dato = 1.januar,
                         hendelseId = hendelseId,
@@ -367,7 +369,7 @@ internal class SykepengegrunnlagTest {
                 arbeidsgiverInntektsopplysninger = listOf(
                     ArbeidsgiverInntektsopplysning(
                         orgnummer = "orgnummer",
-                        inntektsopplysning = Inntektshistorikk.Infotrygd(
+                        inntektsopplysning = Infotrygd(
                             id = inntektID,
                             dato = 1.januar,
                             hendelseId = hendelseId,
@@ -402,7 +404,7 @@ internal class SykepengegrunnlagTest {
                 arbeidsgiverInntektsopplysninger = listOf(
                     ArbeidsgiverInntektsopplysning(
                         orgnummer = "orgnummer",
-                        inntektsopplysning = Inntektshistorikk.Infotrygd(
+                        inntektsopplysning = Infotrygd(
                             id = inntektID,
                             dato = 1.januar,
                             hendelseId = hendelseId,
@@ -425,7 +427,7 @@ internal class SykepengegrunnlagTest {
                 arbeidsgiverInntektsopplysninger = listOf(
                     ArbeidsgiverInntektsopplysning(
                         orgnummer = "orgnummer",
-                        inntektsopplysning = Inntektshistorikk.Infotrygd(
+                        inntektsopplysning = Infotrygd(
                             id = inntektID,
                             dato = 1.januar,
                             hendelseId = hendelseId,
@@ -448,7 +450,7 @@ internal class SykepengegrunnlagTest {
                 arbeidsgiverInntektsopplysninger = listOf(
                     ArbeidsgiverInntektsopplysning(
                         orgnummer = "orgnummer",
-                        inntektsopplysning = Inntektshistorikk.Infotrygd(
+                        inntektsopplysning = Infotrygd(
                             id = inntektID,
                             dato = 1.januar,
                             hendelseId = hendelseId,
@@ -461,7 +463,7 @@ internal class SykepengegrunnlagTest {
                 deaktiverteArbeidsforhold = listOf(
                     ArbeidsgiverInntektsopplysning(
                         orgnummer = "orgnummer",
-                        inntektsopplysning = Inntektshistorikk.Infotrygd(
+                        inntektsopplysning = Infotrygd(
                             id = inntektID,
                             dato = 1.januar,
                             hendelseId = hendelseId,

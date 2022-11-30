@@ -5,10 +5,10 @@ import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.januar
-import no.nav.helse.person.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
-import no.nav.helse.person.Inntektshistorikk.Skatt
-import no.nav.helse.person.Inntektshistorikk.SkattComposite
-import no.nav.helse.person.Sammenligningsgrunnlag
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
+import no.nav.helse.person.inntekt.Skatt
+import no.nav.helse.person.inntekt.SkattComposite
+import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag.Companion.dager

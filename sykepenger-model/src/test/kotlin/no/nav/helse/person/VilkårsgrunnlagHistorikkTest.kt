@@ -21,6 +21,10 @@ import no.nav.helse.person.Paragraf.PARAGRAF_8_2
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
+import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
+import no.nav.helse.person.inntekt.Skatt
+import no.nav.helse.person.inntekt.SkattComposite
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.AP
@@ -636,13 +640,13 @@ internal class VilkårsgrunnlagHistorikkTest {
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
                 "ORGNR1",
-                Inntektshistorikk.SkattComposite(UUID.randomUUID(), (0 until 12).map {
-                    Inntektshistorikk.Skatt.RapportertInntekt(
+                SkattComposite(UUID.randomUUID(), (0 until 12).map {
+                    Skatt.RapportertInntekt(
                         dato = skjæringstidspunkt,
                         hendelseId = UUID.randomUUID(),
                         beløp = inntekt,
                         måned = YearMonth.from(skjæringstidspunkt).minusMonths(12L - it),
-                        type = Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT,
+                        type = Skatt.Inntekttype.LØNNSINNTEKT,
                         fordel = "fordel",
                         beskrivelse = "beskrivelse"
                     )

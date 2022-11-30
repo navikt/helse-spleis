@@ -9,13 +9,13 @@ import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Refusjonshistorikk
-import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.erTom
-import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
-import no.nav.helse.person.Refusjonsopplysning
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.person.RefusjonsopplysningerVisitor
+import no.nav.helse.person.inntekt.Refusjonshistorikk
+import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.erTom
+import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.serde.migration.RefusjonData.Companion.parseRefusjon
 import no.nav.helse.serde.migration.RefusjonData.EndringIRefusjonData.Companion.parseEndringerIRefusjon
 import no.nav.helse.serde.serdeObjectMapper
@@ -137,8 +137,7 @@ internal object RefusjonsopplysningerIVilkårsgrunnlag {
     private val Refusjonsopplysninger.harOpplysninger get() = this != Refusjonsopplysninger()
 
     internal val Refusjonsopplysninger.arrayNode get() = RefusjonsopplysningerToArrayNode(this).arrayNode
-    private class RefusjonsopplysningerToArrayNode(refusjonsopplysninger: Refusjonsopplysninger):
-        RefusjonsopplysningerVisitor {
+    private class RefusjonsopplysningerToArrayNode(refusjonsopplysninger: Refusjonsopplysninger): RefusjonsopplysningerVisitor {
         val arrayNode = serdeObjectMapper.createArrayNode()
 
         init {

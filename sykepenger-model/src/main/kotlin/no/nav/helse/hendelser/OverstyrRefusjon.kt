@@ -4,9 +4,9 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.NyeRefusjonsopplysninger
 import no.nav.helse.person.PersonHendelse
-import no.nav.helse.person.Refusjonsopplysning
+import no.nav.helse.person.inntekt.NyeRefusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonsopplysning
 
 class OverstyrRefusjon(
     meldingsreferanseId: UUID,

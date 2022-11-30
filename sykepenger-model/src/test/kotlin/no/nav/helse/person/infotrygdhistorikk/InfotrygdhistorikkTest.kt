@@ -10,9 +10,9 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElementTest.Companion.eksisterendeInfotrygdHistorikkelement
+import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.testhelpers.A
@@ -350,7 +350,7 @@ internal class InfotrygdhistorikkTest {
         val builder = UtbetalingstidslinjeBuilder(Inntekter(
             organisasjonsnummer = "a1",
             vilkårsgrunnlagHistorikk = mapOf(
-                1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
+                1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
             ).somVilkårsgrunnlagHistorikk("a1"),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonObserver = SubsumsjonObserver.NullObserver
@@ -369,7 +369,7 @@ internal class InfotrygdhistorikkTest {
         val builder = UtbetalingstidslinjeBuilder(Inntekter(
             organisasjonsnummer = "a1",
             vilkårsgrunnlagHistorikk = mapOf(
-                1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
+                1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
             ).somVilkårsgrunnlagHistorikk("a1"),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonObserver = SubsumsjonObserver.NullObserver

@@ -6,9 +6,9 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
@@ -35,7 +35,7 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
     fun `ekskluderer dager før første dag`() {
         val builder = UtbetalingstidslinjeBuilder(Inntekter(
             vilkårsgrunnlagHistorikk = mapOf(
-                1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
+                1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
             ).somVilkårsgrunnlagHistorikk("a1"),
             organisasjonsnummer = "a1",
             regler = NormalArbeidstaker,
@@ -51,7 +51,7 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
     fun `ekskluderer infotrygd-snuter`() {
         val builder = UtbetalingstidslinjeBuilder(Inntekter(
             vilkårsgrunnlagHistorikk = mapOf(
-                1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
+                1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
             ).somVilkårsgrunnlagHistorikk("a1"),
             organisasjonsnummer = "a1",
             regler = NormalArbeidstaker,
@@ -67,7 +67,7 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
     fun `ekskluderer infotrygd-haler`() {
         val builder = UtbetalingstidslinjeBuilder(Inntekter(
             vilkårsgrunnlagHistorikk = mapOf(
-                1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
+                1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
             ).somVilkårsgrunnlagHistorikk("a1"),
             organisasjonsnummer = "a1",
             regler = NormalArbeidstaker,
@@ -83,7 +83,7 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
     fun `legger ikke til samme ukjente dag flere ganger selv om det er utbetalt for flere arbeidsgivere`() {
         val builder = UtbetalingstidslinjeBuilder(Inntekter(
             vilkårsgrunnlagHistorikk = mapOf(
-                1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
+                1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
             ).somVilkårsgrunnlagHistorikk("a1"),
             organisasjonsnummer = "a1",
             regler = NormalArbeidstaker,

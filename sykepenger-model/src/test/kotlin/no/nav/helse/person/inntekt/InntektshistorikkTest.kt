@@ -1,4 +1,4 @@
-package no.nav.helse.person
+package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.util.UUID
@@ -14,6 +14,7 @@ import no.nav.helse.inspectors.Inntektsinspektør
 import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.oktober
+import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.testhelpers.assertNotNull
@@ -63,7 +64,7 @@ internal class InntektshistorikkTest {
         ), 1.februar)
         val opplysning = historikk.omregnetÅrsinntekt(1.februar, 1.februar, arbeidsforholdhistorikk)
         assertNotNull(opplysning)
-        assertEquals(Inntektshistorikk.IkkeRapportert::class, opplysning::class)
+        assertEquals(IkkeRapportert::class, opplysning::class)
         assertEquals(INGEN, opplysning.omregnetÅrsinntekt())
     }
 
@@ -75,7 +76,7 @@ internal class InntektshistorikkTest {
         ), 1.februar)
         val opplysning = historikk.omregnetÅrsinntekt(1.februar, 1.februar, arbeidsforholdhistorikk)
         assertNotNull(opplysning)
-        assertEquals(Inntektshistorikk.IkkeRapportert::class, opplysning::class)
+        assertEquals(IkkeRapportert::class, opplysning::class)
         assertEquals(INGEN, opplysning.omregnetÅrsinntekt())
     }
 
@@ -112,7 +113,7 @@ internal class InntektshistorikkTest {
         ), 1.februar)
         val opplysning = historikk.rapportertInntekt(1.februar, arbeidsforholdhistorikk)
         assertNotNull(opplysning)
-        assertEquals(Inntektshistorikk.IkkeRapportert::class, opplysning::class)
+        assertEquals(IkkeRapportert::class, opplysning::class)
         assertEquals(INGEN, opplysning.rapportertInntekt())
     }
 
@@ -124,7 +125,7 @@ internal class InntektshistorikkTest {
         ), 1.februar)
         val opplysning = historikk.rapportertInntekt(1.februar, arbeidsforholdhistorikk)
         assertNotNull(opplysning)
-        assertEquals(Inntektshistorikk.IkkeRapportert::class, opplysning::class)
+        assertEquals(IkkeRapportert::class, opplysning::class)
         assertEquals(INGEN, opplysning.rapportertInntekt())
     }
 
@@ -268,20 +269,20 @@ internal class InntektshistorikkTest {
             }
         }.lagreInntekter(ORGNUMMER, historikk, 1.januar, UUID.randomUUID())
         val inntektsopplysning = historikk.omregnetÅrsinntekt(1.januar, 1.januar, Arbeidsforholdhistorikk())
-        assertTrue(inntektsopplysning is Inntektshistorikk.SkattComposite)
+        assertTrue(inntektsopplysning is SkattComposite)
         assertEquals(INGEN, inntektsopplysning?.omregnetÅrsinntekt())
     }
 
     @Test
     fun `Inntekt fra skatt er minst 0 kroner`() {
-        val skattComposite = Inntektshistorikk.SkattComposite(
+        val skattComposite = SkattComposite(
             UUID.randomUUID(), inntektsopplysninger = listOf(
-                Inntektshistorikk.Skatt.Sykepengegrunnlag(
+                Skatt.Sykepengegrunnlag(
                     dato = 1.januar,
                     hendelseId = UUID.randomUUID(),
                     beløp = (-2500).daglig,
                     måned = desember(2017),
-                    type = Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT,
+                    type = Skatt.Inntekttype.LØNNSINNTEKT,
                     fordel = "fordel",
                     beskrivelse = "beskrivelse"
                 )

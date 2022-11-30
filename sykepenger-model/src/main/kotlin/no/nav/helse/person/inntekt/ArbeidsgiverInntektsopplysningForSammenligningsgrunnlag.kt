@@ -1,11 +1,12 @@
-package no.nav.helse.person
+package no.nav.helse.person.inntekt
 
+import no.nav.helse.person.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagVisitor
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 
 internal class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
     private val orgnummer: String,
-    private val inntektsopplysning: Inntektshistorikk.Inntektsopplysning
+    private val inntektsopplysning: Inntektsopplysning
 ) {
 
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer

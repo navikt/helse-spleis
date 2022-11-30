@@ -15,11 +15,12 @@ import no.nav.helse.mars
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.Varselkode.RV_OV_1
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.SkattComposite
 import no.nav.helse.spleis.e2e.OpptjeningE2ETest.ArbeidsforholdVisitor.Companion.assertHarArbeidsforhold
 import no.nav.helse.spleis.e2e.OpptjeningE2ETest.ArbeidsforholdVisitor.Companion.assertHarIkkeArbeidsforhold
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -124,14 +125,14 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
         assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-            assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
         assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
         }
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
         }
     }
 

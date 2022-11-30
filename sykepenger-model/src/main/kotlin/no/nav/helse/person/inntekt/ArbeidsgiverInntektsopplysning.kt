@@ -1,10 +1,13 @@
-package no.nav.helse.person
+package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
-import no.nav.helse.person.Inntektshistorikk.Inntektsopplysning.Companion.valider
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.ArbeidsgiverInntektsopplysningVisitor
+import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Opptjening
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.valider
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt
@@ -13,7 +16,7 @@ import no.nav.helse.økonomi.Økonomi
 
 internal class ArbeidsgiverInntektsopplysning(
     private val orgnummer: String,
-    private val inntektsopplysning: Inntektshistorikk.Inntektsopplysning,
+    private val inntektsopplysning: Inntektsopplysning,
     private val refusjonsopplysninger: Refusjonsopplysninger
 ) {
     private fun omregnetÅrsinntekt(acc: Inntekt): Inntekt {
@@ -21,7 +24,7 @@ internal class ArbeidsgiverInntektsopplysning(
     }
 
     internal fun harInntektFraAOrdningen() =
-        inntektsopplysning is Inntektshistorikk.SkattComposite || inntektsopplysning is Inntektshistorikk.IkkeRapportert
+        inntektsopplysning is SkattComposite || inntektsopplysning is IkkeRapportert
 
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
 
@@ -76,7 +79,7 @@ internal class ArbeidsgiverInntektsopplysning(
     }
 
     internal fun ikkeGhost(): Boolean {
-        return inntektsopplysning is Inntektshistorikk.Inntektsmelding
+        return inntektsopplysning is Inntektsmelding
     }
 
     internal companion object {
@@ -102,7 +105,7 @@ internal class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.overstyrInntekter(opptjening: Opptjening, other: List<ArbeidsgiverInntektsopplysning>, subsumsjonObserver: SubsumsjonObserver) = this
             .map { inntekt -> inntekt.overstyr(other) }
             .also { it.subsummer(subsumsjonObserver, opptjening) }
-        internal fun List<ArbeidsgiverInntektsopplysning>.erOverstyrt() = any { it.inntektsopplysning is Inntektshistorikk.Saksbehandler }
+        internal fun List<ArbeidsgiverInntektsopplysning>.erOverstyrt() = any { it.inntektsopplysning is Saksbehandler }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.refusjonsopplysninger(organisasjonsnummer: String) =
             singleOrNull{it.gjelder(organisasjonsnummer)}?.refusjonsopplysninger ?: Refusjonsopplysninger()

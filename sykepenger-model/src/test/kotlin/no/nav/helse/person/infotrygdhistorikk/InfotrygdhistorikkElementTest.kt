@@ -15,7 +15,8 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsforholdhistorikk
-import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.inntekt.Infotrygd
+import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenInfo
 import no.nav.helse.sykdomstidslinje.Dag
@@ -707,8 +708,8 @@ internal class InfotrygdhistorikkElementTest {
             listOf(
                 Inntektshistorikk.Innslag(
                     listOf(
-                        Inntektshistorikk.Infotrygd(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 1234.månedlig),
-                        Inntektshistorikk.Infotrygd(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 4321.månedlig)
+                        Infotrygd(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 1234.månedlig),
+                        Infotrygd(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 4321.månedlig)
                     )
                 )
             )

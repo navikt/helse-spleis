@@ -13,22 +13,23 @@ import no.nav.helse.januar
 import no.nav.helse.oktober
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
-import no.nav.helse.person.Sammenligningsgrunnlag
+import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.inntekt.Skatt
+import no.nav.helse.person.inntekt.SkattComposite
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykepengegrunnlag
@@ -289,13 +290,13 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
     private fun sammenligningsgrunnlag(inntekt: Inntekt = INNTEKT, skjæringstidspunkt: LocalDate) = Sammenligningsgrunnlag(
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag("ORGNR1",
-                Inntektshistorikk.SkattComposite(UUID.randomUUID(), (0 until 12).map {
-                    Inntektshistorikk.Skatt.RapportertInntekt(
+                SkattComposite(UUID.randomUUID(), (0 until 12).map {
+                    Skatt.RapportertInntekt(
                         dato = skjæringstidspunkt,
                         hendelseId = UUID.randomUUID(),
                         beløp = inntekt,
                         måned = YearMonth.from(skjæringstidspunkt).minusMonths(12L - it),
-                        type = Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT,
+                        type = Skatt.Inntekttype.LØNNSINNTEKT,
                         fordel = "fordel",
                         beskrivelse = "beskrivelse"
                     )

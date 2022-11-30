@@ -1,4 +1,4 @@
-package no.nav.helse.person
+package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -9,7 +9,8 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.RefusjonsopplysningerVisitor
 import no.nav.helse.økonomi.Inntekt
 
 class Refusjonsopplysning(
@@ -204,12 +205,6 @@ class Refusjonsopplysning(
             internal fun build() = Refusjonsopplysninger(sorterteRefusjonsopplysninger())
         }
     }
-}
-
-interface RefusjonsopplysningerVisitor {
-    fun preVisitRefusjonsopplysninger(refusjonsopplysninger: Refusjonsopplysninger) {}
-    fun visitRefusjonsopplysning(meldingsreferanseId: UUID, fom: LocalDate, tom: LocalDate?, beløp: Inntekt) {}
-    fun postVisitRefusjonsopplysninger(refusjonsopplysninger: Refusjonsopplysninger) {}
 }
 
 typealias ManglerRefusjonsopplysning = (LocalDate, Inntekt) -> Unit

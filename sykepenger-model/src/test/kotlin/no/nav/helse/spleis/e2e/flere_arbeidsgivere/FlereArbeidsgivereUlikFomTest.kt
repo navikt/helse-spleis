@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Inntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -22,6 +21,8 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.Varselkode.RV_VV_2
 import no.nav.helse.person.Varselkode.RV_VV_8
+import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.SkattComposite
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
@@ -138,19 +139,19 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-            assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(20000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-            assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
         }
 
         assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
         }
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
         }
     }
 
@@ -213,19 +214,19 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(30000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-            assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(18000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-            assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
 
         assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
         }
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
         }
     }
 
@@ -282,19 +283,19 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-            assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(21000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-            assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
         }
 
         assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
         }
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
         }
     }
 
@@ -1247,19 +1248,19 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-            assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(21000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-            assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
 
         assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
         }
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
         }
     }
 
@@ -1305,19 +1306,19 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-            assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(20000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-            assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
         }
 
         assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
         }
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
         }
     }
 
@@ -1388,19 +1389,19 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-            assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(32000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-            assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
 
         assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
         }
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
         }
     }
 

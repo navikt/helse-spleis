@@ -1,4 +1,4 @@
-package no.nav.helse.person
+package no.nav.helse.person.inntekt
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -12,6 +12,9 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.AktivitetsloggVisitor
+import no.nav.helse.person.SpesifikkKontekst
 
 internal class RefusjonshistorikkTest {
 

@@ -6,8 +6,8 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.PersonHendelse
-import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.inntekt.Sykepengegrunnlag
 
 class OverstyrArbeidsforhold(
     meldingsreferanseId: UUID,

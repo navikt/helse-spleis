@@ -9,8 +9,9 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.F
@@ -625,7 +626,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         resetSeed(1.januar(2020))
         (14.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                1.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar(2020), hendelseId, 31000.månedlig)
+                1.januar(2020) to Inntektsmelding(UUID.randomUUID(), 1.januar(2020), hendelseId, 31000.månedlig)
             )
         )
         tidslinje.inspektør.navdager.assertDekningsgrunnlag(1.januar(2020) til 31.januar(2020), 31000.månedlig)
@@ -636,7 +637,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         resetSeed(1.januar(2020))
         (10.S + 10.A + 10.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                21.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 21.januar(2020), hendelseId, 30000.månedlig)
+                21.januar(2020) to Inntektsmelding(UUID.randomUUID(), 21.januar(2020), hendelseId, 30000.månedlig)
             )
         )
 
@@ -651,8 +652,8 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         resetSeed(1.januar(2020))
         (20.S + 10.A + 10.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                1.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar(2020), hendelseId, 31000.månedlig),
-                31.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 31.januar(2020), hendelseId, 30000.månedlig)
+                1.januar(2020) to Inntektsmelding(UUID.randomUUID(), 1.januar(2020), hendelseId, 31000.månedlig),
+                31.januar(2020) to Inntektsmelding(UUID.randomUUID(), 31.januar(2020), hendelseId, 30000.månedlig)
             )
         )
 
@@ -667,7 +668,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         resetSeed(1.januar(2020))
         (3.S + 2.A + 5.S + 2.A + 20.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                13.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 13.januar(2020), hendelseId, 30000.månedlig)
+                13.januar(2020) to Inntektsmelding(UUID.randomUUID(), 13.januar(2020), hendelseId, 30000.månedlig)
             )
         )
 
@@ -687,7 +688,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         resetSeed(1.januar(2020))
         (5.S + 5.F + 15.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                1.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar(2020), hendelseId, 30000.månedlig)
+                1.januar(2020) to Inntektsmelding(UUID.randomUUID(), 1.januar(2020), hendelseId, 30000.månedlig)
             )
         )
 
@@ -702,7 +703,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         resetSeed(1.januar(2020))
         (2.S + 1.A + 7.F + 17.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                11.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 11.januar(2020), hendelseId, 30000.månedlig)
+                11.januar(2020) to Inntektsmelding(UUID.randomUUID(), 11.januar(2020), hendelseId, 30000.månedlig)
             )
         )
 
@@ -724,8 +725,8 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         resetSeed(1.januar(2020))
         (20.S + 1.A + 3.F + 3.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                1.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar(2020), hendelseId, 30000.månedlig),
-                25.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 25.januar(2020), hendelseId, 31000.månedlig)
+                1.januar(2020) to Inntektsmelding(UUID.randomUUID(), 1.januar(2020), hendelseId, 30000.månedlig),
+                25.januar(2020) to Inntektsmelding(UUID.randomUUID(), 25.januar(2020), hendelseId, 31000.månedlig)
             )
         )
 
@@ -742,7 +743,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         resetSeed(1.januar(2020))
         (16.S + 2.A + 3.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                19.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 19.januar(2020), hendelseId, 30000.månedlig)
+                19.januar(2020) to Inntektsmelding(UUID.randomUUID(), 19.januar(2020), hendelseId, 30000.månedlig)
             )
         )
         tidslinje.inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 16.januar(2020), INGEN)
@@ -757,7 +758,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         assertDoesNotThrow {
             (1.S + 11.A + 21.S).utbetalingslinjer(
                 inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                    13.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 13.januar(2020), hendelseId, 30000.månedlig)
+                    13.januar(2020) to Inntektsmelding(UUID.randomUUID(), 13.januar(2020), hendelseId, 30000.månedlig)
                 )
             )
         }
@@ -779,7 +780,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         assertDoesNotThrow {
             (16.U + 1.R + 2.S).utbetalingslinjer(
                 inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                    20.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 20.januar(2020), hendelseId, 30000.månedlig)
+                    20.januar(2020) to Inntektsmelding(UUID.randomUUID(), 20.januar(2020), hendelseId, 30000.månedlig)
                 )
             )
         }
@@ -798,7 +799,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         assertDoesNotThrow {
             (16.U + 2.A + 2.S).utbetalingslinjer(
                 inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                    22.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 22.januar(2020), hendelseId, 30000.månedlig)
+                    22.januar(2020) to Inntektsmelding(UUID.randomUUID(), 22.januar(2020), hendelseId, 30000.månedlig)
                 )
             )
         }
@@ -826,7 +827,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
     fun `oppdaterer inntekt etter frisk helg`() {
         (4.U + 1.A + 2.R + 12.U + 4.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                8.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 8.januar, hendelseId, 31000.månedlig)
+                8.januar to Inntektsmelding(UUID.randomUUID(), 8.januar, hendelseId, 31000.månedlig)
             )
         )
         assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
@@ -840,8 +841,8 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
     fun `Sykedag etter langt opphold nullstiller tellere`() {
         (4.S + 1.A + 2.R + 5.A + 2.R + 5.A + 2.R + 5.A + 2.R + 5.A + 2.R + 2.S + 3.A + 2.R + 18.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                12.februar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 12.februar, hendelseId, 30000.månedlig),
-                1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 30000.månedlig)
+                12.februar to Inntektsmelding(UUID.randomUUID(), 12.februar, hendelseId, 30000.månedlig),
+                1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 30000.månedlig)
             )
         )
 
@@ -854,8 +855,8 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
     fun `Syk helgedag etter langt opphold nullstiller tellere`() {
         (3.S + 2.A + 2.R + 5.A + 2.R + 5.A + 2.R + 5.A + 2.R + 5.A + 1.R + 1.H + 1.S + 4.A + 2.R + 18.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                12.februar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 12.februar, hendelseId, 30000.månedlig),
-                1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 30000.månedlig)
+                12.februar to Inntektsmelding(UUID.randomUUID(), 12.februar, hendelseId, 30000.månedlig),
+                1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 30000.månedlig)
             )
         )
 
@@ -868,8 +869,8 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
     fun `Sykmelding som starter i helg etter oppholdsdager gir NavHelgDag i helgen`() {
         (16.U + 2.S + 1.A + 2.R + 5.A + 2.R + 5.A + 2.H + 1.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                    1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, hendelseId, 30000.månedlig),
-                    3.februar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 3.februar, hendelseId, 30000.månedlig)
+                    1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, hendelseId, 30000.månedlig),
+                    3.februar to Inntektsmelding(UUID.randomUUID(), 3.februar, hendelseId, 30000.månedlig)
             )
         )
 
@@ -880,17 +881,17 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
     }
 
     private val inntektsopplysningPerSkjæringstidspunkt = mapOf(
-        1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 31000.månedlig),
-        1.februar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.februar, UUID.randomUUID(), 25000.månedlig),
-        1.mars to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.mars, UUID.randomUUID(), 50000.månedlig),
+        1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 31000.månedlig),
+        1.februar to Inntektsmelding(UUID.randomUUID(), 1.februar, UUID.randomUUID(), 25000.månedlig),
+        1.mars to Inntektsmelding(UUID.randomUUID(), 1.mars, UUID.randomUUID(), 50000.månedlig),
     )
 
     @Test
     fun `Etter sykdom som slutter på fredag starter gap-telling i helgen - helg som friskHelgdag`() { // Fordi vi vet når hen gjenopptok arbeidet, og det var i helgen
         (16.U + 3.S + 2.R + 5.A + 2.R + 5.A + 2.R + 18.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                    1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, hendelseId, 30000.månedlig),
-                    5.februar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 5.februar, hendelseId, 30000.månedlig)
+                    1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, hendelseId, 30000.månedlig),
+                    5.februar to Inntektsmelding(UUID.randomUUID(), 5.februar, hendelseId, 30000.månedlig)
             )
         )
 
@@ -903,8 +904,8 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
     fun `Etter sykdom som slutter på fredag starter gap-telling mandagen etter (ikke i helgen) - helg som ukjent-dag`() { // Fordi vi ikke vet når hen gjenopptok arbeidet, men antar mandag
         (16.U + 3.S + 2.UK + 5.A + 2.R + 5.A + 2.R + 18.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                    1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, hendelseId, 30000.månedlig),
-                    5.februar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 5.februar, hendelseId, 30000.månedlig)
+                    1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, hendelseId, 30000.månedlig),
+                    5.februar to Inntektsmelding(UUID.randomUUID(), 5.februar, hendelseId, 30000.månedlig)
             )
         )
 
@@ -918,8 +919,8 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
     fun `Etter sykdom som slutter på fredag starter gap-telling mandagen etter (ikke i helgen) - helg som sykhelgdag`() {
         (16.U + 3.S + 2.H + 5.A + 2.R + 5.A + 2.R + 18.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
-                1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, hendelseId, 30000.månedlig),
-                5.februar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 5.februar, hendelseId, 30000.månedlig)
+                1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, hendelseId, 30000.månedlig),
+                5.februar to Inntektsmelding(UUID.randomUUID(), 5.februar, hendelseId, 30000.månedlig)
             )
         )
 
@@ -948,7 +949,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
             }
 
     private fun Sykdomstidslinje.utbetalingslinjer(
-        inntektsopplysningPerSkjæringstidspunkt: Map<LocalDate, Inntektshistorikk.Inntektsopplysning> = this@UtbetalingstidslinjeBuilderGammelTest.inntektsopplysningPerSkjæringstidspunkt,
+        inntektsopplysningPerSkjæringstidspunkt: Map<LocalDate, Inntektsopplysning> = this@UtbetalingstidslinjeBuilderGammelTest.inntektsopplysningPerSkjæringstidspunkt,
         betalteInfotrygddager: List<Periode> = emptyList()
     ) {
         val teller = Arbeidsgiverperiodeteller.NormalArbeidstaker

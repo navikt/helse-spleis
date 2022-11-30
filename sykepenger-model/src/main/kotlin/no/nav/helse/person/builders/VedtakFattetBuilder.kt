@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 
 internal class VedtakFattetBuilder(

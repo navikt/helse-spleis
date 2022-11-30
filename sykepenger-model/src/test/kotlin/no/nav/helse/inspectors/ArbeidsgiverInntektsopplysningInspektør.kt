@@ -4,10 +4,15 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Subsumsjon
-import no.nav.helse.person.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.ArbeidsgiverInntektsopplysningVisitor
-import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.inntekt.IkkeRapportert
+import no.nav.helse.person.inntekt.Infotrygd
+import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.Inntektsopplysning
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.inntekt.Saksbehandler
+import no.nav.helse.person.inntekt.SkattComposite
 import no.nav.helse.økonomi.Inntekt
 
 internal val ArbeidsgiverInntektsopplysning.inspektør get() = ArbeidsgiverInntektsopplysningInspektør(this)
@@ -15,7 +20,7 @@ internal val ArbeidsgiverInntektsopplysning.inspektør get() = ArbeidsgiverInnte
 internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning) : ArbeidsgiverInntektsopplysningVisitor {
     internal lateinit var orgnummer: String
         private set
-    internal lateinit var inntektsopplysning: Inntektshistorikk.Inntektsopplysning
+    internal lateinit var inntektsopplysning: Inntektsopplysning
         private set
 
     internal lateinit var refusjonsopplysninger: Refusjonsopplysninger
@@ -33,7 +38,7 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
     }
 
     override fun visitSaksbehandler(
-        saksbehandler: Inntektshistorikk.Saksbehandler,
+        saksbehandler: Saksbehandler,
         id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
@@ -46,7 +51,7 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
     }
 
     override fun visitInntektsmelding(
-        inntektsmelding: Inntektshistorikk.Inntektsmelding,
+        inntektsmelding: Inntektsmelding,
         id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
@@ -57,11 +62,11 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
     }
 
     override fun visitIkkeRapportert(id: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
-        this.inntektsopplysning = Inntektshistorikk.IkkeRapportert(id, dato, tidsstempel)
+        this.inntektsopplysning = IkkeRapportert(id, dato, tidsstempel)
     }
 
     override fun visitInfotrygd(
-        infotrygd: Inntektshistorikk.Infotrygd,
+        infotrygd: Infotrygd,
         id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
@@ -71,7 +76,7 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
         this.inntektsopplysning = infotrygd
     }
 
-    override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
+    override fun preVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
         this.inntektsopplysning = skattComposite
     }
 

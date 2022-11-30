@@ -14,6 +14,19 @@ import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
+import no.nav.helse.person.inntekt.Infotrygd
+import no.nav.helse.person.inntekt.Inntektshistorikk
+import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.Inntektsopplysning
+import no.nav.helse.person.inntekt.Refusjonshistorikk
+import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.person.inntekt.Saksbehandler
+import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
+import no.nav.helse.person.inntekt.Skatt
+import no.nav.helse.person.inntekt.SkattComposite
+import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -840,7 +853,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.preVisitInnslag(innslag, id)
     }
 
-    override fun visitInntekt(inntektsopplysning: Inntektshistorikk.Inntektsopplysning, id: UUID, fom: LocalDate, tidsstempel: LocalDateTime) {
+    override fun visitInntekt(inntektsopplysning: Inntektsopplysning, id: UUID, fom: LocalDate, tidsstempel: LocalDateTime) {
         delegatee.visitInntekt(inntektsopplysning, id, fom, tidsstempel)
     }
 
@@ -861,7 +874,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
     }
 
     override fun visitSaksbehandler(
-        saksbehandler: Inntektshistorikk.Saksbehandler,
+        saksbehandler: Saksbehandler,
         id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
@@ -874,7 +887,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
     }
 
     override fun visitInntektsmelding(
-        inntektsmelding: Inntektshistorikk.Inntektsmelding,
+        inntektsmelding: Inntektsmelding,
         id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
@@ -888,21 +901,21 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitIkkeRapportert(id, dato, tidsstempel)
     }
 
-    override fun visitInfotrygd(infotrygd: Inntektshistorikk.Infotrygd, id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) {
+    override fun visitInfotrygd(infotrygd: Infotrygd, id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) {
         delegatee.visitInfotrygd(infotrygd, id, dato, hendelseId, beløp, tidsstempel)
     }
 
-    override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
+    override fun preVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
         delegatee.preVisitSkatt(skattComposite, id, dato)
     }
 
     override fun visitSkattSykepengegrunnlag(
-        sykepengegrunnlag: Inntektshistorikk.Skatt.Sykepengegrunnlag,
+        sykepengegrunnlag: Skatt.Sykepengegrunnlag,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
         måned: YearMonth,
-        type: Inntektshistorikk.Skatt.Inntekttype,
+        type: Skatt.Inntekttype,
         fordel: String,
         beskrivelse: String,
         tidsstempel: LocalDateTime
@@ -911,12 +924,12 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
     }
 
     override fun visitSkattRapportertInntekt(
-        rapportertInntekt: Inntektshistorikk.Skatt.RapportertInntekt,
+        rapportertInntekt: Skatt.RapportertInntekt,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
         måned: YearMonth,
-        type: Inntektshistorikk.Skatt.Inntekttype,
+        type: Skatt.Inntekttype,
         fordel: String,
         beskrivelse: String,
         tidsstempel: LocalDateTime
@@ -924,7 +937,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitSkattRapportertInntekt(rapportertInntekt, dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel)
     }
 
-    override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
+    override fun postVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
         delegatee.postVisitSkatt(skattComposite, id, dato)
     }
 

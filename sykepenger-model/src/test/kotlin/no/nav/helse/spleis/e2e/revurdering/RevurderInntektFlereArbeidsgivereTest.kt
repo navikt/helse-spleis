@@ -17,7 +17,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
@@ -29,6 +28,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
@@ -627,7 +627,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
             sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                 assertEquals(25000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-                assertEquals(Inntektshistorikk.Saksbehandler::class, it.inntektsopplysning::class)
+                assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
             }
         }
     }

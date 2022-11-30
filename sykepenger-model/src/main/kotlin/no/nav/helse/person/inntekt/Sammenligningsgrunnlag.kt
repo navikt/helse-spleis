@@ -1,7 +1,8 @@
-package no.nav.helse.person
+package no.nav.helse.person.inntekt
 
-import no.nav.helse.person.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag.Companion.sammenligningsgrunnlag
+import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag.Companion.sammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt
 
 internal class Sammenligningsgrunnlag(

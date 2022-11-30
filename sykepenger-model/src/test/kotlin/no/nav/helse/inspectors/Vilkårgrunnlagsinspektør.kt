@@ -7,8 +7,8 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Opptjening
-import no.nav.helse.person.Sammenligningsgrunnlag
-import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
+import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.økonomi.Inntekt

@@ -1,7 +1,7 @@
 package no.nav.helse.inspectors
 
-import no.nav.helse.person.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
-import no.nav.helse.person.Sammenligningsgrunnlag
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
+import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.økonomi.Inntekt
 

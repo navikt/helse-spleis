@@ -11,12 +11,12 @@ import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
-import no.nav.helse.person.Sammenligningsgrunnlag
-import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
+import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
+import no.nav.helse.person.inntekt.Sykepengegrunnlag
 
 class Vilkårsgrunnlag(
     meldingsreferanseId: UUID,

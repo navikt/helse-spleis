@@ -7,8 +7,8 @@ import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Arbeidsforholdhistorikk
-import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.inntekt.Infotrygd
+import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -68,7 +68,7 @@ internal class InfotrygdInntektsopplysningTest {
         val inntektID = UUID.randomUUID()
         val hendelseId = UUID.randomUUID()
         val tidsstempel = LocalDateTime.now()
-        val inntektsopplysning1 = Inntektshistorikk.Infotrygd(
+        val inntektsopplysning1 = Infotrygd(
             id = inntektID,
             dato = 1.januar,
             hendelseId = hendelseId,
@@ -77,7 +77,7 @@ internal class InfotrygdInntektsopplysningTest {
         )
         assertEquals(
             inntektsopplysning1,
-            Inntektshistorikk.Infotrygd(
+            Infotrygd(
                 id = inntektID,
                 dato = 1.januar,
                 hendelseId = hendelseId,
@@ -87,7 +87,7 @@ internal class InfotrygdInntektsopplysningTest {
         )
         assertNotEquals(
             inntektsopplysning1,
-            Inntektshistorikk.Infotrygd(
+            Infotrygd(
                 id = inntektID,
                 dato = 5.januar,
                 hendelseId = hendelseId,
@@ -97,7 +97,7 @@ internal class InfotrygdInntektsopplysningTest {
         )
         assertNotEquals(
             inntektsopplysning1,
-            Inntektshistorikk.Infotrygd(
+            Infotrygd(
                 id = inntektID,
                 dato = 1.januar,
                 hendelseId = hendelseId,
@@ -107,7 +107,7 @@ internal class InfotrygdInntektsopplysningTest {
         )
         assertEquals(
             inntektsopplysning1,
-            Inntektshistorikk.Infotrygd(
+            Infotrygd(
                 id = UUID.randomUUID(),
                 dato = 1.januar,
                 hendelseId = hendelseId,
@@ -117,7 +117,7 @@ internal class InfotrygdInntektsopplysningTest {
         )
         assertEquals(
             inntektsopplysning1,
-            Inntektshistorikk.Infotrygd(
+            Infotrygd(
                 id = inntektID,
                 dato = 1.januar,
                 hendelseId = UUID.randomUUID(),
@@ -127,7 +127,7 @@ internal class InfotrygdInntektsopplysningTest {
         )
         assertEquals(
             inntektsopplysning1,
-            Inntektshistorikk.Infotrygd(
+            Infotrygd(
                 id = inntektID,
                 dato = 1.januar,
                 hendelseId = hendelseId,

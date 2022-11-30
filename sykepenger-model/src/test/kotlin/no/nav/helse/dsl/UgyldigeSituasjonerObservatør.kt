@@ -9,10 +9,15 @@ import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.InntekthistorikkVisitor
-import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.arbeidsgiver
+import no.nav.helse.person.inntekt.Infotrygd
+import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.Saksbehandler
+import no.nav.helse.person.inntekt.Skatt
+import no.nav.helse.person.inntekt.SkattComposite
 import no.nav.helse.økonomi.Inntekt
 
 internal class UgyldigeSituasjonerObservatør(private val person: Person): PersonObserver {
@@ -129,22 +134,22 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
             this.innslag.add(id)
         }
 
-        override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
+        override fun preVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
             this.skatt.add(id)
         }
 
-        override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
+        override fun postVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
             leggTilInntekt("SkattComposite dato=$dato, inntekter=${skattInntekterFor(id)} ")
         }
 
-        override fun visitInntektsmelding(inntektsmelding: Inntektshistorikk.Inntektsmelding, id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) =
+        override fun visitInntektsmelding(inntektsmelding: Inntektsmelding, id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) =
             leggTilInntekt("Inntektsmelding id=$hendelseId, dato=$dato, beløp=$beløp")
 
-        override fun visitInfotrygd(infotrygd: Inntektshistorikk.Infotrygd, id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) =
+        override fun visitInfotrygd(infotrygd: Infotrygd, id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) =
             leggTilInntekt("Infotrygd id=$hendelseId, dato=$dato, beløp=$beløp")
 
         override fun visitSaksbehandler(
-            saksbehandler: Inntektshistorikk.Saksbehandler,
+            saksbehandler: Saksbehandler,
             id: UUID,
             dato: LocalDate,
             hendelseId: UUID,
@@ -158,10 +163,10 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         override fun visitIkkeRapportert(id: UUID, dato: LocalDate, tidsstempel: LocalDateTime) =
             leggTilInntekt("IkkeRapportert dato=$dato")
 
-        override fun visitSkattSykepengegrunnlag(sykepengegrunnlag: Inntektshistorikk.Skatt.Sykepengegrunnlag, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, måned: YearMonth, type: Inntektshistorikk.Skatt.Inntekttype, fordel: String, beskrivelse: String, tidsstempel: LocalDateTime) =
+        override fun visitSkattSykepengegrunnlag(sykepengegrunnlag: Skatt.Sykepengegrunnlag, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, måned: YearMonth, type: Skatt.Inntekttype, fordel: String, beskrivelse: String, tidsstempel: LocalDateTime) =
             leggTilSkattInntekt("SkattSykepengegrunnlag id=$hendelseId, dato=$dato, beløp=$beløp, måned=$måned, type=$type, fordel=$fordel, beskrivelse=$beskrivelse")
 
-        override fun visitSkattRapportertInntekt(rapportertInntekt: Inntektshistorikk.Skatt.RapportertInntekt, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, måned: YearMonth, type: Inntektshistorikk.Skatt.Inntekttype, fordel: String, beskrivelse: String, tidsstempel: LocalDateTime) =
+        override fun visitSkattRapportertInntekt(rapportertInntekt: Skatt.RapportertInntekt, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, måned: YearMonth, type: Skatt.Inntekttype, fordel: String, beskrivelse: String, tidsstempel: LocalDateTime) =
             leggTilSkattInntekt("SkattRapportertInntekt id=$hendelseId, dato=$dato, beløp=$beløp, måned=$måned, type=$type, fordel=$fordel, beskrivelse=$beskrivelse")
     }
 

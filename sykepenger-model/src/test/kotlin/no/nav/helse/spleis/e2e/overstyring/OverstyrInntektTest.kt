@@ -8,7 +8,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -17,6 +16,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.Varselkode
+import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -75,7 +75,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(ORGNUMMER)?.inspektør
             ?.also {
                 assertEquals(overstyrtInntekt, it.inntektsopplysning.omregnetÅrsinntekt())
-                assertEquals(Inntektshistorikk.Saksbehandler::class, it.inntektsopplysning::class)
+                assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
         }
     }
 

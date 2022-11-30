@@ -2,8 +2,8 @@ package no.nav.helse.serde.migration
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.person.Refusjonsopplysning
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.readResource
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Test

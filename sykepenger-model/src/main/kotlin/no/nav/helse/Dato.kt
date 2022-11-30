@@ -5,6 +5,7 @@ import java.time.DayOfWeek.FRIDAY
 import java.time.DayOfWeek.SATURDAY
 import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
+import java.time.YearMonth
 
 fun Int.januar(year: Int): LocalDate = LocalDate.of(year, 1, this)
 fun Int.februar(year: Int): LocalDate = LocalDate.of(year, 2, this)
@@ -18,6 +19,10 @@ fun Int.september(year: Int): LocalDate = LocalDate.of(year, 9, this)
 fun Int.oktober(year: Int): LocalDate = LocalDate.of(year, 10, this)
 fun Int.november(year: Int): LocalDate = LocalDate.of(year, 11, this)
 fun Int.desember(year: Int): LocalDate = LocalDate.of(year, 12, this)
+
+internal fun YearMonth.isWithinRangeOf(dato: LocalDate, måneder: Long) =
+    this in YearMonth.from(dato).let { it.minusMonths(måneder)..it.minusMonths(1) }
+
 
 internal val Int.ukedager get() = Ukedager(this)
 internal operator fun LocalDate.plus(other: Ukedager) = other + this

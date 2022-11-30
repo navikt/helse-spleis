@@ -17,7 +17,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -39,6 +38,7 @@ import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.Varselkode.RV_OS_1
 import no.nav.helse.person.Varselkode.RV_SV_1
+import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -139,7 +139,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(ORGNUMMER)?.inspektør
             ?.also {
                 assertEquals(32000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-                assertEquals(Inntektshistorikk.Saksbehandler::class, it.inntektsopplysning::class)
+                assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
             }
     }
 
@@ -170,7 +170,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(ORGNUMMER)?.inspektør
             ?.also {
                 assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-                assertEquals(Inntektshistorikk.Saksbehandler::class, it.inntektsopplysning::class)
+                assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
             }
     }
 

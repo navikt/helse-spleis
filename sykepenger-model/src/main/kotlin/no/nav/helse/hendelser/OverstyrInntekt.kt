@@ -5,7 +5,7 @@ import java.util.UUID
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 
 class OverstyrInntekt(
