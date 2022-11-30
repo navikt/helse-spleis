@@ -1,12 +1,15 @@
 package no.nav.helse.serde.api.speil.builders
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.UUID
+import no.nav.helse.hendelser.til
+import no.nav.helse.november
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.AktivitetsloggVisitor
 import no.nav.helse.person.SpesifikkKontekst
-import no.nav.helse.serde.api.dto.AktivitetDTO
-import java.util.*
 import no.nav.helse.person.Varselkode
-import no.nav.helse.serde.api.dto.HendelseDTO
+import no.nav.helse.serde.api.dto.AktivitetDTO
 
 internal class PeriodeVarslerBuilder(
     aktivitetslogg: Aktivitetslogg
@@ -28,11 +31,18 @@ internal class PeriodeVarslerBuilder(
     }
 
 
-    fun build(hendelser: List<HendelseDTO> = emptyList()): List<AktivitetDTO> {
+    fun build(): List<AktivitetDTO> {
         val varsler = varsler.distinctBy { it.melding }
-        val periodeHarEnInntektsmelding = hendelser.count { it.type == "INNTEKTSMELDING" } == 1
-        val flereImVarsel = "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt."
-        return if (periodeHarEnInntektsmelding) varsler.filter { it.melding != flereImVarsel } else varsler
+        val outOfOrderVarsel = "Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning."
+        val tidsrom = 20.november(2022) til 30.november(2022)
+        val harFeilAktigVarsel = varsler.find {
+            it.melding == outOfOrderVarsel && LocalDateTime.parse(
+                it.tidsstempel,
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
+            ).toLocalDate() in tidsrom
+        } != null
+
+        return if (harFeilAktigVarsel) varsler.filter { it.melding != outOfOrderVarsel } else varsler
     }
 }
 
