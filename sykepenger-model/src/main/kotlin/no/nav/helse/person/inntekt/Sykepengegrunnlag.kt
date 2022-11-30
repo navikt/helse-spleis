@@ -1,12 +1,14 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.`2G`
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -180,7 +182,15 @@ internal class Sykepengegrunnlag(
     ): Sykepengegrunnlag {
         val builder = SaksbehandlerOverstyringer(opptjening, subsumsjonObserver)
         hendelse.overstyr(builder)
-        return kopierSykepengegrunnlag(builder.resultat(), deaktiverteArbeidsforhold)
+        val resultat = builder.resultat() ?: return this
+        return kopierSykepengegrunnlag(resultat, deaktiverteArbeidsforhold)
+    }
+
+    internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag? {
+        val builder = SaksbehandlerOverstyringer(null, subsumsjonObserver)
+        hendelse.overstyr(builder)
+        val resultat = builder.resultat() ?: return null
+        return kopierSykepengegrunnlag(resultat, deaktiverteArbeidsforhold)
     }
 
     internal fun refusjonsopplysninger(organisasjonsnummer: String): Refusjonsopplysninger =
@@ -319,15 +329,20 @@ internal class Sykepengegrunnlag(
         ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD
     }
 
-    inner class SaksbehandlerOverstyringer(private val opptjening: Opptjening, private val subsumsjonObserver: SubsumsjonObserver) {
+    inner class SaksbehandlerOverstyringer(private val opptjening: Opptjening?, private val subsumsjonObserver: SubsumsjonObserver) {
         private val nyeInntektsopplysninger = mutableListOf<ArbeidsgiverInntektsopplysning>()
 
         internal fun leggTilInntekt(organisasjonsnummer: String, meldingsreferanseId: UUID, inntekt: Inntekt, forklaring: String, subsumsjon: Subsumsjon?) {
-            val saksbehandler = Saksbehandler(UUID.randomUUID(), skjæringstidspunkt, meldingsreferanseId, inntekt, forklaring, subsumsjon)
+            val saksbehandler = Saksbehandler(skjæringstidspunkt, meldingsreferanseId, inntekt, forklaring, subsumsjon, LocalDateTime.now())
             nyeInntektsopplysninger.add(ArbeidsgiverInntektsopplysning(organisasjonsnummer, saksbehandler, Refusjonsopplysninger()))
         }
+        internal fun leggTilInntekt(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning) {
+            nyeInntektsopplysninger.add(arbeidsgiverInntektsopplysning)
+        }
 
-        internal fun resultat() = arbeidsgiverInntektsopplysninger.overstyrInntekter(opptjening, nyeInntektsopplysninger, subsumsjonObserver)
+        internal fun resultat() = arbeidsgiverInntektsopplysninger.overstyrInntekter(opptjening, nyeInntektsopplysninger, subsumsjonObserver).takeUnless { resultat ->
+            resultat == arbeidsgiverInntektsopplysninger
+        }
     }
 
 }

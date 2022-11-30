@@ -7,7 +7,7 @@ import no.nav.helse.person.Varselkode
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
 
-internal abstract class Inntektsopplysning protected constructor(
+abstract class Inntektsopplysning protected constructor(
     protected val dato: LocalDate,
     private val prioritet: Int
 ): Comparable<Inntektsopplysning> {

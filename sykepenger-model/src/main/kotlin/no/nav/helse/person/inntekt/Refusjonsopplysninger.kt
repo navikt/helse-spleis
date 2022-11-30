@@ -194,15 +194,15 @@ class Refusjonsopplysning(
             internal val Refusjonsopplysning.refusjonsopplysninger get() = Refusjonsopplysninger(listOf(this))
         }
 
-        internal class RefusjonsopplysningerBuilder {
+        class RefusjonsopplysningerBuilder {
             private val refusjonsopplysninger = mutableListOf<Pair<LocalDateTime, Refusjonsopplysning>>()
-            internal fun leggTil(refusjonsopplysning: Refusjonsopplysning, tidsstempel: LocalDateTime) = apply {
+            fun leggTil(refusjonsopplysning: Refusjonsopplysning, tidsstempel: LocalDateTime) = apply {
                 refusjonsopplysninger.add(tidsstempel to refusjonsopplysning)
             }
 
             private fun sorterteRefusjonsopplysninger() = refusjonsopplysninger.sortedWith(compareBy({ it.first }, { it.second.fom })).map { it.second }
 
-            internal fun build() = Refusjonsopplysninger(sorterteRefusjonsopplysninger())
+            fun build() = Refusjonsopplysninger(sorterteRefusjonsopplysninger())
         }
     }
 }

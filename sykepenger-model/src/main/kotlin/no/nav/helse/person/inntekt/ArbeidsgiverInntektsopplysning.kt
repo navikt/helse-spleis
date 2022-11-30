@@ -14,7 +14,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Økonomi
 
-internal class ArbeidsgiverInntektsopplysning(
+class ArbeidsgiverInntektsopplysning(
     private val orgnummer: String,
     private val inntektsopplysning: Inntektsopplysning,
     private val refusjonsopplysninger: Refusjonsopplysninger
@@ -102,7 +102,7 @@ internal class ArbeidsgiverInntektsopplysning(
 
         // overskriver eksisterende verdier i *this* med verdier fra *other*,
         // og ignorerer ting i *other* som ikke finnes i *this*
-        internal fun List<ArbeidsgiverInntektsopplysning>.overstyrInntekter(opptjening: Opptjening, other: List<ArbeidsgiverInntektsopplysning>, subsumsjonObserver: SubsumsjonObserver) = this
+        internal fun List<ArbeidsgiverInntektsopplysning>.overstyrInntekter(opptjening: Opptjening?, other: List<ArbeidsgiverInntektsopplysning>, subsumsjonObserver: SubsumsjonObserver) = this
             .map { inntekt -> inntekt.overstyr(other) }
             .also { it.subsummer(subsumsjonObserver, opptjening) }
         internal fun List<ArbeidsgiverInntektsopplysning>.erOverstyrt() = any { it.inntektsopplysning is Saksbehandler }

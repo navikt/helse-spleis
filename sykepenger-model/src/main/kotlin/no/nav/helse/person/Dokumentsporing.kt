@@ -1,6 +1,6 @@
 package no.nav.helse.person
 
-import java.util.*
+import java.util.UUID
 
 data class Dokumentsporing private constructor(private val id: UUID, private val type: Type) {
 
@@ -11,6 +11,7 @@ data class Dokumentsporing private constructor(private val id: UUID, private val
         internal fun overstyrTidslinje(id: UUID) = Dokumentsporing(id, Type.OverstyrTidslinje)
         internal fun overstyrInntekt(id: UUID) = Dokumentsporing(id, Type.OverstyrInntekt)
         internal fun overstyrRefusjon(id: UUID) = Dokumentsporing(id, Type.OverstyrRefusjon)
+        internal fun overstyrArbeidsgiveropplysninger(id: UUID) = Dokumentsporing(id, Type.OverstyrArbeidsgiveropplysninger)
         internal fun overstyrArbeidsforhold(id: UUID) = Dokumentsporing(id, Type.OverstyrArbeidsforhold)
 
         internal fun Iterable<Dokumentsporing>.toMap() = associate { it.id to it.type }
@@ -26,6 +27,7 @@ data class Dokumentsporing private constructor(private val id: UUID, private val
         OverstyrTidslinje,
         OverstyrInntekt,
         OverstyrRefusjon,
+        OverstyrArbeidsgiveropplysninger,
         OverstyrArbeidsforhold,
     }
 

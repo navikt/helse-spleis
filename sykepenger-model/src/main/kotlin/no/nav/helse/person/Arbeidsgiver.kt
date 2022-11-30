@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
@@ -157,6 +158,9 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold) =
             any { it.håndter(overstyrArbeidsforhold) }
+
+        internal fun List<Arbeidsgiver>.håndterOverstyrArbeidsgiveropplysninger(overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger) =
+            any { it.håndter(overstyrArbeidsgiveropplysninger) }
 
         internal fun List<Arbeidsgiver>.håndterOverstyrInntekt(overstyrInntekt: OverstyrInntekt) {
             val arbeidsgiver = firstOrNull {
@@ -820,6 +824,11 @@ internal class Arbeidsgiver private constructor(
     private fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
         overstyrArbeidsforhold.kontekst(this)
         return énHarHåndtert(overstyrArbeidsforhold, Vedtaksperiode::håndter)
+    }
+
+    private fun håndter(overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger): Boolean {
+        overstyrArbeidsgiveropplysninger.kontekst(this)
+        return énHarHåndtert(overstyrArbeidsgiveropplysninger, Vedtaksperiode::håndter)
     }
 
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {

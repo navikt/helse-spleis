@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
@@ -36,6 +37,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
+import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyrInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.inntekterForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.lagRevurdering
@@ -324,6 +326,11 @@ class Person private constructor(
             }
         }
         håndterGjenoppta(hendelse)
+    }
+
+    fun håndter(hendelse: OverstyrArbeidsgiveropplysninger) {
+        hendelse.kontekst(this)
+        arbeidsgivere.håndterOverstyrArbeidsgiveropplysninger(hendelse)
     }
 
     fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold) {
@@ -753,6 +760,18 @@ class Person private constructor(
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
         nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrInntekt(hendelse, subsumsjonObserver))
     }
+
+    internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
+        hendelse: OverstyrArbeidsgiveropplysninger,
+        vedtaksperiode: Vedtaksperiode,
+        skjæringstidspunkt: LocalDate,
+        subsumsjonObserver: SubsumsjonObserver
+    ) {
+        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
+        nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrArbeidsgiveropplysninger(hendelse, subsumsjonObserver))
+        startRevurdering(vedtaksperiode, hendelse, RevurderingÅrsak.ARBEIDSGIVEROPPLYSNINGER)
+    }
+
 
     private fun nyttVilkårsgrunnlag(hendelse: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?) {
         if (vilkårsgrunnlag == null) return

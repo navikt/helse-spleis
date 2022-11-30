@@ -9,6 +9,7 @@ import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
@@ -337,6 +338,14 @@ internal class Vedtaksperiode private constructor(
         return tilstand.håndter(this, overstyrArbeidsforhold)
     }
 
+    internal fun håndter(overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger): Boolean {
+        if (!overstyrArbeidsgiveropplysninger.erRelevant(skjæringstidspunkt)) return false
+        kontekst(overstyrArbeidsgiveropplysninger)
+        overstyrArbeidsgiveropplysninger.leggTil(hendelseIder)
+        person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(overstyrArbeidsgiveropplysninger, this, this.skjæringstidspunkt, jurist)
+        return true
+    }
+
     internal fun håndter(hendelse: OverstyrInntekt, vedtaksperioder: Iterable<Vedtaksperiode>): Boolean {
         if (hendelse.skjæringstidspunkt != this.skjæringstidspunkt || tilstand == AvsluttetUtenUtbetaling) return false
         kontekst(hendelse)
@@ -432,7 +441,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun revurderInntekt(hendelse: OverstyrInntekt) {
         person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(hendelse, skjæringstidspunkt, jurist())
-        person.startRevurdering(this, hendelse, RevurderingÅrsak.INNTEKT)
+        person.startRevurdering(this, hendelse, RevurderingÅrsak.ARBEIDSGIVEROPPLYSNINGER)
     }
 
     private fun revurderTidslinje(hendelse: OverstyrTidslinje) {
@@ -908,6 +917,7 @@ internal class Vedtaksperiode private constructor(
             overstyrArbeidsforhold: OverstyrArbeidsforhold
         ) = false
 
+        fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrArbeidsgiveropplysninger) {}
         fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {}
 
         fun håndterRevurdertUtbetaling(
@@ -2519,7 +2529,7 @@ enum class Inntektskilde {
 }
 
 enum class RevurderingÅrsak {
-    ARBEIDSGIVERPERIODE, INNTEKT, SYKDOMSTIDSLINJE, NY_PERIODE, ARBEIDSFORHOLD, KORRIGERT_SØKNAD
+    ARBEIDSGIVERPERIODE, ARBEIDSGIVEROPPLYSNINGER, SYKDOMSTIDSLINJE, NY_PERIODE, ARBEIDSFORHOLD, KORRIGERT_SØKNAD
 }
 
 internal typealias VedtaksperiodeFilter = (Vedtaksperiode) -> Boolean

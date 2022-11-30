@@ -12,7 +12,7 @@ import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 
-internal class Saksbehandler(
+class Saksbehandler internal constructor(
     private val id: UUID,
     dato: LocalDate,
     private val hendelseId: UUID,
@@ -21,6 +21,8 @@ internal class Saksbehandler(
     private val subsumsjon: Subsumsjon?,
     private val tidsstempel: LocalDateTime = LocalDateTime.now()
 ) : Inntektsopplysning(dato, 100) {
+
+    constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, forklaring: String, subsumsjon: Subsumsjon?, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
 
     override fun accept(visitor: InntekthistorikkVisitor) {
         visitor.visitSaksbehandler(this, id, dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)

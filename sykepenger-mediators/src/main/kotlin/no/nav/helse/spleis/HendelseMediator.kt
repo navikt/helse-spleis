@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.Migrate
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.PersonPåminnelse
@@ -41,6 +42,7 @@ import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsforholdMessage
+import no.nav.helse.spleis.meldinger.model.OverstyrInntektMedRefusjonsopplysningerMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrInntektMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrTidslinjeMessage
 import no.nav.helse.spleis.meldinger.model.PersonPåminnelseMessage
@@ -220,6 +222,16 @@ internal class HendelseMediator(
         }
     }
 
+    override fun behandle(
+        message: OverstyrInntektMedRefusjonsopplysningerMessage,
+        overstyrArbeidsgiverOpplysninger: OverstyrArbeidsgiveropplysninger,
+        context: MessageContext
+    ) {
+        håndter(message, overstyrArbeidsgiverOpplysninger, context) { person ->
+            person.håndter(overstyrArbeidsgiverOpplysninger)
+        }
+    }
+
     override fun behandle(message: OverstyrArbeidsforholdMessage, overstyrArbeidsforhold: OverstyrArbeidsforhold, context: MessageContext) {
         håndter(message, overstyrArbeidsforhold, context) { person ->
             HendelseProbe.onOverstyrArbeidsforhold()
@@ -300,6 +312,7 @@ internal interface IHendelseMediator {
     fun behandle(message: MigrateMessage, migrate: Migrate, context: MessageContext)
     fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje, context: MessageContext)
     fun behandle(message: OverstyrInntektMessage, overstyrInntekt: OverstyrInntekt, context: MessageContext)
+    fun behandle(message: OverstyrInntektMedRefusjonsopplysningerMessage, overstyrArbeidsgiverOpplysninger: OverstyrArbeidsgiveropplysninger, context: MessageContext)
     fun behandle(message: OverstyrArbeidsforholdMessage, overstyrArbeidsforhold: OverstyrArbeidsforhold, context: MessageContext)
     fun behandle(message: EtterbetalingMessage, grunnbeløpsregulering: Grunnbeløpsregulering, context: MessageContext)
 }

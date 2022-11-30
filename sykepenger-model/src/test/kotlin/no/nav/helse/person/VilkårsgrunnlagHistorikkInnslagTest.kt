@@ -178,6 +178,8 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                 subsumsjonObserver: SubsumsjonObserver
             ): VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
 
-            override fun nyeRefusjonsopplysninger(inntektsmelding: Inntektsmelding): VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null
+            override fun kopierMed(sykepengegrunnlag: Sykepengegrunnlag): VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement {
+                throw IllegalStateException()
+            }
         }
 }
