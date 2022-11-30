@@ -108,7 +108,7 @@ internal class Sykepengegrunnlag(
 
     internal fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode) {
         val tidslinjeperiode = Utbetalingstidslinje.periode(tidslinjer)
-        if (skjæringstidspunktperiode.endInclusive < tidslinjeperiode.start || tidslinjeperiode.endInclusive < skjæringstidspunkt) return
+        if (tidslinjeperiode.starterEtter(skjæringstidspunktperiode) || tidslinjeperiode.endInclusive < skjæringstidspunkt) return
 
         val avvisningsperiode = skjæringstidspunktperiode.start til minOf(tidslinjeperiode.endInclusive, skjæringstidspunktperiode.endInclusive)
         val avvisteDager = avvisningsperiode.filter { dato ->

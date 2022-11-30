@@ -68,6 +68,9 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
     internal fun utenfor(other: Periode) =
         this.start < other.start || this.endInclusive > other.endInclusive
 
+    internal fun starterEtter(other: Periode) =
+        this.start > other.endInclusive
+
     internal fun inneholder(other: Periode) = other in this
 
     internal fun erRettFør(other: Periode) = erRettFør(other.start)

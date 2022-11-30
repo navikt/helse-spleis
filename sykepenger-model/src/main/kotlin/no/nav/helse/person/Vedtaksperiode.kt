@@ -357,7 +357,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun nekterOpprettelseAvNyPeriode(ny: Vedtaksperiode, hendelse: Søknad) {
-        if (ny.periode.start > this.periode.endInclusive) return
+        if (ny.periode.starterEtter(this.periode)) return
         kontekst(hendelse)
         if (this.arbeidsgiver === ny.arbeidsgiver && this.periode.overlapperMed(ny.periode)) return hendelse.funksjonellFeil(`Mottatt søknad som overlapper helt`)
 
@@ -1839,27 +1839,14 @@ internal class Vedtaksperiode private constructor(
 
     internal fun startRevurdering(arbeidsgivere: List<Arbeidsgiver>, hendelse: IAktivitetslogg, overstyrt: Vedtaksperiode, hvorfor: RevurderingÅrsak) {
         if (overstyrt.skjæringstidspunkt > this.skjæringstidspunkt) return // om endringen gjelder et nyere skjæringstidspunkt så trenger vi ikke bryr oss
-        // hvis endringen treffer samme skjæringstidspunkt, men en nyere periode, da trenger vi ikke bli med
-        if (endringGjelderNyerePeriodeMedSammeSkjæringstidspunkt(overstyrt)) {
-            // hvis vi er i en revurdering-situasjon så bør vi reagere på revurderingsignalet, men
-            // bare dersom årsaken er at det ikke er en ny periode
-            if (ikkeAktivRevurdering() || hvorfor == RevurderingÅrsak.NY_PERIODE) return
-        }
+        // hvis endringen treffer samme skjæringstidspunkt, men en nyere nyopprettet periode, da trenger vi ikke bli med
+        if (nySenerePeriodePåSammeSkjæringstidspunkt(overstyrt, hvorfor)) return
         kontekst(hendelse)
         tilstand.startRevurdering(arbeidsgivere, this, hendelse, overstyrt, hvorfor)
     }
 
-    private fun endringGjelderNyerePeriodeMedSammeSkjæringstidspunkt(overstyrt: Vedtaksperiode) =
-        overstyrt.skjæringstidspunkt == this.skjæringstidspunkt && overstyrt.periode.start > this.periode.endInclusive
-
-    private fun ikkeAktivRevurdering() =
-        this.tilstand !in setOf(
-            AvventerGjennomførtRevurdering,
-            AvventerHistorikkRevurdering,
-            AvventerVilkårsprøvingRevurdering,
-            AvventerSimuleringRevurdering,
-            AvventerGodkjenningRevurdering
-        )
+    private fun nySenerePeriodePåSammeSkjæringstidspunkt(overstyrt: Vedtaksperiode, hvorfor: RevurderingÅrsak) =
+        hvorfor == RevurderingÅrsak.NY_PERIODE && overstyrt.periode.starterEtter(this.periode) && overstyrt.skjæringstidspunkt == this.skjæringstidspunkt
 
     private fun validerYtelser(ytelser: Ytelser, skjæringstidspunkt: LocalDate, infotrygdhistorikk: Infotrygdhistorikk) {
         kontekst(ytelser)
@@ -2057,6 +2044,7 @@ internal class Vedtaksperiode private constructor(
             overstyrt: Vedtaksperiode,
             hvorfor: RevurderingÅrsak
         ) {
+            if (overstyrt.periode.starterEtter(vedtaksperiode.periode)) return
             if (!vedtaksperiode.forventerInntekt()) return hendelse.info("Revurderingen påvirker ikke denne perioden i AvsluttetUtenUtbetaling")
             hendelse.varsel(RV_RV_1)
             vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
@@ -2125,6 +2113,17 @@ internal class Vedtaksperiode private constructor(
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.skjæringstidspunktFraInfotrygd = vedtaksperiode.person.skjæringstidspunkt(vedtaksperiode.sykdomstidslinje.sykdomsperiode() ?: vedtaksperiode.periode)
             vedtaksperiode.låsOpp()
+        }
+
+        override fun startRevurdering(
+            arbeidsgivere: List<Arbeidsgiver>,
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            overstyrt: Vedtaksperiode,
+            hvorfor: RevurderingÅrsak
+        ) {
+            if (overstyrt.periode.starterEtter(vedtaksperiode.periode)) return
+            super.startRevurdering(arbeidsgivere, vedtaksperiode, hendelse, overstyrt, hvorfor)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
