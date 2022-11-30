@@ -338,6 +338,10 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.last(IKKE_FERDIG_REVURDERT).igangsettRevurdering(hendelse)
     }
 
+    internal fun ferdigstillRevurdering(hendelse: IAktivitetslogg, ferdigstiller: Vedtaksperiode) {
+        håndter(hendelse) { ferdigstillRevurdering(hendelse, ferdigstiller) }
+    }
+
     internal fun accept(visitor: ArbeidsgiverVisitor) {
         visitor.preVisitArbeidsgiver(this, id, organisasjonsnummer)
         inntektshistorikk.accept(visitor)

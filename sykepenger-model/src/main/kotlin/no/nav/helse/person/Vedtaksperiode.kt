@@ -925,6 +925,9 @@ internal class Vedtaksperiode private constructor(
             hendelse.info("Tidligere periode ferdigbehandlet, men gjør ingen tilstandsendring.")
         }
 
+        fun ferdigstillRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        }
+
         fun startRevurdering(
             arbeidsgivere: List<Arbeidsgiver>,
             vedtaksperiode: Vedtaksperiode,
@@ -1100,12 +1103,17 @@ internal class Vedtaksperiode private constructor(
             arbeidsgivere: Iterable<Arbeidsgiver>,
             hendelse: IAktivitetslogg
         ) {
-            if (feiletRevurdering(vedtaksperiode)) {
-                hendelse.info("Går til revurdering feilet fordi revurdering er avvist")
-                return vedtaksperiode.tilstand(hendelse, RevurderingFeilet)
-            }
-            hendelse.info("Går til avsluttet fordi revurdering er fullført via en annen vedtaksperiode")
-            vedtaksperiode.tilstand(hendelse, Avsluttet)
+            hendelse.info("Gjenopptar ikke behandling fordi perioden avventer på at revurderingen ferdigstilles.")
+        }
+
+         override fun ferdigstillRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+             if (feiletRevurdering(vedtaksperiode)) {
+                 hendelse.info("Går til revurdering feilet fordi revurdering er avvist")
+                 return vedtaksperiode.tilstand(hendelse, RevurderingFeilet)
+             }
+
+             hendelse.info("Går til avsluttet fordi revurdering er fullført via en annen vedtaksperiode")
+             vedtaksperiode.tilstand(hendelse, Avsluttet)
         }
 
         private fun feiletRevurdering(vedtaksperiode: Vedtaksperiode) =
@@ -1812,11 +1820,27 @@ internal class Vedtaksperiode private constructor(
         tilstand(hendelse, AvventerGjennomførtRevurdering)
     }
 
+    internal fun ferdigstillRevurdering(hendelse: IAktivitetslogg, ferdigstiller: Vedtaksperiode) {
+        if (ferdigstiller.skjæringstidspunkt != this.skjæringstidspunkt || ferdigstiller === this) return
+        kontekst(hendelse)
+        tilstand.
+        ferdigstillRevurdering(this, hendelse)
+    }
+
     internal fun startRevurdering(arbeidsgivere: List<Arbeidsgiver>, hendelse: IAktivitetslogg, overstyrt: Vedtaksperiode, hvorfor: RevurderingÅrsak) {
-        if (overstyrt etter this && !overstyrt.periode.overlapperMed(this.periode) && ikkeAktivRevurdering()) return
+        if (overstyrt.skjæringstidspunkt > this.skjæringstidspunkt) return // om endringen gjelder et nyere skjæringstidspunkt så trenger vi ikke bryr oss
+        // hvis endringen treffer samme skjæringstidspunkt, men en nyere periode, da trenger vi ikke bli med
+        if (endringGjelderNyerePeriodeMedSammeSkjæringstidspunkt(overstyrt)) {
+            // hvis vi er i en revurdering-situasjon så bør vi reagere på revurderingsignalet, men
+            // bare dersom årsaken er at det ikke er en ny periode
+            if (ikkeAktivRevurdering() || hvorfor == RevurderingÅrsak.NY_PERIODE) return
+        }
         kontekst(hendelse)
         tilstand.startRevurdering(arbeidsgivere, this, hendelse, overstyrt, hvorfor)
     }
+
+    private fun endringGjelderNyerePeriodeMedSammeSkjæringstidspunkt(overstyrt: Vedtaksperiode) =
+        overstyrt.skjæringstidspunkt == this.skjæringstidspunkt && overstyrt.periode.start > this.periode.endInclusive
 
     private fun ikkeAktivRevurdering() =
         this.tilstand !in setOf(
@@ -2083,6 +2107,8 @@ internal class Vedtaksperiode private constructor(
             check(vedtaksperiode.utbetalinger.erAvsluttet()) {
                 "forventer at utbetaling skal være avsluttet"
             }
+            vedtaksperiode.arbeidsgiver.ferdigstillRevurdering(hendelse, vedtaksperiode)
+            vedtaksperiode.kontekst(hendelse) // obs: 'ferdigstillRevurdering' påvirker kontekst på hendelsen
             vedtaksperiode.ferdigstillVedtak(hendelse)
         }
 
@@ -2131,6 +2157,8 @@ internal class Vedtaksperiode private constructor(
         override val type: TilstandType = REVURDERING_FEILET
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            vedtaksperiode.arbeidsgiver.ferdigstillRevurdering(hendelse, vedtaksperiode)
+            vedtaksperiode.kontekst(hendelse) // 'ferdigstillRevurdering'  påvirker hendelsekontekst
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
             vedtaksperiode.sendOppgaveEvent(hendelse)
         }
