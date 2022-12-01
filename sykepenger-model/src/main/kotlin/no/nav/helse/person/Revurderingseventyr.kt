@@ -74,22 +74,22 @@ class Revurderingseventyr private constructor(private val hvorfor: RevurderingÅ
 
     internal fun sendRevurderingIgangsattEvent(
         person: Person,
-        initiertAvVedtaksperiode: UUID,
-        skjæringstidspunkt: LocalDate,
+        initiertAvArbeidsgiver: String,
+        initiertAvVedtaksperiode: PersonObserver.RevurderingIgangsattEvent.VedtaksperiodeData,
         kilde: PersonHendelse,
     ) {
-        if (vedtaksperioder.isEmpty()) {
-            return kilde.info("Sendte ikke ut et revurdering-igangsatt-event fordi ingen vedtaksperioder inngikk i revurderingen") // rART?
-        }
-        person.sendRevurderingIgangsattEvent(
-            PersonObserver.RevurderingIgangsattEvent(
-                revurderingsÅrsak = hvorfor.name,
-                berørtePerioder = vedtaksperioder.toMap(),
-                kilde = kilde.meldingsreferanseId(),
-                initiertAvVedtaksperiode = initiertAvVedtaksperiode,
-                skjæringstidspunkt = skjæringstidspunkt
+        if (vedtaksperioder.isEmpty()) return
+        else {
+            person.sendRevurderingIgangsattEvent(
+                PersonObserver.RevurderingIgangsattEvent(
+                    revurderingsÅrsak = hvorfor.name,
+                    kilde = kilde.meldingsreferanseId(),
+                    initiertAvArbeidsgiver = initiertAvArbeidsgiver,
+                    initiertAvVedtaksperiode = initiertAvVedtaksperiode,
+                    berørtePerioder = vedtaksperioder.toMap(),
+                )
             )
-        )
+        }
     }
 
     fun nySenerePeriodePåSammeSkjæringstidspunkt(starterEtter: Boolean, sammeSkjæringstidspunkt: Boolean) =

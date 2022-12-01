@@ -34,7 +34,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
 
         revurderingIgangsattEvent {
             this bleForårsaketAv "SYKDOMSTIDSLINJE" grunnet overstyring
-            this bleInitiertAv vedtaksperiode medSkjæringstidspunkt 1.januar
+            this bleInitiertAv vedtaksperiode hosArbeidsgiver a1 medSkjæringstidspunkt 1.januar
         }
     }
 
@@ -108,6 +108,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
 
         revurderingIgangsattEvent {
             this bleForårsaketAv "ARBEIDSGIVEROPPLYSNINGER" grunnet overstyringId
+            this bleInitiertAv periodeAG1 hosArbeidsgiver a1 medSkjæringstidspunkt 1.januar
             this medførteRevurderingAv (periodeAG1 og periodeAG2)
             assertEquals(setOf(a1, a2), this.berørtePerioder.keys)
             assertEquals(
@@ -177,7 +178,11 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
     }
 
     private infix fun PersonObserver.RevurderingIgangsattEvent.bleInitiertAv(vedtaksperiodeId: UUID): PersonObserver.RevurderingIgangsattEvent {
-        assertEquals(vedtaksperiodeId, this.initiertAvVedtaksperiode)
+        assertEquals(vedtaksperiodeId, this.initiertAvVedtaksperiode.id)
+        return this
+    }
+    private infix fun PersonObserver.RevurderingIgangsattEvent.hosArbeidsgiver(orgnummer: String): PersonObserver.RevurderingIgangsattEvent {
+        assertEquals(orgnummer, this.initiertAvArbeidsgiver)
         return this
     }
 
@@ -192,7 +197,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
     }
 
     private infix fun PersonObserver.RevurderingIgangsattEvent.medSkjæringstidspunkt(dato: LocalDate): PersonObserver.RevurderingIgangsattEvent {
-        assertEquals(dato, this.skjæringstidspunkt)
+        assertEquals(dato, this.initiertAvVedtaksperiode.skjæringstidspunkt)
         return this
     }
 

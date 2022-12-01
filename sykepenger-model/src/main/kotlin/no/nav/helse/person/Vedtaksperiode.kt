@@ -1872,8 +1872,12 @@ internal class Vedtaksperiode private constructor(
     internal fun sendRevurderingIgangsattEvent(revurderingseventyr: Revurderingseventyr, kilde: PersonHendelse) {
         revurderingseventyr.sendRevurderingIgangsattEvent(
             person = person,
-            initiertAvVedtaksperiode = id,
-            skjæringstidspunkt = skjæringstidspunkt,
+            initiertAvArbeidsgiver = organisasjonsnummer,
+            initiertAvVedtaksperiode = PersonObserver.RevurderingIgangsattEvent.VedtaksperiodeData(
+                id = id,
+                skjæringstidspunkt = skjæringstidspunkt,
+                periode = periode
+            ),
             kilde = kilde,
         )
     }

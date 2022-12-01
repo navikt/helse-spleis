@@ -204,8 +204,8 @@ interface PersonObserver {
     data class RevurderingIgangsattEvent(
         val revurderingsÅrsak: String,
         val kilde: UUID,
-        val initiertAvVedtaksperiode: UUID,
-        val skjæringstidspunkt: LocalDate,
+        val initiertAvArbeidsgiver: String,
+        val initiertAvVedtaksperiode: VedtaksperiodeData,
         val berørtePerioder: Map<String, List<VedtaksperiodeData>>
     ) {
         data class VedtaksperiodeData(
