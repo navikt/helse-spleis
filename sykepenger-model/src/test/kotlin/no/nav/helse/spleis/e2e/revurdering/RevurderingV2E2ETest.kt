@@ -68,7 +68,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -230,6 +229,39 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertDiff(0)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+    }
+
+    @Test
+    fun `starte revurdering av eldre skjæringstidspunkt, så revurdere nyere`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        nyttVedtak(1.april, 30.april)
+        nullstillTilstandsendringer()
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Feriedag)))
+        håndterYtelser(2.vedtaksperiode)
+
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(31.januar, 0.0)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+
+        nullstillTilstandsendringer()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(10.februar, Feriedag)))
+        håndterYtelser(2.vedtaksperiode)
+
+        assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(10.februar, 0.0)
+        assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertTilstander(2.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+        assertTilstander(3.vedtaksperiode, AVVENTER_REVURDERING)
+
+        nullstillTilstandsendringer()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.april, Feriedag)))
+
+        assertDag<Dag.Feriedag, Utbetalingsdag.UkjentDag>(20.april, null, null)
+        assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertTilstander(2.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+        assertTilstander(3.vedtaksperiode, AVVENTER_REVURDERING)
     }
 
     @Test
@@ -946,14 +978,14 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertVarsel(RV_VV_4, 1.vedtaksperiode.filter())
     }
 
-    private inline fun <reified D: Dag, reified UD: Utbetalingsdag>assertDag(dato: LocalDate, beløp: Double) {
+    private inline fun <reified D: Dag, reified UD: Utbetalingsdag>assertDag(dato: LocalDate, arbeidsgiverbeløp: Double?, personbeløp: Double? = 0.0) {
         inspektør.sykdomshistorikk.sykdomstidslinje()[dato].let {
             assertTrue(it is D) { "Forventet at $dato er ${D::class.simpleName} men var ${it::class.simpleName}"}
         }
         inspektør.sisteUtbetalingUtbetalingstidslinje()[dato].let {
             assertTrue(it is UD) { "Forventet at $dato er ${UD::class.simpleName} men var ${it::class.simpleName}"}
-            assertEquals(beløp.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
-            assertEquals(INGEN, it.økonomi.inspektør.personbeløp)
+            assertEquals(arbeidsgiverbeløp?.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(personbeløp?.daglig, it.økonomi.inspektør.personbeløp)
         }
     }
 

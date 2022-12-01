@@ -1700,6 +1700,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.revurderInntekt(hendelse)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
+            vedtaksperiode.revurderTidslinje(hendelse)
+        }
+
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
             overstyrArbeidsforhold: OverstyrArbeidsforhold
