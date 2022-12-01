@@ -949,7 +949,14 @@ internal class Vedtaksperiode private constructor(
             revurdering: Revurderingseventyr
         ) {
             if (revurdering.kanStarteRevurderingIDefaultTilstand(hendelse, overstyrt.forventerInntekt())) {
-                revurdering.inngåIRevurdering(vedtaksperiode.organisasjonsnummer, vedtaksperiode.id, hendelse, vedtaksperiode)
+                revurdering.inngåIRevurdering(
+                    vedtaksperiode.organisasjonsnummer,
+                    vedtaksperiode.id,
+                    vedtaksperiode.periode,
+                    vedtaksperiode.skjæringstidspunkt,
+                    hendelse,
+                    vedtaksperiode,
+                )
                 vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
             }
         }

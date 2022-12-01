@@ -206,8 +206,14 @@ interface PersonObserver {
         val kilde: UUID,
         val initiertAvVedtaksperiode: UUID,
         val skjæringstidspunkt: LocalDate,
-        val berørtePerioder: Map<String, List<UUID>>
-    )
+        val berørtePerioder: Map<String, List<VedtaksperiodeData>>
+    ) {
+        data class VedtaksperiodeData(
+            val id: UUID,
+            val periode: Periode,
+            val skjæringstidspunkt: LocalDate
+        )
+    }
 
     fun inntektsmeldingReplay(personidentifikator: Personidentifikator, vedtaksperiodeId: UUID) {}
     fun vedtaksperiodePåminnet(hendelseskontekst: Hendelseskontekst, påminnelse: Påminnelse) {}

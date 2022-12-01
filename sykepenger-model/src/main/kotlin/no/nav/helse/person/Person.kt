@@ -799,7 +799,7 @@ class Person private constructor(
 
     internal fun startRevurdering(overstyrtVedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse, revurdering: Revurderingseventyr) {
         arbeidsgivere.startRevurdering(overstyrtVedtaksperiode, hendelse, revurdering)
-        overstyrtVedtaksperiode.sendRevurderingIgangsattEvent(revurdering, hendelse) // er det mer interessant med vedtkasperioden som ble truffet av revurderingen
+        overstyrtVedtaksperiode.sendRevurderingIgangsattEvent(revurdering, hendelse)
     }
 
     internal fun slettUtgåtteSykmeldingsperioder(tom: LocalDate) {

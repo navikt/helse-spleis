@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.hendelser.Periode
 
 class Revurderingseventyr private constructor(private val hvorfor: RevurderingÅrsak) {
 
@@ -17,17 +18,25 @@ class Revurderingseventyr private constructor(private val hvorfor: RevurderingÅ
         fun arbeidsgiverperiode() = Revurderingseventyr(RevurderingÅrsak.ARBEIDSGIVERPERIODE)
     }
 
-    private val vedtaksperioder = mutableMapOf<String, MutableList<UUID>>()
+    private val vedtaksperioder = mutableMapOf<String, MutableList<PersonObserver.RevurderingIgangsattEvent.VedtaksperiodeData>>()
 
     internal fun inngåIRevurdering(
         orgnummer: String,
         vedtaksperiodeId: UUID,
+        periode: Periode,
+        skjæringstidspunkt: LocalDate,
         hendelse: IAktivitetslogg,
         vedtaksperiode: Vedtaksperiode
     ) {
         hendelse.kontekst(vedtaksperiode)
         // guard
-        vedtaksperioder.getOrPut(orgnummer){ mutableListOf() }.add(vedtaksperiodeId)
+        vedtaksperioder.getOrPut(orgnummer) { mutableListOf() }.add(
+            PersonObserver.RevurderingIgangsattEvent.VedtaksperiodeData(
+                id = vedtaksperiodeId,
+                skjæringstidspunkt = skjæringstidspunkt,
+                periode = periode
+            )
+        )
     }
 
     internal fun kanStarteRevurderingIDefaultTilstand( // burde bo i bliMed?
