@@ -1024,7 +1024,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun gjenopptaRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, første: Vedtaksperiode) {
-            hendelse.info("$this blir med i revurderingen igangsatt av $første")
+            hendelse.info("$vedtaksperiode blir med i revurderingen igangsatt av $første")
             vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
         }
 
