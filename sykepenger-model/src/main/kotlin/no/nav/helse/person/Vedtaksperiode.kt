@@ -1336,7 +1336,6 @@ internal class Vedtaksperiode private constructor(
                     harNødvendigOpplysningerFraArbeidsgiver(vedtaksperiode, hendelse)
                 )
             ) {
-                revurdering.inngåIRevurdering(vedtaksperiode.organisasjonsnummer, vedtaksperiode.id, hendelse, vedtaksperiode)
                 vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
             }
         }
@@ -1476,7 +1475,6 @@ internal class Vedtaksperiode private constructor(
             overstyrt: Vedtaksperiode,
             revurdering: Revurderingseventyr
         ) {
-            revurdering.inngåIRevurdering(vedtaksperiode.organisasjonsnummer, vedtaksperiode.id, hendelse, vedtaksperiode)
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
     }
@@ -1583,7 +1581,6 @@ internal class Vedtaksperiode private constructor(
             overstyrt: Vedtaksperiode,
             revurdering: Revurderingseventyr
         ) {
-            revurdering.inngåIRevurdering(vedtaksperiode.organisasjonsnummer, vedtaksperiode.id, hendelse, vedtaksperiode)
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
     }
@@ -1619,7 +1616,6 @@ internal class Vedtaksperiode private constructor(
             overstyrt: Vedtaksperiode,
             revurdering: Revurderingseventyr
         ) {
-            revurdering.inngåIRevurdering(vedtaksperiode.organisasjonsnummer, vedtaksperiode.id, hendelse, vedtaksperiode)
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
@@ -1796,7 +1792,6 @@ internal class Vedtaksperiode private constructor(
             overstyrt: Vedtaksperiode,
             revurdering: Revurderingseventyr
         ) {
-            revurdering.inngåIRevurdering(vedtaksperiode.organisasjonsnummer, vedtaksperiode.id, hendelse, vedtaksperiode)
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
@@ -2065,8 +2060,7 @@ internal class Vedtaksperiode private constructor(
             if (overstyrt.periode.starterEtter(vedtaksperiode.periode)) return
             if (!vedtaksperiode.forventerInntekt()) return hendelse.info("Revurderingen påvirker ikke denne perioden i AvsluttetUtenUtbetaling")
             hendelse.varsel(RV_RV_1)
-            revurdering.inngåIRevurdering(vedtaksperiode.organisasjonsnummer, vedtaksperiode.id, hendelse, vedtaksperiode)
-            //
+            // skal vedtaksperioden inngå i revurdering eller er vi en "omgjøring" fremfor revurdering
             vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
         }
 
