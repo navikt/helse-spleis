@@ -330,7 +330,9 @@ class Person private constructor(
 
     fun håndter(hendelse: OverstyrArbeidsgiveropplysninger) {
         hendelse.kontekst(this)
-        arbeidsgivere.håndterOverstyrArbeidsgiveropplysninger(hendelse)
+        check(arbeidsgivere.håndterOverstyrArbeidsgiveropplysninger(hendelse)) {
+            "Ingen vedtaksperioder håndterte overstyringen av arbeidsgiveropplysninger"
+        }
         håndterGjenoppta(hendelse)
     }
 

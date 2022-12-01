@@ -339,10 +339,12 @@ internal class Vedtaksperiode private constructor(
         return tilstand.håndter(this, overstyrArbeidsforhold)
     }
 
-    internal fun håndter(overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger): Boolean {
+    internal fun håndter(overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, vedtaksperioder: Iterable<Vedtaksperiode>): Boolean {
         if (!overstyrArbeidsgiveropplysninger.erRelevant(skjæringstidspunkt)) return false
         kontekst(overstyrArbeidsgiveropplysninger)
-        overstyrArbeidsgiveropplysninger.leggTil(hendelseIder)
+        vedtaksperioder.filter(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt)).forEach {
+            overstyrArbeidsgiveropplysninger.leggTil(it.hendelseIder)
+        }
         person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(overstyrArbeidsgiveropplysninger, this, this.skjæringstidspunkt, jurist)
         return true
     }
@@ -1842,8 +1844,7 @@ internal class Vedtaksperiode private constructor(
     internal fun ferdigstillRevurdering(hendelse: IAktivitetslogg, ferdigstiller: Vedtaksperiode) {
         if (ferdigstiller.skjæringstidspunkt != this.skjæringstidspunkt || ferdigstiller === this) return
         kontekst(hendelse)
-        tilstand.
-        ferdigstillRevurdering(this, hendelse)
+        tilstand.ferdigstillRevurdering(this, hendelse)
     }
 
     internal fun startRevurdering(arbeidsgivere: List<Arbeidsgiver>, hendelse: IAktivitetslogg, overstyrt: Vedtaksperiode, hvorfor: RevurderingÅrsak) {

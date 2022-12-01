@@ -6,7 +6,6 @@ import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.Migrate
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
-import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
@@ -33,7 +32,6 @@ import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsforholdMessage
-import no.nav.helse.spleis.meldinger.model.OverstyrInntektMedRefusjonsopplysningerMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrInntektMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrTidslinjeMessage
 import no.nav.helse.spleis.meldinger.model.PersonPåminnelseMessage
@@ -96,8 +94,6 @@ internal class TestHendelseMediator : IHendelseMediator {
         private set
     internal var lestOverstyrInntekt = false
         private set
-    internal var lestOverstyrArbeidsgiverOpplysninger = false
-        private set
     internal var lestOverstyrArbeidsforhold = false
         private set
     internal var lestReplayHendelser = false
@@ -153,14 +149,6 @@ internal class TestHendelseMediator : IHendelseMediator {
 
     override fun behandle(message: UtbetalingpåminnelseMessage, påminnelse: Utbetalingpåminnelse, context: MessageContext) {
         lestutbetalingpåminnelse = true
-    }
-
-    override fun behandle(
-        message: OverstyrInntektMedRefusjonsopplysningerMessage,
-        overstyrArbeidsgiverOpplysninger: OverstyrArbeidsgiveropplysninger,
-        context: MessageContext
-    ) {
-        lestOverstyrArbeidsgiverOpplysninger = true
     }
 
     override fun behandle(message: PåminnelseMessage, påminnelse: Påminnelse, context: MessageContext) {
@@ -219,7 +207,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestOverstyrTidslinje = true
     }
 
-    override fun behandle(message: OverstyrInntektMessage, overstyrInntekt: OverstyrInntekt, context: MessageContext) {
+    override fun behandle(message: OverstyrInntektMessage, overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, context: MessageContext) {
         lestOverstyrInntekt = true
     }
 

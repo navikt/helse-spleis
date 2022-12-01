@@ -34,7 +34,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
-import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.Varselkode.RV_OS_1
 import no.nav.helse.person.Varselkode.RV_SV_1
@@ -42,7 +41,6 @@ import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
-import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertHarHendelseIder
 import no.nav.helse.spleis.e2e.assertHarIkkeHendelseIder
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
@@ -83,6 +81,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class RevurderInntektTest : AbstractEndToEndTest() {
 
@@ -178,11 +177,11 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     fun `revurder inntekt ukjent skjæringstidspunkt`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         nullstillTilstandsendringer()
-        håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 2.januar)
-        assertFunksjonellFeil(Varselkode.RV_VV_12, AktivitetsloggFilter.person())
+        assertThrows<IllegalStateException> { håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 2.januar) }
+        assertIngenFunksjonelleFeil(AktivitetsloggFilter.person())
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertEquals(1, inspektør.utbetalinger.size)
-        assertEquals(Varselkode.RV_VV_12.varseltekst, observatør.avvisteRevurderinger.single().errors.single())
+        assertEquals(0, observatør.avvisteRevurderinger.size)
     }
 
     @Test

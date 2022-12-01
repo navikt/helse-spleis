@@ -128,7 +128,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyr inntekt med flere AG -- kan ikke overstyre perioden i AvventerBlokkerende`() {
+    fun `overstyr inntekt med flere AG -- kan overstyre perioden i AvventerBlokkerende`() {
         tilGodkjenning(1.januar, 31.januar, a1, a2)
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -136,25 +136,25 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         håndterOverstyrInntekt(19000.månedlig, a2, 1.januar)
         assertIngenFunksjonelleFeil()
         assertInntektForDato(20000.månedlig, 1.januar, inspektør = inspektør(a1))
-        assertInntektForDato(20000.månedlig, 1.januar, inspektør = inspektør(a2))
+        assertInntektForDato(19000.månedlig, 1.januar, inspektør = inspektør(a2))
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
         val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
 
-        assertEquals(480000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
-        assertEquals(480000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+        assertEquals(468000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+        assertEquals(468000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
         assertEquals(480000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+        assertEquals(3, vilkårsgrunnlag.avviksprosent?.roundToInt())
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(20000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
             assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(20000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+            assertEquals(19000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+            assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
         }
 
         assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)

@@ -16,7 +16,14 @@ internal class OverstyrInntektRiver(
         message.requireKey("aktørId", "fødselsnummer", "organisasjonsnummer", "månedligInntekt", "skjæringstidspunkt", "forklaring")
         message.interestedIn("subsumsjon") { require(it.path("paragraf").isTextual) }
         message.interestedIn("subsumsjon.paragraf", "subsumsjon.ledd", "subsumsjon.bokstav")
-        message.forbid("refusjonsopplysninger")
+        message.interestedIn("refusjonsopplysninger")
+        /*
+        message.requireArray("refusjonsopplysninger") {
+            require("fom", JsonNode::asLocalDate)
+            interestedIn("tom", JsonNode::asLocalDate)
+            requireKey("beløp")
+        }
+         */
     }
 
     override fun createMessage(packet: JsonMessage) = OverstyrInntektMessage(packet)

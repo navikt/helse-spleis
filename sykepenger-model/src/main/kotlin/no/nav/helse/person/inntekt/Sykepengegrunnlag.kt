@@ -186,8 +186,8 @@ internal class Sykepengegrunnlag(
         return kopierSykepengegrunnlag(resultat, deaktiverteArbeidsforhold)
     }
 
-    internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag? {
-        val builder = SaksbehandlerOverstyringer(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, null, subsumsjonObserver)
+    internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, opptjening: Opptjening?, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag? {
+        val builder = SaksbehandlerOverstyringer(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, opptjening, subsumsjonObserver)
         hendelse.overstyr(builder)
         val resultat = builder.resultat() ?: return null
         return kopierSykepengegrunnlag(resultat, deaktiverteArbeidsforhold)

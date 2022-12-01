@@ -818,7 +818,7 @@ internal class Arbeidsgiver private constructor(
 
     private fun håndter(hendelse: OverstyrInntekt) {
         hendelse.kontekst(this)
-        énHarHåndtert(hendelse) { håndter(it, vedtaksperioder) }
+        énHarHåndtert(hendelse) { håndter(it, vedtaksperioder.toList()) }
     }
 
     private fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
@@ -828,7 +828,7 @@ internal class Arbeidsgiver private constructor(
 
     private fun håndter(overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger): Boolean {
         overstyrArbeidsgiveropplysninger.kontekst(this)
-        return énHarHåndtert(overstyrArbeidsgiveropplysninger, Vedtaksperiode::håndter)
+        return énHarHåndtert(overstyrArbeidsgiveropplysninger) { håndter(it, vedtaksperioder.toList()) }
     }
 
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {

@@ -18,7 +18,6 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
-import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
@@ -826,16 +825,11 @@ internal fun AbstractEndToEndTest.håndterOverstyrInntekt(
     forklaring: String = "forklaring",
     subsumsjon: Subsumsjon? = null
 ) {
-    OverstyrInntekt(
-        meldingsreferanseId = meldingsreferanseId,
-        fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018.toString(),
-        aktørId = AbstractPersonTest.AKTØRID,
-        organisasjonsnummer = orgnummer,
-        inntekt = inntekt,
-        skjæringstidspunkt = skjæringstidspunkt,
-        forklaring = forklaring,
-        subsumsjon = subsumsjon
-    ).håndter(Person::håndter)
+    håndterOverstyrArbeidsgiveropplysninger(
+        skjæringstidspunkt,
+        listOf(OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, forklaring, subsumsjon, emptyList())),
+        meldingsreferanseId
+    )
 }
 
 internal fun AbstractEndToEndTest.håndterOverstyrArbeidsgiveropplysninger(

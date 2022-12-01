@@ -3,17 +3,16 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
@@ -163,7 +162,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     }
 
     private val testgrunnlag
-        get() = object : VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement(UUID.randomUUID(), 1.januar, Inntekt.INGEN.sykepengegrunnlag) {
+        get() = object : VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement(UUID.randomUUID(), 1.januar, Inntekt.INGEN.sykepengegrunnlag, null) {
             override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {}
             override fun vilkårsgrunnlagtype() = "testgrunnlag"
             override fun overstyrInntekt(
@@ -178,7 +177,11 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                 subsumsjonObserver: SubsumsjonObserver
             ): VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
 
-            override fun kopierMed(sykepengegrunnlag: Sykepengegrunnlag): VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement {
+            override fun kopierMed(
+                hendelse: IAktivitetslogg,
+                sykepengegrunnlag: Sykepengegrunnlag,
+                subsumsjonObserver: SubsumsjonObserver
+            ): VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement {
                 throw IllegalStateException()
             }
         }
