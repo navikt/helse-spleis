@@ -135,6 +135,8 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         private set
     internal lateinit var vilkårsgrunnlagId: UUID
         private set
+    private lateinit var type: String
+    internal val infotrygd get() = type == "Infotrygd"
 
     init {
         grunnlagsdata.accept(this)
@@ -160,6 +162,7 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         this.vurdertOk = vurdertOk
         this.inntektskilde = sykepengegrunnlag.inntektskilde()
         this.vilkårsgrunnlagId = vilkårsgrunnlagId
+        this.type = "Spleis"
     }
 
     override fun postVisitInfotrygdVilkårsgrunnlag(
@@ -170,6 +173,7 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
     ) {
         this.sykepengegrunnlag = sykepengegrunnlag
         this.vilkårsgrunnlagId = vilkårsgrunnlagId
+        this.type = "Infotrygd"
     }
 
     override fun preVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {
