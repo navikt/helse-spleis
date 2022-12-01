@@ -62,7 +62,7 @@ internal class RevurderingHendelseTest : AbstractEndToEndTest() {
             this bleForårsaketAv "KORRIGERT_SØKNAD" grunnet søknadId
         }
         revurderingIgangsattEvent(1) {
-            this bleForårsaketAv "INNTEKT" grunnet overstyringId
+            this bleForårsaketAv "ARBEIDSGIVEROPPLYSNINGER" grunnet overstyringId
         }
     }
 
@@ -76,7 +76,7 @@ internal class RevurderingHendelseTest : AbstractEndToEndTest() {
         val periode2 = observatør.utbetalteVedtaksperioder.last()
 
         revurderingIgangsattEvent {
-            this bleForårsaketAv "INNTEKT" grunnet overstyringId
+            this bleForårsaketAv "ARBEIDSGIVEROPPLYSNINGER" grunnet overstyringId
             this medførteRevurderingAv (periode1 og periode2)
             assertEquals(setOf(a1, a2), this.berørtePerioder.keys)
         }
@@ -98,7 +98,7 @@ internal class RevurderingHendelseTest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar, meldingsreferanseId = overstyringId)
 
         revurderingIgangsattEvent {
-            this bleForårsaketAv "INNTEKT" grunnet overstyringId
+            this bleForårsaketAv "ARBEIDSGIVEROPPLYSNINGER" grunnet overstyringId
             this bleInitiertAv januar medSkjæringstidspunkt 1.januar
             this medførteRevurderingAv (januar og februar og mars og april)
         }

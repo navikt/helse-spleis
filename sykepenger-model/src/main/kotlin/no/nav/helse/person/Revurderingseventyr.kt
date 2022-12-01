@@ -14,21 +14,24 @@ class Revurderingseventyr private constructor(private val hvorfor: List<Revurder
         fun arbeidsforhold() = Revurderingseventyr(RevurderingÅrsak.ARBEIDSFORHOLD)
         fun korrigertSøknad() = Revurderingseventyr(RevurderingÅrsak.KORRIGERT_SØKNAD)
         fun sykdomstidslinje() = Revurderingseventyr(RevurderingÅrsak.SYKDOMSTIDSLINJE)
-        fun inntekt() = Revurderingseventyr(RevurderingÅrsak.INNTEKT)
+        fun arbeidsgiveropplysninger() = Revurderingseventyr(RevurderingÅrsak.ARBEIDSGIVEROPPLYSNINGER)
         fun arbeidsgiverperiode() = Revurderingseventyr(RevurderingÅrsak.ARBEIDSGIVERPERIODE)
     }
 
     private val vedtaksperioder = mutableMapOf<String, MutableList<UUID>>()
 
-    internal fun inngåIRevurdering(orgnummer: String, vedtaksperiodeId: UUID) {
-        if (vedtaksperioder.contains(orgnummer)) {
-            vedtaksperioder[orgnummer]!!.add(vedtaksperiodeId)
-        } else {
-            vedtaksperioder[orgnummer] = mutableListOf(vedtaksperiodeId)
-        }
+    internal fun inngåIRevurdering(
+        orgnummer: String,
+        vedtaksperiodeId: UUID,
+        hendelse: IAktivitetslogg,
+        vedtaksperiode: Vedtaksperiode
+    ) {
+        hendelse.kontekst(vedtaksperiode)
+        // guard
+        vedtaksperioder.getOrPut(orgnummer){ mutableListOf() }.add(vedtaksperiodeId)
     }
 
-    internal fun kanStarteRevurderingIDefaultTilstand(
+    internal fun kanStarteRevurderingIDefaultTilstand( // burde bo i bliMed?
         hendelse: IAktivitetslogg,
         overstyrtForventerInntekt: Boolean
     ): Boolean {
@@ -63,26 +66,29 @@ class Revurderingseventyr private constructor(private val hvorfor: List<Revurder
 
     internal fun sendRevurderingIgangsattEvent(
         person: Person,
-        initertAvVedtaksperiode: UUID,
+        initiertAvVedtaksperiode: UUID,
         skjæringstidspunkt: LocalDate,
         kilde: PersonHendelse,
     ) {
         if (vedtaksperioder.isEmpty()) {
-            return kilde.info("Sendte ikke ut et revurdering-igangsatt-event fordi ingen vedtaksperioder inngikk i revurderingen")
+            return kilde.info("Sendte ikke ut et revurdering-igangsatt-event fordi ingen vedtaksperioder inngikk i revurderingen") // rART?
         }
         person.sendRevurderingIgangsattEvent(
             PersonObserver.RevurderingIgangsattEvent(
                 revurderingsÅrsak = hvorfor.map { it.name },
                 berørtePerioder = vedtaksperioder.toMap(),
                 kilde = kilde.meldingsreferanseId(),
-                initiertAvVedtaksperiode = initertAvVedtaksperiode,
+                initiertAvVedtaksperiode = initiertAvVedtaksperiode,
                 skjæringstidspunkt = skjæringstidspunkt
             )
         )
     }
 
+    fun nySenerePeriodePåSammeSkjæringstidspunkt(starterEtter: Boolean, sammeSkjæringstidspunkt: Boolean) =
+        this skyldes RevurderingÅrsak.NY_PERIODE && starterEtter && sammeSkjæringstidspunkt
+
     private enum class RevurderingÅrsak {
-        ARBEIDSGIVERPERIODE, INNTEKT, SYKDOMSTIDSLINJE, NY_PERIODE, ARBEIDSFORHOLD, KORRIGERT_SØKNAD
+        ARBEIDSGIVERPERIODE, ARBEIDSGIVEROPPLYSNINGER, SYKDOMSTIDSLINJE, NY_PERIODE, ARBEIDSFORHOLD, KORRIGERT_SØKNAD
     }
 
 }
