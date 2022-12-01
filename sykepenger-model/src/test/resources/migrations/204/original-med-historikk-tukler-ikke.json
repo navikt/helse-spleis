@@ -1,0 +1,99 @@
+{
+  "arbeidsgivere": [
+    {
+      "utbetalinger": [
+        {
+          "korrelasjonsId": "9622d55c-9ae0-4d25-bbc7-66ba6b0f7442",
+          "tidsstempel": "2020-01-01T01:01:01.1234",
+          "fom": "2020-07-01",
+          "tom": "2020-07-30",
+          "status": "ANNULLERT",
+          "arbeidsgiverOppdrag": {
+            "linjer": [
+              "not empty"
+            ]
+          },
+          "personOppdrag": {
+            "linjer": []
+          }
+        }
+      ],
+      "sykdomshistorikk": [
+        {
+          "hendelseId": null,
+          "hendelseSykdomstidslinje": {
+            "låstePerioder": [],
+            "periode": {
+              "fom": "2022-01-01",
+              "tom": "2022-01-31"
+            },
+            "dager": [
+              {
+                "fom": "2022-01-01",
+                "tom": "2022-01-31",
+                "type": "SYKEDAG",
+                "kilde": {
+                  "type": "Søknad",
+                  "id": "8c810244-6050-4406-bb02-c98c5d6aaf61",
+                  "tidsstempel": "2020-07-02T22:00:00"
+                },
+                "grad": 100
+              }
+            ]
+          },
+          "beregnetSykdomstidslinje": {
+            "låstePerioder": [],
+            "periode": {
+              "fom": "2022-01-01",
+              "tom": "2022-01-31"
+            },
+            "dager": [
+              {
+                "fom": "2022-01-01",
+                "tom": "2022-01-31",
+                "type": "SYKEDAG",
+                "kilde": {
+                  "type": "Søknad",
+                  "id": "8c810244-6050-4406-bb02-c98c5d6aaf61",
+                  "tidsstempel": "2020-07-02T22:00:00"
+                },
+                "grad": 100
+              }
+            ]
+          }
+        }
+      ],
+      "vedtaksperioder": [],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "sykdomstidslinje": {
+              "låstePerioder": [],
+              "periode": {
+                "fom": "2020-07-01",
+                "tom": "2020-07-16"
+              },
+              "dager": [
+                {
+                  "fom": "2020-07-01",
+                  "tom": "2020-07-16",
+                  "type": "SYKEDAG",
+                  "kilde": {
+                    "type": "Søknad",
+                    "id": "8c810244-6050-4406-bb02-c98c5d6aaf61",
+                    "tidsstempel": "2020-07-02T22:00:00"
+                  },
+                  "grad": 100
+                }
+              ]
+            },
+            "id": "51eac032-2a59-450c-b479-8a5b5a4f5bad",
+            "fom": "2020-07-01",
+            "tom": "2020-07-16",
+            "tilstand": "AVSLUTTET"
+          }
+        }
+      ]
+    }
+  ]
+}
