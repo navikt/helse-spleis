@@ -15,9 +15,10 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.NAV
@@ -26,6 +27,7 @@ import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -334,6 +336,128 @@ internal class SykepengegrunnlagTest {
         assertNotEquals(inntekt, sykepengegrunnlag.inspektør.sykepengegrunnlag)
         assertEquals(overstyrt, sykepengegrunnlag.inspektør.sykepengegrunnlag)
         assertEquals(overstyrt, sykepengegrunnlag.inspektør.skjønnsmessigFastsattÅrsinntekt)
+    }
+
+    @Test
+    fun `overstyre inntekt og refusjon - endre til samme`() {
+        val opprinnelig = listOf(
+            ArbeidsgiverInntektsopplysning("a1", Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig), RefusjonsopplysningerBuilder().apply {
+                leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
+            }.build()),
+            ArbeidsgiverInntektsopplysning("a2", Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig), RefusjonsopplysningerBuilder().apply {
+                leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, INGEN), LocalDateTime.now())
+            }.build()),
+        )
+        val overstyring = Sykepengegrunnlag.SaksbehandlerOverstyringer(1.januar, opprinnelig, null, NullObserver)
+        val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", Saksbehandler(1.januar, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
+            leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
+        }.build())
+        overstyring.leggTilInntekt(endretOpplysning)
+
+        assertNull(overstyring.resultat())
+    }
+    @Test
+    fun `overstyre inntekt og refusjon - endrer kun refusjon`() {
+        val a1Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
+        val a2Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig)
+        val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
+            leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, INGEN), LocalDateTime.now())
+        }.build()
+        val a1Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
+            leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
+        }.build()
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", a1Inntektsopplysning, a1Refusjonsopplysninger)
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Inntektsopplysning, a2Refusjonsopplysninger)
+        val opprinnelig = listOf(a1Opplysning, a2Opplysning)
+
+        val overstyring = Sykepengegrunnlag.SaksbehandlerOverstyringer(1.januar, opprinnelig, null, NullObserver)
+        val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
+            leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 2000.månedlig), LocalDateTime.now())
+        }.build()
+        val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", Saksbehandler(1.januar, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now()), a1EndretRefusjonsopplysninger)
+        overstyring.leggTilInntekt(endretOpplysning)
+
+        val forventetOpplysning = ArbeidsgiverInntektsopplysning("a1", a1Inntektsopplysning, a1EndretRefusjonsopplysninger)
+        assertEquals(listOf(forventetOpplysning, a2Opplysning), overstyring.resultat())
+    }
+    @Test
+    fun `overstyre inntekt og refusjon - endrer kun inntekt`() {
+        val a1Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
+        val a2Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig)
+        val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
+            leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, INGEN), LocalDateTime.now())
+        }.build()
+        val a1Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
+            leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
+        }.build()
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", a1Inntektsopplysning, a1Refusjonsopplysninger)
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Inntektsopplysning, a2Refusjonsopplysninger)
+        val opprinnelig = listOf(a1Opplysning, a2Opplysning)
+
+        val overstyring = Sykepengegrunnlag.SaksbehandlerOverstyringer(1.januar, opprinnelig, null, NullObserver)
+
+        val a1EndretInntektsopplysning = Saksbehandler(1.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
+        val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
+            leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
+        }.build()
+
+        val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", a1EndretInntektsopplysning, a1EndretRefusjonsopplysninger)
+        overstyring.leggTilInntekt(endretOpplysning)
+
+        val forventetOpplysning = ArbeidsgiverInntektsopplysning("a1", a1EndretInntektsopplysning, a1Refusjonsopplysninger)
+        assertEquals(listOf(forventetOpplysning, a2Opplysning), overstyring.resultat())
+    }
+    @Test
+    fun `overstyre inntekt og refusjon - forsøker å endre Infotrygd-inntekt`() {
+        val a1Inntektsopplysning = Infotrygd(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig)
+        val a2Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig)
+        val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
+            leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, INGEN), LocalDateTime.now())
+        }.build()
+        val a1Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
+            leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
+        }.build()
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", a1Inntektsopplysning, a1Refusjonsopplysninger)
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Inntektsopplysning, a2Refusjonsopplysninger)
+        val opprinnelig = listOf(a1Opplysning, a2Opplysning)
+
+        val overstyring = Sykepengegrunnlag.SaksbehandlerOverstyringer(1.januar, opprinnelig, null, NullObserver)
+
+        val a1EndretInntektsopplysning = Saksbehandler(1.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
+        val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
+            leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
+        }.build()
+
+        val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", a1EndretInntektsopplysning, a1EndretRefusjonsopplysninger)
+        overstyring.leggTilInntekt(endretOpplysning)
+
+        assertNull(overstyring.resultat())
+    }
+    @Test
+    fun `overstyre inntekt og refusjon - forsøker å legge til ny arbeidsgiver`() {
+        val a1Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
+        val a2Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig)
+        val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
+            leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, INGEN), LocalDateTime.now())
+        }.build()
+        val a1Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
+            leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
+        }.build()
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", a1Inntektsopplysning, a1Refusjonsopplysninger)
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Inntektsopplysning, a2Refusjonsopplysninger)
+        val opprinnelig = listOf(a1Opplysning, a2Opplysning)
+
+        val overstyring = Sykepengegrunnlag.SaksbehandlerOverstyringer(1.januar, opprinnelig, null, NullObserver)
+
+        val a3EndretInntektsopplysning = Saksbehandler(1.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
+        val a3EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
+            leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
+        }.build()
+
+        val endretOpplysning = ArbeidsgiverInntektsopplysning("a3", a3EndretInntektsopplysning, a3EndretRefusjonsopplysninger)
+        overstyring.leggTilInntekt(endretOpplysning)
+
+        assertNull(overstyring.resultat())
     }
 
     @Test

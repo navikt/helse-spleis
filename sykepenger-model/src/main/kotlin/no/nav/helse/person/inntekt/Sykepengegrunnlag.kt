@@ -180,14 +180,14 @@ internal class Sykepengegrunnlag(
         subsumsjonObserver: SubsumsjonObserver,
         opptjening: Opptjening
     ): Sykepengegrunnlag {
-        val builder = SaksbehandlerOverstyringer(opptjening, subsumsjonObserver)
+        val builder = SaksbehandlerOverstyringer(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, opptjening, subsumsjonObserver)
         hendelse.overstyr(builder)
         val resultat = builder.resultat() ?: return this
         return kopierSykepengegrunnlag(resultat, deaktiverteArbeidsforhold)
     }
 
     internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag? {
-        val builder = SaksbehandlerOverstyringer(null, subsumsjonObserver)
+        val builder = SaksbehandlerOverstyringer(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, null, subsumsjonObserver)
         hendelse.overstyr(builder)
         val resultat = builder.resultat() ?: return null
         return kopierSykepengegrunnlag(resultat, deaktiverteArbeidsforhold)
@@ -329,7 +329,12 @@ internal class Sykepengegrunnlag(
         ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD
     }
 
-    inner class SaksbehandlerOverstyringer(private val opptjening: Opptjening?, private val subsumsjonObserver: SubsumsjonObserver) {
+    internal class SaksbehandlerOverstyringer(
+        private val skjæringstidspunkt: LocalDate,
+        private val opprinneligArbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
+        private val opptjening: Opptjening?,
+        private val subsumsjonObserver: SubsumsjonObserver
+    ) {
         private val nyeInntektsopplysninger = mutableListOf<ArbeidsgiverInntektsopplysning>()
 
         internal fun leggTilInntekt(organisasjonsnummer: String, meldingsreferanseId: UUID, inntekt: Inntekt, forklaring: String, subsumsjon: Subsumsjon?) {
@@ -340,8 +345,8 @@ internal class Sykepengegrunnlag(
             nyeInntektsopplysninger.add(arbeidsgiverInntektsopplysning)
         }
 
-        internal fun resultat() = arbeidsgiverInntektsopplysninger.overstyrInntekter(opptjening, nyeInntektsopplysninger, subsumsjonObserver).takeUnless { resultat ->
-            resultat == arbeidsgiverInntektsopplysninger
+        internal fun resultat() = opprinneligArbeidsgiverInntektsopplysninger.overstyrInntekter(opptjening, nyeInntektsopplysninger, subsumsjonObserver).takeUnless { resultat ->
+            resultat == opprinneligArbeidsgiverInntektsopplysninger
         }
     }
 
