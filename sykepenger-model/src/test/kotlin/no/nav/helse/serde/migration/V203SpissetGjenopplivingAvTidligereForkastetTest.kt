@@ -52,4 +52,12 @@ internal class V203SpissetGjenopplivingAvTidligereForkastetTest : MigrationTest(
             LocalDateTime.parse(result.path("arbeidsgivere").single().path("sykdomshistorikk")[0].path("tidsstempel").asText())
         }
     }
+
+    @Test
+    fun `endrer ikke arbeidsgivere som ikke skal endres`() {
+        assertMigration(
+            expectedJson = "/migrations/203/expected-med-historikk-tukler-ikke.json",
+            originalJson = "/migrations/203/original-med-historikk-tukler-ikke.json"
+        )
+    }
 }
