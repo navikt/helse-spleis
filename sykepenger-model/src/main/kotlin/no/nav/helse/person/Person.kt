@@ -331,6 +331,7 @@ class Person private constructor(
     fun håndter(hendelse: OverstyrArbeidsgiveropplysninger) {
         hendelse.kontekst(this)
         arbeidsgivere.håndterOverstyrArbeidsgiveropplysninger(hendelse)
+        håndterGjenoppta(hendelse)
     }
 
     fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold) {

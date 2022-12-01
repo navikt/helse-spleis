@@ -21,6 +21,11 @@ abstract class Inntektsopplysning protected constructor(
     internal open fun kanLagres(other: Inntektsopplysning) = this != other
     internal open fun skalErstattesAv(other: Inntektsopplysning) = this == other
 
+    internal open fun overstyres(ny: Inntektsopplysning): Inntektsopplysning {
+        if (ny.omregnetÅrsinntekt() == this.omregnetÅrsinntekt()) return this
+        return ny
+    }
+
     final override fun equals(other: Any?) = other is Inntektsopplysning && erSamme(other)
 
     final override fun hashCode(): Int {

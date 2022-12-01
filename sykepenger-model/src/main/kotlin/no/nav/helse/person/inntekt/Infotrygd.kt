@@ -19,6 +19,8 @@ internal class Infotrygd(
         visitor.visitInfotrygd(this, id, dato, hendelseId, beløp, tidsstempel)
     }
 
+    override fun overstyres(ny: Inntektsopplysning) = this
+
     override fun omregnetÅrsinntekt(): Inntekt = beløp
 
     override fun rapportertInntekt(): Inntekt = error("Infotrygd har ikke grunnlag for sammenligningsgrunnlag")

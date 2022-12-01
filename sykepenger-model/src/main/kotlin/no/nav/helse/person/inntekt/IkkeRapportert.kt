@@ -17,6 +17,8 @@ internal class IkkeRapportert(
         visitor.visitIkkeRapportert(id, dato, tidsstempel)
     }
 
+    override fun overstyres(ny: Inntektsopplysning) = ny
+
     override fun omregnetÅrsinntekt() = Inntekt.INGEN
 
     override fun rapportertInntekt() = Inntekt.INGEN

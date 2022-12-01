@@ -20,6 +20,11 @@ internal class Inntektsmelding(
         visitor.visitInntektsmelding(this, id, dato, hendelseId, beløp, tidsstempel)
     }
 
+    override fun overstyres(ny: Inntektsopplysning): Inntektsopplysning {
+        if (ny !is Saksbehandler) return this
+        return super.overstyres(ny)
+    }
+
     override fun subsumerArbeidsforhold(
         subsumsjonObserver: SubsumsjonObserver,
         organisasjonsnummer: String,

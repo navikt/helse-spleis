@@ -28,6 +28,12 @@ class Saksbehandler internal constructor(
         visitor.visitSaksbehandler(this, id, dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
     }
 
+    override fun overstyres(ny: Inntektsopplysning): Inntektsopplysning {
+        if (ny !is Saksbehandler) return this
+        if (ny.beløp == this.beløp) return this
+        return ny
+    }
+
     override fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) = takeIf { it.dato == skjæringstidspunkt }
     override fun omregnetÅrsinntekt(): Inntekt = beløp
 

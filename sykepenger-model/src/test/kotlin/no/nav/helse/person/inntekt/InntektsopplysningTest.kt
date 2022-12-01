@@ -4,6 +4,7 @@ import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.lagre
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -14,6 +15,24 @@ import org.junit.jupiter.api.Test
 internal class InntektsopplysningTest {
     private companion object {
         private val INNTEKT = 25000.månedlig
+    }
+
+    @Test
+    fun overstyres() {
+        val im1 = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), INNTEKT)
+        val im2 = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), INNTEKT)
+        val saksbehandler1 = Saksbehandler(UUID.randomUUID(), 20.januar, UUID.randomUUID(), 20000.månedlig, "", null)
+        val saksbehandler2 = Saksbehandler(UUID.randomUUID(), 20.januar, UUID.randomUUID(), 20000.månedlig, "", null)
+        val saksbehandler3 = Saksbehandler(UUID.randomUUID(), 20.januar, UUID.randomUUID(), 30000.månedlig, "", null)
+        val saksbehandler4 = Saksbehandler(UUID.randomUUID(), 20.januar, UUID.randomUUID(), INGEN, "", null)
+        val ikkeRapportert = IkkeRapportert(UUID.randomUUID(), 1.januar)
+
+        assertEquals(saksbehandler1, im1.overstyres(saksbehandler1))
+        assertEquals(saksbehandler1, saksbehandler1.overstyres(saksbehandler2))
+        assertEquals(saksbehandler3, saksbehandler1.overstyres(saksbehandler3))
+        assertEquals(im1, im1.overstyres(im2))
+        assertEquals(saksbehandler4, ikkeRapportert.overstyres(saksbehandler4))
+        assertEquals(im1, ikkeRapportert.overstyres(im1))
     }
 
     @Test

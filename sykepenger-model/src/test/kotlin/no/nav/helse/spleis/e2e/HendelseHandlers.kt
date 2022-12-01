@@ -17,6 +17,7 @@ import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
@@ -57,9 +58,14 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
+import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
+import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.tilOverstyrt
 import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -830,6 +836,36 @@ internal fun AbstractEndToEndTest.håndterOverstyrInntekt(
         forklaring = forklaring,
         subsumsjon = subsumsjon
     ).håndter(Person::håndter)
+}
+
+internal fun AbstractEndToEndTest.håndterOverstyrArbeidsgiveropplysninger(
+    skjæringstidspunkt: LocalDate,
+    arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>,
+    meldingsreferanseId: UUID = UUID.randomUUID()
+) {
+    OverstyrArbeidsgiveropplysninger(
+        meldingsreferanseId = meldingsreferanseId,
+        fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018.toString(),
+        aktørId = AbstractPersonTest.AKTØRID,
+        skjæringstidspunkt = skjæringstidspunkt,
+        arbeidsgiveropplysninger = arbeidsgiveropplysninger.tilOverstyrt(meldingsreferanseId, skjæringstidspunkt)
+    ).håndter(Person::håndter)
+}
+
+internal class OverstyrtArbeidsgiveropplysning(
+    private val orgnummer: String,
+    private val inntekt: Inntekt,
+    private val forklaring: String,
+    private val subsumsjon: Subsumsjon?,
+    private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>
+) {
+    internal companion object {
+        internal fun List<OverstyrtArbeidsgiveropplysning>.tilOverstyrt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) = map {
+            ArbeidsgiverInntektsopplysning(it.orgnummer, Saksbehandler(skjæringstidspunkt, meldingsreferanseId, it.inntekt, it.forklaring, it.subsumsjon, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
+                it.refusjonsopplysninger.forEach { (fom, tom, refusjonsbeløp) -> leggTil(Refusjonsopplysning(meldingsreferanseId, fom, tom, refusjonsbeløp), LocalDateTime.now())}
+            }.build())
+        }
+    }
 }
 
 internal fun AbstractEndToEndTest.håndterOverstyrTidslinje(
