@@ -23,15 +23,24 @@ class Revurderingseventyr private constructor(private val hvorfor: RevurderingÅ
     internal fun inngåIRevurdering(
         orgnummer: String,
         vedtaksperiodeId: UUID,
-        periode: Periode,
         skjæringstidspunkt: LocalDate,
-        skalInngåIRevurdering: Boolean,
-        vedInngåelse: () -> Unit = {},
+        periode: Periode,
+        overstyrtSkjæringstidspunkt: LocalDate,
+        overstyrtPeriode: Periode,
+        settKontekst: () -> Unit,
+        skalInngåIRevurdering: () -> Boolean,
+        dersomInngått: () -> Unit = {},
         doAnyway: () -> Unit = {}
     ) {
-        if (!skalInngåIRevurdering) return doAnyway()
+        // om endringen gjelder et nyere skjæringstidspunkt så trenger vi ikke bryr oss
+        if (overstyrtSkjæringstidspunkt > skjæringstidspunkt) return
+        // hvis endringen treffer samme skjæringstidspunkt, men en nyere nyopprettet periode, da trenger vi ikke bli med
+        if (nySenerePeriodePåSammeSkjæringstidspunkt(periode, overstyrtPeriode, skjæringstidspunkt, overstyrtSkjæringstidspunkt)) return
+
+        settKontekst()
+        if (!skalInngåIRevurdering()) return doAnyway()
         else inngå(orgnummer, vedtaksperiodeId, skjæringstidspunkt, periode).also {
-            vedInngåelse()
+            dersomInngått()
         }
     }
 
@@ -78,8 +87,16 @@ class Revurderingseventyr private constructor(private val hvorfor: RevurderingÅ
         return true
     }
 
-    internal fun nySenerePeriodePåSammeSkjæringstidspunkt(starterEtter: Boolean, sammeSkjæringstidspunkt: Boolean) =
-        this skyldes RevurderingÅrsak.NY_PERIODE && starterEtter && sammeSkjæringstidspunkt
+    private fun nySenerePeriodePåSammeSkjæringstidspunkt(
+        periode: Periode,
+        overstyrtPeriode: Periode,
+        skjæringstidspunkt: LocalDate,
+        overstyrtSkjæringstidspunkt: LocalDate
+    ): Boolean {
+        val starterEtter = overstyrtPeriode.starterEtter(periode)
+        val sammeSkjæringstidspunkt = overstyrtSkjæringstidspunkt == skjæringstidspunkt
+        return this skyldes RevurderingÅrsak.NY_PERIODE && starterEtter && sammeSkjæringstidspunkt
+    }
 
     internal fun sendRevurderingIgangsattEvent(
         person: Person,
