@@ -68,8 +68,9 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.Varselkode.Companion.`Mottatt søknad out of order`
+import no.nav.helse.person.Varselkode.Companion.`Mottatt søknad out of order innenfor 18 dager`
 import no.nav.helse.person.Varselkode.Companion.`Mottatt søknad som delvis overlapper`
-import no.nav.helse.person.Varselkode.Companion.`Mottatt søknad som overlapper helt`
+import no.nav.helse.person.Varselkode.Companion.`Mottatt søknad som overlapper`
 import no.nav.helse.person.Varselkode.RV_AY_10
 import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.Varselkode.RV_OO_1
@@ -358,20 +359,23 @@ internal class Vedtaksperiode private constructor(
 
     internal fun nekterOpprettelseAvNyPeriode(ny: Vedtaksperiode, hendelse: Søknad) {
         if (ny.periode.starterEtter(this.periode)) return
+        if (this.arbeidsgiver !== ny.arbeidsgiver) return
         kontekst(hendelse)
-        if (this.arbeidsgiver === ny.arbeidsgiver && this.periode.overlapperMed(ny.periode)) return hendelse.funksjonellFeil(`Mottatt søknad som overlapper helt`)
-
+        if (this.periode.overlapperMed(ny.periode)) return hendelse.funksjonellFeil(`Mottatt søknad som overlapper`)
         // Vi er litt runde i kantene før perioden er utbetalt
         if (!this.utbetalinger.harAvsluttede() && !this.utbetalinger.utbetales()) return
         // Vi er litt strengere etter perioden er utbetalt
-        if (this.arbeidsgiver === ny.arbeidsgiver && this.erMindreEnn16DagerEtter(ny)) return hendelse.funksjonellFeil(`Mottatt søknad out of order`)
 
-        // Guarder med å ikke endre skjæringstidspunkt tilbake i tid.
-        // 🗯 At skjæringstidspunktet flyttes tilbake er ikke farlig ettersom vi da starter revurdering og vil vilkårsprøve på nytt
-        // Det som faktisk kan bli feil er perioder som overlapper og skjæringstidspunktet ikke endres, for da endres ikke sykepengegrunnlaget seg
-        // og vi kommer til å utbetale basert på skatteopplysninger for den ny arbeidsgiveren
-        if (ny.starterFørOgOverlapperMed(this)) return hendelse.funksjonellFeil(`Mottatt søknad som overlapper helt`)
-        if (this.periode.erRettFør(ny.periode)) return hendelse.funksjonellFeil(`Mottatt søknad out of order`)
+        if (this.påvirkerArbeidsgiverperioden(ny)) return hendelse.funksjonellFeil(`Mottatt søknad out of order innenfor 18 dager`)
+        if (ny.periode.erRettFør(this.periode)) return hendelse.funksjonellFeil(`Mottatt søknad out of order`)
+    }
+
+    private fun påvirkerArbeidsgiverperioden(ny: Vedtaksperiode): Boolean {
+        val dagerMellom = ny.periode.periodeMellom(this.periode.start)?.count() ?: return false
+        // dersom "ny" slutter på en fredag, så starter ikke oppholdstelling før påfølgende mandag.
+        // det kan derfor være mer enn 16 dager avstand mellom periodene, og arbeidsgiverperioden kan være den samme
+        // Derfor bruker vi tallet 18 fremfor kanskje det forventende 16…
+        return dagerMellom < 18L
     }
 
     internal fun håndterRevurdertUtbetaling(revurdertUtbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg, other: Vedtaksperiode) {
@@ -389,9 +393,6 @@ internal class Vedtaksperiode private constructor(
 
     internal fun erVedtaksperiodeRettFør(other: Vedtaksperiode) =
         this.sykdomstidslinje.erRettFør(other.sykdomstidslinje)
-
-    private fun starterFørOgOverlapperMed(other: Vedtaksperiode) =
-        this.periode.overlapperMed(other.periode) && this før other
 
     internal fun erSykeperiodeAvsluttetUtenUtbetalingRettFør(other: Vedtaksperiode) =
         this.sykdomstidslinje.erRettFør(other.sykdomstidslinje) && this.tilstand == AvsluttetUtenUtbetaling
@@ -1861,11 +1862,6 @@ internal class Vedtaksperiode private constructor(
         tilstand.valider(this, periode, skjæringstidspunkt, arbeidsgiver, ytelser, infotrygdhistorikk)
     }
 
-    private fun erMindreEnn16DagerEtter(ny: Vedtaksperiode): Boolean {
-        val dagerMellom = ny.periode.periodeMellom(this.periode.start)?.count() ?: return false
-        return dagerMellom < 16L
-    }
-
     internal object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_GODKJENNING_REVURDERING
 
@@ -2071,6 +2067,7 @@ internal class Vedtaksperiode private constructor(
                     keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer)
                 )
                 inntektsmelding.info("Revurdering blokkeres fordi det finnes nyere skjæringstidspunkt, og det mangler funksjonalitet for å håndtere dette.")
+                inntektsmelding.trimLeft(vedtaksperiode.periode.endInclusive)
                 return vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
             }
 

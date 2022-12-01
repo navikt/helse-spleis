@@ -17,6 +17,7 @@ import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.november
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -35,6 +36,8 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
+import no.nav.helse.person.Varselkode.Companion.`Mottatt søknad out of order`
+import no.nav.helse.person.Varselkode.Companion.`Mottatt søknad out of order innenfor 18 dager`
 import no.nav.helse.person.Varselkode.RV_OO_1
 import no.nav.helse.person.Varselkode.RV_OO_2
 import no.nav.helse.person.Varselkode.RV_SØ_10
@@ -46,6 +49,7 @@ import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenInfo
 import no.nav.helse.spleis.e2e.assertIngenVarsel
+import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertUtbetalingsbeløp
@@ -75,12 +79,15 @@ import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.spleis.e2e.tilGodkjent
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
@@ -92,26 +99,36 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         forlengVedtak(29.januar, 11.februar)
         nullstillTilstandsendringer()
         nyPeriode(27.januar til 28.januar)
-        håndterYtelser(3.vedtaksperiode)
 
-        val andreUtbetaling = inspektør.utbetaling(1).inspektør
-        val outOfOrderUtbetaling = inspektør.utbetaling(2).inspektør
+        assertForventetFeil(
+            nå = {
+                assertFunksjonellFeil(`Mottatt søknad out of order`, 2.vedtaksperiode.filter())
+                assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
+            },
+            ønsket = {
+                håndterYtelser(3.vedtaksperiode)
 
-        assertEquals(andreUtbetaling.korrelasjonsId, outOfOrderUtbetaling.korrelasjonsId)
-        val arbeidsgiverOppdrag = outOfOrderUtbetaling.arbeidsgiverOppdrag
-        assertEquals(1, arbeidsgiverOppdrag.size)
-        arbeidsgiverOppdrag[0].inspektør.also { linje ->
-            assertEquals(NY, linje.endringskode)
-            assertEquals(17.januar, linje.fom)
-            assertEquals(26.januar, linje.tom)
-            assertEquals(3, linje.delytelseId)
-            assertEquals(2, linje.refDelytelseId)
-            assertNull(linje.datoStatusFom)
-        }
+                val andreUtbetaling = inspektør.utbetaling(1).inspektør
+                val outOfOrderUtbetaling = inspektør.utbetaling(2).inspektør
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+                assertEquals(andreUtbetaling.korrelasjonsId, outOfOrderUtbetaling.korrelasjonsId)
+                val arbeidsgiverOppdrag = outOfOrderUtbetaling.arbeidsgiverOppdrag
+                assertEquals(1, arbeidsgiverOppdrag.size)
+                arbeidsgiverOppdrag[0].inspektør.also { linje ->
+                    assertEquals(NY, linje.endringskode)
+                    assertEquals(17.januar, linje.fom)
+                    assertEquals(26.januar, linje.tom)
+                    assertEquals(3, linje.delytelseId)
+                    assertEquals(2, linje.refDelytelseId)
+                    assertNull(linje.datoStatusFom)
+                }
+
+                assertTilstander(1.vedtaksperiode, AVSLUTTET)
+                assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+                assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+
+            }
+        )
     }
 
     @Test
@@ -220,8 +237,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `out of order periode med 16 dagers gap - utbetalingen på revurderingen får korrekt beløp`() {
-        nyttVedtak(17.februar, 15.mars)
+    fun `out of order periode med 18 dagers gap - revurderingen er uten endringer`() {
+        nyttVedtak(19.februar, 15.mars)
         nyttVedtak(1.januar, 31.januar)
         håndterYtelser(1.vedtaksperiode)
 
@@ -229,8 +246,14 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
         assertEquals(3, inspektør.utbetalinger.size)
-        val revurdering = inspektør.utbetalinger.last()
-        assertEquals(0, revurdering.inspektør.nettobeløp)
+        val førsteUtbetaling = inspektør.utbetaling(0).inspektør
+        val andreUtbetaling = inspektør.utbetaling(1).inspektør
+        val revurdering = inspektør.utbetaling(2).inspektør
+
+        assertNotEquals(førsteUtbetaling.korrelasjonsId, andreUtbetaling.korrelasjonsId)
+        assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
+        assertEquals(0, revurdering.nettobeløp)
+        assertEquals(UEND, revurdering.arbeidsgiverOppdrag.inspektør.endringskode)
     }
     @Test
     fun `out of order periode med 15 dagers gap - støttes ikke`() {
@@ -241,8 +264,73 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
+        assertFunksjonellFeil(`Mottatt søknad out of order innenfor 18 dager`)
     }
 
+    @Test
+    fun `out of order periode rett før - påvirker arbeidsgiverperioden - støttes ikke`() {
+        nyttVedtak(29.januar, 28.februar)
+        nyPeriode(1.januar til 28.januar)
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+        assertFunksjonellFeil(`Mottatt søknad out of order`)
+    }
+
+    @Test
+    fun `out of order periode med 15 dagers gap - mellom to perioder`() {
+        nyPeriode(1.januar til 15.januar)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        nyttVedtak(29.januar, 15.februar)
+        nyPeriode(17.januar til 25.januar)
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
+        assertFunksjonellFeil(`Mottatt søknad out of order innenfor 18 dager`)
+    }
+
+    @Test
+    fun `out of order periode rett før - mellom to perioder - arbeidsgiverperioden slutter tidligere`() {
+        nyPeriode(1.januar til 15.januar)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        nyPeriode(29.januar til 15.februar)
+        håndterInntektsmelding(listOf(1.januar til 15.januar, 29.januar til 29.januar))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        nyPeriode(17.januar til 28.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        assertFunksjonellFeil(`Mottatt søknad out of order`, 2.vedtaksperiode.filter())
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `out of order periode rett før - mellom to perioder - arbeidsgiverperioden var ferdig`() {
+        nyPeriode(1.januar til 16.januar)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+
+        nyPeriode(29.januar til 15.februar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 29.januar)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        nyPeriode(17.januar til 28.januar)
+
+        assertFunksjonellFeil(`Mottatt søknad out of order`, 2.vedtaksperiode.filter())
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
+    }
 
     @Test
     fun `out of order periode trigger revurdering`() {
@@ -328,9 +416,69 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     fun `out of order som overlapper med eksisterende -- flere ag`() {
         nyttVedtak(1.mars, 31.mars, orgnummer = a2)
         nyPeriode(20.februar til 15.mars, a1)
+        håndterInntektsmelding(listOf(20.februar til 7.mars), orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            orgnummer = a1,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.februar(2017) til 1.januar(2018) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt INNTEKT
+                }
+            }),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
+                1.november(2017) til 1.januar(2018) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt INNTEKT
+                }
+            }, arbeidsforhold = listOf()),
+            arbeidsforhold = listOf(
+                Arbeidsforhold(a1, 1.januar(2017)),
+                Arbeidsforhold(a2, 1.januar(2017))
+            )
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        val a1Utbetaling = inspektør(a1).utbetaling(0).inspektør
+        val a2FørsteUtbetaling = inspektør(a2).utbetaling(0).inspektør
+        val a2AndreUtbetaling = inspektør(a2).utbetaling(2).inspektør
+
+        assertEquals(a1Utbetaling.tilstand, Utbetaling.Utbetalt)
+        assertEquals(a2FørsteUtbetaling.tilstand, Utbetaling.Utbetalt)
+        assertEquals(a2AndreUtbetaling.tilstand, Utbetaling.Utbetalt)
+        assertEquals(a2FørsteUtbetaling.korrelasjonsId, a2AndreUtbetaling.korrelasjonsId)
+        a2FørsteUtbetaling.arbeidsgiverOppdrag.also { oppdrag ->
+            assertEquals(1, oppdrag.size)
+            val linje = oppdrag.single().inspektør
+            assertEquals(17.mars, linje.fom)
+            assertEquals(30.mars, linje.tom)
+            assertEquals(1431, linje.beløp)
+        }
+        a2AndreUtbetaling.arbeidsgiverOppdrag.also { oppdrag ->
+            assertEquals(1, oppdrag.size)
+            val linje = oppdrag.single().inspektør
+            assertEquals(17.mars, linje.fom)
+            assertEquals(30.mars, linje.tom)
+            assertEquals(1080, linje.beløp)
+        }
+        a1Utbetaling.arbeidsgiverOppdrag.also { oppdrag ->
+            assertEquals(1, oppdrag.size)
+            val linje = oppdrag.single().inspektør
+            assertEquals(8.mars, linje.fom)
+            assertEquals(15.mars, linje.tom)
+            assertEquals(1080, linje.beløp)
+        }
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
     }
 
     @Test
@@ -942,8 +1090,9 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Out of order som overlapper med annen AG og flytter skjæringstidspunktet skal forkastes`() {
+    fun `Out of order som overlapper med annen AG og flytter skjæringstidspunktet - nærmere enn 18 dager fra neste - støttes ikke`() {
         nyPeriode(1.mars til 31.mars, a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
         nyPeriode(20.mars til 20.april, a2)
 
         håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a1)
@@ -982,11 +1131,14 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
+        // siden perioden slutter på en fredag starter ikke oppholdstelling i arbeidsgiverperioden før mandagen.
+        // 10.februar-2.mars hører derfor til samme arbeidsgiverperioden som 20.mars-4.april, ettersom avstanden mellom
+        // 5.mars (påfølgende mandag)-20.mars er akkurat 16 dager
         nyPeriode(10.februar til 2.mars, a2)
 
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD, a2)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a2)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
-        assertFunksjonellFeil("Mottatt overlappende søknad")
+        assertFunksjonellFeil(`Mottatt søknad out of order innenfor 18 dager`)
     }
 }

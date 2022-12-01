@@ -41,6 +41,7 @@ enum class Varselkode(
     RV_SØ_24("Mottatt flere søknade for perioden - den første søknaden som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt", avviklet = true),
     RV_SØ_25("Permisjon oppgitt i perioden i søknaden. Vurder rett til sykepenger og korriger sykmeldingsperioden", avviklet = true),
     RV_SØ_26("Søknaden inneholder Feriedager utenfor perioden søknaden gjelder for", avviklet = true),
+    RV_SØ_27("Mottatt søknad out of order innenfor 18 dager til neste"),
 
     // OO: Out-of-order
     RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne."),
@@ -227,8 +228,9 @@ enum class Varselkode(
     internal companion object {
         internal val aktiveVarselkoder = values().filterNot { it.avviklet }
 
+        internal val `Mottatt søknad out of order innenfor 18 dager` = RV_SØ_14
         internal val `Mottatt søknad out of order` = RV_SØ_11
-        internal val `Mottatt søknad som overlapper helt` = RV_SØ_12
+        internal val `Mottatt søknad som overlapper` = RV_SØ_12
         internal val `Mottatt søknad som delvis overlapper` = RV_SØ_13
     }
 }
