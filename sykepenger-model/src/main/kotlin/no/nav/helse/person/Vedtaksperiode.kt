@@ -935,6 +935,8 @@ internal class Vedtaksperiode private constructor(
             hendelse.info("Tidligere periode ferdigbehandlet, men gjør ingen tilstandsendring.")
         }
 
+        fun gjenopptaRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, første: Vedtaksperiode) {}
+
         fun ferdigstillRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
         }
 
@@ -1019,6 +1021,11 @@ internal class Vedtaksperiode private constructor(
                 return hendelse.info("Mangler nødvendig inntekt for vilkårsprøving og kan derfor ikke gjenoppta revurdering.")
             vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
             vedtaksperiode.arbeidsgiver.gjenopptaRevurdering(vedtaksperiode, hendelse)
+        }
+
+        override fun gjenopptaRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, første: Vedtaksperiode) {
+            hendelse.info("$this blir med i revurderingen igangsatt av $første")
+            vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse) {
@@ -1822,11 +1829,9 @@ internal class Vedtaksperiode private constructor(
     internal fun gjenopptaRevurdering(hendelse: IAktivitetslogg, første: Vedtaksperiode) {
         hendelse.kontekst(arbeidsgiver)
         kontekst(hendelse)
-        if (this.tilstand != AvventerRevurdering) return
         if (this.skjæringstidspunkt != første.skjæringstidspunkt) return
         if (this.utbetalinger.hørerIkkeSammenMed(første.utbetalinger)) return
-        hendelse.info("$this blir med i revurderingen igangsatt av $første")
-        tilstand(hendelse, AvventerGjennomførtRevurdering)
+        this.tilstand.gjenopptaRevurdering(this, hendelse, første)
     }
 
     internal fun ferdigstillRevurdering(hendelse: IAktivitetslogg, ferdigstiller: Vedtaksperiode) {
