@@ -2,12 +2,16 @@
 
 Alle tilstandsendringer som er eksplisitt beskrevet i tilstandsmaskinen (at the time of writing...)
 
-Det er to tilstander (TilInfotrygd og AvventerSimulering) som ikke har noen innkommende transisjoner. Disse tilstandene havner vi ofte i, så dermed vet vi at diagrammet mangler transisjoner. Dette er transisjoner som gjøres utenfor tilstandsmaskinen, men gjerne av Vedtaksperioden eller kanskje andre objekter.
+Det er tilstander, TilInfotrygd, AvventerSimulering, og AvventerSimuleringRevurdering, som ikke har noen innkommende transisjoner. Disse tilstandene
+havner vi ofte i, så dermed vet vi at diagrammet mangler transisjoner. Dette er transisjoner som gjøres utenfor
+tilstandsmaskinen, men gjerne av Vedtaksperioden eller kanskje andre objekter.
+
+Merk at det også er tilstander som ikke har noen eksplisitte utgående transisjoner, men som vi vet ikke stopper behandling. Her er det også snakk om at transisjonene gjøres på utsiden av tilstandsmaskinen.
 
 ```mermaid
 
 stateDiagram-v2
-    * --> Start
+    [*] --> Start
     
     Start --> AvventerInntektsmeldingEllerHistorikk
     Start --> AvventerBlokkerendePeriode
@@ -15,16 +19,6 @@ stateDiagram-v2
     AvventerBlokkerendePeriode --> AvsluttetUtenUtbetaling
     AvventerBlokkerendePeriode --> AvventerHistorikk
     AvventerBlokkerendePeriode --> AvventerVilkarsproving
-    
-    AvventerRevurdering --> AvventerGjennomfortRevurdering
-    
-    AvventerGjennomfortRevurdering --> RevurderingFeilet
-    AvventerGjennomfortRevurdering --> Avsluttet
-    
-    AvventerHistorikkRevurdering --> AvventerVilkarsprovingRevurdering
-    
-    AvventerVilkarsprovingRevurdering --> AvventerHistorikkRevurdering
-    AvventerVilkarsprovingRevurdering --> AvventerVilkarsprovingRevurdering
     
     AvventerInntektsmeldingEllerHistorikk --> AvsluttetUtenUtbetaling
     AvventerInntektsmeldingEllerHistorikk --> AvventerBlokkerendePeriode
@@ -37,16 +31,9 @@ stateDiagram-v2
     AvventerSimulering --> AvventerBlokkerendePeriode
     AvventerSimulering --> AvventerGodkjenning
     
-    AvventerSimuleringRevurdering --> AvventerHistorikkRevurdering
-    AvventerSimuleringRevurdering --> AvventerGodkjenningRevurdering
-
     AvventerGodkjenning --> AvventerBlokkerendePeriode   
     AvventerGodkjenning --> TilUtbetaling   
     AvventerGodkjenning --> Avsluttet
-    
-    AvventerGodkjenningRevurdering --> AvventerHistorikkRevurdering   
-    AvventerGodkjenningRevurdering --> RevurderingFeilet   
-    AvventerGodkjenningRevurdering --> Avsluttet
     
     TilUtbetaling --> UtbetalingFeilet
     TilUtbetaling --> Avsluttet   
@@ -56,8 +43,33 @@ stateDiagram-v2
     UtbetalingFeilet --> AvventerBlokkerendePeriode
     UtbetalingFeilet --> Avsluttet
     
-    AvsluttetUtenUtbetaling --> AvventerRevurdering
+    AvsluttetUtenUtbetaling --> revurderingslopet
     
     TilInfotrygd 
+
+    state revurderingslopet {
+        [*] --> AvventerRevurdering
+    
+        AvventerRevurdering --> AvventerGjennomfortRevurdering
+        
+        AvventerGjennomfortRevurdering --> RevurderingFeilet
+        AvventerGjennomfortRevurdering --> [*]
+        
+        AvventerHistorikkRevurdering --> AvventerVilkarsprovingRevurdering
+        
+        AvventerVilkarsprovingRevurdering --> AvventerHistorikkRevurdering
+        AvventerVilkarsprovingRevurdering --> AvventerVilkarsprovingRevurdering
+        
+        AvventerSimuleringRevurdering --> AvventerHistorikkRevurdering
+        AvventerSimuleringRevurdering --> AvventerGodkjenningRevurdering
+    
+        AvventerGodkjenningRevurdering --> AvventerHistorikkRevurdering   
+        AvventerGodkjenningRevurdering --> RevurderingFeilet   
+        AvventerGodkjenningRevurdering --> [*]
+    }
+    
+    revurderingslopet --> Avsluttet
+
+    
 
 ```
