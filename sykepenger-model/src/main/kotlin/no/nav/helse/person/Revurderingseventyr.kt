@@ -3,11 +3,10 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.util.UUID
 
-class Revurderingseventyr private constructor(private val hvorfor: List<RevurderingÅrsak>) {
-    private constructor(hvorfor: RevurderingÅrsak): this(listOf(hvorfor))
+class Revurderingseventyr private constructor(private val hvorfor: RevurderingÅrsak) {
 
-    private infix fun Revurderingseventyr.skyldes(årsak: RevurderingÅrsak) = hvorfor.size == 1 && hvorfor.first() == årsak
-    private infix fun Revurderingseventyr.ikkeSkyldes(årsak: RevurderingÅrsak) = !hvorfor.contains(årsak)
+    private infix fun Revurderingseventyr.skyldes(årsak: RevurderingÅrsak) = hvorfor == årsak
+    private infix fun Revurderingseventyr.ikkeSkyldes(årsak: RevurderingÅrsak) = !skyldes(årsak)
 
     internal companion object {
         fun nyPeriode() = Revurderingseventyr(RevurderingÅrsak.NY_PERIODE)
@@ -75,7 +74,7 @@ class Revurderingseventyr private constructor(private val hvorfor: List<Revurder
         }
         person.sendRevurderingIgangsattEvent(
             PersonObserver.RevurderingIgangsattEvent(
-                revurderingsÅrsak = hvorfor.map { it.name },
+                revurderingsÅrsak = hvorfor.name,
                 berørtePerioder = vedtaksperioder.toMap(),
                 kilde = kilde.meldingsreferanseId(),
                 initiertAvVedtaksperiode = initiertAvVedtaksperiode,

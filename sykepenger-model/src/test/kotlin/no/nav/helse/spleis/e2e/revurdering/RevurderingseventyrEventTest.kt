@@ -22,7 +22,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class RevurderingHendelseTest : AbstractEndToEndTest() {
+internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
 
     @Test
     fun `happy case`() {
@@ -115,7 +115,7 @@ internal class RevurderingHendelseTest : AbstractEndToEndTest() {
     }
 
     private infix fun PersonObserver.RevurderingIgangsattEvent.bleForårsaketAv(årsak: String): PersonObserver.RevurderingIgangsattEvent {
-        assertEquals(listOf(årsak), this.revurderingsÅrsak)
+        assertEquals(årsak, this.revurderingsÅrsak)
         return this
     }
 
