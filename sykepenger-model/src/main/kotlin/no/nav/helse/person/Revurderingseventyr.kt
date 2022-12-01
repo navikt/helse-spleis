@@ -25,11 +25,17 @@ class Revurderingseventyr private constructor(private val hvorfor: RevurderingÅ
         vedtaksperiodeId: UUID,
         periode: Periode,
         skjæringstidspunkt: LocalDate,
-        hendelse: IAktivitetslogg,
-        vedtaksperiode: Vedtaksperiode
+        skalInngåIRevurdering: Boolean,
+        vedInngåelse: () -> Unit = {},
+        doAnyway: () -> Unit = {}
     ) {
-        hendelse.kontekst(vedtaksperiode)
-        // guard
+        if (!skalInngåIRevurdering) return doAnyway()
+        else inngå(orgnummer, vedtaksperiodeId, skjæringstidspunkt, periode).also {
+            vedInngåelse()
+        }
+    }
+
+    private fun inngå(orgnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, periode: Periode) {
         vedtaksperioder.getOrPut(orgnummer) { mutableListOf() }.add(
             PersonObserver.RevurderingIgangsattEvent.VedtaksperiodeData(
                 id = vedtaksperiodeId,
@@ -39,7 +45,7 @@ class Revurderingseventyr private constructor(private val hvorfor: RevurderingÅ
         )
     }
 
-    internal fun kanStarteRevurderingIDefaultTilstand( // burde bo i bliMed?
+    internal fun kanInngåIRevurdering(
         hendelse: IAktivitetslogg,
         overstyrtForventerInntekt: Boolean
     ): Boolean {
@@ -54,7 +60,7 @@ class Revurderingseventyr private constructor(private val hvorfor: RevurderingÅ
         return true
     }
 
-    internal fun kanStarteRevurderingIAvventerInntektsmeldingEllerHistorikk(
+    internal fun skalPåvirkeIAvventerInntektsmeldingEllerHistorikk(
         overstyrt: Vedtaksperiode,
         vedtaksperiode: Vedtaksperiode,
         hendelse: IAktivitetslogg,
@@ -71,6 +77,9 @@ class Revurderingseventyr private constructor(private val hvorfor: RevurderingÅ
         hendelse.info("Som følge av out of order-periode har vi nødvendige opplysninger fra arbeidsgiver")
         return true
     }
+
+    internal fun nySenerePeriodePåSammeSkjæringstidspunkt(starterEtter: Boolean, sammeSkjæringstidspunkt: Boolean) =
+        this skyldes RevurderingÅrsak.NY_PERIODE && starterEtter && sammeSkjæringstidspunkt
 
     internal fun sendRevurderingIgangsattEvent(
         person: Person,
@@ -91,9 +100,6 @@ class Revurderingseventyr private constructor(private val hvorfor: RevurderingÅ
             )
         }
     }
-
-    fun nySenerePeriodePåSammeSkjæringstidspunkt(starterEtter: Boolean, sammeSkjæringstidspunkt: Boolean) =
-        this skyldes RevurderingÅrsak.NY_PERIODE && starterEtter && sammeSkjæringstidspunkt
 
     private enum class RevurderingÅrsak {
         ARBEIDSGIVERPERIODE, ARBEIDSGIVEROPPLYSNINGER, SYKDOMSTIDSLINJE, NY_PERIODE, ARBEIDSFORHOLD, KORRIGERT_SØKNAD
