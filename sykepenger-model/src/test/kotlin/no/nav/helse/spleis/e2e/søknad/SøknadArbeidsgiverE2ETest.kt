@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.søknad
 
 import no.nav.helse.assertForventetFeil
+import no.nav.helse.august
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -18,9 +19,13 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.Varselkode.RV_SØ_16
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
@@ -40,6 +45,20 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `delvis overlappende søknad i avsluttet uten utbetaling`() {
+        håndterSykmelding(Sykmeldingsperiode(8.august, 21.august, 100.prosent))
+        håndterSøknad(Sykdom(8.august, 21.august, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterSykmelding(Sykmeldingsperiode(10.august, 31.august, 100.prosent))
+        håndterSøknad(Sykdom(10.august, 31.august, 100.prosent))
+        assertEquals(8.august til 21.august, inspektør.periode(1.vedtaksperiode))
+        assertEquals(10.august til 31.august, inspektør.periode(2.vedtaksperiode))
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+        assertFunksjonellFeil(RV_SØ_16, 1.vedtaksperiode.filter())
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
+    }
 
     @Test
     fun `avslutter søknad utenfor arbeidsgiverperioden dersom det kun er ferie`() {
