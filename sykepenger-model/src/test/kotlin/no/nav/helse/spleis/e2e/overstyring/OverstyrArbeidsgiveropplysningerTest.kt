@@ -150,6 +150,29 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(716, revurdering.personOppdrag.single().inspektør.beløp)
     }
 
+    @Test
+    fun `skal være idempotente greier`() {
+        nyttVedtak(1.januar, 31.januar)
+
+        val overstyr: () -> Unit = {
+            håndterOverstyrArbeidsgiveropplysninger(
+                skjæringstidspunkt = 1.januar,
+                meldingsreferanseId = UUID.randomUUID(),
+                arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT/2, "noe", null, refusjonsopplysninger = listOf(
+                    Triple(1.januar, null, INNTEKT/2)
+                )))
+            )
+            håndterYtelser(1.vedtaksperiode)
+        }
+
+        assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+        overstyr()
+        assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+
+        repeat(10) { overstyr() }
+        assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+    }
+
     private fun TestArbeidsgiverInspektør.inntektISykepengegrunnlaget(vedtaksperiodeInnhenter: IdInnhenter, orgnr: String = ORGNUMMER) =
         vilkårsgrunnlag(vedtaksperiodeInnhenter)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.inntektsopplysning.omregnetÅrsinntekt()
 
