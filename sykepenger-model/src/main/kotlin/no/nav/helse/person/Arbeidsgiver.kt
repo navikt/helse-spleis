@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
-import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
@@ -161,16 +160,6 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.håndterOverstyrArbeidsgiveropplysninger(overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger) =
             any { it.håndter(overstyrArbeidsgiveropplysninger) }
-
-        internal fun List<Arbeidsgiver>.håndterOverstyrInntekt(overstyrInntekt: OverstyrInntekt) {
-            val arbeidsgiver = firstOrNull {
-                it.organisasjonsnummer == overstyrInntekt.organisasjonsnummer() && it.harSykdomFor(overstyrInntekt.skjæringstidspunkt)
-            } ?: firstOrNull {
-                it.harSykdomFor(overstyrInntekt.skjæringstidspunkt)
-            }
-
-            arbeidsgiver?.håndter(overstyrInntekt) ?: overstyrInntekt.logiskFeil("Kan ikke overstyre inntekt hvis vi ikke har en arbeidsgiver med sykdom for skjæringstidspunktet")
-        }
 
         internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
             mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode(filter) }
@@ -814,11 +803,6 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(hendelse: OverstyrTidslinje) {
         hendelse.kontekst(this)
         håndter(hendelse, Vedtaksperiode::håndter)
-    }
-
-    private fun håndter(hendelse: OverstyrInntekt) {
-        hendelse.kontekst(this)
-        énHarHåndtert(hendelse) { håndter(it, vedtaksperioder.toList()) }
     }
 
     private fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {

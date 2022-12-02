@@ -8,11 +8,9 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
-import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Varselkode.RV_IT_16
-import no.nav.helse.person.Varselkode.RV_IT_17
 import no.nav.helse.person.Varselkode.RV_VV_11
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
 import no.nav.helse.person.builders.VedtakFattetBuilder
@@ -206,18 +204,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             innslag.add(skjæringstidspunkt, this)
         }
 
-        internal fun valider(overstyrInntekt: OverstyrInntekt): Boolean {
-            validerOverstyrInntekt(overstyrInntekt)
-            return !overstyrInntekt.harFunksjonelleFeilEllerVerre()
-        }
-
         internal fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: List<String>, erForlengelse: Boolean): Boolean {
             sykepengegrunnlag.validerInntekt(aktivitetslogg, organisasjonsnummer)
             valider(aktivitetslogg, erForlengelse)
             return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
         }
 
-        protected open fun validerOverstyrInntekt(overstyrInntekt: OverstyrInntekt) {}
         protected open fun valider(aktivitetslogg: IAktivitetslogg, erForlengelse: Boolean) {}
 
         internal abstract fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
@@ -244,29 +236,25 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             )
         )
 
-        abstract fun overstyrInntekt(
-            hendelse: OverstyrInntekt,
-            subsumsjonObserver: SubsumsjonObserver
-        ): Grunnlagsdata?
-
         internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, subsumsjonObserver: SubsumsjonObserver): VilkårsgrunnlagElement? {
             val sykepengegrunnlag = sykepengegrunnlag.overstyrArbeidsgiveropplysninger(hendelse, opptjening, subsumsjonObserver) ?: return null
-            return kopierMed(hendelse, sykepengegrunnlag, subsumsjonObserver)
+            return kopierMed(hendelse, sykepengegrunnlag, opptjening, subsumsjonObserver)
         }
         protected abstract fun kopierMed(
             hendelse: IAktivitetslogg,
             sykepengegrunnlag: Sykepengegrunnlag,
+            opptjening: Opptjening?,
             subsumsjonObserver: SubsumsjonObserver
         ): VilkårsgrunnlagElement
 
         abstract fun overstyrArbeidsforhold(
             hendelse: OverstyrArbeidsforhold,
             subsumsjonObserver: SubsumsjonObserver
-        ): Grunnlagsdata?
+        ): VilkårsgrunnlagElement?
 
         internal fun nyeRefusjonsopplysninger(inntektsmelding: Inntektsmelding): VilkårsgrunnlagElement? {
             val sykepengegrunnlag = sykepengegrunnlag.nyeRefusjonsopplysninger(inntektsmelding) ?: return null
-            return kopierMed(inntektsmelding, sykepengegrunnlag, SubsumsjonObserver.NullObserver)
+            return kopierMed(inntektsmelding, sykepengegrunnlag, opptjening, SubsumsjonObserver.NullObserver)
         }
 
         protected abstract fun vilkårsgrunnlagtype(): String
@@ -442,45 +430,24 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun overstyrArbeidsforhold(
             hendelse: OverstyrArbeidsforhold,
             subsumsjonObserver: SubsumsjonObserver
-        ): Grunnlagsdata {
-            return overstyr(hendelse, sykepengegrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonObserver), opptjening.overstyrArbeidsforhold(hendelse, subsumsjonObserver), subsumsjonObserver)
-        }
+        ) = kopierMed(hendelse, sykepengegrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonObserver), opptjening.overstyrArbeidsforhold(hendelse, subsumsjonObserver), subsumsjonObserver)
 
         override fun kopierMed(
             hendelse: IAktivitetslogg,
             sykepengegrunnlag: Sykepengegrunnlag,
+            opptjening: Opptjening?,
             subsumsjonObserver: SubsumsjonObserver
         ): VilkårsgrunnlagElement {
             val sykepengegrunnlagOk = sykepengegrunnlag.valider(hendelse)
-            val opptjeningOk = opptjening.valider(hendelse)
+            val opptjeningOk = opptjening?.valider(hendelse)
             return Grunnlagsdata(
                 skjæringstidspunkt = skjæringstidspunkt,
                 sykepengegrunnlag = sykepengegrunnlag,
                 sammenligningsgrunnlag = sammenligningsgrunnlag,
                 avviksprosent = sykepengegrunnlag.avviksprosent(this.sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver),
-                opptjening = opptjening,
+                opptjening = opptjening ?: this.opptjening,
                 medlemskapstatus = medlemskapstatus,
-                vurdertOk = vurdertOk && sykepengegrunnlagOk && opptjeningOk,
-                meldingsreferanseId = meldingsreferanseId,
-                vilkårsgrunnlagId = UUID.randomUUID()
-            )
-        }
-
-        override fun overstyrInntekt(hendelse: OverstyrInntekt, subsumsjonObserver: SubsumsjonObserver): Grunnlagsdata {
-            return overstyr(hendelse, sykepengegrunnlag.overstyrInntekter(hendelse, subsumsjonObserver, opptjening), subsumsjonObserver = subsumsjonObserver)
-        }
-
-        private fun overstyr(hendelse: IAktivitetslogg, sykepengegrunnlag: Sykepengegrunnlag, opptjening: Opptjening = this.opptjening, subsumsjonObserver: SubsumsjonObserver): Grunnlagsdata {
-            val sykepengegrunnlagOk = sykepengegrunnlag.valider(hendelse)
-            val opptjeningOk = opptjening.valider(hendelse)
-            return Grunnlagsdata(
-                skjæringstidspunkt = this.skjæringstidspunkt,
-                sykepengegrunnlag = sykepengegrunnlag,
-                sammenligningsgrunnlag = this.sammenligningsgrunnlag,
-                avviksprosent = sykepengegrunnlag.avviksprosent(this.sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver),
-                opptjening = opptjening,
-                medlemskapstatus = medlemskapstatus,
-                vurdertOk = vurdertOk && sykepengegrunnlagOk && opptjeningOk,
+                vurdertOk = vurdertOk && sykepengegrunnlagOk && (opptjeningOk ?: true),
                 meldingsreferanseId = meldingsreferanseId,
                 vilkårsgrunnlagId = UUID.randomUUID()
             )
@@ -494,9 +461,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         sykepengegrunnlag: Sykepengegrunnlag,
         vilkårsgrunnlagId: UUID = UUID.randomUUID()
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag, null) {
-        override fun validerOverstyrInntekt(overstyrInntekt: OverstyrInntekt) {
-            overstyrInntekt.funksjonellFeil(RV_IT_17)
-        }
 
         override fun ghostPeriode(sisteId: UUID, organisasjonsnummer: String, periode: Periode) = null
 
@@ -516,17 +480,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return null
         }
 
-        override fun overstyrInntekt(
-            hendelse: OverstyrInntekt,
-            subsumsjonObserver: SubsumsjonObserver
-        ): Grunnlagsdata? {
-            hendelse.funksjonellFeil(RV_VV_11)
-            return null
-        }
-
         override fun kopierMed(
             hendelse: IAktivitetslogg,
             sykepengegrunnlag: Sykepengegrunnlag,
+            opptjening: Opptjening?,
             subsumsjonObserver: SubsumsjonObserver
         ): InfotrygdVilkårsgrunnlag {
             return InfotrygdVilkårsgrunnlag(

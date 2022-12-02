@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
-import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.PersonPåminnelse
@@ -38,7 +37,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyrArbeidsgiveropplysninger
-import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyrInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.inntekterForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.lagRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
@@ -53,7 +51,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.validerYtelserForSkjæringstid
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Varselkode.RV_AG_1
 import no.nav.helse.person.Varselkode.RV_VV_10
-import no.nav.helse.person.Varselkode.RV_VV_12
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -302,29 +299,6 @@ class Person private constructor(
     fun håndter(hendelse: OverstyrTidslinje) {
         hendelse.kontekst(this)
         finnArbeidsgiver(hendelse).håndter(hendelse)
-        håndterGjenoppta(hendelse)
-    }
-
-    fun håndter(hendelse: OverstyrInntekt) {
-        hendelse.kontekst(this)
-
-        val vilkårsgrunnlag = vilkårsgrunnlagFor(hendelse.skjæringstidspunkt)
-        if (vilkårsgrunnlag != null) {
-            if (vilkårsgrunnlag.valider(hendelse)) {
-                arbeidsgivere.håndterOverstyrInntekt(hendelse)
-            }
-        } else {
-            hendelse.funksjonellFeil(RV_VV_12)
-        }
-
-        if (hendelse.harFunksjonelleFeilEllerVerre()) {
-            observers.forEach {
-                it.revurderingAvvist(
-                    hendelse.hendelseskontekst(),
-                    hendelse.tilRevurderingAvvistEvent()
-                )
-            }
-        }
         håndterGjenoppta(hendelse)
     }
 
@@ -753,15 +727,6 @@ class Person private constructor(
     internal fun nyeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, inntektsmelding: Inntektsmelding) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return
         nyttVilkårsgrunnlag(inntektsmelding, grunnlag.nyeRefusjonsopplysninger(inntektsmelding))
-    }
-
-    internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-        hendelse: OverstyrInntekt,
-        skjæringstidspunkt: LocalDate,
-        subsumsjonObserver: SubsumsjonObserver
-    ) {
-        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
-        nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrInntekt(hendelse, subsumsjonObserver))
     }
 
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(

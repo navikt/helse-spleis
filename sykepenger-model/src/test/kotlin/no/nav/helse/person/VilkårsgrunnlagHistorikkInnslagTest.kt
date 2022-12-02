@@ -5,7 +5,6 @@ import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
-import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -165,10 +164,6 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
         get() = object : VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement(UUID.randomUUID(), 1.januar, Inntekt.INGEN.sykepengegrunnlag, null) {
             override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {}
             override fun vilkårsgrunnlagtype() = "testgrunnlag"
-            override fun overstyrInntekt(
-                hendelse: OverstyrInntekt,
-                subsumsjonObserver: SubsumsjonObserver
-            ): VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
 
             override fun ghostPeriode(sisteId: UUID, organisasjonsnummer: String, periode: Periode) = null
 
@@ -180,6 +175,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
             override fun kopierMed(
                 hendelse: IAktivitetslogg,
                 sykepengegrunnlag: Sykepengegrunnlag,
+                opptjening: Opptjening?,
                 subsumsjonObserver: SubsumsjonObserver
             ): VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement {
                 throw IllegalStateException()

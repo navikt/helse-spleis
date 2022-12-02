@@ -17,22 +17,4 @@ abstract class ArbeidstakerHendelse protected constructor(
     override fun kontekst() = mapOf(
         "organisasjonsnummer" to organisasjonsnummer()
     )
-
-    fun funksjonelleFeilOgVerre(): List<String> {
-        val meldingsoppsamler = FunksjonelleFeilOgVerre()
-        aktivitetslogg.accept(meldingsoppsamler)
-        return meldingsoppsamler.meldinger()
-    }
-
-    internal class FunksjonelleFeilOgVerre: AktivitetsloggVisitor {
-        private val meldinger = mutableListOf<String>()
-        fun meldinger() = meldinger.toList()
-        override fun visitFunksjonellFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.FunksjonellFeil, melding: String, tidsstempel: String) {
-            meldinger.add(melding)
-        }
-
-        override fun visitLogiskFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.LogiskFeil, melding: String, tidsstempel: String) {
-            meldinger.add(melding)
-        }
-    }
 }

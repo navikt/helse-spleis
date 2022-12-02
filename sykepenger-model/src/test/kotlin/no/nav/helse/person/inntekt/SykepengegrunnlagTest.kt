@@ -348,7 +348,7 @@ internal class SykepengegrunnlagTest {
                 leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, INGEN), LocalDateTime.now())
             }.build()),
         )
-        val overstyring = Sykepengegrunnlag.SaksbehandlerOverstyringer(1.januar, opprinnelig, null, NullObserver)
+        val overstyring = Sykepengegrunnlag.SaksbehandlerOverstyringer(opprinnelig, null, NullObserver)
         val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", Saksbehandler(1.januar, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
         }.build())
@@ -370,7 +370,7 @@ internal class SykepengegrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Sykepengegrunnlag.SaksbehandlerOverstyringer(1.januar, opprinnelig, null, NullObserver)
+        val overstyring = Sykepengegrunnlag.SaksbehandlerOverstyringer(opprinnelig, null, NullObserver)
         val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 2000.månedlig), LocalDateTime.now())
         }.build()
@@ -394,7 +394,7 @@ internal class SykepengegrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Sykepengegrunnlag.SaksbehandlerOverstyringer(1.januar, opprinnelig, null, NullObserver)
+        val overstyring = Sykepengegrunnlag.SaksbehandlerOverstyringer(opprinnelig, null, NullObserver)
 
         val a1EndretInntektsopplysning = Saksbehandler(1.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
@@ -421,7 +421,7 @@ internal class SykepengegrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Sykepengegrunnlag.SaksbehandlerOverstyringer(1.januar, opprinnelig, null, NullObserver)
+        val overstyring = Sykepengegrunnlag.SaksbehandlerOverstyringer(opprinnelig, null, NullObserver)
 
         val a1EndretInntektsopplysning = Saksbehandler(1.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
@@ -447,7 +447,7 @@ internal class SykepengegrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Sykepengegrunnlag.SaksbehandlerOverstyringer(1.januar, opprinnelig, null, NullObserver)
+        val overstyring = Sykepengegrunnlag.SaksbehandlerOverstyringer(opprinnelig, null, NullObserver)
 
         val a3EndretInntektsopplysning = Saksbehandler(1.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val a3EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
