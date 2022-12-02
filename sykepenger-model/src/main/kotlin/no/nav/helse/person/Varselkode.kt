@@ -67,6 +67,8 @@ enum class Varselkode(
     RV_IM_17("Inntektsmelding inneholder ikke arbeidsgiverperiode. Vurder om  arbeidsgiverperioden beregnes riktig", avviklet = true),
     RV_IM_18("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode", avviklet = true),
     RV_IM_19("Mottatt flere inntektsmeldinger - den andre inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", avviklet = true),
+    RV_IM_20("Finner ikke informasjon om refusjon i inntektsmelding og personen har brukerutbetaling", avviklet = true),
+    RV_IM_21("Inntektsmeldingen mangler ikke arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode", avviklet = true),
 
     // ST: Sykdomstidslinje
     RV_ST_1("Sykdomstidslinjen inneholder ustøttet dag."),
@@ -109,6 +111,8 @@ enum class Varselkode(
     RV_IT_31("Perioden forlenger en behandling i Infotrygd, og har historikk fra ny løsning: Undersøk at antall dager igjen er beregnet riktig.", avviklet = true),
     RV_IT_32("Perioden forlenger en behandling i ny løsning, og har historikk i Infotrygd også: Undersøk at antall dager igjen er beregnet riktig.", avviklet = true),
     RV_IT_33("Skjæringstidspunktet har endret seg som følge av historikk fra Infotrygd"),
+    RV_IT_34("Avslutter perioden fordi tidligere periode gikk til Infotrygd", avviklet = true),
+    RV_IT_35("Det er en utbetalingsperiode i Infotrygd som mangler fom- eller tomdato", avviklet = true),
 
     // VV: Vilkårsvurdering
     RV_VV_1("Arbeidsgiver er ikke registrert i Aa-registeret."),
@@ -189,6 +193,7 @@ enum class Varselkode(
     RV_UT_19("Utbetaling markert som ikke godkjent av saksbehandler"),
     RV_UT_20("Utbetaling fra og med dato er endret. Kontroller simuleringen", avviklet = true),
     RV_UT_21("Utbetaling opphører tidligere utbetaling. Kontroller simuleringen", avviklet = true),
+    RV_UT_22("Annullering ble ikke gjennomført", avviklet = true),
 
     // OS: Oppdragsystemet
     RV_OS_1("Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen."),
@@ -201,6 +206,7 @@ enum class Varselkode(
     RV_RV_3("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)", avviklet= true),
     RV_RV_4("Revurdering er igangsatt og må fullføres", avviklet = true),
     RV_RV_5("Validering av ytelser ved revurdering feilet. Utbetalingen må annulleres", avviklet = true),
+    RV_RV_6("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.", avviklet = true),
 
     // VT: Vedtaksperiodetilstand
     RV_VT_1("Gir opp fordi tilstanden er nådd makstid"),
@@ -212,6 +218,12 @@ enum class Varselkode(
     RV_VT_7("Forventet ikke ytelsehistorikk"),
 
     RV_AG_1("Finner ikke arbeidsgiver"),
+
+    //AN: Annet
+    RV_AN_1("Avslutter perioden på grunn av tilbakestilling", avviklet = true),
+    RV_AN_2("Feil i vilkårsgrunnlag i AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD", avviklet = true),
+    RV_AN_3("Feil i vilkårsgrunnlag i AVVENTER_VILKÅRSPRØVING_GAP", avviklet = true),
+    RV_AN_4("Personen har blitt tilbakestilt og kan derfor ha avvik i historikken fra infotrygd.", avviklet = true),
     ;
 
     init {
