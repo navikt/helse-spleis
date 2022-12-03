@@ -801,6 +801,76 @@ internal class Vedtaksperiode private constructor(
                     .any { it.inntektsmeldingInfo != null } ||
                 sykdomstidslinje.any { it.kommerFra(Søknad::class) }
 
+    private fun loggInnenforArbeidsgiverperiode() {
+        if (forventerInntekt()) return
+        sikkerlogg.info(
+            "Vedtaksperioden {} for {} er egentlig innenfor arbeidsgiverperioden ved {}",
+            keyValue("vedtaksperiodeId", id), keyValue("fnr", fødselsnummer), keyValue("tilstand", tilstand.type)
+        )
+    }
+
+    private fun kopierManglende(other: InntektsmeldingInfo) {
+        this.inntektsmeldingInfo = other
+        other.leggTil(this.hendelseIder)
+    }
+
+    private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
+        utbetalinger.godkjenning(
+            hendelse = hendelse,
+            periode = periode,
+            skjæringstidspunkt = skjæringstidspunkt,
+            periodetype = periodetype,
+            førstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING,
+            inntektskilde = requireNotNull(person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntektskilde()),
+            arbeidsforholdId = inntektsmeldingInfo?.arbeidsforholdId,
+            orgnummereMedRelevanteArbeidsforhold = person.relevanteArbeidsgivere(skjæringstidspunkt)
+        )
+    }
+
+    internal fun gjenopptaBehandling(hendelse: IAktivitetslogg, arbeidsgivere: Iterable<Arbeidsgiver>) {
+        hendelse.kontekst(arbeidsgiver)
+        kontekst(hendelse)
+        hendelse.info("Forsøker å gjenoppta $this")
+        tilstand.gjenopptaBehandling(this, arbeidsgivere, hendelse)
+    }
+
+
+    fun igangsettRevurdering(hendelse: IAktivitetslogg) {
+        check(tilstand == AvventerGjennomførtRevurdering){ "Må være i AvventerGjennomførtRevurdering for å igangsette" }
+        hendelse.kontekst(arbeidsgiver)
+        kontekst(hendelse)
+        tilstand(hendelse, AvventerHistorikkRevurdering)
+    }
+
+    internal fun gjenopptaRevurdering(hendelse: IAktivitetslogg, første: Vedtaksperiode) {
+        hendelse.kontekst(arbeidsgiver)
+        kontekst(hendelse)
+        if (this.skjæringstidspunkt != første.skjæringstidspunkt) return
+        if (this.utbetalinger.hørerIkkeSammenMed(første.utbetalinger)) return
+        this.tilstand.gjenopptaRevurdering(this, hendelse, første)
+    }
+
+    internal fun ferdigstillRevurdering(hendelse: IAktivitetslogg, ferdigstiller: Vedtaksperiode) {
+        if (ferdigstiller.skjæringstidspunkt != this.skjæringstidspunkt || ferdigstiller === this) return
+        kontekst(hendelse)
+        tilstand.ferdigstillRevurdering(this, hendelse)
+    }
+
+    internal fun startRevurdering(arbeidsgivere: List<Arbeidsgiver>, hendelse: IAktivitetslogg, overstyrt: Vedtaksperiode, hvorfor: RevurderingÅrsak) {
+        if (overstyrt.skjæringstidspunkt > this.skjæringstidspunkt) return // om endringen gjelder et nyere skjæringstidspunkt så trenger vi ikke bryr oss
+        // hvis endringen treffer samme skjæringstidspunkt, men en nyere nyopprettet periode, da trenger vi ikke bli med
+        if (nySenerePeriodePåSammeSkjæringstidspunkt(overstyrt, hvorfor)) return
+        kontekst(hendelse)
+        tilstand.startRevurdering(arbeidsgivere, this, hendelse, overstyrt, hvorfor)
+    }
+    private fun nySenerePeriodePåSammeSkjæringstidspunkt(overstyrt: Vedtaksperiode, hvorfor: RevurderingÅrsak) =
+        hvorfor == RevurderingÅrsak.NY_PERIODE && overstyrt.periode.starterEtter(this.periode) && overstyrt.skjæringstidspunkt == this.skjæringstidspunkt
+
+    private fun validerYtelser(ytelser: Ytelser, skjæringstidspunkt: LocalDate, infotrygdhistorikk: Infotrygdhistorikk) {
+        kontekst(ytelser)
+        tilstand.valider(this, periode, skjæringstidspunkt, arbeidsgiver, ytelser, infotrygdhistorikk)
+    }
+
     // Gang of four State pattern
     internal sealed interface Vedtaksperiodetilstand : Aktivitetskontekst {
         val type: TilstandType
@@ -1109,14 +1179,14 @@ internal class Vedtaksperiode private constructor(
             hendelse.info("Gjenopptar ikke behandling fordi perioden avventer på at revurderingen ferdigstilles.")
         }
 
-         override fun ferdigstillRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-             if (feiletRevurdering(vedtaksperiode)) {
-                 hendelse.info("Går til revurdering feilet fordi revurdering er avvist")
-                 return vedtaksperiode.tilstand(hendelse, RevurderingFeilet)
-             }
+        override fun ferdigstillRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            if (feiletRevurdering(vedtaksperiode)) {
+                hendelse.info("Går til revurdering feilet fordi revurdering er avvist")
+                return vedtaksperiode.tilstand(hendelse, RevurderingFeilet)
+            }
 
-             hendelse.info("Går til avsluttet fordi revurdering er fullført via en annen vedtaksperiode")
-             vedtaksperiode.tilstand(hendelse, Avsluttet)
+            hendelse.info("Går til avsluttet fordi revurdering er fullført via en annen vedtaksperiode")
+            vedtaksperiode.tilstand(hendelse, Avsluttet)
         }
 
         private fun feiletRevurdering(vedtaksperiode: Vedtaksperiode) =
@@ -1415,7 +1485,7 @@ internal class Vedtaksperiode private constructor(
             hvorfor: RevurderingÅrsak
         ) {}
 
-         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+        override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.utbetalinger.forkast(aktivitetslogg)
         }
     }
@@ -1556,19 +1626,6 @@ internal class Vedtaksperiode private constructor(
         ) {
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
-    }
-
-    private fun loggInnenforArbeidsgiverperiode() {
-        if (forventerInntekt()) return
-        sikkerlogg.info(
-            "Vedtaksperioden {} for {} er egentlig innenfor arbeidsgiverperioden ved {}",
-            keyValue("vedtaksperiodeId", id), keyValue("fnr", fødselsnummer), keyValue("tilstand", tilstand.type)
-        )
-    }
-
-    private fun kopierManglende(other: InntektsmeldingInfo) {
-        this.inntektsmeldingInfo = other
-        other.leggTil(this.hendelseIder)
     }
 
     internal object AvventerSimulering : Vedtaksperiodetilstand {
@@ -1760,63 +1817,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
-    }
-
-    private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
-        utbetalinger.godkjenning(
-            hendelse = hendelse,
-            periode = periode,
-            skjæringstidspunkt = skjæringstidspunkt,
-            periodetype = periodetype,
-            førstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING,
-            inntektskilde = requireNotNull(person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntektskilde()),
-            arbeidsforholdId = inntektsmeldingInfo?.arbeidsforholdId,
-            orgnummereMedRelevanteArbeidsforhold = person.relevanteArbeidsgivere(skjæringstidspunkt)
-        )
-    }
-
-    internal fun gjenopptaBehandling(hendelse: IAktivitetslogg, arbeidsgivere: Iterable<Arbeidsgiver>) {
-        hendelse.kontekst(arbeidsgiver)
-        kontekst(hendelse)
-        hendelse.info("Forsøker å gjenoppta $this")
-        tilstand.gjenopptaBehandling(this, arbeidsgivere, hendelse)
-    }
-
-    fun igangsettRevurdering(hendelse: IAktivitetslogg) {
-        check(tilstand == AvventerGjennomførtRevurdering){ "Må være i AvventerGjennomførtRevurdering for å igangsette" }
-        hendelse.kontekst(arbeidsgiver)
-        kontekst(hendelse)
-        tilstand(hendelse, AvventerHistorikkRevurdering)
-    }
-
-    internal fun gjenopptaRevurdering(hendelse: IAktivitetslogg, første: Vedtaksperiode) {
-        hendelse.kontekst(arbeidsgiver)
-        kontekst(hendelse)
-        if (this.skjæringstidspunkt != første.skjæringstidspunkt) return
-        if (this.utbetalinger.hørerIkkeSammenMed(første.utbetalinger)) return
-        this.tilstand.gjenopptaRevurdering(this, hendelse, første)
-    }
-
-    internal fun ferdigstillRevurdering(hendelse: IAktivitetslogg, ferdigstiller: Vedtaksperiode) {
-        if (ferdigstiller.skjæringstidspunkt != this.skjæringstidspunkt || ferdigstiller === this) return
-        kontekst(hendelse)
-        tilstand.ferdigstillRevurdering(this, hendelse)
-    }
-
-    internal fun startRevurdering(arbeidsgivere: List<Arbeidsgiver>, hendelse: IAktivitetslogg, overstyrt: Vedtaksperiode, hvorfor: RevurderingÅrsak) {
-        if (overstyrt.skjæringstidspunkt > this.skjæringstidspunkt) return // om endringen gjelder et nyere skjæringstidspunkt så trenger vi ikke bryr oss
-        // hvis endringen treffer samme skjæringstidspunkt, men en nyere nyopprettet periode, da trenger vi ikke bli med
-        if (nySenerePeriodePåSammeSkjæringstidspunkt(overstyrt, hvorfor)) return
-        kontekst(hendelse)
-        tilstand.startRevurdering(arbeidsgivere, this, hendelse, overstyrt, hvorfor)
-    }
-
-    private fun nySenerePeriodePåSammeSkjæringstidspunkt(overstyrt: Vedtaksperiode, hvorfor: RevurderingÅrsak) =
-        hvorfor == RevurderingÅrsak.NY_PERIODE && overstyrt.periode.starterEtter(this.periode) && overstyrt.skjæringstidspunkt == this.skjæringstidspunkt
-
-    private fun validerYtelser(ytelser: Ytelser, skjæringstidspunkt: LocalDate, infotrygdhistorikk: Infotrygdhistorikk) {
-        kontekst(ytelser)
-        tilstand.valider(this, periode, skjæringstidspunkt, arbeidsgiver, ytelser, infotrygdhistorikk)
     }
 
     internal object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
