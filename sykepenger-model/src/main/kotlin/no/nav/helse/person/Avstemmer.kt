@@ -63,6 +63,7 @@ internal class Avstemmer(person: Person) {
     }
 
     private inner class HarUtbetalinger(private val utbetalinger: MutableList<Map<String, Any>>) : PersonVisitor {
+        private var vurdering: Map<String, Any>? = null
         override fun preVisitUtbetaling(
             utbetaling: Utbetaling,
             id: UUID,
@@ -83,13 +84,57 @@ internal class Avstemmer(person: Person) {
             avsluttet: LocalDateTime?,
             avstemmingsnøkkel: Long?
         ) {
-            utbetalinger.add(mapOf(
-                "id" to id,
-                "type" to type.name,
-                "status" to Utbetalingstatus.fraTilstand(tilstand),
-                "opprettet" to tidsstempel,
-                "oppdatert" to oppdatert
-            ))
+        }
+
+        override fun visitVurdering(
+            vurdering: Utbetaling.Vurdering,
+            ident: String,
+            epost: String,
+            tidspunkt: LocalDateTime,
+            automatiskBehandling: Boolean,
+            godkjent: Boolean
+        ) {
+            this.vurdering = mapOf(
+                "ident" to ident,
+                "tidspunkt" to tidspunkt,
+                "automatiskBehandling" to automatiskBehandling,
+                "godkjent" to godkjent
+            )
+        }
+
+        override fun postVisitUtbetaling(
+            utbetaling: Utbetaling,
+            id: UUID,
+            korrelasjonsId: UUID,
+            type: Utbetalingtype,
+            tilstand: Utbetaling.Tilstand,
+            periode: Periode,
+            tidsstempel: LocalDateTime,
+            oppdatert: LocalDateTime,
+            arbeidsgiverNettoBeløp: Int,
+            personNettoBeløp: Int,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int?,
+            gjenståendeSykedager: Int?,
+            stønadsdager: Int,
+            beregningId: UUID,
+            overføringstidspunkt: LocalDateTime?,
+            avsluttet: LocalDateTime?,
+            avstemmingsnøkkel: Long?
+        ) {
+            utbetalinger.add(
+                mutableMapOf<String, Any>(
+                    "id" to id,
+                    "type" to type.name,
+                    "status" to Utbetalingstatus.fraTilstand(tilstand),
+                    "opprettet" to tidsstempel,
+                    "oppdatert" to oppdatert,
+                ).apply {
+                    compute("avsluttet") {_, _ -> avsluttet }
+                    compute("vurdering") {_, _ -> vurdering }
+                }
+            )
+            vurdering = null
         }
 
         override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {

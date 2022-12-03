@@ -13,8 +13,10 @@ import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.serde.reflection.castAsList
+import no.nav.helse.serde.reflection.castAsMap
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -31,7 +33,7 @@ internal class AvstemmingTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.mars, Dagtype.Feriedag)))
         håndterYtelser(4.vedtaksperiode)
         håndterSimulering(4.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(4.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(4.vedtaksperiode, automatiskBehandling = true)
         håndterUtbetalt()
         tilYtelser(1.mai, 30.mai, 100.prosent, 1.mai)
         val avstemming = Avstemming(
@@ -84,20 +86,40 @@ internal class AvstemmingTest : AbstractEndToEndTest() {
         assertEquals("UTBETALING", utbetalinger[0]["type"])
         assertTrue(utbetalinger[0]["opprettet"] is LocalDateTime)
         assertTrue(utbetalinger[0]["oppdatert"] is LocalDateTime)
+        assertTrue(utbetalinger[0]["avsluttet"] is LocalDateTime)
+        assertEquals("Ola Nordmann", utbetalinger[0]["vurdering"].castAsMap<String, Any>()["ident"]) // Normalt en saksbehandler-navident, ikke navn på person
+        assertEquals(false, utbetalinger[0]["vurdering"].castAsMap<String, Any>()["automatiskBehandling"])
+        assertEquals(true, utbetalinger[0]["vurdering"].castAsMap<String, Any>()["godkjent"])
+        assertTrue(utbetalinger[0]["vurdering"].castAsMap<String, Any>()["tidspunkt"] is LocalDateTime)
+
         assertEquals(2.utbetaling(ORGNUMMER), utbetalinger[1]["id"])
         assertEquals(Utbetalingstatus.UTBETALT, utbetalinger[1]["status"])
         assertEquals("UTBETALING", utbetalinger[1]["type"])
         assertTrue(utbetalinger[1]["opprettet"] is LocalDateTime)
         assertTrue(utbetalinger[1]["oppdatert"] is LocalDateTime)
+        assertTrue(utbetalinger[1]["avsluttet"] is LocalDateTime)
+        assertEquals("Ola Nordmann", utbetalinger[1]["vurdering"].castAsMap<String, Any>()["ident"]) // Normalt en saksbehandler-navident, ikke navn på person
+        assertEquals(false, utbetalinger[1]["vurdering"].castAsMap<String, Any>()["automatiskBehandling"])
+        assertEquals(true, utbetalinger[1]["vurdering"].castAsMap<String, Any>()["godkjent"])
+        assertTrue(utbetalinger[1]["vurdering"].castAsMap<String, Any>()["tidspunkt"] is LocalDateTime)
+
         assertEquals(3.utbetaling(ORGNUMMER), utbetalinger[2]["id"])
         assertEquals(Utbetalingstatus.UTBETALT, utbetalinger[2]["status"])
         assertEquals("REVURDERING", utbetalinger[2]["type"])
         assertTrue(utbetalinger[2]["opprettet"] is LocalDateTime)
         assertTrue(utbetalinger[2]["oppdatert"] is LocalDateTime)
+        assertTrue(utbetalinger[2]["avsluttet"] is LocalDateTime)
+        assertEquals("Ola Nordmann", utbetalinger[2]["vurdering"].castAsMap<String, Any>()["ident"]) // Normalt en saksbehandler-navident, ikke navn på person
+        assertEquals(true, utbetalinger[2]["vurdering"].castAsMap<String, Any>()["automatiskBehandling"])
+        assertEquals(true, utbetalinger[2]["vurdering"].castAsMap<String, Any>()["godkjent"])
+        assertTrue(utbetalinger[2]["vurdering"].castAsMap<String, Any>()["tidspunkt"] is LocalDateTime)
+
         assertEquals(4.utbetaling(ORGNUMMER), utbetalinger[3]["id"])
         assertEquals(Utbetalingstatus.IKKE_UTBETALT, utbetalinger[3]["status"])
         assertEquals("UTBETALING", utbetalinger[3]["type"])
         assertTrue(utbetalinger[3]["opprettet"] is LocalDateTime)
         assertTrue(utbetalinger[3]["oppdatert"] is LocalDateTime)
+        assertNull(utbetalinger[3]["avsluttet"])
+        assertNull(utbetalinger[3]["vurdering"])
     }
 }
