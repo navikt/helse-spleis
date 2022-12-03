@@ -88,6 +88,7 @@ import no.nav.helse.person.Varselkode.RV_UT_16
 import no.nav.helse.person.Varselkode.RV_UT_5
 import no.nav.helse.person.Varselkode.RV_VT_1
 import no.nav.helse.person.Varselkode.RV_VT_2
+import no.nav.helse.person.Varselkode.RV_VT_3
 import no.nav.helse.person.Varselkode.RV_VT_4
 import no.nav.helse.person.Varselkode.RV_VT_5
 import no.nav.helse.person.Varselkode.RV_VT_6
@@ -947,7 +948,7 @@ internal class Vedtaksperiode private constructor(
             utbetalingsgodkjenning: Utbetalingsgodkjenning
         ) {
             utbetalingsgodkjenning.info("Forventet ikke utbetalingsgodkjenning i %s".format(type.name))
-            utbetalingsgodkjenning.funksjonellFeil(RV_VT_2)
+            utbetalingsgodkjenning.funksjonellFeil(RV_VT_3)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
