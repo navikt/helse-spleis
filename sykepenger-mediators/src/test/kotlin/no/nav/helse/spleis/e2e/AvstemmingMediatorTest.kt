@@ -49,6 +49,7 @@ internal class AvstemmingMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals("AVSLUTTET", vedtaksperioder.path(0).path("tilstand").asText())
         assertDoesNotThrow { LocalDateTime.parse(vedtaksperioder.path(0).path("opprettet").asText()) }
         assertDoesNotThrow { LocalDateTime.parse(vedtaksperioder.path(0).path("oppdatert").asText()) }
+
         assertDoesNotThrow { UUID.fromString(vedtaksperioder.path(1).path("id").asText()) }
         assertEquals("AVVENTER_SIMULERING", vedtaksperioder.path(1).path("tilstand").asText())
         assertDoesNotThrow { LocalDateTime.parse(vedtaksperioder.path(1).path("opprettet").asText()) }
@@ -59,6 +60,7 @@ internal class AvstemmingMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals("TIL_INFOTRYGD", forkastedeVedtaksperioder.path(0).path("tilstand").asText())
         assertDoesNotThrow { LocalDateTime.parse(forkastedeVedtaksperioder.path(0).path("opprettet").asText()) }
         assertDoesNotThrow { LocalDateTime.parse(forkastedeVedtaksperioder.path(0).path("oppdatert").asText()) }
+
         assertDoesNotThrow { UUID.fromString(forkastedeVedtaksperioder.path(1).path("id").asText()) }
         assertEquals("TIL_INFOTRYGD", forkastedeVedtaksperioder.path(1).path("tilstand").asText())
         assertDoesNotThrow { LocalDateTime.parse(forkastedeVedtaksperioder.path(1).path("opprettet").asText()) }
@@ -68,11 +70,17 @@ internal class AvstemmingMediatorTest : AbstractEndToEndMediatorTest() {
         assertDoesNotThrow { UUID.fromString(utbetalinger.path(0).path("id").asText()) }
         assertEquals("UTBETALT", utbetalinger.path(0).path("status").asText())
         assertEquals("UTBETALING", utbetalinger.path(0).path("type").asText())
+        assertEquals("O123456", utbetalinger.path(0).path("vurdering").path("ident").asText())
+        assertEquals(false, utbetalinger.path(0).path("vurdering").path("automatiskBehandling").asBoolean())
+        assertEquals(true, utbetalinger.path(0).path("vurdering").path("godkjent").asBoolean())
+        assertDoesNotThrow { LocalDateTime.parse(utbetalinger.path(0).path("vurdering").path("tidspunkt").asText()) }
         assertDoesNotThrow { LocalDateTime.parse(utbetalinger.path(0).path("opprettet").asText()) }
         assertDoesNotThrow { LocalDateTime.parse(utbetalinger.path(0).path("oppdatert").asText()) }
+
         assertDoesNotThrow { UUID.fromString(utbetalinger.path(1).path("id").asText()) }
         assertEquals("IKKE_UTBETALT", utbetalinger.path(1).path("status").asText())
         assertEquals("UTBETALING", utbetalinger.path(1).path("type").asText())
+        assertEquals(null, utbetalinger.path(1).get("vurdering"))
         assertDoesNotThrow { LocalDateTime.parse(utbetalinger.path(1).path("opprettet").asText()) }
         assertDoesNotThrow { LocalDateTime.parse(utbetalinger.path(1).path("oppdatert").asText()) }
     }
