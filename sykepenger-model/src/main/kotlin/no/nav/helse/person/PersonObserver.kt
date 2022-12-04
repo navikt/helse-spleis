@@ -201,6 +201,20 @@ interface PersonObserver {
         val vedtakFattetTidspunkt: LocalDateTime
     )
 
+    data class RevurderingIgangsattEvent(
+        val revurderingsÅrsak: String,
+        val kilde: UUID,
+        val initiertAvArbeidsgiver: String,
+        val initiertAvVedtaksperiode: VedtaksperiodeData,
+        val berørtePerioder: Map<String, List<VedtaksperiodeData>>
+    ) {
+        data class VedtaksperiodeData(
+            val id: UUID,
+            val periode: Periode,
+            val skjæringstidspunkt: LocalDate
+        )
+    }
+
     fun inntektsmeldingReplay(personidentifikator: Personidentifikator, vedtaksperiodeId: UUID) {}
     fun vedtaksperiodePåminnet(hendelseskontekst: Hendelseskontekst, påminnelse: Påminnelse) {}
     fun vedtaksperiodeIkkePåminnet(hendelseskontekst: Hendelseskontekst, nåværendeTilstand: TilstandType) {}
@@ -229,4 +243,6 @@ interface PersonObserver {
         utbetalingId: UUID,
         vedtaksperiodeId: UUID
     ) {}
+
+    fun revurderingIgangsatt(event: RevurderingIgangsattEvent) {}
 }
