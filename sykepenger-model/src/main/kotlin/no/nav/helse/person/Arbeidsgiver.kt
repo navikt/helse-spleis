@@ -132,10 +132,10 @@ internal class Arbeidsgiver private constructor(
                        || arbeidsgiver.vedtaksperioder.nåværendeVedtaksperiode(KLAR_TIL_BEHANDLING) != null
            }.map { it.organisasjonsnummer }
 
-        internal fun List<Arbeidsgiver>.startRevurdering(overstyrtVedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, hvorfor: RevurderingÅrsak) {
+        internal fun List<Arbeidsgiver>.startRevurdering(overstyrtVedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             forEach { arbeidsgiver ->
                 arbeidsgiver.vedtaksperioder.forEach { vedtaksperiode ->
-                    vedtaksperiode.startRevurdering(this, hendelse, overstyrtVedtaksperiode, hvorfor)
+                    vedtaksperiode.startRevurdering(this, hendelse, overstyrtVedtaksperiode, revurdering)
                 }
             }
         }
@@ -496,9 +496,6 @@ internal class Arbeidsgiver private constructor(
         }
         registrerNyVedtaksperiode(vedtaksperiode)
         vedtaksperiode.håndter(søknad)
-        if (!søknad.harFunksjonelleFeilEllerVerre()) {
-            person.startRevurdering(vedtaksperiode, søknad, RevurderingÅrsak.NY_PERIODE)
-        }
         if (søknad.harFunksjonelleFeilEllerVerre()) {
             person.søppelbøtte(søknad, TIDLIGERE_OG_ETTERGØLGENDE(vedtaksperiode))
             søknad.info("Forsøkte å opprette en ny vedtaksperiode, men den ble forkastet før den rakk å spørre om inntektsmeldingReplay. " +

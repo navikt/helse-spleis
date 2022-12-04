@@ -141,6 +141,31 @@ internal class PersonMediator(
         )).toJson())
     }
 
+    override fun revurderingIgangsatt(
+        event: PersonObserver.RevurderingIgangsattEvent,
+        personidentifikator: Personidentifikator,
+        aktørId: String
+    ) {
+        val eventName = "revurdering_igangsatt"
+        queueMessage(personidentifikator.toString(), eventName, JsonMessage.newMessage(eventName, mapOf(
+            "fødselsnummer" to personidentifikator.toString(),
+            "aktørId" to aktørId,
+            "skjæringstidspunkt" to event.skjæringstidspunkt,
+            "periodeForEndringFom" to event.periodeForEndring.start,
+            "periodeForEndringTom" to event.periodeForEndring.endInclusive,
+            "årsak" to event.årsak,
+            "berørtePerioder" to event.berørtePerioder.map {
+                mapOf(
+                    "vedtaksperiodeId" to it.vedtaksperiodeId,
+                    "skjæringstidspunkt" to it.skjæringstidspunkt,
+                    "periodeFom" to it.periode.start,
+                    "periodeTom" to it.periode.endInclusive,
+                    "orgnummer" to it.orgnummer
+                )
+            }
+        )).toJson())
+    }
+
     override fun utbetalingUtbetalt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingUtbetaltEvent) {
         queueMessage(hendelseskontekst, utbetalingAvsluttet("utbetaling_utbetalt", event))
     }

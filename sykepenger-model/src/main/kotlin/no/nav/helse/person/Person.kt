@@ -458,6 +458,10 @@ class Person private constructor(
         observers.forEach { it.vedtakFattet(hendelseskontekst, vedtakFattetEvent) }
     }
 
+    internal fun emitRevurderingIgangsattEvent(event: PersonObserver.RevurderingIgangsattEvent) {
+        observers.forEach { it.revurderingIgangsatt(event, personidentifikator, aktørId) }
+    }
+
     internal fun feriepengerUtbetalt(
         hendelseskontekst: Hendelseskontekst,
         feriepengerUtbetaltEvent: PersonObserver.FeriepengerUtbetaltEvent
@@ -737,7 +741,7 @@ class Person private constructor(
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
         nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrArbeidsgiveropplysninger(hendelse, subsumsjonObserver))
-        startRevurdering(vedtaksperiode, hendelse, RevurderingÅrsak.ARBEIDSGIVEROPPLYSNINGER)
+        startRevurdering(vedtaksperiode, hendelse, Revurderingseventyr.arbeidsgiveropplysninger(skjæringstidspunkt))
     }
 
 
@@ -760,8 +764,9 @@ class Person private constructor(
         }
     }
 
-    internal fun startRevurdering(overstyrtVedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, hvorfor: RevurderingÅrsak) {
-        arbeidsgivere.startRevurdering(overstyrtVedtaksperiode, hendelse, hvorfor)
+    internal fun startRevurdering(overstyrtVedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
+        arbeidsgivere.startRevurdering(overstyrtVedtaksperiode, hendelse, revurdering)
+        overstyrtVedtaksperiode.emitRevurderingIgangsattEvent(revurdering)
     }
 
     internal fun slettUtgåtteSykmeldingsperioder(tom: LocalDate) {
@@ -799,3 +804,4 @@ class Person private constructor(
         observers.forEach { it.nyVedtaksperiodeUtbetaling(personidentifikator, aktørId, organisasjonsnummer, utbetalingId, vedtaksperiodeId) }
     }
 }
+
