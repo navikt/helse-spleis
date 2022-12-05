@@ -82,9 +82,6 @@ import no.nav.helse.spleis.e2e.lønnsinntekt
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
-import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
-import no.nav.helse.utbetalingslinjer.Endringskode.NY
-import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -100,6 +97,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
@@ -2067,42 +2065,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-
-        val sisteUtbetaling = inspektør.utbetalinger.last().inspektør
-        assertEquals(2, sisteUtbetaling.arbeidsgiverOppdrag.size)
-        assertEquals(0, sisteUtbetaling.personOppdrag.size)
-
-        assertForventetFeil(
-            forklaring = "Ender opp med å trekke tilbake penger for perioden som nå mangler vilkårsgrunnlag",
-            nå = {
-                sisteUtbetaling.arbeidsgiverOppdrag[0].let { februarLinje ->
-                    assertEquals(1.februar til 28.februar, februarLinje.periode)
-                    assertEquals(1.februar, februarLinje.inspektør.datoStatusFom)
-                    assertEquals(ENDR, februarLinje.inspektør.endringskode)
-                    assertTrue(februarLinje.erOpphør())
-                }
-                sisteUtbetaling.arbeidsgiverOppdrag[1].let { marsLinje ->
-                    assertEquals(5.mars til 30.mars, marsLinje.periode)
-                    assertNull(marsLinje.inspektør.datoStatusFom)
-                    assertEquals(NY, marsLinje.inspektør.endringskode)
-                    assertFalse(marsLinje.erOpphør())
-                }
-            },
-            ønsket = {
-                sisteUtbetaling.arbeidsgiverOppdrag[0].let { februarLinje ->
-                    assertEquals(1.februar til 28.februar, februarLinje.periode)
-                    assertNull(februarLinje.inspektør.datoStatusFom)
-                    assertEquals(UEND, februarLinje.inspektør.endringskode)
-                    assertFalse(februarLinje.erOpphør())
-                }
-                sisteUtbetaling.arbeidsgiverOppdrag[1].let { marsLinje ->
-                    assertEquals(5.mars til 30.mars, marsLinje.periode)
-                    assertNull(marsLinje.inspektør.datoStatusFom)
-                    assertEquals(NY, marsLinje.inspektør.endringskode)
-                    assertFalse(marsLinje.erOpphør())
-                }
-            }
-        )
+        assertThrows<IllegalStateException>("Fant ikke vilkårsgrunnlag for 2018-02-01") {
+            håndterYtelser(2.vedtaksperiode)
+        }
     }
 }

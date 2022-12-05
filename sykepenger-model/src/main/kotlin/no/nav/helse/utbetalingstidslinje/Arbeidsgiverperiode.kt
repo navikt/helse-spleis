@@ -36,6 +36,8 @@ internal class Arbeidsgiverperiode private constructor(internal val perioder: Li
 
     internal fun fiktiv() = perioder.isEmpty()
 
+    internal fun periode(sisteDag: LocalDate) = førsteKjente til sisteDag
+
     internal fun kjentDag(dagen: LocalDate) {
         kjenteDager.add(dagen)
     }

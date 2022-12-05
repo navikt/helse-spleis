@@ -1601,7 +1601,8 @@ internal class Vedtaksperiode private constructor(
                         vedtaksperiode.skjæringstidspunkt
                     )
                     arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
-                    arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger, vedtaksperiode.periode, mapOf(vedtaksperiode.periode to (this to vedtaksperiode.jurist())))
+                    val beregningsperiode = vedtaksperiode.finnArbeidsgiverperiode()?.periode(vedtaksperiode.periode.endInclusive) ?: vedtaksperiode.periode
+                    arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger, beregningsperiode, mapOf(vedtaksperiode.periode to (this to vedtaksperiode.jurist())))
                 }
                 onSuccess {
                     if (vedtaksperiode.person.harKunEttAnnetRelevantArbeidsforholdEnn(
