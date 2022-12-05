@@ -82,6 +82,9 @@ import no.nav.helse.spleis.e2e.lønnsinntekt
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
+import no.nav.helse.utbetalingslinjer.Endringskode.NY
+import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -2020,5 +2023,86 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTrue(beregnetSykdomstidslinjeDager.filterKeys { it in førsteDagIArbeidsgiverperioden til 31.mars(2022) }.values.all {
             (it is Dag.Sykedag || it is Dag.SykHelgedag) && it.kommerFra(Søknad::class)
         }) { beregnetSykdomstidslinje.toShortString() }
+    }
+
+    @Test
+    fun `Inntektsmelding sletter vilkårsgrunnlag og trekker tilbake penger`() {
+        createOvergangFraInfotrygdPerson()
+        assertEquals(1.januar til 31.januar, person.inspektør.utbetaltIInfotrygd.single())
+        assertEquals(1.februar til 28.februar, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.periode)
+
+        val assertTilstandFørInnteksmeldingHensyntas: () -> Unit = {
+            val førsteUtbetalingsdagIInfotrygd = 1.januar
+            assertEquals(førsteUtbetalingsdagIInfotrygd, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+            assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.infotrygd)
+        }
+
+        assertTilstandFørInnteksmeldingHensyntas()
+
+        håndterSykmelding(Sykmeldingsperiode(5.mars, 31.mars, 100.prosent))
+        // Arbeidsgiver sender inntektsmelding for forlengelse i Mars _før_ vi møttar søknad.
+        // Så lenge det ikke treffer noen vedtaksperiode i Spleis skjer det ingenting.
+        // Personen vært frisk 1. & 2.Mars, så er nytt skjæringstidspunkt, men samme arbeidsgiverperiode
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(16.desember(2017) til 31.desember(2017)),
+            førsteFraværsdag = 5.mars
+        )
+        assertTilstandFørInnteksmeldingHensyntas()
+
+        // Når søknaden kommer replayes Inntektsmelding og nå puttes plutselig info fra Inntektsmlding på
+        // arbeidsgiver, også lengre tilbake i tid enn inntektsmeldingen som blir truffet.
+        håndterSøknad(Sykdom(5.mars, 31.mars, 100.prosent))
+
+        assertForventetFeil(
+            forklaring = "Inntektsmeldingen flytter skjæringstidspunkt på tidligere periode på arbeidsgiverperiode og sletter vilkårsgrunnlag",
+            nå = {
+                assertEquals(16.desember(2017), inspektør.skjæringstidspunkt(1.vedtaksperiode))
+                assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+                assertTrue(inspektør.vilkårsgrunnlagHistorikkInnslag().first().inspektør.elementer.isEmpty())
+            },
+            ønsket = {
+                assertTilstandFørInnteksmeldingHensyntas()
+            }
+        )
+
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+
+        val sisteUtbetaling = inspektør.utbetalinger.last().inspektør
+        assertEquals(2, sisteUtbetaling.arbeidsgiverOppdrag.size)
+        assertEquals(0, sisteUtbetaling.personOppdrag.size)
+
+        assertForventetFeil(
+            forklaring = "Ender opp med å trekke tilbake penger for perioden som nå mangler vilkårsgrunnlag",
+            nå = {
+                sisteUtbetaling.arbeidsgiverOppdrag[0].let { februarLinje ->
+                    assertEquals(1.februar til 28.februar, februarLinje.periode)
+                    assertEquals(1.februar, februarLinje.inspektør.datoStatusFom)
+                    assertEquals(ENDR, februarLinje.inspektør.endringskode)
+                    assertTrue(februarLinje.erOpphør())
+                }
+                sisteUtbetaling.arbeidsgiverOppdrag[1].let { marsLinje ->
+                    assertEquals(5.mars til 30.mars, marsLinje.periode)
+                    assertNull(marsLinje.inspektør.datoStatusFom)
+                    assertEquals(NY, marsLinje.inspektør.endringskode)
+                    assertFalse(marsLinje.erOpphør())
+                }
+            },
+            ønsket = {
+                sisteUtbetaling.arbeidsgiverOppdrag[0].let { februarLinje ->
+                    assertEquals(1.februar til 28.februar, februarLinje.periode)
+                    assertNull(februarLinje.inspektør.datoStatusFom)
+                    assertEquals(UEND, februarLinje.inspektør.endringskode)
+                    assertFalse(februarLinje.erOpphør())
+                }
+                sisteUtbetaling.arbeidsgiverOppdrag[1].let { marsLinje ->
+                    assertEquals(5.mars til 30.mars, marsLinje.periode)
+                    assertNull(marsLinje.inspektør.datoStatusFom)
+                    assertEquals(NY, marsLinje.inspektør.endringskode)
+                    assertFalse(marsLinje.erOpphør())
+                }
+            }
+        )
     }
 }

@@ -12,7 +12,10 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosentdel
 
 internal val Person.inspektør get() = PersonInspektør(this)
 internal val Person.personLogg get() = inspektør.aktivitetslogg
@@ -34,6 +37,10 @@ internal class PersonInspektør(person: Person): PersonVisitor {
     private val arbeidsgivere = mutableMapOf<String, Arbeidsgiver>()
     private val infotrygdelementerLagretInntekt = mutableListOf<Boolean>()
     private val vilkårsgrunnlagHistorikkInnslag: MutableList<VilkårsgrunnlagHistorikk.Innslag> = mutableListOf()
+
+    private var infotrygdInnslag = 0
+    private val infotrygdPerioder = mutableListOf<Periode>()
+    internal val utbetaltIInfotrygd get() = infotrygdPerioder.toList()
 
     init {
         person.accept(this)
@@ -88,6 +95,28 @@ internal class PersonInspektør(person: Person): PersonVisitor {
         harStatslønn: Boolean
     ) {
         infotrygdelementerLagretInntekt.add(lagretInntekter)
+    }
+
+    override fun preVisitInfotrygdhistorikkPerioder() {
+        infotrygdInnslag++
+    }
+
+    override fun visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(
+        orgnr: String,
+        periode: Utbetalingsperiode,
+        grad: Prosentdel,
+        inntekt: Inntekt
+    ) {
+        if (infotrygdInnslag == 1) infotrygdPerioder.add(periode)
+    }
+
+    override fun visitInfotrygdhistorikkPersonUtbetalingsperiode(
+        orgnr: String,
+        periode: Utbetalingsperiode,
+        grad: Prosentdel,
+        inntekt: Inntekt
+    ) {
+        if (infotrygdInnslag == 1) infotrygdPerioder.add(periode)
     }
 
     override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
