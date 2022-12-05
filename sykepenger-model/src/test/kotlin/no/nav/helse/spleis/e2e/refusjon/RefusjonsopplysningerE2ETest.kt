@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.refusjon
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -12,6 +13,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.i
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.oktober
@@ -20,6 +22,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.Varselkode.RV_RE_1
+import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.september
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -160,6 +163,24 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             håndterYtelser(treffesAvInntektsmelding)
             assertSisteTilstand(treffesAvInntektsmelding, AVVENTER_SIMULERING_REVURDERING)
             assertVarsel(RV_RE_1)
+        }
+    }
+
+    @Test
+    fun `Inntektsmelding uten refusjonsopplysninger`() {
+        a1 {
+            val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(null, null, emptyList()), beregnetInntekt = INNTEKT)
+            assertForventetFeil(
+                forklaring = "Skal dette tolkes som ingen refusjon?",
+                nå = {
+                    assertEquals(0, inspektør.arbeidsgiver.inspektør.refusjonshistorikk.inspektør.antall)
+                    assertEquals(emptyList<Refusjonsopplysning>(), inspektør.refusjonsopplysningerFraVilkårsgrunnlag(1.januar).inspektør.refusjonsopplysninger)
+                },
+                ønsket = {
+                    assertEquals(1, inspektør.arbeidsgiver.inspektør.refusjonshistorikk.inspektør.antall)
+                    assertEquals(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, INGEN)), inspektør.refusjonsopplysningerFraVilkårsgrunnlag(1.januar).inspektør.refusjonsopplysninger)
+                }
+            )
         }
     }
 
