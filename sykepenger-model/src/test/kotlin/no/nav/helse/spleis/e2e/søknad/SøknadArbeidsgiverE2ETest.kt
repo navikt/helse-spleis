@@ -15,14 +15,17 @@ import no.nav.helse.inspectors.søppelbøtte
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.Varselkode.RV_SØ_16
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
@@ -39,12 +42,88 @@ import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
+
+
+    @Test
+    fun `korrigerer førstegangsbehandling med ferie i arbeidsgiverperioden - søknad mottatt i avventer vilkårsprøving`() {
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(15.januar til 30.januar))
+        nullstillTilstandsendringer()
+        håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent), Ferie(10.januar, 15.januar))
+        (10.januar til 12.januar).forEach { dato ->
+            assertEquals(Dag.Arbeidsdag::class, inspektør.sykdomstidslinje[dato]::class) { "$dato er av annen dagtype" }
+        }
+        (13.januar til 15.januar).forEach { dato ->
+            assertEquals(Dag.Feriedag::class, inspektør.sykdomstidslinje[dato]::class) { "$dato er av annen dagtype" }
+        }
+        assertTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
+    fun `korrigerer førstegangsbehandling med ferie i arbeidsgiverperioden - søknad mottatt i avventer historikk`() {
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(15.januar til 30.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        nullstillTilstandsendringer()
+        håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent), Ferie(10.januar, 15.januar))
+        (10.januar til 12.januar).forEach { dato ->
+            assertEquals(Dag.Arbeidsdag::class, inspektør.sykdomstidslinje[dato]::class) { "$dato er av annen dagtype" }
+        }
+        (13.januar til 15.januar).forEach { dato ->
+            assertEquals(Dag.Feriedag::class, inspektør.sykdomstidslinje[dato]::class) { "$dato er av annen dagtype" }
+        }
+        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
+    fun `korrigerer førstegangsbehandling med ferie i arbeidsgiverperioden - søknad mottatt i avventer simulering`() {
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(15.januar til 30.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        nullstillTilstandsendringer()
+        håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent), Ferie(10.januar, 15.januar))
+        (10.januar til 12.januar).forEach { dato ->
+            assertEquals(Dag.Arbeidsdag::class, inspektør.sykdomstidslinje[dato]::class) { "$dato er av annen dagtype" }
+        }
+        (13.januar til 15.januar).forEach { dato ->
+            assertEquals(Dag.Feriedag::class, inspektør.sykdomstidslinje[dato]::class) { "$dato er av annen dagtype" }
+        }
+        assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
+    fun `korrigerer førstegangsbehandling med ferie i arbeidsgiverperioden - søknad mottatt i avventer godkjenning`() {
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(15.januar til 30.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        nullstillTilstandsendringer()
+        håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent), Ferie(10.januar, 15.januar))
+        (10.januar til 12.januar).forEach { dato ->
+            assertEquals(Dag.Arbeidsdag::class, inspektør.sykdomstidslinje[dato]::class) { "$dato er av annen dagtype" }
+        }
+        (13.januar til 15.januar).forEach { dato ->
+            assertEquals(Dag.Feriedag::class, inspektør.sykdomstidslinje[dato]::class) { "$dato er av annen dagtype" }
+        }
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+    }
 
     @Test
     fun `delvis overlappende søknad i avsluttet uten utbetaling`() {
