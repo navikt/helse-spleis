@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.refusjon
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -167,20 +166,15 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `Inntektsmelding uten refusjonsopplysninger`() {
+    fun `Inntektsmelding uten refusjonsopplysninger tolkes som ingen refusjon`() {
         a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            assertEquals(0, inspektør.arbeidsgiver.inspektør.refusjonshistorikk.inspektør.antall)
+            assertEquals(emptyList<Refusjonsopplysning>(), inspektør.refusjonsopplysningerFraRefusjonshistorikk(1.januar).inspektør.refusjonsopplysninger)
             val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(null, null, emptyList()), beregnetInntekt = INNTEKT)
-            assertForventetFeil(
-                forklaring = "Skal dette tolkes som ingen refusjon?",
-                nå = {
-                    assertEquals(0, inspektør.arbeidsgiver.inspektør.refusjonshistorikk.inspektør.antall)
-                    assertEquals(emptyList<Refusjonsopplysning>(), inspektør.refusjonsopplysningerFraVilkårsgrunnlag(1.januar).inspektør.refusjonsopplysninger)
-                },
-                ønsket = {
-                    assertEquals(1, inspektør.arbeidsgiver.inspektør.refusjonshistorikk.inspektør.antall)
-                    assertEquals(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, INGEN)), inspektør.refusjonsopplysningerFraVilkårsgrunnlag(1.januar).inspektør.refusjonsopplysninger)
-                }
-            )
+            assertEquals(1, inspektør.arbeidsgiver.inspektør.refusjonshistorikk.inspektør.antall)
+            assertEquals(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, INGEN)), inspektør.refusjonsopplysningerFraRefusjonshistorikk(1.januar).inspektør.refusjonsopplysninger)
         }
     }
 
