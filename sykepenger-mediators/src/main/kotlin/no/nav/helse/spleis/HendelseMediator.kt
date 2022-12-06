@@ -41,6 +41,7 @@ import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsforholdMessage
+import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsgiveropplysningerMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrInntektMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrTidslinjeMessage
 import no.nav.helse.spleis.meldinger.model.PersonPåminnelseMessage
@@ -220,6 +221,13 @@ internal class HendelseMediator(
         }
     }
 
+    override fun behandle(message: OverstyrArbeidsgiveropplysningerMessage, overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, context: MessageContext) {
+        håndter(message, overstyrArbeidsgiveropplysninger, context) { person ->
+            HendelseProbe.onOverstyrArbeidsgiveropplysninger()
+            person.håndter(overstyrArbeidsgiveropplysninger)
+        }
+    }
+
     override fun behandle(message: OverstyrArbeidsforholdMessage, overstyrArbeidsforhold: OverstyrArbeidsforhold, context: MessageContext) {
         håndter(message, overstyrArbeidsforhold, context) { person ->
             HendelseProbe.onOverstyrArbeidsforhold()
@@ -300,6 +308,7 @@ internal interface IHendelseMediator {
     fun behandle(message: MigrateMessage, migrate: Migrate, context: MessageContext)
     fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje, context: MessageContext)
     fun behandle(message: OverstyrInntektMessage, overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, context: MessageContext)
+    fun behandle(message: OverstyrArbeidsgiveropplysningerMessage, overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, context: MessageContext)
     fun behandle(message: OverstyrArbeidsforholdMessage, overstyrArbeidsforhold: OverstyrArbeidsforhold, context: MessageContext)
     fun behandle(message: EtterbetalingMessage, grunnbeløpsregulering: Grunnbeløpsregulering, context: MessageContext)
 }

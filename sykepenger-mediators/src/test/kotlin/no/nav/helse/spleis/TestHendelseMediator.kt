@@ -32,6 +32,7 @@ import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsforholdMessage
+import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsgiveropplysningerMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrInntektMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrTidslinjeMessage
 import no.nav.helse.spleis.meldinger.model.PersonPåminnelseMessage
@@ -93,6 +94,8 @@ internal class TestHendelseMediator : IHendelseMediator {
     internal var lestOverstyrTidslinje = false
         private set
     internal var lestOverstyrInntekt = false
+        private set
+    internal var lestOverstyrArbeidsgiveropplysningser = false
         private set
     internal var lestOverstyrArbeidsforhold = false
         private set
@@ -209,6 +212,10 @@ internal class TestHendelseMediator : IHendelseMediator {
 
     override fun behandle(message: OverstyrInntektMessage, overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, context: MessageContext) {
         lestOverstyrInntekt = true
+    }
+
+    override fun behandle(message: OverstyrArbeidsgiveropplysningerMessage, overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, context: MessageContext) {
+        lestOverstyrArbeidsgiveropplysningser = true
     }
 
     override fun behandle(message: OverstyrArbeidsforholdMessage, overstyrArbeidsforhold: OverstyrArbeidsforhold, context: MessageContext) {

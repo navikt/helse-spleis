@@ -21,7 +21,7 @@ import org.skyscreamer.jsonassert.JSONCompareMode.STRICT_ORDER
 internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
 
     override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
-
+        OverstyrArbeidsgiveropplysningerRiver(rapidsConnection, mediator)
     }
 
     private val testMessageFactory = TestMessageFactory(
@@ -31,6 +31,21 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
         INNTEKT,
         LocalDate.of(1992, 2, 12)
     )
+
+    @Test
+    fun `kan mappe melding om overstyring av arbeidsgiveropplysninger til modell uten feil`() {
+        assertNoErrors(
+            testMessageFactory.lagOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                mapOf(ORGNUMMER to Arbeidsgiveropplysning(
+                    INNTEKT,
+                    "forklaring",
+                    Subsumsjon("8-15", null, null),
+                    listOf(Refusjonsopplysning(1.januar, null, 0.0))
+                ))
+            )
+        )
+    }
 
     @Test
     fun `lager riktig format på OverstyrArbeidsgiveropplysninger-hendelsen`() {

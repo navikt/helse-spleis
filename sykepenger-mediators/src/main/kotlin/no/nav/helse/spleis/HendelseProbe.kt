@@ -84,6 +84,10 @@ object HendelseProbe {
         tell("OverstyrInntekt")
     }
 
+    fun onOverstyrArbeidsgiveropplysninger() {
+        tell("OverstyrArbeidsgiveropplysninger")
+    }
+
     fun onOverstyrArbeidsforhold() {
         tell("OverstyrArbeidsforhold")
     }
