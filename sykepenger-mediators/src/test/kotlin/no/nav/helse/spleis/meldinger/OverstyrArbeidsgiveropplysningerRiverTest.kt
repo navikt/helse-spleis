@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.meldinger
 
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDate
 import no.nav.helse.februar
 import no.nav.helse.januar
@@ -16,32 +18,135 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndMediatorTest.Companion.UNG_PERSON
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONAssert
-import org.skyscreamer.jsonassert.JSONCompareMode.STRICT_ORDER
+import org.skyscreamer.jsonassert.JSONCompareMode.STRICT
 
 internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
 
-    override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
-        OverstyrArbeidsgiveropplysningerRiver(rapidsConnection, mediator)
-    }
-
-    private val testMessageFactory = TestMessageFactory(
-        UNG_PERSON_FNR_2018,
-        AKTØRID,
-        ORGNUMMER,
-        INNTEKT,
-        LocalDate.of(1992, 2, 12)
-    )
-
     @Test
-    fun `kan mappe melding om overstyring av arbeidsgiveropplysninger til modell uten feil`() {
+    fun `kan mappe melding om overstyring av arbeidsgiveropplysninger for en arbeidsgiver`() {
         assertNoErrors(
             testMessageFactory.lagOverstyrArbeidsgiveropplysninger(
                 1.januar,
                 mapOf(ORGNUMMER to Arbeidsgiveropplysning(
-                    INNTEKT,
-                    "forklaring",
-                    Subsumsjon("8-15", null, null),
-                    listOf(Refusjonsopplysning(1.januar, null, 0.0))
+                    månedligInntekt = INNTEKT,
+                    forklaring = "forklaring",
+                    subsumsjon = Subsumsjon("8-15", null, null),
+                    refusjonsopplysninger = listOf(Refusjonsopplysning(1.januar, null, 0.0))
+                ))
+            )
+        )
+    }
+
+    @Test
+    fun `kan mappe melding om overstyring av arbeidsgiveropplysninger for flere arbeidsgivere`() {
+        assertNoErrors(
+            testMessageFactory.lagOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                mapOf(
+                    "a1" to Arbeidsgiveropplysning(
+                        månedligInntekt = INNTEKT,
+                        forklaring = "forklaring",
+                        subsumsjon = Subsumsjon("8-15", null, null),
+                        refusjonsopplysninger = listOf(Refusjonsopplysning(1.januar, null, 0.0))
+                    ),
+                     "a2" to Arbeidsgiveropplysning(
+                         månedligInntekt = INNTEKT,
+                         forklaring = "forklaring",
+                         subsumsjon = Subsumsjon("8-15", null, null),
+                         refusjonsopplysninger = listOf(Refusjonsopplysning(1.januar, null, 0.0))
+                     )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `skal feile om det ikke er noen arbeidsgivere`() {
+        assertErrors(
+            testMessageFactory.lagOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                emptyMap()
+            )
+        )
+    }
+
+    @Test
+    fun `skal feile om om refusjonsopplysninger er null`() {
+        assertErrors(
+            testMessageFactory.lagOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                mapOf(ORGNUMMER to Arbeidsgiveropplysning(
+                    månedligInntekt = INNTEKT,
+                    forklaring = "forklaring",
+                    subsumsjon = Subsumsjon("8-15", null, null),
+                    refusjonsopplysninger = null
+                ))
+            )
+        )
+    }
+    @Test
+    fun `refusjonsopplysninger kan være en tom liste`() {
+        assertNoErrors(
+            testMessageFactory.lagOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                mapOf(ORGNUMMER to Arbeidsgiveropplysning(
+                    månedligInntekt = INNTEKT,
+                    forklaring = "forklaring",
+                    subsumsjon = Subsumsjon("8-15", null, null),
+                    refusjonsopplysninger = emptyList()
+                ))
+            )
+        )
+    }
+
+    @Test
+    fun `skal feile hvis vi mangler forklaring fra saksbehandler`() {
+        assertErrors(
+            testMessageFactory.lagOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                mapOf(ORGNUMMER to Arbeidsgiveropplysning(
+                    månedligInntekt = INNTEKT,
+                    forklaring = null,
+                    subsumsjon = Subsumsjon("8-15", null, null),
+                    refusjonsopplysninger = listOf(Refusjonsopplysning(1.januar, null, 0.0))
+                ))
+            )
+        )
+    }
+
+    @Test
+    fun `skal feile hvis vi mangler opplysninger på èn av fler arbeidsgivere`() {
+        assertErrors(
+            testMessageFactory.lagOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                mapOf(
+                    "a1" to Arbeidsgiveropplysning(
+                        månedligInntekt = INNTEKT,
+                        forklaring = "forklaring",
+                        subsumsjon = Subsumsjon("8-15", null, null),
+                        refusjonsopplysninger = listOf(Refusjonsopplysning(1.januar, null, 0.0))
+                    ),
+                    "a2" to Arbeidsgiveropplysning(
+                        månedligInntekt = INNTEKT,
+                        forklaring = " ",
+                        subsumsjon = Subsumsjon("8-15", null, null),
+                        refusjonsopplysninger = listOf(Refusjonsopplysning(1.januar, null, 0.0))
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `skal feile hvis vi har en subsumsjon uten paragraf`() {
+        assertErrors(
+            testMessageFactory.lagOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                mapOf(ORGNUMMER to Arbeidsgiveropplysning(
+                    månedligInntekt = INNTEKT,
+                    forklaring = "forklaring",
+                    subsumsjon = Subsumsjon(null, null, null),
+                    refusjonsopplysninger = listOf(Refusjonsopplysning(1.januar, null, 0.0))
                 ))
             )
         )
@@ -53,12 +158,18 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
             1.januar,
             mapOf(
                 ORGNUMMER to Arbeidsgiveropplysning(
-                    INNTEKT,
-                    "forklaring",
-                    Subsumsjon("8-15", null, null),
-                    listOf(Refusjonsopplysning(1.januar, 31.januar, INNTEKT/2), Refusjonsopplysning(1.februar, null, 0.0))
+                    månedligInntekt = INNTEKT,
+                    forklaring = "forklaring",
+                    subsumsjon = Subsumsjon("8-15", null, null),
+                    refusjonsopplysninger = listOf(Refusjonsopplysning(1.januar, 31.januar, INNTEKT/2), Refusjonsopplysning(1.februar, null, 0.0))
+                ),
+                "987654322" to Arbeidsgiveropplysning(
+                    månedligInntekt = INNTEKT/2,
+                    forklaring = "forklaring2",
+                    subsumsjon = Subsumsjon("8-14", "1", "a"),
+                    refusjonsopplysninger = listOf(Refusjonsopplysning(1.januar, null, INNTEKT/3)
                 )
-            )
+            ))
         )
 
         @Language("json")
@@ -86,11 +197,48 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
                   "subsumsjon": {
                     "paragraf": "8-15"
                   }
+                },
+                "987654322": {
+                  "månedligInntekt": 15500.0,
+                  "forklaring": "forklaring2",
+                  "refusjonsopplysninger": [
+                    {
+                      "fom": "2018-01-01",
+                      "beløp": 10333.333333333334
+                    }
+                  ],
+                  "subsumsjon": {
+                    "paragraf": "8-14",
+                    "ledd": "1",
+                    "bokstav": "a"
+                  }
                 }
               }
             }"""
 
-        JSONAssert.assertEquals(forventetResultat, overstyrArbeidsgiveropplysninger.second, STRICT_ORDER)
+        val faktiskResultat =
+            overstyrArbeidsgiveropplysninger.json("@event_name", "aktørId", "fødselsnummer", "skjæringstidspunkt", "arbeidsgiveropplysninger")
+
+        JSONAssert.assertEquals(forventetResultat, faktiskResultat, STRICT)
+        assertNoErrors(overstyrArbeidsgiveropplysninger)
     }
 
+    override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
+        OverstyrArbeidsgiveropplysningerRiver(rapidsConnection, mediator)
+    }
+
+    private val testMessageFactory = TestMessageFactory(
+        UNG_PERSON_FNR_2018,
+        AKTØRID,
+        ORGNUMMER,
+        INNTEKT,
+        LocalDate.of(1992, 2, 12)
+    )
+
+    private companion object {
+        private val objectMapper = jacksonObjectMapper()
+        private fun Pair<String, String>.json(vararg behold: String) = (objectMapper.readTree(second) as ObjectNode).let { json ->
+            json.remove(json.fieldNames().asSequence().minus(behold.toSet()).toList())
+        }.toString()
+    }
 }

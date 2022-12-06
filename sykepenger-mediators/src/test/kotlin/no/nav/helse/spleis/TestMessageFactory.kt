@@ -20,16 +20,13 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.spleis.TestMessageFactory.UtbetalingshistorikkTestdata.Companion.toJson
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.økonomi.Inntekt
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
@@ -54,12 +51,12 @@ internal class TestMessageFactory(
             objectMapper
                 .convertValue<Map<String, Any>>(this)
                 .plus("fødselsdato" to "$fødselsdato")
-                .plus("aktorId" to "$aktørId")
+                .plus("aktorId" to aktørId)
         private fun Inntektsmelding.toMapMedFelterFraSpedisjon(fødselsdato: LocalDate, aktørId: String): Map<String, Any> =
             objectMapper
                 .convertValue<Map<String, Any>>(this)
                 .plus("fødselsdato" to "$fødselsdato")
-                .plus("aktorId" to "$aktørId")
+                .plus("aktorId" to aktørId)
     }
 
     fun lagNySøknad(
@@ -463,10 +460,10 @@ internal class TestMessageFactory(
     }
 
     data class Arbeidsgiveropplysning(
-        val månedligInntekt: Double,
-        val forklaring: String,
+        val månedligInntekt: Double?,
+        val forklaring: String?,
         val subsumsjon: Subsumsjon?,
-        val refusjonsopplysninger: List<Refusjonsopplysning>
+        val refusjonsopplysninger: List<Refusjonsopplysning>?
     )
 
     fun lagYtelser(
@@ -987,7 +984,7 @@ internal class TestMessageFactory(
                 mutableMapOf(
                     "månedligInntekt" to arbeidsgiveropplysning.månedligInntekt,
                     "forklaring" to arbeidsgiveropplysning.forklaring,
-                    "refusjonsopplysninger" to arbeidsgiveropplysning.refusjonsopplysninger.map { it.toMap }
+                    "refusjonsopplysninger" to arbeidsgiveropplysning.refusjonsopplysninger?.map { it.toMap }
                 ).apply {
                     arbeidsgiveropplysning.subsumsjon?.let {
                         this["subsumsjon"] = it.toMap
