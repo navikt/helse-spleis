@@ -2,40 +2,34 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.somPeriode
 
-class Revurderingseventyr private constructor(private val hvorfor: RevurderingÅrsak) {
+class Revurderingseventyr private constructor(
+    private val hvorfor: RevurderingÅrsak,
+    private val skjæringstidspunkt: LocalDate,
+    private val periodeForEndring: Periode
+) {
 
     private infix fun Revurderingseventyr.skyldes(årsak: RevurderingÅrsak) = hvorfor == årsak
     private infix fun Revurderingseventyr.ikkeSkyldes(årsak: RevurderingÅrsak) = !skyldes(årsak)
 
     internal companion object {
-        fun nyPeriode() = Revurderingseventyr(RevurderingÅrsak.NY_PERIODE)
-        fun arbeidsforhold() = Revurderingseventyr(RevurderingÅrsak.ARBEIDSFORHOLD)
-        fun korrigertSøknad() = Revurderingseventyr(RevurderingÅrsak.KORRIGERT_SØKNAD)
-        fun sykdomstidslinje() = Revurderingseventyr(RevurderingÅrsak.SYKDOMSTIDSLINJE)
-        fun arbeidsgiveropplysninger() = Revurderingseventyr(RevurderingÅrsak.ARBEIDSGIVEROPPLYSNINGER)
-        fun arbeidsgiverperiode() = Revurderingseventyr(RevurderingÅrsak.ARBEIDSGIVERPERIODE)
+        fun nyPeriode(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(RevurderingÅrsak.NY_PERIODE, skjæringstidspunkt, periodeForEndring)
+        fun arbeidsforhold(skjæringstidspunkt: LocalDate) = Revurderingseventyr(RevurderingÅrsak.ARBEIDSFORHOLD, skjæringstidspunkt, skjæringstidspunkt.somPeriode())
+        fun korrigertSøknad(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(RevurderingÅrsak.KORRIGERT_SØKNAD, skjæringstidspunkt, periodeForEndring)
+        fun sykdomstidslinje(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(RevurderingÅrsak.SYKDOMSTIDSLINJE, skjæringstidspunkt, periodeForEndring)
+        fun arbeidsgiveropplysninger(skjæringstidspunkt: LocalDate) = Revurderingseventyr(RevurderingÅrsak.ARBEIDSGIVEROPPLYSNINGER, skjæringstidspunkt, skjæringstidspunkt.somPeriode())
+        fun arbeidsgiverperiode(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(RevurderingÅrsak.ARBEIDSGIVERPERIODE, skjæringstidspunkt, periodeForEndring)
     }
 
-    private val vedtaksperioder = mutableMapOf<String, MutableList<PersonObserver.RevurderingIgangsattEvent.VedtaksperiodeData>>()
+    private val vedtaksperioder = mutableListOf<PersonObserver.RevurderingIgangsattEvent.VedtaksperiodeData>()
 
     internal fun inngåIRevurdering(
         vedtaksperiode: Vedtaksperiode,
-        hendelse: IAktivitetslogg,
-        skjæringstidspunkt: LocalDate,
-        overstyrtSkjæringstidspunkt: LocalDate,
-        overstyrtPeriode: Periode,
         skalInngåIRevurdering: () -> Boolean,
-        dersomInngått: () -> Unit = {},
-        doAnyway: () -> Unit = {}
+        dersomInngått: () -> Unit = {}
     ) {
-        // om endringen gjelder et nyere skjæringstidspunkt så trenger vi ikke bryr oss
-        if (overstyrtSkjæringstidspunkt > skjæringstidspunkt) return
-        // hvis endringen treffer samme skjæringstidspunkt, men en nyere nyopprettet periode, da trenger vi ikke bli med
-        if (nySenerePeriodePåSammeSkjæringstidspunkt(vedtaksperiode.periode(), overstyrtPeriode, skjæringstidspunkt, overstyrtSkjæringstidspunkt)) return
-        vedtaksperiode.kontekst(hendelse)
-
-        if (!skalInngåIRevurdering()) return doAnyway()
+        if (!skalInngåIRevurdering()) return
         inngå(vedtaksperiode).also {
             dersomInngått()
         }
@@ -58,25 +52,7 @@ class Revurderingseventyr private constructor(private val hvorfor: RevurderingÅ
         return true
     }
 
-    internal fun skalPåvirkeIAvventerInntektsmeldingEllerHistorikk(
-        overstyrt: Vedtaksperiode,
-        vedtaksperiode: Vedtaksperiode,
-        hendelse: IAktivitetslogg,
-        harNødvendigOpplysningerFraArbeidsgiver: Boolean
-    ): Boolean {
-        // perioden er seg selv, og har også bedt om replay av IM. Replay av IM
-        // vil muligens sørge for at perioden går videre. Om vi gikk videre herfra ville perioden endt opp
-        // med warning om "flere inntektsmeldinger mottatt" siden perioden ville stått i AvventerBlokkerende
-        if (overstyrt === vedtaksperiode) return false
-        // bare reager på nye perioder, slik at vi ikke reagerer på revurdering igangsatt av en AUU-periode ved
-        // mottak av IM
-        if (this ikkeSkyldes RevurderingÅrsak.NY_PERIODE) return false
-        if (!harNødvendigOpplysningerFraArbeidsgiver) return false
-        hendelse.info("Som følge av out of order-periode har vi nødvendige opplysninger fra arbeidsgiver")
-        return true
-    }
-
-    private fun nySenerePeriodePåSammeSkjæringstidspunkt(
+    internal fun nySenerePeriodePåSammeSkjæringstidspunkt(
         periode: Periode,
         overstyrtPeriode: Periode,
         skjæringstidspunkt: LocalDate,
@@ -89,22 +65,16 @@ class Revurderingseventyr private constructor(private val hvorfor: RevurderingÅ
 
     internal fun sendRevurderingIgangsattEvent(
         person: Person,
-        initiertAvArbeidsgiver: String,
-        initiertAvVedtaksperiode: PersonObserver.RevurderingIgangsattEvent.VedtaksperiodeData,
-        kilde: PersonHendelse,
     ) {
         if (vedtaksperioder.isEmpty()) return
-        else {
-            person.emitRevurderingIgangsattEvent(
-                PersonObserver.RevurderingIgangsattEvent(
-                    revurderingsÅrsak = hvorfor.name,
-                    kilde = kilde.meldingsreferanseId(),
-                    initiertAvArbeidsgiver = initiertAvArbeidsgiver,
-                    initiertAvVedtaksperiode = initiertAvVedtaksperiode,
-                    berørtePerioder = vedtaksperioder.toMap(),
-                )
+        person.emitRevurderingIgangsattEvent(
+            PersonObserver.RevurderingIgangsattEvent(
+                revurderingsÅrsak = hvorfor.name,
+                berørtePerioder = vedtaksperioder.toList(),
+                skjæringstidspunkt = skjæringstidspunkt,
+                fomForEndring = periodeForEndring.start
             )
-        }
+        )
     }
 
     private enum class RevurderingÅrsak {

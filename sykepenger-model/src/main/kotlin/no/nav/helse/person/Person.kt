@@ -741,7 +741,7 @@ class Person private constructor(
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
         nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrArbeidsgiveropplysninger(hendelse, subsumsjonObserver))
-        startRevurdering(vedtaksperiode, hendelse, Revurderingseventyr.arbeidsgiveropplysninger())
+        startRevurdering(vedtaksperiode, hendelse, Revurderingseventyr.arbeidsgiveropplysninger(skjæringstidspunkt))
     }
 
 
@@ -764,9 +764,9 @@ class Person private constructor(
         }
     }
 
-    internal fun startRevurdering(overstyrtVedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse, revurdering: Revurderingseventyr) {
+    internal fun startRevurdering(overstyrtVedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
         arbeidsgivere.startRevurdering(overstyrtVedtaksperiode, hendelse, revurdering)
-        overstyrtVedtaksperiode.emitRevurderingIgangsattEvent(revurdering, hendelse)
+        overstyrtVedtaksperiode.emitRevurderingIgangsattEvent(revurdering)
     }
 
     internal fun slettUtgåtteSykmeldingsperioder(tom: LocalDate) {

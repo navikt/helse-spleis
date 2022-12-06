@@ -29,12 +29,11 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
     @Test
     fun `happy case`() {
         nyttVedtak(1.januar, 31.januar)
-        val overstyring = håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag))).meldingsreferanseId()
-        val vedtaksperiode = observatør.utbetalteVedtaksperioder.single()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag))).meldingsreferanseId()
 
         revurderingIgangsattEvent {
-            this bleForårsaketAv "SYKDOMSTIDSLINJE" grunnet overstyring
-            this bleInitiertAv vedtaksperiode hosArbeidsgiver a1 medSkjæringstidspunkt 1.januar
+            this bleForårsaketAv "SYKDOMSTIDSLINJE"
+            this medSkjæringstidspunkt 1.januar
         }
     }
 
@@ -42,13 +41,13 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
     fun `to vedtaksperioder berørt av en revurdering -- første håndterer`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
-        val overstyring = håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag))).meldingsreferanseId()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag))).meldingsreferanseId()
         val januar = observatør.utbetalteVedtaksperioder.first()
         val februar = observatør.utbetalteVedtaksperioder.last()
 
         revurderingIgangsattEvent {
-            this bleForårsaketAv "SYKDOMSTIDSLINJE" grunnet overstyring
-            this bleInitiertAv januar medSkjæringstidspunkt 1.januar
+            this bleForårsaketAv "SYKDOMSTIDSLINJE"
+            this medSkjæringstidspunkt 1.januar
             this medførteRevurderingAv (januar og februar)
         }
     }
@@ -62,8 +61,8 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         val februar = observatør.utbetalteVedtaksperioder.last()
 
         revurderingIgangsattEvent {
-            this bleForårsaketAv "ARBEIDSGIVEROPPLYSNINGER" grunnet overstyringId
-            this bleInitiertAv januar medSkjæringstidspunkt 1.januar
+            this bleForårsaketAv "ARBEIDSGIVEROPPLYSNINGER"
+            this medSkjæringstidspunkt 1.januar
             this medførteRevurderingAv (januar og februar)
         }
     }
@@ -72,12 +71,12 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
     fun `to vedtaksperioder berørt av en revurdering av sykdsomtidslinje -- siste håndterer`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
-        val overstyring = håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.februar, Dagtype.Feriedag))).meldingsreferanseId()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.februar, Dagtype.Feriedag))).meldingsreferanseId()
         val februar = observatør.utbetalteVedtaksperioder.last()
 
         revurderingIgangsattEvent {
-            this bleForårsaketAv "SYKDOMSTIDSLINJE" grunnet overstyring
-            this bleInitiertAv februar medSkjæringstidspunkt 1.januar
+            this bleForårsaketAv "SYKDOMSTIDSLINJE"
+            this medSkjæringstidspunkt 1.januar
             this medførteRevurderingAv listOf(februar)
         }
     }
@@ -85,15 +84,14 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
     @Test
     fun `flere revurderinger`() {
         nyttVedtak(1.januar, 31.januar)
-        val søknadId = håndterSøknad(Søknad.Søknadsperiode.Sykdom(29.januar, 30.januar, 50.prosent))
-        val overstyringId = UUID.randomUUID()
-        håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar, meldingsreferanseId = overstyringId)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(29.januar, 30.januar, 50.prosent))
+        håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar)
 
         revurderingIgangsattEvent(0) {
-            this bleForårsaketAv "KORRIGERT_SØKNAD" grunnet søknadId
+            this bleForårsaketAv "KORRIGERT_SØKNAD"
         }
         revurderingIgangsattEvent(1) {
-            this bleForårsaketAv "ARBEIDSGIVEROPPLYSNINGER" grunnet overstyringId
+            this bleForårsaketAv "ARBEIDSGIVEROPPLYSNINGER"
         }
     }
 
@@ -107,14 +105,23 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         val periodeAG2 = observatør.utbetalteVedtaksperioder.last()
 
         revurderingIgangsattEvent {
-            this bleForårsaketAv "ARBEIDSGIVEROPPLYSNINGER" grunnet overstyringId
-            this bleInitiertAv periodeAG1 hosArbeidsgiver a1 medSkjæringstidspunkt 1.januar
+            this bleForårsaketAv "ARBEIDSGIVEROPPLYSNINGER"
+            this medSkjæringstidspunkt 1.januar
             this medførteRevurderingAv (periodeAG1 og periodeAG2)
-            assertEquals(setOf(a1, a2), this.berørtePerioder.keys)
             assertEquals(
-                mapOf(
-                    a1 to listOf(VedtaksperiodeData(id = periodeAG1, periode = 1.januar til 31.januar, skjæringstidspunkt = 1.januar)),
-                    a2 to listOf(VedtaksperiodeData(id = periodeAG2, periode = 1.januar til 31.januar, skjæringstidspunkt = 1.januar))
+                listOf(
+                    VedtaksperiodeData(
+                        orgnummer = a1,
+                        id = periodeAG1,
+                        periode = 1.januar til 31.januar,
+                        skjæringstidspunkt = 1.januar
+                    ),
+                    VedtaksperiodeData(
+                        orgnummer = a2,
+                        id = periodeAG2,
+                        periode = 1.januar til 31.januar,
+                        skjæringstidspunkt = 1.januar
+                    )
                 ), this.berørtePerioder
             )
         }
@@ -136,19 +143,17 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar, meldingsreferanseId = overstyringId)
 
         revurderingIgangsattEvent {
-            this bleForårsaketAv "ARBEIDSGIVEROPPLYSNINGER" grunnet overstyringId
-            this bleInitiertAv januar medSkjæringstidspunkt 1.januar
+            this bleForårsaketAv "ARBEIDSGIVEROPPLYSNINGER"
+            this medSkjæringstidspunkt 1.januar
             this medførteRevurderingAv (januar og februar og mars og april)
-
             assertEquals(
-                mapOf(
-                    a1 to listOf(
-                        VedtaksperiodeData(id = januar, periode = 1.januar til 31.januar, skjæringstidspunkt = 1.januar),
-                        VedtaksperiodeData(id = februar, periode = 1.februar til 15.februar, skjæringstidspunkt = 1.januar),
-                        VedtaksperiodeData(id = mars, periode = 1.mars til 31.mars, skjæringstidspunkt = 1.mars),
-                        VedtaksperiodeData(id = april, periode = 1.april til 30.april, skjæringstidspunkt = 1.mars)
-                    ),
-                ), this.berørtePerioder
+                listOf(
+                        VedtaksperiodeData(orgnummer = a1, id = januar, periode = 1.januar til 31.januar, skjæringstidspunkt = 1.januar),
+                        VedtaksperiodeData(orgnummer = a1, id = februar, periode = 1.februar til 15.februar, skjæringstidspunkt = 1.januar),
+                        VedtaksperiodeData(orgnummer = a1, id = mars, periode = 1.mars til 31.mars, skjæringstidspunkt = 1.mars),
+                        VedtaksperiodeData(orgnummer = a1, id = april, periode = 1.april til 30.april, skjæringstidspunkt = 1.mars)
+                    )
+                , this.berørtePerioder
             )
         }
     }
@@ -163,11 +168,11 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         val mars = observatør.utbetalteVedtaksperioder[2]
         val april = observatør.utbetalteVedtaksperioder[3]
 
-        val overstyring = håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.februar, Dagtype.Feriedag))).meldingsreferanseId()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.februar, Dagtype.Feriedag)))
 
         revurderingIgangsattEvent {
-            this bleForårsaketAv "SYKDOMSTIDSLINJE" grunnet overstyring
-            this bleInitiertAv februar medSkjæringstidspunkt 1.januar
+            this bleForårsaketAv "SYKDOMSTIDSLINJE"
+            this medSkjæringstidspunkt 1.januar
             this medførteRevurderingAv (februar og mars og april)
         }
     }
@@ -177,32 +182,18 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         revurderingIgangsattEvent.run(assertBlock)
     }
 
-    private infix fun PersonObserver.RevurderingIgangsattEvent.bleInitiertAv(vedtaksperiodeId: UUID): PersonObserver.RevurderingIgangsattEvent {
-        assertEquals(vedtaksperiodeId, this.initiertAvVedtaksperiode.id)
-        return this
-    }
-    private infix fun PersonObserver.RevurderingIgangsattEvent.hosArbeidsgiver(orgnummer: String): PersonObserver.RevurderingIgangsattEvent {
-        assertEquals(orgnummer, this.initiertAvArbeidsgiver)
-        return this
-    }
-
     private infix fun PersonObserver.RevurderingIgangsattEvent.bleForårsaketAv(årsak: String): PersonObserver.RevurderingIgangsattEvent {
         assertEquals(årsak, this.revurderingsÅrsak)
         return this
     }
 
-    private infix fun PersonObserver.RevurderingIgangsattEvent.grunnet(hendelseId: UUID): PersonObserver.RevurderingIgangsattEvent {
-        assertEquals(hendelseId, this.kilde)
-        return this
-    }
-
     private infix fun PersonObserver.RevurderingIgangsattEvent.medSkjæringstidspunkt(dato: LocalDate): PersonObserver.RevurderingIgangsattEvent {
-        assertEquals(dato, this.initiertAvVedtaksperiode.skjæringstidspunkt)
+        assertEquals(dato, this.skjæringstidspunkt)
         return this
     }
 
     private infix fun PersonObserver.RevurderingIgangsattEvent.medførteRevurderingAv(vedtaksperiodeIder: List<UUID>): PersonObserver.RevurderingIgangsattEvent {
-        assertEquals(vedtaksperiodeIder, this.berørtePerioder.values.flatten().map { it.id })
+        assertEquals(vedtaksperiodeIder, this.berørtePerioder.map { it.id })
         return this
     }
 
