@@ -104,6 +104,9 @@ spec:
           application: spesialist
           access: readwrite
         - team: tbd
+          application: spesialist-migrering
+          access: readwrite
+        - team: tbd
           application: spotter
           access: readwrite
         - team: tbd
