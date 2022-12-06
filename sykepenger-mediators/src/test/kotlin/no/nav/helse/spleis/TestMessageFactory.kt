@@ -20,13 +20,16 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.spleis.TestMessageFactory.UtbetalingshistorikkTestdata.Companion.toJson
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.økonomi.Inntekt
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
@@ -406,7 +409,6 @@ internal class TestMessageFactory(
         val inntekter: List<Inntekt>,
         val arbeidsforhold: List<Arbeidsforhold>
     ) {
-
         data class Inntekt(
             val beløp: Double,
             val orgnummer: String
@@ -428,12 +430,44 @@ internal class TestMessageFactory(
         )
     }
 
-    data class Subsumsjon(
-        val paragraf: String?,
-        val ledd: String?,
-        val bokstav: String?
-    )
+    class Subsumsjon(
+        paragraf: String?,
+        ledd: String?,
+        bokstav: String?
+    ) {
+        val toMap = mutableMapOf(
+            "paragraf" to paragraf,
+        ).apply {
+            ledd?.let {
+                this["ledd"] = ledd
+            }
+            bokstav?.let {
+                this["bokstav"] = bokstav
+            }
+        }.toMap()
+    }
 
+    class Refusjonsopplysning(
+        fom: LocalDate,
+        tom: LocalDate?,
+        beløp: Double
+    ) {
+        val toMap = mutableMapOf(
+            "fom" to fom,
+            "beløp" to beløp
+        ).apply {
+            tom?.let {
+                this["tom"] = it
+            }
+        }.toMap()
+    }
+
+    data class Arbeidsgiveropplysning(
+        val månedligInntekt: Double,
+        val forklaring: String,
+        val subsumsjon: Subsumsjon?,
+        val refusjonsopplysninger: List<Refusjonsopplysning>
+    )
 
     fun lagYtelser(
         vedtaksperiodeId: UUID,
@@ -879,6 +913,7 @@ internal class TestMessageFactory(
             ))
     }
 
+
     fun lagOverstyringInntekt(
         inntekt: Double,
         skjæringstidspunkt: LocalDate,
@@ -896,20 +931,10 @@ internal class TestMessageFactory(
                 "forklaring" to forklaring
             ).apply {
                 subsumsjon?.let {
-                    this["subsumsjon"] = mutableMapOf(
-                        "paragraf" to subsumsjon.paragraf,
-                    ).apply {
-                        subsumsjon.ledd?.let {
-                            this["ledd"] = subsumsjon.ledd
-                        }
-                        subsumsjon.bokstav?.let {
-                            this["bokstav"] = subsumsjon.bokstav
-                        }
-                    }
+                    this["subsumsjon"] = subsumsjon.toMap
                 }
             })
     }
-
 
     fun lagOverstyrArbeidsforhold(
         skjæringstidspunkt: LocalDate,
@@ -949,6 +974,28 @@ internal class TestMessageFactory(
                 "månedligInntekt" to månedligInntekt,
             ) + forklaringMap + subsumsjonsMap
         )
+
+    fun lagOverstyrArbeidsgiveropplysninger(
+        skjæringstidspunkt: LocalDate,
+        arbeidsgiveropplysninger: Map<String, Arbeidsgiveropplysning>
+    ) = nyHendelse(
+        "overstyr_arbeidsgiveropplysninger", mutableMapOf(
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "arbeidsgiveropplysninger" to arbeidsgiveropplysninger.mapValues { (_, arbeidsgiveropplysning) ->
+                mutableMapOf(
+                    "månedligInntekt" to arbeidsgiveropplysning.månedligInntekt,
+                    "forklaring" to arbeidsgiveropplysning.forklaring,
+                    "refusjonsopplysninger" to arbeidsgiveropplysning.refusjonsopplysninger.map { it.toMap }
+                ).apply {
+                    arbeidsgiveropplysning.subsumsjon?.let {
+                        this["subsumsjon"] = it.toMap
+                    }
+                }
+            }
+        )
+    )
 
     private fun nyHendelse(navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(navn, hendelse).let { it.id to it.toJson() }

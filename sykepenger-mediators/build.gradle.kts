@@ -4,6 +4,7 @@ val innteksmeldingKontraktVersion = "2020.04.06-ab8f786"
 val syfokafkaVersion = "2022.10.28-10.24-aa0eced7"
 val mockkVersion = "1.12.4"
 val jsonSchemaValidatorVersion = "1.0.70"
+val jsonassertVersion = "1.5.0"
 
 dependencies {
     implementation(project(":sykepenger-model"))
@@ -18,6 +19,7 @@ dependencies {
     testImplementation("com.github.navikt:inntektsmelding-kontrakt:$innteksmeldingKontraktVersion")
     testImplementation("com.github.navikt:sykepengesoknad-kafka:$syfokafkaVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
+    testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
 }
 
 tasks {
