@@ -150,6 +150,7 @@ internal class PersonMediator(
         queueMessage(personidentifikator.toString(), eventName, JsonMessage.newMessage(eventName, mapOf(
             "fødselsnummer" to personidentifikator.toString(),
             "aktørId" to aktørId,
+            "kilde" to message.id,
             "skjæringstidspunkt" to event.skjæringstidspunkt,
             "periodeForEndringFom" to event.periodeForEndring.start,
             "periodeForEndringTom" to event.periodeForEndring.endInclusive,
