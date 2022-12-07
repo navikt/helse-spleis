@@ -22,6 +22,7 @@ import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -334,6 +335,101 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         ), inspektør.refusjonsopplysningerISykepengegrunnlaget(1.januar, a2))
     }
 
+    @Test
+    fun `flere arbeidsgivere får rett utbetaling etter nye opplysninger på begge arbeidsgivere`() {
+        val inntekt = 10000.månedlig
+        nyeVedtak(1.januar, 31.januar, a1, a2, inntekt = inntekt)
+        assertEquals(1, ikkeForkastedeUtbetalinger(a1).size)
+        assertEquals(1, ikkeForkastedeUtbetalinger(a2).size)
+
+        håndterOverstyrArbeidsgiveropplysninger(
+            skjæringstidspunkt = 1.januar,
+            arbeidsgiveropplysninger = listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a1,
+                    inntekt = inntekt * 1.5,
+                    forklaring = "oppjustert inntekt, uendret refusjon",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(
+                        Triple(1.januar, null, inntekt),
+                    )
+                ), OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a2,
+                    inntekt = inntekt,
+                    forklaring = "samme inntekt, overgang til brukerutbetaling",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(
+                        Triple(1.januar, 20.januar, inntekt),
+                        Triple(21.januar, null, INGEN)
+                    )
+                )
+            )
+        )
+
+        håndterYtelser(1.vedtaksperiode)
+
+        assertEquals(2, ikkeForkastedeUtbetalinger(a1).size)
+        assertEquals(2, ikkeForkastedeUtbetalinger(a2).size)
+
+        assertEquals(ikkeForkastedeUtbetalinger(a1).first().inspektør.korrelasjonsId, ikkeForkastedeUtbetalinger(a1).last().inspektør.korrelasjonsId)
+        assertEquals(ikkeForkastedeUtbetalinger(a2).first().inspektør.korrelasjonsId, ikkeForkastedeUtbetalinger(a2).last().inspektør.korrelasjonsId)
+
+        ikkeForkastedeUtbetalinger(a1).first().inspektør.let { opprinneligUtbetaling ->
+            assertEquals(0, opprinneligUtbetaling.personOppdrag.size)
+            assertEquals(1, opprinneligUtbetaling.arbeidsgiverOppdrag.size)
+            opprinneligUtbetaling.arbeidsgiverOppdrag[0].let { utbetalingslinje ->
+                assertEquals(17.januar, utbetalingslinje.inspektør.fom)
+                assertEquals(31.januar, utbetalingslinje.inspektør.tom)
+                assertEquals(462, utbetalingslinje.inspektør.beløp)
+                assertEquals(NY, utbetalingslinje.inspektør.endringskode)
+            }
+        }
+
+        ikkeForkastedeUtbetalinger(a1).last().inspektør.let { revurdering ->
+            assertEquals(1, revurdering.personOppdrag.size)
+            assertEquals(1, revurdering.arbeidsgiverOppdrag.size)
+            revurdering.arbeidsgiverOppdrag[0].let { utbetalingslinje ->
+                assertEquals(17.januar, utbetalingslinje.inspektør.fom)
+                assertEquals(31.januar, utbetalingslinje.inspektør.tom)
+                assertEquals(462, utbetalingslinje.inspektør.beløp)
+                assertEquals(UEND, utbetalingslinje.inspektør.endringskode)
+            }
+            revurdering.personOppdrag[0].let { utbetalingslinje ->
+                assertEquals(17.januar, utbetalingslinje.inspektør.fom)
+                assertEquals(31.januar, utbetalingslinje.inspektør.tom)
+                assertEquals(230, utbetalingslinje.inspektør.beløp)
+                assertEquals(NY, utbetalingslinje.inspektør.endringskode)
+            }
+        }
+
+        ikkeForkastedeUtbetalinger(a2).first().inspektør.let { opprinneligUtbetaling ->
+            assertEquals(0, opprinneligUtbetaling.personOppdrag.size)
+            assertEquals(1, opprinneligUtbetaling.arbeidsgiverOppdrag.size)
+            opprinneligUtbetaling.arbeidsgiverOppdrag[0].let { utbetalingslinje ->
+                assertEquals(17.januar, utbetalingslinje.inspektør.fom)
+                assertEquals(31.januar, utbetalingslinje.inspektør.tom)
+                assertEquals(461, utbetalingslinje.inspektør.beløp)
+                assertEquals(NY, utbetalingslinje.inspektør.endringskode)
+            }
+        }
+        ikkeForkastedeUtbetalinger(a2).last().inspektør.let { revurdering ->
+            assertEquals(1, revurdering.personOppdrag.size)
+            assertEquals(1, revurdering.arbeidsgiverOppdrag.size)
+            revurdering.arbeidsgiverOppdrag[0].let { utbetalingslinje ->
+                assertEquals(17.januar, utbetalingslinje.inspektør.fom)
+                assertEquals(19.januar, utbetalingslinje.inspektør.tom)
+                assertEquals(462, utbetalingslinje.inspektør.beløp)
+                assertEquals(NY, utbetalingslinje.inspektør.endringskode)
+            }
+            revurdering.personOppdrag[0].let { utbetalingslinje ->
+                assertEquals(20.januar, utbetalingslinje.inspektør.fom)
+                assertEquals(31.januar, utbetalingslinje.inspektør.tom)
+                assertEquals(462, utbetalingslinje.inspektør.beløp)
+                assertEquals(NY, utbetalingslinje.inspektør.endringskode)
+            }
+        }
+    }
+
     private fun TestArbeidsgiverInspektør.inntektISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =
         vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.inntektsopplysning.omregnetÅrsinntekt()
 
@@ -342,4 +438,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     private fun TestArbeidsgiverInspektør.arbeidsgiverInntektsopplysningISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =
         vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }
+
+    private fun ikkeForkastedeUtbetalinger(orgnr: String) =
+        inspektør(orgnr).utbetalinger.filterNot { it.inspektør.erForkastet }
 }
