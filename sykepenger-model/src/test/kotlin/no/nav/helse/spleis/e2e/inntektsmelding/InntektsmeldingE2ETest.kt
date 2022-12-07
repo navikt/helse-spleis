@@ -46,6 +46,7 @@ import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_3
 import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.Varselkode.RV_RE_1
+import no.nav.helse.person.Varselkode.RV_VT_2
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.inntekt.SkattComposite
@@ -79,6 +80,7 @@ import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.lønnsinntekt
+import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
@@ -100,6 +102,23 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `to inntektsmeldinger på rappen`() {
+        nyPeriode(1.januar til 10.januar)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        nyPeriode(11.januar til 31.januar)
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(1.januar til 16.januar), harFlereInntektsmeldinger = true)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), harFlereInntektsmeldinger = true)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
+        assertFunksjonellFeil(RV_VT_2, 2.vedtaksperiode.filter())
+        assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
+    }
 
     @Test
     fun `bestridelse av sykdom`() {
