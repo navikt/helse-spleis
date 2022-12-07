@@ -94,6 +94,18 @@ import org.junit.jupiter.api.Test
 internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
     @Test
+    fun `out of order med nyere periode til godkjenning revurdering`() {
+        nyttVedtak(1.mars, 31.mars)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(30.mars, Dagtype.Feriedag)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        nullstillTilstandsendringer()
+        nyPeriode(1.januar til 31.januar)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+    }
+
+    @Test
     fun `out of order periode i helg mellom to andre perioder`() {
         nyttVedtak(1.januar, 26.januar)
         forlengVedtak(29.januar, 11.februar)
