@@ -7,6 +7,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.Logger
@@ -118,10 +119,15 @@ internal abstract class GjenopplivingAvTidligereForkastet(version: Int): JsonMig
                 val dagerSomSkalSettesInn = sykdomstidslinje.path("dager")
                     .flatMap { dag ->
                         val dager = dag.deepCopy<ObjectNode>()
-                        val fraDag = LocalDate.parse(dager.remove("fom").asText())
-                        val tilDag = LocalDate.parse(dager.remove("tom").asText())
+                        val periode = if (dager.hasNonNull("dato")) {
+                            LocalDate.parse(dager.remove("dato").asText()).somPeriode()
+                        } else {
+                            val fraDag = LocalDate.parse(dager.remove("fom").asText())
+                            val tilDag = LocalDate.parse(dager.remove("tom").asText())
+                            fraDag til tilDag
+                        }
 
-                        (fraDag til tilDag).map { dato ->
+                        periode.map { dato ->
                             dager.deepCopy().apply {
                                 put("fom", dato.toString())
                                 put("tom", dato.toString())
@@ -131,10 +137,15 @@ internal abstract class GjenopplivingAvTidligereForkastet(version: Int): JsonMig
                     .filterNot { dagen ->
                         val dagensDato = LocalDate.parse(dagen.path("fom").asText())
                         beregnetDager.any { beregnetDag ->
-                            val fraDag = LocalDate.parse(beregnetDag.path("fom").asText())
-                            val tilDag = LocalDate.parse(beregnetDag.path("tom").asText())
+                            val periode = if (beregnetDag.hasNonNull("dato")) {
+                                LocalDate.parse(beregnetDag.path("dato").asText()).somPeriode()
+                            } else {
+                                val fraDag = LocalDate.parse(beregnetDag.path("fom").asText())
+                                val tilDag = LocalDate.parse(beregnetDag.path("tom").asText())
+                                fraDag til tilDag
+                            }
 
-                            dagensDato in (fraDag til tilDag)
+                            dagensDato in periode
                         }
                     }
 
