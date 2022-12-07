@@ -243,9 +243,103 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(a3RefusjonsopplysningerFørOverstyring, inspektør.refusjonsopplysningerISykepengegrunnlaget(1.januar, a3))
     }
 
+    @Test
+    fun `to arbeidsgivere uten endring`() {
+        val inntektPerArbeidsgiver = 19000.månedlig
+        nyeVedtak(1.januar, 31.januar, a1, a2, inntekt = inntektPerArbeidsgiver)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a2)
+
+        val vilkårsgrunnlagHistorikkInnslagFørOverstyring = inspektør.vilkårsgrunnlagHistorikkInnslag().size
+        val overstyringId = UUID.randomUUID()
+        val a1ArbeidsgiverinntektsopplysningerFørOverstyring = inspektør.arbeidsgiverInntektsopplysningISykepengegrunnlaget(1.januar, a1)
+        val a2ArbeidsgiverinntektsopplysningerFørOverstyring = inspektør.arbeidsgiverInntektsopplysningISykepengegrunnlaget(1.januar, a2)
+
+        håndterOverstyrArbeidsgiveropplysninger(
+            skjæringstidspunkt = 1.januar,
+            meldingsreferanseId = overstyringId,
+            arbeidsgiveropplysninger = listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a1,
+                    inntekt = inntektPerArbeidsgiver,
+                    forklaring = "ingen endring",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(
+                        Triple(1.januar, null, inntektPerArbeidsgiver),
+                    )
+                ), OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a2,
+                    inntekt = inntektPerArbeidsgiver,
+                    forklaring = "ingen endring",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(
+                        Triple(1.januar, null, inntektPerArbeidsgiver)
+                    )
+                )
+            )
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        assertEquals(vilkårsgrunnlagHistorikkInnslagFørOverstyring, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+
+        assertEquals(a1ArbeidsgiverinntektsopplysningerFørOverstyring, inspektør.arbeidsgiverInntektsopplysningISykepengegrunnlaget(1.januar, a1))
+        assertEquals(a2ArbeidsgiverinntektsopplysningerFørOverstyring, inspektør.arbeidsgiverInntektsopplysningISykepengegrunnlaget(1.januar, a2))
+    }
+
+    @Test
+    fun `to arbeidsgivere kun endring på den ene`() {
+        val inntektPerArbeidsgiver = 19000.månedlig
+        nyeVedtak(1.januar, 31.januar, a1, a2, inntekt = inntektPerArbeidsgiver)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a2)
+
+        val vilkårsgrunnlagHistorikkInnslagFørOverstyring = inspektør.vilkårsgrunnlagHistorikkInnslag().size
+        val overstyringId = UUID.randomUUID()
+        val a1ArbeidsgiverinntektsopplysningerFørOverstyring = inspektør.arbeidsgiverInntektsopplysningISykepengegrunnlaget(1.januar, a1)
+
+        håndterOverstyrArbeidsgiveropplysninger(
+            skjæringstidspunkt = 1.januar,
+            meldingsreferanseId = overstyringId,
+            arbeidsgiveropplysninger = listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a1,
+                    inntekt = inntektPerArbeidsgiver,
+                    forklaring = "ingen endring",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(
+                        Triple(1.januar, null, inntektPerArbeidsgiver),
+                    )
+                ), OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a2,
+                    inntekt = inntektPerArbeidsgiver*1.5,
+                    forklaring = "endring",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(
+                        Triple(1.januar, 20.januar, inntektPerArbeidsgiver),
+                        Triple(21.januar, null, inntektPerArbeidsgiver*1.5)
+                    )
+                )
+            )
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        assertEquals(vilkårsgrunnlagHistorikkInnslagFørOverstyring +1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+
+        assertEquals(a1ArbeidsgiverinntektsopplysningerFørOverstyring, inspektør.arbeidsgiverInntektsopplysningISykepengegrunnlaget(1.januar, a1))
+
+        assertEquals(inntektPerArbeidsgiver*1.5, inspektør.inntektISykepengegrunnlaget(1.januar, a2))
+        assertEquals(listOf(
+            Refusjonsopplysning(overstyringId, 1.januar, 20.januar, inntektPerArbeidsgiver),
+            Refusjonsopplysning(overstyringId, 21.januar, null, inntektPerArbeidsgiver*1.5)
+        ), inspektør.refusjonsopplysningerISykepengegrunnlaget(1.januar, a2))
+    }
+
     private fun TestArbeidsgiverInspektør.inntektISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =
         vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.inntektsopplysning.omregnetÅrsinntekt()
 
     private fun TestArbeidsgiverInspektør.refusjonsopplysningerISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =
         vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.refusjonsopplysninger.inspektør.refusjonsopplysninger
+
+    private fun TestArbeidsgiverInspektør.arbeidsgiverInntektsopplysningISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =
+        vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }
 }
