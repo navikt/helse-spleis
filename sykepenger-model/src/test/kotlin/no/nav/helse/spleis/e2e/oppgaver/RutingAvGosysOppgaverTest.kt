@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.oppgaver
 
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
@@ -26,6 +27,7 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
+import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forkastAlle
@@ -445,5 +447,33 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         val event = observatør.opprettOppgaveForSpeilsaksbehandlereEvent().single()
         assertEquals(observatør.hendelseider(2.vedtaksperiode.id(ORGNUMMER)), event.hendelser)
+    }
+
+    @Test
+    fun `mottar inntektsmelding før søknad som forkastes på direkten`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        forkastAlle(hendelselogg)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+        assertTrue(søknadId in observatør.opprettOppgaverEventer.single().hendelser)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.februar til 16.februar))
+        assertEquals(inntektsmeldingId, observatør.utsettOppgaveEventer().single().hendelse)
+        assertEquals(1, observatør.opprettOppgaverEventer.size)
+
+        val søknadIdFebruar = håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        assertTrue(søknadIdFebruar in observatør.opprettOppgaverEventer.last().hendelser)
+        assertEquals(2, observatør.opprettOppgaverEventer.size)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TIL_INFOTRYGD)
+        assertForventetFeil(
+            forklaring = "Når vi mottar inntektmelding før en periode som forkastes på direkten, sender vi " +
+                    "aldri signal om å opprette oppgave på inntektsmeldingen",
+            nå = { assertEquals(2, observatør.opprettOppgaverEventer.size) },
+            ønsket = {
+                assertEquals(3, observatør.opprettOppgaverEventer.size)
+                assertTrue(inntektsmeldingId in observatør.opprettOppgaverEventer.last().hendelser)
+            }
+        )
     }
 }
