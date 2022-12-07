@@ -15,7 +15,7 @@ import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
-internal class OverstyrArbeidsgiveropplysningerMessage(private val packet: JsonMessage) : HendelseMessage(packet) {
+internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage) : HendelseMessage(packet) {
 
     override val fødselsnummer: String = packet["fødselsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
@@ -38,7 +38,7 @@ internal class OverstyrArbeidsgiveropplysningerMessage(private val packet: JsonM
         this.fields().asSequence().toList().map { (orgnummer, arbeidsgiveropplysning) ->
             val månedligInntekt = arbeidsgiveropplysning["månedligInntekt"].asDouble().månedlig
             val forklaring = arbeidsgiveropplysning["forklaring"].asText()
-            val subsumsjon = arbeidsgiveropplysning["subsumsjon"].asSubsumsjon()
+            val subsumsjon = arbeidsgiveropplysning.path("subsumsjon").asSubsumsjon()
 
             val saksbehandlerinntekt = Saksbehandler(skjæringstidspunkt, id, månedligInntekt, forklaring, subsumsjon, opprettet)
             val refusjonsopplysninger = arbeidsgiveropplysning["refusjonsopplysninger"].asRefusjonsopplysninger()

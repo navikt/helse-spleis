@@ -38,6 +38,7 @@ import no.nav.helse.spleis.TestMessageFactory
 import no.nav.helse.spleis.TestMessageFactory.ArbeidsavklaringspengerTestdata
 import no.nav.helse.spleis.TestMessageFactory.Arbeidsforhold
 import no.nav.helse.spleis.TestMessageFactory.ArbeidsforholdOverstyrt
+import no.nav.helse.spleis.TestMessageFactory.Arbeidsgiveropplysning
 import no.nav.helse.spleis.TestMessageFactory.DagpengerTestdata
 import no.nav.helse.spleis.TestMessageFactory.InntekterForSammenligningsgrunnlagFraLøsning
 import no.nav.helse.spleis.TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning
@@ -469,6 +470,17 @@ internal abstract class AbstractEndToEndMediatorTest {
         overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>
     ) {
         val (_, message) = meldingsfabrikk.lagOverstyrArbeidsforhold(skjæringstidspunkt, overstyrteArbeidsforhold)
+        testRapid.sendTestMessage(message)
+    }
+
+    protected fun sendOverstyrArbeidsgiveropplysninger(
+        skjæringstidspunkt: LocalDate,
+        arbeidsgiveropplysninger: Map<String, Arbeidsgiveropplysning>
+    ) {
+        val (_, message) = meldingsfabrikk.lagOverstyrArbeidsgiveropplysninger(
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidsgiveropplysninger = arbeidsgiveropplysninger
+        )
         testRapid.sendTestMessage(message)
     }
 
