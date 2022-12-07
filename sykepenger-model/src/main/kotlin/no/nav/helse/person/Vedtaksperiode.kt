@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.delvisOverlappMed
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
@@ -532,8 +533,6 @@ internal class Vedtaksperiode private constructor(
         forkast(søknad)
     }
 
-    private fun Periode.delvisOverlappMed(other: Periode) = overlapperMed(other) && !inneholder(other)
-
     private fun håndterOverlappendeSøknad(søknad: Søknad, nesteTilstand: Vedtaksperiodetilstand? = null) {
         if (periode.delvisOverlappMed(søknad.periode())) return overlappendeSøknadIkkeStøttet(søknad, `Mottatt søknad som delvis overlapper`)
         håndterSøknad(søknad) { nesteTilstand }
@@ -909,9 +908,7 @@ internal class Vedtaksperiode private constructor(
             )
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.overlappendeSøknadIkkeStøttet(søknad)
-        }
+        fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad)
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             inntektsmelding.trimLeft(vedtaksperiode.periode.endInclusive)
@@ -1946,6 +1943,10 @@ internal class Vedtaksperiode private constructor(
         ) {
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            vedtaksperiode.overlappendeSøknadIkkeStøttet(søknad)
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse) {
             sjekkUtbetalingstatus(vedtaksperiode, hendelse)
         }
@@ -2004,6 +2005,13 @@ internal class Vedtaksperiode private constructor(
             if (!vedtaksperiode.forventerInntekt()) return hendelse.info("Revurderingen påvirker ikke denne perioden i AvsluttetUtenUtbetaling")
             hendelse.varsel(RV_RV_1)
             vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            val varselkode = if (vedtaksperiode.periode.delvisOverlappMed(søknad.periode())) `Mottatt søknad som delvis overlapper`
+            else if (søknad.harArbeidsdager()) RV_SØ_15
+            else RV_SØ_16 // TODO: dette caset kan vi støtte
+            vedtaksperiode.overlappendeSøknadIkkeStøttet(søknad, varselkode)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
@@ -2128,6 +2136,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.sendOppgaveEvent(hendelse)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            throw IllegalStateException("Kan ikke håndtere søknad mens perioden er i RevurderingFeilet")
+        }
+
         override fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgivere: Iterable<Arbeidsgiver>,
@@ -2159,6 +2171,10 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             hendelse.info("Sykdom for denne personen kan ikke behandles automatisk.")
             vedtaksperiode.sendOppgaveEvent(hendelse)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            throw IllegalStateException("Kan ikke håndtere søknad mens perioden er i TilInfotrygd")
         }
 
         override fun håndter(

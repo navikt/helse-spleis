@@ -57,6 +57,8 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
             }
             return false
         }
+
+        internal fun Periode.delvisOverlappMed(other: Periode) = overlapperMed(other) && !inneholder(other)
     }
 
     fun overlapperMed(other: Periode) =
