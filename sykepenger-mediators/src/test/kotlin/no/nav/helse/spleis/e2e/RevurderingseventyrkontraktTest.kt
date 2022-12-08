@@ -53,11 +53,13 @@ internal class RevurderingseventyrkontraktTest : AbstractEndToEndMediatorTest() 
         assertDato(eventyr.path("periodeForEndringFom").asText())
         assertDato(eventyr.path("periodeForEndringTom").asText())
         assertTrue(eventyr.path("årsak").asText().isNotEmpty())
+        assertTrue(eventyr.path("typeEndring").asText().isNotEmpty())
         assertTrue(eventyr.path("berørtePerioder").isArray)
         eventyr.path("berørtePerioder").forEach { periode ->
             assertDato(periode.path("skjæringstidspunkt").asText())
             assertDato(periode.path("periodeFom").asText())
             assertDato(periode.path("periodeTom").asText())
+            assertTrue(periode.path("typeEndring").asText().isNotEmpty())
             assertTrue(periode.path("orgnummer").asText().isNotEmpty())
             val vedtaksperiodeId = periode.path("vedtaksperiodeId").asText()
             assertDoesNotThrow { UUID.fromString(vedtaksperiodeId) }

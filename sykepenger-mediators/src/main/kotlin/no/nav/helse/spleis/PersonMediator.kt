@@ -146,6 +146,7 @@ internal class PersonMediator(
         personidentifikator: Personidentifikator,
         aktørId: String
     ) {
+        if (event.typeEndring != "REVURDERING") return // TODO: Fjern når konsumenter kan skille på type endring
         val eventName = "revurdering_igangsatt"
         queueMessage(personidentifikator.toString(), eventName, JsonMessage.newMessage(eventName, mapOf(
             "fødselsnummer" to personidentifikator.toString(),
@@ -155,14 +156,16 @@ internal class PersonMediator(
             "periodeForEndringFom" to event.periodeForEndring.start,
             "periodeForEndringTom" to event.periodeForEndring.endInclusive,
             "årsak" to event.årsak,
+            "typeEndring" to event.typeEndring,
             "berørtePerioder" to event.berørtePerioder.map {
                 mapOf(
                     "vedtaksperiodeId" to it.vedtaksperiodeId,
                     "skjæringstidspunkt" to it.skjæringstidspunkt,
                     "periodeFom" to it.periode.start,
                     "periodeTom" to it.periode.endInclusive,
-                    "orgnummer" to it.orgnummer
-                )
+                    "orgnummer" to it.orgnummer,
+                    "typeEndring" to it.typeEndring,
+                    )
             }
         )).toJson())
     }

@@ -28,18 +28,27 @@ class Revurderingseventyr private constructor(
 
     private val vedtaksperioder = mutableListOf<PersonObserver.RevurderingIgangsattEvent.VedtaksperiodeData>()
 
-    internal fun inngåIRevurdering(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode): Boolean {
+    internal fun inngåSomRevurdering(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode): Boolean {
         if (!hvorfor.kanInngå(hendelse)) return false
         hvorfor.dersomInngått(hendelse)
-        inngå(vedtaksperiode)
+        inngå(vedtaksperiode, TypeEndring.REVURDERING)
         return true
     }
-    internal fun inngåIRevurdering(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, periode: Periode): Boolean {
+
+    internal fun inngåSomRevurdering(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, periode: Periode): Boolean {
         if (periodeForEndring.starterEtter(periode)) return false
-        return inngåIRevurdering(hendelse, vedtaksperiode)
+        return inngåSomRevurdering(hendelse, vedtaksperiode)
     }
 
-    private fun inngå(vedtaksperiode: Vedtaksperiode) = vedtaksperiode.inngåIRevurderingseventyret(vedtaksperioder)
+    internal fun inngåSomOverstyring(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode): Boolean {
+        if (!hvorfor.kanInngå(hendelse)) return false
+        hvorfor.dersomInngått(hendelse)
+        inngå(vedtaksperiode, TypeEndring.OVERSTYRING)
+        return true
+    }
+
+    private fun inngå(vedtaksperiode: Vedtaksperiode, typeEndring: TypeEndring) =
+        vedtaksperiode.inngåIRevurderingseventyret(vedtaksperioder, typeEndring.name)
 
     internal fun ikkeRelevant(periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
         // om endringen gjelder et nyere skjæringstidspunkt så trenger vi ikke bryr oss
@@ -57,6 +66,11 @@ class Revurderingseventyr private constructor(
                 periodeForEndring = periodeForEndring
             )
         )
+    }
+
+    private enum class TypeEndring {
+        OVERSTYRING,
+        REVURDERING
     }
 
     private sealed interface RevurderingÅrsak {

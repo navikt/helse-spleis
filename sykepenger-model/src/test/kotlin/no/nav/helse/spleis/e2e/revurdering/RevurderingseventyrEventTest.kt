@@ -19,6 +19,7 @@ import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -27,18 +28,42 @@ import org.junit.jupiter.api.Test
 internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
 
     @Test
-    fun `happy case`() {
+    fun `happy case revurdering`() {
         nyttVedtak(1.januar, 31.januar)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag))).meldingsreferanseId()
 
         revurderingIgangsattEvent {
             this bleForårsaketAv "SYKDOMSTIDSLINJE"
             this medSkjæringstidspunkt 1.januar
+            this avTypeEndring "REVURDERING"
+        }
+    }
+    @Test
+    fun `happy case overstyring`() {
+        tilGodkjenning(1.januar, 31.januar, a1)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+
+        revurderingIgangsattEvent {
+            this bleForårsaketAv "SYKDOMSTIDSLINJE"
+            this medSkjæringstidspunkt 1.januar
+            this avTypeEndring "OVERSTYRING"
         }
     }
 
     @Test
-    fun `to vedtaksperioder berørt av en revurdering -- første håndterer`() {
+    fun `Overstyring av inntekt`() {
+        tilGodkjenning(1.januar, 31.januar, a1)
+        håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar)
+
+        revurderingIgangsattEvent {
+            this bleForårsaketAv "ARBEIDSGIVEROPPLYSNINGER"
+            this medSkjæringstidspunkt 1.januar
+            this avTypeEndring "OVERSTYRING"
+        }
+    }
+
+    @Test
+    fun `to vedtaksperioder berørt av en revurdering`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag))).meldingsreferanseId()
@@ -49,35 +74,6 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
             this bleForårsaketAv "SYKDOMSTIDSLINJE"
             this medSkjæringstidspunkt 1.januar
             this medførteRevurderingAv (januar og februar)
-        }
-    }
-    @Test
-    fun `to vedtaksperioder berørt av en revurdering av inntekt -- første håndterer`() {
-        nyttVedtak(1.januar, 31.januar)
-        forlengVedtak(1.februar, 28.februar)
-        val overstyringId = UUID.randomUUID()
-        håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar, meldingsreferanseId = overstyringId)
-        val januar = observatør.utbetalteVedtaksperioder.first()
-        val februar = observatør.utbetalteVedtaksperioder.last()
-
-        revurderingIgangsattEvent {
-            this bleForårsaketAv "ARBEIDSGIVEROPPLYSNINGER"
-            this medSkjæringstidspunkt 1.januar
-            this medførteRevurderingAv (januar og februar)
-        }
-    }
-
-    @Test
-    fun `to vedtaksperioder berørt av en revurdering av sykdsomtidslinje -- siste håndterer`() {
-        nyttVedtak(1.januar, 31.januar)
-        forlengVedtak(1.februar, 28.februar)
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.februar, Dagtype.Feriedag))).meldingsreferanseId()
-        val februar = observatør.utbetalteVedtaksperioder.last()
-
-        revurderingIgangsattEvent {
-            this bleForårsaketAv "SYKDOMSTIDSLINJE"
-            this medSkjæringstidspunkt 1.januar
-            this medførteRevurderingAv listOf(februar)
         }
     }
 
@@ -114,13 +110,15 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
                         orgnummer = a1,
                         vedtaksperiodeId = periodeAG1,
                         periode = 1.januar til 31.januar,
-                        skjæringstidspunkt = 1.januar
+                        skjæringstidspunkt = 1.januar,
+                        typeEndring = "REVURDERING"
                     ),
                     VedtaksperiodeData(
                         orgnummer = a2,
                         vedtaksperiodeId = periodeAG2,
                         periode = 1.januar til 31.januar,
-                        skjæringstidspunkt = 1.januar
+                        skjæringstidspunkt = 1.januar,
+                        typeEndring = "REVURDERING"
                     )
                 ), this.berørtePerioder
             )
@@ -148,10 +146,10 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
             this medførteRevurderingAv (januar og februar og mars og april)
             assertEquals(
                 listOf(
-                        VedtaksperiodeData(orgnummer = a1, vedtaksperiodeId = januar, periode = 1.januar til 31.januar, skjæringstidspunkt = 1.januar),
-                        VedtaksperiodeData(orgnummer = a1, vedtaksperiodeId = februar, periode = 1.februar til 15.februar, skjæringstidspunkt = 1.januar),
-                        VedtaksperiodeData(orgnummer = a1, vedtaksperiodeId = mars, periode = 1.mars til 31.mars, skjæringstidspunkt = 1.mars),
-                        VedtaksperiodeData(orgnummer = a1, vedtaksperiodeId = april, periode = 1.april til 30.april, skjæringstidspunkt = 1.mars)
+                        VedtaksperiodeData(orgnummer = a1, vedtaksperiodeId = januar, periode = 1.januar til 31.januar, skjæringstidspunkt = 1.januar, typeEndring = "REVURDERING"),
+                        VedtaksperiodeData(orgnummer = a1, vedtaksperiodeId = februar, periode = 1.februar til 15.februar, skjæringstidspunkt = 1.januar, typeEndring = "REVURDERING"),
+                        VedtaksperiodeData(orgnummer = a1, vedtaksperiodeId = mars, periode = 1.mars til 31.mars, skjæringstidspunkt = 1.mars, typeEndring = "REVURDERING"),
+                        VedtaksperiodeData(orgnummer = a1, vedtaksperiodeId = april, periode = 1.april til 30.april, skjæringstidspunkt = 1.mars, typeEndring = "REVURDERING")
                     )
                 , this.berørtePerioder
             )
@@ -189,6 +187,11 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
 
     private infix fun PersonObserver.RevurderingIgangsattEvent.medSkjæringstidspunkt(dato: LocalDate): PersonObserver.RevurderingIgangsattEvent {
         assertEquals(dato, this.skjæringstidspunkt)
+        return this
+    }
+
+    private infix fun PersonObserver.RevurderingIgangsattEvent.avTypeEndring(typeEndring: String): PersonObserver.RevurderingIgangsattEvent {
+        assertEquals(typeEndring, this.typeEndring)
         return this
     }
 
