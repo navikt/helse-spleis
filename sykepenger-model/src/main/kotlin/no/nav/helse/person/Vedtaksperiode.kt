@@ -435,12 +435,12 @@ internal class Vedtaksperiode private constructor(
 
     private fun revurderTidslinje(hendelse: OverstyrTidslinje) {
         oppdaterHistorikk(hendelse)
-        person.startRevurdering(this, hendelse, Revurderingseventyr.sykdomstidslinje(skjæringstidspunkt, periode))
+        person.startRevurdering(hendelse, Revurderingseventyr.sykdomstidslinje(skjæringstidspunkt, periode))
     }
 
     private fun revurderArbeidsforhold(hendelse: OverstyrArbeidsforhold): Boolean {
         person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(hendelse, skjæringstidspunkt, jurist())
-        person.startRevurdering(this, hendelse, Revurderingseventyr.arbeidsforhold(skjæringstidspunkt))
+        person.startRevurdering(hendelse, Revurderingseventyr.arbeidsforhold(skjæringstidspunkt))
         return true
     }
 
@@ -550,7 +550,7 @@ internal class Vedtaksperiode private constructor(
             if (tilstand == Avsluttet) lås()
         }
 
-        person.startRevurdering(this, søknad, Revurderingseventyr.korrigertSøknad(skjæringstidspunkt, periode))
+        person.startRevurdering(søknad, Revurderingseventyr.korrigertSøknad(skjæringstidspunkt, periode))
     }
 
     private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
@@ -661,11 +661,6 @@ internal class Vedtaksperiode private constructor(
         )
 
         person.vedtaksperiodeEndret(aktivitetslogg, event)
-    }
-    internal fun emitRevurderingIgangsattEvent(revurderingseventyr: Revurderingseventyr) {
-        revurderingseventyr.sendRevurderingIgangsattEvent(
-            person = person,
-        )
     }
 
     private fun sendVedtakFattet(hendelse: IAktivitetslogg) {
@@ -1042,7 +1037,10 @@ internal class Vedtaksperiode private constructor(
             }
             søknad.info("Fullført behandling av søknad")
             if (!søknad.harFunksjonelleFeilEllerVerre()) {
-                vedtaksperiode.person.startRevurdering(vedtaksperiode, søknad, Revurderingseventyr.nyPeriode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, vedtaksperiode.forventerInntekt()))
+                vedtaksperiode.person.startRevurdering(
+                    søknad,
+                    Revurderingseventyr.nyPeriode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, vedtaksperiode.forventerInntekt())
+                )
             }
         }
 
@@ -1974,7 +1972,10 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
             }
             inntektsmelding.info("Varsler revurdering i tilfelle inntektsmelding påvirker andre perioder.")
-            vedtaksperiode.person.startRevurdering(vedtaksperiode, inntektsmelding, Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
+            vedtaksperiode.person.startRevurdering(
+                inntektsmelding,
+                Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
+            )
         }
 
         override fun håndter(
@@ -2036,7 +2037,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.låsOpp()
             vedtaksperiode.oppdaterHistorikk(hendelse)
             vedtaksperiode.lås()
-            vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse, Revurderingseventyr.sykdomstidslinje(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
+            vedtaksperiode.person.startRevurdering(
+                hendelse,
+                Revurderingseventyr.sykdomstidslinje(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
+            )
         }
 
         override fun håndter(
