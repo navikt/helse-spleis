@@ -36,6 +36,7 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import kotlin.properties.Delegates
 
 internal class SykepengegrunnlagTest {
@@ -457,7 +458,7 @@ internal class SykepengegrunnlagTest {
         val endretOpplysning = ArbeidsgiverInntektsopplysning("a3", a3EndretInntektsopplysning, a3EndretRefusjonsopplysninger)
         overstyring.leggTilInntekt(endretOpplysning)
 
-        assertNull(overstyring.resultat())
+        assertEquals("De nye arbeidsgiveropplysningene inneholder arbeidsgivere som ikke er en del av sykepengegrunnlaget.", assertThrows<IllegalStateException> { overstyring.resultat() }.message)
     }
 
     @Test

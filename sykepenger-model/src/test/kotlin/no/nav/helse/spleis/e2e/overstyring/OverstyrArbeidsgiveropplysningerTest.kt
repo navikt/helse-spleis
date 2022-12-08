@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
@@ -428,6 +429,79 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 assertEquals(NY, utbetalingslinje.inspektør.endringskode)
             }
         }
+    }
+
+    @Test
+    fun `overstyrer arbeidsgiver som ikke er i sykepengegrunnlaget`() {
+        nyttVedtak(1.januar, 31.januar, orgnummer = a1)
+        val nyInntekt = INNTEKT * 1.25
+
+        val overstyr: () -> Unit = {
+            håndterOverstyrArbeidsgiveropplysninger(
+                skjæringstidspunkt = 1.januar,
+                arbeidsgiveropplysninger = listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a1,
+                        inntekt = INNTEKT * 1.25,
+                        forklaring = "er i sykepengegrunnlaget",
+                        subsumsjon = null,
+                        refusjonsopplysninger = listOf(
+                            Triple(1.januar, null, nyInntekt)
+                        )
+                    ), OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a2,
+                        inntekt = nyInntekt,
+                        forklaring = "er ikke i sykepengegrunnlaget",
+                        subsumsjon = null,
+                        refusjonsopplysninger = listOf(
+                            Triple(1.januar, null, nyInntekt)
+                        )
+                    )
+                )
+            )
+        }
+
+        assertEquals("De nye arbeidsgiveropplysningene inneholder arbeidsgivere som ikke er en del av sykepengegrunnlaget.", assertThrows<IllegalStateException>(overstyr).message)
+    }
+
+    @Test
+    fun `overstyrer kun enkelte arbeidsgivere i sykepengegrunnlaget`() {
+        val inntektPerArbeidsgiver = 19000.månedlig
+        nyeVedtak(1.januar, 31.januar, a1, a2, inntekt = inntektPerArbeidsgiver)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a2)
+
+        val vilkårsgrunnlagHistorikkInnslagFørOverstyring = inspektør.vilkårsgrunnlagHistorikkInnslag().size
+        val overstyringId = UUID.randomUUID()
+        val a1ArbeidsgiverinntektsopplysningerFørOverstyring = inspektør.arbeidsgiverInntektsopplysningISykepengegrunnlaget(1.januar, a1)
+
+        håndterOverstyrArbeidsgiveropplysninger(
+            skjæringstidspunkt = 1.januar,
+            meldingsreferanseId = overstyringId,
+            arbeidsgiveropplysninger = listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a2,
+                    inntekt = inntektPerArbeidsgiver*1.5,
+                    forklaring = "endring",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(
+                        Triple(1.januar, 20.januar, inntektPerArbeidsgiver),
+                        Triple(21.januar, null, inntektPerArbeidsgiver*1.5)
+                    )
+                )
+            )
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        assertEquals(vilkårsgrunnlagHistorikkInnslagFørOverstyring + 1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+
+        assertEquals(a1ArbeidsgiverinntektsopplysningerFørOverstyring, inspektør.arbeidsgiverInntektsopplysningISykepengegrunnlaget(1.januar, a1))
+
+        assertEquals(inntektPerArbeidsgiver*1.5, inspektør.inntektISykepengegrunnlaget(1.januar, a2))
+        assertEquals(listOf(
+            Refusjonsopplysning(overstyringId, 1.januar, 20.januar, inntektPerArbeidsgiver),
+            Refusjonsopplysning(overstyringId, 21.januar, null, inntektPerArbeidsgiver*1.5)
+        ), inspektør.refusjonsopplysningerISykepengegrunnlaget(1.januar, a2))
     }
 
     private fun TestArbeidsgiverInspektør.inntektISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =

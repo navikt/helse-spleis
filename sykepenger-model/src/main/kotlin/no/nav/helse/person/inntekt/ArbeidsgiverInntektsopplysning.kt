@@ -171,5 +171,8 @@ class ArbeidsgiverInntektsopplysning(
                 refusjonsbeløp = refusjonsbeløp
             )
         }
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.inneholderAlleArbeidsgivereI(other: List<ArbeidsgiverInntektsopplysning>) =
+            this.map { it.orgnummer }.containsAll(other.map { it.orgnummer })
     }
 }

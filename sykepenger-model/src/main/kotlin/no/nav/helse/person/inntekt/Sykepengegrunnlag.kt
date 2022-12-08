@@ -27,6 +27,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.buil
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.erOverstyrt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harInntekt
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.inneholderAlleArbeidsgivereI
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medUtbetalingsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.nyeRefusjonsopplysninger
@@ -326,8 +327,13 @@ internal class Sykepengegrunnlag(
             nyeInntektsopplysninger.add(arbeidsgiverInntektsopplysning)
         }
 
-        internal fun resultat() = opprinneligArbeidsgiverInntektsopplysninger.overstyrInntekter(opptjening, nyeInntektsopplysninger, subsumsjonObserver).takeUnless { resultat ->
-            resultat == opprinneligArbeidsgiverInntektsopplysninger
+        internal fun resultat(): List<ArbeidsgiverInntektsopplysning>? {
+            check(opprinneligArbeidsgiverInntektsopplysninger.inneholderAlleArbeidsgivereI(nyeInntektsopplysninger)) {
+                "De nye arbeidsgiveropplysningene inneholder arbeidsgivere som ikke er en del av sykepengegrunnlaget."
+            }
+            return opprinneligArbeidsgiverInntektsopplysninger.overstyrInntekter(opptjening, nyeInntektsopplysninger, subsumsjonObserver).takeUnless { resultat ->
+                resultat == opprinneligArbeidsgiverInntektsopplysninger
+            }
         }
     }
 
