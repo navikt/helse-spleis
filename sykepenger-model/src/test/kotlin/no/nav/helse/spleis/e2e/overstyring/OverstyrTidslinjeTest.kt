@@ -234,7 +234,6 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING
         )
@@ -307,7 +306,6 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING

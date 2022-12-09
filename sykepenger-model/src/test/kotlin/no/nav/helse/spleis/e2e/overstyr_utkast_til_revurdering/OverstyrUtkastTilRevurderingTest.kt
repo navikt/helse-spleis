@@ -411,7 +411,6 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVSLUTTET

@@ -1184,7 +1184,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            vedtaksperiode.emitVedtaksperiodeEndret(hendelse)
             vedtaksperiode.revurderTidslinje(hendelse)
         }
 
