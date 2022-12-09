@@ -804,7 +804,7 @@ internal class Arbeidsgiver private constructor(
 
     private fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
         overstyrArbeidsforhold.kontekst(this)
-        return énHarHåndtert(overstyrArbeidsforhold, Vedtaksperiode::håndter)
+        return énHarHåndtert(overstyrArbeidsforhold) { håndter(it, vedtaksperioder.toList()) }
     }
 
     private fun håndter(overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger): Boolean {

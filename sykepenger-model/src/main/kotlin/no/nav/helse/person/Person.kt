@@ -719,15 +719,6 @@ class Person private constructor(
         return aktiveArbeidsforhold.size == 1 && aktiveArbeidsforhold.single().organisasjonsnummer() != orgnummer
     }
 
-    internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-        hendelse: OverstyrArbeidsforhold,
-        skjæringstidspunkt: LocalDate,
-        subsumsjonObserver: SubsumsjonObserver
-    ) {
-        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
-        nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrArbeidsforhold(hendelse, subsumsjonObserver))
-    }
-
     internal fun nyeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, inntektsmelding: Inntektsmelding) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return
         nyttVilkårsgrunnlag(inntektsmelding, grunnlag.nyeRefusjonsopplysninger(inntektsmelding))
@@ -735,13 +726,22 @@ class Person private constructor(
 
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
         hendelse: OverstyrArbeidsgiveropplysninger,
-        vedtaksperiode: Vedtaksperiode,
         skjæringstidspunkt: LocalDate,
         subsumsjonObserver: SubsumsjonObserver
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
         nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrArbeidsgiveropplysninger(hendelse, subsumsjonObserver))
         startRevurdering(hendelse, Revurderingseventyr.arbeidsgiveropplysninger(skjæringstidspunkt))
+    }
+
+    internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
+        hendelse: OverstyrArbeidsforhold,
+        skjæringstidspunkt: LocalDate,
+        subsumsjonObserver: SubsumsjonObserver
+    ) {
+        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
+        nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrArbeidsforhold(hendelse, subsumsjonObserver))
+        startRevurdering(hendelse, Revurderingseventyr.arbeidsforhold(skjæringstidspunkt))
     }
 
 

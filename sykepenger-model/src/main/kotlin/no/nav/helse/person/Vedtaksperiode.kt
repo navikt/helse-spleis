@@ -333,11 +333,14 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
+    internal fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold, vedtaksperioder: Iterable<Vedtaksperiode>): Boolean {
         if (!overstyrArbeidsforhold.erRelevant(skjæringstidspunkt)) return false
         kontekst(overstyrArbeidsforhold)
-        overstyrArbeidsforhold.leggTil(hendelseIder)
-        return tilstand.håndter(this, overstyrArbeidsforhold)
+        vedtaksperioder.filter(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt)).forEach {
+            overstyrArbeidsforhold.leggTil(it.hendelseIder)
+        }
+        person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(overstyrArbeidsforhold, this.skjæringstidspunkt, jurist)
+        return true
     }
 
     internal fun håndter(overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, vedtaksperioder: Iterable<Vedtaksperiode>): Boolean {
@@ -346,7 +349,11 @@ internal class Vedtaksperiode private constructor(
         vedtaksperioder.filter(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt)).forEach {
             overstyrArbeidsgiveropplysninger.leggTil(it.hendelseIder)
         }
-        person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(overstyrArbeidsgiveropplysninger, this, this.skjæringstidspunkt, jurist)
+        person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
+            overstyrArbeidsgiveropplysninger,
+            this.skjæringstidspunkt,
+            jurist
+        )
         return true
     }
 
@@ -436,12 +443,6 @@ internal class Vedtaksperiode private constructor(
     private fun revurderTidslinje(hendelse: OverstyrTidslinje) {
         oppdaterHistorikk(hendelse)
         person.startRevurdering(hendelse, Revurderingseventyr.sykdomstidslinje(skjæringstidspunkt, periode))
-    }
-
-    private fun revurderArbeidsforhold(hendelse: OverstyrArbeidsforhold): Boolean {
-        person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(hendelse, skjæringstidspunkt, jurist())
-        person.startRevurdering(hendelse, Revurderingseventyr.arbeidsforhold(skjæringstidspunkt))
-        return true
     }
 
     internal fun periode() = periode
@@ -979,11 +980,6 @@ internal class Vedtaksperiode private constructor(
             hendelse.funksjonellFeil(RV_VT_6)
         }
 
-        fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            overstyrArbeidsforhold: OverstyrArbeidsforhold
-        ) = false
-
         fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrArbeidsgiveropplysninger) {}
 
         fun håndterRevurdertUtbetaling(
@@ -1090,11 +1086,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.revurderTidslinje(hendelse)
         }
 
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            overstyrArbeidsforhold: OverstyrArbeidsforhold
-        ) = vedtaksperiode.revurderArbeidsforhold(overstyrArbeidsforhold)
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndterInntektsmelding(inntektsmelding) {this}
             vedtaksperiode.trengerIkkeInntektsmelding(inntektsmelding.hendelseskontekst())
@@ -1197,11 +1188,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.revurderTidslinje(hendelse)
         }
 
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            overstyrArbeidsforhold: OverstyrArbeidsforhold
-        ) = vedtaksperiode.revurderArbeidsforhold(overstyrArbeidsforhold)
-
         override fun valider(
             vedtaksperiode: Vedtaksperiode,
             periode: Periode,
@@ -1230,11 +1216,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndterInntektsmelding(inntektsmelding) {this}
         }
-
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            overstyrArbeidsforhold: OverstyrArbeidsforhold
-        ) = vedtaksperiode.revurderArbeidsforhold(overstyrArbeidsforhold)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vedtaksperiode.trengerYtelser(påminnelse)
@@ -1680,11 +1661,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.revurderTidslinje(hendelse)
         }
 
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            overstyrArbeidsforhold: OverstyrArbeidsforhold
-        ) = vedtaksperiode.revurderArbeidsforhold(overstyrArbeidsforhold)
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
@@ -1729,14 +1705,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.revurderTidslinje(hendelse)
-        }
-
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            overstyrArbeidsforhold: OverstyrArbeidsforhold
-        ): Boolean {
-            vedtaksperiode.revurderArbeidsforhold(overstyrArbeidsforhold)
-            return true
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -1813,11 +1781,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.revurderTidslinje(hendelse)
         }
-
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            overstyrArbeidsforhold: OverstyrArbeidsforhold
-        ) = vedtaksperiode.revurderArbeidsforhold(overstyrArbeidsforhold)
 
         override fun håndter(
             person: Person,
@@ -2046,11 +2009,6 @@ internal class Vedtaksperiode private constructor(
                 Revurderingseventyr.sykdomstidslinje(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
             )
         }
-
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            overstyrArbeidsforhold: OverstyrArbeidsforhold
-        ) = vedtaksperiode.revurderArbeidsforhold(overstyrArbeidsforhold)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
 
