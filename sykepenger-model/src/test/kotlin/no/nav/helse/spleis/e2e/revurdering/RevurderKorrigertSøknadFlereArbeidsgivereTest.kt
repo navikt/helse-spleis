@@ -262,6 +262,57 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         a1 {
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
             assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            håndterYtelser(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        }
+
+        a1 {
+            assertEquals(6, inspektør.utbetalinger.size)
+
+            inspektør.utbetaling(0).inspektør.also { januarutbetaling ->
+                val revurdering = inspektør.utbetaling(3).inspektør
+                assertEquals(januarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
+                assertEquals(17.januar til 31.januar, januarutbetaling.periode)
+                assertEquals(17.januar til 31.januar, revurdering.periode)
+                assertEquals(0, revurdering.personOppdrag.size)
+                revurdering.arbeidsgiverOppdrag.inspektør.also { arbeidsgiveroppdrag ->
+                    assertEquals(2, arbeidsgiveroppdrag.antallLinjer())
+                    assertEquals(17.januar, arbeidsgiveroppdrag.fom(0))
+                    assertEquals(17.januar, arbeidsgiveroppdrag.tom(0))
+                    assertEquals(Endringskode.ENDR, arbeidsgiveroppdrag.endringskode(0))
+
+                    assertEquals(20.januar, arbeidsgiveroppdrag.fom(1))
+                    assertEquals(31.januar, arbeidsgiveroppdrag.tom(1))
+                    assertEquals(Endringskode.NY, arbeidsgiveroppdrag.endringskode(1))
+                }
+            }
+
+            inspektør.utbetaling(2).inspektør.also { marsutbetaling ->
+                val revurdering = inspektør.utbetaling(5).inspektør
+                assertEquals(marsutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
+                assertEquals(12.mars til 24.mars, marsutbetaling.periode)
+                assertEquals(12.mars til 24.mars, revurdering.periode)
+                assertEquals(0, revurdering.personOppdrag.size)
+                assertEquals(1, revurdering.arbeidsgiverOppdrag.size)
+                assertEquals(Endringskode.UEND, revurdering.arbeidsgiverOppdrag.inspektør.endringskode)
+            }
+        }
+        a2 {
+            assertEquals(4, inspektør.utbetalinger.size)
+            inspektør.utbetaling(1).inspektør.also { februarutbetaling ->
+                val revurdering = inspektør.utbetaling(3).inspektør
+                assertEquals(februarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
+                assertEquals(10.februar til 25.februar, februarutbetaling.periode)
+                assertEquals(10.februar til 25.februar, revurdering.periode)
+                assertEquals(0, revurdering.personOppdrag.size)
+                assertEquals(1, revurdering.arbeidsgiverOppdrag.size)
+                assertEquals(Endringskode.UEND, revurdering.arbeidsgiverOppdrag.inspektør.endringskode)
+                revurdering.arbeidsgiverOppdrag.inspektør.also { arbeidsgiveroppdrag ->
+                    assertEquals(10.februar, arbeidsgiveroppdrag.fom(0))
+                    assertEquals(23.februar, arbeidsgiveroppdrag.tom(0))
+                    assertEquals(Endringskode.UEND, arbeidsgiveroppdrag.endringskode(0))
+                }
+            }
         }
     }
 
@@ -514,6 +565,50 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterYtelser(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             assertTilstand(2.vedtaksperiode, AVSLUTTET)
+        }
+
+        a1 {
+            assertEquals(6, inspektør.utbetalinger.size)
+
+            inspektør.utbetaling(0).inspektør.also { januarutbetaling ->
+                val revurdering = inspektør.utbetaling(3).inspektør
+                assertEquals(januarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
+                assertEquals(17.januar til 31.januar, januarutbetaling.periode)
+                assertEquals(17.januar til 31.januar, revurdering.periode)
+                assertEquals(0, revurdering.personOppdrag.size)
+                assertEquals(1, revurdering.arbeidsgiverOppdrag.size)
+                assertEquals(Endringskode.UEND, revurdering.arbeidsgiverOppdrag.inspektør.endringskode)
+            }
+
+            inspektør.utbetaling(2).inspektør.also { marsutbetaling ->
+                val revurdering = inspektør.utbetaling(5).inspektør
+                assertEquals(marsutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
+                assertEquals(12.mars til 24.mars, marsutbetaling.periode)
+                assertEquals(12.mars til 24.mars, revurdering.periode)
+                assertEquals(0, revurdering.personOppdrag.size)
+                assertEquals(1, revurdering.arbeidsgiverOppdrag.size)
+                assertEquals(Endringskode.UEND, revurdering.arbeidsgiverOppdrag.inspektør.endringskode)
+            }
+        }
+
+        a2 {
+            assertEquals(4, inspektør.utbetalinger.size)
+
+            inspektør.utbetaling(1).inspektør.also { februarutbetaling ->
+                val revurdering = inspektør.utbetaling(3).inspektør
+                assertEquals(februarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
+                assertEquals(10.februar til 25.februar, februarutbetaling.periode)
+                assertEquals(10.februar til 25.februar, revurdering.periode)
+                assertEquals(0, revurdering.personOppdrag.size)
+                assertEquals(1, revurdering.arbeidsgiverOppdrag.size)
+                assertEquals(Endringskode.ENDR, revurdering.arbeidsgiverOppdrag.inspektør.endringskode)
+                revurdering.arbeidsgiverOppdrag.inspektør.also { arbeidsgiveroppdrag ->
+                    assertEquals(10.februar, arbeidsgiveroppdrag.fom(0))
+                    assertEquals(23.februar, arbeidsgiveroppdrag.tom(0))
+                    assertEquals(50, arbeidsgiveroppdrag.grad(0))
+                    assertEquals(Endringskode.NY, arbeidsgiveroppdrag.endringskode(0))
+                }
+            }
         }
     }
 

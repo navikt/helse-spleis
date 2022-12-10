@@ -62,6 +62,7 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.assertNotNull
+import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Forkastet
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
@@ -229,6 +230,33 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertDiff(0)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+
+        assertEquals(3, inspektør.utbetalinger.size)
+        inspektør.utbetaling(2).inspektør.also { revurdering ->
+            val januarutbetaling = inspektør.utbetaling(0).inspektør
+            val februarutbetaling = inspektør.utbetaling(1).inspektør
+            assertEquals(revurdering.korrelasjonsId, januarutbetaling.korrelasjonsId)
+            assertEquals(revurdering.korrelasjonsId, februarutbetaling.korrelasjonsId)
+            assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNNAAFF AAAAAHH NNNNNHH NNNNNHH NNN", revurdering.utbetalingstidslinje.toString().trim())
+            assertEquals(17.januar til 31.januar, januarutbetaling.periode)
+            assertEquals(17.januar til 28.februar, februarutbetaling.periode)
+            assertEquals(17.januar til 28.februar, revurdering.periode)
+            assertEquals(0, revurdering.personOppdrag.size)
+            assertEquals(2, revurdering.arbeidsgiverOppdrag.size)
+            assertEquals(Endringskode.UEND, revurdering.arbeidsgiverOppdrag.inspektør.endringskode)
+            assertEquals(0, revurdering.arbeidsgiverOppdrag.inspektør.nettoBeløp)
+            revurdering.arbeidsgiverOppdrag.inspektør.also { arbeidsgiveroppdrag ->
+                assertEquals(17.januar, arbeidsgiveroppdrag.fom(0))
+                assertEquals(31.januar, arbeidsgiveroppdrag.tom(0))
+                assertEquals(1431, arbeidsgiveroppdrag.beløp(0))
+                assertEquals(Endringskode.UEND, arbeidsgiveroppdrag.endringskode(0))
+
+                assertEquals(10.februar, arbeidsgiveroppdrag.fom(1))
+                assertEquals(28.februar, arbeidsgiveroppdrag.tom(1))
+                assertEquals(1431, arbeidsgiveroppdrag.beløp(1))
+                assertEquals(Endringskode.UEND, arbeidsgiveroppdrag.endringskode(1))
+            }
+        }
     }
 
     @Test
@@ -331,6 +359,44 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertDiff(-1431)
         håndterSimulering(4.vedtaksperiode)
         håndterUtbetalingsgodkjenning(4.vedtaksperiode)
+
+        assertEquals(5, inspektør.utbetalinger.size)
+        inspektør.utbetaling(4).inspektør.also { revurdering ->
+            val januar1utbetaling = inspektør.utbetaling(0).inspektør
+            val januar2utbetaling = inspektør.utbetaling(1).inspektør
+            val februarutbetaling = inspektør.utbetaling(2).inspektør
+            val marsutbetaling = inspektør.utbetaling(3).inspektør
+            assertEquals(revurdering.korrelasjonsId, januar1utbetaling.korrelasjonsId)
+            assertEquals(revurdering.korrelasjonsId, januar2utbetaling.korrelasjonsId)
+            assertEquals(revurdering.korrelasjonsId, februarutbetaling.korrelasjonsId)
+            assertEquals(revurdering.korrelasjonsId, marsutbetaling.korrelasjonsId)
+            assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNNAAFF AAAAAHH NNNFNHH NNNNNHH NNNNNHH NNNNNHH NNNNNHH NNNNNHH NNNNNH", revurdering.utbetalingstidslinje.toString().trim())
+            assertEquals(17.januar til 20.januar, januar1utbetaling.periode)
+            assertEquals(17.januar til 31.januar, januar2utbetaling.periode)
+            assertEquals(17.januar til 28.februar, februarutbetaling.periode)
+            assertEquals(17.januar til 31.mars, marsutbetaling.periode)
+            assertEquals(17.januar til 31.mars, revurdering.periode)
+            assertEquals(0, revurdering.personOppdrag.size)
+            assertEquals(3, revurdering.arbeidsgiverOppdrag.size)
+            assertEquals(Endringskode.ENDR, revurdering.arbeidsgiverOppdrag.inspektør.endringskode)
+            assertEquals(-1431, revurdering.arbeidsgiverOppdrag.inspektør.nettoBeløp)
+            revurdering.arbeidsgiverOppdrag.inspektør.also { arbeidsgiveroppdrag ->
+                assertEquals(17.januar, arbeidsgiveroppdrag.fom(0))
+                assertEquals(31.januar, arbeidsgiveroppdrag.tom(0))
+                assertEquals(1431, arbeidsgiveroppdrag.beløp(0))
+                assertEquals(Endringskode.UEND, arbeidsgiveroppdrag.endringskode(0))
+
+                assertEquals(10.februar, arbeidsgiveroppdrag.fom(1))
+                assertEquals(14.februar, arbeidsgiveroppdrag.tom(1))
+                assertEquals(1431, arbeidsgiveroppdrag.beløp(1))
+                assertEquals(Endringskode.ENDR, arbeidsgiveroppdrag.endringskode(1))
+
+                assertEquals(16.februar, arbeidsgiveroppdrag.fom(2))
+                assertEquals(30.mars, arbeidsgiveroppdrag.tom(2))
+                assertEquals(1431, arbeidsgiveroppdrag.beløp(2))
+                assertEquals(Endringskode.NY, arbeidsgiveroppdrag.endringskode(2))
+            }
+        }
 
         assertDag<SykHelgedag, NavHelgDag>(21.januar, 0.0)
         assertDag<Sykedag, NavDag>(19.januar, 1431.0)

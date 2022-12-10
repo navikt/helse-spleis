@@ -32,6 +32,8 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
         private set
     private val fom = mutableListOf<LocalDate>()
     private val tom = mutableListOf<LocalDate>()
+    private val grad = mutableListOf<Int?>()
+    private val beløp = mutableListOf<Int?>()
     private val datoStatusFom = mutableListOf<LocalDate?>()
     private val delytelseIder = mutableListOf<Int>()
     private val refDelytelseIder = mutableListOf<Int?>()
@@ -105,6 +107,8 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
         refFagsystemIder.add(refFagsystemId)
         this.fom.add(fom)
         this.tom.add(tom)
+        this.grad.add(grad)
+        this.beløp.add(beløp)
         this.datoStatusFom.add(datoStatusFom)
         datoStatusFom?.also { this.periode = this.periode.oppdaterFom(it) }
         this.periode = this.periode.oppdaterTom(tom)
@@ -118,6 +122,9 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
     fun refFagsystemId(indeks: Int) = refFagsystemIder.elementAt(indeks)
     fun fom(indeks: Int) = fom.elementAt(indeks)
     fun tom(indeks: Int) = tom.elementAt(indeks)
+    fun beløp(indeks: Int) = beløp.elementAt(indeks)
+    fun grad(indeks: Int) = grad.elementAt(indeks)
+    fun endringskode(indeks: Int) = endringskoder.elementAt(indeks)
     fun datoStatusFom(indeks: Int) = datoStatusFom.elementAt(indeks)
     fun totalBeløp(indeks: Int) = totalBeløp.elementAt(indeks)
     fun status() = status
