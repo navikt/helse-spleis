@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
@@ -301,48 +301,6 @@ class Utbetaling private constructor(
 
         private const val systemident = "SPLEIS"
 
-        internal fun lagRevurdering(
-            utbetalinger: List<Utbetaling>,
-            fødselsnummer: String,
-            beregningId: UUID,
-            organisasjonsnummer: String,
-            utbetalingstidslinje: Utbetalingstidslinje,
-            sisteDato: LocalDate,
-            aktivitetslogg: IAktivitetslogg,
-            maksdato: LocalDate,
-            forbrukteSykedager: Int,
-            gjenståendeSykedager: Int,
-            forrige: Utbetaling?
-        ): Utbetaling {
-            val sisteUtbetaling = utbetalinger.sisteAktiveMedSammeKorrelasjonsId(forrige)
-            val revurdertTidslinje = sisteUtbetaling?.lagRevurdertTidslinje(utbetalingstidslinje, sisteDato) ?: utbetalingstidslinje
-
-            return Utbetaling(
-                // Siste aktive utbetaling på arbeidsgiveren
-                sisteAktive = utbetalinger.sisteAktiveFør(sisteDato),
-                fødselsnummer = fødselsnummer,
-                beregningId = beregningId,
-                organisasjonsnummer = organisasjonsnummer,
-                utbetalingstidslinje = revurdertTidslinje,
-                type = Utbetalingtype.REVURDERING.takeUnless { forrige == null } ?: Utbetalingtype.UTBETALING,
-                sisteDato = sisteUtbetaling?.let { maxOf(sisteUtbetaling.periode.endInclusive, sisteDato) } ?: sisteDato,
-                aktivitetslogg = aktivitetslogg,
-                maksdato = maksdato,
-                forbrukteSykedager = forbrukteSykedager,
-                gjenståendeSykedager = gjenståendeSykedager,
-                // Forrige utbetaling på vedtaksperioden
-                forrige = sisteUtbetaling
-            )
-        }
-
-        private fun List<Utbetaling>.sisteAktiveMedSammeKorrelasjonsId(forrige: Utbetaling?) =
-            forrige?.let { aktive().lastOrNull { it.korrelasjonsId == forrige.korrelasjonsId } }
-        private fun List<Utbetaling>.sisteAktiveFør(sisteDato: LocalDate) =
-            aktive().lastOrNull { utbetaling ->
-                utbetaling.oppdragsperiode != null && sisteDato in utbetaling.oppdragsperiode
-                        || utbetaling.periode.endInclusive <= sisteDato
-            }
-
         internal fun lagUtbetaling(
             utbetalinger: List<Utbetaling>,
             fødselsnummer: String,
@@ -354,52 +312,53 @@ class Utbetaling private constructor(
             maksdato: LocalDate,
             forbrukteSykedager: Int,
             gjenståendeSykedager: Int,
-            forrige: Utbetaling? = null
-        ): Utbetaling = lagUtbetaling(
-                utbetalinger,
-                fødselsnummer,
-                beregningId,
-                organisasjonsnummer,
-                utbetalingstidslinje,
-                sisteDato,
-                aktivitetslogg,
-                maksdato,
-                forbrukteSykedager,
-                gjenståendeSykedager,
-                forrige,
-                Utbetalingtype.UTBETALING
-            )
-
-        private fun lagUtbetaling(
-            utbetalinger: List<Utbetaling>,
-            fødselsnummer: String,
-            beregningId: UUID,
-            organisasjonsnummer: String,
-            utbetalingstidslinje: Utbetalingstidslinje,
-            sisteDato: LocalDate,
-            aktivitetslogg: IAktivitetslogg,
-            maksdato: LocalDate,
-            forbrukteSykedager: Int,
-            gjenståendeSykedager: Int,
-            forrige: Utbetaling? = null,
-            type: Utbetalingtype
+            type: Utbetalingtype = Utbetalingtype.UTBETALING
         ): Utbetaling {
-            return Utbetaling(
-                // Siste aktive utbetaling på arbeidsgiveren
-                sisteAktive = utbetalinger.sisteAktiveFør(sisteDato),
-                fødselsnummer = fødselsnummer,
-                beregningId = beregningId,
-                organisasjonsnummer = organisasjonsnummer,
-                utbetalingstidslinje = utbetalingstidslinje,
-                type = type,
-                sisteDato = sisteDato,
-                aktivitetslogg = aktivitetslogg,
-                maksdato = maksdato,
-                forbrukteSykedager = forbrukteSykedager,
-                gjenståendeSykedager = gjenståendeSykedager,
-                // Forrige utbetaling på vedtaksperioden
-                forrige = forrige?.takeIf { it.erAktiv() || it.kanIkkeForsøkesPåNy() }
-            )
+            val bb = UtbetalingkladderBuilder(utbetalingstidslinje, organisasjonsnummer, fødselsnummer)
+            val oppdragene = bb.build()
+
+            val kladden = oppdragene.firstOrNull { kladd -> kladd.overlapperMed(sisteDato) }
+
+            if (kladden == null) {
+                // tror det lages utbetaling for en AUU-periode
+                return Utbetaling(
+                    beregningId = beregningId,
+                    korrelerendeUtbetaling = null,
+                    periode = sisteDato.somPeriode(),
+                    utbetalingstidslinje = utbetalingstidslinje.kutt(sisteDato),
+                    arbeidsgiverOppdrag = Oppdrag(organisasjonsnummer, SykepengerRefusjon),
+                    personOppdrag = Oppdrag(fødselsnummer, Sykepenger),
+                    type = type,
+                    maksdato = maksdato,
+                    forbrukteSykedager = forbrukteSykedager,
+                    gjenståendeSykedager = gjenståendeSykedager
+                )
+            }
+
+            val forrigeUtbetalte = kladden.forrigeUtbetalte(utbetalinger)
+            val korrelerendeUtbetaling = forrigeUtbetalte.singleOrNull()
+
+            val nyUtbetaling = if (korrelerendeUtbetaling == null) {
+                if (forrigeUtbetalte.isEmpty()) {
+                    // dette er nok første gangen vi utbetaler denne perioden
+                    kladden.begrensTil(sisteDato)
+                } else {
+                    // mer enn én forrige utbetalte for samme periode, dette
+                    // er nok en merge-hendelse: tidslinjen har endret seg slik at to uavhengige
+                    // oppdragsperioder nå sees på som samme sak.
+                    // Eksempelvis: tidligere utbetaling i Infotrygd er fjernet
+                    // eller at vi har revurdert inn sykedager slik at to arbeidsgiverperioder nå er én felles AGP
+                    throw IllegalStateException("Dette støtter vi ikke helt enda: må annullere/opphøre ${forrigeUtbetalte.size - 1} oppdrag for å kunne kjøre frem igjen ett.")
+                }
+            } else {
+                if (korrelerendeUtbetaling.oppdragsperiode != null && kladden.opphører(korrelerendeUtbetaling.oppdragsperiode)) {
+                    kladden.begrensTil(aktivitetslogg, sisteDato, korrelerendeUtbetaling.arbeidsgiverOppdrag, korrelerendeUtbetaling.personOppdrag)
+                } else {
+                    kladden.begrensTilOgKopier(aktivitetslogg, sisteDato, korrelerendeUtbetaling.arbeidsgiverOppdrag, korrelerendeUtbetaling.personOppdrag)
+                }
+            }
+
+            return nyUtbetaling.lagUtbetaling(type, korrelerendeUtbetaling, beregningId, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager)
         }
 
         internal fun finnUtbetalingForJustering(
@@ -464,7 +423,6 @@ class Utbetaling private constructor(
             .filter { utbetaling ->
                 utbetaling.oppdragsperiode?.overlapperMed(periode) == true || (utbetaling.utbetalingstidslinje.isNotEmpty() && utbetaling.utbetalingstidslinje.periode().endInclusive in periode)
             }
-
         private fun List<Utbetaling>.grupperUtbetalinger(filter: (Utbetaling) -> Boolean) =
             this.groupBy { it.korrelasjonsId }
                 .map { (_, utbetalinger) -> utbetalinger.sortedBy { it.tidsstempel } }
@@ -552,12 +510,6 @@ class Utbetaling private constructor(
                 annulleringer.any { annullering -> annullering.hørerSammen(utbetaling) }
             }
         }
-    }
-
-    private fun lagRevurdertTidslinje(nyUtbetalingstidslinje: Utbetalingstidslinje, sisteDato: LocalDate): Utbetalingstidslinje {
-        if (sisteDato >= utbetalingstidslinje.periode().endInclusive) return nyUtbetalingstidslinje
-        return nyUtbetalingstidslinje.kutt(sisteDato) + utbetalingstidslinje.subset(sisteDato.plusDays(1) til utbetalingstidslinje.periode().endInclusive)
-
     }
 
     internal fun accept(visitor: UtbetalingVisitor) {

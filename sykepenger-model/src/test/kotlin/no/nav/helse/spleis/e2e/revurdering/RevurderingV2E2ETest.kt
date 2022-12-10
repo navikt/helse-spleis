@@ -263,7 +263,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
             val februarutbetaling = inspektør.utbetaling(1).inspektør
             assertEquals(revurdering.korrelasjonsId, januarutbetaling.korrelasjonsId)
             assertEquals(revurdering.korrelasjonsId, februarutbetaling.korrelasjonsId)
-            assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNNAAFF AAAAAHH NNNNNHH NNNNNHH NNN", revurdering.utbetalingstidslinje.toString().trim())
+            assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", revurdering.utbetalingstidslinje.toString().trim())
             assertEquals(17.januar til 31.januar, januarutbetaling.periode)
             assertEquals(17.januar til 28.februar, februarutbetaling.periode)
             assertEquals(17.januar til 28.februar, revurdering.periode)
@@ -1068,6 +1068,21 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertEquals(19, inspektør.sykdomstidslinje.inspektør.grader[17.januar])
         assertVarsel(RV_VV_4, 2.vedtaksperiode.filter())
         assertVarsel(RV_VV_4, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `maksdato hensyntar ikke fremtidige perioder ved revurdering`() {
+        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(1.mars, 31.mars)
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Sykedag, 50)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        assertEquals(28.desember, inspektør.utbetaling(0).inspektør.maksdato)
+        assertEquals(inspektør.utbetaling(0).inspektør.maksdato, inspektør.utbetaling(2).inspektør.maksdato)
+        assertEquals(11, inspektør.utbetaling(0).inspektør.forbrukteSykedager)
+        assertEquals(inspektør.utbetaling(0).inspektør.forbrukteSykedager, inspektør.utbetaling(2).inspektør.forbrukteSykedager)
     }
 
     private inline fun <reified D: Dag, reified UD: Utbetalingsdag>assertDag(dato: LocalDate, arbeidsgiverbeløp: Double?, personbeløp: Double? = 0.0) {

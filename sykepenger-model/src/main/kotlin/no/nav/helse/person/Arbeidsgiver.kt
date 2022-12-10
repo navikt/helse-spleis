@@ -366,8 +366,40 @@ internal class Arbeidsgiver private constructor(
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
+        periode: Periode
+    ) = lagUtbetaling(aktivitetslogg, fødselsnummer, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, Utbetalingtype.UTBETALING)
+
+    internal fun lagRevurdering(
+        vedtaksperiode: Vedtaksperiode,
+        aktivitetslogg: IAktivitetslogg,
+        fødselsnummer: String,
+        maksdato: LocalDate,
+        forbrukteSykedager: Int,
+        gjenståendeSykedager: Int,
         periode: Periode,
-        forrige: Utbetaling?
+        type: Utbetalingtype
+    ): Utbetaling {
+        return lagUtbetaling(
+            aktivitetslogg,
+            fødselsnummer,
+            maksdato,
+            forbrukteSykedager,
+            gjenståendeSykedager,
+            periode,
+            type
+        ).also {
+            fordelRevurdertUtbetaling(aktivitetslogg.barn().also { logg -> logg.kontekst(person) }, it, vedtaksperiode)
+        }
+    }
+
+    private fun lagUtbetaling(
+        aktivitetslogg: IAktivitetslogg,
+        fødselsnummer: String,
+        maksdato: LocalDate,
+        forbrukteSykedager: Int,
+        gjenståendeSykedager: Int,
+        periode: Periode,
+        type: Utbetalingtype
     ): Utbetaling {
         return Utbetalingstidslinjeberegning.lagUtbetaling(
             beregnetUtbetalingstidslinjer,
@@ -378,36 +410,9 @@ internal class Arbeidsgiver private constructor(
             maksdato,
             forbrukteSykedager,
             gjenståendeSykedager,
-            forrige,
+            type,
             organisasjonsnummer
         ).also { nyUtbetaling(aktivitetslogg, it) }
-    }
-
-    internal fun lagRevurdering(
-        vedtaksperiode: Vedtaksperiode,
-        aktivitetslogg: IAktivitetslogg,
-        fødselsnummer: String,
-        maksdato: LocalDate,
-        forbrukteSykedager: Int,
-        gjenståendeSykedager: Int,
-        periode: Periode,
-        forrige: Utbetaling?
-    ): Utbetaling {
-        return Utbetalingstidslinjeberegning.lagRevurdering(
-            beregnetUtbetalingstidslinjer,
-            utbetalinger,
-            fødselsnummer,
-            periode,
-            aktivitetslogg,
-            maksdato,
-            forbrukteSykedager,
-            gjenståendeSykedager,
-            forrige,
-            organisasjonsnummer
-        ).also {
-            nyUtbetaling(aktivitetslogg, it)
-            fordelRevurdertUtbetaling(aktivitetslogg.barn().also { logg -> logg.kontekst(person) }, it, vedtaksperiode)
-        }
     }
 
     private fun nyUtbetaling(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling) {
@@ -1035,8 +1040,8 @@ internal class Arbeidsgiver private constructor(
             vedtaksperioder = vedtaksperioder
         )
         return { periode ->
-            val sykdomstidslinje = sykdomstidslinje().fremTilOgMed(periode.endInclusive).takeUnless { it.count() == 0 }
-            if (sykdomstidslinje == null) Utbetalingstidslinje()
+            val sykdomstidslinje = sykdomstidslinje()
+            if (sykdomstidslinje.count() == 0) Utbetalingstidslinje()
             else {
                 val builder = UtbetalingstidslinjeBuilder(inntekter, periode, hendelse)
                 infotrygdhistorikk.buildUtbetalingstidslinje(organisasjonsnummer, sykdomstidslinje, builder, subsumsjonObserver)

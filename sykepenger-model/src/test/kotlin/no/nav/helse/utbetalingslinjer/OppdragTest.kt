@@ -1,16 +1,19 @@
 package no.nav.helse.utbetalingslinjer
 
+import java.time.LocalDateTime
+import java.util.UUID
+import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.desember
 import no.nav.helse.januar
-import org.junit.jupiter.api.Assertions.*
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import java.util.*
-import no.nav.helse.februar
 
 internal class OppdragTest {
 
@@ -56,7 +59,7 @@ internal class OppdragTest {
         oppdrag1.begrensTil(20.januar).also { result ->
             assertEquals(1, result.size)
             assertEquals(19.januar, result.single().inspektør.fom)
-            assertEquals(20.januar, result.single().inspektør.tom)
+            assertEquals(19.januar, result.single().inspektør.tom)
         }
         oppdrag1.begrensTil(28.januar).also { result ->
             assertEquals(2, result.size)

@@ -643,11 +643,11 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             assertEquals(2, utbetaling.inspektør.arbeidsgiverOppdrag.size)
             utbetaling.inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
                 assertEquals(1081, linje.beløp)
-                assertEquals(17.januar til 19.januar, linje.fom til linje.tom)
+                assertEquals(17.januar til 21.januar, linje.fom til linje.tom)
             }
             utbetaling.inspektør.arbeidsgiverOppdrag[1].inspektør.also { linje ->
                 assertEquals(1431, linje.beløp)
-                assertEquals(20.januar til 31.januar, linje.fom til linje.tom)
+                assertEquals(22.januar til 31.januar, linje.fom til linje.tom)
             }
             assertTrue(utbetaling.inspektør.personOppdrag.isEmpty())
         }
@@ -661,7 +661,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             assertEquals(1, utbetaling.inspektør.personOppdrag.size)
             utbetaling.inspektør.personOppdrag[0].inspektør.also { linje ->
                 assertEquals(730, linje.beløp)
-                assertEquals(20.januar til 31.januar, linje.fom til linje.tom)
+                assertEquals(22.januar til 31.januar, linje.fom til linje.tom)
             }
         }
 

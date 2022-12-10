@@ -535,7 +535,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 assertEquals(NY, utbetalingslinje.inspektør.endringskode)
             }
             revurdering.personOppdrag[0].let { utbetalingslinje ->
-                assertEquals(20.januar, utbetalingslinje.inspektør.fom)
+                assertEquals(22.januar, utbetalingslinje.inspektør.fom)
                 assertEquals(31.januar, utbetalingslinje.inspektør.tom)
                 assertEquals(462, utbetalingslinje.inspektør.beløp)
                 assertEquals(NY, utbetalingslinje.inspektør.endringskode)

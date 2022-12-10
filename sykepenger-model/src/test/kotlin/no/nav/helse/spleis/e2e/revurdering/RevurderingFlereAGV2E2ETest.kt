@@ -578,6 +578,6 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         håndterYtelser(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(a2, 17.januar, 18.februar, 100.prosent, INNTEKT), orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
     }
 }

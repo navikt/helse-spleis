@@ -856,10 +856,10 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         // til at vi fordeler den til den arbeidsgiveren som tapte mest på avrunningen
         val a3Linje = inspektør(a3).utbetalinger.last().inspektør.arbeidsgiverOppdrag[0]
         assertEquals(19.januar, a3Linje.fom)
-        assertEquals(19.januar, a3Linje.tom)
+        assertEquals(21.januar, a3Linje.tom)
         assertEquals(274, a3Linje.beløp)
         val a3Linje2 = inspektør(a3).utbetalinger.last().inspektør.arbeidsgiverOppdrag[1]
-        assertEquals(20.januar, a3Linje2.fom)
+        assertEquals(22.januar, a3Linje2.fom)
         assertEquals(15.mars, a3Linje2.tom)
         assertEquals(275, a3Linje2.beløp)
 

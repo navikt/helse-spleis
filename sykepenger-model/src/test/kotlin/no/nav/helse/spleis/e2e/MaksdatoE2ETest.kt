@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.april
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -15,7 +16,6 @@ import no.nav.helse.oktober
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.serde.serialize
 import no.nav.helse.somPersonidentifikator
@@ -44,7 +44,7 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `hensyntar senere arbeidsgivere fra IT`() {
+    fun `hensyntar ikke senere arbeidsgivere fra IT`() {
         nyPeriode(1.mars til 31.mars, a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(a2, 1.april, 30.april, 100.prosent, INNTEKT))
         håndterInntektsmelding(listOf(1.mars til 16.mars))
@@ -54,8 +54,8 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         val utbetalingInspektør = inspektør(a1).utbetaling(0).inspektør
-        assertEquals(31, utbetalingInspektør.forbrukteSykedager)
-        assertEquals(217, utbetalingInspektør.gjenståendeSykedager)
+        assertEquals(10, utbetalingInspektør.forbrukteSykedager)
+        assertEquals(238, utbetalingInspektør.gjenståendeSykedager)
         assertEquals(27.februar(2019), utbetalingInspektør.maksdato)
     }
 

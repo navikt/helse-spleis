@@ -2,12 +2,12 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 import no.nav.helse.Alder
+import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_9
-import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjonsformat
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
@@ -83,10 +83,13 @@ internal class MaksimumSykepengedagerfilter(
         tidslinjer: List<Utbetalingstidslinje>,
         perioder: List<Triple<Periode, IAktivitetslogg, SubsumsjonObserver>>
     ): List<Utbetalingstidslinje> {
+        val sisteDato = perioder.maxOf {
+            it.first.endInclusive
+        }
         this.perioder = perioder
         beregnetTidslinje = tidslinjer
             .reduce(Utbetalingstidslinje::plus)
-            .plus(infotrygdtidslinje)
+            .plus(infotrygdtidslinje).kutt(sisteDato)
         tidslinjegrunnlag = tidslinjer + listOf(infotrygdtidslinje)
         teller = UtbetalingTeller(alder, arbeidsgiverRegler)
         state = State.Initiell

@@ -38,10 +38,10 @@ import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_1
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -1198,7 +1198,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             )
         )
 
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         assertVarsel(RV_IT_3, AktivitetsloggFilter.person())
     }
 

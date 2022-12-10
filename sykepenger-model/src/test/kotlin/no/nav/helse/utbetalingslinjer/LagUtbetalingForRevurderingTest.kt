@@ -3,7 +3,9 @@ package no.nav.helse.utbetalingslinjer
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
@@ -14,12 +16,11 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -29,7 +30,6 @@ import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -126,7 +126,7 @@ internal class LagUtbetalingForRevurderingTest {
     @Test
     fun `lag revurdering`() {
         val utbetaling = utbetaling(tidslinjeOf(16.AP, 15.NAV), utbetalt = true)
-        val revurdering = revurdering(tidslinjeOf(16.AP, 1.FRI, 14.NAV), utbetaling, utbetaling, 31.januar)
+        val revurdering = revurdering(tidslinjeOf(16.AP, 1.FRI, 14.NAV), utbetaling, 31.januar)
         assertEquals(utbetaling.inspektør.korrelasjonsId, revurdering.inspektør.korrelasjonsId)
         assertEquals(utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), revurdering.inspektør.arbeidsgiverOppdrag.fagsystemId())
         revurdering.inspektør.arbeidsgiverOppdrag.also {
@@ -151,12 +151,12 @@ internal class LagUtbetalingForRevurderingTest {
     @Test
     fun `lag revurdering begrenset til kuttdato`() {
         val utbetaling = utbetaling(tidslinjeOf(16.AP, 15.NAV, 16.NAV), utbetalt = true)
-        val revurdering = revurdering(tidslinjeOf(16.AP, 1.FRI, 14.NAV, 1.FRI, 15.NAV), utbetaling, utbetaling, 31.januar)
+        val revurdering = revurdering(tidslinjeOf(16.AP, 1.FRI, 14.NAV, 1.FRI, 15.NAV), utbetaling, 31.januar)
         assertEquals(utbetaling.inspektør.korrelasjonsId, revurdering.inspektør.korrelasjonsId)
         revurdering.assertDiff(-1200) // Trekker tilbake 1 dag
         revurdering.inspektør.utbetalingstidslinje.inspektør.also {
             assertEquals(1, it.fridagTeller)
-            assertEquals(22, it.navDagTeller)
+            assertEquals(10, it.navDagTeller)
         }
 
         revurdering.inspektør.arbeidsgiverOppdrag.also {
@@ -180,8 +180,13 @@ internal class LagUtbetalingForRevurderingTest {
     @Test
     fun `lag revurdering begrenset til kuttdato og deretter ny revurdering`() {
         val utbetaling = utbetaling(tidslinjeOf(16.AP, 15.NAV, 16.NAV), utbetalt = true)
-        val revurdering = revurdering(tidslinjeOf(16.AP, 1.FRI, 14.NAV, 1.FRI, 15.NAV), utbetaling, utbetaling, 31.januar, utbetalt = true)
-        val revurdering2 = revurdering(tidslinjeOf(16.AP, 1.FRI, 14.NAV, 1.ARB, 15.NAV), revurdering, revurdering, 16.februar)
+        val revurdering = revurdering(
+            tidslinjeOf(16.AP, 1.FRI, 14.NAV, 1.FRI, 15.NAV),
+            utbetaling,
+            31.januar,
+            utbetalt = true
+        )
+        val revurdering2 = revurdering(tidslinjeOf(16.AP, 1.FRI, 14.NAV, 1.ARB, 15.NAV), revurdering, 16.februar)
         assertEquals(utbetaling.inspektør.korrelasjonsId, revurdering.inspektør.korrelasjonsId)
         assertEquals(revurdering.inspektør.korrelasjonsId, revurdering2.inspektør.korrelasjonsId)
         revurdering2.assertDiff(-1200)
@@ -189,7 +194,7 @@ internal class LagUtbetalingForRevurderingTest {
         revurdering.inspektør.utbetalingstidslinje.inspektør.also {
             assertEquals(1, it.fridagTeller)
             assertEquals(0, it.arbeidsdagTeller)
-            assertEquals(22, it.navDagTeller)
+            assertEquals(10, it.navDagTeller)
         }
         revurdering2.inspektør.utbetalingstidslinje.inspektør.also {
             assertEquals(1, it.fridagTeller)
@@ -218,7 +223,7 @@ internal class LagUtbetalingForRevurderingTest {
     @Test
     fun `revurderingen kan strekkes forbi utbetalingen`() {
         val utbetaling = utbetaling(tidslinjeOf(16.AP, 15.NAV), utbetalt = true)
-        val revurdering = revurdering(tidslinjeOf(16.AP, 20.NAV), utbetaling, utbetaling, 5.februar)
+        val revurdering = revurdering(tidslinjeOf(16.AP, 20.NAV), utbetaling, 5.februar)
         revurdering.inspektør.utbetalingstidslinje.inspektør.apply {
             assertEquals(1.januar, førstedag.dato)
             assertEquals(5.februar, sistedag.dato)
@@ -238,7 +243,7 @@ internal class LagUtbetalingForRevurderingTest {
     @Test
     fun `revurderingen strekkes forbi utbetalingen, men kuttes`() {
         val utbetaling = utbetaling(tidslinjeOf(16.AP, 15.NAV), utbetalt = true)
-        val revurdering = revurdering(tidslinjeOf(16.AP, 20.NAV), utbetaling, utbetaling, 31.januar)
+        val revurdering = revurdering(tidslinjeOf(16.AP, 20.NAV), utbetaling, 31.januar)
         revurdering.inspektør.utbetalingstidslinje.inspektør.apply {
             assertEquals(1.januar, førstedag.dato)
             assertEquals(31.januar, sistedag.dato)
@@ -252,7 +257,8 @@ internal class LagUtbetalingForRevurderingTest {
         fødselsnummer: String = FNR.toString(),
         orgnummer: String = ORGNUMMER,
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg,
-        utbetalt: Boolean = false
+        utbetalt: Boolean = false,
+        type: Utbetaling.Utbetalingtype = Utbetaling.Utbetalingtype.UTBETALING,
     ): Utbetaling {
         beregnUtbetalinger(tidslinje)
         return Utbetaling.lagUtbetaling(
@@ -265,7 +271,8 @@ internal class LagUtbetalingForRevurderingTest {
             aktivitetslogg,
             LocalDate.MAX,
             100,
-            148
+            148,
+            type
         ).also { utbetaling ->
             utbetaling.opprett(aktivitetslogg)
             if (utbetalt) {
@@ -282,38 +289,12 @@ internal class LagUtbetalingForRevurderingTest {
     private fun revurdering(
         tidslinje: Utbetalingstidslinje,
         tidligere: Utbetaling? = null,
-        forrige: Utbetaling,
         sisteDato: LocalDate,
         fødselsnummer: String = FNR.toString(),
         orgnummer: String = ORGNUMMER,
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg,
         utbetalt: Boolean = false,
-    ): Utbetaling {
-        beregnUtbetalinger(tidslinje)
-        return Utbetaling.lagRevurdering(
-            tidligere?.let { listOf(tidligere) } ?: emptyList(),
-            fødselsnummer,
-            UUID.randomUUID(),
-            orgnummer,
-            tidslinje,
-            sisteDato,
-            aktivitetslogg,
-            LocalDate.MAX,
-            100,
-            148,
-            forrige
-        ).also { utbetaling ->
-            utbetaling.opprett(aktivitetslogg)
-            if (utbetalt) {
-                godkjenn(utbetaling)
-                listOf(utbetaling.inspektør.arbeidsgiverOppdrag, utbetaling.inspektør.personOppdrag)
-                    .filter { it.harUtbetalinger() }
-                    .map { it.fagsystemId() }
-                    .onEach { overfør(utbetaling, it) }
-                    .onEach { kvittèr(utbetaling, it) }
-            }
-        }
-    }
+    ) = utbetaling(tidslinje, tidligere, sisteDato, fødselsnummer, orgnummer, aktivitetslogg, utbetalt, Utbetaling.Utbetalingtype.REVURDERING)
 
     private fun godkjenn(utbetaling: Utbetaling, utbetalingGodkjent: Boolean = true) =
         Utbetalingsgodkjenning(

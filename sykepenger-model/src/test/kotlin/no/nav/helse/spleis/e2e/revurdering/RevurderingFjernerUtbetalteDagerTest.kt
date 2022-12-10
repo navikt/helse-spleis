@@ -104,7 +104,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         assertEquals(2, (behov.detaljer()["linjer"] as List<*>).size)
 
         assertEquals("2021-04-17", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["fom"])
-        assertEquals("2021-04-23", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["tom"])
+        assertEquals("2021-04-25", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["tom"])
         assertEquals("2021-04-28", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[1]["fom"])
         assertEquals("2021-05-07", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[1]["tom"])
     }

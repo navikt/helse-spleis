@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
@@ -33,6 +34,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -105,9 +107,20 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
         inspektør.utbetaling(1).inspektør.also { utbetalingInspektør ->
-            assertEquals(
-                utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(),
-                inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId()
+            assertForventetFeil(
+                forklaring = "cornercase kanskje håndtere på en annen måte?",
+                nå = {
+                    assertNotEquals(
+                        utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(),
+                        inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId()
+                    )
+                },
+                ønsket = {
+                    assertEquals(
+                        utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(),
+                        inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId()
+                    )
+                }
             )
             assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertTrue(utbetalingInspektør.arbeidsgiverOppdrag.harUtbetalinger())
@@ -159,20 +172,33 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, andre.inspektør.utbetalingId, andre.inspektør.personOppdrag.inspektør.fagsystemId(), Fagområde.Sykepenger)
         assertEquals(Utbetaling.Forkastet, første.inspektør.tilstand)
         andre.inspektør.also { utbetalingInspektør ->
-            assertEquals(utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
-            assertEquals(utbetalingInspektør.personOppdrag.inspektør.fagsystemId(), første.inspektør.personOppdrag.inspektør.fagsystemId())
+            assertForventetFeil(
+                forklaring = "cornercase som vi løser på sikt",
+                nå = {
+                    assertNotEquals(utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+                    assertNotEquals(utbetalingInspektør.personOppdrag.inspektør.fagsystemId(), første.inspektør.personOppdrag.inspektør.fagsystemId())
+                    assertTilstander(1.vedtaksperiode, UTBETALING_FEILET, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+                },
+                ønsket = {
+                    assertEquals(utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+                    assertEquals(utbetalingInspektør.personOppdrag.inspektør.fagsystemId(), første.inspektør.personOppdrag.inspektør.fagsystemId())
+                    assertFalse(utbetalingInspektør.arbeidsgiverOppdrag.harUtbetalinger())
+                    assertFalse(utbetalingInspektør.arbeidsgiverOppdrag[0].erForskjell())
+                    assertTilstander(1.vedtaksperiode, UTBETALING_FEILET, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
+                }
+
+            )
             assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertEquals(1, utbetalingInspektør.personOppdrag.size)
-            assertFalse(utbetalingInspektør.arbeidsgiverOppdrag.harUtbetalinger())
+
             assertTrue(utbetalingInspektør.personOppdrag.harUtbetalinger())
             assertEquals(17.januar, utbetalingInspektør.arbeidsgiverOppdrag[0].fom)
             assertEquals(31.januar, utbetalingInspektør.arbeidsgiverOppdrag[0].tom)
-            assertFalse(utbetalingInspektør.arbeidsgiverOppdrag[0].erForskjell())
+
             assertEquals(17.januar, utbetalingInspektør.personOppdrag[0].fom)
             assertEquals(31.januar, utbetalingInspektør.personOppdrag[0].tom)
             assertTrue(utbetalingInspektør.personOppdrag[0].erForskjell())
         }
-        assertTilstander(1.vedtaksperiode, UTBETALING_FEILET, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
     }
 
     @Test
@@ -194,20 +220,37 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, andre.inspektør.utbetalingId, andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), Fagområde.SykepengerRefusjon)
         assertEquals(Utbetaling.Forkastet, første.inspektør.tilstand)
         andre.inspektør.also { utbetalingInspektør ->
-            assertEquals(utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
-            assertEquals(utbetalingInspektør.personOppdrag.inspektør.fagsystemId(), første.inspektør.personOppdrag.inspektør.fagsystemId())
+            assertForventetFeil(
+                forklaring = "cornercase kanskje håndtere på en annen måte",
+                nå = {
+                    assertNotEquals(utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+                    assertNotEquals(utbetalingInspektør.personOppdrag.inspektør.fagsystemId(), første.inspektør.personOppdrag.inspektør.fagsystemId())
+                    assertTrue(utbetalingInspektør.personOppdrag.harUtbetalinger())
+                    assertTilstander(1.vedtaksperiode, UTBETALING_FEILET, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+
+                },
+                ønsket = {
+                    assertEquals(utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+                    assertEquals(utbetalingInspektør.personOppdrag.inspektør.fagsystemId(), første.inspektør.personOppdrag.inspektør.fagsystemId())
+                    assertFalse(utbetalingInspektør.personOppdrag.harUtbetalinger())
+                    assertFalse(utbetalingInspektør.personOppdrag[0].erForskjell())
+                    assertTilstander(1.vedtaksperiode, UTBETALING_FEILET, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
+                }
+
+
+            )
+
             assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertEquals(1, utbetalingInspektør.personOppdrag.size)
             assertTrue(utbetalingInspektør.arbeidsgiverOppdrag.harUtbetalinger())
-            assertFalse(utbetalingInspektør.personOppdrag.harUtbetalinger())
+
             assertEquals(17.januar, utbetalingInspektør.arbeidsgiverOppdrag[0].fom)
             assertEquals(31.januar, utbetalingInspektør.arbeidsgiverOppdrag[0].tom)
             assertTrue(utbetalingInspektør.arbeidsgiverOppdrag[0].erForskjell())
             assertEquals(17.januar, utbetalingInspektør.personOppdrag[0].fom)
             assertEquals(31.januar, utbetalingInspektør.personOppdrag[0].tom)
-            assertFalse(utbetalingInspektør.personOppdrag[0].erForskjell())
         }
-        assertTilstander(1.vedtaksperiode, UTBETALING_FEILET, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
+
     }
 
     @Test

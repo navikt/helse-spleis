@@ -15,6 +15,8 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
 import no.nav.helse.Alder
+import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype.REVURDERING
+import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype.UTBETALING
 import no.nav.helse.utbetalingslinjer.utbetalingport
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
@@ -36,7 +38,7 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
         visitor.postVisitVedtakserperiodeUtbetalinger(utbetalinger)
     }
 
-    private fun forrigeUtbetalte() = utbetalingene.aktive().lastOrNull()
+    private fun harUtbetaltTidligere() = utbetalingene.aktive().isNotEmpty()
 
     internal fun harUtbetaling() = siste != null && siste!!.gyldig()
     internal fun trekkerTilbakePenger() = siste?.trekkerTilbakePenger() == true
@@ -92,8 +94,7 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
                 maksdato = maksimumSykepenger.sisteDag(),
                 forbrukteSykedager = maksimumSykepenger.forbrukteDager(),
                 gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
-                periode = periode,
-                forrige = siste
+                periode = periode
             )
         }
     }
@@ -125,7 +126,7 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
             forbrukteSykedager = maksimumSykepenger.forbrukteDager(),
             gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
             periode = periode,
-            forrige = forrigeUtbetalte()
+            type = if (harUtbetaltTidligere()) REVURDERING else UTBETALING
         )
     }
 

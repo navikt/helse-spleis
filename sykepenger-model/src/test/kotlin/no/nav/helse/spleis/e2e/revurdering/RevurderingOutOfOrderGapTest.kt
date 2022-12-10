@@ -80,7 +80,7 @@ import no.nav.helse.spleis.e2e.tilGodkjent
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
-import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -330,7 +330,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
                 inspektør.utbetaling(1).also { outOfOrderUtbetalingen ->
                     assertEquals(Utbetaling.Utbetalingtype.UTBETALING, outOfOrderUtbetalingen.inspektør.type)
                     outOfOrderUtbetalingen.inspektør.arbeidsgiverOppdrag.also { oppdraget ->
-                        assertEquals(Endringskode.ENDR, oppdraget.inspektør.endringskode)
+                        assertEquals(ENDR, oppdraget.inspektør.endringskode)
                         assertEquals(2, oppdraget.size)
                         oppdraget[0].inspektør.also { linje1 ->
                             assertEquals(18.januar, linje1.fom)
@@ -353,7 +353,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
                 inspektør.utbetaling(2).also { revurderingen ->
                     assertEquals(Utbetaling.Utbetalingtype.REVURDERING, revurderingen.inspektør.type)
                     revurderingen.inspektør.arbeidsgiverOppdrag.also { oppdraget ->
-                        assertEquals(Endringskode.ENDR, oppdraget.inspektør.endringskode)
+                        assertEquals(ENDR, oppdraget.inspektør.endringskode)
                         assertEquals(2, oppdraget.size)
                         oppdraget[0].inspektør.also { linje1 ->
                             assertEquals(18.januar, linje1.fom)

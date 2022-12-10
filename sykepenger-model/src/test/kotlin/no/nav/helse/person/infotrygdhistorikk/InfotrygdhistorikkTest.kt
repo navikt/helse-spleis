@@ -390,8 +390,7 @@ internal class InfotrygdhistorikkTest {
         aktivitetslogg = Aktivitetslogg(),
         maksdato = 1.januar,
         forbrukteSykedager = 0,
-        gjenståendeSykedager = 0,
-        forrige = null
+        gjenståendeSykedager = 0
     )
 
     private fun historikkelement(

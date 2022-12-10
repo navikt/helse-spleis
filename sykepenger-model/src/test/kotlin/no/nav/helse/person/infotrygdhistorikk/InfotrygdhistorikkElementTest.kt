@@ -234,7 +234,7 @@ internal class InfotrygdhistorikkElementTest {
             )
         )
         val tidslinje = element.historikkFor("ag1", sykdomstidslinje)
-        assertEquals(sykdomstidslinje.periode(), tidslinje.periode())
+        assertEquals(1.januar til 28.februar, tidslinje.periode())
     }
 
     @Test

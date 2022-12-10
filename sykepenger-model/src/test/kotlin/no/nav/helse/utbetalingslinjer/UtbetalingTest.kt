@@ -25,6 +25,7 @@ import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.UKJ
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingslinjer.Endringskode.*
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.OVERFØRT
@@ -54,6 +55,96 @@ internal class UtbetalingTest {
     @BeforeEach
     internal fun initEach() {
         aktivitetslogg = Aktivitetslogg()
+    }
+
+    @Test
+    fun `ny utbetaling starter før`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV, startDato = 17.januar)
+        beregnUtbetalinger(tidslinje)
+        val utbetaling1 = opprettUtbetaling(tidslinje)
+
+        val tidslinjeNy = tidslinjeOf(16.AP, 15.NAV, 16.NAV, startDato = 1.januar)
+        beregnUtbetalinger(tidslinjeNy)
+        val utbetaling2 = opprettUtbetaling(tidslinjeNy, utbetaling1, sisteDato = 31.januar)
+
+        val utbetaling1Inspektør = utbetaling1.inspektør
+        val utbetaling2Inspektør = utbetaling2.inspektør
+
+        assertEquals("PPPPP PPPPPPP PPPPNHH NNNNNHH NNNNN", utbetaling1Inspektør.utbetalingstidslinje.toString())
+        assertEquals(17.januar til 16.februar, utbetaling1Inspektør.utbetalingstidslinje.periode())
+        assertEquals(1, utbetaling1Inspektør.arbeidsgiverOppdrag.size)
+        utbetaling1Inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(2.februar til 16.februar, linje.fom til linje.tom)
+            assertEquals(NY, linje.endringskode)
+            assertEquals(1, linje.delytelseId)
+            assertNull(linje.refDelytelseId)
+        }
+
+        assertEquals(utbetaling1Inspektør.korrelasjonsId, utbetaling2Inspektør.korrelasjonsId)
+        assertEquals(utbetaling1Inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), utbetaling2Inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", utbetaling2Inspektør.utbetalingstidslinje.toString())
+        assertEquals(1.januar til 31.januar, utbetaling2Inspektør.utbetalingstidslinje.periode())
+        assertEquals(2, utbetaling2Inspektør.arbeidsgiverOppdrag.size)
+        utbetaling2Inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
+            assertEquals(NY, linje.endringskode)
+            assertEquals(2, linje.delytelseId)
+            assertEquals(1, linje.refDelytelseId)
+        }
+        utbetaling2Inspektør.arbeidsgiverOppdrag[1].inspektør.also { linje ->
+            assertEquals(2.februar til 16.februar, linje.fom til linje.tom)
+            assertEquals(NY, linje.endringskode)
+            assertEquals(3, linje.delytelseId)
+            assertEquals(2, linje.refDelytelseId)
+        }
+    }
+
+    @Test
+    fun `ny utbetaling splitter opp tidligere utbetaling før`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV, 1.ARB, 27.NAV, 2.ARB, 29.NAV, startDato = 1.januar)
+        beregnUtbetalinger(tidslinje)
+        val utbetaling1 = opprettUtbetaling(tidslinje)
+
+        val tidslinjeNy = tidslinjeOf(16.AP, 15.NAV, 18.ARB, 16.AP, 25.NAV, startDato = 1.januar)
+        beregnUtbetalinger(tidslinjeNy)
+        val utbetaling2 = opprettUtbetaling(tidslinjeNy, utbetaling1, sisteDato = 31.januar)
+
+        val utbetaling1Inspektør = utbetaling1.inspektør
+        val utbetaling2Inspektør = utbetaling2.inspektør
+
+        assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNNANHH NNNNNHH NNNNNHH NNNNNHH NNNAAHH NNNNNHH NNNNNHH NNNNNHH NNNNNH", utbetaling1Inspektør.utbetalingstidslinje.toString())
+        assertEquals(1.januar til 31.mars, utbetaling1Inspektør.utbetalingstidslinje.periode())
+        assertEquals(3, utbetaling1Inspektør.arbeidsgiverOppdrag.size)
+        utbetaling1Inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
+            assertEquals(NY, linje.endringskode)
+            assertEquals(1, linje.delytelseId)
+            assertNull(linje.refDelytelseId)
+        }
+        utbetaling1Inspektør.arbeidsgiverOppdrag[1].inspektør.also { linje ->
+            assertEquals(2.februar til 28.februar, linje.fom til linje.tom)
+            assertEquals(NY, linje.endringskode)
+            assertEquals(2, linje.delytelseId)
+            assertEquals(1, linje.refDelytelseId)
+        }
+        utbetaling1Inspektør.arbeidsgiverOppdrag[2].inspektør.also { linje ->
+            assertEquals(3.mars til 30.mars, linje.fom til linje.tom)
+            assertEquals(NY, linje.endringskode)
+            assertEquals(3, linje.delytelseId)
+            assertEquals(2, linje.refDelytelseId)
+        }
+
+        assertEquals(utbetaling1Inspektør.korrelasjonsId, utbetaling2Inspektør.korrelasjonsId)
+        assertEquals(utbetaling1Inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), utbetaling2Inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", utbetaling2Inspektør.utbetalingstidslinje.toString())
+        assertEquals(1.januar til 31.januar, utbetaling2Inspektør.utbetalingstidslinje.periode())
+        assertEquals(1, utbetaling2Inspektør.arbeidsgiverOppdrag.size)
+        utbetaling2Inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
+            assertEquals(NY, linje.endringskode)
+            assertEquals(4, linje.delytelseId)
+            assertEquals(3, linje.refDelytelseId)
+        }
     }
 
     @Test
@@ -220,8 +311,8 @@ internal class UtbetalingTest {
         assertTrue(andre.inspektør.arbeidsgiverOppdrag.isNotEmpty())
         assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
-        assertEquals(Endringskode.NY, andre.inspektør.arbeidsgiverOppdrag.inspektør.endringskode)
-        assertEquals(Endringskode.NY, andre.inspektør.arbeidsgiverOppdrag[0].inspektør.endringskode)
+        assertEquals(NY, andre.inspektør.arbeidsgiverOppdrag.inspektør.endringskode)
+        assertEquals(NY, andre.inspektør.arbeidsgiverOppdrag[0].inspektør.endringskode)
         assertEquals(17.januar, andre.inspektør.arbeidsgiverOppdrag[0].inspektør.fom)
         assertEquals(26.januar, andre.inspektør.arbeidsgiverOppdrag[0].inspektør.tom)
     }

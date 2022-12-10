@@ -272,8 +272,6 @@ class Oppdrag private constructor(
     }
 
     fun minus(eldre: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
-        // Vi  ønsker ikke å forlenge et oppdrag vi ikke overlapper med, eller et tomt oppdrag
-        if (harIngenKoblingTilTidligereOppdrag(eldre)) return this
         // overtar fagsystemId fra tidligere Oppdrag uten utbetaling, gitt at det er samme arbeidsgiverperiode
         if (eldre.erTomt()) return medFagsystemId(eldre)
         return when {
@@ -309,14 +307,12 @@ class Oppdrag private constructor(
 
     // Vi har endret tidligere utbetalte dager til ikke-utbetalte dager i starten av tidslinjen
     private fun fomHarFlyttetSegFremover(eldre: Oppdrag) = this.first().fom > eldre.first().fom
-
     // man opphører (annullerer) et annet oppdrag ved å lage en opphørslinje som dekker hele perioden som er utbetalt
     private fun annulleringsoppdrag(tidligere: Oppdrag) = kopierMed(
         linjer = listOf(tidligere.last().opphørslinje(tidligere.first().fom)),
         fagsystemId = tidligere.fagsystemId,
         endringskode = Endringskode.ENDR
     )
-
     // når man oppretter en NY linje med dato-intervall "(a, b)" vil oppdragsystemet
     // automatisk opphøre alle eventuelle linjer med fom > b.
     //
@@ -353,7 +349,7 @@ class Oppdrag private constructor(
     private fun kopierMed(linjer: List<Utbetalingslinje>, fagsystemId: String = this.fagsystemId, endringskode: Endringskode = this.endringskode) = Oppdrag(
         mottaker = mottaker,
         fagområde = fagområde,
-        linjer = linjer.toMutableList(),
+        linjer = linjer.map { it.kopier() }.toMutableList(),
         fagsystemId = fagsystemId,
         endringskode = endringskode,
         sisteArbeidsgiverdag = sisteArbeidsgiverdag,
@@ -395,13 +391,11 @@ class Oppdrag private constructor(
         if (this.overføringstidspunkt == null) this.overføringstidspunkt = hendelse.overføringstidspunkt
         this.status = hendelse.status
     }
-
     fun håndter(simulering: SimuleringPort) {
         if (!simulering.erRelevantFor(fagområde, fagsystemId)) return
         this.erSimulert = true
         this.simuleringsResultat = simulering.simuleringResultat
     }
-
     fun erKlarForGodkjenning() = !harUtbetalinger() || erSimulert
 
     private class DifferanseBuilder(

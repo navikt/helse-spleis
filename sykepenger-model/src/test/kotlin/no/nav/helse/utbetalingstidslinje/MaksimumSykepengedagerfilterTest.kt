@@ -2,9 +2,11 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 import no.nav.helse.Alder
+import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.erHelg
+import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -15,7 +17,6 @@ import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.testhelpers.AP
@@ -28,7 +29,6 @@ import no.nav.helse.testhelpers.NAVDAGER
 import no.nav.helse.testhelpers.UTELATE
 import no.nav.helse.testhelpers.Utbetalingsdager
 import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.NyVilkårsprøvingNødvendig
@@ -136,7 +136,8 @@ internal class MaksimumSykepengedagerfilterTest {
     @Test
     fun `ingen warning om avvist dag ikke er innenfor perioden`() {
         val tidslinje = tidslinjeOf(16.AP, 249.NAVDAGER)
-        assertEquals(listOf(31.desember), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, Periode(1.januar, 30.desember)))
+        assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, Periode(1.januar, 30.desember)))
+        assertEquals(listOf(31.desember), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, Periode(1.januar, 31.desember)))
         assertTrue(aktivitetslogg.harAktiviteter())
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
