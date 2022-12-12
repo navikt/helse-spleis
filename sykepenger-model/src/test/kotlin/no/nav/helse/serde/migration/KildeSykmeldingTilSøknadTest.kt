@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 
 internal class KildeSykmeldingTilSøknadTest: MigrationTest(TestMigrering){
 
-
     @Test
     fun `endrer fra sykmelding til søknad for en enkeltdag`() {
         assertMigration(

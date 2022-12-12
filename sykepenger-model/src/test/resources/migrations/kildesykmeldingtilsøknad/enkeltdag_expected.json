@@ -2,6 +2,7 @@
   "aktørId": "42",
   "arbeidsgivere": [
     {
+      "organisasjonsnummer": "1",
       "sykdomshistorikk": [
         {
           "beregnetSykdomstidslinje": {
