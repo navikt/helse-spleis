@@ -185,6 +185,9 @@ spec:
           application: sparkel-arbeidsgiver
           access: readwrite
         - team: tbd
+          application: sp-revurdering-monitor
+          access: readwrite
+        - team: tbd
           application: sparsom
           access: readwrite
         - team: tbd
