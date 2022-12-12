@@ -1,0 +1,37 @@
+{
+  "aktørId": "42",
+  "arbeidsgivere": [
+    {
+      "sykdomshistorikk": [
+        {
+          "beregnetSykdomstidslinje": {
+            "dager": [
+              {
+                "fom": "2018-01-01",
+                "tom": "2018-01-30",
+                "type": "SYKEDAG",
+                "kilde": {
+                  "type": "Søknad",
+                  "id": "e8493259-ebf9-4df5-b7bc-3d35e9bf81cc",
+                  "tidsstempel": "2018-01-01T00:00:00"
+                },
+                "grad": 100.0
+              },
+              {
+                "dato": "2018-01-31",
+                "type": "SYKEDAG",
+                "kilde": {
+                  "type": "Sykmelding",
+                  "id": "1dcae1f5-efb0-43dc-9c89-52300fa34402",
+                  "tidsstempel": "2018-01-01T00:00:00"
+                },
+                "grad": 100.0
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 1
+}
