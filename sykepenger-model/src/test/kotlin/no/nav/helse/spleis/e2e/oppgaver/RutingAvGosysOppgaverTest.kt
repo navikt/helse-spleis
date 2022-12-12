@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.oppgaver
 
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
@@ -21,6 +20,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.Varselkode.RV_IM_4
+import no.nav.helse.person.Varselkode.RV_SØ_19
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -463,17 +463,10 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         assertEquals(1, observatør.opprettOppgaverEventer.size)
 
         val søknadIdFebruar = håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        assertTrue(søknadIdFebruar in observatør.opprettOppgaverEventer.last().hendelser)
-        assertEquals(2, observatør.opprettOppgaverEventer.size)
+        assertFunksjonellFeil(RV_SØ_19)
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TIL_INFOTRYGD)
-        assertForventetFeil(
-            forklaring = "Når vi mottar inntektmelding før en periode som forkastes på direkten, sender vi " +
-                    "aldri signal om å opprette oppgave på inntektsmeldingen",
-            nå = { assertEquals(2, observatør.opprettOppgaverEventer.size) },
-            ønsket = {
-                assertEquals(3, observatør.opprettOppgaverEventer.size)
-                assertTrue(inntektsmeldingId in observatør.opprettOppgaverEventer.last().hendelser)
-            }
-        )
+        assertEquals(3, observatør.opprettOppgaverEventer.size)
+        assertTrue(søknadIdFebruar in observatør.opprettOppgaverEventer[1].hendelser)
+        assertTrue(inntektsmeldingId in observatør.opprettOppgaverEventer.last().hendelser)
     }
 }

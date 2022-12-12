@@ -491,17 +491,21 @@ internal class Arbeidsgiver private constructor(
         val vedtaksperiode = søknad.lagVedtaksperiode(person, this, jurist)
         if (søknad.harFunksjonelleFeilEllerVerre() || person.nekterOpprettelseAvPeriode(vedtaksperiode, søknad)) {
             registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
-            person.søppelbøtte(søknad, TIDLIGERE_OG_ETTERGØLGENDE(vedtaksperiode))
+            forkastOgBeOmReplay(vedtaksperiode, søknad)
             return
         }
         registrerNyVedtaksperiode(vedtaksperiode)
         vedtaksperiode.håndter(søknad)
         if (søknad.harFunksjonelleFeilEllerVerre()) {
-            person.søppelbøtte(søknad, TIDLIGERE_OG_ETTERGØLGENDE(vedtaksperiode))
             søknad.info("Forsøkte å opprette en ny vedtaksperiode, men den ble forkastet før den rakk å spørre om inntektsmeldingReplay. " +
                     "Ber om inntektsmeldingReplay så vi kan opprette gosys-oppgaver for inntektsmeldinger som ville ha truffet denne vedtaksperioden")
-            vedtaksperiode.trengerInntektsmeldingReplay()
+            forkastOgBeOmReplay(vedtaksperiode, søknad)
         }
+    }
+    
+    private fun forkastOgBeOmReplay(vedtaksperiode: Vedtaksperiode, søknad: Søknad){
+        person.søppelbøtte(søknad, TIDLIGERE_OG_ETTERGØLGENDE(vedtaksperiode))
+        vedtaksperiode.trengerInntektsmeldingReplay()
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID? = null) {
