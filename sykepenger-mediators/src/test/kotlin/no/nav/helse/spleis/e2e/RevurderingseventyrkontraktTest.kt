@@ -40,11 +40,14 @@ internal class RevurderingseventyrkontraktTest : AbstractEndToEndMediatorTest() 
     }
 
     private fun assertRevurderingIgangsatt(eventyr: JsonNode) {
-        val id = eventyr.path("@id").asText()
+        val hendelseId = eventyr.path("@id").asText()
+        val id = eventyr.path("id").asText()
         val kilde = eventyr.path("kilde").asText()
         assertTrue(eventyr.path("fødselsnummer").asText().isNotEmpty())
         assertTrue(eventyr.path("aktørId").asText().isNotEmpty())
         assertDatotid(eventyr.path("@opprettet").asText())
+        assertTrue(hendelseId.isNotEmpty())
+        assertDoesNotThrow { UUID.fromString(hendelseId) }
         assertTrue(id.isNotEmpty())
         assertDoesNotThrow { UUID.fromString(id) }
         assertTrue(kilde.isNotEmpty())

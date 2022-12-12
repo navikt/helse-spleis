@@ -149,6 +149,7 @@ internal class PersonMediator(
         if (event.typeEndring != "REVURDERING") return // TODO: Fjern når konsumenter kan skille på type endring
         val eventName = "revurdering_igangsatt"
         queueMessage(personidentifikator.toString(), eventName, JsonMessage.newMessage(eventName, mapOf(
+            "id" to UUID.randomUUID(),
             "fødselsnummer" to personidentifikator.toString(),
             "aktørId" to aktørId,
             "kilde" to message.id,
