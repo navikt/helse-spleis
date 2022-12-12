@@ -311,9 +311,10 @@ internal class TestPerson(
         internal fun håndterOverstyrInntekt(
             skjæringstidspunkt: LocalDate,
             inntekt: Inntekt,
-            hendelseId: UUID = UUID.randomUUID()
+            hendelseId: UUID = UUID.randomUUID(),
+            organisasjonsnummer: String = orgnummer,
         ) =
-            arbeidsgiverHendelsefabrikk.lagOverstyrInntekt(hendelseId, skjæringstidspunkt, inntekt)
+            arbeidsgiverHendelsefabrikk.lagOverstyrInntekt(hendelseId, skjæringstidspunkt, inntekt, organisasjonsnummer)
                 .håndter(Person::håndter)
 
         operator fun <R> invoke(testblokk: TestArbeidsgiver.() -> R): R {
