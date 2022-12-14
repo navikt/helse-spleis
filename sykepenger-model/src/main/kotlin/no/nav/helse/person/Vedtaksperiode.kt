@@ -615,6 +615,24 @@ internal class Vedtaksperiode private constructor(
         medlemskap(hendelse, periode.start, periode.endInclusive)
     }
 
+    private fun trengerArbeidsgiveropplysninger(hendelse: IAktivitetslogg) {
+        val arbeidsgiverperiode = finnArbeidsgiverperiode()?.perioder.orEmpty()
+
+        person.trengerArbeidsgiveropplysninger(
+            hendelse.hendelseskontekst(),
+            PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+                fom = periode.start,
+                tom = periode.endInclusive,
+                vedtaksperiodeId = id,
+                forespurteOpplysninger = listOf(
+                    PersonObserver.Inntekt,
+                    PersonObserver.Refusjon,
+                    PersonObserver.Arbeidsgiverperiode(arbeidsgiverperiode)
+                )
+            )
+        )
+    }
+
     private fun trengerInntektsmelding(hendelseskontekst: Hendelseskontekst) {
         if (!forventerInntekt()) return
         if (arbeidsgiver.finnVedtaksperiodeRettFør(this) != null) return
@@ -1298,20 +1316,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             if(Toggle.Splarbeidsbros.enabled) {
-                val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode()?.perioder.orEmpty()
-                vedtaksperiode.person.trengerArbeidsgiveropplysninger(
-                    hendelse.hendelseskontekst(),
-                    PersonObserver.TrengerArbeidsgiveropplysningerEvent(
-                        fom = vedtaksperiode.periode.start,
-                        tom = vedtaksperiode.periode.endInclusive,
-                        vedtaksperiodeId = vedtaksperiode.id,
-                        forespurteOpplysninger = listOf(
-                            PersonObserver.Inntekt,
-                            PersonObserver.Refusjon,
-                            PersonObserver.Arbeidsgiverperiode(arbeidsgiverperiode)
-                        )
-                    )
-                )
+                vedtaksperiode.trengerArbeidsgiveropplysninger(hendelse)
             }
             vedtaksperiode.trengerInntektsmeldingReplay()
             vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
