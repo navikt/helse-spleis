@@ -31,26 +31,13 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
 
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
-        assertForventetFeil(
-            forklaring = "Skal ikke be om arbeidsgiverperiode når gapet er mindre enn 16 dager",
-            nå = {
-                val expectedForespurteOpplysninger = listOf(
-                    PersonObserver.Inntekt,
-                    PersonObserver.Refusjon,
-                    PersonObserver.Arbeidsgiverperiode(listOf(1.januar til 16.januar))
-                )
-                val actualForespurteOpplysninger = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
-            },
-            ønsket = {
-                val expectedForespurteOpplysninger = listOf(
-                    PersonObserver.Inntekt,
-                    PersonObserver.Refusjon
-                )
-                val actualForespurteOpplysninger = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
-                assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
-
-            }
+        val expectedForespurteOpplysninger = listOf(
+            PersonObserver.Inntekt,
+            PersonObserver.Refusjon
         )
+        val actualForespurteOpplysninger =
+            observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
+        assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
     }
 
     @Test
@@ -148,7 +135,6 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
                 val expectedForespurteOpplysninger = listOf(
                     PersonObserver.Inntekt,
                     PersonObserver.Refusjon,
-                    PersonObserver.Arbeidsgiverperiode(listOf(1.januar til 16.januar))
                 )
                 assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
             }
