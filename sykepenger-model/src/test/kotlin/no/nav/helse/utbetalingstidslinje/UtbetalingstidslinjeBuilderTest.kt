@@ -532,12 +532,23 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `utbetalingsdager med kilde Sykmelding etter arbeidsgiverperioden`() {
-        assertThrows<IllegalStateException> { undersøke(16.S + 1.S(Sykmelding::class)) }
+        assertThrows<IllegalStateException> { undersøke(16.S + 1.S(Sykmelding::class)) }.also {
+            assertEquals("Kan ikke opprette utbetalingsdager med kilde Sykmelding: [17-01-2018 til 17-01-2018]", it.message)
+        }
     }
 
     @Test
     fun `utbetalingsdager med kilde Sykmelding i arbeidsgiverperioden`() {
-        assertThrows<IllegalStateException> { undersøke(1.S(Sykmelding::class)) }
+        assertThrows<IllegalStateException> { undersøke(1.S(Sykmelding::class)) }.also {
+            assertEquals("Kan ikke opprette utbetalingsdager med kilde Sykmelding: [01-01-2018 til 01-01-2018]", it.message)
+        }
+    }
+
+    @Test
+    fun `utbetalingsdager med kilde Sykmelding i og etter arbeidsgiverperioden`() {
+        assertThrows<IllegalStateException> { undersøke(5.S + 5.S(Sykmelding::class) + 11.S + 5.S(Sykmelding::class) + 5.S) }.also {
+            assertEquals("Kan ikke opprette utbetalingsdager med kilde Sykmelding: [06-01-2018 til 10-01-2018, 22-01-2018 til 26-01-2018]", it.message)
+        }
     }
 
     private val Økonomi.arbeidsgiverperiode get() = this.get<Arbeidsgiverperiode?>("arbeidsgiverperiode")

@@ -32,6 +32,7 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
 
     private val builder = Utbetalingstidslinje.Builder()
 
+    private val kildeSykmelding = mutableSetOf<LocalDate>()
     private val manglerRefusjonsopplysninger = mutableSetOf<LocalDate>()
     private val manglerRefusjonsopplysning: ManglerRefusjonsopplysning = { dag, _ ->
        manglerRefusjonsopplysninger.add(dag)
@@ -41,6 +42,9 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
         if (manglerRefusjonsopplysninger.isNotEmpty()) {
             hendelse.varsel(RV_RE_1)
             hendelse.info("Manglet refusjonsopplysninger ved beregning av utbetalingstidslinje. Manglet for periodene ${manglerRefusjonsopplysninger.grupperSammenhengendePerioder()}")
+        }
+        check(kildeSykmelding.isEmpty()) {
+            "Kan ikke opprette utbetalingsdager med kilde Sykmelding: ${kildeSykmelding.grupperSammenhengendePerioder()}"
         }
         return builder.build()
     }
@@ -62,7 +66,7 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
         økonomi: Økonomi,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) {
-        check(!kilde.erAvType(Sykmelding::class)) { "Kan ikke opprette arbeidsgiverperiodedag for $dato med kilde Sykmelding" }
+        if (kilde.sykmelding) return kildeSykmelding.leggTil(dato)
         periodebuilder.arbeidsgiverperiodedag(dato, økonomi, kilde)
         builder.addArbeidsgiverperiodedag(dato, inntekter.medInntekt(dato, nåværendeArbeidsgiverperiode))
     }
@@ -72,7 +76,7 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
     }
 
     override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
-        check(!kilde.erAvType(Sykmelding::class)) { "Kan ikke opprette utbetalingsdag for $dato med kilde Sykmelding" }
+        if (kilde.sykmelding) return kildeSykmelding.leggTil(dato)
         if (dato.erHelg()) return builder.addHelg(dato, inntekter.utenInntekt(dato, økonomi, nåværendeArbeidsgiverperiode))
         val medUtbetalingsopplysninger = when (dato in beregningsperiode) {
             true -> inntekter.medUtbetalingsopplysninger(dato, nåværendeArbeidsgiverperiode, økonomi, manglerRefusjonsopplysning)
@@ -97,5 +101,10 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
     override fun arbeidsgiverperiodeFerdig() {
         periodebuilder.arbeidsgiverperiodeFerdig()
         sisteArbeidsgiverperiode = periodebuilder.build()
+    }
+
+    private companion object {
+        private val SykdomstidslinjeHendelse.Hendelseskilde.sykmelding get() = erAvType(Sykmelding::class)
+        private fun MutableSet<LocalDate>.leggTil(dag: LocalDate) { add(dag) }
     }
 }
