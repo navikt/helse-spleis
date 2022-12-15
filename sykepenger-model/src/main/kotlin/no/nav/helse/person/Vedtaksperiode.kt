@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.delvisOverlappMed
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
@@ -2315,6 +2316,16 @@ internal class Vedtaksperiode private constructor(
                 keyValue("potensieltNyttSkjæringstidspunkt", "$potensieltNyttSkjæringstidspunkt")
             )
         }
+
+        internal fun List<Vedtaksperiode>.ugyldigUtbetalingstidslinje(dager: Set<LocalDate>) {
+            val vedtaksperiode = firstOrNull() ?: return
+            sikkerlogg.warn("Ugyldig utbetalingstidslinje: utbetalingsdager med kilde Sykmelding: ${dager.grupperSammenhengendePerioder()}. {}, {}, {}",
+                keyValue("aktørId", vedtaksperiode.aktørId),
+                keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer),
+                keyValue("antallDager", dager.size)
+            )
+        }
+
         internal fun List<Vedtaksperiode>.manglerVilkårsgrunnlag(dag: LocalDate) =
             manglendeUtbetalingsopplysninger(dag, "mangler vilkårsgrunnlag")
         internal fun List<Vedtaksperiode>.inngårIkkeISykepengegrunnlaget(dag: LocalDate) =

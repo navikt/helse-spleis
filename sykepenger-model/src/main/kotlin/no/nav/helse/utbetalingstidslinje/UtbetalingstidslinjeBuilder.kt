@@ -44,6 +44,7 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
             hendelse.info("Manglet refusjonsopplysninger ved beregning av utbetalingstidslinje. Manglet for periodene ${manglerRefusjonsopplysninger.grupperSammenhengendePerioder()}")
         }
         check(kildeSykmelding.isEmpty()) {
+            inntekter.ugyldigUtbetalingstidslinje(kildeSykmelding)
             "Kan ikke opprette utbetalingsdager med kilde Sykmelding: ${kildeSykmelding.grupperSammenhengendePerioder()}"
         }
         return builder.build()

@@ -5,6 +5,7 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.inngårIkkeISykepengegrunnlaget
 import no.nav.helse.person.Vedtaksperiode.Companion.manglerRefusjonsopplysninger
 import no.nav.helse.person.Vedtaksperiode.Companion.manglerVilkårsgrunnlag
+import no.nav.helse.person.Vedtaksperiode.Companion.ugyldigUtbetalingstidslinje
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.ManglerRefusjonsopplysning
@@ -29,6 +30,9 @@ internal class Inntekter(
 
     internal fun utenInntekt(dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?) =
         vilkårsgrunnlagHistorikk.utenInntekt(dato, økonomi, arbeidsgiverperiode)
+
+    internal fun ugyldigUtbetalingstidslinje(dager: Set<LocalDate>) =
+        vedtaksperioder.ugyldigUtbetalingstidslinje(dager)
 
     private companion object {
         fun IllegalStateException.håndter(dag: LocalDate, vedtaksperioder: List<Vedtaksperiode>) {
