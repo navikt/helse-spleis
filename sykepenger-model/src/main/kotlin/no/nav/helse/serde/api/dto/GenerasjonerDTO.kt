@@ -233,6 +233,7 @@ class Utbetaling(
     private fun erForkastetRevurdering() = status == Utbetalingstatus.Forkastet && type == Utbetalingtype.REVURDERING
     private fun erUtbetalingFeilet() = status == Utbetalingstatus.UtbetalingFeilet && type == Utbetalingtype.UTBETALING
     fun utbetales() = status in listOf(Utbetalingstatus.Godkjent, Utbetalingstatus.Sendt, Utbetalingstatus.Overført)
+    fun ikkeBetalt() = status == Utbetalingstatus.Ubetalt
     fun utbetalt() = status in listOf(Utbetalingstatus.Utbetalt, Utbetalingstatus.GodkjentUtenUtbetaling)
     fun kanUtbetales() = !erUtbetalingFeilet() && !erForkastetRevurdering()
     fun tilGodkjenning() = tilGodkjenning

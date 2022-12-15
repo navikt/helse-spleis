@@ -262,7 +262,8 @@ internal class Tidslinjeperioder(
                 }
                 utbetalingDTO.utbetalingFeilet(periode.tilstand) -> Periodetilstand.UtbetalingFeilet
                 utbetalingDTO.kanUtbetales() -> when {
-                    utbetalingDTO.venterPåRevurdering(periode.tilstand) -> UtbetaltVenterPåAnnenPeriode
+                    utbetalingDTO.venterPåRevurdering(periode.tilstand) && utbetalingDTO.ikkeBetalt() -> VenterPåAnnenPeriode
+                    utbetalingDTO.venterPåRevurdering(periode.tilstand) && !utbetalingDTO.utbetales() -> UtbetaltVenterPåAnnenPeriode
                     utbetalingDTO.utbetalt() -> if (sammenslåttTidslinje.inneholderSykepengedager()) Utbetalt else IngenUtbetaling
                     utbetalingDTO.utbetales() -> Periodetilstand.TilUtbetaling
                     utbetalingDTO.tilGodkjenning() -> TilGodkjenning

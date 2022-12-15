@@ -1349,8 +1349,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         }
         0.generasjon(a2) {
             assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
-            beregnetPeriode(1) medTilstand UtbetaltVenterPåAnnenPeriode
+            beregnetPeriode(0) medTilstand VenterPåAnnenPeriode
+            beregnetPeriode(1) medTilstand VenterPåAnnenPeriode
         }
 
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
@@ -1362,8 +1362,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         }
         0.generasjon(a2) {
             assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
-            beregnetPeriode(1) medTilstand UtbetaltVenterPåAnnenPeriode
+            beregnetPeriode(0) medTilstand VenterPåAnnenPeriode
+            beregnetPeriode(1) medTilstand VenterPåAnnenPeriode
         }
 
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
