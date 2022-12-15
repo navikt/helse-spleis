@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
@@ -10,6 +11,7 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -159,5 +161,37 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         )
 
         assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
+    }
+
+    @Test
+    fun `sender med fastsatt inntekt for periode ved gap uten nytt skjæringstidspunkt`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+        forlengVedtak(1.februar, 28.februar, orgnummer = a2)
+        nyPeriode(1.mars til 31.mars, a1)
+
+        assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        val actualForespurtOpplysning = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
+
+        assertForventetFeil(
+            forklaring = "",
+            nå = {
+                val expectedForespurteOpplysninger = listOf(
+                    PersonObserver.Refusjon,
+                    PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
+                )
+
+                assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
+            },
+            ønsket = {
+                val expectedForespurteOpplysninger = listOf(
+                    PersonObserver.Refusjon,
+                    PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars)),
+                    PersonObserver.FastsattInntekt(20000.månedlig)
+                )
+
+                assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
+            }
+        )
+
     }
 }

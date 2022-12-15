@@ -102,14 +102,18 @@ interface PersonObserver {
                         "beregningsmåneder" to forespurtOpplysning.forslag.beregningsmåneder
                     )
                 )
+                is FastsattInntekt -> mapOf(
+                    "opplysningstype" to "FastsattInntekt",
+                    "fastsattInntekt" to forespurtOpplysning.fastsattInntekt.reflection { _, månedlig, _, _ -> månedlig }
+                )
                 Refusjon -> mapOf("opplysningstype" to "Refusjon")
             }
         }
     }
 
-
     data class Inntektsforslag(val beregningsmåneder: List<YearMonth>)
     data class Inntekt(val forslag: Inntektsforslag) : ForespurtOpplysning()
+    data class FastsattInntekt(val fastsattInntekt: no.nav.helse.økonomi.Inntekt) : ForespurtOpplysning()
     data class Arbeidsgiverperiode(val forslag: List<Periode>) : ForespurtOpplysning()
     object Refusjon : ForespurtOpplysning()
 
