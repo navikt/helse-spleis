@@ -28,27 +28,22 @@ class Revurderingseventyr private constructor(
 
     private val vedtaksperioder = mutableListOf<PersonObserver.RevurderingIgangsattEvent.VedtaksperiodeData>()
 
-    internal fun inngåSomRevurdering(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode): Boolean {
-        if (!hvorfor.kanInngå(hendelse)) return false
-        hvorfor.dersomInngått(hendelse)
-        inngå(vedtaksperiode, TypeEndring.REVURDERING)
-        return true
-    }
-
     internal fun inngåSomRevurdering(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, periode: Periode): Boolean {
         if (periodeForEndring.starterEtter(periode)) return false
         return inngåSomRevurdering(hendelse, vedtaksperiode)
     }
+    internal fun inngåSomRevurdering(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode) =
+        inngå(hendelse, vedtaksperiode, TypeEndring.REVURDERING)
 
-    internal fun inngåSomOverstyring(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode): Boolean {
+    internal fun inngåSomOverstyring(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode) =
+        inngå(hendelse, vedtaksperiode, TypeEndring.OVERSTYRING)
+
+    private fun inngå(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, typeEndring: TypeEndring) : Boolean {
         if (!hvorfor.kanInngå(hendelse)) return false
         hvorfor.dersomInngått(hendelse)
-        inngå(vedtaksperiode, TypeEndring.OVERSTYRING)
+        vedtaksperiode.inngåIRevurderingseventyret(vedtaksperioder, typeEndring.name)
         return true
     }
-
-    private fun inngå(vedtaksperiode: Vedtaksperiode, typeEndring: TypeEndring) =
-        vedtaksperiode.inngåIRevurderingseventyret(vedtaksperioder, typeEndring.name)
 
     internal fun ikkeRelevant(periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
         // om endringen gjelder et nyere skjæringstidspunkt så trenger vi ikke bryr oss
