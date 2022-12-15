@@ -1962,7 +1962,11 @@ internal class Vedtaksperiode private constructor(
         ) {
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (!vedtaksperiode.forventerInntekt()) return
+            if (vedtaksperiode.vilkårsgrunnlag == null) return påminnelse.info("AUU-periode som potensielt burde omgjøres og mangler vilkårsgrunnlag")
+            påminnelse.info("AUU-periode som potensielt burde omgjøres og har vilkårsgrunnlag")
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             hendelse.info("Overstyrer ikke en vedtaksperiode som er avsluttet uten utbetaling")
