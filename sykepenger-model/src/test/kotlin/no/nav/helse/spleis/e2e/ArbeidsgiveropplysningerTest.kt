@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -10,10 +10,11 @@ import no.nav.helse.person.PersonObserver
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
+@EnableToggle(Toggle.Splarbeidsbros::class)
 internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
 
     @Test
-    fun `sender ut event TrengerArbeidsgiveropplysninger når vi ankommer AvventerInntektsmeldingEllerHistorikk`() = Toggle.Splarbeidsbros.enable {
+    fun `sender ut event TrengerArbeidsgiveropplysninger når vi ankommer AvventerInntektsmeldingEllerHistorikk`() {
         nyPeriode(1.januar til 31.januar)
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
@@ -25,7 +26,7 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `skal ikke be om arbeidsgiverperiode når det er mindre en 16 dagers gap`() = Toggle.Splarbeidsbros.enable {
+    fun `skal ikke be om arbeidsgiverperiode når det er mindre en 16 dagers gap`() {
         nyttVedtak(1.januar, 31.januar)
         nyPeriode(16.februar til 15.mars)
 
@@ -41,7 +42,7 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `skal ikke be om arbeidsgiveropplysninger ved forlengelse`() = Toggle.Splarbeidsbros.enable {
+    fun `skal ikke be om arbeidsgiveropplysninger ved forlengelse`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
 
@@ -49,7 +50,7 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `skal be om arbeidsgiverperiodeopplysninger ved 16 dagers gap`() = Toggle.Splarbeidsbros.enable {
+    fun `skal be om arbeidsgiverperiode ved 16 dagers gap`() {
         nyttVedtak(1.januar, 31.januar)
         nyPeriode(17.februar til 17.mars)
 
@@ -65,7 +66,7 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sender med riktig forslag til arbeidsgiverperiodeo når arbeidsperioden er stykket opp i flere korte perioder`() = Toggle.Splarbeidsbros.enable {
+    fun `sender med riktig forslag til arbeidsgiverperiode når arbeidsperioden er stykket opp i flere korte perioder`() {
         nyPeriode(1.januar til 7.januar)
         nyPeriode(9.januar til 14.januar)
         nyPeriode(16.januar til 21.januar)
@@ -86,7 +87,7 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ber ikke om inntekt når vi allerede har inntekt på skjæringstidspunktet -- med arbeidsgiverperiode`() = Toggle.Splarbeidsbros.enable {
+    fun `ber ikke om inntekt når vi allerede har inntekt på skjæringstidspunktet -- med arbeidsgiverperiode`() {
         nyeVedtak(1.januar, 31.januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, orgnummer = a2)
         nyPeriode(1.mars til 31.mars, a1)
@@ -94,50 +95,23 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
         val actualForespurteOpplysninger = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
-        assertForventetFeil(
-            forklaring = "Skal ikke be om inntekt når det ikke trengs",
-            ønsket = {
-                val expectedForespurteOpplysninger = listOf(
-                    PersonObserver.Refusjon,
-                    PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
-                )
-                assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
-            },
-            nå = {
-                val expectedForespurteOpplysninger = listOf(
-                    PersonObserver.Inntekt,
-                    PersonObserver.Refusjon,
-                    PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
-                )
-                assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
-            }
+        val expectedForespurteOpplysninger = listOf(
+            PersonObserver.Refusjon,
+            PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
         )
+        assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
     }
 
     @Test
-    fun `ber ikke om inntekt og AGP når vi har inntekt på skjæringstidspunkt og det er mindre enn 16 dagers gap`() = Toggle.Splarbeidsbros.enable {
+    fun `ber ikke om inntekt og AGP når vi har inntekt på skjæringstidspunkt og det er mindre enn 16 dagers gap`() {
         nyeVedtak(1.januar, 31.januar, a1, a2)
         forlengVedtak(1.februar, 10.februar, orgnummer = a2)
         nyPeriode(11.februar til 28.februar, a1)
 
         assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-        val actualForespurteOpplysninger = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
 
-        assertForventetFeil(
-            forklaring = "Skal ikke be om inntekt eller AGP når det ikke trengs",
-            ønsket = {
-                val expectedForespurteOpplysninger = listOf(
-                    PersonObserver.Refusjon,
-                )
-                assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
-            },
-            nå = {
-                val expectedForespurteOpplysninger = listOf(
-                    PersonObserver.Inntekt,
-                    PersonObserver.Refusjon,
-                )
-                assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
-            }
-        )
+        val actualForespurteOpplysninger = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
+        val expectedForespurteOpplysninger = listOf(PersonObserver.Refusjon)
+        assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
     }
 }

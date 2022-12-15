@@ -618,11 +618,15 @@ internal class Vedtaksperiode private constructor(
 
     private fun trengerArbeidsgiveropplysninger(hendelse: IAktivitetslogg) {
         val arbeidsgiverperiode = finnArbeidsgiverperiode()?.perioder.orEmpty()
+        val inntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)
+            ?.harNødvendigInntektForVilkårsprøving(arbeidsgiver.organisasjonsnummer())
+
+        val trengerInntekt = inntekt == null
         val trengerArbeidsgiverperiode = arbeidsgiverperiode.maxByOrNull { it.endInclusive }?.overlapperMed(periode())
             ?: false
 
         val forespurteOpplysninger = listOf(
-            true to PersonObserver.Inntekt,
+            trengerInntekt to PersonObserver.Inntekt,
             true to PersonObserver.Refusjon,
             trengerArbeidsgiverperiode to PersonObserver.Arbeidsgiverperiode(arbeidsgiverperiode)
         ).mapNotNull { if (it.first) it.second else null }
