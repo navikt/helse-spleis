@@ -981,7 +981,8 @@ internal class Arbeidsgiver private constructor(
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
             regler = regler,
             subsumsjonObserver = subsumsjonObserver,
-            organisasjonsnummer = organisasjonsnummer
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperioder = vedtaksperioder
         )
         return { periode ->
             val sykdomstidslinje = sykdomstidslinje().fremTilOgMed(periode.endInclusive).takeUnless { it.count() == 0 }

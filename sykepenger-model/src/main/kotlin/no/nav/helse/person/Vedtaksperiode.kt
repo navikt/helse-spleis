@@ -2302,6 +2302,26 @@ internal class Vedtaksperiode private constructor(
             return skjæringstidspunkt til sisteDato
         }
 
+        private fun List<Vedtaksperiode>.manglendeUtbetalingsopplysninger(dag: LocalDate, melding: String) {
+            val vedtaksperiode = firstOrNull { dag in it.periode } ?: return
+            val potensieltNyttSkjæringstidspunkt =
+                vedtaksperiode.skjæringstidspunktFraInfotrygd != null && vedtaksperiode.skjæringstidspunkt != vedtaksperiode.skjæringstidspunktFraInfotrygd
+
+            sikkerlogg.warn("Manglende utbetalingsopplysninger: $melding for $dag med skjæringstidspunkt ${vedtaksperiode.skjæringstidspunkt}. {}, {}, {}, {}, {}",
+                keyValue("aktørId", vedtaksperiode.aktørId),
+                keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer),
+                keyValue("tilstand", vedtaksperiode.tilstand.type.name),
+                keyValue("vedtaksperiodeId", "${vedtaksperiode.id}"),
+                keyValue("potensieltNyttSkjæringstidspunkt", "$potensieltNyttSkjæringstidspunkt")
+            )
+        }
+        internal fun List<Vedtaksperiode>.manglerVilkårsgrunnlag(dag: LocalDate) =
+            manglendeUtbetalingsopplysninger(dag, "mangler vilkårsgrunnlag")
+        internal fun List<Vedtaksperiode>.inngårIkkeISykepengegrunnlaget(dag: LocalDate) =
+            manglendeUtbetalingsopplysninger(dag, "inngår ikke i sykepengegrunnlaget")
+        internal fun List<Vedtaksperiode>.manglerRefusjonsopplysninger(dag: LocalDate) =
+            manglendeUtbetalingsopplysninger(dag, "mangler refusjonsopplysninger")
+
         // Forstår hvordan bygge utbetaling for revurderinger
         internal class RevurderingUtbetalinger(
             vedtaksperioder: List<Vedtaksperiode>,
