@@ -2,10 +2,13 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
+import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.november
+import no.nav.helse.oktober
 import no.nav.helse.person.PersonObserver
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -33,7 +36,11 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt,
+            PersonObserver.Inntekt(PersonObserver.Inntektsforslag(listOf(
+                november(2017),
+                desember(2017),
+                januar(2018)
+            ))),
             PersonObserver.Refusjon
         )
         val actualForespurteOpplysninger =
@@ -55,7 +62,15 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         nyPeriode(17.februar til 17.mars)
 
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt,
+            PersonObserver.Inntekt(
+                PersonObserver.Inntektsforslag(
+                    listOf(
+                        november(2017),
+                        desember(2017),
+                        januar(2018)
+                    )
+                )
+            ),
             PersonObserver.Refusjon,
             PersonObserver.Arbeidsgiverperiode(forslag = listOf(17.februar til 4.mars))
         )
@@ -72,7 +87,15 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         nyPeriode(16.januar til 21.januar)
 
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt,
+            PersonObserver.Inntekt(
+                PersonObserver.Inntektsforslag(
+                    listOf(
+                        oktober(2017),
+                        november(2017),
+                        desember(2017)
+                    )
+                )
+            ),
             PersonObserver.Refusjon,
             PersonObserver.Arbeidsgiverperiode(forslag = listOf(
                 1.januar til 7.januar,

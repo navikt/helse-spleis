@@ -2,12 +2,13 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.person.PersonObserver.Inntekt.toJsonMap
+import no.nav.helse.person.PersonObserver.Refusjon.toJsonMap
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
 
 interface PersonObserver {
@@ -84,26 +85,33 @@ interface PersonObserver {
             )
     }
     sealed class ForespurtOpplysning {
-        fun List<ForespurtOpplysning>.toJsonMap() = map { forespurteOpplysning ->
-            when (forespurteOpplysning) {
+        fun List<ForespurtOpplysning>.toJsonMap() = map { forespurtOpplysning ->
+            when (forespurtOpplysning) {
                 is Arbeidsgiverperiode -> mapOf(
                     "opplysningstype" to "Arbeidsgiverperiode",
-                    "forslag" to forespurteOpplysning.forslag.map { forslag ->
+                    "forslag" to forespurtOpplysning.forslag.map { forslag ->
                         mapOf(
                             "fom" to forslag.start,
                             "tom" to forslag.endInclusive
                         )
                     }
                 )
-                Inntekt -> mapOf("opplysningstype" to "Inntekt")
+                is Inntekt -> mapOf(
+                    "opplysningstype" to "Inntekt",
+                    "forslag" to mapOf(
+                        "beregningsmåneder" to forespurtOpplysning.forslag.beregningsmåneder
+                    )
+                )
                 Refusjon -> mapOf("opplysningstype" to "Refusjon")
             }
         }
     }
 
-    object Inntekt : ForespurtOpplysning()
-    object Refusjon : ForespurtOpplysning()
+
+    data class Inntektsforslag(val beregningsmåneder: List<YearMonth>)
+    data class Inntekt(val forslag: Inntektsforslag) : ForespurtOpplysning()
     data class Arbeidsgiverperiode(val forslag: List<Periode>) : ForespurtOpplysning()
+    object Refusjon : ForespurtOpplysning()
 
     data class UtbetalingAnnullertEvent(
         val utbetalingId: UUID,
