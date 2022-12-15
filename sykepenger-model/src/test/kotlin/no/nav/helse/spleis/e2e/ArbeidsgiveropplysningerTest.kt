@@ -137,4 +137,27 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         val expectedForespurteOpplysninger = listOf(PersonObserver.Refusjon)
         assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
     }
+
+    @Test
+    fun `sender med riktig beregningsmåneder når første fraværsdag hos én arbeidsgivers er i en annen måned enn skjæringstidspunktet`() {
+        nyPeriode(31.januar til 28.februar, a1)
+        nyPeriode(1.februar til 28.februar, a2)
+
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        val actualForespurtOpplysning = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
+
+        val expectedForespurteOpplysninger = listOf(
+            PersonObserver.Inntekt(PersonObserver.Inntektsforslag(
+                listOf(
+                    oktober(2017),
+                    november(2017),
+                    desember(2017)
+                )
+            )),
+            PersonObserver.Refusjon,
+            PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.februar til 16.februar))
+        )
+
+        assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
+    }
 }
