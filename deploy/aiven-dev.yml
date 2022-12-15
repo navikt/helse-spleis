@@ -206,7 +206,7 @@ spec:
           application: sparkel-arbeidsgiver
           access: readwrite
         - team: tbd
-          application: sp-revurdering-monitor
+          application: sportsrevyen
           access: readwrite
         - team: tbd
           application: sparsom
