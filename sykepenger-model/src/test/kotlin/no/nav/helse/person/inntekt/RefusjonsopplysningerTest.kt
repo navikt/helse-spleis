@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
@@ -527,6 +528,24 @@ internal class RefusjonsopplysningerTest {
             Refusjonsopplysning(overstyringId, 10.februar, 28.februar, 1200.daglig)
         ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger)
     }
+
+    @Test
+    fun `saksbehandler legger til ny opplysning midt i en eksisterende`() {
+        val inntektsmeldingId = UUID.randomUUID()
+        val eksisterendeRefusjonsopplysninger =
+            Refusjonsopplysning(inntektsmeldingId, 1.januar, null, 1200.daglig).refusjonsopplysninger
+
+        val overstyringId = UUID.randomUUID()
+        val ønskedeRefusjonsopplysninger =
+            Refusjonsopplysning(overstyringId, 13.januar, 1.desember, 1600.daglig).refusjonsopplysninger
+
+        assertEquals(listOf(
+            Refusjonsopplysning(inntektsmeldingId, 1.januar, 12.januar, 1200.daglig),
+            Refusjonsopplysning(overstyringId, 13.januar, 1.desember, 1600.daglig),
+            Refusjonsopplysning(inntektsmeldingId, 2.desember, null, 1200.daglig)
+        ), eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger)
+    }
+
     @Test
     fun `saksbehandler rydder opp i rotete refusjonsopplysninger`() {
         val beløp = 1500.daglig

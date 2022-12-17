@@ -40,9 +40,10 @@ class Refusjonsopplysning(
         if (nyOpplysning.erEtter(this)) return listOf(this)
         // Om den nye opplysningen ikke har tom er det kun en eventuell snute som fortsatt er gjeldende
         if (nyOpplysning.tom == null) return listOfNotNull(oppdatertTom(nyOpplysning.fom.forrigeDag))
-        // Om vi ikke har tom er det eventuelt en del av snuten vår som blir kortere, ellers fortsatt gjeldende
-        if (tom == null) return listOfNotNull(oppdatertFom(nyOpplysning.tom.nesteDag))
+        // Om vi ikke har tom er det eventuelt snuten før og halen etter den nye opplysningen som fortsatt er gjeldende
+        if (tom == null) return listOfNotNull(oppdatertTom(nyOpplysning.fom.forrigeDag), oppdatertFom(nyOpplysning.tom.nesteDag))
 
+        // Nå vet vi at hverken vi eller den nye opplysningen har tom == null og kan jobbe med perioden
         // Finner den overlappende perioden som den nye opplysningen skal erstatte. Om det ikke noe overlapp returnerer vi oss selv
         val overlapp = periode.overlappendePeriode(nyOpplysning.periode)?: return listOf(this)
 
