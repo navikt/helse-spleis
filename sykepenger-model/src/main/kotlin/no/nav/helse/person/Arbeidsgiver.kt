@@ -38,7 +38,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.PÅGÅENDE_REVURDERING
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
-import no.nav.helse.person.Vedtaksperiode.Companion.TIDLIGERE_OG_ETTERGØLGENDE
 import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_REFUSJONSOPPLYSNINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.feiletRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
@@ -490,7 +489,7 @@ internal class Arbeidsgiver private constructor(
         val vedtaksperiode = søknad.lagVedtaksperiode(person, this, jurist)
         if (søknad.harFunksjonelleFeilEllerVerre() || person.nekterOpprettelseAvPeriode(vedtaksperiode, søknad)) {
             registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
-            forkastOgBeOmReplay(vedtaksperiode, søknad)
+            vedtaksperiode.trengerInntektsmeldingReplay()
             return
         }
         registrerNyVedtaksperiode(vedtaksperiode)
@@ -498,13 +497,8 @@ internal class Arbeidsgiver private constructor(
         if (søknad.harFunksjonelleFeilEllerVerre()) {
             søknad.info("Forsøkte å opprette en ny vedtaksperiode, men den ble forkastet før den rakk å spørre om inntektsmeldingReplay. " +
                     "Ber om inntektsmeldingReplay så vi kan opprette gosys-oppgaver for inntektsmeldinger som ville ha truffet denne vedtaksperioden")
-            forkastOgBeOmReplay(vedtaksperiode, søknad)
+            vedtaksperiode.trengerInntektsmeldingReplay()
         }
-    }
-    
-    private fun forkastOgBeOmReplay(vedtaksperiode: Vedtaksperiode, søknad: Søknad){
-        person.søppelbøtte(søknad, TIDLIGERE_OG_ETTERGØLGENDE(vedtaksperiode))
-        vedtaksperiode.trengerInntektsmeldingReplay()
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID? = null) {
