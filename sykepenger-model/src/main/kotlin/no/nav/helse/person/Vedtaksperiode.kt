@@ -807,8 +807,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun Vedtaksperiodetilstand.påminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-        if (!påminnelse.gjelderTilstand(type)) return vedtaksperiode.person.vedtaksperiodeIkkePåminnet(påminnelse, type)
-        vedtaksperiode.person.vedtaksperiodePåminnet(påminnelse)
+        if (!påminnelse.gjelderTilstand(type)) return vedtaksperiode.person.vedtaksperiodeIkkePåminnet(id, organisasjonsnummer, type)
+        vedtaksperiode.person.vedtaksperiodePåminnet(id, organisasjonsnummer, påminnelse)
         if (påminnelse.nåddMakstid(::makstid)) return håndterMakstid(vedtaksperiode, påminnelse)
         håndter(vedtaksperiode, påminnelse)
     }

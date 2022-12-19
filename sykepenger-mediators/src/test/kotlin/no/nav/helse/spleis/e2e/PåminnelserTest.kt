@@ -3,11 +3,15 @@ package no.nav.helse.spleis.e2e
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
+import no.nav.helse.person.TilstandType
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 
 internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
 
@@ -26,6 +30,7 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
         val melding = testRapid.inspektør.melding(5)
         assertEquals("vedtaksperiode_ikke_funnet", melding.path("@event_name").asText())
         assertEquals("$id", melding.path("vedtaksperiodeId").asText())
+        assertVedtaksperiodeIkkeFunnet(melding)
     }
 
     @Test
@@ -33,8 +38,21 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendNyPåminnelse(0)
-        assertEquals("vedtaksperiode_ikke_påminnet", testRapid.inspektør.melding(5).path("@event_name").asText())
-        assertEquals("AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", testRapid.inspektør.melding(5).path("tilstand").asText())
+        val vedtaksperiodeIkkePåminnet = testRapid.inspektør.melding(5)
+        assertEquals("vedtaksperiode_ikke_påminnet", vedtaksperiodeIkkePåminnet.path("@event_name").asText())
+        assertEquals("AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", vedtaksperiodeIkkePåminnet.path("tilstand").asText())
+        assertVedtaksperiodeIkkePåminnet(vedtaksperiodeIkkePåminnet)
+    }
+
+    @Test
+    fun `påminnelse for riktig tilstand`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendNyPåminnelse(0, tilstandType = TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        val vedtaksperiodePåminnet = testRapid.inspektør.melding(5)
+        assertEquals("vedtaksperiode_påminnet", vedtaksperiodePåminnet.path("@event_name").asText())
+        assertEquals("AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", vedtaksperiodePåminnet.path("tilstand").asText())
+        assertVedtaksperiodePåminnet(vedtaksperiodePåminnet)
     }
 
     @Test
@@ -49,6 +67,33 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
         sendNyUtbetalingpåminnelse(0, Utbetalingstatus.SENDT)
         assertUtbetalingTilstander(0, "NY", "IKKE_UTBETALT", "GODKJENT", "SENDT")
         assertEquals(2, (0 until testRapid.inspektør.antall()).filter { "Utbetaling" in testRapid.inspektør.melding(it).path("@behov").map(JsonNode::asText) }.size)
+    }
+
+    private fun assertVedtaksperiodePåminnet(melding: JsonNode) {
+        assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
+        assertTrue(melding.path("aktørId").asText().isNotEmpty())
+        assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
+        assertTrue(melding.path("vedtaksperiodeId").asText().isNotEmpty())
+        assertTrue(melding.path("tilstand").asText().isNotEmpty())
+        assertTrue(melding.path("antallGangerPåminnet").asText().isNotEmpty())
+        assertDoesNotThrow { melding.path("tilstandsendringstidspunkt").asLocalDateTime() }
+        assertDoesNotThrow { melding.path("påminnelsestidspunkt").asLocalDateTime() }
+        assertDoesNotThrow { melding.path("nestePåminnelsestidspunkt").asLocalDateTime() }
+    }
+
+    private fun assertVedtaksperiodeIkkePåminnet(melding: JsonNode) {
+        assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
+        assertTrue(melding.path("aktørId").asText().isNotEmpty())
+        assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
+        assertTrue(melding.path("vedtaksperiodeId").asText().isNotEmpty())
+        assertTrue(melding.path("tilstand").asText().isNotEmpty())
+    }
+
+    private fun assertVedtaksperiodeIkkeFunnet(melding: JsonNode) {
+        assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
+        assertTrue(melding.path("aktørId").asText().isNotEmpty())
+        assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
+        assertTrue(melding.path("vedtaksperiodeId").asText().isNotEmpty())
     }
 }
 

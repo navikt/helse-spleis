@@ -1,5 +1,6 @@
 package no.nav.helse.spleis
 
+import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Påminnelse
@@ -28,21 +29,15 @@ object VedtaksperiodeProbe : PersonObserver {
         )
     }
 
-    override fun vedtaksperiodePåminnet(hendelseskontekst: Hendelseskontekst, påminnelse: Påminnelse) {
+    override fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {
         log.debug(
-            "mottok påminnelse for vedtaksperiode: ${hendelseskontekst.vedtaksperiodeId()}",
+            "mottok påminnelse for vedtaksperiode: $vedtaksperiodeId",
             keyValue("påminnelsenr", "${påminnelse.antallGangerPåminnet()}"),
             keyValue("påminnelsestidspunkt", påminnelse.påminnelsestidspunkt().toString()),
-            keyValue("vedtaksperiodeId", hendelseskontekst.vedtaksperiodeId()),
+            keyValue("vedtaksperiodeId", vedtaksperiodeId),
             keyValue("tilstand", påminnelse.tilstand().name),
             keyValue("tilstandsendringstidspunkt", påminnelse.tilstandsendringstidspunkt().toString()),
             keyValue("nestePåminnelsestidspunkt", påminnelse.nestePåminnelsestidspunkt().toString())
         )
-    }
-
-    private fun Hendelseskontekst.vedtaksperiodeId(): String {
-        val keyValues = mutableMapOf<String, String>()
-        appendTo(keyValues::set)
-        return keyValues["vedtaksperiodeId"]!!
     }
 }

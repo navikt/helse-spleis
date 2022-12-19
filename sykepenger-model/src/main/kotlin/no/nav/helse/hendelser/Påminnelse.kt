@@ -44,14 +44,17 @@ class Påminnelse(
 
     internal fun vedtaksperiodeIkkeFunnet(observer: PersonObserver) {
         observer.vedtaksperiodeIkkeFunnet(
-            hendelseskontekst(),
             PersonObserver.VedtaksperiodeIkkeFunnetEvent(
+                fødselsnummer = fødselsnummer,
+                aktørId = aktørId,
+                organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = UUID.fromString(vedtaksperiodeId)
             )
         )
     }
 
     fun toOutgoingMessage() = mapOf(
+        "organisasjonsnummer" to organisasjonsnummer,
         "vedtaksperiodeId" to vedtaksperiodeId,
         "tilstand" to tilstand,
         "antallGangerPåminnet" to antallGangerPåminnet,

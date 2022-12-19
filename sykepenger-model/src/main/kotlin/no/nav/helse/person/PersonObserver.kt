@@ -13,6 +13,9 @@ import no.nav.helse.serde.api.dto.BegrunnelseDTO
 
 interface PersonObserver {
     data class VedtaksperiodeIkkeFunnetEvent(
+        val fødselsnummer: String,
+        val aktørId: String,
+        val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID
     )
 
@@ -243,14 +246,14 @@ interface PersonObserver {
     }
 
     fun inntektsmeldingReplay(personidentifikator: Personidentifikator, vedtaksperiodeId: UUID) {}
-    fun vedtaksperiodePåminnet(hendelseskontekst: Hendelseskontekst, påminnelse: Påminnelse) {}
-    fun vedtaksperiodeIkkePåminnet(hendelseskontekst: Hendelseskontekst, nåværendeTilstand: TilstandType) {}
+    fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {}
+    fun vedtaksperiodeIkkePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, nåværendeTilstand: TilstandType) {}
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {}
     fun vedtaksperiodeForkastet(event: VedtaksperiodeForkastetEvent) {}
     fun opprettOppgaveForSpeilsaksbehandlere(hendelseskontekst: Hendelseskontekst, event: OpprettOppgaveForSpeilsaksbehandlereEvent) {}
     fun opprettOppgave(hendelseskontekst: Hendelseskontekst, event: OpprettOppgaveEvent) {}
     fun utsettOppgave(hendelseskontekst: Hendelseskontekst, event: UtsettOppgaveEvent) {}
-    fun vedtaksperiodeIkkeFunnet(hendelseskontekst: Hendelseskontekst, vedtaksperiodeEvent: VedtaksperiodeIkkeFunnetEvent) {}
+    fun vedtaksperiodeIkkeFunnet(event: VedtaksperiodeIkkeFunnetEvent) {}
     fun manglerInntektsmelding(hendelseskontekst: Hendelseskontekst, orgnr: String, event: ManglendeInntektsmeldingEvent) {}
     fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst, event: TrengerIkkeInntektsmeldingEvent) {}
     fun trengerArbeidsgiveropplysninger(hendelseskontekst: Hendelseskontekst, event: TrengerArbeidsgiveropplysningerEvent) {}

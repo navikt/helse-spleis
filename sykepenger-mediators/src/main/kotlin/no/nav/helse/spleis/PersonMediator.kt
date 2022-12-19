@@ -74,12 +74,14 @@ internal class PersonMediator(
         replays.add(message.toString())
     }
 
-    override fun vedtaksperiodePåminnet(hendelseskontekst: Hendelseskontekst, påminnelse: Påminnelse) {
-        queueMessage(hendelseskontekst, JsonMessage.newMessage("vedtaksperiode_påminnet", påminnelse.toOutgoingMessage()))
+    override fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {
+        queueMessage(JsonMessage.newMessage("vedtaksperiode_påminnet", påminnelse.toOutgoingMessage()))
     }
 
-    override fun vedtaksperiodeIkkePåminnet(hendelseskontekst: Hendelseskontekst, nåværendeTilstand: TilstandType) {
-        queueMessage(hendelseskontekst, JsonMessage.newMessage("vedtaksperiode_ikke_påminnet", mapOf(
+    override fun vedtaksperiodeIkkePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, nåværendeTilstand: TilstandType) {
+        queueMessage(JsonMessage.newMessage("vedtaksperiode_ikke_påminnet", mapOf(
+            "organisasjonsnummer" to organisasjonsnummer,
+            "vedtaksperiodeId" to vedtaksperiodeId,
             "tilstand" to nåværendeTilstand
         )))
     }
@@ -275,9 +277,10 @@ internal class PersonMediator(
         queueMessage(hendelseskontekst, JsonMessage.newMessage("person_avstemt", result))
     }
 
-    override fun vedtaksperiodeIkkeFunnet(hendelseskontekst: Hendelseskontekst, vedtaksperiodeEvent: PersonObserver.VedtaksperiodeIkkeFunnetEvent) {
-        queueMessage(hendelseskontekst, JsonMessage.newMessage("vedtaksperiode_ikke_funnet", mapOf(
-            "vedtaksperiodeId" to vedtaksperiodeEvent.vedtaksperiodeId
+    override fun vedtaksperiodeIkkeFunnet(event: PersonObserver.VedtaksperiodeIkkeFunnetEvent) {
+        queueMessage(JsonMessage.newMessage("vedtaksperiode_ikke_funnet", mapOf(
+            "organisasjonsnummer" to event.organisasjonsnummer,
+            "vedtaksperiodeId" to event.vedtaksperiodeId
         )))
     }
 
