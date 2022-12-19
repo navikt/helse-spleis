@@ -304,8 +304,8 @@ internal class PersonMediator(
         )))
     }
 
-    override fun trengerArbeidsgiveropplysninger(hendelseskontekst: Hendelseskontekst, event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
-        queueMessage(hendelseskontekst , JsonMessage.newMessage("trenger_opplysninger_fra_arbeidsgiver", event.toJsonMap()))
+    override fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
+        queueMessage(JsonMessage.newMessage("trenger_opplysninger_fra_arbeidsgiver", event.toJsonMap()))
     }
 
     private fun leggPåStandardfelter(hendelseskontekst: Hendelseskontekst, outgoingMessage: JsonMessage) = outgoingMessage.apply {

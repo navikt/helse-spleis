@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
@@ -113,7 +112,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         trengerIkkeInntektsmeldingVedtaksperioder.add(event)
     }
 
-    override fun trengerArbeidsgiveropplysninger(hendelseskontekst: Hendelseskontekst, event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
+    override fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
         trengerArbeidsgiveropplysningerVedtaksperioder.add(event)
     }
 

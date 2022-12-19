@@ -6,7 +6,6 @@ import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Avstemming
-import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
@@ -410,11 +409,8 @@ class Person private constructor(
         observers.forEach { it.trengerIkkeInntektsmelding(event) }
     }
 
-    internal fun trengerArbeidsgiveropplysninger(
-        hendelseskontekst: Hendelseskontekst,
-        event: PersonObserver.TrengerArbeidsgiveropplysningerEvent
-    ) {
-        observers.forEach { it.trengerArbeidsgiveropplysninger(hendelseskontekst, event) }
+    internal fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
+        observers.forEach { it.trengerArbeidsgiveropplysninger(event) }
     }
 
     internal fun utbetalingUtbetalt(event: PersonObserver.UtbetalingUtbetaltEvent) {

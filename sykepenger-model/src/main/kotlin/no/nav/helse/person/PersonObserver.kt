@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.PersonObserver.Refusjon.toJsonMap
@@ -89,6 +88,7 @@ interface PersonObserver {
     )
 
     class TrengerArbeidsgiveropplysningerEvent(
+        val organisasjonsnummer: String,
         val fom: LocalDate,
         val tom: LocalDate,
         val vedtaksperiodeId: UUID,
@@ -96,6 +96,7 @@ interface PersonObserver {
     ) {
         fun toJsonMap(): Map<String, Any> =
             mapOf(
+                "organisasjonsnummer" to organisasjonsnummer,
                 "fom" to fom,
                 "tom" to tom,
                 "vedtaksperiodeId" to vedtaksperiodeId,
@@ -268,7 +269,7 @@ interface PersonObserver {
     fun vedtaksperiodeIkkeFunnet(event: VedtaksperiodeIkkeFunnetEvent) {}
     fun manglerInntektsmelding(event: ManglendeInntektsmeldingEvent) {}
     fun trengerIkkeInntektsmelding(event: TrengerIkkeInntektsmeldingEvent) {}
-    fun trengerArbeidsgiveropplysninger(hendelseskontekst: Hendelseskontekst, event: TrengerArbeidsgiveropplysningerEvent) {}
+    fun trengerArbeidsgiveropplysninger(event: TrengerArbeidsgiveropplysningerEvent) {}
     fun utbetalingEndret(event: UtbetalingEndretEvent) {}
     fun utbetalingUtbetalt(event: UtbetalingUtbetaltEvent) {}
     fun utbetalingUtenUtbetaling(event: UtbetalingUtbetaltEvent) {}

@@ -6,7 +6,6 @@ import java.time.YearMonth
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Toggle
-import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -619,7 +618,7 @@ internal class Vedtaksperiode private constructor(
         medlemskap(hendelse, periode.start, periode.endInclusive)
     }
 
-    private fun trengerArbeidsgiveropplysninger(hendelse: IAktivitetslogg) {
+    private fun trengerArbeidsgiveropplysninger() {
         val arbeidsgiverperiode = finnArbeidsgiverperiode()?.perioder.orEmpty()
         val inntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)
             ?.harNødvendigInntektForVilkårsprøving(arbeidsgiver.organisasjonsnummer())
@@ -638,8 +637,8 @@ internal class Vedtaksperiode private constructor(
         ).mapNotNull { if (it.first) it.second else null }
 
         person.trengerArbeidsgiveropplysninger(
-            hendelse.hendelseskontekst(),
             PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+                organisasjonsnummer = organisasjonsnummer,
                 fom = periode.start,
                 tom = periode.endInclusive,
                 vedtaksperiodeId = id,
@@ -648,7 +647,7 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun trengerInntektsmelding(hendelseskontekst: Hendelseskontekst) {
+    private fun trengerInntektsmelding() {
         if (!forventerInntekt()) return
         if (arbeidsgiver.finnVedtaksperiodeRettFør(this) != null) return
         this.person.trengerInntektsmelding(
@@ -664,7 +663,7 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst) {
+    private fun trengerIkkeInntektsmelding() {
         this.person.trengerIkkeInntektsmelding(
             PersonObserver.TrengerIkkeInntektsmeldingEvent(
                 fødselsnummer = fødselsnummer,
@@ -1100,7 +1099,7 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             if(!vedtaksperiode.harNødvendigInntektForVilkårsprøving()) {
                 hendelse.info("Revurdering førte til at sykefraværstilfellet trenger inntektsmelding")
-                vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
+                vedtaksperiode.trengerInntektsmelding()
             }
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
@@ -1133,7 +1132,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndterInntektsmelding(inntektsmelding) {this}
-            vedtaksperiode.trengerIkkeInntektsmelding(inntektsmelding.hendelseskontekst())
+            vedtaksperiode.trengerIkkeInntektsmelding()
             vedtaksperiode.person.gjenopptaBehandling(inntektsmelding)
         }
 
@@ -1145,7 +1144,7 @@ internal class Vedtaksperiode private constructor(
             super.håndter(vedtaksperiode, påminnelse)
             if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving()) {
                 påminnelse.info("Varsler arbeidsgiver at vi har behov for inntektsmelding.")
-                vedtaksperiode.trengerInntektsmelding(påminnelse.hendelseskontekst())
+                vedtaksperiode.trengerInntektsmelding()
             }
         }
 
@@ -1343,16 +1342,16 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             if(Toggle.Splarbeidsbros.enabled) {
-                vedtaksperiode.trengerArbeidsgiveropplysninger(hendelse)
+                vedtaksperiode.trengerArbeidsgiveropplysninger()
             }
             vedtaksperiode.trengerInntektsmeldingReplay()
-            vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
+            vedtaksperiode.trengerInntektsmelding()
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.utbetalinger.forkast(aktivitetslogg)
-            vedtaksperiode.trengerIkkeInntektsmelding(aktivitetslogg.hendelseskontekst())
+            vedtaksperiode.trengerIkkeInntektsmelding()
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
