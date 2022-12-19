@@ -15,9 +15,12 @@ import no.nav.helse.inspectors.søppelbøtte
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
@@ -409,26 +412,15 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.februar, 18.februar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)))
         håndterSøknad(Sykdom(3.februar, 18.februar, 100.prosent))
-        assertForventetFeil(
-            forklaring = "Vi får ikke inntektshistorikk før etter vi har kjørt replay av IM, så vi finner ikke ut at vi er en forlengelse. Dette kan bare skje om spleis aldri har fått vite om søknaden",
-            nå = {
-                assertTilstander(
-                    1.vedtaksperiode,
-                    START,
-                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-                    AVVENTER_BLOKKERENDE_PERIODE,
-                    AVSLUTTET_UTEN_UTBETALING
-                )
-            },
-            ønsket = {
-                assertTilstander(
-                    1.vedtaksperiode,
-                    START,
-                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-                    AVVENTER_BLOKKERENDE_PERIODE,
-                    AVVENTER_HISTORIKK
-                )
-            }
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVVENTER_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING
         )
     }
 

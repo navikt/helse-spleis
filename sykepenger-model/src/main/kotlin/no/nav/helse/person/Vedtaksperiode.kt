@@ -1939,10 +1939,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            val varselkode = if (vedtaksperiode.periode.delvisOverlappMed(søknad.periode())) `Mottatt søknad som delvis overlapper`
-            else if (søknad.harArbeidsdager()) RV_SØ_15
-            else RV_SØ_16 // TODO: dette caset kan vi støtte
-            vedtaksperiode.overlappendeSøknadIkkeStøttet(søknad, varselkode)
+            vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
