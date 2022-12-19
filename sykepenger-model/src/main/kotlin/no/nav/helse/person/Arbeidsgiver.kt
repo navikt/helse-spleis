@@ -523,7 +523,6 @@ internal class Arbeidsgiver private constructor(
             }
             if (ForkastetVedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede, inntektsmelding)) {
                 person.opprettOppgave(
-                    inntektsmelding,
                     PersonObserver.OpprettOppgaveEvent(
                         hendelser = setOf(inntektsmelding.meldingsreferanseId()),
                     )

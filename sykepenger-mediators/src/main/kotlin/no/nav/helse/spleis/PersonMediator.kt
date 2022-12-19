@@ -221,20 +221,20 @@ internal class PersonMediator(
         )))
     }
 
-    override fun opprettOppgaveForSpeilsaksbehandlere(hendelseskontekst: Hendelseskontekst, event: PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent) {
-        queueMessage(hendelseskontekst, JsonMessage.newMessage("opprett_oppgave_for_speilsaksbehandlere", mapOf(
+    override fun opprettOppgaveForSpeilsaksbehandlere(event: PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent) {
+        queueMessage(JsonMessage.newMessage("opprett_oppgave_for_speilsaksbehandlere", mapOf(
             "hendelser" to event.hendelser,
         )))
     }
 
-    override fun opprettOppgave(hendelseskontekst: Hendelseskontekst, event: PersonObserver.OpprettOppgaveEvent) {
-        queueMessage(hendelseskontekst, JsonMessage.newMessage("opprett_oppgave", mapOf(
+    override fun opprettOppgave(event: PersonObserver.OpprettOppgaveEvent) {
+        queueMessage(JsonMessage.newMessage("opprett_oppgave", mapOf(
             "hendelser" to event.hendelser,
         )))
     }
 
-    override fun utsettOppgave(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtsettOppgaveEvent) {
-        queueMessage(hendelseskontekst, JsonMessage.newMessage("utsett_oppgave", mapOf(
+    override fun utsettOppgave(event: PersonObserver.UtsettOppgaveEvent) {
+        queueMessage(JsonMessage.newMessage("utsett_oppgave", mapOf(
             "hendelse" to event.hendelse
         )))
     }

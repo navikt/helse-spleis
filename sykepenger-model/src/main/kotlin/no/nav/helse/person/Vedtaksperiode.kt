@@ -837,7 +837,6 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiver.finnSammenhengendePeriode(skjæringstidspunkt)
                 .mapNotNull { it.inntektsmeldingInfo }.ider()
         person.sendOppgaveEvent(
-            hendelse = hendelse,
             periode = periode(),
             hendelseIder = hendelseIder() + inntektsmeldingIds
         )

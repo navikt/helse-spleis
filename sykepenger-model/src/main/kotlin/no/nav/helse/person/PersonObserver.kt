@@ -258,9 +258,9 @@ interface PersonObserver {
     fun vedtaksperiodeIkkePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, nåværendeTilstand: TilstandType) {}
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {}
     fun vedtaksperiodeForkastet(event: VedtaksperiodeForkastetEvent) {}
-    fun opprettOppgaveForSpeilsaksbehandlere(hendelseskontekst: Hendelseskontekst, event: OpprettOppgaveForSpeilsaksbehandlereEvent) {}
-    fun opprettOppgave(hendelseskontekst: Hendelseskontekst, event: OpprettOppgaveEvent) {}
-    fun utsettOppgave(hendelseskontekst: Hendelseskontekst, event: UtsettOppgaveEvent) {}
+    fun opprettOppgaveForSpeilsaksbehandlere(event: OpprettOppgaveForSpeilsaksbehandlereEvent) {}
+    fun opprettOppgave(event: OpprettOppgaveEvent) {}
+    fun utsettOppgave(event: UtsettOppgaveEvent) {}
     fun vedtaksperiodeIkkeFunnet(event: VedtaksperiodeIkkeFunnetEvent) {}
     fun manglerInntektsmelding(event: ManglendeInntektsmeldingEvent) {}
     fun trengerIkkeInntektsmelding(event: TrengerIkkeInntektsmeldingEvent) {}

@@ -384,8 +384,8 @@ class Person private constructor(
         observers.forEach { it.vedtaksperiodeIkkePåminnet(vedtaksperiodeId, organisasjonsnummer, tilstandType) }
     }
 
-    internal fun opprettOppgave(aktivitetslogg: IAktivitetslogg, event: PersonObserver.OpprettOppgaveEvent) {
-        observers.forEach { it.opprettOppgave(aktivitetslogg.hendelseskontekst(), event) }
+    internal fun opprettOppgave(event: PersonObserver.OpprettOppgaveEvent) {
+        observers.forEach { it.opprettOppgave(event) }
     }
 
     internal fun vedtaksperiodeForkastet(event: PersonObserver.VedtaksperiodeForkastetEvent) {
@@ -556,15 +556,15 @@ class Person private constructor(
     }
 
     internal fun sendOppgaveEvent(hendelse: SykdomstidslinjeHendelse) {
-        sendOppgaveEvent(hendelse, hendelse.sykdomstidslinje().periode(), setOf(hendelse.meldingsreferanseId()))
+        sendOppgaveEvent(hendelse.sykdomstidslinje().periode(), setOf(hendelse.meldingsreferanseId()))
     }
 
-    internal fun sendOppgaveEvent(hendelse: IAktivitetslogg, periode: Periode?, hendelseIder: Set<UUID>) {
+    internal fun sendOppgaveEvent(periode: Periode?, hendelseIder: Set<UUID>) {
         val harNærliggendeUtbetaling = periode?.let { harNærliggendeUtbetaling(it) } ?: false
         if (harNærliggendeUtbetaling) {
-            emitOpprettOppgaveForSpeilsaksbehandlereEvent(hendelse, hendelseIder)
+            emitOpprettOppgaveForSpeilsaksbehandlereEvent(hendelseIder)
         } else {
-            emitOpprettOppgaveEvent(hendelse, hendelseIder)
+            emitOpprettOppgaveEvent(hendelseIder)
         }
     }
 
@@ -626,10 +626,9 @@ class Person private constructor(
         gjenopptaBehandling(hendelse)
     }
 
-    private fun emitOpprettOppgaveForSpeilsaksbehandlereEvent(hendelse: IAktivitetslogg, hendelseIder: Set<UUID>) {
+    private fun emitOpprettOppgaveForSpeilsaksbehandlereEvent(hendelseIder: Set<UUID>) {
         observers.forEach {
             it.opprettOppgaveForSpeilsaksbehandlere(
-                hendelse.hendelseskontekst(),
                 PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent(
                     hendelseIder
                 )
@@ -637,10 +636,9 @@ class Person private constructor(
         }
     }
 
-    private fun emitOpprettOppgaveEvent(hendelse: IAktivitetslogg, hendelseIder: Set<UUID>) {
+    private fun emitOpprettOppgaveEvent(hendelseIder: Set<UUID>) {
         observers.forEach {
             it.opprettOppgave(
-                hendelse.hendelseskontekst(),
                 PersonObserver.OpprettOppgaveEvent(
                     hendelseIder
                 )
@@ -651,7 +649,6 @@ class Person private constructor(
     internal fun emitUtsettOppgaveEvent(hendelse: SykdomstidslinjeHendelse) {
         observers.forEach {
             it.utsettOppgave(
-                hendelse.hendelseskontekst(),
                 PersonObserver.UtsettOppgaveEvent(
                     hendelse.meldingsreferanseId()
                 )

@@ -131,15 +131,15 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         forkastedeEventer[event.vedtaksperiodeId] = event
     }
 
-    override fun opprettOppgaveForSpeilsaksbehandlere(hendelseskontekst: Hendelseskontekst, event: PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent) {
+    override fun opprettOppgaveForSpeilsaksbehandlere(event: PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent) {
         opprettOppgaverTilSpeilsaksbehandlerEventer.add(event)
     }
 
-    override fun opprettOppgave(hendelseskontekst: Hendelseskontekst, event: PersonObserver.OpprettOppgaveEvent) {
+    override fun opprettOppgave(event: PersonObserver.OpprettOppgaveEvent) {
         opprettOppgaverEventer.add(event)
     }
 
-    override fun utsettOppgave(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtsettOppgaveEvent) {
+    override fun utsettOppgave(event: PersonObserver.UtsettOppgaveEvent) {
         utsettOppgaveEventer.add(event)
     }
 
