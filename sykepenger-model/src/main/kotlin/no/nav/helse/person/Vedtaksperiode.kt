@@ -591,7 +591,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun ferdigstillVedtak(hendelse: IAktivitetslogg) {
-        sendVedtakFattet(hendelse)
+        sendVedtakFattet()
         person.gjenopptaBehandling(hendelse)
     }
 
@@ -701,15 +701,19 @@ internal class Vedtaksperiode private constructor(
         person.vedtaksperiodeEndret(event)
     }
 
-    private fun sendVedtakFattet(hendelse: IAktivitetslogg) {
+    private fun sendVedtakFattet() {
         val builder = VedtakFattetBuilder(
+            fødselsnummer,
+            aktørId,
+            organisasjonsnummer,
+            id,
             periode,
             hendelseIder(),
             skjæringstidspunkt
         )
         utbetalinger.build(builder)
         person.build(skjæringstidspunkt, builder)
-        person.vedtakFattet(hendelse.hendelseskontekst(), builder.result())
+        person.vedtakFattet(builder.result())
     }
 
     /**

@@ -209,6 +209,10 @@ interface PersonObserver {
     )
 
     data class VedtakFattetEvent(
+        val fødselsnummer: String,
+        val aktørId: String,
+        val organisasjonsnummer: String,
+        val vedtaksperiodeId: UUID,
         val periode: Periode,
         val hendelseIder: Set<UUID>,
         val skjæringstidspunkt: LocalDate,
@@ -256,7 +260,7 @@ interface PersonObserver {
     fun feriepengerUtbetalt(hendelseskontekst: Hendelseskontekst, event: FeriepengerUtbetaltEvent) {}
     fun annullering(hendelseskontekst: Hendelseskontekst, event: UtbetalingAnnullertEvent) {}
     fun avstemt(hendelseskontekst: Hendelseskontekst, result: Map<String, Any>) {}
-    fun vedtakFattet(hendelseskontekst: Hendelseskontekst, event: VedtakFattetEvent) {}
+    fun vedtakFattet(event: VedtakFattetEvent) {}
     fun revurderingAvvist(hendelseskontekst: Hendelseskontekst, event: RevurderingAvvistEvent) {}
     fun nyVedtaksperiodeUtbetaling(
         personidentifikator: Personidentifikator,

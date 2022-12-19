@@ -86,6 +86,9 @@ internal class VedtakkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     private fun assertVedtak(melding: JsonNode) {
+        assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
+        assertTrue(melding.path("aktørId").asText().isNotEmpty())
+        assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
         assertTrue(melding.path("vedtaksperiodeId").asText().isNotEmpty())
         assertTrue(melding.path("hendelser").isArray)
         assertDato(melding.path("fom").asText())

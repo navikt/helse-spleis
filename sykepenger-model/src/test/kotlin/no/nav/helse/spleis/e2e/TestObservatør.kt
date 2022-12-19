@@ -90,8 +90,8 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         utbetaltEndretEventer.add(ObservedEvent(event, hendelseskontekst))
     }
 
-    override fun vedtakFattet(hendelseskontekst: Hendelseskontekst, event: PersonObserver.VedtakFattetEvent) {
-        vedtakFattetEvent[hendelseskontekst.vedtaksperiodeId()] = event
+    override fun vedtakFattet(event: PersonObserver.VedtakFattetEvent) {
+        vedtakFattetEvent[event.vedtaksperiodeId] = event
     }
 
     override fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {

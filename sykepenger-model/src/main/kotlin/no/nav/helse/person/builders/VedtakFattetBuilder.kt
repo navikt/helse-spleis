@@ -9,6 +9,10 @@ import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 
 internal class VedtakFattetBuilder(
+    private val fødselsnummer: String,
+    private val aktørId: String,
+    private val organisasjonsnummer: String,
+    private val vedtaksperiodeId: UUID,
     private val periode: Periode,
     private val hendelseIder: Set<UUID>,
     private val skjæringstidspunkt: LocalDate
@@ -29,6 +33,10 @@ internal class VedtakFattetBuilder(
 
     internal fun result(): PersonObserver.VedtakFattetEvent {
         return PersonObserver.VedtakFattetEvent(
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
             periode = periode,
             hendelseIder = hendelseIder,
             skjæringstidspunkt = skjæringstidspunkt,

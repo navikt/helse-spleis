@@ -442,11 +442,8 @@ class Person private constructor(
         observers.forEach { it.utbetalingEndret(hendelseskontekst, event) }
     }
 
-    internal fun vedtakFattet(
-        hendelseskontekst: Hendelseskontekst,
-        vedtakFattetEvent: PersonObserver.VedtakFattetEvent
-    ) {
-        observers.forEach { it.vedtakFattet(hendelseskontekst, vedtakFattetEvent) }
+    internal fun vedtakFattet(vedtakFattetEvent: PersonObserver.VedtakFattetEvent) {
+        observers.forEach { it.vedtakFattet(vedtakFattetEvent) }
     }
 
     internal fun emitRevurderingIgangsattEvent(event: PersonObserver.RevurderingIgangsattEvent) {
