@@ -192,6 +192,28 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
                 assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
             }
         )
+    }
 
+    @Test
+    fun `ber om inntekt for a2 når søknad for a2 kommer inn etter fattet vedtak for a1`() {
+        nyttVedtak(1.januar, 31.januar, orgnummer = a1)
+        nyPeriode(1.januar til 31.januar, a2)
+
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        val actualForespurtOpplysning = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
+
+        val expectedForespurteOpplysninger = listOf(
+            PersonObserver.Inntekt(PersonObserver.Inntektsforslag(
+                listOf(
+                    oktober(2017),
+                    november(2017),
+                    desember(2017)
+                )
+            )),
+            PersonObserver.Refusjon,
+            PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.januar til 16.januar))
+        )
+
+        assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
     }
 }
