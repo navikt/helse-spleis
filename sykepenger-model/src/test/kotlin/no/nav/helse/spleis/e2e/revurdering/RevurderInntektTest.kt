@@ -181,7 +181,6 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertIngenFunksjonelleFeil(AktivitetsloggFilter.person())
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertEquals(1, inspektør.utbetalinger.size)
-        assertEquals(0, observatør.avvisteRevurderinger.size)
     }
 
     @Test

@@ -292,7 +292,7 @@ class Person private constructor(
         avstemming.kontekst(this)
         avstemming.info("Avstemmer utbetalinger og vedtaksperioder")
         val result = Avstemmer(this).toMap()
-        observers.forEach { it.avstemt(avstemming.hendelseskontekst(), result) }
+        observers.forEach { it.avstemt(result) }
         håndterGjenoppta(avstemming)
     }
 
@@ -372,8 +372,8 @@ class Person private constructor(
         )
     }
 
-    internal fun annullert(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingAnnullertEvent) {
-        observers.forEach { it.annullering(hendelseskontekst, event) }
+    internal fun annullert(event: PersonObserver.UtbetalingAnnullertEvent) {
+        observers.forEach { it.annullering(event) }
     }
 
     internal fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {

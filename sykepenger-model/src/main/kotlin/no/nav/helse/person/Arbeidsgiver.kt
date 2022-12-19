@@ -776,8 +776,8 @@ internal class Arbeidsgiver private constructor(
         arbeidsgiverFagsystemId: String?
     ) {
         person.annullert(
-            hendelseskontekst = hendelseskontekst,
             PersonObserver.UtbetalingAnnullertEvent(
+                organisasjonsnummer = organisasjonsnummer,
                 korrelasjonsId = korrelasjonsId,
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
                 personFagsystemId = personFagsystemId,

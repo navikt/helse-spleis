@@ -44,8 +44,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     lateinit var avstemming: Map<String, Any>
     val inntektsmeldingReplayEventer = mutableListOf<UUID>()
 
-    val avvisteRevurderinger = mutableListOf<PersonObserver.RevurderingAvvistEvent>()
-
     internal fun replayInntektsmeldinger(block: () -> Unit): Set<UUID> {
         val replaysFør = inntektsmeldingReplayEventer.toSet()
         block()
@@ -70,7 +68,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     fun opprettOppgaveEvent() = opprettOppgaverEventer.toList()
     fun utsettOppgaveEventer() = utsettOppgaveEventer.toList()
 
-    override fun avstemt(hendelseskontekst: Hendelseskontekst, result: Map<String, Any>) {
+    override fun avstemt(result: Map<String, Any>) {
         avstemming = result
     }
 
@@ -123,7 +121,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         inntektsmeldingReplayEventer.add(vedtaksperiodeId)
     }
 
-    override fun annullering(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingAnnullertEvent) {
+    override fun annullering(event: PersonObserver.UtbetalingAnnullertEvent) {
         annulleringer.add(event)
     }
 
@@ -141,10 +139,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     override fun utsettOppgave(event: PersonObserver.UtsettOppgaveEvent) {
         utsettOppgaveEventer.add(event)
-    }
-
-    override fun revurderingAvvist(hendelseskontekst: Hendelseskontekst, event: PersonObserver.RevurderingAvvistEvent) {
-        avvisteRevurderinger.add(event)
     }
 
     override fun revurderingIgangsatt(

@@ -137,6 +137,7 @@ interface PersonObserver {
     object Refusjon : ForespurtOpplysning()
 
     data class UtbetalingAnnullertEvent(
+        val organisasjonsnummer: String,
         val utbetalingId: UUID,
         val korrelasjonsId: UUID,
         val arbeidsgiverFagsystemId: String?,
@@ -269,10 +270,9 @@ interface PersonObserver {
     fun utbetalingUtbetalt(hendelseskontekst: Hendelseskontekst, event: UtbetalingUtbetaltEvent) {}
     fun utbetalingUtenUtbetaling(hendelseskontekst: Hendelseskontekst, event: UtbetalingUtbetaltEvent) {}
     fun feriepengerUtbetalt(hendelseskontekst: Hendelseskontekst, event: FeriepengerUtbetaltEvent) {}
-    fun annullering(hendelseskontekst: Hendelseskontekst, event: UtbetalingAnnullertEvent) {}
-    fun avstemt(hendelseskontekst: Hendelseskontekst, result: Map<String, Any>) {}
+    fun annullering(event: UtbetalingAnnullertEvent) {}
+    fun avstemt(result: Map<String, Any>) {}
     fun vedtakFattet(event: VedtakFattetEvent) {}
-    fun revurderingAvvist(hendelseskontekst: Hendelseskontekst, event: RevurderingAvvistEvent) {}
     fun nyVedtaksperiodeUtbetaling(
         personidentifikator: Personidentifikator,
         aktørId: String,

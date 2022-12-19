@@ -86,8 +86,9 @@ internal class PersonMediator(
         )))
     }
 
-    override fun annullering(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingAnnullertEvent) {
-        queueMessage(hendelseskontekst, JsonMessage.newMessage("utbetaling_annullert", mutableMapOf(
+    override fun annullering(event: PersonObserver.UtbetalingAnnullertEvent) {
+        queueMessage(JsonMessage.newMessage("utbetaling_annullert", mutableMapOf(
+            "organisasjonsnummer" to event.organisasjonsnummer,
             "utbetalingId" to event.utbetalingId,
             "korrelasjonsId" to event.korrelasjonsId,
             "fom" to event.fom,
@@ -269,12 +270,8 @@ internal class PersonMediator(
         }))
     }
 
-    override fun revurderingAvvist(hendelseskontekst: Hendelseskontekst, event: PersonObserver.RevurderingAvvistEvent) {
-        queueMessage(hendelseskontekst, JsonMessage.newMessage("revurdering_avvist", event.toJsonMap()))
-    }
-
-    override fun avstemt(hendelseskontekst: Hendelseskontekst, result: Map<String, Any>) {
-        queueMessage(hendelseskontekst, JsonMessage.newMessage("person_avstemt", result))
+    override fun avstemt(result: Map<String, Any>) {
+        queueMessage(JsonMessage.newMessage("person_avstemt", result))
     }
 
     override fun vedtaksperiodeIkkeFunnet(event: PersonObserver.VedtaksperiodeIkkeFunnetEvent) {
