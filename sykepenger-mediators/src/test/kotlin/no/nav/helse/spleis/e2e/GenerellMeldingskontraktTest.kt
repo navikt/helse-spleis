@@ -49,6 +49,10 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
     private fun assertVedtaksperiodeEndret(melding: JsonNode, originalMeldingId: UUID, originalMeldingtype: String) {
         assertStandardinformasjon(melding)
         assertSporingsinformasjon(melding, originalMeldingId, originalMeldingtype)
+        assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
+        assertTrue(melding.path("aktørId").asText().isNotEmpty())
+        assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
+        assertTrue(melding.path("vedtaksperiodeId").asText().isNotEmpty())
         assertTrue(melding.path("gjeldendeTilstand").asText().isNotEmpty())
         assertTrue(melding.path("forrigeTilstand").asText().isNotEmpty())
         assertDato(melding.path("fom").asText())
@@ -60,6 +64,10 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
     private fun assertBehov(melding: JsonNode, originalMeldingId: UUID, originalMeldingtype: String) {
         assertStandardinformasjon(melding)
         assertSporingsinformasjon(melding, originalMeldingId, originalMeldingtype)
+        assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
+        assertTrue(melding.path("aktørId").asText().isNotEmpty())
+        assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
+        assertTrue(melding.path("vedtaksperiodeId").asText().isNotEmpty())
         assertTrue(melding.path("@behovId").asText().isNotEmpty())
         assertTrue(melding.path("@behov").isArray)
     }

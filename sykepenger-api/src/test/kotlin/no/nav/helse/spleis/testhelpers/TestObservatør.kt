@@ -1,10 +1,10 @@
 package no.nav.helse.spleis.testhelpers
 
-import no.nav.helse.hendelser.Hendelseskontekst
-import no.nav.helse.person.*
+import java.util.UUID
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
+import no.nav.helse.person.TilstandType
 import org.junit.jupiter.api.fail
-import java.util.*
 
 internal class TestObservatør : PersonObserver {
     private lateinit var sisteVedtaksperiode: UUID
@@ -19,25 +19,13 @@ internal class TestObservatør : PersonObserver {
 
     fun vedtaksperiode(orgnummer: String, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
 
-    override fun vedtaksperiodeEndret(hendelseskontekst: Hendelseskontekst, event: VedtaksperiodeEndretEvent) {
-        sisteVedtaksperiode = hendelseskontekst.vedtaksperiodeId()
-        vedtaksperiodeendringer.getOrPut(hendelseskontekst.vedtaksperiodeId()) { mutableListOf(event) }.add(event)
-        vedtaksperioder.getOrPut(hendelseskontekst.orgnummer()) { mutableSetOf() }.add(sisteVedtaksperiode)
+    override fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {
+        sisteVedtaksperiode = event.vedtaksperiodeId
+        vedtaksperiodeendringer.getOrPut(event.vedtaksperiodeId) { mutableListOf(event) }.add(event)
+        vedtaksperioder.getOrPut(event.organisasjonsnummer) { mutableSetOf() }.add(sisteVedtaksperiode)
         if (event.gjeldendeTilstand != event.forrigeTilstand) {
-            tilstandsendringer.getOrPut(hendelseskontekst.vedtaksperiodeId()) { mutableListOf(TilstandType.START) }.add(event.gjeldendeTilstand)
+            tilstandsendringer.getOrPut(event.vedtaksperiodeId) { mutableListOf(TilstandType.START) }.add(event.gjeldendeTilstand)
         }
-        if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(hendelseskontekst.vedtaksperiodeId())
-    }
-
-    companion object {
-        private fun Hendelseskontekst.toMap() = mutableMapOf<String, String>().also { appendTo(it::set) }
-
-        private fun Hendelseskontekst.vedtaksperiodeId(): UUID {
-            return UUID.fromString(toMap()["vedtaksperiodeId"])
-        }
-
-        private fun Hendelseskontekst.orgnummer(): String {
-            return toMap()["organisasjonsnummer"]!!
-        }
+        if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(event.vedtaksperiodeId)
     }
 }

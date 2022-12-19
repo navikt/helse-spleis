@@ -98,13 +98,10 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
     }
 
     override fun vedtaksperiodeEndret(
-        hendelseskontekst: Hendelseskontekst,
         event: PersonObserver.VedtaksperiodeEndretEvent
     ) {
-        val detaljer = mutableMapOf<String, String>().apply { hendelseskontekst.appendTo(this::put) }
-        val vedtaksperiodeId = UUID.fromString(detaljer.getValue("vedtaksperiodeId"))
-        tilstander[vedtaksperiodeId] = event.gjeldendeTilstand
-        kvitterVedtaksperiode(vedtaksperiodeId)
+        tilstander[event.vedtaksperiodeId] = event.gjeldendeTilstand
+        kvitterVedtaksperiode(event.vedtaksperiodeId)
     }
 
     private companion object {

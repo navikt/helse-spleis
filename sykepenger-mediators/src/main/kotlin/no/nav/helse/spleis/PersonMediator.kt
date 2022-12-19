@@ -206,8 +206,10 @@ internal class PersonMediator(
             "personOppdrag" to event.personOppdrag,
         )))
 
-    override fun vedtaksperiodeEndret(hendelseskontekst: Hendelseskontekst, event: PersonObserver.VedtaksperiodeEndretEvent) {
-        queueMessage(hendelseskontekst, JsonMessage.newMessage("vedtaksperiode_endret", mapOf(
+    override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretEvent) {
+        queueMessage(JsonMessage.newMessage("vedtaksperiode_endret", mapOf(
+            "organisasjonsnummer" to event.organisasjonsnummer,
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
             "gjeldendeTilstand" to event.gjeldendeTilstand,
             "forrigeTilstand" to event.forrigeTilstand,
             "hendelser" to event.hendelser,
@@ -302,9 +304,20 @@ internal class PersonMediator(
         hendelseskontekst.appendTo(this::set)
     }
 
+    private fun leggPåStandardfelter(outgoingMessage: JsonMessage) = outgoingMessage.apply {
+        this["aktørId"] = hendelse.aktørId()
+        this["fødselsnummer"] = hendelse.fødselsnummer()
+    }
+
     private fun queueMessage(hendelseskontekst: Hendelseskontekst, outgoingMessage: JsonMessage) {
+        queueMessage(outgoingMessage) { message ->
+            leggPåStandardfelter(hendelseskontekst, message)
+        }
+    }
+
+    private fun queueMessage(outgoingMessage: JsonMessage, withMessage: (JsonMessage) -> JsonMessage = ::leggPåStandardfelter) {
         loggHvisTomHendelseliste(outgoingMessage)
-        queueMessage(hendelse.fødselsnummer(), outgoingMessage.also { it.interestedIn("@event_name") }["@event_name"].asText(), leggPåStandardfelter(hendelseskontekst, outgoingMessage).toJson())
+        queueMessage(hendelse.fødselsnummer(), outgoingMessage.also { it.interestedIn("@event_name") }["@event_name"].asText(), withMessage(outgoingMessage).toJson())
     }
 
     private fun loggHvisTomHendelseliste(outgoingMessage: JsonMessage) {

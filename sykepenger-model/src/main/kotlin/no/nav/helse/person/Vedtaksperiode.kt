@@ -680,6 +680,10 @@ internal class Vedtaksperiode private constructor(
     ) {
         val event = PersonObserver.
         VedtaksperiodeEndretEvent(
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = id,
             gjeldendeTilstand = tilstand.type,
             forrigeTilstand = previousState.type,
             aktivitetslogg = aktivitetslogg.toMap(),

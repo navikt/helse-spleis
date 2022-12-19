@@ -400,7 +400,7 @@ class Person private constructor(
         event: PersonObserver.VedtaksperiodeEndretEvent
     ) {
         observers.forEach {
-            it.vedtaksperiodeEndret(aktivitetslogg.hendelseskontekst(), event)
+            it.vedtaksperiodeEndret(event)
             it.personEndret(aktivitetslogg.hendelseskontekst())
         }
     }

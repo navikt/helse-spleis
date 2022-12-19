@@ -94,13 +94,13 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         vedtakFattetEvent[hendelseskontekst.vedtaksperiodeId()] = event
     }
 
-    override fun vedtaksperiodeEndret(hendelseskontekst: Hendelseskontekst, event: VedtaksperiodeEndretEvent) {
-        sisteVedtaksperiode = hendelseskontekst.vedtaksperiodeId()
-        vedtaksperiodeendringer.getOrPut(hendelseskontekst.vedtaksperiodeId()) { mutableListOf() }.add(event)
-        vedtaksperioder.getOrPut(hendelseskontekst.orgnummer()) { mutableSetOf() }.add(sisteVedtaksperiode)
-        tilstandsendringer.getOrPut(hendelseskontekst.vedtaksperiodeId()) { mutableListOf(event.forrigeTilstand) }.add(event.gjeldendeTilstand)
+    override fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {
+        sisteVedtaksperiode = event.vedtaksperiodeId
+        vedtaksperiodeendringer.getOrPut(event.vedtaksperiodeId) { mutableListOf() }.add(event)
+        vedtaksperioder.getOrPut(event.organisasjonsnummer) { mutableSetOf() }.add(sisteVedtaksperiode)
+        tilstandsendringer.getOrPut(event.vedtaksperiodeId) { mutableListOf(event.forrigeTilstand) }.add(event.gjeldendeTilstand)
         inntektsmeldingReplayEventer.remove(sisteVedtaksperiode)
-        if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(hendelseskontekst.vedtaksperiodeId())
+        if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(event.vedtaksperiodeId)
     }
 
     internal fun nullstillTilstandsendringer() {

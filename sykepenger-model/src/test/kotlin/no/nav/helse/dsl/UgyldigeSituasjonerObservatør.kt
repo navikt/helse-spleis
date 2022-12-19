@@ -4,16 +4,15 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.InntekthistorikkVisitor
-import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.inntekt.Infotrygd
+import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Skatt
@@ -30,13 +29,9 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     }
 
     override fun vedtaksperiodeEndret(
-        hendelseskontekst: Hendelseskontekst,
         event: PersonObserver.VedtaksperiodeEndretEvent
     ) {
-        val detaljer = mutableMapOf<String, String>()
-        hendelseskontekst.appendTo(detaljer::put)
-        val orgnr = detaljer.getValue("organisasjonsnummer")
-        arbeidsgivereMap.getOrPut(orgnr) { person.arbeidsgiver(orgnr) }
+        arbeidsgivereMap.getOrPut(event.organisasjonsnummer) { person.arbeidsgiver(event.organisasjonsnummer) }
         bekreftIngenUgyldigeSituasjoner()
     }
 
