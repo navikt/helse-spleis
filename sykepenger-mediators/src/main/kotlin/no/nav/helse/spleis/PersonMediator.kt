@@ -8,7 +8,6 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.PersonObserver
@@ -308,24 +307,14 @@ internal class PersonMediator(
         queueMessage(JsonMessage.newMessage("trenger_opplysninger_fra_arbeidsgiver", event.toJsonMap()))
     }
 
-    private fun leggPåStandardfelter(hendelseskontekst: Hendelseskontekst, outgoingMessage: JsonMessage) = outgoingMessage.apply {
-        hendelseskontekst.appendTo(this::set)
-    }
-
     private fun leggPåStandardfelter(outgoingMessage: JsonMessage) = outgoingMessage.apply {
         this["aktørId"] = hendelse.aktørId()
         this["fødselsnummer"] = hendelse.fødselsnummer()
     }
 
-    private fun queueMessage(hendelseskontekst: Hendelseskontekst, outgoingMessage: JsonMessage) {
-        queueMessage(outgoingMessage) { message ->
-            leggPåStandardfelter(hendelseskontekst, message)
-        }
-    }
-
-    private fun queueMessage(outgoingMessage: JsonMessage, withMessage: (JsonMessage) -> JsonMessage = ::leggPåStandardfelter) {
+    private fun queueMessage(outgoingMessage: JsonMessage) {
         loggHvisTomHendelseliste(outgoingMessage)
-        queueMessage(hendelse.fødselsnummer(), outgoingMessage.also { it.interestedIn("@event_name") }["@event_name"].asText(), withMessage(outgoingMessage).toJson())
+        queueMessage(hendelse.fødselsnummer(), outgoingMessage.also { it.interestedIn("@event_name") }["@event_name"].asText(), leggPåStandardfelter(outgoingMessage).toJson())
     }
 
     private fun loggHvisTomHendelseliste(outgoingMessage: JsonMessage) {

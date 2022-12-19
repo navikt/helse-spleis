@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.UUID
-import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.serde.reflection.AktivitetsloggMap
@@ -123,25 +122,12 @@ class Aktivitetslogg(
             .groupBy { it.kontekst(null) }
             .map { Aktivitetslogg(this).apply { aktiviteter.addAll(it.value) } }
 
-    override fun hendelseskontekster(): Map<String, String> {
-        return kontekster
-            .map(Aktivitetskontekst::toSpesifikkKontekst)
-            .filter { it.kontekstType in MODELL_KONTEKSTER }
-            .map(SpesifikkKontekst::kontekstMap)
-            .fold(mapOf()) { result, kontekst -> result + kontekst }
-    }
-
-    override fun hendelseskontekst(): Hendelseskontekst = Hendelseskontekst(hendelseskontekster())
-
     private fun info() = Aktivitet.Info.filter(aktiviteter)
     internal fun varsel() = Aktivitet.Varsel.filter(aktiviteter)
     override fun behov() = Behov.filter(aktiviteter)
     private fun funksjonellFeil() = Aktivitet.FunksjonellFeil.filter(aktiviteter)
     private fun logiskFeil() = Aktivitet.LogiskFeil.filter(aktiviteter)
 
-    companion object {
-        private val MODELL_KONTEKSTER: Array<String> = arrayOf("Person", "Arbeidsgiver", "Vedtaksperiode")
-    }
 
     class AktivitetException internal constructor(private val aktivitetslogg: Aktivitetslogg) :
         RuntimeException(aktivitetslogg.toString()) {
@@ -500,8 +486,6 @@ interface IAktivitetslogg {
     fun kontekst(kontekst: Aktivitetskontekst)
     fun kontekst(person: Person)
     fun kontekster(): List<IAktivitetslogg>
-    fun hendelseskontekster(): Map<String, String>
-    fun hendelseskontekst(): Hendelseskontekst
     fun toMap(): Map<String, List<Map<String, Any>>>
 
     fun register(observer: AktivitetsloggObserver)

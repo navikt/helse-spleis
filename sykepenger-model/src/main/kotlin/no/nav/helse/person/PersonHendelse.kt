@@ -84,8 +84,6 @@ abstract class PersonHendelse protected constructor(
     override fun kontekst(kontekst: Aktivitetskontekst) = aktivitetslogg.kontekst(kontekst)
     override fun kontekst(person: Person) = aktivitetslogg.kontekst(person)
     override fun kontekster() = aktivitetslogg.kontekster()
-    override fun hendelseskontekster() = aktivitetslogg.hendelseskontekster()
-    override fun hendelseskontekst() = aktivitetslogg.hendelseskontekst()
     override fun toMap() = aktivitetslogg.toMap()
 
     override fun register(observer: AktivitetsloggObserver) {
