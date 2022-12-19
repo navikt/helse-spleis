@@ -151,6 +151,15 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `korrigerende søknad på periode i AUU - er fortsatt i AUU`() {
+        håndterSykmelding(Sykmeldingsperiode(4.januar, 21.januar, 100.prosent))
+        håndterSøknad(Sykdom(4.januar, 21.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterSøknad(Sykdom(4.januar, 21.januar, 100.prosent), Ferie(19.januar, 21.januar))
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
     fun `avslutter forlengelse utenfor arbeidsgiverperioden dersom det kun er friskmelding - etter utbetaling`() {
         nyttVedtak(1.januar, 23.januar)
         håndterSykmelding(Sykmeldingsperiode(24.januar, 25.januar, 100.prosent))

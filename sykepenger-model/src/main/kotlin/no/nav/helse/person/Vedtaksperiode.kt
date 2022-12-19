@@ -1939,6 +1939,9 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
+            if (!søknad.harFunksjonelleFeilEllerVerre() && !vedtaksperiode.forventerInntekt()) {
+                vedtaksperiode.emitVedtaksperiodeEndret(søknad) // TODO: for å unngå at flex oppretter oppgaver
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
