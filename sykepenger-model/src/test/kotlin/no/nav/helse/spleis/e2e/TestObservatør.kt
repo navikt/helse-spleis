@@ -127,8 +127,8 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         annulleringer.add(event)
     }
 
-    override fun vedtaksperiodeForkastet(hendelseskontekst: Hendelseskontekst, event: PersonObserver.VedtaksperiodeForkastetEvent) {
-        forkastedeEventer[hendelseskontekst.vedtaksperiodeId()] = event
+    override fun vedtaksperiodeForkastet(event: PersonObserver.VedtaksperiodeForkastetEvent) {
+        forkastedeEventer[event.vedtaksperiodeId] = event
     }
 
     override fun opprettOppgaveForSpeilsaksbehandlere(hendelseskontekst: Hendelseskontekst, event: PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent) {

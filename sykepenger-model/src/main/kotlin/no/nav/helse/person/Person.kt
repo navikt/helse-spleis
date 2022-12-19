@@ -388,21 +388,12 @@ class Person private constructor(
         observers.forEach { it.opprettOppgave(aktivitetslogg.hendelseskontekst(), event) }
     }
 
-    internal fun vedtaksperiodeForkastet(
-        aktivitetslogg: IAktivitetslogg,
-        event: PersonObserver.VedtaksperiodeForkastetEvent
-    ) {
-        observers.forEach { it.vedtaksperiodeForkastet(aktivitetslogg.hendelseskontekst(), event) }
+    internal fun vedtaksperiodeForkastet(event: PersonObserver.VedtaksperiodeForkastetEvent) {
+        observers.forEach { it.vedtaksperiodeForkastet(event) }
     }
 
-    internal fun vedtaksperiodeEndret(
-        aktivitetslogg: IAktivitetslogg,
-        event: PersonObserver.VedtaksperiodeEndretEvent
-    ) {
-        observers.forEach {
-            it.vedtaksperiodeEndret(event)
-            it.personEndret(aktivitetslogg.hendelseskontekst())
-        }
+    internal fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretEvent) {
+        observers.forEach { it.vedtaksperiodeEndret(event) }
     }
 
     internal fun inntektsmeldingReplay(vedtaksperiodeId: UUID) {

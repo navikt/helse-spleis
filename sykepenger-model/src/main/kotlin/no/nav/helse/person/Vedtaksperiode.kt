@@ -425,8 +425,11 @@ internal class Vedtaksperiode private constructor(
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
         this.utbetalinger.forkast(hendelse)
         person.vedtaksperiodeForkastet(
-            hendelse,
             PersonObserver.VedtaksperiodeForkastetEvent(
+                fødselsnummer = fødselsnummer,
+                aktørId = aktørId,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = id,
                 gjeldendeTilstand = tilstand.type,
                 hendelser = hendelseIder(),
                 fom = periode.start,
@@ -695,7 +698,7 @@ internal class Vedtaksperiode private constructor(
             tom = periode.endInclusive
         )
 
-        person.vedtaksperiodeEndret(aktivitetslogg, event)
+        person.vedtaksperiodeEndret(event)
     }
 
     private fun sendVedtakFattet(hendelse: IAktivitetslogg) {

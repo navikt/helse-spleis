@@ -32,6 +32,10 @@ interface PersonObserver {
     )
 
     data class VedtaksperiodeForkastetEvent(
+        val fødselsnummer: String,
+        val aktørId: String,
+        val organisasjonsnummer: String,
+        val vedtaksperiodeId: UUID,
         val gjeldendeTilstand: TilstandType,
         val hendelser: Set<UUID>,
         val fom: LocalDate,
@@ -238,11 +242,10 @@ interface PersonObserver {
     fun vedtaksperiodePåminnet(hendelseskontekst: Hendelseskontekst, påminnelse: Påminnelse) {}
     fun vedtaksperiodeIkkePåminnet(hendelseskontekst: Hendelseskontekst, nåværendeTilstand: TilstandType) {}
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {}
-    fun vedtaksperiodeForkastet(hendelseskontekst: Hendelseskontekst, event: VedtaksperiodeForkastetEvent) {}
+    fun vedtaksperiodeForkastet(event: VedtaksperiodeForkastetEvent) {}
     fun opprettOppgaveForSpeilsaksbehandlere(hendelseskontekst: Hendelseskontekst, event: OpprettOppgaveForSpeilsaksbehandlereEvent) {}
     fun opprettOppgave(hendelseskontekst: Hendelseskontekst, event: OpprettOppgaveEvent) {}
     fun utsettOppgave(hendelseskontekst: Hendelseskontekst, event: UtsettOppgaveEvent) {}
-    fun personEndret(hendelseskontekst: Hendelseskontekst) {}
     fun vedtaksperiodeIkkeFunnet(hendelseskontekst: Hendelseskontekst, vedtaksperiodeEvent: VedtaksperiodeIkkeFunnetEvent) {}
     fun manglerInntektsmelding(hendelseskontekst: Hendelseskontekst, orgnr: String, event: ManglendeInntektsmeldingEvent) {}
     fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst, event: TrengerIkkeInntektsmeldingEvent) {}

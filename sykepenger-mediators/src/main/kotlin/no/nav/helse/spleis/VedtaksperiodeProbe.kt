@@ -10,8 +10,6 @@ object VedtaksperiodeProbe : PersonObserver {
 
     private val log = LoggerFactory.getLogger(VedtaksperiodeProbe::class.java)
 
-    override fun personEndret(hendelseskontekst: Hendelseskontekst) {}
-
     override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretEvent) {
         log.info(
             "vedtaksperiode endret {}, {}, {}",

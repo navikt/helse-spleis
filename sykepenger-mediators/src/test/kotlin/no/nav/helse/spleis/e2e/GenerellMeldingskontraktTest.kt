@@ -23,6 +23,17 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
+    fun `vedtaksperiode forkastet`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        val søknadId = sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        val søknadId2 = sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 27.januar, sykmeldingsgrad = 100)))
+        val vedtaksperiodeForkastet = testRapid.inspektør.meldinger("vedtaksperiode_forkastet")
+        assertEquals(2, vedtaksperiodeForkastet.size)
+        assertVedtaksperiodeForkastet(vedtaksperiodeForkastet[0], søknadId2, "sendt_søknad_nav")
+        assertVedtaksperiodeForkastet(vedtaksperiodeForkastet[1], søknadId2, "sendt_søknad_nav")
+    }
+
+    @Test
     fun `behov`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
@@ -59,6 +70,19 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
         assertDato(melding.path("tom").asText())
         assertTrue(melding.path("hendelser").isArray)
         assertDatotid(melding.path("makstid").asText())
+    }
+
+    private fun assertVedtaksperiodeForkastet(melding: JsonNode, originalMeldingId: UUID, originalMeldingtype: String) {
+        assertStandardinformasjon(melding)
+        assertSporingsinformasjon(melding, originalMeldingId, originalMeldingtype)
+        assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
+        assertTrue(melding.path("aktørId").asText().isNotEmpty())
+        assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
+        assertTrue(melding.path("vedtaksperiodeId").asText().isNotEmpty())
+        assertTrue(melding.path("tilstand").asText().isNotEmpty())
+        assertDato(melding.path("fom").asText())
+        assertDato(melding.path("tom").asText())
+        assertTrue(melding.path("hendelser").isArray)
     }
 
     private fun assertBehov(melding: JsonNode, originalMeldingId: UUID, originalMeldingtype: String) {
