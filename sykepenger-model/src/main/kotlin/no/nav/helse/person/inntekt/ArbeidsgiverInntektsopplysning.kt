@@ -110,6 +110,9 @@ class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.refusjonsopplysninger(organisasjonsnummer: String) =
             singleOrNull{it.gjelder(organisasjonsnummer)}?.refusjonsopplysninger ?: Refusjonsopplysninger()
 
+        internal fun List<ArbeidsgiverInntektsopplysning>.inntekt(organisasjonsnummer: String) =
+            firstOrNull { it.orgnummer == organisasjonsnummer }?.inntektsopplysning?.omregnetÅrsinntekt()
+
         internal fun List<ArbeidsgiverInntektsopplysning>.nyeRefusjonsopplysninger(orgnummer: String, refusjonsopplysninger: Refusjonsopplysninger) = this
             .map { inntekt -> inntekt.nyeRefusjonsopplysninger(orgnummer, refusjonsopplysninger) }
 

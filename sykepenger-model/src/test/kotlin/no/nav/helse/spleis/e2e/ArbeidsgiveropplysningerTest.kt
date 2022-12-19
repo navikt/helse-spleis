@@ -1,16 +1,22 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDate
 import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -121,6 +127,7 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
 
         val actualForespurteOpplysninger = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
         val expectedForespurteOpplysninger = listOf(
+            PersonObserver.FastsattInntekt(20000.månedlig),
             PersonObserver.Refusjon,
             PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
         )
@@ -136,7 +143,10 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
         val actualForespurteOpplysninger = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
-        val expectedForespurteOpplysninger = listOf(PersonObserver.Refusjon)
+        val expectedForespurteOpplysninger = listOf(
+            PersonObserver.FastsattInntekt(20000.månedlig),
+            PersonObserver.Refusjon
+        )
         assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
     }
 
@@ -164,37 +174,6 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sender med fastsatt inntekt for periode ved gap uten nytt skjæringstidspunkt`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
-        forlengVedtak(1.februar, 28.februar, orgnummer = a2)
-        nyPeriode(1.mars til 31.mars, a1)
-
-        assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-        val actualForespurtOpplysning = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
-
-        assertForventetFeil(
-            forklaring = "",
-            nå = {
-                val expectedForespurteOpplysninger = listOf(
-                    PersonObserver.Refusjon,
-                    PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
-                )
-
-                assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
-            },
-            ønsket = {
-                val expectedForespurteOpplysninger = listOf(
-                    PersonObserver.Refusjon,
-                    PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars)),
-                    PersonObserver.FastsattInntekt(20000.månedlig)
-                )
-
-                assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
-            }
-        )
-    }
-
-    @Test
     fun `ber om inntekt for a2 når søknad for a2 kommer inn etter fattet vedtak for a1`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
         nyPeriode(1.januar til 31.januar, a2)
@@ -215,5 +194,85 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         )
 
         assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
+    }
+
+    @Test
+    fun `sender med FastsattInntekt når vi allerede har en inntektsmelding lagt til grunn på skjæringstidspunktet`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+        forlengVedtak(1.februar, 28.februar, orgnummer = a2)
+        nyPeriode(1.mars til 31.mars, a1)
+
+        assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        val actualForespurtOpplysning = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
+
+        val expectedForespurteOpplysninger = listOf(
+            PersonObserver.FastsattInntekt(20000.månedlig),
+            PersonObserver.Refusjon,
+            PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
+        )
+
+        assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
+    }
+
+    @Test
+    fun `sender med FastsattInntekt når vi allerede har inntekt fra skatt lagt til grunn på skjæringstidspunktet`() {
+        nyeVedtakMedUlikFom(mapOf(
+            a1 to (31.desember(2017) til 31.januar),
+            a2 to (1.januar til 31.januar)
+        ))
+        forlengVedtak(1.februar, 28.februar, orgnummer = a1)
+        nyPeriode(1.mars til 31.mars, a2)
+
+        assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+
+        val actualForespurtOpplysning = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
+        val expectedForespurteOpplysninger = listOf(
+            PersonObserver.FastsattInntekt(20000.månedlig),
+            PersonObserver.Refusjon,
+            PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
+        )
+        assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
+    }
+
+    private fun nyeVedtakMedUlikFom(sykefraværHosArbeidsgiver: Map<String, Periode>, inntekt: Inntekt = 20000.månedlig) {
+        val ag1Periode = sykefraværHosArbeidsgiver[a1]!!
+        val ag2Periode = sykefraværHosArbeidsgiver[a2]!!
+        nyPeriode(ag1Periode.start til ag1Periode.endInclusive, a1)
+        nyPeriode(ag2Periode.start til ag2Periode.endInclusive, a2)
+
+        håndterInntektsmelding(listOf(ag1Periode.start til ag1Periode.start.plusDays(15)), orgnummer = a1, beregnetInntekt = inntekt)
+        håndterInntektsmelding(listOf(ag2Periode.start til ag2Periode.endInclusive), orgnummer = a2, beregnetInntekt = inntekt)
+
+        val sykepengegrunnlag = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3))
+        )
+
+        val sammenligningsgrunnlag = listOf(
+            sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(12)),
+            sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(12))
+        )
+
+        val arbeidsforhold = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+        )
+
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            orgnummer = a1,
+            inntektsvurdering = Inntektsvurdering(sammenligningsgrunnlag),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(sykepengegrunnlag, emptyList()),
+            arbeidsforhold = arbeidsforhold
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
     }
 }

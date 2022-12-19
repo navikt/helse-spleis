@@ -110,6 +110,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjerFilter
+import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 
 internal class Vedtaksperiode private constructor(
@@ -620,17 +621,17 @@ internal class Vedtaksperiode private constructor(
 
     private fun trengerArbeidsgiveropplysninger() {
         val arbeidsgiverperiode = finnArbeidsgiverperiode()?.perioder.orEmpty()
-        val vilkårsgrunnlag = person.vilkårsgrunnlagFor(skjæringstidspunkt)
+        val inntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntekt(arbeidsgiver.organisasjonsnummer())
         val beregningsmåneder = 3.downTo(1).map {
             YearMonth.from(skjæringstidspunkt).minusMonths(it.toLong())
         }
 
-        val trengerInntekt = vilkårsgrunnlag == null || !vilkårsgrunnlag.harNødvendigInntektForVilkårsprøving(arbeidsgiver.organisasjonsnummer())
         val trengerArbeidsgiverperiode = arbeidsgiverperiode.maxByOrNull { it.endInclusive }?.overlapperMed(periode())
             ?: false
 
         val forespurteOpplysninger = listOf(
-            trengerInntekt to PersonObserver.Inntekt(forslag = PersonObserver.Inntektsforslag(beregningsmåneder)),
+            (inntekt == null) to PersonObserver.Inntekt(forslag = PersonObserver.Inntektsforslag(beregningsmåneder)),
+            (inntekt != null) to inntekt?.let { PersonObserver.FastsattInntekt(fastsattInntekt = it) },
             true to PersonObserver.Refusjon,
             trengerArbeidsgiverperiode to PersonObserver.Arbeidsgiverperiode(arbeidsgiverperiode)
         ).mapNotNull { if (it.first) it.second else null }
