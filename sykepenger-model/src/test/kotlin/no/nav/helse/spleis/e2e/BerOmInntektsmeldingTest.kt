@@ -64,7 +64,15 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
         )
         assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
         assertEquals(
-            PersonObserver.ManglendeInntektsmeldingEvent(1.januar, 31.januar, setOf(søknadId)),
+            PersonObserver.ManglendeInntektsmeldingEvent(
+                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+                aktørId = AKTØRID,
+                organisasjonsnummer = ORGNUMMER,
+                vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
+                fom = 1.januar,
+                tom = 31.januar,
+                søknadIder = setOf(søknadId)
+            ),
             observatør.manglendeInntektsmeldingVedtaksperioder.single()
         )
     }
@@ -82,7 +90,15 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
         assertEquals(
-            PersonObserver.ManglendeInntektsmeldingEvent(1.januar, 31.januar, setOf(søknadId1)),
+            PersonObserver.ManglendeInntektsmeldingEvent(
+                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+                aktørId = AKTØRID,
+                organisasjonsnummer = ORGNUMMER,
+                vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
+                fom = 1.januar,
+                tom = 31.januar,
+                søknadIder = setOf(søknadId1)
+            ),
             observatør.manglendeInntektsmeldingVedtaksperioder.single()
         )
     }

@@ -107,11 +107,11 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         tilstandsendringer.replaceAll { _, value -> mutableListOf(value.last()) }
     }
 
-    override fun manglerInntektsmelding(hendelseskontekst: Hendelseskontekst, orgnr: String, event: PersonObserver.ManglendeInntektsmeldingEvent) {
+    override fun manglerInntektsmelding(event: PersonObserver.ManglendeInntektsmeldingEvent) {
         manglendeInntektsmeldingVedtaksperioder.add(event)
     }
 
-    override fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst, event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
+    override fun trengerIkkeInntektsmelding(event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
         trengerIkkeInntektsmeldingVedtaksperioder.add(event)
     }
 

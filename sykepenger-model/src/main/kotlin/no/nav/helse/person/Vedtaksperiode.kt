@@ -652,9 +652,11 @@ internal class Vedtaksperiode private constructor(
         if (!forventerInntekt()) return
         if (arbeidsgiver.finnVedtaksperiodeRettFør(this) != null) return
         this.person.trengerInntektsmelding(
-            hendelseskontekst,
-            this.organisasjonsnummer,
             PersonObserver.ManglendeInntektsmeldingEvent(
+                fødselsnummer = fødselsnummer,
+                aktørId = aktørId,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = id,
                 fom = this.periode.start,
                 tom = this.periode.endInclusive,
                 søknadIder = hendelseIder.søknadIder()
@@ -664,8 +666,11 @@ internal class Vedtaksperiode private constructor(
 
     private fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst) {
         this.person.trengerIkkeInntektsmelding(
-            hendelseskontekst,
             PersonObserver.TrengerIkkeInntektsmeldingEvent(
+                fødselsnummer = fødselsnummer,
+                aktørId = aktørId,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = id,
                 fom = this.periode.start,
                 tom = this.periode.endInclusive,
                 søknadIder = hendelseIder.søknadIder()

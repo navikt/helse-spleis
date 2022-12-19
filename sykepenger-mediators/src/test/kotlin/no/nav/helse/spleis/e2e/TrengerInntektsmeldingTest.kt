@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
@@ -7,6 +8,7 @@ import no.nav.helse.januar
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
@@ -26,6 +28,14 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
         sendUtbetalingshistorikk(0)
         val melding = testRapid.inspektør.siste("trenger_inntektsmelding")
         assertEquals(søknadId, UUID.fromString(melding["søknadIder"].toList().single().asText()))
+        assertTrengerInntektsmelding(melding)
+    }
+
+    private fun assertTrengerInntektsmelding(melding: JsonNode) {
+        assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
+        assertTrue(melding.path("aktørId").asText().isNotEmpty())
+        assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
+        assertTrue(melding.path("vedtaksperiodeId").asText().isNotEmpty())
     }
 
     @Test

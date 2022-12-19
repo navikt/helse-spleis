@@ -284,16 +284,20 @@ internal class PersonMediator(
         )))
     }
 
-    override fun manglerInntektsmelding(hendelseskontekst: Hendelseskontekst, orgnr: String, event: PersonObserver.ManglendeInntektsmeldingEvent) {
-        queueMessage(hendelseskontekst , JsonMessage.newMessage("trenger_inntektsmelding", mapOf(
+    override fun manglerInntektsmelding(event: PersonObserver.ManglendeInntektsmeldingEvent) {
+        queueMessage(JsonMessage.newMessage("trenger_inntektsmelding", mapOf(
+            "organisasjonsnummer" to event.organisasjonsnummer,
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
             "fom" to event.fom,
             "tom" to event.tom,
             "søknadIder" to event.søknadIder
         )))
     }
 
-    override fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst, event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
-        queueMessage(hendelseskontekst, JsonMessage.newMessage("trenger_ikke_inntektsmelding", mapOf(
+    override fun trengerIkkeInntektsmelding(event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
+        queueMessage(JsonMessage.newMessage("trenger_ikke_inntektsmelding", mapOf(
+            "organisasjonsnummer" to event.organisasjonsnummer,
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
             "fom" to event.fom,
             "tom" to event.tom,
             "søknadIder" to event.søknadIder

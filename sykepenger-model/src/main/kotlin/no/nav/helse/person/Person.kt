@@ -402,19 +402,12 @@ class Person private constructor(
         }
     }
 
-    internal fun trengerInntektsmelding(
-        hendelseskontekst: Hendelseskontekst,
-        orgnr: String,
-        event: PersonObserver.ManglendeInntektsmeldingEvent
-    ) {
-        observers.forEach { it.manglerInntektsmelding(hendelseskontekst, orgnr, event) }
+    internal fun trengerInntektsmelding(event: PersonObserver.ManglendeInntektsmeldingEvent) {
+        observers.forEach { it.manglerInntektsmelding(event) }
     }
 
-    internal fun trengerIkkeInntektsmelding(
-        hendelseskontekst: Hendelseskontekst,
-        event: PersonObserver.TrengerIkkeInntektsmeldingEvent
-    ) {
-        observers.forEach { it.trengerIkkeInntektsmelding(hendelseskontekst, event) }
+    internal fun trengerIkkeInntektsmelding(event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
+        observers.forEach { it.trengerIkkeInntektsmelding(event) }
     }
 
     internal fun trengerArbeidsgiveropplysninger(
