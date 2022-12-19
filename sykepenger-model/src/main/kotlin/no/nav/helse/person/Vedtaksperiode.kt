@@ -543,8 +543,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterOverlappendeSøknadRevurdering(søknad: Søknad) {
-        if (periode.delvisOverlappMed(søknad.periode())) søknad.varsel(`Mottatt søknad som delvis overlapper`)
-        else if (søknad.harArbeidsdager()) søknad.varsel(RV_SØ_15)
+        if (periode.delvisOverlappMed(søknad.periode())) return søknad.funksjonellFeil(`Mottatt søknad som delvis overlapper`)
+        if (søknad.harArbeidsdager()) søknad.varsel(RV_SØ_15)
         else {
             søknad.valider(periode, jurist())
             søknad.validerInntektskilder(vilkårsgrunnlag == null)

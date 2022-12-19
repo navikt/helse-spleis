@@ -1,14 +1,15 @@
 package no.nav.helse.spleis.e2e.oppgaver
 
-import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.Varselkode.RV_SØ_13
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -26,10 +27,10 @@ import org.junit.jupiter.api.Test
 internal class RutingAvSøknadOppgaverTest : AbstractEndToEndTest() {
 
     @Test
-    fun `dersom vi har en nærliggende utbetaling og vi mottar overlappende søknader - skal det ikke opprettes oppgave i speilkøen i gosys`() {
+    fun `dersom vi har en nærliggende utbetaling og vi mottar overlappende søknader - skal det opprettes oppgave i speilkøen i gosys`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        val im = håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -37,10 +38,11 @@ internal class RutingAvSøknadOppgaverTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(20.januar, 10.februar, 100.prosent))
-        håndterSøknad(Sykdom(20.januar, 10.februar, 100.prosent))
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        assertIngenFunksjonelleFeil()
-        assertEquals(emptyList<UUID>(), observatør.opprettOppgaveForSpeilsaksbehandlereEvent().flatMap { it.hendelser })
+        val søknadId = håndterSøknad(Sykdom(20.januar, 10.februar, 100.prosent))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+        assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
+        assertEquals(listOf(søknadId, im), observatør.opprettOppgaveForSpeilsaksbehandlereEvent().flatMap { it.hendelser })
     }
 
     @Test

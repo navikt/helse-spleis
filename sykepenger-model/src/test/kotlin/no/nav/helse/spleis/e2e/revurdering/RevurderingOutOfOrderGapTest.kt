@@ -498,8 +498,9 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyttVedtak(1.mars, 31.mars, orgnummer = a1)
         nyPeriode(20.februar til 15.mars, a1)
 
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
-        assertVarsel(RV_SØ_13)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
     @Test

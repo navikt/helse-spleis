@@ -56,6 +56,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
@@ -1340,7 +1341,9 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
 
-        assertVarsel(RV_SØ_13, 1.vedtaksperiode.filter())
+        assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
+
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
@@ -1376,16 +1379,17 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
         assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
 
-        assertVarsel(RV_SØ_13, 1.vedtaksperiode.filter())
-        assertVarsel(RV_OS_2, 2.vedtaksperiode.filter())
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
         assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
+        assertVarsel(RV_OS_2, 2.vedtaksperiode.filter())
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
     }
 }

@@ -25,6 +25,8 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
@@ -98,10 +100,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         }
         a1 {
             håndterSykmelding(Sykmeldingsperiode(15.januar, 15.februar, 50.prosent))
-            assertRevurderingUtenEndring(1.vedtaksperiode) {
-                håndterSøknad(Sykdom(15.januar, 15.februar, 50.prosent))
-                håndterYtelser(1.vedtaksperiode)
-            }
+            håndterSøknad(Sykdom(15.januar, 15.februar, 50.prosent))
+            assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
             val utbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode)
             (17.januar til 31.januar).forEach {
                 assertEquals(100.prosent, utbetalingstidslinje[it].økonomi.inspektør.grad)
@@ -109,7 +109,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         }
 
         a2 {
-            assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
         }
     }
 

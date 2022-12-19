@@ -24,6 +24,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
+import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.Varselkode.RV_OS_2
 import no.nav.helse.person.Varselkode.RV_SØ_10
@@ -32,6 +33,7 @@ import no.nav.helse.person.Varselkode.RV_SØ_15
 import no.nav.helse.person.Varselkode.RV_SØ_4
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
@@ -83,28 +85,21 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
     fun `Avsluttet periode får en overlappende søknad som strekker seg etter vedtaksperiode - skal ikke sette i gang revurdering`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(15.januar, 15.februar, 100.prosent))
+        håndterSøknad(Sykdom(15.januar, 15.februar, 100.prosent))
 
-        assertRevurderingUtenEndring(1.vedtaksperiode) {
-            håndterSøknad(Sykdom(15.januar, 15.februar, 100.prosent))
-            håndterYtelser(1.vedtaksperiode)
-            assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-            assertEquals(1.januar til 31.januar, inspektør.sykdomstidslinje.periode())
-            assertVarsel(RV_SØ_13, 1.vedtaksperiode.filter())
-        }
+        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
     @Test
     fun `Avsluttet periode får en overlappende søknad som strekker seg før vedtaksperiode - skal ikke sette i gang revurdering`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(15.desember(2017), 15.januar, 100.prosent))
-
-        assertRevurderingUtenEndring(1.vedtaksperiode) {
-            håndterSøknad(Sykdom(15.desember(2017), 15.januar, 100.prosent))
-            håndterYtelser(1.vedtaksperiode)
-            assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-            assertEquals(1.januar til 31.januar, inspektør.sykdomstidslinje.periode())
-            assertVarsel(RV_SØ_13, 1.vedtaksperiode.filter())
-        }
+        håndterSøknad(Sykdom(15.desember(2017), 15.januar, 100.prosent))
+        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
     @Test
@@ -216,29 +211,26 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(15.januar, 15.februar, 100.prosent))
         håndterSøknad(Sykdom(15.januar, 15.februar, 100.prosent))
 
-        assertRevurderingUtenEndring(2.vedtaksperiode) {
-            håndterYtelser(2.vedtaksperiode)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-            assertVarsel(RV_SØ_13)
-        }
+        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertFunksjonellFeil(RV_SØ_13, 2.vedtaksperiode.filter())
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
 
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
     }
 
     @Test
     fun `Avsluttet forlengelse får en overlappende søknad som slutter etter`() {
         nyttVedtak(1.januar, 31.januar, 50.prosent)
         forlengVedtak(1.februar, 28.februar, 50.prosent)
+
         håndterSykmelding(Sykmeldingsperiode(15.februar, 15.mars, 100.prosent))
         håndterSøknad(Sykdom(15.februar, 15.mars, 100.prosent))
 
-        assertRevurderingUtenEndring(2.vedtaksperiode) {
-            håndterYtelser(2.vedtaksperiode)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-            assertVarsel(RV_SØ_13)
-        }
+        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
+        assertFunksjonellFeil(RV_SØ_13, 2.vedtaksperiode.filter())
 
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
     }
 
     @Test
@@ -248,13 +240,11 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(15.desember(2017), 15.januar, 100.prosent))
         håndterSøknad(Sykdom(15.desember(2017), 15.januar, 100.prosent))
 
-        assertRevurderingUtenEndring(2.vedtaksperiode) {
-            håndterYtelser(2.vedtaksperiode)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-            assertVarsel(RV_SØ_13)
-        }
+        assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
+        assertTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
 
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
     }
 
     @Test
