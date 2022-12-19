@@ -4,7 +4,6 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.til
@@ -294,7 +293,7 @@ internal class Utbetaling private constructor(
         val forrigeTilstand = tilstand
         tilstand = neste
         observers.forEach {
-            it.utbetalingEndret(hendelse.hendelseskontekst(), id, type, arbeidsgiverOppdrag, personOppdrag, forrigeTilstand, neste)
+            it.utbetalingEndret(id, type, arbeidsgiverOppdrag, personOppdrag, forrigeTilstand, neste)
         }
         tilstand.entering(this, hendelse)
     }
@@ -781,7 +780,7 @@ internal class Utbetaling private constructor(
 
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             check(!utbetaling.harUtbetalinger())
-            utbetaling.vurdering?.avsluttetUtenUtbetaling(hendelse.hendelseskontekst(), utbetaling)
+            utbetaling.vurdering?.avsluttetUtenUtbetaling(utbetaling)
             utbetaling.avsluttet = LocalDateTime.now()
         }
     }
@@ -845,14 +844,14 @@ internal class Utbetaling private constructor(
 
     internal object Annullert : Tilstand {
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
-            utbetaling.vurdering?.annullert(hendelse.hendelseskontekst(), utbetaling)
+            utbetaling.vurdering?.annullert(utbetaling)
             utbetaling.avsluttet = LocalDateTime.now()
         }
     }
 
     internal object Utbetalt : Tilstand {
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
-            utbetaling.vurdering?.utbetalt(hendelse.hendelseskontekst(), utbetaling)
+            utbetaling.vurdering?.utbetalt(utbetaling)
             utbetaling.avsluttet = LocalDateTime.now()
         }
 
@@ -931,26 +930,24 @@ internal class Utbetaling private constructor(
             visitor.visitVurdering(this, ident, epost, tidspunkt, automatiskBehandling, godkjent)
         }
 
-        internal fun annullert(hendelseskontekst: Hendelseskontekst, utbetaling: Utbetaling) {
+        internal fun annullert(utbetaling: Utbetaling) {
             utbetaling.observers.forEach {
                 it.utbetalingAnnullert(
-                    hendelseskontekst = hendelseskontekst,
                     id = utbetaling.id,
                     korrelasjonsId = utbetaling.korrelasjonsId,
                     periode = utbetaling.periode,
-                    arbeidsgiverFagsystemId = utbetaling.arbeidsgiverOppdrag.takeIf(Oppdrag::harUtbetalinger)?.fagsystemId(),
                     personFagsystemId = utbetaling.personOppdrag.takeIf(Oppdrag::harUtbetalinger)?.fagsystemId(),
                     godkjenttidspunkt = tidspunkt,
                     saksbehandlerEpost = epost,
-                    saksbehandlerIdent = ident
+                    saksbehandlerIdent = ident,
+                    arbeidsgiverFagsystemId = utbetaling.arbeidsgiverOppdrag.takeIf(Oppdrag::harUtbetalinger)?.fagsystemId()
                 )
             }
         }
 
-        internal fun utbetalt(hendelseskontekst: Hendelseskontekst, utbetaling: Utbetaling) {
+        internal fun utbetalt(utbetaling: Utbetaling) {
             utbetaling.observers.forEach {
                 it.utbetalingUtbetalt(
-                    hendelseskontekst,
                     utbetaling.id,
                     utbetaling.korrelasjonsId,
                     utbetaling.type,
@@ -970,10 +967,9 @@ internal class Utbetaling private constructor(
             }
         }
 
-        internal fun avsluttetUtenUtbetaling(hendelseskontekst: Hendelseskontekst, utbetaling: Utbetaling) {
+        internal fun avsluttetUtenUtbetaling(utbetaling: Utbetaling) {
             utbetaling.observers.forEach {
                 it.utbetalingUtenUtbetaling(
-                    hendelseskontekst,
                     utbetaling.id,
                     utbetaling.korrelasjonsId,
                     utbetaling.type,

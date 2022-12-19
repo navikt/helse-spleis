@@ -2,7 +2,6 @@ package no.nav.helse.spleis
 
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.PersonObserver
 import org.slf4j.LoggerFactory
@@ -20,7 +19,7 @@ object VedtaksperiodeProbe : PersonObserver {
         )
     }
 
-    override fun utbetalingEndret(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingEndretEvent) {
+    override fun utbetalingEndret(event: PersonObserver.UtbetalingEndretEvent) {
         log.info(
             "utbetaling endret {}, {}, {}",
             keyValue("utbetalingId", "${event.utbetalingId}"),

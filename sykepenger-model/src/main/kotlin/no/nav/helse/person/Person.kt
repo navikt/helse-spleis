@@ -417,22 +417,16 @@ class Person private constructor(
         observers.forEach { it.trengerArbeidsgiveropplysninger(hendelseskontekst, event) }
     }
 
-    internal fun utbetalingUtbetalt(
-        hendelseskontekst: Hendelseskontekst,
-        event: PersonObserver.UtbetalingUtbetaltEvent
-    ) {
-        observers.forEach { it.utbetalingUtbetalt(hendelseskontekst, event) }
+    internal fun utbetalingUtbetalt(event: PersonObserver.UtbetalingUtbetaltEvent) {
+        observers.forEach { it.utbetalingUtbetalt(event) }
     }
 
-    internal fun utbetalingUtenUtbetaling(
-        hendelseskontekst: Hendelseskontekst,
-        event: PersonObserver.UtbetalingUtbetaltEvent
-    ) {
-        observers.forEach { it.utbetalingUtenUtbetaling(hendelseskontekst, event) }
+    internal fun utbetalingUtenUtbetaling(event: PersonObserver.UtbetalingUtbetaltEvent) {
+        observers.forEach { it.utbetalingUtenUtbetaling(event) }
     }
 
-    internal fun utbetalingEndret(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingEndretEvent) {
-        observers.forEach { it.utbetalingEndret(hendelseskontekst, event) }
+    internal fun utbetalingEndret(event: PersonObserver.UtbetalingEndretEvent) {
+        observers.forEach { it.utbetalingEndret(event) }
     }
 
     internal fun vedtakFattet(vedtakFattetEvent: PersonObserver.VedtakFattetEvent) {
@@ -443,11 +437,8 @@ class Person private constructor(
         observers.forEach { it.revurderingIgangsatt(event, personidentifikator, aktørId) }
     }
 
-    internal fun feriepengerUtbetalt(
-        hendelseskontekst: Hendelseskontekst,
-        feriepengerUtbetaltEvent: PersonObserver.FeriepengerUtbetaltEvent
-    ) {
-        observers.forEach { it.feriepengerUtbetalt(hendelseskontekst, feriepengerUtbetaltEvent) }
+    internal fun feriepengerUtbetalt(feriepengerUtbetaltEvent: PersonObserver.FeriepengerUtbetaltEvent) {
+        observers.forEach { it.feriepengerUtbetalt(feriepengerUtbetaltEvent) }
     }
 
     internal fun nyesteIdForVilkårsgrunnlagHistorikk() =

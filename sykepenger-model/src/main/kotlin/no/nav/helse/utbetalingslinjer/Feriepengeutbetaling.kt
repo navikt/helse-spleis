@@ -93,7 +93,7 @@ internal class Feriepengeutbetaling private constructor(
         )
     }
 
-    fun håndter(utbetalingHendelse: UtbetalingHendelse, person: Person) {
+    fun håndter(utbetalingHendelse: UtbetalingHendelse, organisasjonsnummer: String, person: Person) {
         if (!utbetalingHendelse.erRelevant(oppdrag.fagsystemId(), personoppdrag.fagsystemId(), utbetalingId)) return
 
         utbetalingHendelse.info("Behandler svar fra Oppdrag/UR/spenn for feriepenger")
@@ -107,16 +107,16 @@ internal class Feriepengeutbetaling private constructor(
         }
 
         person.feriepengerUtbetalt(
-            utbetalingHendelse.hendelseskontekst(),
             PersonObserver.FeriepengerUtbetaltEvent(
+                organisasjonsnummer = organisasjonsnummer,
                 arbeidsgiverOppdrag = oppdrag.toHendelseMap(),
                 personOppdrag = personoppdrag.toHendelseMap()
             )
         )
 
         person.utbetalingEndret(
-            utbetalingHendelse.hendelseskontekst(),
             PersonObserver.UtbetalingEndretEvent(
+                organisasjonsnummer = organisasjonsnummer,
                 utbetalingId = utbetalingId,
                 type = Utbetalingtype.FERIEPENGER.name,
                 arbeidsgiverOppdrag = oppdrag.toHendelseMap(),

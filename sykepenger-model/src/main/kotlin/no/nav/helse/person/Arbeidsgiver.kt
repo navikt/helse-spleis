@@ -6,7 +6,6 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
-import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -580,7 +579,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun håndterFeriepengeUtbetaling(utbetalingHendelse: UtbetalingHendelse) {
-        feriepengeutbetalinger.forEach { it.håndter(utbetalingHendelse, person) }
+        feriepengeutbetalinger.forEach { it.håndter(utbetalingHendelse, organisasjonsnummer, person) }
     }
 
     private fun håndterUtbetaling(utbetaling: UtbetalingHendelse) {
@@ -651,7 +650,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     override fun utbetalingUtbetalt(
-        hendelseskontekst: Hendelseskontekst,
         id: UUID,
         korrelasjonsId: UUID,
         type: Utbetalingtype,
@@ -671,8 +669,8 @@ internal class Arbeidsgiver private constructor(
         val builder = UtbetalingsdagerBuilder(sykdomshistorikk.sykdomstidslinje())
         utbetalingstidslinje.accept(builder)
         person.utbetalingUtbetalt(
-            hendelseskontekst,
             PersonObserver.UtbetalingUtbetaltEvent(
+                organisasjonsnummer = organisasjonsnummer,
                 utbetalingId = id,
                 type = type.name,
                 korrelasjonsId = korrelasjonsId,
@@ -695,7 +693,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     override fun utbetalingUtenUtbetaling(
-        hendelseskontekst: Hendelseskontekst,
         id: UUID,
         korrelasjonsId: UUID,
         type: Utbetalingtype,
@@ -715,8 +712,8 @@ internal class Arbeidsgiver private constructor(
         val builder = UtbetalingsdagerBuilder(sykdomshistorikk.sykdomstidslinje())
         utbetalingstidslinje.accept(builder)
         person.utbetalingUtenUtbetaling(
-            hendelseskontekst,
             PersonObserver.UtbetalingUtbetaltEvent(
+                organisasjonsnummer = organisasjonsnummer,
                 utbetalingId = id,
                 type = type.name,
                 fom = periode.start,
@@ -739,7 +736,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     override fun utbetalingEndret(
-        hendelseskontekst: Hendelseskontekst,
         id: UUID,
         type: Utbetalingtype,
         arbeidsgiverOppdrag: Oppdrag,
@@ -748,8 +744,8 @@ internal class Arbeidsgiver private constructor(
         nesteTilstand: Utbetaling.Tilstand
     ) {
         person.utbetalingEndret(
-            hendelseskontekst,
             PersonObserver.UtbetalingEndretEvent(
+                organisasjonsnummer = organisasjonsnummer,
                 utbetalingId = id,
                 type = type.name,
                 forrigeStatus = Utbetalingstatus.fraTilstand(forrigeTilstand).name,
@@ -765,7 +761,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     override fun utbetalingAnnullert(
-        hendelseskontekst: Hendelseskontekst,
         id: UUID,
         korrelasjonsId: UUID,
         periode: Periode,

@@ -163,6 +163,7 @@ interface PersonObserver {
     }
 
     data class UtbetalingEndretEvent(
+        val organisasjonsnummer: String,
         val utbetalingId: UUID,
         val type: String,
         val forrigeStatus: String,
@@ -172,6 +173,7 @@ interface PersonObserver {
     )
 
     data class UtbetalingUtbetaltEvent(
+        val organisasjonsnummer: String,
         val utbetalingId: UUID,
         val korrelasjonsId: UUID,
         val type: String,
@@ -211,6 +213,7 @@ interface PersonObserver {
     }
 
     data class FeriepengerUtbetaltEvent(
+        val organisasjonsnummer: String,
         val arbeidsgiverOppdrag: Map<String, Any?>,
         val personOppdrag: Map<String, Any?> = mapOf("linjer" to emptyList<String>())
     )
@@ -266,10 +269,10 @@ interface PersonObserver {
     fun manglerInntektsmelding(event: ManglendeInntektsmeldingEvent) {}
     fun trengerIkkeInntektsmelding(event: TrengerIkkeInntektsmeldingEvent) {}
     fun trengerArbeidsgiveropplysninger(hendelseskontekst: Hendelseskontekst, event: TrengerArbeidsgiveropplysningerEvent) {}
-    fun utbetalingEndret(hendelseskontekst: Hendelseskontekst, event: UtbetalingEndretEvent) {}
-    fun utbetalingUtbetalt(hendelseskontekst: Hendelseskontekst, event: UtbetalingUtbetaltEvent) {}
-    fun utbetalingUtenUtbetaling(hendelseskontekst: Hendelseskontekst, event: UtbetalingUtbetaltEvent) {}
-    fun feriepengerUtbetalt(hendelseskontekst: Hendelseskontekst, event: FeriepengerUtbetaltEvent) {}
+    fun utbetalingEndret(event: UtbetalingEndretEvent) {}
+    fun utbetalingUtbetalt(event: UtbetalingUtbetaltEvent) {}
+    fun utbetalingUtenUtbetaling(event: UtbetalingUtbetaltEvent) {}
+    fun feriepengerUtbetalt(event: FeriepengerUtbetaltEvent) {}
     fun annullering(event: UtbetalingAnnullertEvent) {}
     fun avstemt(result: Map<String, Any>) {}
     fun vedtakFattet(event: VedtakFattetEvent) {}

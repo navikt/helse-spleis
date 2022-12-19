@@ -562,7 +562,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             assertEquals("1460", "${linje["totalbeløp"]}")
         }
         assertTrue(observatør.utbetaltEndretEventer.any {
-            it.event.arbeidsgiverOppdrag["linjer"].castAsList<Map<String, Any>>().single()["satstype"] == "ENG"
+            it.arbeidsgiverOppdrag["linjer"].castAsList<Map<String, Any>>().single()["satstype"] == "ENG"
         })
     }
 
@@ -626,10 +626,10 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             assertEquals("2627", "${linje["totalbeløp"]}")
         }
 
-        val feriepengerUtbetaltEndretEventer = observatør.utbetaltEndretEventer.filter { it.event.type == Utbetalingtype.FERIEPENGER.name }
+        val feriepengerUtbetaltEndretEventer = observatør.utbetaltEndretEventer.filter { it.type == Utbetalingtype.FERIEPENGER.name }
         assertEquals(2, feriepengerUtbetaltEndretEventer.size)
         assertTrue(feriepengerUtbetaltEndretEventer.any {
-            it.event.arbeidsgiverOppdrag["linjer"].castAsList<Map<String, Any>>().single()["satstype"] == "ENG"
+            it.arbeidsgiverOppdrag["linjer"].castAsList<Map<String, Any>>().single()["satstype"] == "ENG"
         })
     }
 

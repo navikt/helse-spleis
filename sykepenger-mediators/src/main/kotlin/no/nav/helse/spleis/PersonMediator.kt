@@ -116,8 +116,9 @@ internal class PersonMediator(
         }))
     }
 
-    override fun utbetalingEndret(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingEndretEvent) {
-        queueMessage(hendelseskontekst , JsonMessage.newMessage("utbetaling_endret", mapOf(
+    override fun utbetalingEndret(event: PersonObserver.UtbetalingEndretEvent) {
+        queueMessage(JsonMessage.newMessage("utbetaling_endret", mapOf(
+            "organisasjonsnummer" to event.organisasjonsnummer,
             "utbetalingId" to event.utbetalingId,
             "type" to event.type,
             "forrigeStatus" to event.forrigeStatus,
@@ -174,16 +175,17 @@ internal class PersonMediator(
         )).toJson())
     }
 
-    override fun utbetalingUtbetalt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingUtbetaltEvent) {
-        queueMessage(hendelseskontekst, utbetalingAvsluttet("utbetaling_utbetalt", event))
+    override fun utbetalingUtbetalt(event: PersonObserver.UtbetalingUtbetaltEvent) {
+        queueMessage(utbetalingAvsluttet("utbetaling_utbetalt", event))
     }
 
-    override fun utbetalingUtenUtbetaling(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingUtbetaltEvent) {
-        queueMessage(hendelseskontekst, utbetalingAvsluttet("utbetaling_uten_utbetaling", event))
+    override fun utbetalingUtenUtbetaling(event: PersonObserver.UtbetalingUtbetaltEvent) {
+        queueMessage(utbetalingAvsluttet("utbetaling_uten_utbetaling", event))
     }
 
     private fun utbetalingAvsluttet(eventName: String, event: PersonObserver.UtbetalingUtbetaltEvent) =
         JsonMessage.newMessage(eventName, mapOf(
+            "organisasjonsnummer" to event.organisasjonsnummer,
             "utbetalingId" to event.utbetalingId,
             "korrelasjonsId" to event.korrelasjonsId,
             "type" to event.type,
@@ -203,8 +205,9 @@ internal class PersonMediator(
             "vedtaksperiodeIder" to event.vedtaksperiodeIder
         ))
 
-    override fun feriepengerUtbetalt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.FeriepengerUtbetaltEvent) =
-        queueMessage(hendelseskontekst, JsonMessage.newMessage("feriepenger_utbetalt", mapOf(
+    override fun feriepengerUtbetalt(event: PersonObserver.FeriepengerUtbetaltEvent) =
+        queueMessage(JsonMessage.newMessage("feriepenger_utbetalt", mapOf(
+            "organisasjonsnummer" to event.organisasjonsnummer,
             "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
             "personOppdrag" to event.personOppdrag,
         )))

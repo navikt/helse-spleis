@@ -2,7 +2,6 @@ package no.nav.helse.dsl
 
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.IAktivitetslogg
@@ -85,7 +84,6 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
     }
 
     override fun utbetalingUtbetalt(
-        hendelseskontekst: Hendelseskontekst,
         event: PersonObserver.UtbetalingUtbetaltEvent
     ) {
         assertTrue(behov.removeAll { it.utbetalingId == event.utbetalingId }) {

@@ -23,7 +23,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val utbetalingUtenUtbetalingEventer = mutableListOf<PersonObserver.UtbetalingUtbetaltEvent>()
     val utbetalingMedUtbetalingEventer = mutableListOf<PersonObserver.UtbetalingUtbetaltEvent>()
     val feriepengerUtbetaltEventer = mutableListOf<PersonObserver.FeriepengerUtbetaltEvent>()
-    val utbetaltEndretEventer = mutableListOf<ObservedEvent<PersonObserver.UtbetalingEndretEvent>>()
+    val utbetaltEndretEventer = mutableListOf<PersonObserver.UtbetalingEndretEvent>()
     val vedtakFattetEvent = mutableMapOf<UUID, PersonObserver.VedtakFattetEvent>()
 
     val revurderingIgangsattEvent = mutableListOf<PersonObserver.RevurderingIgangsattEvent>()
@@ -72,20 +72,20 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         avstemming = result
     }
 
-    override fun utbetalingUtenUtbetaling(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingUtbetaltEvent) {
+    override fun utbetalingUtenUtbetaling(event: PersonObserver.UtbetalingUtbetaltEvent) {
         utbetalingUtenUtbetalingEventer.add(event)
     }
 
-    override fun utbetalingUtbetalt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingUtbetaltEvent) {
+    override fun utbetalingUtbetalt(event: PersonObserver.UtbetalingUtbetaltEvent) {
         utbetalingMedUtbetalingEventer.add(event)
     }
 
-    override fun feriepengerUtbetalt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.FeriepengerUtbetaltEvent) {
+    override fun feriepengerUtbetalt(event: PersonObserver.FeriepengerUtbetaltEvent) {
         feriepengerUtbetaltEventer.add(event)
     }
 
-    override fun utbetalingEndret(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingEndretEvent) {
-        utbetaltEndretEventer.add(ObservedEvent(event, hendelseskontekst))
+    override fun utbetalingEndret(event: PersonObserver.UtbetalingEndretEvent) {
+        utbetaltEndretEventer.add(event)
     }
 
     override fun vedtakFattet(event: PersonObserver.VedtakFattetEvent) {
@@ -147,20 +147,5 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         aktørId: String
     ) {
         revurderingIgangsattEvent.add(event)
-    }
-
-    companion object {
-        private fun Hendelseskontekst.toMap() = mutableMapOf<String, String>().also { appendTo(it::set) }
-
-        private fun Hendelseskontekst.vedtaksperiodeId(): UUID {
-            return UUID.fromString(toMap()["vedtaksperiodeId"])
-        }
-
-        private fun Hendelseskontekst.orgnummer() = toMap()["organisasjonsnummer"]!!
-
-        data class ObservedEvent<EventType>(val event: EventType, private val kontekst: Hendelseskontekst) {
-            fun vedtaksperiodeId() = kontekst.vedtaksperiodeId()
-            fun orgnummer() = kontekst.orgnummer()
-        }
     }
 }

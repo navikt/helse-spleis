@@ -312,6 +312,9 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     private fun assertUtbetalingEndret(melding: JsonNode, fra: String, til: String, annullering: Boolean = false) {
+        assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
+        assertTrue(melding.path("aktørId").asText().isNotEmpty())
+        assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
         assertTrue(melding.path("utbetalingId").asText().isNotEmpty())
         assertTrue(melding.path("type").asText().isNotEmpty())
         assertTrue(melding.path("forrigeStatus").asText().isNotEmpty())
@@ -323,6 +326,9 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     private fun assertUtbetalt(melding: JsonNode) {
+        assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
+        assertTrue(melding.path("aktørId").asText().isNotEmpty())
+        assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
         assertTrue(melding.path("utbetalingId").asText().isNotEmpty())
         assertTrue(melding.path("korrelasjonsId").asText().isNotEmpty())
         assertTrue(melding.path("type").asText().isNotEmpty())
