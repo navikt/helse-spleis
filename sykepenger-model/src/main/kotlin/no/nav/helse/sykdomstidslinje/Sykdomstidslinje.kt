@@ -2,6 +2,8 @@ package no.nav.helse.sykdomstidslinje
 
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.chrono.ChronoLocalDate
+import java.time.temporal.ChronoUnit
 import java.util.Objects
 import java.util.SortedMap
 import java.util.stream.Collectors.toMap
@@ -175,6 +177,7 @@ internal class Sykdomstidslinje private constructor(
     internal fun erRettFør(other: Sykdomstidslinje): Boolean {
         return this.sisteDag().erRettFør(other.førsteDag()) && !this.erSisteDagArbeidsdag() && !other.erFørsteDagArbeidsdag()
     }
+    internal fun dagerMellom(other: Sykdomstidslinje) = ChronoUnit.DAYS.between(this.sisteDag(), other.førsteDag())
 
     private fun erFørsteDagArbeidsdag() = this.dager.keys.firstOrNull()?.let(::erArbeidsdag) ?: true
     private fun erSisteDagArbeidsdag() = this.dager.keys.lastOrNull()?.let(::erArbeidsdag) ?: true

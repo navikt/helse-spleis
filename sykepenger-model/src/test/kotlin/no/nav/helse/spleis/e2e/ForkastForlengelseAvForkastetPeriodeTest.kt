@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
@@ -306,6 +307,41 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
+    }
+    @Test
+    fun `forkaster ikke periode dersom person har vært friskmeldt mindre enn 2 dager`() = Toggle.StrengereForkastingAvInfotrygdforlengelser.disable {
+        nyPeriode(1.januar til 31.januar)
+        person.søppelbøtte(hendelselogg, 1.januar til 31.januar)
+
+        nyPeriode(2.februar til 20.mars)
+        assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+    }
+
+    @Test
+    fun `forkaster periode dersom person har vært friskmeldt mindre enn 20 dager`() = Toggle.StrengereForkastingAvInfotrygdforlengelser.enable {
+        nyPeriode(1.januar til 31.januar)
+        person.søppelbøtte(hendelselogg, 1.januar til 31.januar)
+
+        nyPeriode(20.februar til 20.mars)
+        assertTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `person som har vært friskmeldt i 21 dager kan fortsatt behandles`() = Toggle.StrengereForkastingAvInfotrygdforlengelser.enable {
+        nyPeriode(1.januar til 31.januar)
+        person.søppelbøtte(hendelselogg, 1.januar til 31.januar)
+
+        nyPeriode(21.februar til 20.mars)
+        assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+    }
+
+    @Test
+    fun `forkaster periode dersom person har vært friskmeldt mindre enn 20 dager hos annen arbeidsgiver`() = Toggle.StrengereForkastingAvInfotrygdforlengelser.enable {
+        nyPeriode(1.januar til 31.januar, a1)
+        person.søppelbøtte(hendelselogg) { true }
+
+        nyPeriode(20.februar til 20.mars, a2)
+        assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
     }
 
     private fun Periode.forkast() {
