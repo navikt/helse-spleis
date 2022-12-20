@@ -63,6 +63,12 @@ class Revurderingseventyr private constructor(
         )
     }
 
+    internal fun loggDersomKorrigerendeSøknad(hendelse: IAktivitetslogg, loggMelding: String) {
+        if (hvorfor == KorrigertSøknad){
+            hendelse.info(loggMelding)
+        }
+    }
+
     private enum class TypeEndring {
         OVERSTYRING,
         REVURDERING

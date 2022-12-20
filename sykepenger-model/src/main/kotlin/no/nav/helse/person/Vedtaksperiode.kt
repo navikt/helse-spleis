@@ -1933,11 +1933,13 @@ internal class Vedtaksperiode private constructor(
         override fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             if (!vedtaksperiode.forventerInntekt()) return
             if (!revurdering.inngåSomRevurdering(hendelse, vedtaksperiode, vedtaksperiode.periode)) return
+            revurdering.loggDersomKorrigerendeSøknad(hendelse, "Startet revurdering grunnet korrigerende søknad")
             hendelse.varsel(RV_RV_1)
             vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            søknad.info("Prøver å igangsette revurdering grunnet korrigerende søknad")
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
             if (!søknad.harFunksjonelleFeilEllerVerre() && !vedtaksperiode.forventerInntekt()) {
                 vedtaksperiode.emitVedtaksperiodeEndret(søknad) // TODO: for å unngå at flex oppretter oppgaver
