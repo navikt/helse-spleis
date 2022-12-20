@@ -2230,7 +2230,8 @@ internal class Vedtaksperiode private constructor(
 
         internal fun forlengerForkastet(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
             if (Toggle.StrengereForkastingAvInfotrygdforlengelser.disabled && forkastede.any {
-                    it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje()) <= 20
+                    val dagerMellom = it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje())
+                    dagerMellom in 2..20
             }) {
                 val friskedager = forkastede.minOfOrNull { it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje()) }
                 sikkerlogg.info("Denne ville vi forkastet, det var bare $friskedager friske dager til en forkastet periode")
@@ -2238,7 +2239,7 @@ internal class Vedtaksperiode private constructor(
             forkastede
                 .filter {
                     if (Toggle.StrengereForkastingAvInfotrygdforlengelser.enabled) {
-                        return@filter it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje()) <= 20
+                        return@filter it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje()) in 1 ..20
                     } else {
                         return@filter it.sykdomstidslinje.erRettFør(hendelse.sykdomstidslinje())
                     }
