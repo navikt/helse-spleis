@@ -2228,13 +2228,18 @@ internal class Vedtaksperiode private constructor(
                 }
         }
 
-        internal fun forlengerForkastet(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
-            if (Toggle.StrengereForkastingAvInfotrygdforlengelser.disabled && forkastede.any {
-                    val dagerMellom = it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje())
-                    dagerMellom in 2..20
-            }) {
-                val friskedager = forkastede.minOfOrNull { it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje()) }
-                sikkerlogg.info("Denne ville vi forkastet, det var bare $friskedager friske dager til en forkastet periode")
+        internal fun forlengerForkastet(forkastede: List<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
+            if (Toggle.StrengereForkastingAvInfotrygdforlengelser.disabled) {
+                val forkastedePerioderSomErForNærme = forkastede.filter {
+                    it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje()) in 2..20
+                }
+                if (forkastedePerioderSomErForNærme.isNotEmpty()) {
+                    sikkerlogg.info(
+                            "Denne søknaden ville blitt forkastet, den har for lite gap: ${forkastedePerioderSomErForNærme.map { it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje()) }}\n" +
+                            "søknad: ${hendelse.periode()}\n" +
+                            "forkastede vedtaksperioder: ${forkastedePerioderSomErForNærme.map { it.periode() }}"
+                    )
+                }
             }
             forkastede
                 .filter {
