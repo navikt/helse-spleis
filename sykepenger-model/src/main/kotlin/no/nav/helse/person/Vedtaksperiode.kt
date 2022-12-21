@@ -2245,7 +2245,8 @@ internal class Vedtaksperiode private constructor(
                     sikkerlogg.info(
                         "Denne søknaden ville blitt forkastet, den har for lite gap: ${forkastedePerioderSomErForNærme.map { it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje()) }}\n" +
                                 "søknad: ${hendelse.periode()}\n" +
-                                "forkastede vedtaksperioder: ${forkastedePerioderSomErForNærme.map { it.periode() }}"
+                                "forkastede vedtaksperioder: ${forkastedePerioderSomErForNærme.map { it.periode() }}\n" +
+                                "aktørId: ${hendelse.aktørId()}"
                     )
                 }
             }
