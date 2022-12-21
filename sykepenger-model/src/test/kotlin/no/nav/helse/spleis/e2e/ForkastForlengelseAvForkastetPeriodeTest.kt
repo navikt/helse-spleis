@@ -94,8 +94,8 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSøknad(Sykdom(9.januar, 15.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(16.januar, 19.januar, 100.prosent))
         håndterSøknad(Sykdom(16.januar, 19.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
         assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
     }
 
@@ -123,18 +123,24 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     fun `forkaster ikke periode som har gap til forkastet periode`() {
         (1.januar til 19.januar).forkast()
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
-        håndterSykmelding(Sykmeldingsperiode(23.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(23.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
     }
 
     @Test
-    fun `logger ikke periode som har gap til forkastet periode`() {
+    fun `logger ikke periode som har gap til forkastet periode`() = Toggle.StrengereForkastingAvInfotrygdforlengelser.disable {
         (1.januar til 19.januar).forkast()
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
-        håndterSykmelding(Sykmeldingsperiode(23.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(23.januar, 31.januar, 100.prosent))
+        if(Toggle.StrengereForkastingAvInfotrygdforlengelser.disabled) {
+            håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar, 100.prosent))
+            håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
+
+        } else {
+            håndterSykmelding(Sykmeldingsperiode(23.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(23.januar, 31.januar, 100.prosent))
+        }
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         assertIngenInfo("Søknad forlenger en forkastet periode", 2.vedtaksperiode.filter())
     }
@@ -151,8 +157,8 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
         assertFunksjonellFeil("Søknad forlenger en forkastet periode", 3.vedtaksperiode.filter())
-        håndterSykmelding(Sykmeldingsperiode(2.mars, 31.mars, 100.prosent))
-        håndterSøknad(Sykdom(2.mars, 31.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(21.mars, 21.april, 100.prosent))
+        håndterSøknad(Sykdom(21.mars, 21.april, 100.prosent))
         assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         assertIngenFunksjonelleFeil(4.vedtaksperiode.filter())
     }
@@ -333,15 +339,6 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
 
         nyPeriode(21.februar til 20.mars)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-    }
-
-    @Test
-    fun `forkaster periode dersom person har vært friskmeldt mindre enn 20 dager hos annen arbeidsgiver`() = Toggle.StrengereForkastingAvInfotrygdforlengelser.enable {
-        nyPeriode(1.januar til 31.januar, a1)
-        person.søppelbøtte(hendelselogg) { true }
-
-        nyPeriode(20.februar til 20.mars, a2)
-        assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
     }
 
     private fun Periode.forkast() {

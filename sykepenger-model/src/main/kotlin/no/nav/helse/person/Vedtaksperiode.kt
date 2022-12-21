@@ -2228,27 +2228,32 @@ internal class Vedtaksperiode private constructor(
                 }
         }
 
-        internal fun forlengerForkastet(forkastede: List<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
-            if (Toggle.StrengereForkastingAvInfotrygdforlengelser.disabled) {
+        internal fun kortGapTilForkastet(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
+            if (Toggle.StrengereForkastingAvInfotrygdforlengelser.enabled) {
+                forkastede
+                    .filter { it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje()) in 2..20 }
+                    .forEach {
+                        hendelse.funksjonellFeil(RV_SØ_19) // TODO: få en egen feilkode for denne
+                        hendelse.info("Søknad har et gap som er kortere enn 20 dager til en forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
+                    }
+
+            } else {
                 val forkastedePerioderSomErForNærme = forkastede.filter {
                     it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje()) in 2..20
                 }
                 if (forkastedePerioderSomErForNærme.isNotEmpty()) {
                     sikkerlogg.info(
-                            "Denne søknaden ville blitt forkastet, den har for lite gap: ${forkastedePerioderSomErForNærme.map { it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje()) }}\n" +
-                            "søknad: ${hendelse.periode()}\n" +
-                            "forkastede vedtaksperioder: ${forkastedePerioderSomErForNærme.map { it.periode() }}"
+                        "Denne søknaden ville blitt forkastet, den har for lite gap: ${forkastedePerioderSomErForNærme.map { it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje()) }}\n" +
+                                "søknad: ${hendelse.periode()}\n" +
+                                "forkastede vedtaksperioder: ${forkastedePerioderSomErForNærme.map { it.periode() }}"
                     )
                 }
             }
+        }
+
+        internal fun forlengerForkastet(forkastede: List<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
             forkastede
-                .filter {
-                    if (Toggle.StrengereForkastingAvInfotrygdforlengelser.enabled) {
-                        return@filter it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje()) in 1 ..20
-                    } else {
-                        return@filter it.sykdomstidslinje.erRettFør(hendelse.sykdomstidslinje())
-                    }
-                }
+                .filter { it.sykdomstidslinje.erRettFør(hendelse.sykdomstidslinje()) }
                 .forEach {
                     hendelse.funksjonellFeil(RV_SØ_19)
                     hendelse.info("Søknad forlenger forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")

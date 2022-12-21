@@ -50,6 +50,10 @@ internal class ForkastetVedtaksperiode(
             Vedtaksperiode.forlengerForkastet(forkastede.perioder(), hendelse)
         }
 
+        internal fun kortGapTilForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
+            Vedtaksperiode.kortGapTilForkastet(forkastede.perioder(), hendelse)
+        }
+
         internal fun arbeidsgiverperiodeFor(
             person: Person,
             sykdomshistorikkId: UUID,
