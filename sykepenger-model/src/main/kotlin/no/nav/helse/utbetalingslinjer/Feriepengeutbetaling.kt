@@ -119,10 +119,11 @@ internal class Feriepengeutbetaling private constructor(
                 organisasjonsnummer = organisasjonsnummer,
                 utbetalingId = utbetalingId,
                 type = Utbetalingtype.FERIEPENGER.name,
+                forrigeStatus = Utbetalingstatus.fraTilstand(Utbetaling.Ubetalt).name,
+                gjeldendeStatus = Utbetalingstatus.fraTilstand(Utbetaling.Utbetalt).name,
                 arbeidsgiverOppdrag = oppdrag.toHendelseMap(),
                 personOppdrag = personoppdrag.toHendelseMap(),
-                forrigeStatus = Utbetalingstatus.fraTilstand(Utbetaling.Ubetalt).name,
-                gjeldendeStatus = Utbetalingstatus.fraTilstand(Utbetaling.Utbetalt).name
+                korrelasjonsId = UUID.randomUUID()
             )
         )
     }

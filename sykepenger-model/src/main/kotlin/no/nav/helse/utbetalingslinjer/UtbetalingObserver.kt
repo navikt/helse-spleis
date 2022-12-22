@@ -63,7 +63,8 @@ internal interface UtbetalingObserver {
         arbeidsgiverOppdrag: Oppdrag,
         personOppdrag: Oppdrag,
         forrigeTilstand: Utbetaling.Tilstand,
-        nesteTilstand: Utbetaling.Tilstand
+        nesteTilstand: Utbetaling.Tilstand,
+        korrelasjonsId: UUID
     ) {
     }
 

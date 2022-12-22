@@ -316,6 +316,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(melding.path("aktørId").asText().isNotEmpty())
         assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
         assertTrue(melding.path("utbetalingId").asText().isNotEmpty())
+        assertTrue(melding.path("korrelasjonsId").asText().isNotEmpty())
         assertTrue(melding.path("type").asText().isNotEmpty())
         assertTrue(melding.path("forrigeStatus").asText().isNotEmpty())
         assertTrue(melding.path("gjeldendeStatus").asText().isNotEmpty())

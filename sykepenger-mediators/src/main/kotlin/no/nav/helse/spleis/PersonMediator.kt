@@ -123,7 +123,8 @@ internal class PersonMediator(
             "forrigeStatus" to event.forrigeStatus,
             "gjeldendeStatus" to event.gjeldendeStatus,
             "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
-            "personOppdrag" to event.personOppdrag
+            "personOppdrag" to event.personOppdrag,
+            "korrelasjonsId" to event.korrelasjonsId
         )))
     }
 

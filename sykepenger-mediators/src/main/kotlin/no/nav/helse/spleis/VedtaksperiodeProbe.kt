@@ -21,8 +21,9 @@ object VedtaksperiodeProbe : PersonObserver {
 
     override fun utbetalingEndret(event: PersonObserver.UtbetalingEndretEvent) {
         log.info(
-            "utbetaling endret {}, {}, {}",
-            keyValue("utbetalingId", "${event.utbetalingId}"),
+            "utbetaling endret {}, {}, {}, {}",
+            keyValue("utbetalingId", event.utbetalingId),
+            keyValue("korrelasjonsId", event.korrelasjonsId),
             keyValue("status", event.gjeldendeStatus),
             keyValue("forrigeStatus", event.forrigeStatus)
         )

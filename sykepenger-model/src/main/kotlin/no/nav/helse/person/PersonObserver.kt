@@ -170,7 +170,8 @@ interface PersonObserver {
         val forrigeStatus: String,
         val gjeldendeStatus: String,
         val arbeidsgiverOppdrag: Map<String, Any?>,
-        val personOppdrag: Map<String, Any?>
+        val personOppdrag: Map<String, Any?>,
+        val korrelasjonsId: UUID
     )
 
     data class UtbetalingUtbetaltEvent(

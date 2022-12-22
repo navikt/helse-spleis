@@ -736,7 +736,8 @@ internal class Arbeidsgiver private constructor(
         arbeidsgiverOppdrag: Oppdrag,
         personOppdrag: Oppdrag,
         forrigeTilstand: Utbetaling.Tilstand,
-        nesteTilstand: Utbetaling.Tilstand
+        nesteTilstand: Utbetaling.Tilstand,
+        korrelasjonsId: UUID
     ) {
         person.utbetalingEndret(
             PersonObserver.UtbetalingEndretEvent(
@@ -747,6 +748,7 @@ internal class Arbeidsgiver private constructor(
                 gjeldendeStatus = Utbetalingstatus.fraTilstand(nesteTilstand).name,
                 arbeidsgiverOppdrag = arbeidsgiverOppdrag.toHendelseMap(),
                 personOppdrag = personOppdrag.toHendelseMap(),
+                korrelasjonsId = korrelasjonsId
             )
         )
     }

@@ -293,7 +293,7 @@ internal class Utbetaling private constructor(
         val forrigeTilstand = tilstand
         tilstand = neste
         observers.forEach {
-            it.utbetalingEndret(id, type, arbeidsgiverOppdrag, personOppdrag, forrigeTilstand, neste)
+            it.utbetalingEndret(id, type, arbeidsgiverOppdrag, personOppdrag, forrigeTilstand, neste, korrelasjonsId)
         }
         tilstand.entering(this, hendelse)
     }
