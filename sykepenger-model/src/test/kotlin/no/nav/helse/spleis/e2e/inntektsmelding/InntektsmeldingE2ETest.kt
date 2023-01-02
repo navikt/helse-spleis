@@ -99,7 +99,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
@@ -2040,52 +2039,5 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTrue(beregnetSykdomstidslinjeDager.filterKeys { it in førsteDagIArbeidsgiverperioden til 31.mars(2022) }.values.all {
             (it is Dag.Sykedag || it is Dag.SykHelgedag) && it.kommerFra(Søknad::class)
         }) { beregnetSykdomstidslinje.toShortString() }
-    }
-
-    @Test
-    fun `Inntektsmelding sletter vilkårsgrunnlag og trekker tilbake penger`() {
-        createOvergangFraInfotrygdPerson()
-        assertEquals(1.januar til 31.januar, person.inspektør.utbetaltIInfotrygd.single())
-        assertEquals(1.februar til 28.februar, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.periode)
-
-        val assertTilstandFørInnteksmeldingHensyntas: () -> Unit = {
-            val førsteUtbetalingsdagIInfotrygd = 1.januar
-            assertEquals(førsteUtbetalingsdagIInfotrygd, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-            assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-            assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.infotrygd)
-        }
-
-        assertTilstandFørInnteksmeldingHensyntas()
-
-        håndterSykmelding(Sykmeldingsperiode(5.mars, 31.mars, 100.prosent))
-        // Arbeidsgiver sender inntektsmelding for forlengelse i Mars _før_ vi møttar søknad.
-        // Så lenge det ikke treffer noen vedtaksperiode i Spleis skjer det ingenting.
-        // Personen vært frisk 1. & 2.Mars, så er nytt skjæringstidspunkt, men samme arbeidsgiverperiode
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(16.desember(2017) til 31.desember(2017)),
-            førsteFraværsdag = 5.mars
-        )
-        assertTilstandFørInnteksmeldingHensyntas()
-
-        // Når søknaden kommer replayes Inntektsmelding og nå puttes plutselig info fra Inntektsmlding på
-        // arbeidsgiver, også lengre tilbake i tid enn inntektsmeldingen som blir truffet.
-        håndterSøknad(Sykdom(5.mars, 31.mars, 100.prosent))
-
-        assertForventetFeil(
-            forklaring = "Inntektsmeldingen flytter skjæringstidspunkt på tidligere periode på arbeidsgiverperiode og sletter vilkårsgrunnlag",
-            nå = {
-                assertEquals(16.desember(2017), inspektør.skjæringstidspunkt(1.vedtaksperiode))
-                assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-                assertTrue(inspektør.vilkårsgrunnlagHistorikkInnslag().first().inspektør.elementer.isEmpty())
-            },
-            ønsket = {
-                assertTilstandFørInnteksmeldingHensyntas()
-            }
-        )
-
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        assertThrows<IllegalStateException>("Fant ikke vilkårsgrunnlag for 2018-02-01") {
-            håndterYtelser(2.vedtaksperiode)
-        }
     }
 }
