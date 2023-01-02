@@ -10,6 +10,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -56,6 +57,25 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         assertIllegalStateException("Fant ikke vilkårsgrunnlag for 2018-01-17. Må ha et vilkårsgrunnlag for å legge til utbetalingsopplysninger. Har vilkårsgrunnlag på skjæringstidspunktene [2018-01-22]") {
+            håndterYtelser(2.vedtaksperiode)
+        }
+    }
+
+    @Test
+    fun `Infotrygd utbetaler periode i forkant - Skjæringstidspunktet flytter seg`() {
+        nyttVedtak(1.februar, 28.februar)
+        assertEquals(1.februar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+
+        nyPeriode(10.mars til 31.mars)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT))
+        håndterInntektsmelding(listOf(10.mars til 26.mars))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+
+        assertIllegalStateException("Fant ikke vilkårsgrunnlag for 2018-02-01. Må ha et vilkårsgrunnlag for å legge til utbetalingsopplysninger. Har vilkårsgrunnlag på skjæringstidspunktene [2018-03-10]") {
             håndterYtelser(2.vedtaksperiode)
         }
     }
