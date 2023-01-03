@@ -126,6 +126,15 @@ internal class ArbeidsgiverperiodeBuilder(
         throw UtbetalingstidslinjeBuilderException.UforventetDagException(dag, melding)
     }
 
+    override fun visitDag(
+        dag: Dag.AndreYtelser,
+        dato: LocalDate,
+        kilde: Hendelseskilde,
+        ytelse: Dag.AndreYtelser.AnnenYtelse
+    ) {
+        super.visitDag(dag, dato, kilde, ytelse)
+    }
+
     override fun visitDag(dag: Dag.Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) {
         tilstand(Initiell)
         fridager.somFerieOppholdsdager()
