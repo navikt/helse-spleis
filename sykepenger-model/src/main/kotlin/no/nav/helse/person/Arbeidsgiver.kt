@@ -505,26 +505,44 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID? = null) {
         inntektsmelding.kontekst(this)
         if (vedtaksperiodeId != null) inntektsmelding.info("Replayer inntektsmelding til påfølgende perioder som overlapper.")
-        if (!noenHarHåndtert(inntektsmelding) { håndter(inntektsmelding, vedtaksperiodeId, vedtaksperioder.toList()) }) {
-            if (vedtaksperiodeId != null) {
-                if (!forkastede.håndterInntektsmeldingReplay(person, inntektsmelding, vedtaksperiodeId)) {
-                    inntektsmelding.info("Vedtaksperiode overlapper ikke med replayet Inntektsmelding")
-                }
-                return
-            }
-            if (sykmeldingsperioder.blirTruffetAv(inntektsmelding)) {
-                person.emitUtsettOppgaveEvent(inntektsmelding)
-            }
-            if (ForkastetVedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede, inntektsmelding)) {
-                person.opprettOppgave(
-                    PersonObserver.OpprettOppgaveEvent(
-                        hendelser = setOf(inntektsmelding.meldingsreferanseId()),
-                    )
-                )
-                inntektsmelding.info("Forkastet vedtaksperiode overlapper med uforventet inntektsmelding")
-            } else
-                inntektsmelding.info("Ingen forkastede vedtaksperioder overlapper med uforventet inntektsmelding")
+        if (Toggle.EgenHåndteringAvArbeidsgiverperiode.enabled) return håndterArbeidsgiveropplysninger(inntektsmelding, vedtaksperiodeId)
+        håndterInntektsmelding(inntektsmelding, vedtaksperiodeId)
+
+    }
+
+    private fun håndterArbeidsgiveropplysninger(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID?) {
+        val ingenHarHåndtertArbeidsgiverperioden = ingenHarHåndtert(inntektsmelding) { håndterArbeidsgiverperiode(inntektsmelding, vedtaksperiodeId, vedtaksperioder.toList()) }
+        val ingenHarHåndtertArbeidsgiveropplysninger = ingenHarHåndtert(inntektsmelding) { håndterArbeidsgiveropplysninger(inntektsmelding, vedtaksperiodeId, vedtaksperioder.toList()) }
+        if (ingenHarHåndtertArbeidsgiverperioden || ingenHarHåndtertArbeidsgiveropplysninger) {
+            inntektsmeldingIkkeHåndert(vedtaksperiodeId, inntektsmelding)
         }
+    }
+
+    private fun håndterInntektsmelding(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID?) {
+        if (ingenHarHåndtert(inntektsmelding) { håndter(inntektsmelding, vedtaksperiodeId, vedtaksperioder.toList()) }) {
+            inntektsmeldingIkkeHåndert(vedtaksperiodeId, inntektsmelding)
+        }
+    }
+
+    private fun inntektsmeldingIkkeHåndert(vedtaksperiodeId: UUID?, inntektsmelding: Inntektsmelding) {
+        if (vedtaksperiodeId != null) {
+            if (!forkastede.håndterInntektsmeldingReplay(person, inntektsmelding, vedtaksperiodeId)) {
+                inntektsmelding.info("Vedtaksperiode overlapper ikke med replayet Inntektsmelding")
+            }
+            return
+        }
+        if (sykmeldingsperioder.blirTruffetAv(inntektsmelding)) {
+            person.emitUtsettOppgaveEvent(inntektsmelding)
+        }
+        if (ForkastetVedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede, inntektsmelding)) {
+            person.opprettOppgave(
+                PersonObserver.OpprettOppgaveEvent(
+                    hendelser = setOf(inntektsmelding.meldingsreferanseId()),
+                )
+            )
+            inntektsmelding.info("Forkastet vedtaksperiode overlapper med uforventet inntektsmelding")
+        } else
+            inntektsmelding.info("Ingen forkastede vedtaksperioder overlapper med uforventet inntektsmelding")
     }
 
     internal fun håndter(inntektsmelding: InntektsmeldingReplay) {
@@ -1014,6 +1032,7 @@ internal class Arbeidsgiver private constructor(
         looper { håndtert = håndterer(it, hendelse) || håndtert }
         return håndtert
     }
+    private fun <Hendelse : IAktivitetslogg> ingenHarHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean) = !noenHarHåndtert(hendelse, håndterer)
 
     // støtter å loope over vedtaksperioder som modifiseres pga. forkasting.
     // dvs. vi stopper å iterere så snart listen har endret seg

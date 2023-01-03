@@ -262,6 +262,17 @@ internal class Vedtaksperiode private constructor(
             tilstand.håndter(this, inntektsmelding)
         }
     }
+    internal fun håndterArbeidsgiverperiode(
+        inntektsmelding: Inntektsmelding,
+        other: UUID?,
+        vedtaksperioder: List<Vedtaksperiode>
+    ): Boolean { return false }
+
+    internal fun håndterArbeidsgiveropplysninger(
+        inntektsmelding: Inntektsmelding,
+        other: UUID?,
+        vedtaksperioder: List<Vedtaksperiode>
+    ): Boolean { return false }
 
     private fun erAlleredeHensyntatt(inntektsmelding: Inntektsmelding) =
         hendelseIder.ider().contains(inntektsmelding.meldingsreferanseId())
