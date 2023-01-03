@@ -19,6 +19,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.Varselkode.RV_SØ_19
+import no.nav.helse.person.Varselkode.RV_SØ_20
 import no.nav.helse.person.Varselkode.RV_SØ_28
 import no.nav.helse.serde.serialize
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -351,6 +352,18 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         nyPeriode(22.januar til 31.januar)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
         assertFunksjonellFeil(RV_SØ_19)
+        assertIngenFunksjonellFeil(RV_SØ_28)
+    }
+
+    @Test
+    fun `søknad som har mindre enn 20 dagers gap til en forkastet periode og overlapper med en annen forkastet periode skal kun få én funksjonell feil` () = Toggle.StrengereForkastingAvInfotrygdforlengelser.enable {
+        nyPeriode(1.januar til 17.januar)
+        nyPeriode(18.januar til 31.januar)
+        person.søppelbøtte(hendelselogg, 1.januar til 31.januar)
+
+        nyPeriode(22.januar til 31.januar)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
+        assertFunksjonellFeil(RV_SØ_20)
         assertIngenFunksjonellFeil(RV_SØ_28)
     }
 

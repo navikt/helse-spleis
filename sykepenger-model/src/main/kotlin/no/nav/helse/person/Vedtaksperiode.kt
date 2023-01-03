@@ -2221,14 +2221,14 @@ internal class Vedtaksperiode private constructor(
         internal fun List<Vedtaksperiode>.medSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
             this.filter { it.skjæringstidspunkt == skjæringstidspunkt }
 
-        internal fun harNyereForkastetPeriode(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
+        internal fun harNyereForkastetPeriode(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) =
             forkastede
                 .filter { it.periode().endInclusive >= hendelse.periode().start }
-                .forEach {
+                .onEach {
                     hendelse.funksjonellFeil(RV_SØ_20)
                     hendelse.info("Søknad overlapper med, eller er før, en forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
                 }
-        }
+                .isNotEmpty()
 
         internal fun kortGapTilForkastet(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
             if (Toggle.StrengereForkastingAvInfotrygdforlengelser.enabled) {
