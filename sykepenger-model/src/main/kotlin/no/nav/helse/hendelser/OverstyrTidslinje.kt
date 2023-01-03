@@ -6,6 +6,13 @@ import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.forrigeDag
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.AAP
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Dagpenger
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Foreldrepenger
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Omsorgspenger
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Opplæringspenger
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Pleiepenger
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Svangerskapspenger
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -23,7 +30,8 @@ data class ManuellOverskrivingDag(
 }
 
 enum class Dagtype {
-    Sykedag, Feriedag, FerieUtenSykmeldingDag, Egenmeldingsdag, Permisjonsdag, Arbeidsdag, SykedagNav
+    Sykedag, Feriedag, FerieUtenSykmeldingDag, Egenmeldingsdag, Permisjonsdag, Arbeidsdag, SykedagNav,
+    Foreldrepengerdag, AAPdag, Omsorgspengerdag, Pleiepengerdag, Svangerskapspengerdag, Opplæringspengerdag, Dagpengerdag
 }
 
 class OverstyrTidslinje(
@@ -78,6 +86,48 @@ class OverstyrTidslinje(
                     sisteDato = it.dato,
                     grad = it.grad!!.prosent, // Sykedager må ha grad
                     kilde = kilde
+                )
+                Dagtype.Foreldrepengerdag -> Sykdomstidslinje.andreYtelsedager(
+                    førsteDato = it.dato,
+                    sisteDato = it.dato,
+                    kilde = kilde,
+                    ytelse = Foreldrepenger
+                )
+                Dagtype.AAPdag -> Sykdomstidslinje.andreYtelsedager(
+                    førsteDato = it.dato,
+                    sisteDato = it.dato,
+                    kilde = kilde,
+                    ytelse = AAP
+                )
+                Dagtype.Omsorgspengerdag -> Sykdomstidslinje.andreYtelsedager(
+                    førsteDato = it.dato,
+                    sisteDato = it.dato,
+                    kilde = kilde,
+                    ytelse = Omsorgspenger
+                )
+                Dagtype.Pleiepengerdag -> Sykdomstidslinje.andreYtelsedager(
+                    førsteDato = it.dato,
+                    sisteDato = it.dato,
+                    kilde = kilde,
+                    ytelse = Pleiepenger
+                )
+                Dagtype.Svangerskapspengerdag -> Sykdomstidslinje.andreYtelsedager(
+                    førsteDato = it.dato,
+                    sisteDato = it.dato,
+                    kilde = kilde,
+                    ytelse = Svangerskapspenger
+                )
+                Dagtype.Opplæringspengerdag -> Sykdomstidslinje.andreYtelsedager(
+                    førsteDato = it.dato,
+                    sisteDato = it.dato,
+                    kilde = kilde,
+                    ytelse = Opplæringspenger
+                )
+                Dagtype.Dagpengerdag -> Sykdomstidslinje.andreYtelsedager(
+                    førsteDato = it.dato,
+                    sisteDato = it.dato,
+                    kilde = kilde,
+                    ytelse = Dagpenger
                 )
             }
         }.reduce(Sykdomstidslinje::plus)

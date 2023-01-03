@@ -187,6 +187,19 @@ internal sealed class Dag(
         override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde, other, melding)
     }
+
+    internal class AndreYtelser(
+        dato: LocalDate,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde,
+        private val ytelse: AnnenYtelse,
+    ) : Dag(dato, kilde) {
+        enum class AnnenYtelse {
+            Foreldrepenger, AAP, Omsorgspenger, Pleiepenger, Svangerskapspenger, Opplæringspenger, Dagpenger
+        }
+
+        override fun accept(visitor: SykdomstidslinjeDagVisitor) =
+            visitor.visitDag(this, dato, kilde, ytelse)
+    }
 }
 
 internal interface SykdomstidslinjeDagVisitor {
@@ -251,6 +264,13 @@ internal interface SykdomstidslinjeDagVisitor {
         kilde: SykdomstidslinjeHendelse.Hendelseskilde,
         other: SykdomstidslinjeHendelse.Hendelseskilde?,
         melding: String
+    ) {
+    }
+    fun visitDag(
+        dag: Dag.AndreYtelser,
+        dato: LocalDate,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde,
+        ytelse: Dag.AndreYtelser.AnnenYtelse
     ) {
     }
 }

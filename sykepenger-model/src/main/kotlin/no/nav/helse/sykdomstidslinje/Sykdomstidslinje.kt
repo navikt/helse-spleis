@@ -19,6 +19,8 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_ST_1
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
@@ -260,6 +262,7 @@ internal class Sykdomstidslinje private constructor(
                     is FriskHelgedag -> "R"
                     is ForeldetSykedag -> "K"
                     is SykedagNav -> "N"
+                    is AndreYtelser -> "Y"
                 }
         }?.trim() ?: "Tom tidslinje"
     }
@@ -442,6 +445,17 @@ internal class Sykdomstidslinje private constructor(
             Sykdomstidslinje(
                 førsteDato.datesUntil(sisteDato.plusDays(1))
                     .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { Permisjonsdag(it, kilde) }))
+            )
+
+        internal fun andreYtelsedager(
+            førsteDato: LocalDate,
+            sisteDato: LocalDate,
+            kilde: Hendelseskilde,
+            ytelse: AnnenYtelse
+        ) =
+            Sykdomstidslinje(
+                førsteDato.datesUntil(sisteDato.plusDays(1))
+                    .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { AndreYtelser(it, kilde, ytelse) }))
             )
 
         internal fun problemdager(

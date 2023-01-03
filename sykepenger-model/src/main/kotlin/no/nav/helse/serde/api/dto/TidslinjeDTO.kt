@@ -23,7 +23,8 @@ enum class SykdomstidslinjedagType {
     PERMISJONSDAG,
     SYKEDAG,
     SYK_HELGEDAG,
-    UBESTEMTDAG
+    UBESTEMTDAG,
+    ANDRE_YTELSER
 }
 
 enum class SykdomstidslinjedagKildetype {
