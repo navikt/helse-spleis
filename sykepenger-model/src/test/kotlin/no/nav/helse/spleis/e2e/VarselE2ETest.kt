@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
+import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -18,6 +19,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.søppelbøtte
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
@@ -157,6 +159,27 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
             andreInntektskilder = true
         )
         assertFunksjonellFeil(RV_SØ_10.varseltekst, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `funksjonell feil - Periode som forlenger forkastet periode skal forkastes`() = Toggle.StrengereForkastingAvInfotrygdforlengelser.enable {
+        nyPeriode(1.januar til 19.januar)
+        person.søppelbøtte(hendelselogg, 1.januar til 19.januar)
+
+        nyPeriode(22.januar til 31.januar)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, TilstandType.START, TilstandType.TIL_INFOTRYGD)
+        assertFunksjonellFeil(Varselkode.RV_SØ_19)
+        assertIngenFunksjonellFeil(Varselkode.RV_SØ_28)
+    }
+
+    @Test
+    fun `funksjonell feil - Periode med mindre enn 20 dagers gap til forkastet periode skal forkastes`() = Toggle.StrengereForkastingAvInfotrygdforlengelser.enable {
+        nyPeriode(1.januar til 19.januar)
+        person.søppelbøtte(hendelselogg, 1.januar til 19.januar)
+
+        nyPeriode(25.januar til 31.januar)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, TilstandType.START, TilstandType.TIL_INFOTRYGD)
+        assertFunksjonellFeil(Varselkode.RV_SØ_28)
     }
 
     @Test

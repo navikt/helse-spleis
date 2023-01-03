@@ -18,6 +18,8 @@ import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.Varselkode.RV_SØ_19
+import no.nav.helse.person.Varselkode.RV_SØ_28
 import no.nav.helse.serde.serialize
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -339,6 +341,17 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
 
         nyPeriode(21.februar til 20.mars)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+    }
+
+    @Test
+    fun `person som kun har helg mellom to sykefraværstilfeller skal ikke få to funksjonelle feil når den kastes ut pga for lite gap` () = Toggle.StrengereForkastingAvInfotrygdforlengelser.enable {
+        nyPeriode(1.januar til 19.januar)
+        person.søppelbøtte(hendelselogg, 1.januar til 19.januar)
+
+        nyPeriode(22.januar til 31.januar)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
+        assertFunksjonellFeil(RV_SØ_19)
+        assertIngenFunksjonellFeil(RV_SØ_28)
     }
 
     private fun Periode.forkast() {

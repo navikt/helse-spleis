@@ -84,6 +84,7 @@ import no.nav.helse.person.Varselkode.RV_SØ_15
 import no.nav.helse.person.Varselkode.RV_SØ_16
 import no.nav.helse.person.Varselkode.RV_SØ_19
 import no.nav.helse.person.Varselkode.RV_SØ_20
+import no.nav.helse.person.Varselkode.RV_SØ_28
 import no.nav.helse.person.Varselkode.RV_UT_1
 import no.nav.helse.person.Varselkode.RV_UT_16
 import no.nav.helse.person.Varselkode.RV_UT_5
@@ -2234,7 +2235,7 @@ internal class Vedtaksperiode private constructor(
                 forkastede
                     .filter { it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje()) in 2..20 }
                     .forEach {
-                        hendelse.funksjonellFeil(RV_SØ_19) // TODO: få en egen feilkode for denne
+                        hendelse.funksjonellFeil(RV_SØ_28)
                         hendelse.info("Søknad har et gap som er kortere enn 20 dager til en forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
                     }
 
@@ -2253,14 +2254,14 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        internal fun forlengerForkastet(forkastede: List<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
+        internal fun forlengerForkastet(forkastede: List<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) =
             forkastede
                 .filter { it.sykdomstidslinje.erRettFør(hendelse.sykdomstidslinje()) }
-                .forEach {
+                .onEach {
                     hendelse.funksjonellFeil(RV_SØ_19)
                     hendelse.info("Søknad forlenger forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
                 }
-        }
+                .isNotEmpty()
 
         internal fun sjekkOmOverlapperMedForkastet(
             forkastede: Iterable<Vedtaksperiode>,

@@ -166,6 +166,8 @@ internal fun AbstractPersonTest.assertIngenVarsel(varselkode: Varselkode, vararg
 internal fun AbstractPersonTest.assertFunksjonellFeil(error: String, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertFunksjonellFeil(error, *filtre)
 internal fun AbstractPersonTest.assertFunksjonellFeil(varselkode: Varselkode, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertFunksjonellFeil(varselkode.varseltekst, *filtre)
 internal fun AbstractPersonTest.assertFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertFunksjonelleFeil(*filtre)
+internal fun AbstractPersonTest.assertIngenFunksjonellFeil(varselkode: Varselkode, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertIngenFunksjonellFeil(varselkode, *filtre)
+
 internal fun AbstractPersonTest.assertIngenFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertIngenFunksjonelleFeil(*filtre)
 internal fun AbstractPersonTest.assertLogiskFeil(severe: String, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertLogiskFeil(severe, *filtre)
 
@@ -224,10 +226,14 @@ internal fun Aktivitetslogg.assertFunksjonelleFeil(vararg filtre: Aktivitetslogg
     assertTrue(errors.isNotEmpty(), "forventet errors, fant ingen.")
 }
 
-
 internal fun Aktivitetslogg.assertIngenFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) {
     val errors = collectFunksjonelleFeil(*filtre)
     assertTrue(errors.isEmpty(), "forventet ingen errors. Errors: \n${errors.joinToString("\n")}")
+}
+
+internal fun Aktivitetslogg.assertIngenFunksjonellFeil(varselkode: Varselkode, vararg filtre: AktivitetsloggFilter) {
+    val errors = collectFunksjonelleFeil(*filtre)
+    assertFalse(errors.contains(varselkode.varseltekst), "\nFant en varselkode vi ikke forventet:\n\t$varselkode\nVarselkoder funnet:\n\t${errors.joinToString("\n\t")}\n")
 }
 
 internal fun Aktivitetslogg.assertLogiskFeil(severe: String, vararg filtre: AktivitetsloggFilter) {

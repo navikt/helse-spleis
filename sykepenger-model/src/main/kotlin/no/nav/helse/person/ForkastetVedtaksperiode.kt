@@ -46,9 +46,8 @@ internal class ForkastetVedtaksperiode(
         internal fun harNyereForkastetPeriode(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
             Vedtaksperiode.harNyereForkastetPeriode(forkastede.perioder(), hendelse)
         }
-        internal fun forlengerForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
+        internal fun forlengerForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse) =
             Vedtaksperiode.forlengerForkastet(forkastede.perioder(), hendelse)
-        }
 
         internal fun kortGapTilForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
             Vedtaksperiode.kortGapTilForkastet(forkastede.perioder(), hendelse)
