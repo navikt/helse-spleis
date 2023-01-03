@@ -1187,7 +1187,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    fun `revvurdering etter periode til godkjenning`() {
+    fun `revvurdering etter periode til godkjenning`() = Toggle.StrengereForkastingAvInfotrygdforlengelser.disable {
         håndterSykmelding(Sykmeldingsperiode(1.juni, 16.juni, 100.prosent))
         håndterSøknad(Sykdom(1.juni, 16.juni, 100.prosent))
 

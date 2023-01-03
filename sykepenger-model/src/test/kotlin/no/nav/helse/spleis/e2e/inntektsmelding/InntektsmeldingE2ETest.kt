@@ -1,8 +1,8 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -832,7 +832,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     // TODO: sanitycheck
     @Test
-    fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere forkastet periode`() {
+    fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere forkastet periode`() = Toggle.StrengereForkastingAvInfotrygdforlengelser.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar)
@@ -1578,20 +1578,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-    }
-
-    @Test
-    fun `overlappende inntektsmelding på grunn av ferie`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
-
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, LocalDateTime.now().minusYears(1))
-
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 16.februar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
     }
 
     @Test

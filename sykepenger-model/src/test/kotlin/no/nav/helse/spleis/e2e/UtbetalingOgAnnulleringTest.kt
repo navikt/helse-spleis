@@ -50,9 +50,9 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling(fagsystemId = fagsystemId)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
-        håndterSykmelding(Sykmeldingsperiode(15.februar, 15.mars, 100.prosent))
-        håndterSøknad(Sykdom(15.februar, 15.mars, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(15.februar, 2.mars)), førsteFraværsdag = 15.februar)
+        håndterSykmelding(Sykmeldingsperiode(20.februar, 20.mars, 100.prosent))
+        håndterSøknad(Sykdom(20.februar, 20.mars, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(20.februar, 7.mars)), førsteFraværsdag = 20.februar)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -60,7 +60,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertEquals(26.januar, observatør.annulleringer[0].utbetalingslinjer.last().tom)
-        assertEquals(15.mars, observatør.utbetalingMedUtbetalingEventer.last().tom)
+        assertEquals(20.mars, observatør.utbetalingMedUtbetalingEventer.last().tom)
     }
 
     @Test

@@ -52,8 +52,8 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
             besvart = LocalDate.EPOCH.atStartOfDay()
         )
 
-        håndterSykmelding(Sykmeldingsperiode(3.februar, 26.februar, 100.prosent))
-        håndterSøknad(Sykdom(3.februar, 26.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(16.februar, 5.mars, 100.prosent))
+        håndterSøknad(Sykdom(16.februar, 5.mars, 100.prosent))
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,
             *historie1,
@@ -62,9 +62,9 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         )
         håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         val historie2 = historie1 + arrayOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 26.februar, 26.mars, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.mars, 26.mars, 100.prosent, 1000.daglig)
         )
-        val inntektshistorikk2 = inntektshistorikk1 + Inntektsopplysning(ORGNUMMER, 26.februar, INNTEKT, true)
+        val inntektshistorikk2 = inntektshistorikk1 + Inntektsopplysning(ORGNUMMER, 5.mars, INNTEKT, true)
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,
             *historie2,

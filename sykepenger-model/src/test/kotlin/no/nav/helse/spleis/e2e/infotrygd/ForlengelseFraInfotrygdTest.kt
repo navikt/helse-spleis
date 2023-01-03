@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.infotrygd
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.februar
@@ -102,7 +103,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `periode utvides ikke tilbake til arbeidsgiverperiode dersom det er gap mellom`() {
+    fun `periode utvides ikke tilbake til arbeidsgiverperiode dersom det er gap mellom`() = Toggle.StrengereForkastingAvInfotrygdforlengelser.disable {
         nyPeriode(17.januar til 31.januar)
         forkastAlle(hendelselogg)
         håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar, 100.prosent))

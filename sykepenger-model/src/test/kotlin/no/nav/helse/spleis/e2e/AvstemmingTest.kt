@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -28,7 +29,7 @@ internal class AvstemmingTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 3.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 2.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 3.januar, 100.prosent))
-        nyttVedtak(5.januar, 26.januar, 100.prosent)
+        nyttVedtak(1.februar, 20.februar, 100.prosent)
         nyttVedtak(1.mars, 31.mars, 100.prosent)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.mars, Dagtype.Feriedag)))
         håndterYtelser(4.vedtaksperiode)
