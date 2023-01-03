@@ -111,7 +111,6 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjerFilter
-import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 
 internal class Vedtaksperiode private constructor(
@@ -272,7 +271,24 @@ internal class Vedtaksperiode private constructor(
         inntektsmelding: Inntektsmelding,
         other: UUID?,
         vedtaksperioder: List<Vedtaksperiode>
-    ): Boolean { return false }
+    ): Boolean {
+        val sammenhengendePerioder = arbeidsgiver.finnSammehengendeVedtaksperioder(this)
+        val overlapperMedSammengendePerioder = overlapperMedSammenhengende(inntektsmelding, sammenhengendePerioder, other, vedtaksperioder)
+        if (erAlleredeHensyntatt(inntektsmelding) || !overlapperMedSammengendePerioder) {
+            inntektsmelding.trimLeft(periode.endInclusive)
+            return overlapperMedSammengendePerioder
+        }
+
+        kontekst(inntektsmelding)
+
+        if (!inntektsmelding.erRelevant(periode, sammenhengendePerioder.map { periode -> periode.periode })) {
+            return true
+        }
+
+        person.nyeRefusjonsopplysninger(skjæringstidspunkt, inntektsmelding)
+        tilstand.håndterArbeidsgiveropplysninger(this, inntektsmelding)
+        return true
+    }
 
     private fun erAlleredeHensyntatt(inntektsmelding: Inntektsmelding) =
         hendelseIder.ider().contains(inntektsmelding.meldingsreferanseId())
@@ -527,6 +543,14 @@ internal class Vedtaksperiode private constructor(
         hendelse.info("Fullført behandling av inntektsmelding")
         if (hendelse.harFunksjonelleFeilEllerVerre()) return forkast(hendelse)
         tilstand(hendelse, nesteTilstand())
+    }
+
+    private fun håndterArbeidsgiveropplysninger(inntektsmelding: Inntektsmelding, nesteTilstand: () -> Vedtaksperiodetilstand) {
+        inntektsmeldingInfo = arbeidsgiver.addInntektsmelding(skjæringstidspunkt, inntektsmelding, jurist())
+        inntektsmelding.valider(periode, skjæringstidspunkt, finnArbeidsgiverperiode(), jurist())
+        inntektsmelding.info("Fullført behandling av inntektsmelding")
+        if (inntektsmelding.harFunksjonelleFeilEllerVerre()) return forkast(inntektsmelding)
+        tilstand(inntektsmelding, nesteTilstand())
     }
 
     private fun oppdaterHistorikk(hendelse: SykdomstidslinjeHendelse) {
@@ -968,6 +992,14 @@ internal class Vedtaksperiode private constructor(
             inntektsmelding.varsel(RV_IM_4)
         }
 
+        fun håndterArbeidsgiveropplysninger(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            inntektsmelding.trimLeft(vedtaksperiode.periode.endInclusive)
+            inntektsmelding.varsel(RV_IM_4)
+        }
+        fun håndterArbeidsgiverperiode(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+
+        }
+
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             vilkårsgrunnlag.info("Forventet ikke vilkårsgrunnlag i %s".format(type.name))
             vilkårsgrunnlag.funksjonellFeil(RV_VT_2)
@@ -1367,6 +1399,15 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndterInntektsmelding(inntektsmelding) {
+                when {
+                    !vedtaksperiode.arbeidsgiver.kanBeregneSykepengegrunnlag(vedtaksperiode.skjæringstidspunkt) -> AvsluttetUtenUtbetaling
+                    else -> AvventerBlokkerendePeriode
+                }
+            }
+        }
+
+        override fun håndterArbeidsgiveropplysninger(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            vedtaksperiode.håndterArbeidsgiveropplysninger(inntektsmelding) {
                 when {
                     !vedtaksperiode.arbeidsgiver.kanBeregneSykepengegrunnlag(vedtaksperiode.skjæringstidspunkt) -> AvsluttetUtenUtbetaling
                     else -> AvventerBlokkerendePeriode
