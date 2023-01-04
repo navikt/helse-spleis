@@ -23,8 +23,8 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTes
         assertEquals(UNG_PERSON_FNR_2018, event["fødselsnummer"].asText())
         assertEquals(ORGNUMMER, event["organisasjonsnummer"].asText())
 
-        assertEquals(1.januar, event["fom"].asLocalDate())
-        assertEquals(31.januar, event["tom"].asLocalDate())
+        assertEquals(1.januar, event["sykmeldingsperioder"][0]["fom"].asLocalDate())
+        assertEquals(31.januar, event["sykmeldingsperioder"][0]["tom"].asLocalDate())
 
         val forespurteOpplysninger = event["forespurteOpplysninger"].asIterable().toList()
         assertEquals("Inntekt", forespurteOpplysninger[0]["opplysningstype"].asText())

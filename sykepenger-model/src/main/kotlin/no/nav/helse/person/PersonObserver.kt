@@ -89,17 +89,20 @@ interface PersonObserver {
 
     class TrengerArbeidsgiveropplysningerEvent(
         val organisasjonsnummer: String,
-        val fom: LocalDate,
-        val tom: LocalDate,
         val vedtaksperiodeId: UUID,
+        val sykmeldingsperioder: List<Periode>,
         val forespurteOpplysninger: List<ForespurtOpplysning>
     ) {
         fun toJsonMap(): Map<String, Any> =
             mapOf(
                 "organisasjonsnummer" to organisasjonsnummer,
-                "fom" to fom,
-                "tom" to tom,
                 "vedtaksperiodeId" to vedtaksperiodeId,
+                "sykmeldingsperioder" to sykmeldingsperioder.map {
+                    mapOf(
+                        "fom" to it.start,
+                        "tom" to it.endInclusive
+                    )
+                },
                 "forespurteOpplysninger" to forespurteOpplysninger.toJsonMap()
 
             )

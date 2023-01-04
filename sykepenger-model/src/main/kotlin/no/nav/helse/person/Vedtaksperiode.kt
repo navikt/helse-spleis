@@ -640,8 +640,7 @@ internal class Vedtaksperiode private constructor(
         person.trengerArbeidsgiveropplysninger(
             PersonObserver.TrengerArbeidsgiveropplysningerEvent(
                 organisasjonsnummer = organisasjonsnummer,
-                fom = periode.start,
-                tom = periode.endInclusive,
+                sykmeldingsperioder = listOf(periode.start til periode.endInclusive), // TODO: skal inneholde skmeldingsperiodene til alle vedtaksperioder som deler arbeidsgiverperiode
                 vedtaksperiodeId = id,
                 forespurteOpplysninger = forespurteOpplysninger.toList()
             )

@@ -89,7 +89,7 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sender med riktig forslag til arbeidsgiverperiode når arbeidsperioden er stykket opp i flere korte perioder`() {
+    fun `sender med riktig sykmeldingsperioder og forslag til arbeidsgiverperiode når arbeidsperioden er stykket opp i flere korte perioder`() {
         nyPeriode(1.januar til 7.januar)
         nyPeriode(9.januar til 14.januar)
         nyPeriode(16.januar til 21.januar)
@@ -111,8 +111,25 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
                 16.januar til 18.januar
             ))
         )
-        val actualForespurteOpplysninger = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
-        assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
+
+        val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
+        assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
+        assertForventetFeil(
+            forklaring = "Vi skal sende med sykmeldingsperiodene til alle vedtaksperioder som deler AGP",
+            nå = {
+                val expectedSykmeldingsperioder = listOf(16.januar til 21.januar)
+                assertEquals(expectedSykmeldingsperioder, trengerArbeidsgiveropplysningerEvent.sykmeldingsperioder)
+            },
+            ønsket = {
+                val expectedSykmeldingsperioder = listOf(
+                    1.januar til 7.januar,
+                    9.januar til 14. januar,
+                    16.januar til 21.januar
+                )
+                assertEquals(expectedSykmeldingsperioder, trengerArbeidsgiveropplysningerEvent.sykmeldingsperioder)
+            }
+        )
+
 
         assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
