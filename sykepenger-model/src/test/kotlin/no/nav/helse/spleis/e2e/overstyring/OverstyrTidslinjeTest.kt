@@ -39,6 +39,7 @@ import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -54,6 +55,7 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.manuellArbeidsgiverdag
 import no.nav.helse.spleis.e2e.manuellFeriedag
+import no.nav.helse.spleis.e2e.manuellForeldrepengedag
 import no.nav.helse.spleis.e2e.manuellPermisjonsdag
 import no.nav.helse.spleis.e2e.manuellSykedag
 import no.nav.helse.spleis.e2e.nyPeriode
@@ -559,6 +561,25 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(17.januar, førsteUtbetalingsdagEtterOverstyring)
     }
 
+    @Test
+    fun `overstyring av andre ytelser`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterOverstyrTidslinje((17.januar til 19.januar).map { manuellForeldrepengedag(it) })
+        assertEquals("SSSSSHH SSSSSHH SSYYYHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        håndterYtelser(1.vedtaksperiode)
+        /*   håndterSimulering(1.vedtaksperiode)
+           håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+           håndterUtbetalt()*/
+
+
+
+        // assert at arbeidsgiverperioden er 1 til 16.januar
+        // assert at skjæringstidspunkt er 1.januar
+        // assert at det kun er en vedtaksperiode
+        // assert på at det er null utbetaling fra 17 til 19.
+
+    }
 
     private fun assertSykdomstidslinjedag(dato: LocalDate, dagtype: KClass<out Dag>, kommerFra: KClass<out SykdomstidslinjeHendelse>) {
         val dagen = inspektør.sykdomstidslinje[dato]
