@@ -20,6 +20,9 @@ spec:
           application: dataprodukt-forstegangsbehandling
           access: readwrite
         - team: tbd
+          application: dataprodukt-iverksettelser
+          access: readwrite
+        - team: tbd
           application: spre-subsumsjon
           access: readwrite
         - team: tbd
