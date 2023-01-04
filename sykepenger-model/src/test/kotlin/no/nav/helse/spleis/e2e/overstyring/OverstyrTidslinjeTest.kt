@@ -568,17 +568,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals("SSSSSHH SSSSSHH SSYYYHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         håndterYtelser(1.vedtaksperiode)
-        /*   håndterSimulering(1.vedtaksperiode)
-           håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-           håndterUtbetalt()*/
-
-
-
-        // assert at arbeidsgiverperioden er 1 til 16.januar
-        // assert at skjæringstidspunkt er 1.januar
-        // assert at det kun er en vedtaksperiode
-        // assert på at det er null utbetaling fra 17 til 19.
-
+        assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
     }
 
     private fun assertSykdomstidslinjedag(dato: LocalDate, dagtype: KClass<out Dag>, kommerFra: KClass<out SykdomstidslinjeHendelse>) {
