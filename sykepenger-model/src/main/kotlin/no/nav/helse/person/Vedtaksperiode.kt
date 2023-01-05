@@ -266,7 +266,9 @@ internal class Vedtaksperiode private constructor(
         arbeidsgiverperiode: Inntektsmelding.ArbeidsgiverperiodeFraIM
     ): Boolean {
         kontekst(inntektsmelding)
-        return tilstand.håndterArbeidsgiverperiode(this, inntektsmelding, arbeidsgiverperiode)
+        return tilstand.håndterArbeidsgiverperiode(this, inntektsmelding, arbeidsgiverperiode).also {
+            inntektsmelding.trimLeft(periode.endInclusive)
+        }
     }
 
     internal fun håndterInntektOgRefusjon(inntektsmelding: Inntektsmelding): Boolean {
@@ -993,7 +995,6 @@ internal class Vedtaksperiode private constructor(
             inntektsmelding: Inntektsmelding,
             arbeidsgiverperiode: Inntektsmelding.ArbeidsgiverperiodeFraIM
         ): Boolean {
-            inntektsmelding.trimLeft(vedtaksperiode.periode.endInclusive)
             return false
         }
 
@@ -2030,7 +2031,10 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        override fun håndterInntektOgRefusjon(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {}
+        override fun håndterInntektOgRefusjon(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            vedtaksperiode.håndterInntektOgRefusjon(inntektsmelding) { this }
+            vedtaksperiode.person.gjenopptaBehandling(inntektsmelding)
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             val filter = if (Toggle.InntektsmeldingKanTriggeRevurdering.enabled) NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING else NYERE_ELLER_SAMME_SKJÆRINGSTIDSPUNKT_ER_UTBETALT

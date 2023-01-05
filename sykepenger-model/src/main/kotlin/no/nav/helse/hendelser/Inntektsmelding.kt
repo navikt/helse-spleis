@@ -205,7 +205,7 @@ class Inntektsmelding(
         internal fun håndter(inntektsmelding: Inntektsmelding, periode: Periode, arbeidsgiver: Arbeidsgiver) {
             val overlappendeDager = periode.intersect(gjenståendeDager)
             if (overlappendeDager.isEmpty()) return
-            val dagerÅLeggetil = SubsetAvArbeidsgiverperiodeDagerFraIM(inntektsmelding, overlappendeDager.grupperSammenhengendePerioder())
+            val dagerÅLeggetil = SubsetAvArbeidsgiverperiodeDagerFraIM(inntektsmelding, listOf(overlappendeDager.min() til overlappendeDager.max()))
             arbeidsgiver.oppdaterSykdom(dagerÅLeggetil)
             gjenståendeDager.removeAll(overlappendeDager)
         }

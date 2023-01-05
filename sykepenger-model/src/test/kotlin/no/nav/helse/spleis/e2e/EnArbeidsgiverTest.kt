@@ -167,8 +167,8 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
 
-        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
 
         assertTilstander(
             1.vedtaksperiode,

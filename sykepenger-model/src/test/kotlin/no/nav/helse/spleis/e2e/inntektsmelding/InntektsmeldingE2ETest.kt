@@ -2026,4 +2026,28 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             (it is Dag.Sykedag || it is Dag.SykHelgedag) && it.kommerFra(Søknad::class)
         }) { beregnetSykdomstidslinje.toShortString() }
     }
+
+    @Test
+    fun `frisk helgedag -- kort arbeidsgiverperiode`() {
+        nyPeriode(1.januar til 31.januar)
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 4.januar, 8.januar til 16.januar))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        inspektør.sykdomshistorikk.sykdomstidslinje().inspektør.dager.let {
+            assertTrue(it[5.januar] is Dag.Arbeidsdag)
+            assertTrue(it[6.januar] is Dag.FriskHelgedag)
+            assertTrue(it[7.januar] is Dag.FriskHelgedag)
+        }
+    }
+
+    @Test
+    fun `frisk helgedag`() {
+        nyPeriode(1.januar til 31.januar)
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 4.januar, 8.januar til 19.januar))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        inspektør.sykdomshistorikk.sykdomstidslinje().inspektør.dager.let {
+            assertTrue(it[5.januar] is Dag.Arbeidsdag)
+            assertTrue(it[6.januar] is Dag.FriskHelgedag)
+            assertTrue(it[7.januar] is Dag.FriskHelgedag)
+        }
+    }
 }
