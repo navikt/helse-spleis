@@ -188,7 +188,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         arbeidsgiverperioder: List<Periode> = listOf(Periode(1.januar, 16.januar))
     ) = a1Hendelsefabrikk.lagInntektsmelding(
             refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-            førsteFraværsdag = 1.januar,
+            førsteFraværsdag = arbeidsgiverperioder.first().start,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = arbeidsgiverperioder,
             arbeidsforholdId = null,

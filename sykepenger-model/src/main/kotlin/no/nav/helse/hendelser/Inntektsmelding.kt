@@ -4,11 +4,13 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.forrigeDag
+import no.nav.helse.førsteArbeidsdag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.cacheRefusjon
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.endrerRefusjon
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.refusjonshistorikkRefusjon
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
+import no.nav.helse.nesteArbeidsdag
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
@@ -68,6 +70,11 @@ class Inntektsmelding(
         else -> arbeidsgiverperiode
     }
     private var sykdomstidslinje: Sykdomstidslinje
+
+    internal fun skalHåndtereInntektOgRefusjon(periode: Periode): Boolean {
+        if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) return førsteFraværsdag in periode
+        return arbeidsgiverperiode!!.endInclusive.nesteDag in periode
+    }
 
     init {
         if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) logiskFeil("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
@@ -196,15 +203,19 @@ class Inntektsmelding(
         builder.leggTilRefusjonsopplysninger(organisasjonsnummer, refusjon.refusjonsopplysninger(meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder))
     }
 
-    internal fun arbeidsgiverperiodeFraIM(): ArbeidsgiverperiodeFraIM {
-        if (arbeidsgiverperiode == null) {
+    internal fun arbeidsgiverperiodeFraIM(): ArbeidsgiverperiodeFraIM { // 🦉
+        val førsteDagNevntIInntektsmeldingen = listOfNotNull(arbeidsgiverperiode?.start, førsteFraværsdag).min()
+        val sisteDagNevntIInntektsmeldingen = listOfNotNull(arbeidsgiverperiode?.endInclusive, førsteFraværsdag).max()
+        val periode = førsteDagNevntIInntektsmeldingen til sisteDagNevntIInntektsmeldingen
+        return ArbeidsgiverperiodeFraIM(periode.toList())
+        /*if (arbeidsgiverperiode == null) {
             return ArbeidsgiverperiodeFraIM(listOf(førsteFraværsdag!!))
         }
         if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) {
             val gråsonen = arbeidsgiverperiode.endInclusive.nesteDag til førsteFraværsdag
             return ArbeidsgiverperiodeFraIM(arbeidsgiverperioder.flatten() + gråsonen)
         }
-        return ArbeidsgiverperiodeFraIM(arbeidsgiverperioder.flatten())
+        return ArbeidsgiverperiodeFraIM(arbeidsgiverperioder.flatten())*/
     }
 
     class ArbeidsgiverperiodeFraIM constructor(opprinneligeDager: List<LocalDate>) {

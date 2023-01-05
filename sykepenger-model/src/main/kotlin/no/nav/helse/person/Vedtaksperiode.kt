@@ -272,10 +272,9 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndterInntektOgRefusjon(inntektsmelding: Inntektsmelding): Boolean {
-        val overlapper = overlapperMed(inntektsmelding)
-        if (erAlleredeHensyntatt(inntektsmelding) || !overlapper) {
-            inntektsmelding.trimLeft(periode.endInclusive)
-            return overlapper
+        val håndtererInntektOgRefusjon = inntektsmelding.skalHåndtereInntektOgRefusjon(periode)
+        if (erAlleredeHensyntatt(inntektsmelding) || !håndtererInntektOgRefusjon) {
+            return håndtererInntektOgRefusjon
         }
         inntektsmelding.leggTil(hendelseIder)
         kontekst(inntektsmelding)
@@ -1422,6 +1421,7 @@ internal class Vedtaksperiode private constructor(
         ): Boolean {
             vedtaksperiode.periode = inntektsmelding.oppdaterFom(vedtaksperiode.periode)
             arbeidsgiverperiode.håndter(inntektsmelding, vedtaksperiode.periode, vedtaksperiode.arbeidsgiver)
+            if (!vedtaksperiode.forventerInntekt()) vedtaksperiode.tilstand(inntektsmelding, AvsluttetUtenUtbetaling)
             return true
         }
 
