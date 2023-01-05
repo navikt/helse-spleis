@@ -515,7 +515,21 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun håndterInntektsmeldingOppdelt(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID?) {
-        throw IllegalStateException("Ikke implementert")
+        val dager = inntektsmelding.dager
+        val noenHarHåndtertDager = noenHarHåndtert(inntektsmelding) {
+            håndter(dager).also { håndter ->
+                if (håndter) dager.håndterFør(periode(), this@Arbeidsgiver)
+            }
+        }
+        if (noenHarHåndtertDager) dager.håndterGjenstående(this@Arbeidsgiver)
+
+        val inntektOgRefusjon = inntektsmelding.inntektOgRefusjon
+        val enHarHåndtertInntektOgRefusjon = énHarHåndtert(inntektsmelding) {
+            håndter(inntektOgRefusjon)
+        }
+
+        if (noenHarHåndtertDager || enHarHåndtertInntektOgRefusjon) return
+        inntektsmeldingIkkeHåndtert(inntektsmelding, vedtaksperiodeId)
     }
 
     private fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID?) {

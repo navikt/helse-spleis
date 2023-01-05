@@ -21,6 +21,8 @@ import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
+import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
@@ -111,7 +113,6 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjerFilter
-import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 
 internal class Vedtaksperiode private constructor(
@@ -261,6 +262,14 @@ internal class Vedtaksperiode private constructor(
             person.nyeRefusjonsopplysninger(skjæringstidspunkt, inntektsmelding)
             tilstand.håndter(this, inntektsmelding)
         }
+    }
+
+    internal fun håndter(dager: DagerFraInntektsmelding): Boolean {
+        return false
+    }
+
+    internal fun håndter(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding): Boolean {
+        return false
     }
 
     private fun erAlleredeHensyntatt(inntektsmelding: Inntektsmelding) =

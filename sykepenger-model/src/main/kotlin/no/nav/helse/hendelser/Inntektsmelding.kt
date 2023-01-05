@@ -9,6 +9,8 @@ import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companio
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.refusjonshistorikkRefusjon
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
+import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
+import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
@@ -285,4 +287,12 @@ class Inntektsmelding(
             endringerIRefusjon.cacheRefusjon(refusjonshistorikk, meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, opphørsdato)
         }
     }
+
+    internal val dager: DagerFraInntektsmelding
+        get() {
+            val førsteDag = listOfNotNull(arbeidsgiverperiode?.start, førsteFraværsdag).min()
+            val sisteDag = listOfNotNull(arbeidsgiverperiode?.endInclusive, førsteDag).max()
+            return DagerFraInntektsmelding(this, førsteDag til sisteDag)
+        }
+    internal val inntektOgRefusjon get() = InntektOgRefusjonFraInntektsmelding()
 }
