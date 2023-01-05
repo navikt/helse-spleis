@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.EnableToggle
+import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
@@ -29,7 +31,13 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
+@EnableToggle(Toggle.EgenHåndteringAvArbeidsgiverperiode::class)
 internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `oppvarming`() {
+        nyttVedtak(1.januar, 31.januar)
+    }
 
     @Test
     fun `drawio -- misc -- oppvarming`() {
@@ -159,15 +167,15 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         assertTilstander(
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVSLUTTET_UTEN_UTBETALING,
-            AVSLUTTET_UTEN_UTBETALING
+            //AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
     }

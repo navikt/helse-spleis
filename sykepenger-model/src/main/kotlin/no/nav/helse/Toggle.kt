@@ -128,5 +128,5 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object StrengereForkastingAvInfotrygdforlengelser : Toggle(true)
     object InntektsmeldingKanTriggeRevurdering: Toggle("InntektsmeldingKanTriggeRevurdering", false)
 
-    object EgenHåndteringAvArbeidsgiverperiode: Toggle()
+    object EgenHåndteringAvArbeidsgiverperiode: Toggle(true)
 }

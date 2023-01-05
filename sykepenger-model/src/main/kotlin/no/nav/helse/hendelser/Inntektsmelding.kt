@@ -196,6 +196,53 @@ class Inntektsmelding(
         builder.leggTilRefusjonsopplysninger(organisasjonsnummer, refusjon.refusjonsopplysninger(meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder))
     }
 
+    val arbeidsgiverperiodeFraIM get() = ArbeidsgiverperiodeFraIM(arbeidsgiverperioder)
+
+    class ArbeidsgiverperiodeFraIM constructor(arbeidsgiverperioder: List<Periode>) {
+        private val opprinneligeDager = arbeidsgiverperioder.flatten()
+        private val gjenståendeDager = opprinneligeDager.toMutableSet()
+
+        internal fun håndter(inntektsmelding: Inntektsmelding, periode: Periode, arbeidsgiver: Arbeidsgiver) {
+            val overlappendeDager = periode.intersect(gjenståendeDager)
+            if (overlappendeDager.isEmpty()) return
+            val dagerÅLeggetil = SubsetAvArbeidsgiverperiodeDagerFraIM(inntektsmelding, overlappendeDager.grupperSammenhengendePerioder())
+            arbeidsgiver.oppdaterSykdom(dagerÅLeggetil)
+            gjenståendeDager.removeAll(overlappendeDager)
+        }
+
+        internal fun håndterGjenståendeDager(inntektsmelding: Inntektsmelding, arbeidsgiver: Arbeidsgiver) {
+            if (opprinneligeDager == gjenståendeDager) return
+            if (gjenståendeDager.isEmpty()) return
+            val gjenståendeArbeidsgiverperiodeDager =
+                SubsetAvArbeidsgiverperiodeDagerFraIM(inntektsmelding, gjenståendeDager.grupperSammenhengendePerioder())
+            arbeidsgiver.oppdaterSykdom(gjenståendeArbeidsgiverperiodeDager)
+        }
+    }
+
+    // TODO: Burde se på å lage en bedre måte å legge på gjenstående arbeidsgiverperiodedager enn en "fiktiv" sykomstidslinjehendelse
+    private class SubsetAvArbeidsgiverperiodeDagerFraIM(val inntektsmelding: Inntektsmelding, val perioder: List<Periode>) :
+        SykdomstidslinjeHendelse(inntektsmelding.meldingsreferanseId(), inntektsmelding) {
+
+        override fun sykdomstidslinje(): Sykdomstidslinje {
+            return perioder.fold(Sykdomstidslinje()) { sykdomstidslinje, periode ->
+                sykdomstidslinje + inntektsmelding.sykdomstidslinje.subset(periode)
+            }
+        }
+
+        override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
+            throw IllegalStateException("Bruker ikke dette")
+        }
+
+        override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
+            throw IllegalStateException("Bruker ikke dette")
+        }
+
+
+        override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
+            throw IllegalStateException("Bruker ikke dette")
+        }
+    }
+
     class Refusjon(
         private val beløp: Inntekt?,
         private val opphørsdato: LocalDate?,
