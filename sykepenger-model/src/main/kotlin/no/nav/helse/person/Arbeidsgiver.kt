@@ -505,26 +505,52 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID? = null) {
         inntektsmelding.kontekst(this)
         if (vedtaksperiodeId != null) inntektsmelding.info("Replayer inntektsmelding til påfølgende perioder som overlapper.")
-        if (!noenHarHåndtert(inntektsmelding) { håndter(inntektsmelding, vedtaksperiodeId, vedtaksperioder.toList()) }) {
-            if (vedtaksperiodeId != null) {
-                if (!forkastede.håndterInntektsmeldingReplay(person, inntektsmelding, vedtaksperiodeId)) {
-                    inntektsmelding.info("Vedtaksperiode overlapper ikke med replayet Inntektsmelding")
-                }
-                return
+        if (Toggle.HåndterInntektsmeldingOppdelt.enabled) return håndterInntektsmeldingOppdelt(inntektsmelding, vedtaksperiodeId)
+        håndterInntektsmelding(inntektsmelding, vedtaksperiodeId)
+    }
+
+    private fun håndterInntektsmelding(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID?) {
+        if (noenHarHåndtert(inntektsmelding) { håndter(inntektsmelding, vedtaksperiodeId, vedtaksperioder.toList()) }) return
+        inntektsmeldingIkkeHåndtert(inntektsmelding, vedtaksperiodeId)
+    }
+
+    private fun håndterInntektsmeldingOppdelt(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID?) {
+        val dager = inntektsmelding.dager
+        val noenHarHåndtertDager = noenHarHåndtert(inntektsmelding) {
+            håndter(dager).also { håndtert ->
+                if (håndtert) dager.håndterGjenståendeFør(periode(), this@Arbeidsgiver)
             }
-            if (sykmeldingsperioder.blirTruffetAv(inntektsmelding)) {
-                person.emitUtsettOppgaveEvent(inntektsmelding)
-            }
-            if (ForkastetVedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede, inntektsmelding)) {
-                person.opprettOppgave(
-                    PersonObserver.OpprettOppgaveEvent(
-                        hendelser = setOf(inntektsmelding.meldingsreferanseId()),
-                    )
-                )
-                inntektsmelding.info("Forkastet vedtaksperiode overlapper med uforventet inntektsmelding")
-            } else
-                inntektsmelding.info("Ingen forkastede vedtaksperioder overlapper med uforventet inntektsmelding")
         }
+        if (noenHarHåndtertDager) dager.håndterGjenstående(this@Arbeidsgiver)
+
+        val inntektOgRefusjon = inntektsmelding.inntektOgRefusjon
+        val enHarHåndtertInntektOgRefusjon = énHarHåndtert(inntektsmelding) {
+            håndter(inntektOgRefusjon)
+        }
+
+        if (noenHarHåndtertDager || enHarHåndtertInntektOgRefusjon) return
+        inntektsmeldingIkkeHåndtert(inntektsmelding, vedtaksperiodeId)
+    }
+
+    private fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID?) {
+        if (vedtaksperiodeId != null) {
+            if (!forkastede.håndterInntektsmeldingReplay(person, inntektsmelding, vedtaksperiodeId)) {
+                inntektsmelding.info("Vedtaksperiode overlapper ikke med replayet Inntektsmelding")
+            }
+            return
+        }
+        if (sykmeldingsperioder.blirTruffetAv(inntektsmelding)) {
+            person.emitUtsettOppgaveEvent(inntektsmelding)
+        }
+        if (ForkastetVedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede, inntektsmelding)) {
+            person.opprettOppgave(
+                PersonObserver.OpprettOppgaveEvent(
+                    hendelser = setOf(inntektsmelding.meldingsreferanseId()),
+                )
+            )
+            inntektsmelding.info("Forkastet vedtaksperiode overlapper med uforventet inntektsmelding")
+        } else
+            inntektsmelding.info("Ingen forkastede vedtaksperioder overlapper med uforventet inntektsmelding")
     }
 
     internal fun håndter(inntektsmelding: InntektsmeldingReplay) {

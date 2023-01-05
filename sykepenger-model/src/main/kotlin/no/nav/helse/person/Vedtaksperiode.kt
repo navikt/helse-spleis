@@ -21,6 +21,8 @@ import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
+import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
@@ -262,8 +264,30 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
+    internal fun håndter(dager: DagerFraInntektsmelding): Boolean {
+        kontekst(dager)
+        return tilstand.håndter(this, dager).also {
+            dager.trimLeft(periode.endInclusive)
+        }
+    }
+
+    internal fun håndter(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding): Boolean {
+        val skalHåndtereInntektOgRefusjon = inntektOgRefusjon.skalHåndteresAv(periode)
+        if (erAlleredeHensyntatt(inntektOgRefusjon) || !skalHåndtereInntektOgRefusjon) {
+            return skalHåndtereInntektOgRefusjon
+        }
+        inntektOgRefusjon.leggTil(hendelseIder)
+        kontekst(inntektOgRefusjon)
+        inntektOgRefusjon.nyeRefusjonsopplysninger(skjæringstidspunkt, person)
+        tilstand.håndter(this, inntektOgRefusjon)
+        return true
+    }
+
     private fun erAlleredeHensyntatt(inntektsmelding: Inntektsmelding) =
         hendelseIder.ider().contains(inntektsmelding.meldingsreferanseId())
+
+    private fun erAlleredeHensyntatt(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) =
+        hendelseIder.ider().contains(inntektOgRefusjon.meldingsreferanseId())
 
     internal fun håndterHistorikkFraInfotrygd(hendelse: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
         tilstand.håndter(person, arbeidsgiver, this, hendelse, infotrygdhistorikk)
@@ -954,6 +978,14 @@ internal class Vedtaksperiode private constructor(
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             inntektsmelding.trimLeft(vedtaksperiode.periode.endInclusive)
             inntektsmelding.varsel(RV_IM_4)
+        }
+
+        fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
+            return false
+        }
+
+        fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
+
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
