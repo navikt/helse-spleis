@@ -292,7 +292,11 @@ class Inntektsmelding(
         get() {
             val førsteDag = listOfNotNull(arbeidsgiverperiode?.start, førsteFraværsdag).min()
             val sisteDag = listOfNotNull(arbeidsgiverperiode?.endInclusive, førsteDag).max()
-            return DagerFraInntektsmelding(this, førsteDag til sisteDag)
+            return DagerFraInntektsmelding(this, førsteDag, sisteDag)
         }
-    internal val inntektOgRefusjon get() = InntektOgRefusjonFraInntektsmelding()
+    internal val inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding
+        get() {
+            val sisteDagIArbeidsgiverperioden = arbeidsgiverperiode?.endInclusive
+            return InntektOgRefusjonFraInntektsmelding(this, førsteFraværsdag, sisteDagIArbeidsgiverperioden)
+        }
 }
