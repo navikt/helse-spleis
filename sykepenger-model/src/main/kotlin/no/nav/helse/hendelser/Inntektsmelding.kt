@@ -196,10 +196,18 @@ class Inntektsmelding(
         builder.leggTilRefusjonsopplysninger(organisasjonsnummer, refusjon.refusjonsopplysninger(meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder))
     }
 
-    val arbeidsgiverperiodeFraIM get() = ArbeidsgiverperiodeFraIM(arbeidsgiverperioder)
+    internal fun arbeidsgiverperiodeFraIM(): ArbeidsgiverperiodeFraIM {
+        if (arbeidsgiverperiode == null) {
+            return ArbeidsgiverperiodeFraIM(listOf(førsteFraværsdag!!))
+        }
+        if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) {
+            val gråsonen = arbeidsgiverperiode.endInclusive.nesteDag til førsteFraværsdag
+            return ArbeidsgiverperiodeFraIM(arbeidsgiverperioder.flatten() + gråsonen)
+        }
+        return ArbeidsgiverperiodeFraIM(arbeidsgiverperioder.flatten())
+    }
 
-    class ArbeidsgiverperiodeFraIM constructor(arbeidsgiverperioder: List<Periode>) {
-        private val opprinneligeDager = arbeidsgiverperioder.flatten()
+    class ArbeidsgiverperiodeFraIM constructor(opprinneligeDager: List<LocalDate>) {
         private val gjenståendeDager = opprinneligeDager.toMutableSet()
 
         internal fun håndter(inntektsmelding: Inntektsmelding, periode: Periode, arbeidsgiver: Arbeidsgiver) {
@@ -211,17 +219,26 @@ class Inntektsmelding(
         }
 
         internal fun håndterGjenståendeDager(inntektsmelding: Inntektsmelding, arbeidsgiver: Arbeidsgiver) {
-            if (opprinneligeDager == gjenståendeDager) return
+            // if (opprinneligeDager.containsAll(gjenståendeDager)) return // vi har blitt opplyst om en arbeidsgiverperiode som ikke er håndtert av noen vedtaksperioder
             if (gjenståendeDager.isEmpty()) return
             val gjenståendeArbeidsgiverperiodeDager =
-                SubsetAvArbeidsgiverperiodeDagerFraIM(inntektsmelding, gjenståendeDager.grupperSammenhengendePerioder())
+                SubsetAvArbeidsgiverperiodeDagerFraIM(inntektsmelding, listOf(gjenståendeDager.min() til gjenståendeDager.max()))
             arbeidsgiver.oppdaterSykdom(gjenståendeArbeidsgiverperiodeDager)
+        }
+
+        internal fun håndterGjenståendeDagerFør(periode: Periode, inntektsmelding: Inntektsmelding, arbeidsgiver: Arbeidsgiver) {
+            val gjenståendeDagerFør = gjenståendeDager.filter { it < periode.start }
+            if (gjenståendeDagerFør.isEmpty()) return
+            val gjenståendeArbeidsgiverperiodeDager =
+                SubsetAvArbeidsgiverperiodeDagerFraIM(inntektsmelding, listOf(gjenståendeDagerFør.min() til gjenståendeDagerFør.max()))
+            arbeidsgiver.oppdaterSykdom(gjenståendeArbeidsgiverperiodeDager)
+            gjenståendeDager.removeAll(gjenståendeDagerFør)
         }
     }
 
     // TODO: Burde se på å lage en bedre måte å legge på gjenstående arbeidsgiverperiodedager enn en "fiktiv" sykomstidslinjehendelse
     private class SubsetAvArbeidsgiverperiodeDagerFraIM(val inntektsmelding: Inntektsmelding, val perioder: List<Periode>) :
-        SykdomstidslinjeHendelse(inntektsmelding.meldingsreferanseId(), inntektsmelding) {
+        SykdomstidslinjeHendelse(UUID.randomUUID(), inntektsmelding) { // Hack å ikke bruke inntektsmelding sin meldingsreferanseId?
 
         override fun sykdomstidslinje(): Sykdomstidslinje {
             return perioder.fold(Sykdomstidslinje()) { sykdomstidslinje, periode ->

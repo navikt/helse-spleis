@@ -511,16 +511,17 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun håndterArbeidsgiveropplysninger(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID?) {
-        val arbeidsgiverperiode = inntektsmelding.arbeidsgiverperiodeFraIM
-
+        val arbeidsgiverperiode = inntektsmelding.arbeidsgiverperiodeFraIM()
         val ingenHarHåndtert = ingenHarHåndtert(inntektsmelding) {
             val håndtertArbeidsgiverperiode = håndterArbeidsgiverperiode(inntektsmelding, arbeidsgiverperiode)
+            arbeidsgiverperiode.håndterGjenståendeDagerFør(this.periode(), inntektsmelding, this@Arbeidsgiver)
             val håndterInntektOgRefusjon = håndterInntektOgRefusjon(inntektsmelding)
             håndtertArbeidsgiverperiode || håndterInntektOgRefusjon
         }
-        arbeidsgiverperiode.håndterGjenståendeDager(inntektsmelding, this)
         if (ingenHarHåndtert) {
             inntektsmeldingIkkeHåndert(vedtaksperiodeId, inntektsmelding)
+        } else {
+            arbeidsgiverperiode.håndterGjenståendeDager(inntektsmelding, this)
         }
     }
 

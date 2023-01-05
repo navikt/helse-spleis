@@ -2031,11 +2031,6 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        override fun håndterInntektOgRefusjon(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektOgRefusjon(inntektsmelding) { this }
-            vedtaksperiode.person.gjenopptaBehandling(inntektsmelding)
-        }
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             val filter = if (Toggle.InntektsmeldingKanTriggeRevurdering.enabled) NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING else NYERE_ELLER_SAMME_SKJÆRINGSTIDSPUNKT_ER_UTBETALT
             val revurderingIkkeStøttet = vedtaksperiode.person.vedtaksperioder(filter(vedtaksperiode)).isNotEmpty()
