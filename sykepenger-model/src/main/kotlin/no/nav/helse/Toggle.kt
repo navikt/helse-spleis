@@ -127,4 +127,5 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object Splarbeidsbros : Toggle("Splarbeidsbros", false)
     object StrengereForkastingAvInfotrygdforlengelser : Toggle(true)
     object InntektsmeldingKanTriggeRevurdering: Toggle("InntektsmeldingKanTriggeRevurdering", false)
+    object HåndterInntektsmeldingOppdelt: Toggle()
 }
