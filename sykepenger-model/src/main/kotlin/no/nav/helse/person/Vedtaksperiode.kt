@@ -265,10 +265,19 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(dager: DagerFraInntektsmelding): Boolean {
-        kontekst(dager)
-        return tilstand.håndter(this, dager).also {
-            dager.trimLeft(periode.endInclusive)
+        val skalHåndtereDager = dager.skalHåndteresAv(periode)
+        if (skalHåndtereDager) {
+            kontekst(dager)
+            // Ettersom tilstanden kan strekke perioden tilbake må det gjøres _før_ vi hånderer dagene
+            // slik at det som håndteres er perioden slik den er når det er strukket tilbake.
+            tilstand.håndterPeriode(this, dager)
+            // Håndterer dagene som vedtaksperioden skal håndtere og oppdaterer sykdomstidslinjen
+            sykdomstidslinje = dager.håndter(periode, arbeidsgiver)!!
+            tilstand.håndter(this, dager)
         }
+        // Uavhengig av om vi håndterer noen dager eller ei må vi trimme forbi
+        dager.trimLeft(periode.endInclusive)
+        return skalHåndtereDager
     }
 
     internal fun håndter(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding): Boolean {
@@ -276,8 +285,8 @@ internal class Vedtaksperiode private constructor(
         if (erAlleredeHensyntatt(inntektOgRefusjon) || !skalHåndtereInntektOgRefusjon) {
             return skalHåndtereInntektOgRefusjon
         }
-        inntektOgRefusjon.leggTil(hendelseIder)
         kontekst(inntektOgRefusjon)
+        inntektOgRefusjon.leggTil(hendelseIder)
         inntektOgRefusjon.nyeRefusjonsopplysninger(skjæringstidspunkt, person)
         tilstand.håndter(this, inntektOgRefusjon)
         return true
@@ -983,13 +992,9 @@ internal class Vedtaksperiode private constructor(
             inntektsmelding.varsel(RV_IM_4)
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
-            return false
-        }
-
-        fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
-
-        }
+        fun håndterPeriode(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {}
+        fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {}
+        fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {}
 
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             vilkårsgrunnlag.info("Forventet ikke vilkårsgrunnlag i %s".format(type.name))
@@ -1395,6 +1400,15 @@ internal class Vedtaksperiode private constructor(
                     else -> AvventerBlokkerendePeriode
                 }
             }
+        }
+
+        override fun håndterPeriode(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
+            vedtaksperiode.periode = dager.oppdatertFom(vedtaksperiode.periode)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
+            if (vedtaksperiode.forventerInntekt()) return
+            vedtaksperiode.tilstand(dager, AvsluttetUtenUtbetaling)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {

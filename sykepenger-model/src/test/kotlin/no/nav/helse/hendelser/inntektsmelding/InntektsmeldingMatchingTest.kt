@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Personopplysninger
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -129,6 +130,7 @@ internal class InntektsmeldingMatchingTest {
         var håndtertPeriode: Periode? = null
         håndter(periode) {
             håndtertPeriode = it.sykdomstidslinje().periode()
+            Sykdomstidslinje()
         }
         return håndtertPeriode
     }

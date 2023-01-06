@@ -9,6 +9,7 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 
 internal class DagerFraInntektsmelding(
@@ -31,15 +32,18 @@ internal class DagerFraInntektsmelding(
         arbeidsgiver.oppdaterSykdom(it)
     }
 
+    private fun overlappendeDager(periode: Periode) = periode.intersect(gjenståendeDager)
+    internal fun skalHåndteresAv(periode: Periode) = overlappendeDager(periode).isNotEmpty()
+
     internal fun håndter(periode: Periode, arbeidsgiver: Arbeidsgiver) = håndter(periode) {
         arbeidsgiver.oppdaterSykdom(it)
     }
 
-    internal fun håndter(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit): Boolean {
-        val overlappendeDager = periode.intersect(gjenståendeDager).takeUnless { it.isEmpty() } ?: return false
-        oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, overlappendeDager.overordnetPeriode))
+    internal fun håndter(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Sykdomstidslinje): Sykdomstidslinje? {
+        val overlappendeDager = overlappendeDager(periode).takeUnless { it.isEmpty() } ?: return null
+        val arbeidsgiverSykedomstidslinje = oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, overlappendeDager.overordnetPeriode))
         gjenståendeDager.removeAll(overlappendeDager)
-        return true
+        return arbeidsgiverSykedomstidslinje.subset(periode)
     }
 
     internal fun håndterGjenstående(oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit) {
