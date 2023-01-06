@@ -12,29 +12,45 @@ import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 
 internal class DagerFraInntektsmelding(
-    private val inntektsmelding: Inntektsmelding,
-    førsteDag: LocalDate,
-    sisteDag: LocalDate
+    private val inntektsmelding: Inntektsmelding
 ): IAktivitetslogg by inntektsmelding {
-    private val opprinneligeDager = (førsteDag til sisteDag).toSet()
+    private val opprinneligeDager = inntektsmelding.sykdomstidslinje().periode()?.toSet() ?: emptySet()
     private val gjenståendeDager = opprinneligeDager.toMutableSet()
 
     internal fun trimLeft(dato: LocalDate) = inntektsmelding.trimLeft(dato)
     internal fun oppdatertFom(periode: Periode) = inntektsmelding.oppdaterFom(periode)
-    private fun dagerFør(periode: Periode) = gjenståendeDager.filter { it < periode.start }
+    private fun dagerFør(periode: Periode) = gjenståendeDager.filter { it < periode.start }.toSet()
 
-    internal fun håndter(periode: Periode, arbeidsgiver: Arbeidsgiver): Boolean {
+    internal fun håndterGjenståendeFør(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit) {
+        val dagerFør = dagerFør(periode).takeUnless { it.isEmpty() } ?: return
+        oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, dagerFør.overordnetPeriode))
+        gjenståendeDager.removeAll(dagerFør)
+    }
+
+    internal fun håndterGjenståendeFør(periode: Periode, arbeidsgiver: Arbeidsgiver) = håndterGjenståendeFør(periode) {
+        arbeidsgiver.oppdaterSykdom(it)
+    }
+
+    internal fun håndter(periode: Periode, arbeidsgiver: Arbeidsgiver) = håndter(periode) {
+        arbeidsgiver.oppdaterSykdom(it)
+    }
+
+    internal fun håndter(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit): Boolean {
         val overlappendeDager = periode.intersect(gjenståendeDager).takeUnless { it.isEmpty() } ?: return false
-        val overlappendeDagerOgDagerFør = overlappendeDager.plus(dagerFør(periode))
-        arbeidsgiver.oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, overlappendeDagerOgDagerFør.overordnetPeriode))
-        gjenståendeDager.removeAll(overlappendeDagerOgDagerFør)
+        oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, overlappendeDager.overordnetPeriode))
+        gjenståendeDager.removeAll(overlappendeDager)
         return true
     }
 
-    internal fun håndterGjenstående(arbeidsgiver: Arbeidsgiver) {
+    internal fun håndterGjenstående(oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit) {
         if (gjenståendeDager.isEmpty()) return
-        arbeidsgiver.oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, gjenståendeDager.overordnetPeriode))
+        if (opprinneligeDager.containsAll(gjenståendeDager)) return
+        oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, gjenståendeDager.overordnetPeriode))
         gjenståendeDager.clear()
+    }
+
+    internal fun håndterGjenstående(arbeidsgiver: Arbeidsgiver) = håndterGjenstående {
+        arbeidsgiver.oppdaterSykdom(it)
     }
 
     private companion object {

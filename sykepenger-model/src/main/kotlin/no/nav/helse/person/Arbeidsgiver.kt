@@ -517,7 +517,9 @@ internal class Arbeidsgiver private constructor(
     private fun håndterInntektsmeldingOppdelt(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID?) {
         val dager = inntektsmelding.dager
         val noenHarHåndtertDager = noenHarHåndtert(inntektsmelding) {
-            håndter(dager)
+            håndter(dager).also { håndtert ->
+                if (håndtert) dager.håndterGjenståendeFør(periode(), this@Arbeidsgiver)
+            }
         }
         if (noenHarHåndtertDager) dager.håndterGjenstående(this@Arbeidsgiver)
 
