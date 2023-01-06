@@ -137,7 +137,12 @@ internal class RestApiTest {
         val fom = LocalDate.of(2018, 9, 10)
         val tom = fom.plusDays(16)
         val sykeperioder = listOf(Sykmeldingsperiode(fom, tom, 100.prosent))
-        val personopplysninger = Personopplysninger(Personidentifikator.somPersonidentifikator(UNG_PERSON_FNR), AKTØRID, UNG_PERSON_FØDSELSDATO)
+        val personopplysninger = Personopplysninger(
+            Personidentifikator.somPersonidentifikator(UNG_PERSON_FNR),
+            AKTØRID,
+            UNG_PERSON_FØDSELSDATO,
+            emptyList()
+        )
         val sykmelding = Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR,

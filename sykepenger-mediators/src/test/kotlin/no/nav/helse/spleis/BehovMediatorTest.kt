@@ -229,10 +229,11 @@ class BehovMediatorTest {
         val logg: Aktivitetslogg
     ) : ArbeidstakerHendelse(UUID.randomUUID(), fødselsnummer, aktørId, "not_relevant", logg,
         Personopplysninger(
-        personidentifikator = fødselsnummer.somPersonidentifikator(),
-        aktørId = aktørId,
-        fødselsdato = 24.desember(2000)
-    )), Aktivitetskontekst {
+            personidentifikator = fødselsnummer.somPersonidentifikator(),
+            aktørId = aktørId,
+            fødselsdato = 24.desember(2000),
+            historiskeFolkeregisteridenter = emptyList()
+        )), Aktivitetskontekst {
         private val person = person(MaskinellJurist())
         init {
             kontekst(person)

@@ -43,7 +43,8 @@ internal open class InntektsmeldingerRiver(
             "arbeidsforholdId",
             "begrunnelseForReduksjonEllerIkkeUtbetalt",
             "opphoerAvNaturalytelser",
-            "harFlereInntektsmeldinger"
+            "harFlereInntektsmeldinger",
+            "historiskeFolkeregisteridenter"
         )
     }
 

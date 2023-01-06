@@ -70,7 +70,12 @@ abstract class AbstractObservableTest {
         orgnummer: String = ORGNUMMER,
         sykmeldingSkrevet: LocalDateTime = FOM.atStartOfDay(),
         fnr: String = UNG_PERSON_FNR,
-        personopplysninger: Personopplysninger = Personopplysninger(Personidentifikator.somPersonidentifikator(fnr), AKTØRID, UNG_PERSON_FØDSELSDATO)
+        personopplysninger: Personopplysninger = Personopplysninger(
+            Personidentifikator.somPersonidentifikator(fnr),
+            AKTØRID,
+            UNG_PERSON_FØDSELSDATO,
+            emptyList()
+        )
     ): Sykmelding = Sykmelding(
         meldingsreferanseId = id,
         fnr = fnr,
@@ -89,7 +94,12 @@ abstract class AbstractObservableTest {
         orgnummer: String = ORGNUMMER,
         sykmeldingSkrevet: LocalDateTime = FOM.atStartOfDay(),
         fnr: String = UNG_PERSON_FNR,
-        personopplysninger: Personopplysninger = Personopplysninger(Personidentifikator.somPersonidentifikator(fnr), AKTØRID, UNG_PERSON_FØDSELSDATO)
+        personopplysninger: Personopplysninger = Personopplysninger(
+            Personidentifikator.somPersonidentifikator(fnr),
+            AKTØRID,
+            UNG_PERSON_FØDSELSDATO,
+            emptyList()
+        )
     ): Søknad = Søknad(
         meldingsreferanseId = id,
         fnr = fnr,
@@ -117,7 +127,12 @@ abstract class AbstractObservableTest {
         arbeidsforholdId: String? = null,
         fnr: String = UNG_PERSON_FNR,
         harFlereInntektsmeldinger: Boolean = false,
-        personopplysninger: Personopplysninger = Personopplysninger(Personidentifikator.somPersonidentifikator(fnr), AKTØRID, UNG_PERSON_FØDSELSDATO)
+        personopplysninger: Personopplysninger = Personopplysninger(
+            Personidentifikator.somPersonidentifikator(fnr),
+            AKTØRID,
+            UNG_PERSON_FØDSELSDATO,
+            emptyList()
+        )
     ): Inntektsmelding = Inntektsmelding(
         meldingsreferanseId = id,
         refusjon = refusjon,

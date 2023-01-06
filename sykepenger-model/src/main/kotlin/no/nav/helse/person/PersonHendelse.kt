@@ -17,7 +17,8 @@ internal class FunksjonelleFeilTilVarsler(private val other: IAktivitetslogg) : 
 class Personopplysninger(
     private val personidentifikator: Personidentifikator,
     private val aktørId: String,
-    private val fødselsdato: LocalDate
+    private val fødselsdato: LocalDate,
+    val historiskeFolkeregisteridenter: List<String>
 ) {
     internal fun nyPerson(jurist: MaskinellJurist) = Person(
         personidentifikator = personidentifikator,

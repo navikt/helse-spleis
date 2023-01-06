@@ -25,8 +25,13 @@ internal abstract class SøknadBuilder {
     internal fun fnr(fnr: String) = apply { this.fnr = fnr }
     internal fun aktørId(aktørId: String) = apply { this.aktørId = aktørId }
     internal fun fødselsdato(fødselsdato: LocalDate) = apply { this.fødselsdato = fødselsdato }
-    internal fun personopplysninger(fnr: String, aktørId: String, fødselsdato: LocalDate) = apply {
-        personopplysninger = Personopplysninger(fnr.somPersonidentifikator(), aktørId, fødselsdato)
+    internal fun personopplysninger(
+        fnr: String,
+        aktørId: String,
+        fødselsdato: LocalDate,
+        historiskeFolkeregisteridenter: List<String>
+    ) = apply {
+        personopplysninger = Personopplysninger(fnr.somPersonidentifikator(), aktørId, fødselsdato,historiskeFolkeregisteridenter)
     }
     internal fun organisasjonsnummer(organisasjonsnummer: String) = apply { this.organisasjonsnummer = organisasjonsnummer }
     internal fun opprettet(opprettet: LocalDateTime) = apply { this.opprettet = opprettet }

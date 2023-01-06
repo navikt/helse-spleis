@@ -60,7 +60,8 @@ internal class ArbeidsgiverHendelsefabrikk(
     private val søknader = mutableListOf<Søknad>()
     private val inntektsmeldinger = mutableMapOf<UUID, () -> Inntektsmelding>()
     private val personopplysninger = Personopplysninger(
-        personidentifikator, aktørId, fødselsdato)
+        personidentifikator, aktørId, fødselsdato, emptyList()
+    )
 
     internal fun lagSykmelding(
         vararg sykeperioder: Sykmeldingsperiode,

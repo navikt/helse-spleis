@@ -35,7 +35,7 @@ internal abstract class AbstractPersonTest {
         val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         const val AKTØRID = "42"
         val ORGNUMMER: String = "987654321"
-        val personopplysninger = Personopplysninger(UNG_PERSON_FNR_2018, AKTØRID, UNG_PERSON_FØDSELSDATO)
+        val personopplysninger = Personopplysninger(UNG_PERSON_FNR_2018, AKTØRID, UNG_PERSON_FØDSELSDATO, emptyList())
 
 
         val a1: String = ORGNUMMER

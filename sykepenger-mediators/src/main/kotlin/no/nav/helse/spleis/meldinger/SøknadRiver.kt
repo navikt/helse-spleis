@@ -27,5 +27,6 @@ internal abstract class SøknadRiver(
             require("tom", JsonNode::asLocalDate)
             requireKey("sykmeldingsgrad")
         }
+        packet.interestedIn("historiskeFolkeregisteridenter")
     }
 }
