@@ -21,17 +21,13 @@ internal class DagerFraInntektsmelding(
 
     internal fun trimLeft(dato: LocalDate) = inntektsmelding.trimLeft(dato)
     internal fun oppdatertFom(periode: Periode) = inntektsmelding.oppdaterFom(periode)
-
-    internal fun håndterFør(periode: Periode, arbeidsgiver: Arbeidsgiver) {
-        val dagerFør = gjenståendeDager.filter { it < periode.start }.takeUnless { it.isEmpty() } ?: return
-        arbeidsgiver.oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, dagerFør.overordnetPeriode))
-        gjenståendeDager.removeAll(dagerFør.toSet())
-    }
+    private fun dagerFør(periode: Periode) = gjenståendeDager.filter { it < periode.start }
 
     internal fun håndter(periode: Periode, arbeidsgiver: Arbeidsgiver): Boolean {
         val overlappendeDager = periode.intersect(gjenståendeDager).takeUnless { it.isEmpty() } ?: return false
-        arbeidsgiver.oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, overlappendeDager.overordnetPeriode))
-        gjenståendeDager.removeAll(overlappendeDager)
+        val overlappendeDagerOgDagerFør = overlappendeDager.plus(dagerFør(periode))
+        arbeidsgiver.oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, overlappendeDagerOgDagerFør.overordnetPeriode))
+        gjenståendeDager.removeAll(overlappendeDagerOgDagerFør)
         return true
     }
 
