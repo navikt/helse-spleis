@@ -290,8 +290,6 @@ interface PersonObserver {
     ) {}
 
     fun revurderingIgangsatt(
-        event: RevurderingIgangsattEvent,
-        personidentifikator: Personidentifikator,
-        aktørId: String
+        event: RevurderingIgangsattEvent
     ) {}
 }

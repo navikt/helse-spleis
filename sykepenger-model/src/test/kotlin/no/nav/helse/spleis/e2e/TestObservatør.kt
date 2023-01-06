@@ -141,9 +141,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     }
 
     override fun revurderingIgangsatt(
-        event: PersonObserver.RevurderingIgangsattEvent,
-        personidentifikator: Personidentifikator,
-        aktørId: String
+        event: PersonObserver.RevurderingIgangsattEvent
     ) {
         revurderingIgangsattEvent.add(event)
     }

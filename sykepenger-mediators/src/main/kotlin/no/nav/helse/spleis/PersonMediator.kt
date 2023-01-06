@@ -146,16 +146,12 @@ internal class PersonMediator(
     }
 
     override fun revurderingIgangsatt(
-        event: PersonObserver.RevurderingIgangsattEvent,
-        personidentifikator: Personidentifikator,
-        aktørId: String
+        event: PersonObserver.RevurderingIgangsattEvent
     ) {
         if (event.typeEndring != "REVURDERING") return // TODO: Fjern når konsumenter kan skille på type endring
         val eventName = "revurdering_igangsatt"
-        queueMessage(personidentifikator.toString(), eventName, JsonMessage.newMessage(eventName, mapOf(
+        queueMessage(JsonMessage.newMessage(eventName, mapOf(
             "revurderingId" to UUID.randomUUID(),
-            "fødselsnummer" to personidentifikator.toString(),
-            "aktørId" to aktørId,
             "kilde" to message.id,
             "skjæringstidspunkt" to event.skjæringstidspunkt,
             "periodeForEndringFom" to event.periodeForEndring.start,
@@ -172,7 +168,7 @@ internal class PersonMediator(
                     "typeEndring" to it.typeEndring,
                 )
             }
-        )).toJson())
+        )))
     }
 
     override fun utbetalingUtbetalt(event: PersonObserver.UtbetalingUtbetaltEvent) {

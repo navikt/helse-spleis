@@ -430,7 +430,7 @@ class Person private constructor(
     }
 
     internal fun emitRevurderingIgangsattEvent(event: PersonObserver.RevurderingIgangsattEvent) {
-        observers.forEach { it.revurderingIgangsatt(event, personidentifikator, aktørId) }
+        observers.forEach { it.revurderingIgangsatt(event) }
     }
 
     internal fun feriepengerUtbetalt(feriepengerUtbetaltEvent: PersonObserver.FeriepengerUtbetaltEvent) {
