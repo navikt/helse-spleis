@@ -21,10 +21,9 @@ import org.junit.jupiter.api.Test
 internal class SykmeldingsperioderTest {
 
     private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-        organisasjonsnummer = "ORGNUMMER",
-        personidentifikator = "12029212345".somPersonidentifikator(),
         aktørId = "AKTØRID",
-        fødselsdato = 12.februar(1992)
+        personidentifikator = "12029212345".somPersonidentifikator(),
+        organisasjonsnummer = "ORGNUMMER"
     )
 
     private fun Sykmeldingsperioder.lagre(periode: Periode) =

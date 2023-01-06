@@ -3,12 +3,14 @@ package no.nav.helse.spleis.meldinger.model
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.person.Personopplysninger
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.rapids_rivers.isMissingOrNull
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage.Fødselsnummer.Companion.tilFødselsnummer
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -38,6 +40,7 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
         packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val harOpphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].size() > 0
     private val harFlereInntektsmeldinger = packet["harFlereInntektsmeldinger"].asBoolean(false)
+    private val personopplysninger = Personopplysninger(fødselsnummer.somPersonidentifikator(), aktørId, fødselsdato)
 
     protected val inntektsmelding
         get() = Inntektsmelding(
@@ -53,8 +56,8 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
             mottatt = mottatt,
-            fødselsdato = fødselsdato,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+            personopplysninger = personopplysninger
         )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {

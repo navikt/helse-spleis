@@ -36,10 +36,9 @@ internal class ForeldetSykedagTest {
         private const val AKTØRID = "42"
         private const val ORGNUMMER = "987654321"
         private val hendelefabrikk = ArbeidsgiverHendelsefabrikk(
-            personidentifikator = UNG_PERSON_FNR_2018.somPersonidentifikator(),
             aktørId = AKTØRID,
-            organisasjonsnummer = ORGNUMMER,
-            fødselsdato = 12.februar(1992)
+            personidentifikator = UNG_PERSON_FNR_2018.somPersonidentifikator(),
+            organisasjonsnummer = ORGNUMMER
         )
     }
 

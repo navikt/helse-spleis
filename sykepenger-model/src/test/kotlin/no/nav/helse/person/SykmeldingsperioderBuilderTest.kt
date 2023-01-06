@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import java.time.LocalDate
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.januar
@@ -19,8 +18,7 @@ internal class SykmeldingsperioderBuilderTest() {
         val fabrikk = ArbeidsgiverHendelsefabrikk(
             "aktor",
             "12345678910".somPersonidentifikator(),
-            "orgnummer",
-            LocalDate.now()
+            "orgnummer"
         )
 
         sykmeldingsperioder.lagre(fabrikk.lagSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent)))

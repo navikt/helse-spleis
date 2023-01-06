@@ -31,7 +31,8 @@ abstract class PersonHendelse protected constructor(
     private val meldingsreferanseId: UUID,
     protected val fødselsnummer: String,
     protected val aktørId: String,
-    private var aktivitetslogg: IAktivitetslogg
+    private var aktivitetslogg: IAktivitetslogg,
+    private val personopplysninger: Personopplysninger? = null
 ) : IAktivitetslogg, Aktivitetskontekst {
 
     init {
@@ -49,8 +50,8 @@ abstract class PersonHendelse protected constructor(
     fun aktørId() = aktørId
     fun fødselsnummer() = fødselsnummer
 
-    open fun personopplysninger(): Personopplysninger =
-        throw IllegalStateException("${this::class.simpleName} inneholder ikke nødvendige personopplysninger.")
+    internal fun personopplysninger(): Personopplysninger =
+        checkNotNull(personopplysninger) {"${this::class.simpleName} inneholder ikke nødvendige personopplysninger."}
 
     fun person(jurist: MaskinellJurist) = personopplysninger().nyPerson(jurist)
 

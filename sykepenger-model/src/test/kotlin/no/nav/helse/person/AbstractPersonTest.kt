@@ -35,13 +35,13 @@ internal abstract class AbstractPersonTest {
         val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         const val AKTØRID = "42"
         val ORGNUMMER: String = "987654321"
+        val personopplysninger = Personopplysninger(UNG_PERSON_FNR_2018, AKTØRID, UNG_PERSON_FØDSELSDATO)
 
 
         val a1: String = ORGNUMMER
         val a1Hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             aktørId = AKTØRID,
             personidentifikator = UNG_PERSON_FNR_2018,
-            fødselsdato = UNG_PERSON_FØDSELSDATO,
             organisasjonsnummer = ORGNUMMER
         )
         val a2: String = "654321987"
@@ -56,14 +56,14 @@ internal abstract class AbstractPersonTest {
                     orgnummer = ORGNUMMER,
                     fødselsnummer = "",
                     aktørId = "",
-                    fødselsdato = 1.januar(1990),
                     førsteFraværsdag = null,
                     beregnetInntekt = TestPerson.INNTEKT,
                     arbeidsgiverperioder = listOf(1.januar til 16.januar),
                     arbeidsforholdId = null,
                     begrunnelseForReduksjonEllerIkkeUtbetalt = null,
                     mottatt = LocalDateTime.now(),
-                    harFlereInntektsmeldinger = false
+                    harFlereInntektsmeldinger = false,
+                    personopplysninger = personopplysninger
                 )
             )
             person.håndter(

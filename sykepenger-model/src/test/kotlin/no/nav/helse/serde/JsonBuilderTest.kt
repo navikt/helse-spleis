@@ -90,10 +90,9 @@ class JsonBuilderTest {
         private val fødselsdato = 12.februar(1992)
         private val orgnummer = "987654321"
         private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            personidentifikator = fnr,
-            organisasjonsnummer = orgnummer,
             aktørId = aktørId,
-            fødselsdato = 12.februar(1992)
+            personidentifikator = fnr,
+            organisasjonsnummer = orgnummer
         )
     }
 
@@ -659,10 +658,9 @@ class JsonBuilderTest {
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar
     ) = hendelsefabrikk.lagSykmelding(
-        id = hendelseId,
         sykeperioder = arrayOf(Sykmeldingsperiode(fom, tom, 100.prosent)),
         sykmeldingSkrevet = fom.atStartOfDay(),
-        mottatt = tom.atStartOfDay()
+        id = hendelseId
     )
 
     private fun søknad(

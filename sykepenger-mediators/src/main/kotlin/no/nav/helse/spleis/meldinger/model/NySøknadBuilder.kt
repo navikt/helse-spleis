@@ -28,7 +28,6 @@ internal class NySøknadBuilder : SøknadBuilder() {
         orgnummer = organisasjonsnummer,
         sykeperioder = sykemeldingsperioder,
         sykmeldingSkrevet = sykmeldingSkrevet,
-        mottatt = opprettet,
-        fødselsdato = fødselsdato
+        personopplysninger = personopplysninger
     )
 }

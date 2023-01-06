@@ -15,6 +15,7 @@ import java.math.RoundingMode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
+import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeUtbetalinger
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
@@ -25,6 +26,9 @@ import org.junit.jupiter.api.Assertions
 
 @JsonIgnoreProperties("jurist")
 private class PersonMixin
+
+@JsonIgnoreProperties("historiskeFolkeregisteridenter")
+private class PersonopplysningerMixin
 
 @JsonIgnoreProperties("person", "jurist")
 private class ArbeidsgiverMixin
@@ -79,7 +83,8 @@ private val objectMapper = jacksonObjectMapper()
             Begrunnelse::class.java to BegrunnelseMixin::class.java,
             InfotrygdhistorikkElement::class.java to InfotrygdhistorikkElementMixin::class.java,
             Prosentdel::class.java to ProsentdelMixin::class.java,
-            Aktivitetslogg::class.java to AktivitetsloggMixin::class.java
+            Aktivitetslogg::class.java to AktivitetsloggMixin::class.java,
+            Personopplysninger::class.java to PersonopplysningerMixin::class.java
         )
     )
     .setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE)

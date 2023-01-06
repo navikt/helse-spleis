@@ -134,7 +134,7 @@ internal class TestPerson(
     }
 
     inner class TestArbeidsgiver(internal val orgnummer: String) {
-        private val arbeidsgiverHendelsefabrikk = ArbeidsgiverHendelsefabrikk(aktørId, personidentifikator, orgnummer, fødselsdato)
+        private val arbeidsgiverHendelsefabrikk = ArbeidsgiverHendelsefabrikk(aktørId, personidentifikator, orgnummer)
 
         internal val inspektør get() = TestArbeidsgiverInspektør(person, orgnummer)
 
@@ -143,7 +143,7 @@ internal class TestPerson(
         internal fun håndterSykmelding(vararg sykmeldingsperiode: Sykmeldingsperiode,
                                        sykmeldingSkrevet: LocalDateTime? = null,
                                        mottatt: LocalDateTime? = null,) =
-            arbeidsgiverHendelsefabrikk.lagSykmelding(*sykmeldingsperiode, sykmeldingSkrevet = sykmeldingSkrevet, mottatt = mottatt).håndter(Person::håndter)
+            arbeidsgiverHendelsefabrikk.lagSykmelding(*sykmeldingsperiode, sykmeldingSkrevet = sykmeldingSkrevet).håndter(Person::håndter)
 
         internal fun håndterSøknad(
             vararg perioder: Søknad.Søknadsperiode,

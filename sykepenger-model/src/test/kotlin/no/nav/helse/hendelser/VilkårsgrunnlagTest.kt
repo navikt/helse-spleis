@@ -13,7 +13,6 @@ import no.nav.helse.januar
 import no.nav.helse.oktober
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.IdInnhenter
@@ -22,12 +21,13 @@ import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
-import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
+import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Skatt
 import no.nav.helse.person.inntekt.SkattComposite
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -250,9 +250,8 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
 
     private fun sykmelding() = a1Hendelsefabrikk.lagSykmelding(
         sykeperioder = arrayOf(Sykmeldingsperiode(16.januar, 30.januar, 100.prosent)),
-        id = UUID.randomUUID(),
         sykmeldingSkrevet = 1.april.atStartOfDay(),
-        mottatt = 1.april.atStartOfDay()
+        id = UUID.randomUUID()
     )
 
     private fun søknad() = a1Hendelsefabrikk.lagSøknad(

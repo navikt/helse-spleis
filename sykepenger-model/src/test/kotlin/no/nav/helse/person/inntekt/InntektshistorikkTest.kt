@@ -46,7 +46,6 @@ internal class InntektshistorikkTest {
         val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             aktørId = AKTØRID,
             personidentifikator = UNG_PERSON_FNR_2018.somPersonidentifikator(),
-            fødselsdato = UNG_PERSON_FØDSELSDATO,
             organisasjonsnummer = ORGNUMMER
         )
     }

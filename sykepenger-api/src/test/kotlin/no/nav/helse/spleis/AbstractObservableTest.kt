@@ -3,6 +3,7 @@ package no.nav.helse.spleis
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Personidentifikator
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
@@ -29,6 +30,7 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Person
+import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -67,18 +69,16 @@ abstract class AbstractObservableTest {
         sykeperioder: List<Sykmeldingsperiode> = listOf(Sykmeldingsperiode(FOM, TOM, 100.prosent)),
         orgnummer: String = ORGNUMMER,
         sykmeldingSkrevet: LocalDateTime = FOM.atStartOfDay(),
-        mottatt: LocalDateTime = TOM.plusDays(1).atStartOfDay(),
         fnr: String = UNG_PERSON_FNR,
-        fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO
+        personopplysninger: Personopplysninger = Personopplysninger(Personidentifikator.somPersonidentifikator(fnr), AKTØRID, UNG_PERSON_FØDSELSDATO)
     ): Sykmelding = Sykmelding(
         meldingsreferanseId = id,
         fnr = fnr,
-        fødselsdato = fødselsdato,
         aktørId = AKTØRID,
         orgnummer = orgnummer,
         sykeperioder = sykeperioder,
         sykmeldingSkrevet = sykmeldingSkrevet,
-        mottatt = mottatt
+        personopplysninger = personopplysninger
     )
 
     protected fun søknad(
@@ -89,7 +89,7 @@ abstract class AbstractObservableTest {
         orgnummer: String = ORGNUMMER,
         sykmeldingSkrevet: LocalDateTime = FOM.atStartOfDay(),
         fnr: String = UNG_PERSON_FNR,
-        fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO
+        personopplysninger: Personopplysninger = Personopplysninger(Personidentifikator.somPersonidentifikator(fnr), AKTØRID, UNG_PERSON_FØDSELSDATO)
     ): Søknad = Søknad(
         meldingsreferanseId = id,
         fnr = fnr,
@@ -101,9 +101,9 @@ abstract class AbstractObservableTest {
         permittert = false,
         merknaderFraSykmelding = emptyList(),
         sykmeldingSkrevet = sykmeldingSkrevet,
-        fødselsdato = fødselsdato,
         korrigerer = null,
-        opprinneligSendt = null
+        opprinneligSendt = null,
+        personopplysninger = personopplysninger
     )
 
     protected fun inntektsmelding(
@@ -116,14 +116,13 @@ abstract class AbstractObservableTest {
         harOpphørAvNaturalytelser: Boolean = false,
         arbeidsforholdId: String? = null,
         fnr: String = UNG_PERSON_FNR,
-        fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
-        harFlereInntektsmeldinger: Boolean = false
+        harFlereInntektsmeldinger: Boolean = false,
+        personopplysninger: Personopplysninger = Personopplysninger(Personidentifikator.somPersonidentifikator(fnr), AKTØRID, UNG_PERSON_FØDSELSDATO)
     ): Inntektsmelding = Inntektsmelding(
         meldingsreferanseId = id,
         refusjon = refusjon,
         orgnummer = orgnummer,
         fødselsnummer = fnr,
-        fødselsdato = fødselsdato,
         aktørId = AKTØRID,
         førsteFraværsdag = førsteFraværsdag,
         beregnetInntekt = beregnetInntekt,
@@ -132,7 +131,8 @@ abstract class AbstractObservableTest {
         begrunnelseForReduksjonEllerIkkeUtbetalt = null,
         harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
         mottatt = LocalDateTime.now(),
-        harFlereInntektsmeldinger = harFlereInntektsmeldinger
+        harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+        personopplysninger = personopplysninger
     )
 
     protected fun vilkårsgrunnlag(

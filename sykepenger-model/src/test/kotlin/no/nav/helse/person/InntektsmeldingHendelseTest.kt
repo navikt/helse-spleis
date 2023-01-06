@@ -87,8 +87,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
 
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode) = a1Hendelsefabrikk.lagSykmelding(
         sykeperioder = sykeperioder,
-        sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
-        mottatt = Sykmeldingsperiode.periode(sykeperioder.toList())!!.endInclusive.atStartOfDay()
+        sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
     )
 
     private fun søknad(vararg perioder: Søknadsperiode) = a1Hendelsefabrikk.lagSøknad(

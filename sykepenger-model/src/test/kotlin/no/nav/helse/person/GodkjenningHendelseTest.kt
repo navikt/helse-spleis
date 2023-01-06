@@ -165,8 +165,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
     private fun sykmelding() =
         a1Hendelsefabrikk.lagSykmelding(
             sykeperioder = arrayOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100.prosent)),
-            sykmeldingSkrevet = førsteSykedag.atStartOfDay(),
-            mottatt = sisteSykedag.atStartOfDay()
+            sykmeldingSkrevet = førsteSykedag.atStartOfDay()
         ).apply {
             hendelse = this
         }

@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
-import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -22,9 +21,8 @@ internal class SykmeldingTest {
         const val UNG_PERSON_FNR_2018 = "12029240045"
         val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             aktørId = "12345",
-            organisasjonsnummer = "987654321",
             personidentifikator = UNG_PERSON_FNR_2018.somPersonidentifikator(),
-            fødselsdato = 12.februar(1992)
+            organisasjonsnummer = "987654321"
         )
     }
 
@@ -61,8 +59,7 @@ internal class SykmeldingTest {
         val sisteTom = Sykmeldingsperiode.periode(sykeperioder.toList())?.endInclusive?.atStartOfDay()
         sykmelding = hendelsefabrikk.lagSykmelding(
             sykeperioder = sykeperioder,
-            sykmeldingSkrevet = tidligsteFom ?: LocalDateTime.now(),
-            mottatt = mottatt ?: sisteTom ?: LocalDateTime.now()
+            sykmeldingSkrevet = tidligsteFom ?: LocalDateTime.now()
         )
     }
 

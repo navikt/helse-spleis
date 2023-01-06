@@ -1,25 +1,23 @@
 package no.nav.helse.person
 
+import java.util.UUID
+import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.januar
+import no.nav.helse.somPersonidentifikator
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
-import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
-import no.nav.helse.februar
-import no.nav.helse.somPersonidentifikator
 
 internal class InntektsmeldingInfoHistorikkTest {
 
     private lateinit var historikk: InntektsmeldingInfoHistorikk
     private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-        organisasjonsnummer = "orgnr",
-        personidentifikator = "12029212345".somPersonidentifikator(),
         aktørId = "aktør",
-        fødselsdato = 12.februar(1992)
+        personidentifikator = "12029212345".somPersonidentifikator(),
+        organisasjonsnummer = "orgnr"
     )
 
     @BeforeEach

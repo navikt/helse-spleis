@@ -392,7 +392,6 @@ internal class SkjæringstidspunktTest {
         return hendelsefabrikk.lagSykmelding(
             sykeperioder = sykeperioder,
             sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
-            mottatt = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
         )
     }
 
@@ -427,10 +426,9 @@ internal class SkjæringstidspunktTest {
         private const val INNTEKT = 31000.00
         private val INNTEKT_PR_MÅNED = INNTEKT.månedlig
         private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            organisasjonsnummer = ORGNUMMER,
-            personidentifikator = UNG_PERSON_FNR_2018.somPersonidentifikator(),
             aktørId = AKTØRID,
-            fødselsdato = UNG_PERSON_FØDSELSDATO
+            personidentifikator = UNG_PERSON_FNR_2018.somPersonidentifikator(),
+            organisasjonsnummer = ORGNUMMER
         )
 
         private fun assertDagenErSkjæringstidspunkt(

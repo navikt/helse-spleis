@@ -110,12 +110,11 @@ internal fun AbstractEndToEndTest.sykmelding(
     mottatt: LocalDateTime? = null,
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
     fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO
-) = ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer, fødselsdato).lagSykmelding(
-        id = id,
-        sykeperioder = sykeperioder,
-        sykmeldingSkrevet = sykmeldingSkrevet ?: Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
-        mottatt = mottatt ?: Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
-    ).apply {
+) = ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer).lagSykmelding(
+    sykeperioder = sykeperioder,
+    sykmeldingSkrevet = sykmeldingSkrevet ?: Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
+    id = id
+).apply {
         hendelselogg = this
     }
 
@@ -132,7 +131,7 @@ internal fun AbstractEndToEndTest.søknad(
     opprinneligSendt: LocalDate? = null,
     merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
     permittert: Boolean = false
-) = ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer, fødselsdato).lagSøknad(
+) = ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer).lagSøknad(
     id = id,
     perioder = perioder,
     andreInntektskilder = andreInntektskilder,
@@ -173,7 +172,7 @@ internal fun AbstractEndToEndTest.inntektsmelding(
     harFlereInntektsmeldinger: Boolean = false
 ): Inntektsmelding {
     val inntektsmeldinggenerator = {
-        ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer, fødselsdato).lagInntektsmelding(
+        ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer).lagInntektsmelding(
             id = id,
             refusjon = refusjon,
             førsteFraværsdag = førsteFraværsdag,

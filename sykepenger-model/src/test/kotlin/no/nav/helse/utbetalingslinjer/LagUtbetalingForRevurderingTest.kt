@@ -53,8 +53,7 @@ internal class LagUtbetalingForRevurderingTest {
         private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             aktørId = AKTØRID,
             personidentifikator = FNR,
-            organisasjonsnummer = ORGNUMMER,
-            fødselsdato = 12.februar(1992)
+            organisasjonsnummer = ORGNUMMER
         )
     }
 

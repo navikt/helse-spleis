@@ -31,7 +31,6 @@ import no.nav.helse.person.inntekt.NyeRefusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -45,10 +44,10 @@ import kotlin.contracts.contract
 class Inntektsmelding(
     meldingsreferanseId: UUID,
     private val refusjon: Refusjon,
+    personopplysninger: Personopplysninger,
     orgnummer: String,
     fødselsnummer: String,
     aktørId: String,
-    private val fødselsdato: LocalDate,
     private val førsteFraværsdag: LocalDate?,
     private val beregnetInntekt: Inntekt,
     arbeidsgiverperioder: List<Periode>,
@@ -58,7 +57,13 @@ class Inntektsmelding(
     private val harFlereInntektsmeldinger: Boolean,
     mottatt: LocalDateTime,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
-) : SykdomstidslinjeHendelse(meldingsreferanseId, fødselsnummer, aktørId, orgnummer, mottatt, aktivitetslogg = aktivitetslogg) {
+) : SykdomstidslinjeHendelse(
+    meldingsreferanseId = meldingsreferanseId,
+    fødselsnummer = fødselsnummer,
+    aktørId = aktørId,
+    organisasjonsnummer = orgnummer,
+    opprettet = mottatt, aktivitetslogg = aktivitetslogg, personopplysninger = personopplysninger)
+{
 
     private val arbeidsgiverperioder = arbeidsgiverperioder.grupperSammenhengendePerioder()
     private val arbeidsgiverperiode = this.arbeidsgiverperioder.periode()
@@ -75,8 +80,6 @@ class Inntektsmelding(
         if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) logiskFeil("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
         sykdomstidslinje = arbeidsgivertidslinje()
     }
-
-    override fun personopplysninger() = Personopplysninger(fødselsnummer.somPersonidentifikator(), aktørId, fødselsdato)
 
     private fun arbeidsgivertidslinje(): Sykdomstidslinje {
         val arbeidsdager = arbeidsgiverperiode?.let { Sykdomstidslinje.arbeidsdager(arbeidsgiverperiode, kilde) } ?: return Sykdomstidslinje()

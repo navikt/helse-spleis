@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 
 class PersonidentifikatorTest {
 
@@ -24,19 +23,6 @@ class PersonidentifikatorTest {
         assertNotEquals(a.somPersonidentifikator(), b.somPersonidentifikator())
         assertNotEquals(a.somPersonidentifikator().toLong(), b.somPersonidentifikator().toLong())
         assertNotEquals(a.somPersonidentifikator().hashCode(), b.somPersonidentifikator().hashCode())
-    }
-
-    @Test
-    fun `ting som ikke er fnr`() {
-        assertThrows<RuntimeException> { "010101123456".somPersonidentifikator() }
-        assertThrows<RuntimeException> { "0101011234".somPersonidentifikator() }
-        assertThrows<RuntimeException> { "1010112345".somPersonidentifikator() }
-        assertThrows<RuntimeException> { "1o101123456".somPersonidentifikator() }
-        assertThrows<RuntimeException> { "l0101123456".somPersonidentifikator() }
-        assertThrows<RuntimeException> { "1010112345s".somPersonidentifikator() }
-        assertThrows<RuntimeException> { "Jørgen Hattemaker".somPersonidentifikator() }
-        assertThrows<RuntimeException> { "".somPersonidentifikator() }
-        assertThrows<RuntimeException> { "1".somPersonidentifikator() }
     }
 
     @Test

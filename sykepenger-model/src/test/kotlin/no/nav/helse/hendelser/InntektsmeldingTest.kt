@@ -37,10 +37,9 @@ import org.junit.jupiter.api.assertThrows
 internal class InntektsmeldingTest {
 
     private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-        organisasjonsnummer = "88888888",
-        personidentifikator = "12029240045".somPersonidentifikator(),
         aktørId = "100010101010",
-        fødselsdato = 12.februar(1992)
+        personidentifikator = "12029240045".somPersonidentifikator(),
+        organisasjonsnummer = "88888888"
     )
     private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var inntektsmelding: Inntektsmelding

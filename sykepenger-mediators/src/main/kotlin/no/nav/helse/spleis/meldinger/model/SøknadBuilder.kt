@@ -3,6 +3,8 @@ package no.nav.helse.spleis.meldinger.model
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.person.Personopplysninger
+import no.nav.helse.somPersonidentifikator
 
 internal abstract class SøknadBuilder {
     protected lateinit var meldingsreferanseId: UUID
@@ -12,6 +14,7 @@ internal abstract class SøknadBuilder {
     protected lateinit var fødselsdato: LocalDate
     protected lateinit var organisasjonsnummer: String
     protected lateinit var opprettet: LocalDateTime
+    protected lateinit var personopplysninger: Personopplysninger
     private lateinit var fom: LocalDate
     private lateinit var tom: LocalDate
     protected var permittert = false
@@ -22,6 +25,9 @@ internal abstract class SøknadBuilder {
     internal fun fnr(fnr: String) = apply { this.fnr = fnr }
     internal fun aktørId(aktørId: String) = apply { this.aktørId = aktørId }
     internal fun fødselsdato(fødselsdato: LocalDate) = apply { this.fødselsdato = fødselsdato }
+    internal fun personopplysninger(fnr: String, aktørId: String, fødselsdato: LocalDate) = apply {
+        personopplysninger = Personopplysninger(fnr.somPersonidentifikator(), aktørId, fødselsdato)
+    }
     internal fun organisasjonsnummer(organisasjonsnummer: String) = apply { this.organisasjonsnummer = organisasjonsnummer }
     internal fun opprettet(opprettet: LocalDateTime) = apply { this.opprettet = opprettet }
     internal fun fom(fom: LocalDate) = apply { this.fom = fom }

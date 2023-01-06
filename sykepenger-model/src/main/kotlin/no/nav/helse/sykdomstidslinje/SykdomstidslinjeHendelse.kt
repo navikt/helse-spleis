@@ -11,6 +11,7 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import kotlin.reflect.KClass
 
@@ -23,8 +24,9 @@ abstract class SykdomstidslinjeHendelse(
     organisasjonsnummer: String,
     private val opprettet: LocalDateTime,
     melding: Melding? = null,
-    private val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg) {
+    private val aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
+    personopplysninger: Personopplysninger? = null
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg, personopplysninger) {
 
     protected constructor(meldingsreferanseId: UUID, other: SykdomstidslinjeHendelse) : this(meldingsreferanseId, other.fødselsnummer, other.aktørId, other.organisasjonsnummer, other.opprettet, null, other.aktivitetslogg)
 

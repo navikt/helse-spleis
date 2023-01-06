@@ -7,7 +7,6 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.noOverlap
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -19,27 +18,20 @@ class Sykmelding(
     meldingsreferanseId: UUID,
     fnr: String,
     aktørId: String,
-    private val fødselsdato: LocalDate,
+    personopplysninger: Personopplysninger,
     orgnummer: String,
     sykeperioder: List<Sykmeldingsperiode>,
-    sykmeldingSkrevet: LocalDateTime,
-    private val mottatt: LocalDateTime
-) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet) {
+    sykmeldingSkrevet: LocalDateTime
+) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, personopplysninger = personopplysninger) {
 
     private val sykdomstidslinje: Sykdomstidslinje
     private val periode: Periode
-
-    internal companion object {
-        const val ERRORTEKST_FOR_GAMMEL = "Søknadsperioden kan ikke være eldre enn 6 måneder fra mottattidspunkt"
-    }
 
     init {
         if (sykeperioder.isEmpty()) logiskFeil("Ingen sykeperioder")
         sykdomstidslinje = Sykmeldingsperiode.tidslinje(this, sykeperioder)
         periode = requireNotNull(sykdomstidslinje.periode())
     }
-
-    override fun personopplysninger() = Personopplysninger(fødselsnummer.somPersonidentifikator(), aktørId, fødselsdato)
 
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver) = this
 

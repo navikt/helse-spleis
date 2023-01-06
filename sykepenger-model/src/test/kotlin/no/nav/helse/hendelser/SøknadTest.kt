@@ -40,19 +40,17 @@ internal class SøknadTest {
         private const val UNG_PERSON_FNR_2018 = "12029240045"
         private val februar12 = 12.februar(1992)
         private val ungPersonFnr2018Hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            personidentifikator = UNG_PERSON_FNR_2018.somPersonidentifikator(),
             aktørId = "12345",
-            organisasjonsnummer = "987654321",
-            fødselsdato = februar12
+            personidentifikator = UNG_PERSON_FNR_2018.somPersonidentifikator(),
+            organisasjonsnummer = "987654321"
         )
         private val EN_PERIODE = Periode(1.januar, 31.januar)
         private const val FYLLER_18_ÅR_2_NOVEMBER = "02110075045"
         private val november2 = 2.november(2000)
         private val fyller18År2NovemberHendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            personidentifikator = FYLLER_18_ÅR_2_NOVEMBER.somPersonidentifikator(),
             aktørId = "12345",
-            organisasjonsnummer = "987654321",
-            fødselsdato = november2
+            personidentifikator = FYLLER_18_ÅR_2_NOVEMBER.somPersonidentifikator(),
+            organisasjonsnummer = "987654321"
         )
     }
 

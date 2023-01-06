@@ -18,7 +18,6 @@ import no.nav.helse.person.Varselkode.*
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -31,7 +30,7 @@ class Søknad(
     meldingsreferanseId: UUID,
     fnr: String,
     aktørId: String,
-    private val fødselsdato: LocalDate,
+    personopplysninger: Personopplysninger,
     orgnummer: String,
     private val perioder: List<Søknadsperiode>,
     private val andreInntektskilder: Boolean,
@@ -42,7 +41,7 @@ class Søknad(
     private val korrigerer: UUID?,
     private val opprinneligSendt: LocalDateTime?,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
-) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class, aktivitetslogg) {
+) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class, aktivitetslogg, personopplysninger) {
 
     private val sykdomsperiode: Periode
     private val sykdomstidslinje: Sykdomstidslinje
@@ -61,8 +60,6 @@ class Søknad(
             .merge(Dagturnering.SØKNAD::beste)
             .subset(sykdomsperiode)
     }
-
-    override fun personopplysninger() = Personopplysninger(fødselsnummer.somPersonidentifikator(), aktørId, fødselsdato)
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
         arbeidsgiver.håndter(this)

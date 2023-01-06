@@ -6,10 +6,7 @@ class Personidentifikator private constructor(private val value: String) {
     override fun equals(other: Any?) = other is Personidentifikator && this.value == other.value
     fun toLong() = value.toLong()
     companion object {
-        fun somPersonidentifikator(ident: String): Personidentifikator {
-            if (ident.length == 11 && alleTegnErSiffer(ident)) return Personidentifikator(ident)
-            else throw RuntimeException("$ident er ikke en gyldig identifikator.")
-        }
+        fun somPersonidentifikator(ident: String) = Personidentifikator(value = ident)
         private fun alleTegnErSiffer(string: String) = string.matches(Regex("\\d*"))
     }
 }

@@ -69,10 +69,9 @@ internal class ArbeidsgiverUtbetalingerTest {
         val PERSON_70_ÅR_1_FEBRUAR_2018_FØDSELSDATO = 1.februar(1948)
         val ORGNUMMER = "888888888"
         val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            personidentifikator = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = ORGNUMMER,
             aktørId = "aktørId",
-            fødselsdato = 12.februar(1992)
+            personidentifikator = UNG_PERSON_FNR_2018,
+            organisasjonsnummer = ORGNUMMER
         )
     }
 
@@ -309,8 +308,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         person.håndter(
             hendelsefabrikk.lagSykmelding(
                 sykeperioder = arrayOf(Sykmeldingsperiode(førsteDag, sisteDag, 100.prosent)),
-                sykmeldingSkrevet = 1.januar.atStartOfDay(),
-                mottatt = 1.januar.atStartOfDay()
+                sykmeldingSkrevet = 1.januar.atStartOfDay()
             )
         )
         person.håndter(

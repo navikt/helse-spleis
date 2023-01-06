@@ -192,10 +192,9 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             )
         )
     ) = a1Hendelsefabrikk.lagSykmelding(
-            sykeperioder = perioder,
-            sykmeldingSkrevet = Sykmeldingsperiode.periode(perioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
-            mottatt = Sykmeldingsperiode.periode(perioder.toList())!!.endInclusive.atStartOfDay()
-        ).apply {
+        sykeperioder = perioder,
+        sykmeldingSkrevet = Sykmeldingsperiode.periode(perioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
+    ).apply {
             hendelse = this
         }
 

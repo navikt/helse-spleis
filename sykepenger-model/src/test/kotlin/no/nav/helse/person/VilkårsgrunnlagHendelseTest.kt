@@ -168,8 +168,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         perioder: List<Sykmeldingsperiode> = listOf(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
     ) = a1Hendelsefabrikk.lagSykmelding(
         sykeperioder = perioder.toTypedArray(),
-        sykmeldingSkrevet = Sykmeldingsperiode.periode(perioder)?.start?.atStartOfDay() ?: LocalDateTime.now(),
-        mottatt = Sykmeldingsperiode.periode(perioder.toList())!!.endInclusive.atStartOfDay()
+        sykmeldingSkrevet = Sykmeldingsperiode.periode(perioder)?.start?.atStartOfDay() ?: LocalDateTime.now()
     ).apply {
         hendelse = this
     }

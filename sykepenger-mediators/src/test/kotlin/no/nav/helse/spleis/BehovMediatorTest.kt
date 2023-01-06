@@ -227,7 +227,12 @@ class BehovMediatorTest {
 
     private class TestHendelse(
         val logg: Aktivitetslogg
-    ) : ArbeidstakerHendelse(UUID.randomUUID(), fødselsnummer, aktørId, "not_relevant", logg), Aktivitetskontekst {
+    ) : ArbeidstakerHendelse(UUID.randomUUID(), fødselsnummer, aktørId, "not_relevant", logg,
+        Personopplysninger(
+        personidentifikator = fødselsnummer.somPersonidentifikator(),
+        aktørId = aktørId,
+        fødselsdato = 24.desember(2000)
+    )), Aktivitetskontekst {
         private val person = person(MaskinellJurist())
         init {
             kontekst(person)
@@ -236,11 +241,5 @@ class BehovMediatorTest {
         override fun kontekst(kontekst: Aktivitetskontekst) {
             logg.kontekst(kontekst)
         }
-
-        override fun personopplysninger() = Personopplysninger(
-            personidentifikator = fødselsnummer.somPersonidentifikator(),
-            aktørId = aktørId,
-            fødselsdato = 24.desember(2000)
-        )
     }
 }

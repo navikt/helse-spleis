@@ -18,12 +18,14 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.Personidentifikator
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.person.Person
+import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.config.AzureAdAppConfig
@@ -135,15 +137,15 @@ internal class RestApiTest {
         val fom = LocalDate.of(2018, 9, 10)
         val tom = fom.plusDays(16)
         val sykeperioder = listOf(Sykmeldingsperiode(fom, tom, 100.prosent))
+        val personopplysninger = Personopplysninger(Personidentifikator.somPersonidentifikator(UNG_PERSON_FNR), AKTØRID, UNG_PERSON_FØDSELSDATO)
         val sykmelding = Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR,
-            fødselsdato = UNG_PERSON_FØDSELSDATO,
             aktørId = "aktørId",
             orgnummer = ORGNUMMER,
             sykeperioder = sykeperioder,
             sykmeldingSkrevet = fom.atStartOfDay(),
-            mottatt = tom.atStartOfDay()
+            personopplysninger = personopplysninger
         )
         val inntektsmelding = Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
@@ -153,7 +155,6 @@ internal class RestApiTest {
             ),
             orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR,
-            fødselsdato = UNG_PERSON_FØDSELSDATO,
             aktørId = "aktørId",
             førsteFraværsdag = LocalDate.of(2018, 1, 1),
             beregnetInntekt = 12000.månedlig,
@@ -161,7 +162,8 @@ internal class RestApiTest {
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             mottatt = LocalDateTime.now(),
-            harFlereInntektsmeldinger = false
+            harFlereInntektsmeldinger = false,
+            personopplysninger = personopplysninger
         )
         val person = sykmelding.person(MaskinellJurist())
         person.håndter(sykmelding)

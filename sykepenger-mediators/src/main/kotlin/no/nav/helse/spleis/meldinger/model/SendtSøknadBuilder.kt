@@ -26,7 +26,6 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         meldingsreferanseId = meldingsreferanseId,
         fnr = fnr,
         aktørId = aktørId,
-        fødselsdato = fødselsdato,
         orgnummer = organisasjonsnummer,
         perioder = perioder,
         andreInntektskilder = harAndreInntektskilder,
@@ -35,7 +34,8 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         merknaderFraSykmelding = merkander,
         sykmeldingSkrevet = sykmeldingSkrevet,
         korrigerer = korrigerer,
-        opprinneligSendt = opprinneligSendt
+        opprinneligSendt = opprinneligSendt,
+        personopplysninger = personopplysninger
     )
 
     override fun inntektskilde(andreInntektskilder: Boolean) = apply {

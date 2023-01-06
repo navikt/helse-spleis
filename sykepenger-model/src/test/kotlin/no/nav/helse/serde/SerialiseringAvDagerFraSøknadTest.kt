@@ -2,7 +2,6 @@ package no.nav.helse.serde
 
 import no.nav.helse.april
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
-import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -53,8 +52,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
     private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
         aktørId = aktørId,
         personidentifikator = fnr.somPersonidentifikator(),
-        organisasjonsnummer = orgnummer,
-        fødselsdato = 12.februar(1992)
+        organisasjonsnummer = orgnummer
     )
 
     private lateinit var aktivitetslogg: Aktivitetslogg
@@ -73,8 +71,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
 
     private val sykmelding get() = hendelsefabrikk.lagSykmelding(
         sykeperioder = arrayOf(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent)),
-        sykmeldingSkrevet = 4.april.atStartOfDay(),
-        mottatt = 4.april.atStartOfDay()
+        sykmeldingSkrevet = 4.april.atStartOfDay()
     )
 
     private val søknad get() = hendelsefabrikk.lagSøknad(
