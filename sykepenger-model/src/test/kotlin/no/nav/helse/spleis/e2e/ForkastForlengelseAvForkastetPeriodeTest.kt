@@ -367,6 +367,17 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         assertIngenFunksjonellFeil(RV_SØ_28)
     }
 
+    @Test
+    fun `kun én error dersom søknad forlenger forkastet periode og har en forkastet periode som er senere i tid`() {
+        nyPeriode(1.januar til 31.januar)
+        nyPeriode(1.mars til 31.mars)
+        person.søppelbøtte(hendelselogg, 1.januar til 31.mars)
+
+        nyPeriode(1.februar til 17.februar)
+        assertFunksjonellFeil(RV_SØ_19)
+        assertIngenFunksjonellFeil(RV_SØ_20)
+    }
+
     private fun Periode.forkast() {
         håndterSykmelding(Sykmeldingsperiode(start, endInclusive, 100.prosent))
         håndterSøknad(Sykdom(start, endInclusive, 100.prosent))

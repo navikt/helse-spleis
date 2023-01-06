@@ -111,7 +111,6 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjerFilter
-import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 
 internal class Vedtaksperiode private constructor(
@@ -2229,14 +2228,15 @@ internal class Vedtaksperiode private constructor(
                 }
                 .isNotEmpty()
 
-        internal fun kortGapTilForkastet(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
+        internal fun harKortGapTilForkastet(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse): Boolean {
             if (Toggle.StrengereForkastingAvInfotrygdforlengelser.enabled) {
-                forkastede
+                return forkastede
                     .filter { it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje()) in 2..20 }
-                    .forEach {
+                    .onEach {
                         hendelse.funksjonellFeil(RV_SØ_28)
                         hendelse.info("Søknad har et gap som er kortere enn 20 dager til en forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
                     }
+                    .isNotEmpty()
 
             } else {
                 val forkastedePerioderSomErForNærme = forkastede.filter {
@@ -2250,6 +2250,7 @@ internal class Vedtaksperiode private constructor(
                                 "aktørId: ${hendelse.aktørId()}"
                     )
                 }
+                return false
             }
         }
 

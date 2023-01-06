@@ -471,9 +471,9 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse: SykdomstidslinjeHendelse): Boolean {
-        val harNyereForkastetPeriode = ForkastetVedtaksperiode.harNyereForkastetPeriode(forkastede, hendelse)
-        val forlengerForkastet = ForkastetVedtaksperiode.forlengerForkastet(forkastede, hendelse)
-        if (organisasjonsnummer() == hendelse.organisasjonsnummer() && !harNyereForkastetPeriode && !forlengerForkastet) ForkastetVedtaksperiode.kortGapTilForkastet(forkastede, hendelse)
+        ForkastetVedtaksperiode.forlengerForkastet(forkastede, hendelse) ||
+                ForkastetVedtaksperiode.harNyereForkastetPeriode(forkastede, hendelse) ||
+                (organisasjonsnummer() == hendelse.organisasjonsnummer() && ForkastetVedtaksperiode.harKortGapTilForkastet(forkastede, hendelse))
         return hendelse.harFunksjonelleFeilEllerVerre()
     }
 
