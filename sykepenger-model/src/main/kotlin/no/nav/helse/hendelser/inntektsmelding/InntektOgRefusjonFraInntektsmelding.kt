@@ -4,6 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.nesteArbeidsdag
+import no.nav.helse.nesteDag
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Person
@@ -23,9 +24,15 @@ internal class InntektOgRefusjonFraInntektsmelding(
         førsteFraværsdag != null && sisteDagIArbeidsgiverperioden != null && førsteFraværsdag > sisteDagIArbeidsgiverperioden
 
     private val ingenArbeidsgiverperiode = sisteDagIArbeidsgiverperioden == null
+
+    private var erHåndtert: Boolean = false
     internal fun skalHåndteresAv(periode: Periode): Boolean {
+        if (erHåndtert) return false
         if (førsteFraværsdag == null && sisteDagIArbeidsgiverperioden == null) return false
-        if (ingenArbeidsgiverperiode || førsteFraværsdagEtterArbeidsgiverperioden) return førsteFraværsdag in periode
-        return sisteDagIArbeidsgiverperioden!!.nesteArbeidsdag() in periode
+        erHåndtert = when (ingenArbeidsgiverperiode || førsteFraværsdagEtterArbeidsgiverperioden) {
+            true -> førsteFraværsdag in periode
+            false -> sisteDagIArbeidsgiverperioden!!.nesteDag in periode || sisteDagIArbeidsgiverperioden.nesteArbeidsdag() in periode
+        }
+        return erHåndtert
     }
 }
