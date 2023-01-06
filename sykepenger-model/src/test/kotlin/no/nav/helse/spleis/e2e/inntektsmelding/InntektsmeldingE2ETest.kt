@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -828,53 +827,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING
         )
-    }
-
-    // TODO: sanitycheck
-    @Test
-    fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere forkastet periode`() = Toggle.StrengereForkastingAvInfotrygdforlengelser.disable {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(22.januar, 1.februar, 100.prosent))
-        håndterSøknad(Sykdom(22.januar, 1.februar, 100.prosent))
-
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
-
-        håndterSykmelding(Sykmeldingsperiode(3.februar, 18.februar, 100.prosent))
-        håndterSøknad(Sykdom(3.februar, 18.februar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar)
-        håndterVilkårsgrunnlag(4.vedtaksperiode)
-        håndterYtelser(4.vedtaksperiode)
-        håndterSimulering(4.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(4.vedtaksperiode)
-        håndterUtbetalt()
-
-        inspektør.also {
-            assertEquals(3.februar, it.periode(4.vedtaksperiode).start)
-        }
     }
 
     @Disabled // TODO: burde vi sjekke IT-historikk om det er en forlengelse før vi sender den til AVSLUTTET_UTEN_UTBETALING

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.søknad
 
-import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.februar
@@ -364,17 +363,6 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         )
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
-    }
-
-    @Test
-    fun `hensyntar forkastet historikk for å unngå å lage dårlig stemning - med gap til forkastet`() = Toggle.StrengereForkastingAvInfotrygdforlengelser.disable {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
-        person.søppelbøtte(hendelselogg, 1.januar til 20.januar)
-        håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
     }
 
     @Test

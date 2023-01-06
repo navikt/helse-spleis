@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
@@ -130,22 +129,6 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `logger ikke periode som har gap til forkastet periode`() = Toggle.StrengereForkastingAvInfotrygdforlengelser.disable {
-        (1.januar til 19.januar).forkast()
-        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
-        if(Toggle.StrengereForkastingAvInfotrygdforlengelser.disabled) {
-            håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar, 100.prosent))
-            håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
-
-        } else {
-            håndterSykmelding(Sykmeldingsperiode(23.januar, 31.januar, 100.prosent))
-            håndterSøknad(Sykdom(23.januar, 31.januar, 100.prosent))
-        }
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertIngenInfo("Søknad forlenger en forkastet periode", 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -317,17 +300,9 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
     }
-    @Test
-    fun `forkaster ikke periode dersom person har vært friskmeldt mindre enn 2 dager`() = Toggle.StrengereForkastingAvInfotrygdforlengelser.disable {
-        nyPeriode(1.januar til 31.januar)
-        person.søppelbøtte(hendelselogg, 1.januar til 31.januar)
-
-        nyPeriode(2.februar til 20.mars)
-        assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-    }
 
     @Test
-    fun `forkaster periode dersom person har vært friskmeldt mindre enn 20 dager`() = Toggle.StrengereForkastingAvInfotrygdforlengelser.enable {
+    fun `forkaster periode dersom person har vært friskmeldt mindre enn 20 dager`() {
         nyPeriode(1.januar til 31.januar)
         person.søppelbøtte(hendelselogg, 1.januar til 31.januar)
 
@@ -336,7 +311,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `person som har vært friskmeldt i 21 dager kan fortsatt behandles`() = Toggle.StrengereForkastingAvInfotrygdforlengelser.enable {
+    fun `person som har vært friskmeldt i 21 dager kan fortsatt behandles`() {
         nyPeriode(1.januar til 31.januar)
         person.søppelbøtte(hendelselogg, 1.januar til 31.januar)
 
@@ -345,7 +320,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `person som kun har helg mellom to sykefraværstilfeller skal ikke få to funksjonelle feil når den kastes ut pga for lite gap` () = Toggle.StrengereForkastingAvInfotrygdforlengelser.enable {
+    fun `person som kun har helg mellom to sykefraværstilfeller skal ikke få to funksjonelle feil når den kastes ut pga for lite gap` () {
         nyPeriode(1.januar til 19.januar)
         person.søppelbøtte(hendelselogg, 1.januar til 19.januar)
 
@@ -356,7 +331,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `søknad som har mindre enn 20 dagers gap til en forkastet periode og overlapper med en annen forkastet periode skal kun få én funksjonell feil` () = Toggle.StrengereForkastingAvInfotrygdforlengelser.enable {
+    fun `søknad som har mindre enn 20 dagers gap til en forkastet periode og overlapper med en annen forkastet periode skal kun få én funksjonell feil` () {
         nyPeriode(1.januar til 17.januar)
         nyPeriode(18.januar til 31.januar)
         person.søppelbøtte(hendelselogg, 1.januar til 31.januar)

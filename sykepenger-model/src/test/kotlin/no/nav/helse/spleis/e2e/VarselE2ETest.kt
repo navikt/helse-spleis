@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -162,7 +161,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `funksjonell feil - Periode som forlenger forkastet periode skal forkastes`() = Toggle.StrengereForkastingAvInfotrygdforlengelser.enable {
+    fun `funksjonell feil - Periode som forlenger forkastet periode skal forkastes`() {
         nyPeriode(1.januar til 19.januar)
         person.søppelbøtte(hendelselogg, 1.januar til 19.januar)
 
@@ -173,7 +172,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `funksjonell feil - Periode med mindre enn 20 dagers gap til forkastet periode skal forkastes`() = Toggle.StrengereForkastingAvInfotrygdforlengelser.enable {
+    fun `funksjonell feil - Periode med mindre enn 20 dagers gap til forkastet periode skal forkastes`() {
         nyPeriode(1.januar til 19.januar)
         person.søppelbøtte(hendelselogg, 1.januar til 19.januar)
 

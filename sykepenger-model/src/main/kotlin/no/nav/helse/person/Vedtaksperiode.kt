@@ -2228,31 +2228,14 @@ internal class Vedtaksperiode private constructor(
                 }
                 .isNotEmpty()
 
-        internal fun harKortGapTilForkastet(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse): Boolean {
-            if (Toggle.StrengereForkastingAvInfotrygdforlengelser.enabled) {
-                return forkastede
-                    .filter { it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje()) in 2..20 }
-                    .onEach {
-                        hendelse.funksjonellFeil(RV_SØ_28)
-                        hendelse.info("Søknad har et gap som er kortere enn 20 dager til en forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
-                    }
-                    .isNotEmpty()
-
-            } else {
-                val forkastedePerioderSomErForNærme = forkastede.filter {
-                    it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje()) in 2..20
+        internal fun harKortGapTilForkastet(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) =
+            forkastede
+                .filter { it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje()) in 2..20 }
+                .onEach {
+                    hendelse.funksjonellFeil(RV_SØ_28)
+                    hendelse.info("Søknad har et gap som er kortere enn 20 dager til en forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
                 }
-                if (forkastedePerioderSomErForNærme.isNotEmpty()) {
-                    sikkerlogg.info(
-                        "Denne søknaden ville blitt forkastet, den har for lite gap: ${forkastedePerioderSomErForNærme.map { it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje()) }}\n" +
-                                "søknad: ${hendelse.periode()}\n" +
-                                "forkastede vedtaksperioder: ${forkastedePerioderSomErForNærme.map { it.periode() }}\n" +
-                                "aktørId: ${hendelse.aktørId()}"
-                    )
-                }
-                return false
-            }
-        }
+                .isNotEmpty()
 
         internal fun forlengerForkastet(forkastede: List<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) =
             forkastede

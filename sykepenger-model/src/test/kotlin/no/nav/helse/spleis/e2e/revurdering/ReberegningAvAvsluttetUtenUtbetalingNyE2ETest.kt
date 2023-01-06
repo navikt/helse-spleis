@@ -1187,37 +1187,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    fun `revvurdering etter periode til godkjenning`() = Toggle.StrengereForkastingAvInfotrygdforlengelser.disable {
-        håndterSykmelding(Sykmeldingsperiode(1.juni, 16.juni, 100.prosent))
-        håndterSøknad(Sykdom(1.juni, 16.juni, 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(17.juni, 30.juni, 100.prosent))
-        håndterSøknad(Sykdom(17.juni, 30.juni, 100.prosent))
-        håndterInntektsmelding(listOf(1.juni til 16.juni))
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, utbetalingGodkjent = false)
-
-        håndterSykmelding(Sykmeldingsperiode(13.juli, 20.juli, 100.prosent))
-        håndterSøknad(Sykdom(13.juli, 20.juli, 100.prosent), Ferie(13.juli, 20.juli))
-
-        håndterSykmelding(Sykmeldingsperiode(25.juli, 31.juli, 100.prosent))
-        håndterSøknad(Sykdom(25.juli, 31.juli, 100.prosent))
-
-        nullstillTilstandsendringer()
-        håndterInntektsmelding(listOf(1.juni til 16.juni), førsteFraværsdag = 13.juli)
-
-        assertEquals(Dag.Feriedag::class, inspektør.sykdomstidslinje[13.juli]::class)
-        nullstillTilstandsendringer()
-        håndterInntektsmelding(listOf(1.juni til 16.juni), førsteFraværsdag = 25.juli)
-
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-    }
-
-    @Test
     fun `revvurdering med ghost`() {
         val beregnetInntektA1 = 31000.månedlig
 
