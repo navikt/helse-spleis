@@ -1071,6 +1071,12 @@ internal class Arbeidsgiver private constructor(
     internal fun kanForkastes(vedtaksperiodeUtbetalinger: VedtaksperiodeUtbetalinger) =
         vedtaksperiodeUtbetalinger.kanForkastes(utbetalinger)
 
+    fun vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?): List<Vedtaksperiode> {
+        if (arbeidsgiverperiode == null) return emptyList()
+        return vedtaksperioder.filter {
+            arbeidsgiverperiode.hørerTil(it.periode())
+        }
+    }
     internal class JsonRestorer private constructor() {
         internal companion object {
             internal fun restore(

@@ -89,6 +89,34 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
     }
 
     @Test
+    fun `sender med begge sykmeldingsperiodene når vi har en kort periode som forlenges av en lang`() {
+        nyPeriode(1.januar til 16.januar)
+        nyPeriode(17.januar til 31.januar)
+
+        val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
+        val expectedSykmeldingsperioder = listOf(
+            1.januar til 16.januar,
+            17.januar til 31.januar
+        )
+        assertEquals(expectedSykmeldingsperioder, trengerArbeidsgiveropplysningerEvent.sykmeldingsperioder)
+
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+    }
+
+    @Test
+    fun `sender ikke med begge sykmeldingsperiodene når vi har et gap større enn 16 dager mellom dem`() {
+        nyPeriode(1.januar til 31.januar)
+        nyPeriode(17.februar til 17.mars)
+
+        val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
+        val expectedSykmeldingsperioder = listOf(17.februar til 17.mars)
+        assertEquals(expectedSykmeldingsperioder, trengerArbeidsgiveropplysningerEvent.sykmeldingsperioder)
+
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+    }
+
+
+    @Test
     fun `sender med riktig sykmeldingsperioder og forslag til arbeidsgiverperiode når arbeidsperioden er stykket opp i flere korte perioder`() {
         nyPeriode(1.januar til 7.januar)
         nyPeriode(9.januar til 14.januar)
@@ -114,22 +142,13 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
 
         val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
-        assertForventetFeil(
-            forklaring = "Vi skal sende med sykmeldingsperiodene til alle vedtaksperioder som deler AGP",
-            nå = {
-                val expectedSykmeldingsperioder = listOf(16.januar til 21.januar)
-                assertEquals(expectedSykmeldingsperioder, trengerArbeidsgiveropplysningerEvent.sykmeldingsperioder)
-            },
-            ønsket = {
-                val expectedSykmeldingsperioder = listOf(
-                    1.januar til 7.januar,
-                    9.januar til 14. januar,
-                    16.januar til 21.januar
-                )
-                assertEquals(expectedSykmeldingsperioder, trengerArbeidsgiveropplysningerEvent.sykmeldingsperioder)
-            }
-        )
 
+        val expectedSykmeldingsperioder = listOf(
+            1.januar til 7.januar,
+            9.januar til 14. januar,
+            16.januar til 21.januar
+        )
+        assertEquals(expectedSykmeldingsperioder, trengerArbeidsgiveropplysningerEvent.sykmeldingsperioder)
 
         assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
@@ -249,6 +268,104 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
             PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
         )
         assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
+    }
+
+    @Test
+    fun `tenke på når vi skal be om arbeidsgiverperiode når en kort periode forlenges `() {
+        nyPeriode(1.januar til 16.januar)
+        nyPeriode(17.januar til 31.januar)
+
+        val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
+
+        assertForventetFeil(
+            forklaring = "vi skal ikke sende ut en vanlig forespørsel for første periode (siden den er kort) og burde be om AGP i forlengelse",
+            nå = {
+                val expectedForespurteOpplysninger = listOf(
+                    PersonObserver.Inntekt(
+                        PersonObserver.Inntektsforslag(
+                            listOf(
+                                oktober(2017),
+                                november(2017),
+                                desember(2017)
+                            )
+                        )
+                    ),
+                    PersonObserver.Refusjon
+                )
+                assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
+            },
+            ønsket = {
+                val expectedForespurteOpplysninger = listOf(
+                    PersonObserver.Inntekt(
+                        PersonObserver.Inntektsforslag(
+                            listOf(
+                                oktober(2017),
+                                november(2017),
+                                desember(2017)
+                            )
+                        )
+                    ),
+                    PersonObserver.Refusjon,
+                    PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.januar til 16.januar))
+                )
+
+                assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
+            }
+        )
+
+
+
+
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+    }
+
+    @Test
+    fun `tenke på når vi skal be om arbeidsgiverperiode når en kort periode har et lite gap til ny periode`() {
+        nyPeriode(1.januar til 16.januar)
+        nyPeriode(20.januar til 31.januar)
+
+        val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
+
+        assertForventetFeil(
+            forklaring = "vi skal ikke sende ut en vanlig forespørsel for første periode (siden den er kort) og burde be om AGP i forlengelse",
+            nå = {
+                val expectedForespurteOpplysninger = listOf(
+                    PersonObserver.Inntekt(
+                        PersonObserver.Inntektsforslag(
+                            listOf(
+                                oktober(2017),
+                                november(2017),
+                                desember(2017)
+                            )
+                        )
+                    ),
+                    PersonObserver.Refusjon
+                )
+                assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
+            },
+            ønsket = {
+                val expectedForespurteOpplysninger = listOf(
+                    PersonObserver.Inntekt(
+                        PersonObserver.Inntektsforslag(
+                            listOf(
+                                oktober(2017),
+                                november(2017),
+                                desember(2017)
+                            )
+                        )
+                    ),
+                    PersonObserver.Refusjon,
+                    PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.januar til 16.januar))
+                )
+
+                assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
+            }
+        )
+
+
+
+
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
 
     private fun nyeVedtakMedUlikFom(sykefraværHosArbeidsgiver: Map<String, Periode>, inntekt: Inntekt = 20000.månedlig) {

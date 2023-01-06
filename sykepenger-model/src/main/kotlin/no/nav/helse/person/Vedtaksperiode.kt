@@ -644,26 +644,29 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerArbeidsgiveropplysninger() {
-        val arbeidsgiverperiode = finnArbeidsgiverperiode()?.perioder.orEmpty()
+        val arbeidsgiverperiode = finnArbeidsgiverperiode()
+        val arbeidsgiverperiodeperioder = arbeidsgiverperiode?.perioder.orEmpty()
         val inntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntekt(arbeidsgiver.organisasjonsnummer())
         val beregningsmåneder = 3.downTo(1).map {
             YearMonth.from(skjæringstidspunkt).minusMonths(it.toLong())
         }
 
-        val trengerArbeidsgiverperiode = arbeidsgiverperiode.maxByOrNull { it.endInclusive }?.overlapperMed(periode())
+        val trengerArbeidsgiverperiode = arbeidsgiverperiodeperioder.maxByOrNull { it.endInclusive }?.overlapperMed(periode())
             ?: false
 
         val forespurteOpplysninger = listOf(
             (inntekt == null) to PersonObserver.Inntekt(forslag = PersonObserver.Inntektsforslag(beregningsmåneder)),
             (inntekt != null) to inntekt?.let { PersonObserver.FastsattInntekt(fastsattInntekt = it) },
             true to PersonObserver.Refusjon,
-            trengerArbeidsgiverperiode to PersonObserver.Arbeidsgiverperiode(arbeidsgiverperiode)
+            trengerArbeidsgiverperiode to PersonObserver.Arbeidsgiverperiode(arbeidsgiverperiodeperioder)
         ).mapNotNull { if (it.first) it.second else null }
+
+        val vedtaksperioderKnyttetTilArbeidsgiverperiode = arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
 
         person.trengerArbeidsgiveropplysninger(
             PersonObserver.TrengerArbeidsgiveropplysningerEvent(
                 organisasjonsnummer = organisasjonsnummer,
-                sykmeldingsperioder = listOf(periode.start til periode.endInclusive), // TODO: skal inneholde skmeldingsperiodene til alle vedtaksperioder som deler arbeidsgiverperiode
+                sykmeldingsperioder = vedtaksperioderKnyttetTilArbeidsgiverperiode.map { it.periode() },
                 vedtaksperiodeId = id,
                 forespurteOpplysninger = forespurteOpplysninger.toList()
             )
