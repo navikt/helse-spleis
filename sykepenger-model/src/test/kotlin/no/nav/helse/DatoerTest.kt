@@ -140,6 +140,28 @@ internal class DatoerTest {
         assertTrue(lørdag.erRettFør(søndag)) { "lørdag er rett før søndag" }
     }
 
+    @Test
+    fun `første og neste arbeidsdag`() {
+        val mandag = 1.januar
+        val tirsdag = 2.januar
+        val fredag = 5.januar
+        val lørdag = 6.januar
+        val søndag = 7.januar
+        val nesteMandag = 8.januar
+        val nesteTirsdag = 9.januar
+        assertEquals(mandag, mandag.førsteArbeidsdag())
+        assertEquals(tirsdag, mandag.nesteArbeidsdag())
+
+        assertEquals(fredag, fredag.førsteArbeidsdag())
+        assertEquals(nesteMandag, fredag.nesteArbeidsdag())
+
+        assertEquals(lørdag.førsteArbeidsdag(), nesteMandag)
+        assertEquals(lørdag.nesteArbeidsdag(), nesteTirsdag)
+
+        assertEquals(søndag.førsteArbeidsdag(), nesteMandag)
+        assertEquals(søndag.nesteArbeidsdag(), nesteTirsdag)
+    }
+
     @Disabled
     @Test
     fun `forskjell mellom ukedager-impl`() {
