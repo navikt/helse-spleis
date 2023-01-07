@@ -67,7 +67,7 @@ internal class InntektsmeldingMatchingTest {
     @Test
     fun `arbeidsgiverperiode slutter på fredag, forlengelse starter på mandag - første fraværsdag 5 januar`() {
         val vedtaksperiode1 = 5.januar til 20.januar
-        val vedtaksperiode2 = 23.januar til 31.januar
+        val vedtaksperiode2 = 22.januar til 31.januar
         val (dager, inntektOgRefusjon) =
             inntektsmelding(5.januar, 5.januar til 20.januar)
 
@@ -81,11 +81,11 @@ internal class InntektsmeldingMatchingTest {
     }
 
     @Test
-    fun `arbeidsgiverperiode slutter på fredag, forlengelse starter på mandag - første fraværsdag 23 januar`() {
+    fun `arbeidsgiverperiode slutter på fredag, forlengelse starter på mandag - første fraværsdag 22 januar`() {
         val vedtaksperiode1 = 5.januar til 20.januar
-        val vedtaksperiode2 = 23.januar til 31.januar
+        val vedtaksperiode2 = 22.januar til 31.januar
         val (dager, inntektOgRefusjon) =
-            inntektsmelding(23.januar, 5.januar til 20.januar)
+            inntektsmelding(22.januar, 5.januar til 20.januar)
 
         assertEquals(5.januar til 20.januar, dager.håndter(vedtaksperiode1))
         assertNull(dager.håndterGjenståendeFør(vedtaksperiode1))
@@ -94,7 +94,8 @@ internal class InntektsmeldingMatchingTest {
         assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode1))
         assertTrue(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode2))
 
-        assertNull(dager.håndterGjenstående())
+        // TODO: Hva første fraværsdag er satt til har innvirkning på hvor lang sykdomstisdlinjen til IM er
+        assertEquals(21.januar.somPeriode(), dager.håndterGjenstående())
     }
 
     @Test
@@ -148,6 +149,35 @@ internal class InntektsmeldingMatchingTest {
         assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode2))
         assertTrue(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode3))
         assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode4))
+    }
+
+    @Test
+    fun `første fraværsdag i helg`() {
+        val vedtaksperiode1 = 1.januar til 16.januar
+        val vedtaksperiode2 = 22.januar til 31.januar
+
+        val (dager, inntektOgRefusjon) =
+            inntektsmelding(20.januar, 1.januar til 16.januar)
+
+        assertEquals(1.januar til 16.januar, dager.håndter(vedtaksperiode1))
+        assertNull(dager.håndterGjenståendeFør(vedtaksperiode1))
+        assertNull(dager.håndter(vedtaksperiode2))
+        assertNull(dager.håndterGjenstående())
+
+        assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode1))
+        assertTrue(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode2))
+    }
+
+    @Test
+    fun `kun en vedtaksperiode som skal håndtere inntekt og refusjon`() {
+        val vedtaksperiode1 = 11.januar til 20.januar // Slutter på en lørdag (første fraværsdag)
+        val vedtaksperiode2 = 22.januar til 31.januar // Startert på en mandag (første arbeidsdag etter første fraværsdag)
+
+        val (_, inntektOgRefusjon) =
+            inntektsmelding(20.januar, 1.januar til 16.januar)
+
+        assertTrue(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode1))
+        assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode2))
     }
 
     private fun DagerFraInntektsmelding.håndter(periode: Periode): Periode? {

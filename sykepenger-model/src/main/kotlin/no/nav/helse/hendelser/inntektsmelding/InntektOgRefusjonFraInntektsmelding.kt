@@ -1,9 +1,9 @@
 package no.nav.helse.hendelser.inntektsmelding
 
 import java.time.LocalDate
+import no.nav.helse.førsteArbeidsdag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.nesteArbeidsdag
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IAktivitetslogg
@@ -29,10 +29,11 @@ internal class InntektOgRefusjonFraInntektsmelding(
     internal fun skalHåndteresAv(periode: Periode): Boolean {
         if (erHåndtert) return false
         if (førsteFraværsdag == null && sisteDagIArbeidsgiverperioden == null) return false
-        erHåndtert = when (ingenArbeidsgiverperiode || førsteFraværsdagEtterArbeidsgiverperioden) {
-            true -> førsteFraværsdag in periode
-            false -> sisteDagIArbeidsgiverperioden!!.nesteDag in periode || sisteDagIArbeidsgiverperioden.nesteArbeidsdag() in periode
+        val bestemmendeDag = when (ingenArbeidsgiverperiode || førsteFraværsdagEtterArbeidsgiverperioden) {
+            true -> førsteFraværsdag!!
+            false -> sisteDagIArbeidsgiverperioden!!.nesteDag
         }
+        erHåndtert = bestemmendeDag in periode || bestemmendeDag.førsteArbeidsdag() in periode
         return erHåndtert
     }
 }
