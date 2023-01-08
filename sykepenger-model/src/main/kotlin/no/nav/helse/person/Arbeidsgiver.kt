@@ -523,7 +523,14 @@ internal class Arbeidsgiver private constructor(
                 dager.håndterGjenståendeFør(periode(), this@Arbeidsgiver)
             }}
         }
-        if (noenHarHåndtertDager) {
+
+        val noenKommerTilÅHåndtereInntektOgRefusjon = inntektsmelding.inntektOgRefusjon.let { inntektOgRefusjon ->
+            noenHarHåndtert(inntektsmelding) {
+                inntektOgRefusjon.skalHåndteresAv(periode())
+            }
+        }
+
+        if (noenHarHåndtertDager || noenKommerTilÅHåndtereInntektOgRefusjon) {
             // Noen av dagene er håndtert, men ikke nødvendigvis alle. For å beholde dagens oppførsel
             // må vi håndtere de gjenstående dagene også.
             dager.håndterGjenstående(this@Arbeidsgiver)

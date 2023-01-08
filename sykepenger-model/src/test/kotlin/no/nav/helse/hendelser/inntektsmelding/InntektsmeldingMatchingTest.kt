@@ -10,7 +10,9 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.oktober
 import no.nav.helse.person.Personopplysninger
+import no.nav.helse.september
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -107,7 +109,7 @@ internal class InntektsmeldingMatchingTest {
         assertNull(dager.håndter(vedtaksperiode1))
         assertNull(dager.håndterGjenståendeFør(vedtaksperiode1))
         assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode1))
-        assertNull(dager.håndterGjenstående())
+        assertEquals(1.mars til 16.mars, dager.håndterGjenstående()) // Om den kalles tas alt gjenstående med uavhengig
     }
 
     @Test
@@ -178,6 +180,17 @@ internal class InntektsmeldingMatchingTest {
 
         assertTrue(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode1))
         assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode2))
+    }
+
+    @Test
+    fun `vedtaksperiode som starter på mandag med arbeidsgiverperiode som slutter på foregående fredag`() {
+        val vedtaksperiode1 = 21.september(2020) til 10.oktober(2020)
+        val (dager, _) =
+            inntektsmelding(21.september, 4.september(2020) til 19.september(2020))
+
+        assertNull(dager.håndter(vedtaksperiode1))
+        assertFalse(dager.skalHåndteresAv(vedtaksperiode1)) // håndterGjenståendeFør kalles aldri ettersom vedtaksperioden ikke håndterer noe
+        assertEquals(4.september(2020) til 19.september(2020), dager.håndterGjenstående()) // Alt blir dratt med som gjenstående siden vedtaksperiode håndterer inntekt & refusjon
     }
 
     private fun DagerFraInntektsmelding.håndter(periode: Periode): Periode? {

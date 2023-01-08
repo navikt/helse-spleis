@@ -48,7 +48,6 @@ internal class DagerFraInntektsmelding(
 
     internal fun håndterGjenstående(oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit) {
         if (gjenståendeDager.isEmpty()) return
-        if (opprinneligeDager == gjenståendeDager) return
         oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, gjenståendeDager.overordnetPeriode))
         gjenståendeDager.clear()
     }
