@@ -130,15 +130,30 @@ internal class TestHendelseMediator : IHendelseMediator {
         message.behandle(this, context)
     }
 
-    override fun behandle(message: NySøknadMessage, sykmelding: Sykmelding, context: MessageContext) {
+    override fun behandle(
+        message: NySøknadMessage,
+        sykmelding: Sykmelding,
+        context: MessageContext,
+        historiskeFolkeregisteridenter: List<String>
+    ) {
         lestNySøknad = true
     }
 
-    override fun behandle(message: SendtSøknadArbeidsgiverMessage, søknad: Søknad, context: MessageContext) {
+    override fun behandle(
+        message: SendtSøknadArbeidsgiverMessage,
+        søknad: Søknad,
+        context: MessageContext,
+        historiskeFolkeregisteridenter: List<String>
+    ) {
         lestSendtSøknadArbeidsgiver = true
     }
 
-    override fun behandle(message: SendtSøknadNavMessage, søknad: Søknad, context: MessageContext) {
+    override fun behandle(
+        message: SendtSøknadNavMessage,
+        søknad: Søknad,
+        context: MessageContext,
+        historiskeFolkeregisteridenter: List<String>
+    ) {
         lestSendtSøknad = true
     }
 

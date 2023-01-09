@@ -25,7 +25,7 @@ internal class SerialiseringAvRefusjonsopplysningerE2ETest : AbstractEndToEndTes
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         inspektør.refusjonsopplysningerFraVilkårsgrunnlag(1.januar).assertRefusjonsbeløp(1.januar til 31.januar, INNTEKT)
         val json = person.serialize().json
-        person = createTestPerson { jurist -> SerialisertPerson(json).deserialize(jurist) }
+        person = createTestPerson { jurist -> SerialisertPerson(json).deserialize(jurist, emptyList()) }
         inspektør.refusjonsopplysningerFraVilkårsgrunnlag(1.januar).assertRefusjonsbeløp(1.januar til 31.januar, INNTEKT)
     }
 
@@ -36,7 +36,7 @@ internal class SerialiseringAvRefusjonsopplysningerE2ETest : AbstractEndToEndTes
         inspektør(a1).refusjonsopplysningerFraVilkårsgrunnlag(1.januar).assertRefusjonsbeløp(1.januar til 31.januar, 20000.månedlig)
         inspektør(a2).refusjonsopplysningerFraVilkårsgrunnlag(1.januar).assertRefusjonsbeløp(1.januar til 31.januar, 15000.månedlig)
         val json = person.serialize().json
-        person = createTestPerson { jurist -> SerialisertPerson(json).deserialize(jurist) }
+        person = createTestPerson { jurist -> SerialisertPerson(json).deserialize(jurist, emptyList()) }
         inspektør(a1).refusjonsopplysningerFraVilkårsgrunnlag(1.januar).assertRefusjonsbeløp(1.januar til 31.januar, 20000.månedlig)
         inspektør(a2).refusjonsopplysningerFraVilkårsgrunnlag(1.januar).assertRefusjonsbeløp(1.januar til 31.januar, 15000.månedlig)
     }

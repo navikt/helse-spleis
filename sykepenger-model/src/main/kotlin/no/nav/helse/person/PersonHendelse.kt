@@ -3,7 +3,9 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.person.Varselkode.RV_AN_5
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 
 internal class FunksjonelleFeilTilVarsler(private val other: IAktivitetslogg) : IAktivitetslogg by other {
@@ -14,18 +16,31 @@ internal class FunksjonelleFeilTilVarsler(private val other: IAktivitetslogg) : 
     }
 }
 
-class Personopplysninger(
+class Personopplysninger internal constructor(
     private val personidentifikator: Personidentifikator,
     private val aktørId: String,
-    private val fødselsdato: LocalDate,
-    val historiskeFolkeregisteridenter: List<String>
+    private val alder: Alder,
+    private val tidligereBehandledeIdenter: List<String>
 ) {
+    constructor(
+        personidentifikator: Personidentifikator,
+        aktørId: String,
+        fødselsdato: LocalDate,
+        tidligereBehandledeIdenter: List<String>
+    ) : this(personidentifikator, aktørId, fødselsdato.alder, tidligereBehandledeIdenter)
+
     internal fun nyPerson(jurist: MaskinellJurist) = Person(
         personidentifikator = personidentifikator,
         aktørId = aktørId,
-        alder = fødselsdato.alder,
+        alder = alder,
+        personopplysninger = this,
         jurist = jurist
+
     )
+    internal fun valider(hendelse: IAktivitetslogg) {
+        if (tidligereBehandledeIdenter.isEmpty()) return
+        hendelse.funksjonellFeil(RV_AN_5)
+    }
 }
 
 abstract class PersonHendelse protected constructor(

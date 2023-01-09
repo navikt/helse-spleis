@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.meldinger.model
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.spleis.IHendelseMediator
@@ -9,6 +10,6 @@ internal class NySøknadMessage(packet: JsonMessage, private val builder: NySøk
 
     override fun _behandle(mediator: IHendelseMediator, packet: JsonMessage, context: MessageContext) {
         builder.fremtidigSøknad(packet["fremtidig_søknad"].asBoolean())
-        mediator.behandle(this, builder.build(), context)
+        mediator.behandle(this, builder.build(), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText))
     }
 }

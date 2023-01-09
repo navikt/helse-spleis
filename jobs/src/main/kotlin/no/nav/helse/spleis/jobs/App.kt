@@ -81,7 +81,7 @@ private fun migrateV2Task(targetVersjon: Int) {
                         migreringCounter += 1
                         log.info("[$migreringCounter] Utfører migrering")
                         val time = measureTimeMillis {
-                            val resultat = SerialisertPerson(data).deserialize(MaskinellJurist()).serialize()
+                            val resultat = SerialisertPerson(data).deserialize(MaskinellJurist(), emptyList()).serialize()
                             check(1 == txSession.run(queryOf("UPDATE person SET skjema_versjon=:skjemaversjon, data=:data WHERE fnr=:ident", mapOf(
                                 "skjemaversjon" to resultat.skjemaVersjon,
                                 "data" to resultat.json,

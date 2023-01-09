@@ -81,21 +81,36 @@ internal class HendelseMediator(
         }
     }
 
-    override fun behandle(message: NySøknadMessage, sykmelding: Sykmelding, context: MessageContext) {
+    override fun behandle(
+        message: NySøknadMessage,
+        sykmelding: Sykmelding,
+        context: MessageContext,
+        historiskeFolkeregisteridenter: List<String>
+    ) {
         håndter(message, sykmelding, context) { person ->
             HendelseProbe.onSykmelding()
             person.håndter(sykmelding)
         }
     }
 
-    override fun behandle(message: SendtSøknadArbeidsgiverMessage, søknad: Søknad, context: MessageContext) {
+    override fun behandle(
+        message: SendtSøknadArbeidsgiverMessage,
+        søknad: Søknad,
+        context: MessageContext,
+        historiskeFolkeregisteridenter: List<String>
+    ) {
         håndter(message, søknad, context) { person ->
             HendelseProbe.onSøknadArbeidsgiver()
             person.håndter(søknad)
         }
     }
 
-    override fun behandle(message: SendtSøknadNavMessage, søknad: Søknad, context: MessageContext) {
+    override fun behandle(
+        message: SendtSøknadNavMessage,
+        søknad: Søknad,
+        context: MessageContext,
+        historiskeFolkeregisteridenter: List<String>
+    ) {
         håndter(message, søknad, context) { person ->
             HendelseProbe.onSøknadNav()
             person.håndter(søknad)
@@ -245,13 +260,14 @@ internal class HendelseMediator(
         message: HendelseMessage,
         hendelse: Hendelse,
         context: MessageContext,
+        historiskeFolkeregisteridenter: List<String> = emptyList(),
         handler: (Person) -> Unit
     ) {
         val jurist = MaskinellJurist()
         val personMediator = PersonMediator(message, hendelse, hendelseRepository)
         val datadelingMediator = DatadelingMediator(hendelse)
         val subsumsjonMediator = SubsumsjonMediator(jurist, hendelse.fødselsnummer(), message, versjonAvKode)
-        person(message, hendelse, jurist) { person  ->
+        person(message, hendelse, historiskeFolkeregisteridenter, jurist) { person  ->
             person.addObserver(personMediator)
             person.addObserver(VedtaksperiodeProbe)
             handler(person)
@@ -259,12 +275,14 @@ internal class HendelseMediator(
         finalize(context, personMediator, subsumsjonMediator, datadelingMediator, hendelse)
     }
 
-    private fun person(message: HendelseMessage, hendelse: PersonHendelse, jurist: MaskinellJurist, block: (Person) -> Unit) {
+    private fun person(message: HendelseMessage, hendelse: PersonHendelse, historiskeFolkeregisteridenter: List<String>, jurist: MaskinellJurist, block: (Person) -> Unit) {
         val personidentifikator = hendelse.fødselsnummer().somPersonidentifikator()
+        //TODO databasekall
+        val tidligereBehandledeIdenter = listOf<String>()
         personDao.hentEllerOpprettPerson(personidentifikator, hendelse.aktørId(), message, {
             hendelse.person(jurist).serialize()
         }) { serialisertPerson ->
-            serialisertPerson.deserialize(jurist) { hendelseRepository.hentAlleHendelser(personidentifikator) }.also(block).serialize()
+            serialisertPerson.deserialize(jurist, tidligereBehandledeIdenter) { hendelseRepository.hentAlleHendelser(personidentifikator) }.also(block).serialize()
         }
     }
 
@@ -287,9 +305,24 @@ internal class HendelseMediator(
 
 internal interface IHendelseMediator {
     fun behandle(message: HendelseMessage, context: MessageContext)
-    fun behandle(message: NySøknadMessage, sykmelding: Sykmelding, context: MessageContext)
-    fun behandle(message: SendtSøknadArbeidsgiverMessage, søknad: Søknad, context: MessageContext)
-    fun behandle(message: SendtSøknadNavMessage, søknad: Søknad, context: MessageContext)
+    fun behandle(
+        message: NySøknadMessage,
+        sykmelding: Sykmelding,
+        context: MessageContext,
+        historiskeFolkeregisteridenter: List<String>
+    )
+    fun behandle(
+        message: SendtSøknadArbeidsgiverMessage,
+        søknad: Søknad,
+        context: MessageContext,
+        historiskeFolkeregisteridenter: List<String>
+    )
+    fun behandle(
+        message: SendtSøknadNavMessage,
+        søknad: Søknad,
+        context: MessageContext,
+        historiskeFolkeregisteridenter: List<String>
+    )
     fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext)
     fun behandle(message: InntektsmeldingReplayMessage, inntektsmelding: InntektsmeldingReplay, context: MessageContext)
     fun behandle(message: UtbetalingpåminnelseMessage, påminnelse: Utbetalingpåminnelse, context: MessageContext)

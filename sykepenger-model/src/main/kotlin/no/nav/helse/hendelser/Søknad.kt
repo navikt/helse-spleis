@@ -70,6 +70,7 @@ class Søknad(
     internal fun harArbeidsdager() = perioder.filterIsInstance<Søknadsperiode.Arbeid>().isNotEmpty()
 
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
+        personopplysninger().valider(this)
         perioder.forEach { it.subsumsjon(this.perioder.subsumsjonsFormat(), subsumsjonObserver) }
         perioder.forEach { it.valider(this) }
         if (permittert) varsel(RV_SØ_1)

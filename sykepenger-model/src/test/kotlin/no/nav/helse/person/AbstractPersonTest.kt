@@ -48,7 +48,7 @@ internal abstract class AbstractPersonTest {
         val a3: String = "321987654"
         val a4: String = "456789123"
 
-        private fun overgangFraInfotrygdPerson(jurist: MaskinellJurist) = SerialisertPerson("/personer/infotrygdforlengelse.json".readResource()).deserialize(jurist).also { person ->
+        private fun overgangFraInfotrygdPerson(jurist: MaskinellJurist) = SerialisertPerson("/personer/infotrygdforlengelse.json".readResource()).deserialize(jurist, emptyList()).also { person ->
             person.håndter(
                 Inntektsmelding(
                     meldingsreferanseId = UUID.randomUUID(),
@@ -81,7 +81,7 @@ internal abstract class AbstractPersonTest {
                 ),
             )
         }
-        private fun pingPongPerson(jurist: MaskinellJurist) = SerialisertPerson("/personer/pingpong.json".readResource()).deserialize(jurist).also { person ->
+        private fun pingPongPerson(jurist: MaskinellJurist) = SerialisertPerson("/personer/pingpong.json".readResource()).deserialize(jurist, emptyList()).also { person ->
             person.håndter(
                 Utbetalingshistorikk(
                     UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),
@@ -126,10 +126,10 @@ internal abstract class AbstractPersonTest {
         override fun maksSykepengedagerOver67() = maksSykedager
     }
     protected fun createKorttidsPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate, maksSykedager: Int) = createTestPerson { jurist ->
-        Person(AKTØRID, personidentifikator, fødseldato.alder, jurist, regler(maksSykedager))
+        Person(AKTØRID, personidentifikator, fødseldato.alder, personopplysninger, jurist, regler(maksSykedager))
     }
     protected fun createTestPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate) = createTestPerson { jurist ->
-        Person(AKTØRID, personidentifikator, fødseldato.alder, jurist)
+        Person(AKTØRID, personidentifikator, fødseldato.alder, personopplysninger, jurist)
     }
     protected fun createPingPongPerson() = createTestPerson { jurist -> pingPongPerson(jurist) }
     protected fun createOvergangFraInfotrygdPerson() = createTestPerson { jurist -> overgangFraInfotrygdPerson(jurist) }

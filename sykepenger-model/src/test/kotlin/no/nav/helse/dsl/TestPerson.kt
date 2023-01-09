@@ -44,6 +44,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -65,6 +66,7 @@ internal class TestPerson(
     private val aktørId: String = AKTØRID,
     private val personidentifikator: Personidentifikator = UNG_PERSON_FNR_2018,
     private val fødselsdato: LocalDate = UNG_PERSON_FDATO_2018,
+    private val tidligereBehandledeIdenter: List<String> = emptyList(),
     deferredLog: DeferredLog = DeferredLog(),
     jurist: MaskinellJurist = MaskinellJurist()
 ) {
@@ -85,7 +87,7 @@ internal class TestPerson(
     private val behovsamler = Behovsamler(deferredLog)
     private val vedtaksperiodesamler = Vedtaksperiodesamler()
     private val personHendelsefabrikk = PersonHendelsefabrikk(aktørId, personidentifikator)
-    private val person = Person(aktørId, personidentifikator, fødselsdato.alder, jurist).also {
+    private val person = Person(aktørId, personidentifikator, fødselsdato.alder, Personopplysninger(personidentifikator, aktørId, fødselsdato.alder, tidligereBehandledeIdenter), jurist).also {
         it.addObserver(vedtaksperiodesamler)
         it.addObserver(behovsamler)
         it.addObserver(observatør)

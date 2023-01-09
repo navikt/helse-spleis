@@ -21,6 +21,7 @@ import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.Vedtaksperiode
@@ -54,7 +55,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
 
     @BeforeEach
     fun setup() {
-        person = Person(AKTØRID, UNG_PERSON_FNR_2018, UNG_PERSON_FØDSELSDATO.alder, MaskinellJurist())
+        person = Person(AKTØRID, UNG_PERSON_FNR_2018, UNG_PERSON_FØDSELSDATO.alder, Personopplysninger(UNG_PERSON_FNR_2018, AKTØRID, UNG_PERSON_FØDSELSDATO, emptyList()), MaskinellJurist())
         person.addObserver(observatør)
         person.håndter(sykmelding())
         person.håndter(søknad())

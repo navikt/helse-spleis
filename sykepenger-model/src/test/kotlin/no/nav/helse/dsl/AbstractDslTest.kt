@@ -265,6 +265,8 @@ internal abstract class AbstractDslTest {
         this { assertVarsel(warning, *filtre) }
     protected fun String.assertVarsel(kode: Varselkode, vararg filtre: AktivitetsloggFilter) =
         this { assertVarsel(kode, *filtre) }
+    protected fun String.assertFunksjonellFeil(kode: Varselkode, vararg filtre: AktivitetsloggFilter) =
+        this { assertFunksjonellFeil(kode, *filtre) }
     protected fun String.assertIngenVarsler(vararg filtre: AktivitetsloggFilter) =
         this { assertIngenVarsler(*filtre) }
     protected fun String.nyttVedtak(
@@ -380,6 +382,8 @@ internal abstract class AbstractDslTest {
         bareÈnArbeidsgiver(a1).assertVarsel(warning, *filtre)
     protected fun assertVarsel(kode: Varselkode, vararg filtre: AktivitetsloggFilter) =
         bareÈnArbeidsgiver(a1).assertVarsel(kode, *filtre)
+    protected fun assertFunksjonellFeil(kode: Varselkode, vararg filtre: AktivitetsloggFilter) =
+        bareÈnArbeidsgiver(a1).assertFunksjonellFeil(kode, *filtre)
     protected fun assertIngenVarsler(vararg filtre: AktivitetsloggFilter) =
         bareÈnArbeidsgiver(a1).assertIngenVarsler(*filtre)
     protected fun assertActivities() {
@@ -402,6 +406,9 @@ internal abstract class AbstractDslTest {
 
     protected fun medFødselsdato(fødselsdato: LocalDate) {
         testperson = TestPerson(observatør = observatør, fødselsdato = fødselsdato, deferredLog = deferredLog)
+    }
+    protected fun medTidligereBehandledeIdenter() {
+        testperson = TestPerson(tidligereBehandledeIdenter = listOf("ident"), observatør = observatør, deferredLog = deferredLog)
     }
 
     @BeforeEach

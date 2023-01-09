@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.meldinger.model
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -11,6 +12,6 @@ internal class SendtSøknadArbeidsgiverMessage(private val packet: JsonMessage, 
     override fun _behandle(mediator: IHendelseMediator, packet: JsonMessage, context: MessageContext) {
         builder.sendt(packet["sendtArbeidsgiver"].asLocalDateTime())
         SendtSøknadNavMessage.byggSendtSøknad(builder, packet)
-        mediator.behandle(this, builder.build(), context)
+        mediator.behandle(this, builder.build(), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText))
     }
 }

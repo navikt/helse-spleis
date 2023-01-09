@@ -9,8 +9,10 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
 import no.nav.helse.januar
+import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Person
+import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -26,7 +28,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
         val jsonBuilder = JsonBuilder()
         person.accept(jsonBuilder)
         val personDeserialisert = SerialisertPerson(jsonBuilder.toString())
-            .deserialize(MaskinellJurist())
+            .deserialize(MaskinellJurist(), emptyList())
 
         assertJsonEquals(person, personDeserialisert)
     }
@@ -37,7 +39,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
         person.accept(jsonBuilder)
         val json = jsonBuilder.toString()
 
-        val result = SerialisertPerson(json).deserialize(MaskinellJurist())
+        val result = SerialisertPerson(json).deserialize(MaskinellJurist(), emptyList())
         val jsonBuilder2 = JsonBuilder()
         result.accept(jsonBuilder2)
         val json2 = jsonBuilder2.toString()
@@ -49,6 +51,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
     private val aktørId = "12345"
     private val fnr = "12029240045"
     private val orgnummer = "987654321"
+    private val personopplysninger = Personopplysninger(fnr.somPersonidentifikator(), aktørId, UNG_PERSON_FØDSELSDATO, emptyList())
     private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
         aktørId = aktørId,
         personidentifikator = fnr.somPersonidentifikator(),

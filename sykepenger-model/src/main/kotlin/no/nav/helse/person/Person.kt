@@ -81,6 +81,7 @@ class Person private constructor(
     private val infotrygdhistorikk: Infotrygdhistorikk,
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private var dødsdato: LocalDate?,
+    private val personopplysninger: Personopplysninger,
     private val jurist: MaskinellJurist,
     private val regler: ArbeidsgiverRegler = NormalArbeidstaker
 ) : Aktivitetskontekst {
@@ -90,6 +91,7 @@ class Person private constructor(
             aktørId: String,
             personidentifikator: Personidentifikator,
             alder: Alder,
+            personopplysninger: Personopplysninger,
             arbeidsgivere: MutableList<Arbeidsgiver>,
             aktivitetslogg: Aktivitetslogg,
             opprettet: LocalDateTime,
@@ -107,6 +109,7 @@ class Person private constructor(
             infotrygdhistorikk = infotrygdhistorikk,
             vilkårsgrunnlagHistorikk = vilkårsgrunnlaghistorikk,
             dødsdato = dødsdato,
+            personopplysninger = personopplysninger,
             jurist = jurist
         )
     }
@@ -115,6 +118,7 @@ class Person private constructor(
         aktørId: String,
         personidentifikator: Personidentifikator,
         alder: Alder,
+        personopplysninger: Personopplysninger,
         jurist: MaskinellJurist,
         regler: ArbeidsgiverRegler = NormalArbeidstaker
     ) : this(
@@ -127,6 +131,7 @@ class Person private constructor(
         Infotrygdhistorikk(),
         VilkårsgrunnlagHistorikk(),
         null,
+        personopplysninger = personopplysninger,
         jurist.medFødselsnummer(personidentifikator),
         regler = regler
     )
@@ -151,6 +156,7 @@ class Person private constructor(
         before: () -> Any = { }
     ) {
         registrer(hendelse, "Behandler $hendelsesmelding")
+        personopplysninger.valider(hendelse)
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
         before()
         hendelse.fortsettÅBehandle(arbeidsgiver)

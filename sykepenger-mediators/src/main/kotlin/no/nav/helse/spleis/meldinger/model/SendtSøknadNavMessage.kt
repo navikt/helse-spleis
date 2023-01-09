@@ -17,7 +17,7 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, private val builder: 
     override fun _behandle(mediator: IHendelseMediator, packet: JsonMessage, context: MessageContext) {
         builder.sendt(packet["sendtNav"].asLocalDateTime())
         byggSendtSøknad(builder, packet)
-        mediator.behandle(this, builder.build(), context)
+        mediator.behandle(this, builder.build(), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText))
     }
 
     internal companion object {
