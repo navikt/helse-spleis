@@ -663,7 +663,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(16.juni(2019), 31.juli(2019), 50.prosent))
         håndterSøknad(Sykdom(16.juni(2019), 31.juli(2019), 50.prosent, 50.prosent))
-        håndterInntektsmelding(listOf(Periode(16.juni(2019), 31.juli(2019))))
+        håndterInntektsmelding(listOf(Periode(16.juni(2019), 1.juli(2019))))
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

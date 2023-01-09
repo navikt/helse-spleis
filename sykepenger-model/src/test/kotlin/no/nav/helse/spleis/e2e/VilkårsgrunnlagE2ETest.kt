@@ -120,7 +120,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     fun `mer enn 25% avvik lager kun én errormelding i aktivitetsloggen`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 31.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -138,7 +138,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     fun `ingen sammenligningsgrunlag fører til error om 25% avvik`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 31.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(emptyList()))
         håndterYtelser(1.vedtaksperiode)

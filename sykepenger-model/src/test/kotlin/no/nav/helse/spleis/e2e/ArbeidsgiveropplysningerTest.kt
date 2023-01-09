@@ -375,7 +375,7 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         nyPeriode(ag2Periode.start til ag2Periode.endInclusive, a2)
 
         håndterInntektsmelding(listOf(ag1Periode.start til ag1Periode.start.plusDays(15)), orgnummer = a1, beregnetInntekt = inntekt)
-        håndterInntektsmelding(listOf(ag2Periode.start til ag2Periode.endInclusive), orgnummer = a2, beregnetInntekt = inntekt)
+        håndterInntektsmelding(listOf(ag2Periode.start til ag2Periode.start.plusDays(15)), orgnummer = a2, beregnetInntekt = inntekt)
 
         val sykepengegrunnlag = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),

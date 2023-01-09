@@ -120,7 +120,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(3.mars, 26.mars, 100.prosent))
         håndterSøknad(Sykdom(3.mars, 26.mars, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(3.mars, 26.mars)))
+        håndterInntektsmelding(listOf(Periode(3.mars, 18.mars)))
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
