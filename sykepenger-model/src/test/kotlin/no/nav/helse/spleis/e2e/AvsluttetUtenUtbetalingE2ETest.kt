@@ -133,7 +133,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `arbeidsgiverperiode med brudd i helg (toggle)`() {
+    fun `arbeidsgiverperiode med brudd i helg`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(4.januar, 5.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
