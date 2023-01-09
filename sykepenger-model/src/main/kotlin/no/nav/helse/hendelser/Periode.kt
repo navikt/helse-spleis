@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import no.nav.helse.erRettFør
+import no.nav.helse.forrigeDag
 import no.nav.helse.nesteArbeidsdag
 import no.nav.helse.nesteDag
 
@@ -32,6 +33,17 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
         internal fun Iterable<LocalDate>.grupperSammenhengendePerioder() = map(LocalDate::somPeriode).merge(mergeKantIKant)
         internal fun List<Periode>.grupperSammenhengendePerioder() = merge(mergeKantIKant)
         internal fun List<Periode>.grupperSammenhengendePerioderMedHensynTilHelg() = merge(mergeOverHelg)
+
+        internal val Iterable<LocalDate>.omsluttendePeriode get() = this.takeIf { it.iterator().hasNext() }?.let { min() til max() }
+        internal fun Iterable<LocalDate>.periodeRettFør(dato: LocalDate): Periode? {
+            var forrigeFom = dato
+            val rettFør = mutableSetOf<LocalDate>()
+            while (forrigeFom.forrigeDag in this) {
+                rettFør.add(forrigeFom.forrigeDag)
+                forrigeFom = forrigeFom.forrigeDag
+            }
+            return rettFør.omsluttendePeriode
+        }
 
         private fun Iterable<Periode>.merge(erForlengelse: (forrigeDag: LocalDate, nesteDag: LocalDate) -> Boolean = mergeKantIKant): List<Periode> {
             val resultat = mutableListOf<Periode>()

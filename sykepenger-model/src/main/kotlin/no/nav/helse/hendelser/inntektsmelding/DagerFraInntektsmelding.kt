@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IAktivitetslogg
@@ -24,7 +24,7 @@ internal class DagerFraInntektsmelding(
 
     internal fun håndterGjenståendeFør(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit) {
         val dagerFør = dagerFør(periode).takeUnless { it.isEmpty() } ?: return
-        oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, dagerFør.overordnetPeriode))
+        oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, dagerFør.omsluttendePeriode!!))
         gjenståendeDager.removeAll(dagerFør)
     }
 
@@ -41,23 +41,19 @@ internal class DagerFraInntektsmelding(
 
     internal fun håndter(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Sykdomstidslinje): Sykdomstidslinje? {
         val overlappendeDager = overlappendeDager(periode).takeUnless { it.isEmpty() } ?: return null
-        val arbeidsgiverSykedomstidslinje = oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, overlappendeDager.overordnetPeriode))
+        val arbeidsgiverSykedomstidslinje = oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, overlappendeDager.omsluttendePeriode!!))
         gjenståendeDager.removeAll(overlappendeDager)
         return arbeidsgiverSykedomstidslinje.subset(periode)
     }
 
     internal fun håndterGjenstående(oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit) {
         if (gjenståendeDager.isEmpty()) return
-        oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, gjenståendeDager.overordnetPeriode))
+        oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, gjenståendeDager.omsluttendePeriode!!))
         gjenståendeDager.clear()
     }
 
     internal fun håndterGjenstående(arbeidsgiver: Arbeidsgiver) = håndterGjenstående {
         arbeidsgiver.oppdaterSykdom(it)
-    }
-
-    private companion object {
-        private val Iterable<LocalDate>.overordnetPeriode get() = min() til max()
     }
 
     private class PeriodeFraInntektsmelding(

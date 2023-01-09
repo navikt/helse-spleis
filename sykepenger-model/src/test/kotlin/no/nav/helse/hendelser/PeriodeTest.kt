@@ -8,6 +8,8 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.Periode.Companion.overlapper
+import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
+import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
 import no.nav.helse.hendelser.Periode.Companion.slutterEtter
 import no.nav.helse.januar
 import no.nav.helse.juli
@@ -279,6 +281,25 @@ internal class PeriodeTest {
     fun `antall dager`() {
         val periode = 1.januar til 31.januar
         assertEquals(31, periode.count())
+    }
+
+    @Test
+    fun `omsluttende periode`() {
+        assertNull(emptyList<LocalDate>().omsluttendePeriode)
+        assertEquals(1.januar til 31.januar, listOf(1.januar, 5.januar, 31.januar).omsluttendePeriode)
+        assertEquals(1.januar til 31.januar, listOf(31.januar, 1.januar).omsluttendePeriode)
+        assertEquals(1.januar til 31.januar, (1.januar til 31.januar).omsluttendePeriode)
+    }
+
+    @Test
+    fun `periode rett før`() {
+        val dager = listOf(1.januar, 3.januar, 2.januar, 10.januar, 11.januar, 12.januar)
+        assertNull(dager.periodeRettFør(1.januar))
+        assertEquals(1.januar til 3.januar, dager.periodeRettFør(4.januar))
+        assertNull(dager.periodeRettFør(5.januar))
+        assertEquals(10.januar til 11.januar, dager.periodeRettFør(12.januar))
+        assertNull(dager.periodeRettFør(15.januar)) // Skal håndtere helg som gap
+        assertEquals(1.januar til 31.januar, (1.januar til 31.januar).periodeRettFør(1.februar))
     }
 
     private fun assertSize(expected: Int, periode: Periode) {
