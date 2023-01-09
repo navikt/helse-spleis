@@ -36,6 +36,17 @@ internal class PersonDao(private val dataSource: DataSource) {
         }
     }
 
+    internal fun hentTidligereBehandledeIdenter(historiskeFolkeregisteridenter: List<String>): List<String> {
+        if (historiskeFolkeregisteridenter.isEmpty()) return emptyList()
+        @Language("PostgreSQL")
+        val statement = "SELECT fnr FROM person WHERE fnr IN (${historiskeFolkeregisteridenter.joinToString { "?" }})"
+        return sessionOf(dataSource).use{
+                it.run(queryOf(statement, *historiskeFolkeregisteridenter.toTypedArray()).map {
+                    it.string("fnr")
+                }.asList)
+        }
+    }
+
     private fun hentPersonOgLåsPersonForBehandling(session: Session, personidentifikator: Personidentifikator): SerialisertPerson? {
         @Language("PostgreSQL")
         val statement = "SELECT data FROM person WHERE fnr = ? FOR UPDATE"

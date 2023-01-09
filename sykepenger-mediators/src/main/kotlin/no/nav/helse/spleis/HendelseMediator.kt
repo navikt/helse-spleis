@@ -277,8 +277,7 @@ internal class HendelseMediator(
 
     private fun person(message: HendelseMessage, hendelse: PersonHendelse, historiskeFolkeregisteridenter: List<String>, jurist: MaskinellJurist, block: (Person) -> Unit) {
         val personidentifikator = hendelse.fødselsnummer().somPersonidentifikator()
-        //TODO databasekall
-        val tidligereBehandledeIdenter = listOf<String>()
+        val tidligereBehandledeIdenter = personDao.hentTidligereBehandledeIdenter(historiskeFolkeregisteridenter)
         personDao.hentEllerOpprettPerson(personidentifikator, hendelse.aktørId(), message, {
             hendelse.person(jurist).serialize()
         }) { serialisertPerson ->
