@@ -107,13 +107,15 @@ internal abstract class AbstractEndToEndMediatorTest {
         vararg perioder: SoknadsperiodeDTO,
         meldingOpprettet: LocalDateTime = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay(),
         orgnummer: String = ORGNUMMER,
+        fnr: String = UNG_PERSON_FNR_2018
     ): UUID {
-        val (id, message) = meldingsfabrikk.lagNySøknad(*perioder, opprettet = meldingOpprettet, orgnummer = orgnummer)
+        val (id, message) = meldingsfabrikk.lagNySøknad(*perioder, opprettet = meldingOpprettet, orgnummer = orgnummer, fnr = fnr)
         testRapid.sendTestMessage(message)
         return id.toUUID()
     }
 
     protected fun sendSøknad(
+        fnr: String = UNG_PERSON_FNR_2018,
         perioder: List<SoknadsperiodeDTO>,
         fravær: List<FravarDTO> = emptyList(),
         egenmeldinger: List<PeriodeDTO> = emptyList(),
@@ -121,18 +123,21 @@ internal abstract class AbstractEndToEndMediatorTest {
         sendtNav: LocalDateTime? = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
         orgnummer: String = ORGNUMMER,
         korrigerer: UUID? = null,
-        opprinneligSendt: LocalDateTime? = null
+        opprinneligSendt: LocalDateTime? = null,
+        historiskeFolkeregisteridenter: List<String> = emptyList()
     ): UUID {
         val (id, message) = meldingsfabrikk.lagSøknadNav(
-                perioder = perioder,
-                fravær = fravær,
-                egenmeldinger = egenmeldinger,
-                andreInntektskilder = andreInntektskilder,
-                sendtNav = sendtNav,
-                orgnummer = orgnummer,
-                korrigerer = korrigerer,
-                opprinneligSendt = opprinneligSendt
-            )
+            fnr = fnr,
+            perioder = perioder,
+            fravær = fravær,
+            egenmeldinger = egenmeldinger,
+            andreInntektskilder = andreInntektskilder,
+            sendtNav = sendtNav,
+            orgnummer = orgnummer,
+            korrigerer = korrigerer,
+            opprinneligSendt = opprinneligSendt,
+            historiskeFolkeregisteridenter = historiskeFolkeregisteridenter,
+        )
 
         testRapid.sendTestMessage(message)
         return id.toUUID()
@@ -143,7 +148,12 @@ internal abstract class AbstractEndToEndMediatorTest {
         fravær: List<FravarDTO> = emptyList(),
         egenmeldinger: List<PeriodeDTO> = emptyList()
     ) {
-        val (_, message) = meldingsfabrikk.lagSøknadNav(perioder = perioder, fravær = fravær, egenmeldinger = egenmeldinger)
+        val (_, message) = meldingsfabrikk.lagSøknadNav(
+            fnr = UNG_PERSON_FNR_2018,
+            perioder = perioder,
+            fravær = fravær,
+            egenmeldinger = egenmeldinger,
+        )
         testRapid.sendTestMessage(message)
     }
 

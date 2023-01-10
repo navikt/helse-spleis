@@ -87,7 +87,7 @@ internal class HendelseMediator(
         context: MessageContext,
         historiskeFolkeregisteridenter: List<String>
     ) {
-        håndter(message, sykmelding, context) { person ->
+        håndter(message, sykmelding, context, historiskeFolkeregisteridenter) { person ->
             HendelseProbe.onSykmelding()
             person.håndter(sykmelding)
         }
@@ -99,7 +99,7 @@ internal class HendelseMediator(
         context: MessageContext,
         historiskeFolkeregisteridenter: List<String>
     ) {
-        håndter(message, søknad, context) { person ->
+        håndter(message, søknad, context, historiskeFolkeregisteridenter) { person ->
             HendelseProbe.onSøknadArbeidsgiver()
             person.håndter(søknad)
         }
@@ -111,7 +111,7 @@ internal class HendelseMediator(
         context: MessageContext,
         historiskeFolkeregisteridenter: List<String>
     ) {
-        håndter(message, søknad, context) { person ->
+        håndter(message, søknad, context, historiskeFolkeregisteridenter) { person ->
             HendelseProbe.onSøknadNav()
             person.håndter(søknad)
         }

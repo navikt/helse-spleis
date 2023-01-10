@@ -41,7 +41,7 @@ internal class PersonDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val statement = "SELECT fnr FROM person WHERE fnr IN (${historiskeFolkeregisteridenter.joinToString { "?" }})"
         return sessionOf(dataSource).use{
-                it.run(queryOf(statement, *historiskeFolkeregisteridenter.toTypedArray()).map {
+                it.run(queryOf(statement, *historiskeFolkeregisteridenter.map(String::toLong).toTypedArray()).map {
                     it.string("fnr")
                 }.asList)
         }

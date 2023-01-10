@@ -17,7 +17,9 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `Periode med overlappende pleiepenger blir sendt til Infotrygd`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendVilkårsgrunnlag(0)
         sendYtelser(vedtaksperiodeIndeks = 0, pleiepenger = listOf(PleiepengerTestdata(3.januar, 26.januar, 100)))
@@ -35,7 +37,9 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `Periode med overlappende omsorgspenger blir sendt til Infotrygd`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendVilkårsgrunnlag(0)
         sendYtelser(
@@ -56,7 +60,9 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `Periode med overlappende opplæringspenger blir sendt til Infotrygd`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendVilkårsgrunnlag(0)
         sendYtelser(vedtaksperiodeIndeks = 0, opplæringspenger = listOf(OpplæringspengerTestdata(3.januar, 26.januar, 100)))
@@ -74,7 +80,9 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `Periode med overlappende institusjonsopphold blir sendt til Infotrygd`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendVilkårsgrunnlag(0)
         sendYtelser(
@@ -102,7 +110,9 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `Arbeidskategorikode ulik 01 kaster perioden til Infotrygd`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendVilkårsgrunnlag(0)
         sendYtelser(
@@ -146,7 +156,9 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `Arbeidskategorikode lik 01 passerer validering`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
         sendInntektsmelding(
             listOf(Periode(fom = 17.desember(2017), tom = 31.desember(2017))),
             førsteFraværsdag = 17.desember(2017),
@@ -187,7 +199,9 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `Passerer validering når utbetalte sykeperioder er tom`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         val historikk = listOf(UtbetalingshistorikkTestdata(
             fom = 1.januar,
@@ -212,7 +226,9 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `Utbetalingsgrad 000 fører til ugyldig utbetalingsperiode i sykepengehistorikken`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
 
         val historikk = listOf(UtbetalingshistorikkTestdata(
             fom = 1.januar,
@@ -255,7 +271,9 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `Marker ikke historiske ferieperioder som ugyldig basert på utbetalingsgrad`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 9.januar, tom = 31.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 9.januar, tom = 31.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 9.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        )
 
         val historikk = listOf(UtbetalingshistorikkTestdata(
             fom = 1.januar,

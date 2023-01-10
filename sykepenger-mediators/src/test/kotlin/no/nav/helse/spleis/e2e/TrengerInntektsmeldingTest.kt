@@ -16,7 +16,9 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `trenger ikke inntektsmelding for periode innenfor arbeidsgiverperioden`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 14.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 14.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 14.januar, sykmeldingsgrad = 100))
+        )
         sendUtbetalingshistorikk(0)
         assertEquals(0, testRapid.inspektør.meldinger("trenger_inntektsmelding").size)
     }
@@ -24,7 +26,9 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `trenger inntektsmelding for periode utenfor arbeidsgiverperioden`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 17.januar, sykmeldingsgrad = 100))
-        val søknadId = sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 17.januar, sykmeldingsgrad = 100)))
+        val søknadId = sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 17.januar, sykmeldingsgrad = 100))
+        )
         sendUtbetalingshistorikk(0)
         val melding = testRapid.inspektør.siste("trenger_inntektsmelding")
         assertEquals(søknadId, UUID.fromString(melding["søknadIder"].toList().single().asText()))
@@ -41,7 +45,9 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `trenger_inntektsmelding håndterer korrigerende sykmelding som forkorter perioden`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
         sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
         sendVilkårsgrunnlag(0)
         sendYtelserUtenSykepengehistorikk(0)
@@ -51,7 +57,9 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
 
         sendNySøknad(SoknadsperiodeDTO(fom = 2.februar, tom = 12.februar, sykmeldingsgrad = 100))
         sendNySøknad(SoknadsperiodeDTO(fom = 2.februar, tom = 8.februar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 2.februar, tom = 8.februar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 2.februar, tom = 8.februar, sykmeldingsgrad = 100))
+        )
 
         assertEquals(2, testRapid.inspektør.meldinger("trenger_inntektsmelding").size)
     }
@@ -59,7 +67,9 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `håndterer trenger_inntektsmelding isolert per arbeidsgiver`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 20.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 20.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 20.januar, sykmeldingsgrad = 100))
+        )
         sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
 
         val annenArbeidsgiver = "999999999"
@@ -68,7 +78,7 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
             orgnummer = annenArbeidsgiver
         )
         sendSøknad(
-            listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 20.januar, sykmeldingsgrad = 100)),
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 20.januar, sykmeldingsgrad = 100)),
             orgnummer = annenArbeidsgiver
         )
 

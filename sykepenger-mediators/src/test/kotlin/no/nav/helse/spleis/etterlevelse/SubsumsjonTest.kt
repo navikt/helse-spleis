@@ -95,7 +95,9 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `subsumsjon-hendelser - med toggle`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
@@ -177,7 +179,10 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
 
     private fun tilGodkjenningMedGhost(a1: String = "ag1", a2: String = "ag2", fom: LocalDate = 1.januar, tom: LocalDate = 31.januar) {
         sendNySøknad(SoknadsperiodeDTO(fom = fom, tom = tom, sykmeldingsgrad = 100), orgnummer = a1)
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = fom, tom = tom, sykmeldingsgrad = 100)), orgnummer = a1)
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = fom, tom = tom, sykmeldingsgrad = 100)),
+            orgnummer = a1
+        )
         sendInntektsmelding(listOf(Periode(fom, fom.plusDays(15))), fom, orgnummer = a1)
         sendVilkårsgrunnlag(
             vedtaksperiodeIndeks = 0,

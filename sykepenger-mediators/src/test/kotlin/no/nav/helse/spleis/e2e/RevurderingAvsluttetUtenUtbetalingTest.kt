@@ -20,12 +20,18 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
     @Test
     fun `revurdering ved inntektsmelding for korte perioder`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 5.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 5.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 5.januar, sykmeldingsgrad = 100))
+        )
         sendUtbetalingshistorikk(0)
         sendNySøknad(SoknadsperiodeDTO(fom = 6.januar, tom = 10.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 6.januar, tom = 10.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 6.januar, tom = 10.januar, sykmeldingsgrad = 100))
+        )
         sendNySøknad(SoknadsperiodeDTO(fom = 11.januar, tom = 17.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 11.januar, tom = 17.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 11.januar, tom = 17.januar, sykmeldingsgrad = 100))
+        )
         sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
         sendYtelserUtenSykepengehistorikk(2)
         sendVilkårsgrunnlag(2)
@@ -51,12 +57,18 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
     @Test
     fun `revurdering ved inntektsmelding for korte perioder - endring av skjæringstidspunkt`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 8.januar, tom = 10.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 8.januar, tom = 10.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 8.januar, tom = 10.januar, sykmeldingsgrad = 100))
+        )
         sendUtbetalingshistorikk(0)
         sendNySøknad(SoknadsperiodeDTO(fom = 11.januar, tom = 22.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 11.januar, tom = 22.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 11.januar, tom = 22.januar, sykmeldingsgrad = 100))
+        )
         sendNySøknad(SoknadsperiodeDTO(fom = 23.januar, tom = 23.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 23.januar, tom = 23.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 23.januar, tom = 23.januar, sykmeldingsgrad = 100))
+        )
         sendInntektsmelding(
             listOf(
                 Periode(fom = 1.januar, tom = 6.januar),
@@ -87,11 +99,15 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
     @Test
     fun `revurdering ved inntektsmelding etter utbetaling`() = Toggle.InntektsmeldingKanTriggeRevurdering.enable {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 22.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 22.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 22.januar, sykmeldingsgrad = 100))
+        )
         sendUtbetalingshistorikk(0)
 
         sendNySøknad(SoknadsperiodeDTO(fom = 23.januar, tom = 28.februar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 23.januar, tom = 28.februar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 23.januar, tom = 28.februar, sykmeldingsgrad = 100))
+        )
 
         sendInntektsmelding(
             listOf(
@@ -106,7 +122,9 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
         sendUtbetaling(true)
 
         sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100))
+        )
 
         sendYtelserUtenSykepengehistorikk(2)
         sendSimulering(2, SimuleringMessage.Simuleringstatus.OK)

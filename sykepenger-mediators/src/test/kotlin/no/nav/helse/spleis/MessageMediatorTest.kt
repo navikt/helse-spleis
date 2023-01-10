@@ -28,7 +28,7 @@ internal class MessageMediatorTest {
         testRapid.sendTestMessage(meldingsfabrikk.lagSøknadArbeidsgiver(listOf(SoknadsperiodeDTO(LocalDate.now(), LocalDate.now(), 100))))
         assertTrue(hendelseMediator.lestSendtSøknadArbeidsgiver)
 
-        testRapid.sendTestMessage(meldingsfabrikk.lagSøknadNav(listOf(SoknadsperiodeDTO(LocalDate.now(), LocalDate.now(), 100))))
+        testRapid.sendTestMessage(meldingsfabrikk.lagSøknadNav(perioder = listOf(SoknadsperiodeDTO(LocalDate.now(), LocalDate.now(), 100))))
         assertTrue(hendelseMediator.lestSendtSøknad)
     }
 
