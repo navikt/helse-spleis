@@ -268,6 +268,7 @@ internal class Vedtaksperiode private constructor(
         val skalHåndtereDager = dager.skalHåndteresAv(periode)
         if (skalHåndtereDager) {
             kontekst(dager)
+            dager.leggTilArbeidsdagerFør(periode.start)
             // Ettersom tilstanden kan strekke perioden tilbake må det gjøres _før_ vi hånderer dagene
             // slik at det som håndteres er perioden slik den er når det er strukket tilbake.
             tilstand.håndterStrekkingAvPeriode(this, dager)
@@ -275,8 +276,8 @@ internal class Vedtaksperiode private constructor(
             sykdomstidslinje = dager.håndter(periode, arbeidsgiver)!!
             tilstand.håndter(this, dager)
         }
-        // Uavhengig av om vi håndterer noen dager eller ei må vi trimme forbi
-        dager.trimLeft(periode.endInclusive)
+        // Uavhengig av om vi håndterer noen dager eller ei har vi vurdert dem
+        dager.vurdertTilOgMed(periode.endInclusive)
         return skalHåndtereDager
     }
 

@@ -15,11 +15,19 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 internal class DagerFraInntektsmelding(
     private val inntektsmelding: Inntektsmelding
 ): IAktivitetslogg by inntektsmelding {
-    private val opprinneligeDager = inntektsmelding.sykdomstidslinje().periode()?.toSet() ?: emptySet()
-    private val gjenståendeDager = opprinneligeDager.toMutableSet()
+    private val opprinneligPeriode = inntektsmelding.sykdomstidslinje().periode()
+    private val gjenståendeDager = opprinneligPeriode?.toMutableSet() ?: mutableSetOf()
 
-    internal fun trimLeft(dato: LocalDate) = inntektsmelding.trimLeft(dato)
+    internal fun vurdertTilOgMed(dato: LocalDate) = inntektsmelding.trimLeft(dato)
     internal fun oppdatertFom(periode: Periode) = inntektsmelding.oppdaterFom(periode)
+    internal fun leggTilArbeidsdagerFør(dato: LocalDate) {
+        checkNotNull(opprinneligPeriode) { "Forventer ikke å utvide en tom sykdomstidslinje" }
+        inntektsmelding.padLeft(dato)
+        val oppdatertPeriode = inntektsmelding.sykdomstidslinje().periode() ?: return
+        if (opprinneligPeriode == oppdatertPeriode) return
+        val nyeDager = oppdatertPeriode - opprinneligPeriode
+        gjenståendeDager.addAll(nyeDager)
+    }
     private fun dagerFør(periode: Periode) = gjenståendeDager.filter { it < periode.start }.toSet()
 
     internal fun håndterGjenståendeFør(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit) {

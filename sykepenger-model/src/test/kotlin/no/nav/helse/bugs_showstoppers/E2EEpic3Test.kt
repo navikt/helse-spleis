@@ -1067,11 +1067,13 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     fun `periode som begynner på søndag skal ikke gi warning på krav om minimuminntekt`() {
         håndterSykmelding(Sykmeldingsperiode(15.mars(2020), 8.april(2020), 100.prosent))
         håndterSøknad(Sykdom(15.mars(2020), 8.april(2020), 100.prosent))
+        assertEquals("H SSSSSHH SSSSSHH SSSSSHH SSS", inspektør(ORGNUMMER).sykdomshistorikk.sykdomstidslinje().toShortString())
         håndterInntektsmelding(
             listOf(Periode(16.mars(2020), 31.mars(2020))),
             førsteFraværsdag = 16.mars(2020),
             refusjon = Refusjon(INNTEKT, null, emptyList())
         )
+        assertEquals("R SSSSSHH SSSSSHH SSSSSHH SSS", inspektør(ORGNUMMER).sykdomshistorikk.sykdomstidslinje().toShortString())
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.mars(2019) til 1.februar(2020) inntekter {
