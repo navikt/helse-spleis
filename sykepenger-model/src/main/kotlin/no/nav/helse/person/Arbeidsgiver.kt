@@ -538,7 +538,15 @@ internal class Arbeidsgiver private constructor(
 
         val inntektOgRefusjon = inntektsmelding.inntektOgRefusjon
         val enHarHåndtertInntektOgRefusjon = énHarHåndtert(inntektsmelding) {
-            håndter(inntektOgRefusjon)
+            val håndtert = håndter(inntektOgRefusjon)
+            // En av vedtaksperiodene har håndtert inntekt og refusjon
+            // vi må informere de andre vedtaksperiodene på sykefraværstilfellet
+            if (håndtert) {
+                finnSammehengendeVedtaksperioder(this).forEach { vedtaksperiode ->
+                    vedtaksperiode.harFåttInntektPåSkjæringstidspunktet(inntektsmelding)
+                }
+            }
+            håndtert
         }
 
         if (noenHarHåndtertDager || enHarHåndtertInntektOgRefusjon) return

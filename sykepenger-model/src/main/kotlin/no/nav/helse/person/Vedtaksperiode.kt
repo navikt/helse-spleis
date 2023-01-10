@@ -972,6 +972,11 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
+    internal fun harFåttInntektPåSkjæringstidspunktet(hendelse: SykdomstidslinjeHendelse) {
+        hendelse.leggTil(hendelseIder)
+        tilstand.håndterHarFåttInntektPåSkjæringstidspunktet(this, hendelse)
+    }
+
     // Gang of four State pattern
     internal sealed interface Vedtaksperiodetilstand : Aktivitetskontekst {
         val type: TilstandType
@@ -1004,6 +1009,8 @@ internal class Vedtaksperiode private constructor(
         fun håndterStrekkingAvPeriode(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {}
         fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {}
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {}
+
+        fun håndterHarFåttInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) {}
 
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             vilkårsgrunnlag.info("Forventet ikke vilkårsgrunnlag i %s".format(type.name))
@@ -1425,6 +1432,15 @@ internal class Vedtaksperiode private constructor(
                 !vedtaksperiode.arbeidsgiver.kanBeregneSykepengegrunnlag(vedtaksperiode.skjæringstidspunkt) -> AvsluttetUtenUtbetaling
                 else -> AvventerBlokkerendePeriode
             }}
+        }
+        override fun håndterHarFåttInntektPåSkjæringstidspunktet(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: SykdomstidslinjeHendelse
+        ) {
+            when {
+                !vedtaksperiode.arbeidsgiver.kanBeregneSykepengegrunnlag(vedtaksperiode.skjæringstidspunkt) -> vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
+                else -> vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {

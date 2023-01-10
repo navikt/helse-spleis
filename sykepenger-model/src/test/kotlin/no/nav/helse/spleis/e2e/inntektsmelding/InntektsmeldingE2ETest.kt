@@ -102,6 +102,13 @@ import org.junit.jupiter.api.Test
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
+    fun `Lang og useriøs arbeidsgiverperiode`() {
+        nyPeriode(1.januar til 31.januar)
+        håndterInntektsmelding(listOf(1.januar til 31.januar))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+    }
+
+    @Test
     fun `to inntektsmeldinger på rappen`() {
         nyPeriode(1.januar til 10.januar)
         håndterUtbetalingshistorikk(1.vedtaksperiode)
