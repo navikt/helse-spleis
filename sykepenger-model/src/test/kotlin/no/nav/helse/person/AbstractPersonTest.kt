@@ -126,10 +126,10 @@ internal abstract class AbstractPersonTest {
         override fun maksSykepengedagerOver67() = maksSykedager
     }
     protected fun createKorttidsPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate, maksSykedager: Int) = createTestPerson { jurist ->
-        Person(AKTØRID, personidentifikator, fødseldato.alder, personopplysninger, emptyList(), jurist, regler(maksSykedager))
+        Person(AKTØRID, personidentifikator, fødseldato.alder, emptyList(), jurist, regler(maksSykedager))
     }
     protected fun createTestPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate) = createTestPerson { jurist ->
-        Person(AKTØRID, personidentifikator, fødseldato.alder, personopplysninger, emptyList(), jurist)
+        Person(AKTØRID, personidentifikator, fødseldato.alder, emptyList(), jurist)
     }
     protected fun createPingPongPerson() = createTestPerson { jurist -> pingPongPerson(jurist) }
     protected fun createOvergangFraInfotrygdPerson() = createTestPerson { jurist -> overgangFraInfotrygdPerson(jurist) }

@@ -81,7 +81,6 @@ class Person private constructor(
     private val infotrygdhistorikk: Infotrygdhistorikk,
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private var dødsdato: LocalDate?,
-    private val personopplysninger: Personopplysninger,
     private val tidligereBehandledeIdenter: List<String>,
     private val jurist: MaskinellJurist,
     private val regler: ArbeidsgiverRegler = NormalArbeidstaker
@@ -92,7 +91,6 @@ class Person private constructor(
             aktørId: String,
             personidentifikator: Personidentifikator,
             alder: Alder,
-            personopplysninger: Personopplysninger,
             arbeidsgivere: MutableList<Arbeidsgiver>,
             aktivitetslogg: Aktivitetslogg,
             opprettet: LocalDateTime,
@@ -111,7 +109,6 @@ class Person private constructor(
             infotrygdhistorikk = infotrygdhistorikk,
             vilkårsgrunnlagHistorikk = vilkårsgrunnlaghistorikk,
             dødsdato = dødsdato,
-            personopplysninger = personopplysninger,
             tidligereBehandledeIdenter = tidligereBehandledeIdenter,
             jurist = jurist
         )
@@ -121,7 +118,6 @@ class Person private constructor(
         aktørId: String,
         personidentifikator: Personidentifikator,
         alder: Alder,
-        personopplysninger: Personopplysninger,
         tidligereBehandledeIdenter: List<String>,
         jurist: MaskinellJurist,
         regler: ArbeidsgiverRegler = NormalArbeidstaker
@@ -135,7 +131,6 @@ class Person private constructor(
         Infotrygdhistorikk(),
         VilkårsgrunnlagHistorikk(),
         null,
-        personopplysninger = personopplysninger,
         tidligereBehandledeIdenter = tidligereBehandledeIdenter,
         jurist.medFødselsnummer(personidentifikator),
         regler = regler
