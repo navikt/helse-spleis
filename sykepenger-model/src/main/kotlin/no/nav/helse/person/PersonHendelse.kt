@@ -35,9 +35,6 @@ class Personopplysninger internal constructor(
         tidligereBehandledeIdenter = tidligereBehandledeIdenter,
         jurist = jurist
     )
-    internal fun valider(hendelse: IAktivitetslogg) {
-
-    }
 }
 
 abstract class PersonHendelse protected constructor(

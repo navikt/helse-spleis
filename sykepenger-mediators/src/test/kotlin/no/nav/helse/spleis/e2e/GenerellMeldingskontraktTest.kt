@@ -17,7 +17,9 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `vedtaksperiode endret`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        val søknadId = sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        val søknadId = sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
         val vedtaksperiodeEndret = testRapid.inspektør.siste("vedtaksperiode_endret")
         assertVedtaksperiodeEndret(vedtaksperiodeEndret, søknadId, "sendt_søknad_nav")
     }
@@ -25,8 +27,12 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `vedtaksperiode forkastet`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        val søknadId = sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
-        val søknadId2 = sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 27.januar, sykmeldingsgrad = 100)))
+        val søknadId = sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
+        val søknadId2 = sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 27.januar, sykmeldingsgrad = 100))
+        )
         val vedtaksperiodeForkastet = testRapid.inspektør.meldinger("vedtaksperiode_forkastet")
         assertEquals(2, vedtaksperiodeForkastet.size)
         assertVedtaksperiodeForkastet(vedtaksperiodeForkastet[0], søknadId2, "sendt_søknad_nav")
@@ -36,7 +42,9 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `behov`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
         val (meldingId, _) = sendInntektsmelding(
             listOf(Periode(fom = 3.januar, tom = 18.januar)),
             førsteFraværsdag = 3.januar
@@ -52,7 +60,9 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
             førsteFraværsdag = 3.januar
         )
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
         val behov = testRapid.inspektør.siste("behov")
         assertBehov(behov, meldingId, "inntektsmelding_replay")
     }

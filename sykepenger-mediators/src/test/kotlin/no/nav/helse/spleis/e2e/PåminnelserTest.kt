@@ -24,7 +24,9 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `påminnelse når vedtaksperiode ikke finnes`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
         val id = sendNyPåminnelse()
         assertEquals(6, testRapid.inspektør.antall())
         val melding = testRapid.inspektør.melding(5)
@@ -36,7 +38,9 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `påminnelse for feil tilstand`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
         sendNyPåminnelse(0)
         val vedtaksperiodeIkkePåminnet = testRapid.inspektør.melding(5)
         assertEquals("vedtaksperiode_ikke_påminnet", vedtaksperiodeIkkePåminnet.path("@event_name").asText())
@@ -47,7 +51,9 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `påminnelse for riktig tilstand`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
         sendNyPåminnelse(0, tilstandType = TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         val vedtaksperiodePåminnet = testRapid.inspektør.melding(5)
         assertEquals("vedtaksperiode_påminnet", vedtaksperiodePåminnet.path("@event_name").asText())
@@ -58,7 +64,9 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
     @Test
     fun utbetalingpåminnelse() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)

@@ -6,7 +6,6 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Personidentifikator.Companion.somPersonidentifikator
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
@@ -25,7 +24,6 @@ import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.InntektsmeldingInfoHistorikk
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
-import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.TilstandType
@@ -118,7 +116,7 @@ internal data class PersonData(
     private val fnr by lazy { fødselsnummer.somPersonidentifikator() }
     private val alder by lazy { fødselsdato.alder }
 
-    private fun person(jurist: MaskinellJurist, personopplysninger: Personopplysninger, tidligereBehandledeIdenter: List<String>) = Person.ferdigPerson(
+    private fun person(jurist: MaskinellJurist, tidligereBehandledeIdenter: List<String>) = Person.ferdigPerson(
         aktørId = aktørId,
         personidentifikator = fnr,
         alder = alder,
@@ -134,7 +132,7 @@ internal data class PersonData(
 
     internal fun createPerson(jurist: MaskinellJurist, tidligereBehandledeIdenter: List<String>): Person {
         val personJurist = jurist.medFødselsnummer(fødselsnummer.somPersonidentifikator())
-        val person = person(personJurist, Personopplysninger(somPersonidentifikator(this.fødselsnummer), this.aktørId, this.alder, tidligereBehandledeIdenter), tidligereBehandledeIdenter)
+        val person = person(personJurist, tidligereBehandledeIdenter)
         arbeidsgivereliste.addAll(this.arbeidsgivere.map {
             it.konverterTilArbeidsgiver(
                 person,

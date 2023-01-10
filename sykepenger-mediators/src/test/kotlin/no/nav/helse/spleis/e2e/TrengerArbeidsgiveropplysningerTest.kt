@@ -14,7 +14,9 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTes
     @Test
     fun `Sender ut forespørsel om opplysninger fra arbeidsgiver med riktig format`() = Toggle.Splarbeidsbros.enable {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        )
 
         val event = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
 
