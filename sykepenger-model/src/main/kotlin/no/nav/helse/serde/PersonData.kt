@@ -118,12 +118,13 @@ internal data class PersonData(
     private val fnr by lazy { fødselsnummer.somPersonidentifikator() }
     private val alder by lazy { fødselsdato.alder }
 
-    private fun person(jurist: MaskinellJurist, personopplysninger: Personopplysninger) = Person.ferdigPerson(
+    private fun person(jurist: MaskinellJurist, personopplysninger: Personopplysninger, tidligereBehandledeIdenter: List<String>) = Person.ferdigPerson(
         aktørId = aktørId,
         personidentifikator = fnr,
         alder = alder,
         arbeidsgivere = arbeidsgivereliste,
         personopplysninger = personopplysninger,
+        tidligereBehandledeIdenter = tidligereBehandledeIdenter,
         aktivitetslogg = modelAktivitetslogg,
         opprettet = opprettet,
         infotrygdhistorikk = infotrygdhistorikk.tilModellObjekt(),
@@ -134,7 +135,7 @@ internal data class PersonData(
 
     internal fun createPerson(jurist: MaskinellJurist, tidligereBehandledeIdenter: List<String>): Person {
         val personJurist = jurist.medFødselsnummer(fødselsnummer.somPersonidentifikator())
-        val person = person(personJurist, Personopplysninger(somPersonidentifikator(this.fødselsnummer), this.aktørId, this.alder, tidligereBehandledeIdenter))
+        val person = person(personJurist, Personopplysninger(somPersonidentifikator(this.fødselsnummer), this.aktørId, this.alder, tidligereBehandledeIdenter), tidligereBehandledeIdenter)
         arbeidsgivereliste.addAll(this.arbeidsgivere.map {
             it.konverterTilArbeidsgiver(
                 person,
