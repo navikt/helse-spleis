@@ -31,7 +31,7 @@ internal abstract class SøknadBuilder {
         fødselsdato: LocalDate,
         historiskeFolkeregisteridenter: List<String>
     ) = apply {
-        personopplysninger = Personopplysninger(fnr.somPersonidentifikator(), aktørId, fødselsdato,historiskeFolkeregisteridenter)
+        personopplysninger = Personopplysninger(fnr.somPersonidentifikator(), aktørId, fødselsdato, historiskeFolkeregisteridenter)
     }
     internal fun organisasjonsnummer(organisasjonsnummer: String) = apply { this.organisasjonsnummer = organisasjonsnummer }
     internal fun opprettet(opprettet: LocalDateTime) = apply { this.opprettet = opprettet }

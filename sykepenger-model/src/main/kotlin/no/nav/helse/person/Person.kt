@@ -82,6 +82,7 @@ class Person private constructor(
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private var dødsdato: LocalDate?,
     private val personopplysninger: Personopplysninger,
+    private val tidligereBehandledeIdenter: List<String>,
     private val jurist: MaskinellJurist,
     private val regler: ArbeidsgiverRegler = NormalArbeidstaker
 ) : Aktivitetskontekst {
@@ -97,6 +98,7 @@ class Person private constructor(
             opprettet: LocalDateTime,
             infotrygdhistorikk: Infotrygdhistorikk,
             vilkårsgrunnlaghistorikk: VilkårsgrunnlagHistorikk,
+            tidligereBehandledeIdenter: List<String>,
             dødsdato: LocalDate?,
             jurist: MaskinellJurist
         ): Person = Person(
@@ -110,6 +112,7 @@ class Person private constructor(
             vilkårsgrunnlagHistorikk = vilkårsgrunnlaghistorikk,
             dødsdato = dødsdato,
             personopplysninger = personopplysninger,
+            tidligereBehandledeIdenter = tidligereBehandledeIdenter,
             jurist = jurist
         )
     }
@@ -119,6 +122,7 @@ class Person private constructor(
         personidentifikator: Personidentifikator,
         alder: Alder,
         personopplysninger: Personopplysninger,
+        tidligereBehandledeIdenter: List<String>,
         jurist: MaskinellJurist,
         regler: ArbeidsgiverRegler = NormalArbeidstaker
     ) : this(
@@ -132,6 +136,7 @@ class Person private constructor(
         VilkårsgrunnlagHistorikk(),
         null,
         personopplysninger = personopplysninger,
+        tidligereBehandledeIdenter = tidligereBehandledeIdenter,
         jurist.medFødselsnummer(personidentifikator),
         regler = regler
     )
@@ -156,7 +161,9 @@ class Person private constructor(
         before: () -> Any = { }
     ) {
         registrer(hendelse, "Behandler $hendelsesmelding")
-        personopplysninger.valider(hendelse)
+        if (tidligereBehandledeIdenter.isNotEmpty()) {
+            hendelse.funksjonellFeil(Varselkode.RV_AN_5)
+        }
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
         before()
         hendelse.fortsettÅBehandle(arbeidsgiver)

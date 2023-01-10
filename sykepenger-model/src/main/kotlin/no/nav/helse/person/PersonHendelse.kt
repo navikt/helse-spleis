@@ -3,7 +3,6 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.person.Varselkode.RV_AN_5
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
@@ -34,12 +33,11 @@ class Personopplysninger internal constructor(
         aktørId = aktørId,
         alder = alder,
         personopplysninger = this,
+        tidligereBehandledeIdenter = tidligereBehandledeIdenter,
         jurist = jurist
-
     )
     internal fun valider(hendelse: IAktivitetslogg) {
-        if (tidligereBehandledeIdenter.isEmpty()) return
-        hendelse.funksjonellFeil(RV_AN_5)
+
     }
 }
 
