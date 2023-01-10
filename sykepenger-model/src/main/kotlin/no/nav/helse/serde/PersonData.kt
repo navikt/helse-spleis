@@ -123,12 +123,11 @@ internal data class PersonData(
         personidentifikator = fnr,
         alder = alder,
         arbeidsgivere = arbeidsgivereliste,
-        personopplysninger = personopplysninger,
-        tidligereBehandledeIdenter = tidligereBehandledeIdenter,
         aktivitetslogg = modelAktivitetslogg,
         opprettet = opprettet,
         infotrygdhistorikk = infotrygdhistorikk.tilModellObjekt(),
         vilkårsgrunnlaghistorikk = vilkårsgrunnlagHistorikk.tilModellObjekt(alder),
+        tidligereBehandledeIdenter = tidligereBehandledeIdenter,
         dødsdato = dødsdato,
         jurist = jurist
     )

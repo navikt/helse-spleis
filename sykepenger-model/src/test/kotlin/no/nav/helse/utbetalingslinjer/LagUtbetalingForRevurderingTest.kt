@@ -18,7 +18,6 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
-import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somPersonidentifikator
@@ -399,7 +398,7 @@ internal class LagUtbetalingForRevurderingTest {
         )
     }
 
-    private fun person() = Person(AKTØRID, FNR, fødselsdato.alder, Personopplysninger(FNR, AKTØRID, fødselsdato.alder, emptyList()), emptyList(), maskinellJurist)
+    private fun person() = Person(AKTØRID, FNR, fødselsdato.alder, emptyList(), maskinellJurist)
     private fun arbeidsgiver(organisasjonsnummer: String) = Arbeidsgiver(person(), organisasjonsnummer, maskinellJurist)
     private fun søknad(periode: Periode): Søknad {
         val søknadsperiode = Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent)

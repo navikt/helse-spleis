@@ -21,7 +21,6 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
-import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -302,7 +301,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata? = null,
         fødselsdato: LocalDate
     ) {
-        val person = Person("aktørid", fnr, fødselsdato.alder, Personopplysninger(fnr, "aktørid", fødselsdato.alder, emptyList()), emptyList(), MaskinellJurist())
+        val person = Person("aktørid", fnr, fødselsdato.alder, emptyList(), MaskinellJurist())
         // seed arbeidsgiver med sykdomshistorikk
         val førsteDag = arbeidsgiverTidslinje.periode().start
         val sisteDag = arbeidsgiverTidslinje.periode().endInclusive

@@ -29,10 +29,9 @@ class Personopplysninger internal constructor(
     ) : this(personidentifikator, aktørId, fødselsdato.alder, tidligereBehandledeIdenter)
 
     internal fun nyPerson(jurist: MaskinellJurist) = Person(
-        personidentifikator = personidentifikator,
         aktørId = aktørId,
+        personidentifikator = personidentifikator,
         alder = alder,
-        personopplysninger = this,
         tidligereBehandledeIdenter = tidligereBehandledeIdenter,
         jurist = jurist
     )
