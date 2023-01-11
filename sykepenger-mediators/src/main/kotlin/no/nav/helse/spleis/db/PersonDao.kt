@@ -36,12 +36,12 @@ internal class PersonDao(private val dataSource: DataSource) {
         }
     }
 
-    fun lesOppPersoner(personidentifikatorer: List<Personidentifikator>): List<SerialisertPerson> {
+    fun lesOppPersoner(personidentifikatorer: List<Personidentifikator>): List<Pair<Personidentifikator, SerialisertPerson>> {
         sessionOf(dataSource).use { session ->
             session.transaction { txSession ->
                 return personidentifikatorer.map { identifikator ->
-                    hentPersonOgLåsPersonForBehandling(txSession, identifikator)
-                }.mapNotNull { person -> person }
+                    Pair(identifikator, hentPersonOgLåsPersonForBehandling(txSession, identifikator))
+                }.mapNotNull { resultat -> if (resultat.second != null) Pair(resultat.first, resultat.second!!) else null }
             }
         }
     }
