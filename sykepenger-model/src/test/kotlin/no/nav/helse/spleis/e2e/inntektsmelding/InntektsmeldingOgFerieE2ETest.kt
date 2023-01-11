@@ -20,6 +20,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
@@ -233,5 +234,33 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         assertEquals(24.februar til 28.februar, inspektør.periode(3.vedtaksperiode))
         assertEquals(24.februar til 28.februar, inspektør.arbeidsgiverperiode(3.vedtaksperiode))
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+    }
+    @Test
+    fun `periode med ferie kant-i-kant med en periode med utbetalingsdag`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSykmelding(Sykmeldingsperiode(5.februar, 23.februar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar)
+        håndterSykmelding(Sykmeldingsperiode(24.februar, 12.mars, 100.prosent))
+        håndterSøknad(Sykdom(5.februar, 23.februar, 100.prosent), Ferie(5.februar, 23.februar))
+        håndterSøknad(Sykdom(24.februar, 12.mars, 100.prosent))
+
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(1.januar til 16.januar, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+
+        assertEquals(5.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(5.februar til 23.februar, inspektør.periode(2.vedtaksperiode))
+        assertEquals(1.januar til 16.januar, inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+
+        assertEquals(24.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+        assertEquals(24.februar til 12.mars, inspektør.periode(3.vedtaksperiode))
+        assertEquals(24.februar til 11.mars, inspektør.arbeidsgiverperiode(3.vedtaksperiode))
+
+        assertForventetFeil(
+            forklaring = "Er det ikke feil at 3.vedtaksperiode går til AUU, her skal vel tirsdag 12.mars utbetales?",
+            nå = { assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING) },
+            ønsket = { assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING) }
+        )
     }
 }
