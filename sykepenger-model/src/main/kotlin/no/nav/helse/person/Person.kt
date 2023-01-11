@@ -82,6 +82,7 @@ class Person private constructor(
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private var dødsdato: LocalDate?,
     private val jurist: MaskinellJurist,
+    private val tidligereBehandlinger: List<Person> = emptyList(),
     private val regler: ArbeidsgiverRegler = NormalArbeidstaker
 ) : Aktivitetskontekst {
     internal companion object {
@@ -128,6 +129,7 @@ class Person private constructor(
         VilkårsgrunnlagHistorikk(),
         null,
         jurist.medFødselsnummer(personidentifikator),
+        emptyList<Person>(),
         regler = regler
     )
 
@@ -151,10 +153,10 @@ class Person private constructor(
         before: () -> Any = { }
     ) {
         registrer(hendelse, "Behandler $hendelsesmelding")
-        //if (tidligereBehandledeIdenter.isNotEmpty()) {
+        if (tidligereBehandlinger.any { false }) {
             //hendelse.funksjonellFeil(Varselkode.RV_AN_5)
-        //    sikkerLogg.info("hendelse: ${hendelse::class.java.simpleName} her ville vi ha kastet ut personen aktørid: $aktørId fnr: ${personidentifikator} tidligere behandlede identer: $tidligereBehandledeIdenter")
-        //}
+            sikkerLogg.info("hendelse: ${hendelse::class.java.simpleName} her ville vi ha kastet ut personen aktørid: $aktørId fnr: $personidentifikator tidligere behandlede identer: ${tidligereBehandlinger.map { it.personidentifikator }}")
+        }
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
         before()
         hendelse.fortsettÅBehandle(arbeidsgiver)
