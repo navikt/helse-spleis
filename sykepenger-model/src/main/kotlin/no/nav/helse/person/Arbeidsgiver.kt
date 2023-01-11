@@ -37,6 +37,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.PÅGÅENDE_REVURDERING
+import no.nav.helse.person.Vedtaksperiode.Companion.SAMMENHENGENDE_MED_SAMME_SKJÆRINGSTIDSPUNKT_SOM
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
 import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_REFUSJONSOPPLYSNINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.feiletRevurdering
@@ -538,19 +539,23 @@ internal class Arbeidsgiver private constructor(
 
         val inntektOgRefusjon = inntektsmelding.inntektOgRefusjon
         val enHarHåndtertInntektOgRefusjon = énHarHåndtert(inntektsmelding) {
-            val håndtert = håndter(inntektOgRefusjon)
-            // En av vedtaksperiodene har håndtert inntekt og refusjon
-            // vi må informere de andre vedtaksperiodene på sykefraværstilfellet
-            if (håndtert) {
-                finnSammehengendeVedtaksperioder(this).forEach { vedtaksperiode ->
-                    vedtaksperiode.harFåttInntektPåSkjæringstidspunktet(inntektsmelding)
+            håndter(inntektOgRefusjon).also { håndtert ->
+                if (håndtert) {
+                    // En av vedtaksperiodene har håndtert inntekt og refusjon
+                    // vi må informere de andre vedtaksperiodene på arbeidsgiveren som berøres av dette
+                    håndtertInntektPåSkjæringstidspunkt(this, inntektsmelding)
                 }
             }
-            håndtert
         }
 
         if (noenHarHåndtertDager || enHarHåndtertInntektOgRefusjon) return
         inntektsmeldingIkkeHåndtert(inntektsmelding, vedtaksperiodeId)
+    }
+
+    private fun håndtertInntektPåSkjæringstidspunkt(vedtaksperiode: Vedtaksperiode, inntektsmelding: SykdomstidslinjeHendelse) {
+        vedtaksperioder.filter(SAMMENHENGENDE_MED_SAMME_SKJÆRINGSTIDSPUNKT_SOM(vedtaksperiode)).forEach {
+            it.håndtertInntektPåSkjæringstidspunktet(inntektsmelding)
+        }
     }
 
     private fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID?) {
@@ -891,7 +896,7 @@ internal class Arbeidsgiver private constructor(
      * @param vedtaksperiode Perioden vi skal finne alle sammenhengende perioder for. Vi henter alle perioder som
      * tilstøter både foran og bak.
      */
-    internal fun finnSammehengendeVedtaksperioder(vedtaksperiode: Vedtaksperiode): List<Vedtaksperiode> {
+    internal fun finnSammenhengendeVedtaksperioder(vedtaksperiode: Vedtaksperiode): List<Vedtaksperiode> {
         val (perioderFør, perioderEtter) = vedtaksperioder.sorted().partition { it før vedtaksperiode }
         val sammenhengendePerioder = mutableListOf(vedtaksperiode)
         perioderFør.reversed().forEach {

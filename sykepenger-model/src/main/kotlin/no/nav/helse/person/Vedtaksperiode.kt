@@ -247,7 +247,7 @@ internal class Vedtaksperiode private constructor(
         other: UUID?,
         vedtaksperioder: List<Vedtaksperiode>
     ): Boolean {
-        val sammenhengendePerioder = arbeidsgiver.finnSammehengendeVedtaksperioder(this)
+        val sammenhengendePerioder = arbeidsgiver.finnSammenhengendeVedtaksperioder(this)
         val overlapper = overlapperMedSammenhengende(inntektsmelding, sammenhengendePerioder, other, vedtaksperioder)
         return overlapper.also {
             if (erAlleredeHensyntatt(inntektsmelding)) {
@@ -972,9 +972,9 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    internal fun harFåttInntektPåSkjæringstidspunktet(hendelse: SykdomstidslinjeHendelse) {
+    internal fun håndtertInntektPåSkjæringstidspunktet(hendelse: SykdomstidslinjeHendelse) {
         hendelse.leggTil(hendelseIder)
-        tilstand.håndterHarFåttInntektPåSkjæringstidspunktet(this, hendelse)
+        tilstand.håndtertInntektPåSkjæringstidspunktet(this, hendelse)
     }
 
     // Gang of four State pattern
@@ -1010,7 +1010,7 @@ internal class Vedtaksperiode private constructor(
         fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {}
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {}
 
-        fun håndterHarFåttInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) {}
+        fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) {}
 
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             vilkårsgrunnlag.info("Forventet ikke vilkårsgrunnlag i %s".format(type.name))
@@ -1433,7 +1433,7 @@ internal class Vedtaksperiode private constructor(
                 else -> AvventerBlokkerendePeriode
             }}
         }
-        override fun håndterHarFåttInntektPåSkjæringstidspunktet(
+        override fun håndtertInntektPåSkjæringstidspunktet(
             vedtaksperiode: Vedtaksperiode,
             hendelse: SykdomstidslinjeHendelse
         ) {
@@ -2244,6 +2244,11 @@ internal class Vedtaksperiode private constructor(
 
         internal val MED_SKJÆRINGSTIDSPUNKT = { skjæringstidspunkt: LocalDate ->
             { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.skjæringstidspunkt == skjæringstidspunkt }
+        }
+
+        internal fun SAMMENHENGENDE_MED_SAMME_SKJÆRINGSTIDSPUNKT_SOM(vedtaksperiode: Vedtaksperiode): VedtaksperiodeFilter {
+            val sammenhengendePerioder = vedtaksperiode.arbeidsgiver.finnSammenhengendeVedtaksperioder(vedtaksperiode)
+            return { other: Vedtaksperiode -> other.skjæringstidspunkt == vedtaksperiode.skjæringstidspunkt && other in sammenhengendePerioder}
         }
 
         internal val SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG = { skjæringstidspunkt: LocalDate ->
