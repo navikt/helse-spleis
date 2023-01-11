@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -271,100 +270,51 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `tenke på når vi skal be om arbeidsgiverperiode når en kort periode forlenges `() {
+    fun `be om arbeidsgiverperiode ved forlengelse av en kort periode`() {
         nyPeriode(1.januar til 16.januar)
         nyPeriode(17.januar til 31.januar)
 
         val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
-
-        assertForventetFeil(
-            forklaring = "vi skal ikke sende ut en vanlig forespørsel for første periode (siden den er kort) og burde be om AGP i forlengelse",
-            nå = {
-                val expectedForespurteOpplysninger = listOf(
-                    PersonObserver.Inntekt(
-                        PersonObserver.Inntektsforslag(
-                            listOf(
-                                oktober(2017),
-                                november(2017),
-                                desember(2017)
-                            )
-                        )
-                    ),
-                    PersonObserver.Refusjon
+        val expectedForespurteOpplysninger = listOf(
+            PersonObserver.Inntekt(
+                PersonObserver.Inntektsforslag(
+                    listOf(
+                        oktober(2017),
+                        november(2017),
+                        desember(2017)
+                    )
                 )
-                assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
-            },
-            ønsket = {
-                val expectedForespurteOpplysninger = listOf(
-                    PersonObserver.Inntekt(
-                        PersonObserver.Inntektsforslag(
-                            listOf(
-                                oktober(2017),
-                                november(2017),
-                                desember(2017)
-                            )
-                        )
-                    ),
-                    PersonObserver.Refusjon,
-                    PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.januar til 16.januar))
-                )
-
-                assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
-            }
+            ),
+            PersonObserver.Refusjon,
+            PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.januar til 16.januar))
         )
 
-
-
-
+        assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
 
     @Test
-    fun `tenke på når vi skal be om arbeidsgiverperiode når en kort periode har et lite gap til ny periode`() {
+    fun `be om arbeidsgiverperiode når en kort periode har et lite gap til ny periode`() {
         nyPeriode(1.januar til 16.januar)
         nyPeriode(20.januar til 31.januar)
 
         val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
 
-        assertForventetFeil(
-            forklaring = "vi skal ikke sende ut en vanlig forespørsel for første periode (siden den er kort) og burde be om AGP i forlengelse",
-            nå = {
-                val expectedForespurteOpplysninger = listOf(
-                    PersonObserver.Inntekt(
-                        PersonObserver.Inntektsforslag(
-                            listOf(
-                                oktober(2017),
-                                november(2017),
-                                desember(2017)
-                            )
-                        )
-                    ),
-                    PersonObserver.Refusjon
+        val expectedForespurteOpplysninger = listOf(
+            PersonObserver.Inntekt(
+                PersonObserver.Inntektsforslag(
+                    listOf(
+                        oktober(2017),
+                        november(2017),
+                        desember(2017)
+                    )
                 )
-                assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
-            },
-            ønsket = {
-                val expectedForespurteOpplysninger = listOf(
-                    PersonObserver.Inntekt(
-                        PersonObserver.Inntektsforslag(
-                            listOf(
-                                oktober(2017),
-                                november(2017),
-                                desember(2017)
-                            )
-                        )
-                    ),
-                    PersonObserver.Refusjon,
-                    PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.januar til 16.januar))
-                )
-
-                assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
-            }
+            ),
+            PersonObserver.Refusjon,
+            PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.januar til 16.januar))
         )
 
-
-
-
+        assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
 

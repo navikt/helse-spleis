@@ -2,7 +2,6 @@ package no.nav.helse.sykdomstidslinje
 
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.chrono.ChronoLocalDate
 import java.time.temporal.ChronoUnit
 import java.util.Objects
 import java.util.SortedMap
@@ -156,7 +155,7 @@ internal class Sykdomstidslinje private constructor(
 
     private fun finnSkjæringstidspunkt(): LocalDate? {
         val sisteOppholdsdag = sisteOppholdsdag() ?: return førsteSykedag()
-        return førsteSykedagEtter(sisteOppholdsdag)
+        return førsteSykedagEtterEllerLik(sisteOppholdsdag)
     }
 
     internal fun skjæringstidspunkter(): List<LocalDate> {
@@ -171,8 +170,11 @@ internal class Sykdomstidslinje private constructor(
         return skjæringstidspunkter
     }
 
-    internal fun førsteSykedagEtter(dato: LocalDate) =
+    internal fun førsteSykedagEtterEllerLik(dato: LocalDate) =
         periode?.firstOrNull { it >= dato && erEnSykedag(this[it]) }
+
+    internal fun førsteSykedagEtter(dato: LocalDate) =
+        periode?.firstOrNull { it > dato && erEnSykedag(this[it]) }
 
     internal fun erRettFør(other: Sykdomstidslinje): Boolean {
         return this.sisteDag().erRettFør(other.førsteDag()) && !this.erSisteDagArbeidsdag() && !other.erFørsteDagArbeidsdag()

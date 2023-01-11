@@ -669,7 +669,8 @@ internal class Vedtaksperiode private constructor(
             YearMonth.from(skjæringstidspunkt).minusMonths(it.toLong())
         }
 
-        val trengerArbeidsgiverperiode = arbeidsgiverperiodeperioder.maxByOrNull { it.endInclusive }?.overlapperMed(periode())
+        val trengerArbeidsgiverperiode = arbeidsgiver.erFørsteSykedagEtter(periode().start, arbeidsgiverperiode)
+            || arbeidsgiverperiodeperioder.maxByOrNull { it.endInclusive }?.overlapperMed(periode())
             ?: false
 
         val forespurteOpplysninger = listOf(

@@ -84,7 +84,7 @@ abstract class SykdomstidslinjeHendelse(
         val periode = overlappsperiode() ?: aldri
         val fom = nesteFom?.takeUnless { it < periode.start } ?: return periode
         if (fom > periode.endInclusive) return aldri
-        return (sykdomstidslinje().førsteSykedagEtter(fom) ?: fom) til periode.endInclusive
+        return (sykdomstidslinje().førsteSykedagEtterEllerLik(fom) ?: fom) til periode.endInclusive
     }
 
     internal abstract fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg

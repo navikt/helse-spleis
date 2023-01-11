@@ -1103,6 +1103,14 @@ internal class Arbeidsgiver private constructor(
             arbeidsgiverperiode.hørerTil(it.periode())
         }
     }
+
+    fun erFørsteSykedagEtter(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?): Boolean {
+        val sisteDag = arbeidsgiverperiode?.perioder?.maxBy { it.endInclusive }?.endInclusive
+        if (sisteDag == null) return false
+
+        return dato == sykdomstidslinje().førsteSykedagEtter(sisteDag)
+    }
+
     internal class JsonRestorer private constructor() {
         internal companion object {
             internal fun restore(
