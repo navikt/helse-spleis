@@ -97,6 +97,7 @@ class Person private constructor(
             infotrygdhistorikk: Infotrygdhistorikk,
             vilkårsgrunnlaghistorikk: VilkårsgrunnlagHistorikk,
             dødsdato: LocalDate?,
+            tidligereBehandlinger: List<Person> = emptyList(),
             jurist: MaskinellJurist
         ): Person = Person(
             aktørId = aktørId,
@@ -108,6 +109,7 @@ class Person private constructor(
             infotrygdhistorikk = infotrygdhistorikk,
             vilkårsgrunnlagHistorikk = vilkårsgrunnlaghistorikk,
             dødsdato = dødsdato,
+            tidligereBehandlinger = tidligereBehandlinger,
             jurist = jurist
         )
     }

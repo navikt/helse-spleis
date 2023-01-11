@@ -36,6 +36,16 @@ internal class PersonDao(private val dataSource: DataSource) {
         }
     }
 
+    fun lesOppPersoner(personidentifikatorer: List<Personidentifikator>): List<SerialisertPerson> {
+        sessionOf(dataSource).use { session ->
+            session.transaction { txSession ->
+                return personidentifikatorer.map { identifikator ->
+                    hentPersonOgLåsPersonForBehandling(txSession, identifikator)
+                }.mapNotNull { person -> person }
+            }
+        }
+    }
+
     internal fun hentTidligereBehandledeIdenter(historiskeFolkeregisteridenter: List<String>): List<String> {
         if (historiskeFolkeregisteridenter.isEmpty()) return emptyList()
         @Language("PostgreSQL")
