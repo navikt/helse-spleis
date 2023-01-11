@@ -49,7 +49,7 @@ internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: Hende
     query("person") {
         resolver { fnr: String ->
             ApiMetrikker.målDatabase { personDao.hentPersonFraFnr(fnr.toLong()) }?.let { serialisertPerson ->
-                ApiMetrikker.målDeserialisering { serialisertPerson.deserialize(MaskinellJurist(), emptyList()) { hendelseDao.hentAlleHendelser(fnr.toLong()) } }
+                ApiMetrikker.målDeserialisering { serialisertPerson.deserialize(MaskinellJurist()) { hendelseDao.hentAlleHendelser(fnr.toLong()) } }
                     .let { ApiMetrikker.målByggSnapshot { håndterPerson(it, hendelseDao) } }
                     .let { person -> mapTilDto(person) }
             }

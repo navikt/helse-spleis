@@ -18,21 +18,18 @@ internal class FunksjonelleFeilTilVarsler(private val other: IAktivitetslogg) : 
 class Personopplysninger internal constructor(
     private val personidentifikator: Personidentifikator,
     private val aktørId: String,
-    private val alder: Alder,
-    private val tidligereBehandledeIdenter: List<String>
+    private val alder: Alder
 ) {
     constructor(
         personidentifikator: Personidentifikator,
         aktørId: String,
-        fødselsdato: LocalDate,
-        tidligereBehandledeIdenter: List<String>
-    ) : this(personidentifikator, aktørId, fødselsdato.alder, tidligereBehandledeIdenter)
+        fødselsdato: LocalDate
+    ) : this(personidentifikator, aktørId, fødselsdato.alder)
 
     internal fun nyPerson(jurist: MaskinellJurist) = Person(
         aktørId = aktørId,
         personidentifikator = personidentifikator,
         alder = alder,
-        tidligereBehandledeIdenter = tidligereBehandledeIdenter,
         jurist = jurist
     )
 }

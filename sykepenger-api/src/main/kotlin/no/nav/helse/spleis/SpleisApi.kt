@@ -38,7 +38,8 @@ internal fun Application.spannerApi(dataSource: DataSource, authProviderName: St
                     val person = personDao.hentPersonFraFnr(ident) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
                     call.respond(
                         person.deserialize(
-                            jurist = MaskinellJurist(), tidligereBehandledeIdenter = emptyList()) { hendelseDao.hentAlleHendelser(ident) }.serialize().json
+                            jurist = MaskinellJurist()
+                        ) { hendelseDao.hentAlleHendelser(ident) }.serialize().json
                     )
                 }
             }
@@ -77,7 +78,8 @@ internal fun Application.sporingApi(dataSource: DataSource, authProviderName: St
                     call.respond(
                         serializePersonForSporing(
                             person.deserialize(
-                                jurist = MaskinellJurist(), tidligereBehandledeIdenter = emptyList()) { hendelseDao.hentAlleHendelser(fnr) }
+                                jurist = MaskinellJurist()
+                            ) { hendelseDao.hentAlleHendelser(fnr) }
                         )
                     )
                 }

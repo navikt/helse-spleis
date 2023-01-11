@@ -231,8 +231,7 @@ class BehovMediatorTest {
         Personopplysninger(
             personidentifikator = fødselsnummer.somPersonidentifikator(),
             aktørId = aktørId,
-            fødselsdato = 24.desember(2000),
-            tidligereBehandledeIdenter = emptyList()
+            fødselsdato = 24.desember(2000)
         )), Aktivitetskontekst {
         private val person = person(MaskinellJurist())
         init {

@@ -73,8 +73,7 @@ abstract class AbstractObservableTest {
         personopplysninger: Personopplysninger = Personopplysninger(
             Personidentifikator.somPersonidentifikator(fnr),
             AKTØRID,
-            UNG_PERSON_FØDSELSDATO,
-            emptyList()
+            UNG_PERSON_FØDSELSDATO
         )
     ): Sykmelding = Sykmelding(
         meldingsreferanseId = id,
@@ -97,8 +96,7 @@ abstract class AbstractObservableTest {
         personopplysninger: Personopplysninger = Personopplysninger(
             Personidentifikator.somPersonidentifikator(fnr),
             AKTØRID,
-            UNG_PERSON_FØDSELSDATO,
-            emptyList()
+            UNG_PERSON_FØDSELSDATO
         )
     ): Søknad = Søknad(
         meldingsreferanseId = id,
@@ -130,8 +128,7 @@ abstract class AbstractObservableTest {
         personopplysninger: Personopplysninger = Personopplysninger(
             Personidentifikator.somPersonidentifikator(fnr),
             AKTØRID,
-            UNG_PERSON_FØDSELSDATO,
-            emptyList()
+            UNG_PERSON_FØDSELSDATO
         )
     ): Inntektsmelding = Inntektsmelding(
         meldingsreferanseId = id,

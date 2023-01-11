@@ -301,7 +301,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata? = null,
         fødselsdato: LocalDate
     ) {
-        val person = Person("aktørid", fnr, fødselsdato.alder, emptyList(), MaskinellJurist())
+        val person = Person("aktørid", fnr, fødselsdato.alder, MaskinellJurist())
         // seed arbeidsgiver med sykdomshistorikk
         val førsteDag = arbeidsgiverTidslinje.periode().start
         val sisteDag = arbeidsgiverTidslinje.periode().endInclusive

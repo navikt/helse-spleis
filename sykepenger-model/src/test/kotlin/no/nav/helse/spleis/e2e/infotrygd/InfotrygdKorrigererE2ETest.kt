@@ -200,11 +200,11 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
 
 
     private fun createDobbelutbetalingPerson() = createTestPerson { jurist ->
-        SerialisertPerson("/personer/dobbelutbetaling.json".readResource()).deserialize(jurist, emptyList())
+        SerialisertPerson("/personer/dobbelutbetaling.json".readResource()).deserialize(jurist)
     }
 
     private fun createOverlappendeFraInfotrygdPerson() = createTestPerson { jurist ->
-        SerialisertPerson("/personer/infotrygd-overlappende-utbetaling.json".readResource()).deserialize(jurist, emptyList()).also { person ->
+        SerialisertPerson("/personer/infotrygd-overlappende-utbetaling.json".readResource()).deserialize(jurist).also { person ->
             person.håndter(
                 Utbetalingshistorikk(
                     UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),
@@ -223,7 +223,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
     }
 
     private fun createAuuBlirMedIRevureringPerson() = createTestPerson { jurist ->
-        SerialisertPerson("/personer/auu-blir-med-i-revurdering.json".readResource()).deserialize(jurist, emptyList()).also { person ->
+        SerialisertPerson("/personer/auu-blir-med-i-revurdering.json".readResource()).deserialize(jurist).also { person ->
             person.håndter(
                 Utbetalingshistorikk(
                     UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),

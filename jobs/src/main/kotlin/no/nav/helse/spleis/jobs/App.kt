@@ -81,7 +81,7 @@ private fun migrateV2Task(targetVersjon: Int) {
                         migreringCounter += 1
                         log.info("[$migreringCounter] Utfører migrering")
                         val time = measureTimeMillis {
-                            val resultat = SerialisertPerson(data).deserialize(MaskinellJurist(), emptyList()).serialize()
+                            val resultat = SerialisertPerson(data).deserialize(MaskinellJurist()).serialize()
                             check(1 == txSession.run(queryOf("UPDATE person SET skjema_versjon=:skjemaversjon, data=:data WHERE fnr=:ident", mapOf(
                                 "skjemaversjon" to resultat.skjemaVersjon,
                                 "data" to resultat.json,
@@ -181,7 +181,7 @@ private class PaginatedQuery(private val select: String, private val table: Stri
             session.run(queryOf("SELECT COUNT(1) FROM $table WHERE $where", params).map { it.long(1) }.asSingle) ?: 0
     }
 
-    internal fun run(dataSource: DataSource, params: Map<String, Any>, handler: (Row) -> Unit) {
+    fun run(dataSource: DataSource, params: Map<String, Any>, handler: (Row) -> Unit) {
         sessionOf(dataSource).use { session ->
             count(session, params)
             val pages = ceil(count / resultsPerPage.toDouble()).toInt()
@@ -230,7 +230,7 @@ private class DataSourceConfiguration(dbUsername: DbUser) {
         idleTimeout = Duration.ofMinutes(10).toMillis()
     }
 
-    internal fun dataSource() = HikariDataSource(hikariConfig)
+    fun dataSource() = HikariDataSource(hikariConfig)
 }
 
 private enum class DbUser(private val dbUserPrefix: String) {

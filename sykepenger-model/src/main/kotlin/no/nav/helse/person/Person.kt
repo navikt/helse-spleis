@@ -81,7 +81,6 @@ class Person private constructor(
     private val infotrygdhistorikk: Infotrygdhistorikk,
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private var dødsdato: LocalDate?,
-    private val tidligereBehandledeIdenter: List<String>,
     private val jurist: MaskinellJurist,
     private val regler: ArbeidsgiverRegler = NormalArbeidstaker
 ) : Aktivitetskontekst {
@@ -96,7 +95,6 @@ class Person private constructor(
             opprettet: LocalDateTime,
             infotrygdhistorikk: Infotrygdhistorikk,
             vilkårsgrunnlaghistorikk: VilkårsgrunnlagHistorikk,
-            tidligereBehandledeIdenter: List<String>,
             dødsdato: LocalDate?,
             jurist: MaskinellJurist
         ): Person = Person(
@@ -109,7 +107,6 @@ class Person private constructor(
             infotrygdhistorikk = infotrygdhistorikk,
             vilkårsgrunnlagHistorikk = vilkårsgrunnlaghistorikk,
             dødsdato = dødsdato,
-            tidligereBehandledeIdenter = tidligereBehandledeIdenter,
             jurist = jurist
         )
     }
@@ -118,7 +115,6 @@ class Person private constructor(
         aktørId: String,
         personidentifikator: Personidentifikator,
         alder: Alder,
-        tidligereBehandledeIdenter: List<String>,
         jurist: MaskinellJurist,
         regler: ArbeidsgiverRegler = NormalArbeidstaker
     ) : this(
@@ -131,7 +127,6 @@ class Person private constructor(
         Infotrygdhistorikk(),
         VilkårsgrunnlagHistorikk(),
         null,
-        tidligereBehandledeIdenter = tidligereBehandledeIdenter,
         jurist.medFødselsnummer(personidentifikator),
         regler = regler
     )
@@ -156,10 +151,10 @@ class Person private constructor(
         before: () -> Any = { }
     ) {
         registrer(hendelse, "Behandler $hendelsesmelding")
-        if (tidligereBehandledeIdenter.isNotEmpty()) {
+        //if (tidligereBehandledeIdenter.isNotEmpty()) {
             //hendelse.funksjonellFeil(Varselkode.RV_AN_5)
-            sikkerLogg.info("hendelse: ${hendelse::class.java.simpleName} her ville vi ha kastet ut personen aktørid: $aktørId fnr: ${personidentifikator} tidligere behandlede identer: $tidligereBehandledeIdenter")
-        }
+        //    sikkerLogg.info("hendelse: ${hendelse::class.java.simpleName} her ville vi ha kastet ut personen aktørid: $aktørId fnr: ${personidentifikator} tidligere behandlede identer: $tidligereBehandledeIdenter")
+        //}
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
         before()
         hendelse.fortsettÅBehandle(arbeidsgiver)

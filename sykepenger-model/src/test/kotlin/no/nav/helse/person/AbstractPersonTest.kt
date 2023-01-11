@@ -35,7 +35,7 @@ internal abstract class AbstractPersonTest {
         val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         const val AKTØRID = "42"
         val ORGNUMMER: String = "987654321"
-        val personopplysninger = Personopplysninger(UNG_PERSON_FNR_2018, AKTØRID, UNG_PERSON_FØDSELSDATO, emptyList())
+        val personopplysninger = Personopplysninger(UNG_PERSON_FNR_2018, AKTØRID, UNG_PERSON_FØDSELSDATO)
 
 
         val a1: String = ORGNUMMER
@@ -48,7 +48,9 @@ internal abstract class AbstractPersonTest {
         val a3: String = "321987654"
         val a4: String = "456789123"
 
-        private fun overgangFraInfotrygdPerson(jurist: MaskinellJurist) = SerialisertPerson("/personer/infotrygdforlengelse.json".readResource()).deserialize(jurist, emptyList()).also { person ->
+        private fun overgangFraInfotrygdPerson(jurist: MaskinellJurist) = SerialisertPerson("/personer/infotrygdforlengelse.json".readResource()).deserialize(
+            jurist
+        ).also { person ->
             person.håndter(
                 Inntektsmelding(
                     meldingsreferanseId = UUID.randomUUID(),
@@ -81,7 +83,9 @@ internal abstract class AbstractPersonTest {
                 ),
             )
         }
-        private fun pingPongPerson(jurist: MaskinellJurist) = SerialisertPerson("/personer/pingpong.json".readResource()).deserialize(jurist, emptyList()).also { person ->
+        private fun pingPongPerson(jurist: MaskinellJurist) = SerialisertPerson("/personer/pingpong.json".readResource()).deserialize(
+            jurist
+        ).also { person ->
             person.håndter(
                 Utbetalingshistorikk(
                     UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),
@@ -126,10 +130,10 @@ internal abstract class AbstractPersonTest {
         override fun maksSykepengedagerOver67() = maksSykedager
     }
     protected fun createKorttidsPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate, maksSykedager: Int) = createTestPerson { jurist ->
-        Person(AKTØRID, personidentifikator, fødseldato.alder, emptyList(), jurist, regler(maksSykedager))
+        Person(AKTØRID, personidentifikator, fødseldato.alder, jurist, regler(maksSykedager))
     }
     protected fun createTestPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate) = createTestPerson { jurist ->
-        Person(AKTØRID, personidentifikator, fødseldato.alder, emptyList(), jurist)
+        Person(AKTØRID, personidentifikator, fødseldato.alder, jurist)
     }
     protected fun createPingPongPerson() = createTestPerson { jurist -> pingPongPerson(jurist) }
     protected fun createOvergangFraInfotrygdPerson() = createTestPerson { jurist -> overgangFraInfotrygdPerson(jurist) }

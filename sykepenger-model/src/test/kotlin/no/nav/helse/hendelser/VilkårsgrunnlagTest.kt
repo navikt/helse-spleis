@@ -54,7 +54,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
 
     @BeforeEach
     fun setup() {
-        person = Person(AKTØRID, UNG_PERSON_FNR_2018, UNG_PERSON_FØDSELSDATO.alder, emptyList(), MaskinellJurist())
+        person = Person(AKTØRID, UNG_PERSON_FNR_2018, UNG_PERSON_FØDSELSDATO.alder, MaskinellJurist())
         person.addObserver(observatør)
         person.håndter(sykmelding())
         person.håndter(søknad())

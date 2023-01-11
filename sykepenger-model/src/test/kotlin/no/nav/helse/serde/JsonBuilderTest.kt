@@ -58,7 +58,6 @@ import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
-import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -90,7 +89,6 @@ class JsonBuilderTest {
         private val fnr = "12029240045".somPersonidentifikator()
         private val fødselsdato = 12.februar(1992)
         private val orgnummer = "987654321"
-        private val personopplysninger = Personopplysninger(fnr, aktørId, fødselsdato, emptyList())
         private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             aktørId = aktørId,
             personidentifikator = fnr,
@@ -98,7 +96,7 @@ class JsonBuilderTest {
         )
     }
 
-    private val person get() = Person(aktørId, fnr, fødselsdato.alder, emptyList(), MaskinellJurist())
+    private val person get() = Person(aktørId, fnr, fødselsdato.alder, MaskinellJurist())
 
     @Test
     fun `gjenoppbygd Person skal være lik opprinnelig Person - The Jackson Way`() {
@@ -107,7 +105,7 @@ class JsonBuilderTest {
         val jsonBuilder = JsonBuilder()
         person.accept(jsonBuilder)
         val personPost = SerialisertPerson(jsonBuilder.toString())
-            .deserialize(MaskinellJurist(), emptyList())
+            .deserialize(MaskinellJurist())
 
         assertJsonEquals(person, personPost)
     }
@@ -193,7 +191,7 @@ class JsonBuilderTest {
             personMedFeriepenger.accept(jsonBuilder)
             val json = jsonBuilder.toString()
 
-            val result = SerialisertPerson(json).deserialize(MaskinellJurist(), emptyList())
+            val result = SerialisertPerson(json).deserialize(MaskinellJurist())
             val jsonBuilder2 = JsonBuilder()
             result.accept(jsonBuilder2)
             val json2 = jsonBuilder2.toString()
@@ -218,7 +216,7 @@ class JsonBuilderTest {
 
     private fun testSerialiseringAvPerson(person: Person) {
         val serialisert = person.serialize().json
-        val gjenskaptPerson = SerialisertPerson(serialisert).deserialize(MaskinellJurist(), emptyList())
+        val gjenskaptPerson = SerialisertPerson(serialisert).deserialize(MaskinellJurist())
         val reserialisert = gjenskaptPerson.serialize().json
 
         serdeObjectMapper.readTree(serialisert).also {

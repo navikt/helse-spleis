@@ -235,7 +235,11 @@ internal class InntektsmeldingMatchingTest {
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             harFlereInntektsmeldinger = false,
             mottatt = LocalDateTime.now(),
-            personopplysninger = Personopplysninger(Personidentifikator.somPersonidentifikator("12345678910"), "1", LocalDate.now(), emptyList())
+            personopplysninger = Personopplysninger(
+                Personidentifikator.somPersonidentifikator("12345678910"),
+                "1",
+                LocalDate.now()
+            )
         ).let { inntektsmelding ->
             inntektsmelding.dager to inntektsmelding.inntektOgRefusjon
         }

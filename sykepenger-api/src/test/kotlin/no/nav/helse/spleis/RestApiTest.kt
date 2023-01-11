@@ -140,8 +140,7 @@ internal class RestApiTest {
         val personopplysninger = Personopplysninger(
             Personidentifikator.somPersonidentifikator(UNG_PERSON_FNR),
             AKTØRID,
-            UNG_PERSON_FØDSELSDATO,
-            emptyList()
+            UNG_PERSON_FØDSELSDATO
         )
         val sykmelding = Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),

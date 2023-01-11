@@ -408,7 +408,7 @@ internal abstract class AbstractDslTest {
         testperson = TestPerson(observatør = observatør, fødselsdato = fødselsdato, deferredLog = deferredLog)
     }
     protected fun medTidligereBehandledeIdenter() {
-        testperson = TestPerson(tidligereBehandledeIdenter = listOf("ident"), observatør = observatør, deferredLog = deferredLog)
+        testperson = TestPerson(observatør = observatør, deferredLog = deferredLog)
     }
 
     @BeforeEach
