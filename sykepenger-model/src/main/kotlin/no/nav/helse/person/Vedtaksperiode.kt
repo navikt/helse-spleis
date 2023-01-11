@@ -266,24 +266,24 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndter(dager: DagerFraInntektsmelding): Boolean {
         val skalHåndtereDager = dager.skalHåndteresAv(periode)
-        if (skalHåndtereDager) {
-            kontekst(dager)
-            dager.leggTilArbeidsdagerFør(periode.start)
-            // Ettersom tilstanden kan strekke perioden tilbake må det gjøres _før_ vi hånderer dagene
-            // slik at det som håndteres er perioden slik den er når det er strukket tilbake.
-            tilstand.håndterStrekkingAvPeriode(this, dager)
-            // Håndterer dagene som vedtaksperioden skal håndtere og oppdaterer sykdomstidslinjen
-            sykdomstidslinje = dager.håndter(periode, arbeidsgiver)!!
-            tilstand.håndter(this, dager)
+        if (erAlleredeHensyntatt(dager.meldingsreferanseId()) || !skalHåndtereDager) {
+            dager.vurdertTilOgMed(periode.endInclusive)
+            return skalHåndtereDager
         }
-        // Uavhengig av om vi håndterer noen dager eller ei har vi vurdert dem
+        kontekst(dager)
+        tilstand.håndter(this, dager)
         dager.vurdertTilOgMed(periode.endInclusive)
-        return skalHåndtereDager
+        return true
+    }
+
+    internal fun postHåndter(dager: DagerFraInntektsmelding) {
+        if (!dager.harBlittHåndtertAv(periode)) return
+        dager.leggTil(hendelseIder)
     }
 
     internal fun håndter(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding): Boolean {
         val skalHåndtereInntektOgRefusjon = inntektOgRefusjon.skalHåndteresAv(periode)
-        if (erAlleredeHensyntatt(inntektOgRefusjon) || !skalHåndtereInntektOgRefusjon) {
+        if (erAlleredeHensyntatt(inntektOgRefusjon.meldingsreferanseId()) || !skalHåndtereInntektOgRefusjon) {
             return skalHåndtereInntektOgRefusjon
         }
         kontekst(inntektOgRefusjon)
@@ -304,8 +304,8 @@ internal class Vedtaksperiode private constructor(
     private fun erAlleredeHensyntatt(inntektsmelding: Inntektsmelding) =
         hendelseIder.ider().contains(inntektsmelding.meldingsreferanseId())
 
-    private fun erAlleredeHensyntatt(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) =
-        hendelseIder.ider().contains(inntektOgRefusjon.meldingsreferanseId())
+    private fun erAlleredeHensyntatt(meldingsreferanseId: UUID) =
+        hendelseIder.ider().contains(meldingsreferanseId)
 
     internal fun håndterHistorikkFraInfotrygd(hendelse: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
         tilstand.håndter(person, arbeidsgiver, this, hendelse, infotrygdhistorikk)
@@ -1010,7 +1010,14 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndterStrekkingAvPeriode(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {}
-        fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {}
+        fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
+            dager.leggTilArbeidsdagerFør(vedtaksperiode.periode.start)
+            // Ettersom tilstanden kan strekke perioden tilbake må det gjøres _før_ vi hånderer dagene
+            // slik at det som håndteres er perioden slik den er når det er strukket tilbake.
+            vedtaksperiode.tilstand.håndterStrekkingAvPeriode(vedtaksperiode, dager)
+            // Håndterer dagene som vedtaksperioden skal håndtere og oppdaterer sykdomstidslinjen
+            vedtaksperiode.sykdomstidslinje = dager.håndter(vedtaksperiode.periode, vedtaksperiode.arbeidsgiver)!!
+        }
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {}
 
         fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) {}
@@ -1426,6 +1433,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
+            super.håndter(vedtaksperiode, dager)
             if (vedtaksperiode.forventerInntekt()) return
             vedtaksperiode.tilstand(dager, AvsluttetUtenUtbetaling)
         }

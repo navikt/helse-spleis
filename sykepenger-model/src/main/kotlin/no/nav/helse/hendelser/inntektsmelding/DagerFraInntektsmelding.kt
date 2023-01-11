@@ -18,6 +18,9 @@ internal class DagerFraInntektsmelding(
     private val opprinneligPeriode = inntektsmelding.sykdomstidslinje().periode()
     private val gjenståendeDager = opprinneligPeriode?.toMutableSet() ?: mutableSetOf()
 
+    internal fun meldingsreferanseId() = inntektsmelding.meldingsreferanseId()
+    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = inntektsmelding.leggTil(hendelseIder)
+
     internal fun vurdertTilOgMed(dato: LocalDate) = inntektsmelding.trimLeft(dato)
     internal fun oppdatertFom(periode: Periode) = inntektsmelding.oppdaterFom(periode)
     internal fun leggTilArbeidsdagerFør(dato: LocalDate) {
@@ -42,6 +45,12 @@ internal class DagerFraInntektsmelding(
 
     private fun overlappendeDager(periode: Periode) = periode.intersect(gjenståendeDager)
     internal fun skalHåndteresAv(periode: Periode) = overlappendeDager(periode).isNotEmpty()
+
+    internal fun harBlittHåndtertAv(periode: Periode): Boolean {
+        val overlappendeDagerOpprinnelig = periode.intersect(opprinneligPeriode?.toSet() ?: emptySet())
+        val overlappendeDagerNå = overlappendeDager(periode)
+        return overlappendeDagerOpprinnelig.isNotEmpty() && overlappendeDagerNå.isEmpty()
+    }
 
     internal fun håndter(periode: Periode, arbeidsgiver: Arbeidsgiver) = håndter(periode) {
         arbeidsgiver.oppdaterSykdom(it)
