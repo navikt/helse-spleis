@@ -158,7 +158,7 @@ class Person private constructor(
         registrer(hendelse, "Behandler $hendelsesmelding")
         if (tidligereBehandledeIdenter.isNotEmpty()) {
             //hendelse.funksjonellFeil(Varselkode.RV_AN_5)
-            sikkerLogg.info("her ville vi ha kastet ut personen aktørid: $aktørId fnr: ${personidentifikator} tidligere behandlede identer: $tidligereBehandledeIdenter")
+            sikkerLogg.info("hendelse: ${hendelse::class.java.simpleName} her ville vi ha kastet ut personen aktørid: $aktørId fnr: ${personidentifikator} tidligere behandlede identer: $tidligereBehandledeIdenter")
         }
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
         before()
