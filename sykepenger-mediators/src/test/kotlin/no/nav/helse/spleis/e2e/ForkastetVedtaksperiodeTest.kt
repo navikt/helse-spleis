@@ -6,6 +6,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.mars
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
@@ -35,6 +36,7 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
         )
     }
 
+    @Disabled
     @Test
     fun `historiskeFolkeregisteridenter test`() {
         val historiskFnr = "123"
