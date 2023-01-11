@@ -2037,22 +2037,31 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.emitVedtaksperiodeEndret(søknad) // TODO: for å unngå at flex oppretter oppgaver
             }
         }
+        override fun håndterStrekkingAvPeriode(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
+            vedtaksperiode.periode = dager.oppdatertFom(vedtaksperiode.periode)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
+            if (!revurderingStøttet(vedtaksperiode, dager)) return vedtaksperiode.emitVedtaksperiodeEndret(dager)
+            super.håndter(vedtaksperiode, dager)
+            if (!vedtaksperiode.forventerInntekt()) vedtaksperiode.emitVedtaksperiodeEndret(dager) // på stedet hvil!
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
+            if (!vedtaksperiode.forventerInntekt()) return
+            if (!revurderingStøttet(vedtaksperiode, inntektOgRefusjon)) return
+            vedtaksperiode.håndterInntektOgRefusjon(inntektOgRefusjon) { this }
+            inntektOgRefusjon.info("Varsler revurdering i tilfelle inntektsmelding påvirker andre perioder.")
+            vedtaksperiode.person.startRevurdering(
+                inntektOgRefusjon,
+                Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
+            )
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            val filter = if (Toggle.InntektsmeldingKanTriggeRevurdering.enabled) NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING else NYERE_ELLER_SAMME_SKJÆRINGSTIDSPUNKT_ER_UTBETALT
-            val revurderingIkkeStøttet = vedtaksperiode.person.vedtaksperioder(filter(vedtaksperiode)).isNotEmpty()
-
-            // støttes ikke før vi støtter revurdering av eldre skjæringstidspunkt
-            if (revurderingIkkeStøttet) {
-                sikkerlogg.info(
-                    "inntektsmelding i auu: Kan ikke reberegne {} for {} {} fordi nyere skjæringstidspunkt blokkerer",
-                    keyValue("vedtaksperiodeId", vedtaksperiode.id),
-                    keyValue("aktørId", vedtaksperiode.aktørId),
-                    keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer)
-                )
-                inntektsmelding.info("Revurdering blokkeres fordi det finnes nyere skjæringstidspunkt, og det mangler funksjonalitet for å håndtere dette.")
+            if (!revurderingStøttet(vedtaksperiode, inntektsmelding)) {
                 inntektsmelding.trimLeft(vedtaksperiode.periode.endInclusive)
-                return vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
+                return vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding)
             }
 
             vedtaksperiode.håndterInntektsmelding(inntektsmelding) {this} // håndterInntektsmelding krever tilstandsendring, men vi må avvente til vi starter revurdering
@@ -2066,6 +2075,28 @@ internal class Vedtaksperiode private constructor(
                 inntektsmelding,
                 Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
             )
+        }
+
+        private fun revurderingStøttet(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg
+        ): Boolean {
+            val filter =
+                if (Toggle.InntektsmeldingKanTriggeRevurdering.enabled) NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING else NYERE_ELLER_SAMME_SKJÆRINGSTIDSPUNKT_ER_UTBETALT
+            val revurderingIkkeStøttet = vedtaksperiode.person.vedtaksperioder(filter(vedtaksperiode)).isNotEmpty()
+
+            // støttes ikke før vi støtter revurdering av eldre skjæringstidspunkt
+            if (revurderingIkkeStøttet) {
+                sikkerlogg.info(
+                    "inntektsmelding i auu: Kan ikke reberegne {} for {} {} fordi nyere skjæringstidspunkt blokkerer",
+                    keyValue("vedtaksperiodeId", vedtaksperiode.id),
+                    keyValue("aktørId", vedtaksperiode.aktørId),
+                    keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer)
+                )
+                hendelse.info("Revurdering blokkeres fordi det finnes nyere skjæringstidspunkt, og det mangler funksjonalitet for å håndtere dette.")
+                return false // på stedet hvil!
+            }
+            return true
         }
 
         override fun håndter(
