@@ -1111,6 +1111,9 @@ internal class Arbeidsgiver private constructor(
         return dato == sykdomstidslinje().førsteSykedagEtter(sisteDag)
     }
 
+
+    fun harVedtaksperioderEtter(dato: LocalDate) = vedtaksperioder.any { it.slutterEtter(dato) }
+
     internal class JsonRestorer private constructor() {
         internal companion object {
             internal fun restore(

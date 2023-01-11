@@ -155,8 +155,8 @@ class Person private constructor(
         before: () -> Any = { }
     ) {
         registrer(hendelse, "Behandler $hendelsesmelding")
-        if (tidligereBehandlinger.any { false }) {
-            //hendelse.funksjonellFeil(Varselkode.RV_AN_5)
+        if (tidligereBehandlinger.any { it.harVedtaksperioderEtter(hendelse.periode().start.minusMonths(6)) }) {
+            // hendelse.funksjonellFeil(Varselkode.RV_AN_5)
             sikkerLogg.info("hendelse: ${hendelse::class.java.simpleName} her ville vi ha kastet ut personen aktørid: $aktørId fnr: $personidentifikator tidligere behandlede identer: ${tidligereBehandlinger.map { it.personidentifikator }}")
         }
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
@@ -164,6 +164,8 @@ class Person private constructor(
         hendelse.fortsettÅBehandle(arbeidsgiver)
         håndterGjenoppta(hendelse)
     }
+
+    private fun harVedtaksperioderEtter(dato: LocalDate) = arbeidsgivere.any { it.harVedtaksperioderEtter(dato) }
 
     fun håndter(infotrygdendring: Infotrygdendring) {
         infotrygdendring.kontekst(this)

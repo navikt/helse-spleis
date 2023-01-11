@@ -978,6 +978,8 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndtertInntektPåSkjæringstidspunktet(this, hendelse)
     }
 
+    fun slutterEtter(dato: LocalDate) = periode.slutterEtter(dato)
+
     // Gang of four State pattern
     internal sealed interface Vedtaksperiodetilstand : Aktivitetskontekst {
         val type: TilstandType
