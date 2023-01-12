@@ -282,7 +282,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding): Boolean {
-        val skalHåndtereInntektOgRefusjon = inntektOgRefusjon.skalHåndteresAv(periode)
+        val skalHåndtereInntektOgRefusjon = inntektOgRefusjon.skalHåndteresAv(periode, finnArbeidsgiverperiode()?.lastOrNull())
         if (erAlleredeHensyntatt(inntektOgRefusjon.meldingsreferanseId()) || !skalHåndtereInntektOgRefusjon) {
             return skalHåndtereInntektOgRefusjon
         }

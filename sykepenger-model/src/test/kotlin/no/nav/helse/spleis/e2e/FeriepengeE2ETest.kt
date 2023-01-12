@@ -25,6 +25,8 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.september
@@ -999,7 +1001,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Rekjøring etter annullert oppdrag skal sende feriepenger med ny fagsystemId`() {
+    fun `Rekjøring etter annullert oppdrag skal sende feriepenger med ny fagsystemId`() = Toggle.HåndterInntektsmeldingOppdelt.enable {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 14.august(2020), 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -1028,6 +1030,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.oktober(2020), 14.desember(2020), 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.oktober(2020), 14.desember(2020), 100.prosent)) // 41 dager
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         håndterUtbetalingshistorikk(2.vedtaksperiode)
         håndterInntektsmelding(listOf(1.oktober(2020) til 16.oktober(2020)))
         håndterVilkårsgrunnlag(2.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
