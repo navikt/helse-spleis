@@ -193,6 +193,18 @@ internal class InntektsmeldingMatchingTest {
         assertEquals(4.september(2020) til 19.september(2020), dager.håndterGjenstående()) // Alt blir dratt med som gjenstående siden vedtaksperiode håndterer inntekt & refusjon
     }
 
+    @Test
+    fun `Har blitt håndtert av`() {
+        val vedtaksperiode1 =  2.januar til 15.januar
+        val (dager, _) =
+            inntektsmelding(1.januar, 1.januar til 16.januar)
+        assertTrue(dager.skalHåndteresAv(vedtaksperiode1))
+        assertFalse(dager.harBlittHåndtertAv(vedtaksperiode1))
+        assertEquals(2.januar til 15.januar, dager.håndter(vedtaksperiode1))
+        assertFalse(dager.skalHåndteresAv(vedtaksperiode1))
+        assertTrue(dager.harBlittHåndtertAv(vedtaksperiode1))
+    }
+
     private fun DagerFraInntektsmelding.håndter(periode: Periode): Periode? {
         var håndtertPeriode: Periode? = null
         håndter(periode) {
