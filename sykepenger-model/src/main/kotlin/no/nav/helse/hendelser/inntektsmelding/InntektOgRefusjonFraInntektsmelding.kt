@@ -1,9 +1,12 @@
 package no.nav.helse.hendelser.inntektsmelding
 
+import java.time.DayOfWeek.SATURDAY
+import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
 import no.nav.helse.førsteArbeidsdag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
@@ -22,12 +25,21 @@ internal class InntektOgRefusjonFraInntektsmelding(
     internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = inntektsmelding.leggTil(hendelseIder)
     internal fun nyeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, person: Person) =
         person.nyeRefusjonsopplysninger(skjæringstidspunkt, inntektsmelding)
-    internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?, jurist: SubsumsjonObserver) =
+
+    internal fun valider(
+        periode: Periode,
+        skjæringstidspunkt: LocalDate,
+        arbeidsgiverperiode: Arbeidsgiverperiode?,
+        jurist: SubsumsjonObserver
+    ) =
         inntektsmelding.valider(periode, skjæringstidspunkt, arbeidsgiverperiode, jurist)
-    internal fun addInntektsmelding(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver, jurist: SubsumsjonObserver) =
+
+    internal fun addInntektsmelding(
+        skjæringstidspunkt: LocalDate,
+        arbeidsgiver: Arbeidsgiver,
+        jurist: SubsumsjonObserver
+    ) =
         arbeidsgiver.addInntektsmelding(skjæringstidspunkt, inntektsmelding, jurist)
-
-
 
     private val førsteFraværsdagEtterArbeidsgiverperioden =
         førsteFraværsdag != null && sisteDagIArbeidsgiverperioden != null && førsteFraværsdag > sisteDagIArbeidsgiverperioden
@@ -42,7 +54,14 @@ internal class InntektOgRefusjonFraInntektsmelding(
             true -> førsteFraværsdag!!
             false -> sisteDagIArbeidsgiverperioden!!.nesteDag
         }
+        if (periodeOrNull(bestemmendeDag, periode.endInclusive)?.kunHelg == true) return false
         erHåndtert = bestemmendeDag in periode || bestemmendeDag.førsteArbeidsdag() in periode
         return erHåndtert
+    }
+
+    private companion object {
+        private fun periodeOrNull(fom: LocalDate, tom: LocalDate) = if (tom >= fom) fom til tom else null
+        private val helg = setOf(SATURDAY, SUNDAY)
+        private val Periode.kunHelg get() = all { it.dayOfWeek in helg }
     }
 }

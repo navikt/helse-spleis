@@ -178,8 +178,8 @@ internal class InntektsmeldingMatchingTest {
         val (_, inntektOgRefusjon) =
             inntektsmelding(20.januar, 1.januar til 16.januar)
 
-        assertTrue(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode1))
-        assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode2))
+        assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode1))
+        assertTrue(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode2))
     }
 
     @Test
@@ -203,6 +203,16 @@ internal class InntektsmeldingMatchingTest {
         assertEquals(2.januar til 15.januar, dager.håndter(vedtaksperiode1))
         assertFalse(dager.skalHåndteresAv(vedtaksperiode1))
         assertTrue(dager.harBlittHåndtertAv(vedtaksperiode1))
+    }
+
+    @Test
+    fun `Poteniselle dager som skal utbetales er kun helg`() {
+        val vedtaksperiodeAuu = 4.januar til 21.januar // 4-19 agp, 20-21 helg
+        val vedtaksperiodeMedUtbetaling = 22.januar til 31.januar // Starter på mandag
+        val (_, inntekt) =
+            inntektsmelding(4.januar, 4.januar til 19.januar)
+        assertFalse(inntekt.skalHåndteresAv(vedtaksperiodeAuu))
+        assertTrue(inntekt.skalHåndteresAv(vedtaksperiodeMedUtbetaling))
     }
 
     private fun DagerFraInntektsmelding.håndter(periode: Periode): Periode? {
