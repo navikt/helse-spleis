@@ -1326,7 +1326,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.trengerYtelser(påminnelse)
+            val periode = vedtaksperiode.skjæringstidspunktperiode()
+            vedtaksperiode.trengerYtelser(påminnelse, periode)
         }
 
         override fun håndter(
