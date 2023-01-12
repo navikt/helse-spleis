@@ -105,7 +105,31 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `Lang og useriøs arbeidsgiverperiode`() {
         nyPeriode(1.januar til 31.januar)
         håndterInntektsmelding(listOf(1.januar til 31.januar))
+        assertEquals(1.januar til 16.januar, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+    }
+
+    @Test
+    fun `Kort og useriøs arbeidsgiverperiode`() {
+        nyPeriode(1.januar til 31.januar)
+        håndterInntektsmelding(listOf(1.januar til 5.januar))
+        assertEquals(1.januar til 16.januar, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+    }
+
+    @Test
+    fun `Skal ikke bruke inntekt fra gammel inntektsmelding`() {
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar))
+        nyPeriode(1.april til 30.april)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+    }
+
+    @Test
+    fun `Arbeidsgiver opplyser om feilaktig ny arbeidsgiverperiode som dekker hele perioden som skal utbetales`() {
+        nyttVedtak(1.januar, 20.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+        assertEquals(1.januar til 16.januar, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        nyttVedtak(25.januar, 25.januar, arbeidsgiverperiode = listOf(25.januar til 9.februar))
+        assertEquals(1.januar til 16.januar, inspektør.arbeidsgiverperiode(2.vedtaksperiode))
     }
 
     @Test

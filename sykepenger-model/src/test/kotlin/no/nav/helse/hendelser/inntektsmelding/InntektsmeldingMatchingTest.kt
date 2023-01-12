@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
@@ -213,6 +214,27 @@ internal class InntektsmeldingMatchingTest {
             inntektsmelding(4.januar, 4.januar til 19.januar)
         assertFalse(inntekt.skalHåndteresAv(vedtaksperiodeAuu))
         assertTrue(inntekt.skalHåndteresAv(vedtaksperiodeMedUtbetaling))
+    }
+
+    @Test
+    fun `Kun arbeidsgiverperiode og ferie skal ikke håndtere inntekt`() {
+        val vedtaksperiode1 = 4.januar til 22.januar // Ferie 20-22.januar
+        val vedtaksperiode2 = 23.januar til 31.januar
+
+        val (_, inntekt) =
+            inntektsmelding(1.januar, 4.januar til 19.januar)
+
+        assertForventetFeil(
+            forklaring = "Vi vet ikke noe om ferie, så vi tror mandag 22.januar skal håndtere inntekt",
+            nå = {
+                assertTrue(inntekt.skalHåndteresAv(vedtaksperiode1))
+                assertFalse(inntekt.skalHåndteresAv(vedtaksperiode2))
+            },
+            ønsket = {
+                assertFalse(inntekt.skalHåndteresAv(vedtaksperiode1))
+                assertTrue(inntekt.skalHåndteresAv(vedtaksperiode2))
+            }
+        )
     }
 
     private fun DagerFraInntektsmelding.håndter(periode: Periode): Periode? {
