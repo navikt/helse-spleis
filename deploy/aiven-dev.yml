@@ -23,6 +23,9 @@ spec:
           application: dataprodukt-iverksettelser
           access: readwrite
         - team: tbd
+          application: dataprodukt-annulleringer
+          access: readwrite
+        - team: tbd
           application: spre-subsumsjon
           access: readwrite
         - team: tbd
