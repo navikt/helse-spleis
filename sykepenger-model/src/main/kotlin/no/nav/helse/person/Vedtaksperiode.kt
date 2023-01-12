@@ -510,7 +510,7 @@ internal class Vedtaksperiode private constructor(
         return inntektsmelding.erRelevant(perioder.periode()) && relevantForReplay(other, perioder, vedtaksperioder)
     }
 
-    private fun skjæringstidspunktperiode() = person.skjæringstidspunktperiode(skjæringstidspunkt)
+    private fun sykefraværstilfelle() = person.sykefraværstilfelle(skjæringstidspunkt)
 
     private fun validerYtelserForSkjæringstidspunkt(ytelser: Ytelser) {
         person.validerYtelserForSkjæringstidspunkt(ytelser, skjæringstidspunkt)
@@ -1317,7 +1317,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
-            val periode = vedtaksperiode.skjæringstidspunktperiode()
+            val periode = vedtaksperiode.sykefraværstilfelle()
             vedtaksperiode.trengerYtelser(hendelse, periode)
         }
 
@@ -1326,7 +1326,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            val periode = vedtaksperiode.skjæringstidspunktperiode()
+            val periode = vedtaksperiode.sykefraværstilfelle()
             vedtaksperiode.trengerYtelser(påminnelse, periode)
         }
 
@@ -2458,7 +2458,7 @@ internal class Vedtaksperiode private constructor(
                 .forEach { it.validerYtelser(ytelser, skjæringstidspunkt, infotrygdhistorikk) }
         }
 
-        internal fun List<Vedtaksperiode>.skjæringstidspunktperiode(skjæringstidspunkt: LocalDate): Periode {
+        internal fun List<Vedtaksperiode>.sykefraværstilfelle(skjæringstidspunkt: LocalDate): Periode {
             val sisteDato = filter { it.skjæringstidspunkt == skjæringstidspunkt }.maxOf { it.periode.endInclusive }
             return skjæringstidspunkt til sisteDato
         }

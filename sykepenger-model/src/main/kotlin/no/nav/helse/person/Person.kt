@@ -42,9 +42,9 @@ import no.nav.helse.person.Arbeidsgiver.Companion.manglerNødvendigInntektVedTid
 import no.nav.helse.person.Arbeidsgiver.Companion.nekterOpprettelseAvPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsgivere
-import no.nav.helse.person.Arbeidsgiver.Companion.skjæringstidspunktperiode
 import no.nav.helse.person.Arbeidsgiver.Companion.slettUtgåtteSykmeldingsperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.startRevurdering
+import no.nav.helse.person.Arbeidsgiver.Companion.sykefraværstilfelle
 import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.validerYtelserForSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
@@ -770,8 +770,8 @@ class Person private constructor(
         arbeidsgivere.validerYtelserForSkjæringstidspunkt(ytelser, skjæringstidspunkt, infotrygdhistorikk)
     }
 
-    internal fun skjæringstidspunktperiode(skjæringstidspunkt: LocalDate) =
-        arbeidsgivere.skjæringstidspunktperiode(skjæringstidspunkt)
+    internal fun sykefraværstilfelle(skjæringstidspunkt: LocalDate) =
+        arbeidsgivere.sykefraværstilfelle(skjæringstidspunkt)
 
     internal fun nekterOpprettelseAvPeriode(vedtaksperiode: Vedtaksperiode, søknad: Søknad): Boolean {
         return arbeidsgivere.nekterOpprettelseAvPeriode(vedtaksperiode, søknad)

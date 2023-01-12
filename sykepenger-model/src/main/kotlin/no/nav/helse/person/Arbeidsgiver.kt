@@ -45,7 +45,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.lagRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
-import no.nav.helse.person.Vedtaksperiode.Companion.skjæringstidspunktperiode
+import no.nav.helse.person.Vedtaksperiode.Companion.sykefraværstilfelle
 import no.nav.helse.person.Vedtaksperiode.Companion.validerYtelser
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -284,8 +284,8 @@ internal class Arbeidsgiver private constructor(
             forEach { it.vedtaksperioder.validerYtelser(ytelser, skjæringstidspunkt, infotrygdhistorikk) }
         }
 
-        internal fun List<Arbeidsgiver>.skjæringstidspunktperiode(skjæringstidspunkt: LocalDate) =
-            flatMap { it.vedtaksperioder }.skjæringstidspunktperiode(skjæringstidspunkt)
+        internal fun List<Arbeidsgiver>.sykefraværstilfelle(skjæringstidspunkt: LocalDate) =
+            flatMap { it.vedtaksperioder }.sykefraværstilfelle(skjæringstidspunkt)
     }
 
     /* hvorvidt arbeidsgiver ikke inngår i sykepengegrunnlaget som er på et vilkårsgrunnlag,
