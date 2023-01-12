@@ -6,7 +6,6 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.mars
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
@@ -36,13 +35,12 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
         )
     }
 
-    @Disabled
     @Test
     fun `historiskeFolkeregisteridenter test`() {
         val historiskFnr = "123"
         val nyttFnr = "111"
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), fnr = historiskFnr)
-        val søknadId1 = sendSøknad(
+        sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
             historiskeFolkeregisteridenter = listOf(nyttFnr),
             fnr = historiskFnr

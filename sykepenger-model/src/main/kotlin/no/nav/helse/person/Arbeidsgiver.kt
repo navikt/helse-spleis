@@ -1118,7 +1118,6 @@ internal class Arbeidsgiver private constructor(
 
 
     fun vedtaksperioderEtter(dato: LocalDate) = vedtaksperioder.filter { it.slutterEtter(dato) }
-    fun harVedtaksperioderEtter(dato: LocalDate) = vedtaksperioder.any { it.slutterEtter(dato) }
 
     internal class JsonRestorer private constructor() {
         internal companion object {

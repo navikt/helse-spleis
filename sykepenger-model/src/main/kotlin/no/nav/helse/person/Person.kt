@@ -155,16 +155,14 @@ class Person private constructor(
         before: () -> Any = { }
     ) {
         registrer(hendelse, "Behandler $hendelsesmelding")
-        //if (tidligereBehandlinger.any { it.harVedtaksperioderEtter(hendelse.periode().start.minusMonths(6)) }) {
         val cutoff = hendelse.periode().start.minusMonths(6)
         val andreBehandledeVedtaksperioder = tidligereBehandlinger.flatMap { it.vedtaksperioderEtter(cutoff) }
         if (andreBehandledeVedtaksperioder.isNotEmpty()) {
-            // hendelse.funksjonellFeil(Varselkode.RV_AN_5)
-
+             hendelse.funksjonellFeil(Varselkode.RV_AN_5)
             val msg = andreBehandledeVedtaksperioder.map {
                 "vedtaksperiode(${it.periode()})"
             }
-            sikkerLogg.info("""hendelse: ${hendelse::class.java.simpleName} (${hendelse.periode()}) her ville vi ha kastet ut personen aktørid: $aktørId fnr: $personidentifikator 
+            sikkerLogg.info("""hendelse: ${hendelse::class.java.simpleName} (${hendelse.periode()}) kaster ut personen aktørid: $aktørId fnr: $personidentifikator 
                 | tidligere behandlede identer: ${tidligereBehandlinger.map { it.personidentifikator }}
                 | tidligere behandlede perioder: ${msg.joinToString { it }}
                 | cutoff: $cutoff""".trimMargin())
@@ -176,7 +174,6 @@ class Person private constructor(
     }
 
     private fun vedtaksperioderEtter(dato: LocalDate) = arbeidsgivere.flatMap { it.vedtaksperioderEtter(dato) }
-    private fun harVedtaksperioderEtter(dato: LocalDate) = arbeidsgivere.any { it.harVedtaksperioderEtter(dato) }
 
     fun håndter(infotrygdendring: Infotrygdendring) {
         infotrygdendring.kontekst(this)
