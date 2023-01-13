@@ -237,9 +237,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             )
         )
 
-        internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, subsumsjonObserver: SubsumsjonObserver): VilkårsgrunnlagElement? {
-            val sykepengegrunnlag = sykepengegrunnlag.overstyrArbeidsgiveropplysninger(hendelse, opptjening, subsumsjonObserver) ?: return null
-            return kopierMed(hendelse, sykepengegrunnlag, opptjening, subsumsjonObserver)
+        internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, subsumsjonObserver: SubsumsjonObserver): Pair<VilkårsgrunnlagElement?, Revurderingseventyr> {
+            // TODO: gir ikke mening å starte revurdering når sykepengegrunnlaget er lik det forrige
+            val sykepengegrunnlag = sykepengegrunnlag.overstyrArbeidsgiveropplysninger(hendelse, opptjening, subsumsjonObserver) ?: return null to Revurderingseventyr.arbeidsgiveropplysninger(skjæringstidspunkt)
+            val eventyr = sykepengegrunnlag.finnEventyr(this.sykepengegrunnlag)
+            return kopierMed(hendelse, sykepengegrunnlag, opptjening, subsumsjonObserver) to eventyr
         }
         protected abstract fun kopierMed(
             hendelse: IAktivitetslogg,

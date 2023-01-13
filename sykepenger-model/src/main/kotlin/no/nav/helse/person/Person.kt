@@ -713,8 +713,9 @@ class Person private constructor(
         subsumsjonObserver: SubsumsjonObserver
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
-        nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrArbeidsgiveropplysninger(hendelse, subsumsjonObserver))
-        startRevurdering(hendelse, Revurderingseventyr.arbeidsgiveropplysninger(skjæringstidspunkt))
+        val (nyttGrunnlag, eventyr) = (grunnlag.overstyrArbeidsgiveropplysninger(hendelse, subsumsjonObserver) ?: return)
+        nyttVilkårsgrunnlag(hendelse, nyttGrunnlag)
+        startRevurdering(hendelse, eventyr)
     }
 
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(

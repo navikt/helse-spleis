@@ -4,6 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.person.ArbeidsgiverInntektsopplysningVisitor
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Opptjening
+import no.nav.helse.person.Revurderingseventyr
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.valider
@@ -177,5 +178,12 @@ class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.inneholderAlleArbeidsgivereI(other: List<ArbeidsgiverInntektsopplysning>) =
             this.map { it.orgnummer }.containsAll(other.map { it.orgnummer })
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.finnEventyr(
+            skjæringstidspunkt: LocalDate,
+            other: List<ArbeidsgiverInntektsopplysning>
+        ): Revurderingseventyr {
+            return Revurderingseventyr.arbeidsgiveropplysninger(skjæringstidspunkt)
+        }
     }
 }

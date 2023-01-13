@@ -15,6 +15,7 @@ import no.nav.helse.person.GhostPeriode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Opptjening
+import no.nav.helse.person.Revurderingseventyr
 import no.nav.helse.person.SykepengegrunnlagVisitor
 import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_IV_2
@@ -26,6 +27,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.akti
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.build
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.erOverstyrt
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnEventyr
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.inneholderAlleArbeidsgivereI
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.inntekt
@@ -316,6 +318,13 @@ internal class Sykepengegrunnlag(
         )
     }
 
+    internal fun finnEventyr(other: Sykepengegrunnlag): Revurderingseventyr {
+        check(this.skjæringstidspunkt == other.skjæringstidspunkt) {
+            "Skal bare sammenlikne med samme skjæringstidspunkt"
+        }
+        return arbeidsgiverInntektsopplysninger.finnEventyr(this.skjæringstidspunkt, other.arbeidsgiverInntektsopplysninger)
+    }
+
     enum class Begrensning {
         ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD
     }
@@ -342,6 +351,7 @@ internal class Sykepengegrunnlag(
     }
 
 }
+
 internal class NyeRefusjonsopplysninger(private val opprinneligArbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>) {
     private var nyeOpplysninger = opprinneligArbeidsgiverInntektsopplysninger
 
