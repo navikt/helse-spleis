@@ -183,7 +183,17 @@ class ArbeidsgiverInntektsopplysning(
             skjæringstidspunkt: LocalDate,
             other: List<ArbeidsgiverInntektsopplysning>
         ): Revurderingseventyr {
-            return Revurderingseventyr.arbeidsgiveropplysninger(skjæringstidspunkt)
+            val endringsDatoer = this.mapNotNull { ny ->
+                val gammel = other.singleOrNull {
+                    it.orgnummer == ny.orgnummer
+                }
+                when {
+                    (gammel == null || ny.inntektsopplysning != gammel.inntektsopplysning) -> skjæringstidspunkt
+                    (gammel.refusjonsopplysninger != ny.refusjonsopplysninger) -> skjæringstidspunkt// minste dato
+                    else -> null
+                }
+            }
+            return Revurderingseventyr.arbeidsgiveropplysninger(skjæringstidspunkt, endringsDatoer.minOrNull() ?: skjæringstidspunkt)
         }
     }
 }
