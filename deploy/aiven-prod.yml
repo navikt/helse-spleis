@@ -202,3 +202,6 @@ spec:
         - team: tbd
           application: speaker-kafka
           access: readwrite
+        - team: flex
+          application: sykepengesoknad-sak-status-metrikk
+          access: read
