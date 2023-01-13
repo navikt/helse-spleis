@@ -179,8 +179,8 @@ internal class InntektsmeldingMatchingTest {
         val (_, inntektOgRefusjon) =
             inntektsmelding(20.januar, 1.januar til 16.januar)
 
-        assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode1))
-        assertTrue(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode2))
+        assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode1, forventerInntekt = false))
+        assertTrue(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode2, forventerInntekt = true))
     }
 
     @Test
@@ -212,8 +212,8 @@ internal class InntektsmeldingMatchingTest {
         val vedtaksperiodeMedUtbetaling = 22.januar til 31.januar // Starter på mandag
         val (_, inntekt) =
             inntektsmelding(4.januar, 4.januar til 19.januar)
-        assertFalse(inntekt.skalHåndteresAv(vedtaksperiodeAuu))
-        assertTrue(inntekt.skalHåndteresAv(vedtaksperiodeMedUtbetaling))
+        assertFalse(inntekt.skalHåndteresAv(vedtaksperiodeAuu, forventerInntekt = false))
+        assertTrue(inntekt.skalHåndteresAv(vedtaksperiodeMedUtbetaling, forventerInntekt = true))
     }
 
     @Test
@@ -243,28 +243,12 @@ internal class InntektsmeldingMatchingTest {
         val auu2 = 8.januar til 14.januar
         val auu3 = 15.januar til 16.januar
         val skalUtbetales = 17.januar til 31.januar
+        val (_, inntekt) = inntektsmelding(førsteFraværsdag = 5.januar)
 
-        val inntektFraInntektsmelding: () -> InntektOgRefusjonFraInntektsmelding = {
-            inntektsmelding(førsteFraværsdag = 5.januar).second
-        }
-
-        assertForventetFeil(
-            forklaring = "Støtter ikke dette scenarioet enda",
-            nå = {
-                val inntekt = inntektFraInntektsmelding()
-                assertTrue(inntekt.skalHåndteresAv(auu1))
-                assertFalse(inntekt.skalHåndteresAv(auu2))
-                assertFalse(inntekt.skalHåndteresAv(auu3))
-                assertFalse(inntekt.skalHåndteresAv(skalUtbetales))
-            },
-            ønsket = {
-                val inntekt = inntektFraInntektsmelding()
-                assertFalse(inntekt.skalHåndteresAv(auu1))
-                assertFalse(inntekt.skalHåndteresAv(auu2))
-                assertFalse(inntekt.skalHåndteresAv(auu3))
-                assertTrue(inntekt.skalHåndteresAv(skalUtbetales))
-            }
-        )
+        assertFalse(inntekt.skalHåndteresAv(auu1, forventerInntekt = false))
+        assertFalse(inntekt.skalHåndteresAv(auu2, forventerInntekt = false))
+        assertFalse(inntekt.skalHåndteresAv(auu3, forventerInntekt = false))
+        assertTrue(inntekt.skalHåndteresAv(skalUtbetales, forventerInntekt = true))
     }
 
     @Test
@@ -275,27 +259,11 @@ internal class InntektsmeldingMatchingTest {
         // Gap onsdag og torsdag 17-18.januar
         val skalUtbetales = 19.januar til 31.januar
 
-        val inntektFraInntektsmelding: () -> InntektOgRefusjonFraInntektsmelding = {
-            inntektsmelding(førsteFraværsdag = 5.januar).second
-        }
-
-        assertForventetFeil(
-            forklaring = "Støtter ikke dette scenarioet enda",
-            nå = {
-                val inntekt = inntektFraInntektsmelding()
-                assertTrue(inntekt.skalHåndteresAv(auu1))
-                assertFalse(inntekt.skalHåndteresAv(auu2))
-                assertFalse(inntekt.skalHåndteresAv(auu3))
-                assertFalse(inntekt.skalHåndteresAv(skalUtbetales))
-            },
-            ønsket = {
-                val inntekt = inntektFraInntektsmelding()
-                assertFalse(inntekt.skalHåndteresAv(auu1))
-                assertFalse(inntekt.skalHåndteresAv(auu2))
-                assertFalse(inntekt.skalHåndteresAv(auu3))
-                assertFalse(inntekt.skalHåndteresAv(skalUtbetales)) // TODO: Avklare at det er riktig å vente på en annen IM her
-            }
-        )
+        val (_, inntekt) = inntektsmelding(førsteFraværsdag = 5.januar)
+        assertFalse(inntekt.skalHåndteresAv(auu1, forventerInntekt = false))
+        assertFalse(inntekt.skalHåndteresAv(auu2, forventerInntekt = false))
+        assertFalse(inntekt.skalHåndteresAv(auu3, forventerInntekt = false))
+        assertFalse(inntekt.skalHåndteresAv(skalUtbetales, forventerInntekt = true))
     }
 
     @Test
@@ -342,6 +310,9 @@ internal class InntektsmeldingMatchingTest {
         }
         return håndtertPeriode
     }
+
+    private fun InntektOgRefusjonFraInntektsmelding.skalHåndteresAv(periode: Periode, forventerInntekt: Boolean = true) =
+        skalHåndteresAv(periode) { forventerInntekt }
 
     private companion object {
         private fun inntektsmelding(

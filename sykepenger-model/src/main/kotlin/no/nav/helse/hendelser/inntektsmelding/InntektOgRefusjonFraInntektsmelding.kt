@@ -1,12 +1,9 @@
 package no.nav.helse.hendelser.inntektsmelding
 
-import java.time.DayOfWeek.SATURDAY
-import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
 import no.nav.helse.førsteArbeidsdag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
@@ -41,27 +38,33 @@ internal class InntektOgRefusjonFraInntektsmelding(
     ) =
         arbeidsgiver.addInntektsmelding(skjæringstidspunkt, inntektsmelding, jurist)
 
+
+
     private val førsteFraværsdagEtterArbeidsgiverperioden =
         førsteFraværsdag != null && sisteDagIArbeidsgiverperioden != null && førsteFraværsdag > sisteDagIArbeidsgiverperioden
-
     private val ingenArbeidsgiverperiode = sisteDagIArbeidsgiverperioden == null
 
+    private var nesteBestemmendeDag: LocalDate? = null
+    private val bestemmendeDagFraInntektsmelding = when (ingenArbeidsgiverperiode || førsteFraværsdagEtterArbeidsgiverperioden) {
+        true -> førsteFraværsdag!!
+        false -> sisteDagIArbeidsgiverperioden!!.nesteDag
+    }
+    private fun bestemmendeDag() = nesteBestemmendeDag ?: bestemmendeDagFraInntektsmelding
+
     private var erHåndtert: Boolean = false
-    internal fun skalHåndteresAv(periode: Periode): Boolean {
+    internal fun skalHåndteresAv(periode: Periode, forventerInntekt: () -> Boolean = { true }): Boolean {
         if (erHåndtert) return false
         if (førsteFraværsdag == null && sisteDagIArbeidsgiverperioden == null) return false
-        val bestemmendeDag = when (ingenArbeidsgiverperiode || førsteFraværsdagEtterArbeidsgiverperioden) {
-            true -> førsteFraværsdag!!
-            false -> sisteDagIArbeidsgiverperioden!!.nesteDag
+        val bestemmendeDag = bestemmendeDag()
+        val bestemmendeDagIPeriode = bestemmendeDag in periode || bestemmendeDag.førsteArbeidsdag() in periode
+        if (!bestemmendeDagIPeriode) return false
+        // Nå vet vi at perioden matcher, men kan være f.eks. AUU med agp + ferie/ agp + helg
+        if (forventerInntekt()) {
+            erHåndtert = true
+            return true
         }
-        if (periodeOrNull(bestemmendeDag, periode.endInclusive)?.kunHelg == true) return false
-        erHåndtert = bestemmendeDag in periode || bestemmendeDag.førsteArbeidsdag() in periode
-        return erHåndtert
-    }
-
-    private companion object {
-        private fun periodeOrNull(fom: LocalDate, tom: LocalDate) = if (tom >= fom) fom til tom else null
-        private val helg = setOf(SATURDAY, SUNDAY)
-        private val Periode.kunHelg get() = all { it.dayOfWeek in helg }
+        // Kan være at perioden rett etter oss skal håndtere inntekt
+        nesteBestemmendeDag = periode.endInclusive.nesteDag
+        return false
     }
 }
