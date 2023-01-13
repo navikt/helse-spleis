@@ -20,7 +20,6 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.november
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.håndterAnnullerUtbetaling
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -94,7 +93,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Teller ikke med utbetalinger gjort etter feriepengekjøring i IT - oppdatert for andre kjøring i 2022`() {
+    fun `Teller ikke med utbetalinger gjort etter feriepengekjøring i IT - oppdatert for første kjøring i 23 for regnskapåret i 21`() {
         val historikk = utbetalingshistorikkForFeriepenger(
             listOf(
                 UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
@@ -102,7 +101,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
                     1.desember(2017),
                     31.januar(2018),
                     1000,
-                    27.november(2022)
+                    14.januar(2023)
                 )
             )
         )
