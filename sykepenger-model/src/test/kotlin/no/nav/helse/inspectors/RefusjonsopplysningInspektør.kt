@@ -18,3 +18,17 @@ internal class RefusjonsopplysningerInspektør(refusjonsopplysninger: Refusjonso
         visitedRefusjonsopplysninger.add(Refusjonsopplysning(meldingsreferanseId, fom, tom, beløp))
     }
 }
+
+internal val Refusjonsopplysning.inspektør get() = RefusjonsopplysningInspektør(this)
+
+internal class RefusjonsopplysningInspektør(refusjonsopplysning: Refusjonsopplysning) : RefusjonsopplysningerVisitor {
+    lateinit var meldingsreferanseId: UUID
+        private set
+    init {
+        refusjonsopplysning.accept(this)
+    }
+
+    override fun visitRefusjonsopplysning(meldingsreferanseId: UUID, fom: LocalDate, tom: LocalDate?, beløp: Inntekt) {
+        this.meldingsreferanseId = meldingsreferanseId
+    }
+}

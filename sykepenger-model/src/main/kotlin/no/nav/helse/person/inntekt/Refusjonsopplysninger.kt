@@ -57,10 +57,7 @@ class Refusjonsopplysning(
         else this
     }
 
-    private fun dekker(dag: LocalDate): Boolean {
-        if (tom == null) return dag >= fom
-        return dag in periode
-    }
+    private fun dekker(dag: LocalDate) = dag in periode
 
     private fun aksepterer(skjæringstidspunkt: LocalDate, dag: LocalDate) =
         dag >= skjæringstidspunkt && dag < fom
@@ -181,21 +178,20 @@ class Refusjonsopplysning(
             }
         }
         private fun dekker(dag: LocalDate) = validerteRefusjonsopplysninger.any { it.dekker(dag) }
+
+        // finner første dato hvor refusjonsbeløpet for dagen er ulikt beløpet i forrige versjon
         internal fun finnFørsteDatoForEndring(other: Refusjonsopplysninger): LocalDate? {
-            return this.validerteRefusjonsopplysninger.filterNot { refusjonsopplysning ->
-                refusjonsopplysning.fom til (refusjonsopplysning.tom ?: LocalDate.MAX)
-                other.validerteRefusjonsopplysninger.filter {
-                    refusjonsopplysning.periode.overlapperMed(it.periode)
-                }.all {
-                    it.beløp == refusjonsopplysning.beløp
-                }
-            }.minByOrNull {
-                it.fom
-            }?.fom
+            return this
+                .validerteRefusjonsopplysninger
+                .sortedBy { it.fom }
+                .firstOrNull { refusjonsopplysning ->
+                    val overlappende = other.validerteRefusjonsopplysninger.filter { refusjonsopplysning.periode.overlapperMed(it.periode) }
+                    overlappende.isEmpty() || overlappende.any { it.beløp != refusjonsopplysning.beløp }
+                }?.fom
         }
 
         internal companion object {
-            private fun List<Refusjonsopplysning>.overlapper() = map { it.fom til (it.tom ?: LocalDate.MAX) }.overlapper()
+            private fun List<Refusjonsopplysning>.overlapper() = map { it.periode }.overlapper()
             internal fun List<Refusjonsopplysning>.gjennopprett(): Refusjonsopplysninger {
                 check(!overlapper()) { "Kan ikke gjennopprette refusjonsopplysningr med overlapp. For dette formålet må RefusjonsopplysningerBuilder benyttes." }
                 return Refusjonsopplysninger(this)

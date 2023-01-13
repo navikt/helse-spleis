@@ -2,9 +2,11 @@ package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.februar
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
@@ -17,11 +19,13 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -110,6 +114,60 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             }
         } ?: fail { "Forventet vilkårsgrunnlag" }
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+    }
+
+    @Test
+    fun `overstyring av refusjon skal starte revurdering fom første dato med endring`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(1.mars, 31.mars)
+        nullstillTilstandsendringer()
+        val overstyringId = UUID.randomUUID()
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
+            OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT, "Vi bruker det samme som før", null, listOf(
+                Triple(1.mars, null, INNTEKT/2)
+            ))
+        ), meldingsreferanseId = overstyringId)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+
+        val førsteUtbetaling = inspektør.utbetaling(0).inspektør
+        val revurdering = inspektør.utbetaling(3).inspektør
+        assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
+        assertEquals(1, revurdering.personOppdrag.size)
+        revurdering.arbeidsgiverOppdrag.also { oppdrag ->
+            assertEquals(17.januar, oppdrag[0].inspektør.fom)
+            assertEquals(28.februar, oppdrag[0].inspektør.tom)
+            assertEquals(1431, oppdrag[0].inspektør.beløp)
+            assertEquals(ENDR, oppdrag[0].inspektør.endringskode)
+
+            assertEquals(1.mars, oppdrag[1].inspektør.fom)
+            assertEquals(30.mars, oppdrag[1].inspektør.tom)
+            assertEquals(715, oppdrag[1].inspektør.beløp)
+            assertEquals(NY, oppdrag[1].inspektør.endringskode)
+        }
+        revurdering.personOppdrag.also { oppdrag ->
+            assertEquals(1.mars, oppdrag[0].inspektør.fom)
+            assertEquals(30.mars, oppdrag[0].inspektør.tom)
+            assertEquals(716, oppdrag[0].inspektør.beløp)
+            assertEquals(NY, oppdrag[0].inspektør.endringskode)
+        }
+        assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+        inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.also { vilkårsgrunnlag ->
+            vilkårsgrunnlag.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.let { arbeidsgiverInntektsopplysninger ->
+                assertEquals(1, arbeidsgiverInntektsopplysninger.size)
+                arbeidsgiverInntektsopplysninger.single().inspektør.also { overstyring ->
+                    assertEquals(INNTEKT, overstyring.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(listOf(
+                        Refusjonsopplysning(overstyring.refusjonsopplysninger.inspektør.refusjonsopplysninger.first().inspektør.meldingsreferanseId, 1.januar, 28.februar, INNTEKT),
+                        Refusjonsopplysning(overstyringId, 1.mars, null, INNTEKT/2)
+                    ), overstyring.refusjonsopplysninger.inspektør.refusjonsopplysninger)
+                }
+            }
+        } ?: fail { "Forventet vilkårsgrunnlag" }
+        assertTilstander(1.vedtaksperiode, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET)
+        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
     }
 
     @Test
@@ -334,6 +392,59 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             Refusjonsopplysning(overstyringId, 1.januar, 20.januar, inntektPerArbeidsgiver),
             Refusjonsopplysning(overstyringId, 21.januar, null, inntektPerArbeidsgiver*1.5)
         ), inspektør.refusjonsopplysningerISykepengegrunnlaget(1.januar, a2))
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING, a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, a2)
+    }
+    @Test
+    fun `to arbeidsgivere kun refusjonsendring på den ene og endring av inntekt på andre`() {
+        val inntektPerArbeidsgiver = 19000.månedlig
+        nyeVedtak(1.januar, 31.januar, a1, a2, inntekt = inntektPerArbeidsgiver)
+        forlengVedtak(1.februar, 28.februar, a1, a2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, a1)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, a2)
+
+        val refusjonsopplysningerFørOverstyringA1 = inspektør.refusjonsopplysningerISykepengegrunnlaget(1.januar, a1)
+        val overstyringId = UUID.randomUUID()
+        håndterOverstyrArbeidsgiveropplysninger(
+            skjæringstidspunkt = 1.januar,
+            meldingsreferanseId = overstyringId,
+            arbeidsgiveropplysninger = listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a1,
+                    inntekt = inntektPerArbeidsgiver*1.5,
+                    forklaring = "endring på inntekt",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(
+                        Triple(1.januar, null, inntektPerArbeidsgiver),
+                    )
+                ), OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a2,
+                    inntekt = inntektPerArbeidsgiver,
+                    forklaring = "endring på refusjonen",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(
+                        Triple(1.januar, 31.januar, inntektPerArbeidsgiver),
+                        Triple(1.februar, null, inntektPerArbeidsgiver/2)
+                    )
+                )
+            )
+        )
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+
+        assertEquals(inntektPerArbeidsgiver*1.5, inspektør.inntektISykepengegrunnlaget(1.januar, a1))
+        assertEquals(inntektPerArbeidsgiver, inspektør.inntektISykepengegrunnlaget(1.januar, a2))
+        assertEquals(refusjonsopplysningerFørOverstyringA1, inspektør.refusjonsopplysningerISykepengegrunnlaget(1.januar, a1))
+        assertEquals(listOf(
+            Refusjonsopplysning(overstyringId, 1.januar, 31.januar, inntektPerArbeidsgiver),
+            Refusjonsopplysning(overstyringId, 1.februar, null, inntektPerArbeidsgiver/2)
+        ), inspektør.refusjonsopplysningerISykepengegrunnlaget(1.januar, a2))
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING, a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, a2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING, a2)
     }
 
     @Test

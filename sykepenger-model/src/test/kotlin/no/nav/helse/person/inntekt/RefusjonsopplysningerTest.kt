@@ -25,6 +25,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -53,6 +54,7 @@ internal class RefusjonsopplysningerTest {
             )
         ).refusjonsopplysninger()
 
+        assertEquals(15.januar, nyeRefusjonsopplysninger.finnFørsteDatoForEndring(refusjonsopplysninger))
         assertEquals(
             listOf(
                 Refusjonsopplysning(meldingsreferanseId1, 1.januar, 14.januar, 2000.daglig),
@@ -70,6 +72,7 @@ internal class RefusjonsopplysningerTest {
         val meldingsreferanseId2 = UUID.randomUUID()
         val nyeRefusjonsopplysninger = listOf(Refusjonsopplysning(meldingsreferanseId2, 15.januar, null, 1000.daglig)).refusjonsopplysninger()
 
+        assertEquals(15.januar, nyeRefusjonsopplysninger.finnFørsteDatoForEndring(refusjonsopplysninger))
         assertEquals(
             listOf(
                 Refusjonsopplysning(meldingsreferanseId1, 1.januar, 14.januar, 2000.daglig),
@@ -86,6 +89,7 @@ internal class RefusjonsopplysningerTest {
         val meldingsreferanseId2 = UUID.randomUUID()
         val nyeRefusjonsopplysninger = listOf(Refusjonsopplysning(meldingsreferanseId2, 1.januar, 31.januar, 1000.daglig)).refusjonsopplysninger()
 
+        assertEquals(1.januar, nyeRefusjonsopplysninger.finnFørsteDatoForEndring(refusjonsopplysninger))
         assertEquals(
             nyeRefusjonsopplysninger.inspektør.refusjonsopplysninger,
             refusjonsopplysninger.merge(nyeRefusjonsopplysninger).inspektør.refusjonsopplysninger
@@ -99,6 +103,7 @@ internal class RefusjonsopplysningerTest {
         val meldingsreferanseId2 = UUID.randomUUID()
         val nyeRefusjonsopplysninger = listOf(Refusjonsopplysning(meldingsreferanseId2, 1.januar, null, 1000.daglig)).refusjonsopplysninger()
 
+        assertEquals(1.januar, nyeRefusjonsopplysninger.finnFørsteDatoForEndring(refusjonsopplysninger))
         assertEquals(
             nyeRefusjonsopplysninger.inspektør.refusjonsopplysninger,
             refusjonsopplysninger.merge(nyeRefusjonsopplysninger).inspektør.refusjonsopplysninger
@@ -112,6 +117,7 @@ internal class RefusjonsopplysningerTest {
         val meldingsreferanseId2 = UUID.randomUUID()
         val nyeRefusjonsopplysninger = listOf(Refusjonsopplysning(meldingsreferanseId2, 1.mars, null, 1000.daglig)).refusjonsopplysninger()
 
+        assertEquals(1.mars, nyeRefusjonsopplysninger.finnFørsteDatoForEndring(refusjonsopplysninger))
         assertEquals(
             listOf(Refusjonsopplysning(meldingsreferanseId1, 1.januar, 28.februar, 2000.daglig), Refusjonsopplysning(meldingsreferanseId2, 1.mars, null, 1000.daglig)),
             refusjonsopplysninger.merge(nyeRefusjonsopplysninger).inspektør.refusjonsopplysninger
@@ -163,6 +169,7 @@ internal class RefusjonsopplysningerTest {
             Refusjonsopplysning(meldingsreferanseId6, 13.januar, 16.januar, 7000.daglig),
         ).refusjonsopplysninger()
 
+        assertEquals(2.januar, nyeRefusjonsopplysninger.finnFørsteDatoForEndring(refusjonsopplysninger))
         assertEquals(
             listOf(
                 Refusjonsopplysning(meldingsreferanseId1, 1.januar, 1.januar, 2000.daglig),
@@ -181,10 +188,11 @@ internal class RefusjonsopplysningerTest {
 
     @Test
     fun `merging av to tomme refusjonsopplysninger blir en tom refusjonsopplysning`() {
-        assertEquals(
-            Refusjonsopplysninger().inspektør.refusjonsopplysninger,
-            Refusjonsopplysninger().merge(Refusjonsopplysninger()).inspektør.refusjonsopplysninger
-        )
+        val gammelRefusjonsopplysninger = Refusjonsopplysninger()
+        val nyeRefusjonsopplysninger = Refusjonsopplysninger()
+        val resultat = nyeRefusjonsopplysninger.merge(gammelRefusjonsopplysninger)
+        assertNull(resultat.finnFørsteDatoForEndring(nyeRefusjonsopplysninger))
+        assertEquals(Refusjonsopplysninger().inspektør.refusjonsopplysninger, resultat.inspektør.refusjonsopplysninger)
     }
 
     @Test
@@ -233,6 +241,7 @@ internal class RefusjonsopplysningerTest {
         val ny = Refusjonsopplysning(UUID.randomUUID(), 1.januar, 1.mars, 1000.daglig)
         val refusjonsopplysning = RefusjonsopplysningerBuilder()
             .leggTil(eksisterende, eksisterendeTidspunkt).leggTil(ny, nyttTidspunkt).build()
+        assertEquals(1.januar, refusjonsopplysning.finnFørsteDatoForEndring(RefusjonsopplysningerBuilder().leggTil(eksisterende).build()))
         assertEquals(listOf(ny, Refusjonsopplysning(eksisterendeId, 2.mars, 31.mars, 2000.daglig)), refusjonsopplysning.inspektør.refusjonsopplysninger)
 
     }

@@ -184,17 +184,10 @@ class ArbeidsgiverInntektsopplysning(
             other: List<ArbeidsgiverInntektsopplysning>
         ): Revurderingseventyr {
             val endringsDatoer = this.mapNotNull { ny ->
-                val gammel = other.singleOrNull {
-                    it.orgnummer == ny.orgnummer
-                }
+                val gammel = other.singleOrNull { it.orgnummer == ny.orgnummer }
                 when {
                     (gammel == null || ny.inntektsopplysning != gammel.inntektsopplysning) -> skjæringstidspunkt
-                    (gammel.refusjonsopplysninger != ny.refusjonsopplysninger) -> {
-                        // minus operatoren hjelper oss med å finne vedtaksperioden endringen startet
-                        ny.refusjonsopplysninger.finnFørsteDatoForEndring(gammel.refusjonsopplysninger)
-
-                    }
-                    else -> null
+                    else -> ny.refusjonsopplysninger.finnFørsteDatoForEndring(gammel.refusjonsopplysninger)
                 }
             }
             return Revurderingseventyr.arbeidsgiveropplysninger(skjæringstidspunkt, endringsDatoer.minOrNull() ?: skjæringstidspunkt)
