@@ -29,7 +29,7 @@ class Refusjonsopplysning(
         }
     }
 
-    private val periode get() = fom til tom!!
+    private val periode get() = fom til (tom ?: LocalDate.MAX)
     private fun oppdatertFom(nyFom: LocalDate) = if (tom != null && nyFom > tom) null else Refusjonsopplysning(meldingsreferanseId, nyFom, tom, beløp)
     private fun oppdatertTom(nyTom: LocalDate) = if (nyTom < fom) null else Refusjonsopplysning(meldingsreferanseId, fom, nyTom, beløp)
     private fun erEtter(other: Refusjonsopplysning) = other.tom != null && fom > other.tom
@@ -181,6 +181,18 @@ class Refusjonsopplysning(
             }
         }
         private fun dekker(dag: LocalDate) = validerteRefusjonsopplysninger.any { it.dekker(dag) }
+        internal fun finnFørsteDatoForEndring(other: Refusjonsopplysninger): LocalDate? {
+            return this.validerteRefusjonsopplysninger.filterNot { refusjonsopplysning ->
+                refusjonsopplysning.fom til (refusjonsopplysning.tom ?: LocalDate.MAX)
+                other.validerteRefusjonsopplysninger.filter {
+                    refusjonsopplysning.periode.overlapperMed(it.periode)
+                }.all {
+                    it.beløp == refusjonsopplysning.beløp
+                }
+            }.minByOrNull {
+                it.fom
+            }?.fom
+        }
 
         internal companion object {
             private fun List<Refusjonsopplysning>.overlapper() = map { it.fom til (it.tom ?: LocalDate.MAX) }.overlapper()
@@ -202,6 +214,7 @@ class Refusjonsopplysning(
             fun build() = Refusjonsopplysninger(sorterteRefusjonsopplysninger())
         }
     }
+
 }
 
 typealias ManglerRefusjonsopplysning = (LocalDate, Inntekt) -> Unit

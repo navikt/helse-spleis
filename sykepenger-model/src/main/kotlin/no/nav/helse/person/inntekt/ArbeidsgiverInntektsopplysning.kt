@@ -189,7 +189,11 @@ class ArbeidsgiverInntektsopplysning(
                 }
                 when {
                     (gammel == null || ny.inntektsopplysning != gammel.inntektsopplysning) -> skjæringstidspunkt
-                    (gammel.refusjonsopplysninger != ny.refusjonsopplysninger) -> skjæringstidspunkt// minste dato
+                    (gammel.refusjonsopplysninger != ny.refusjonsopplysninger) -> {
+                        // minus operatoren hjelper oss med å finne vedtaksperioden endringen startet
+                        ny.refusjonsopplysninger.finnFørsteDatoForEndring(gammel.refusjonsopplysninger)
+
+                    }
                     else -> null
                 }
             }
