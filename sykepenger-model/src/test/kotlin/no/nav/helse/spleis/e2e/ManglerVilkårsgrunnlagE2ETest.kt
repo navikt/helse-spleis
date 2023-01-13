@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -127,9 +128,40 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         }
     }
 
+    @Test
+    fun `korrigert arbeidsgiverperiode under pågående revurdering`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        forlengVedtak(1.februar, 28.februar, 100.prosent)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 80.prosent))
+
+        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
+
+        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar)
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        assertForventetFeil(
+            forklaring = "Inntektsmeldingen gjør at det tidligere sammenhengende sykefraværet i revurderingen nå har to skjæringstidspunkter",
+            nå = {
+                assertIllegalArgumentException("krever vilkårsgrunnlag for 2018-01-01, men har ikke. Tildeles det utbetaling til en vedtaksperiode som ikke skal ha utbetaling?")
+                { håndterYtelser(2.vedtaksperiode) }
+            },
+            ønsket = {
+                håndterYtelser(2.vedtaksperiode)
+                håndterSimulering(2.vedtaksperiode)
+            }
+        )
+
+    }
+
+
     private companion object {
         private fun assertIllegalStateException(melding: String, block: () -> Unit) {
             assertEquals(melding, assertThrows<IllegalStateException>(melding) { block() }.message)
+        }
+
+        private fun assertIllegalArgumentException(melding: String, block: () -> Unit) {
+            assertEquals(melding, assertThrows<IllegalArgumentException>(melding) { block() }.message)
         }
     }
 }
