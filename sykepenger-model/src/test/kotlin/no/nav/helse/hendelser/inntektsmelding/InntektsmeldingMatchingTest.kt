@@ -237,6 +237,87 @@ internal class InntektsmeldingMatchingTest {
         )
     }
 
+    @Test
+    fun `Flere perioder i AUU etterfulgt av en som skal utbetales - første fraværsdag treffer i første AUU`() {
+        val auu1 = 1.januar til 7.januar
+        val auu2 = 8.januar til 14.januar
+        val auu3 = 15.januar til 16.januar
+        val skalUtbetales = 17.januar til 31.januar
+
+        val inntektFraInntektsmelding: () -> InntektOgRefusjonFraInntektsmelding = {
+            inntektsmelding(førsteFraværsdag = 5.januar).second
+        }
+
+        assertForventetFeil(
+            forklaring = "Støtter ikke dette scenarioet enda",
+            nå = {
+                val inntekt = inntektFraInntektsmelding()
+                assertTrue(inntekt.skalHåndteresAv(auu1))
+                assertFalse(inntekt.skalHåndteresAv(auu2))
+                assertFalse(inntekt.skalHåndteresAv(auu3))
+                assertFalse(inntekt.skalHåndteresAv(skalUtbetales))
+            },
+            ønsket = {
+                val inntekt = inntektFraInntektsmelding()
+                assertFalse(inntekt.skalHåndteresAv(auu1))
+                assertFalse(inntekt.skalHåndteresAv(auu2))
+                assertFalse(inntekt.skalHåndteresAv(auu3))
+                assertTrue(inntekt.skalHåndteresAv(skalUtbetales))
+            }
+        )
+    }
+
+    @Test
+    fun `Flere perioder i AUU etterfulgt av en som skal utbetales - første fraværsdag treffer i første AUU - gap til periode med utbetaling`() {
+        val auu1 = 1.januar til 7.januar
+        val auu2 = 8.januar til 14.januar
+        val auu3 = 15.januar til 16.januar
+        // Gap onsdag og torsdag 17-18.januar
+        val skalUtbetales = 19.januar til 31.januar
+
+        val inntektFraInntektsmelding: () -> InntektOgRefusjonFraInntektsmelding = {
+            inntektsmelding(førsteFraværsdag = 5.januar).second
+        }
+
+        assertForventetFeil(
+            forklaring = "Støtter ikke dette scenarioet enda",
+            nå = {
+                val inntekt = inntektFraInntektsmelding()
+                assertTrue(inntekt.skalHåndteresAv(auu1))
+                assertFalse(inntekt.skalHåndteresAv(auu2))
+                assertFalse(inntekt.skalHåndteresAv(auu3))
+                assertFalse(inntekt.skalHåndteresAv(skalUtbetales))
+            },
+            ønsket = {
+                val inntekt = inntektFraInntektsmelding()
+                assertFalse(inntekt.skalHåndteresAv(auu1))
+                assertFalse(inntekt.skalHåndteresAv(auu2))
+                assertFalse(inntekt.skalHåndteresAv(auu3))
+                assertFalse(inntekt.skalHåndteresAv(skalUtbetales)) // TODO: Avklare at det er riktig å vente på en annen IM her
+            }
+        )
+    }
+
+    @Test
+    fun `lang og useriøs arbeidsgiverperiode`() {
+        val vedtaksperiode = 1.januar til 31.januar
+        val inntektFraInntektsmelding: () -> InntektOgRefusjonFraInntektsmelding = {
+            inntektsmelding(1.januar, 1.januar til 31.januar).second
+        }
+
+        assertForventetFeil(
+            forklaring = "Vi ser etter første dag etter arbeidsgierperioden, så treffer ingen periode",
+            nå = {
+                val inntekt = inntektFraInntektsmelding()
+                assertFalse(inntekt.skalHåndteresAv(vedtaksperiode))
+            },
+            ønsket = {
+                val inntekt = inntektFraInntektsmelding()
+                assertTrue(inntekt.skalHåndteresAv(vedtaksperiode))
+            }
+        )
+    }
+
     private fun DagerFraInntektsmelding.håndter(periode: Periode): Periode? {
         var håndtertPeriode: Periode? = null
         håndter(periode) {
