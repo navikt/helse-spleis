@@ -28,8 +28,7 @@ internal abstract class SøknadBuilder {
     internal fun personopplysninger(
         fnr: String,
         aktørId: String,
-        fødselsdato: LocalDate,
-        historiskeFolkeregisteridenter: List<String>
+        fødselsdato: LocalDate
     ) = apply {
         personopplysninger = Personopplysninger(fnr.somPersonidentifikator(), aktørId, fødselsdato)
     }

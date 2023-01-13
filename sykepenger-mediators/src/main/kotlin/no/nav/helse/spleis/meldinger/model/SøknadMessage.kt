@@ -30,8 +30,7 @@ internal abstract class SøknadMessage(private val packet: JsonMessage, private 
             .personopplysninger(
                 fnr = fødselsnummer,
                 aktørId = packet["aktorId"].asText(),
-                fødselsdato = packet["fødselsdato"].asLocalDate(),
-                historiskeFolkeregisteridenter = packet["historiskeFolkeregisteridenter"].map(JsonNode::asText)
+                fødselsdato = packet["fødselsdato"].asLocalDate()
             )
             .sykmeldingSkrevet(sykmeldingSkrevet)
             .organisasjonsnummer(packet["arbeidsgiver.orgnummer"].asText())
