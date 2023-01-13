@@ -7,8 +7,8 @@ import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
-import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
+import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
 import no.nav.helse.hendelser.Periode.Companion.slutterEtter
 import no.nav.helse.januar
@@ -72,6 +72,15 @@ internal class PeriodeTest {
         assertTrue(periode.overlapperMed(Periode(10.juli, 12.juli)))
         assertTrue(periode.overlapperMed(Periode(30.juni, 11.juli)))
         assertTrue(periode.overlapperMed(periode))
+    }
+
+    @Test
+    fun `overlappende periode`() {
+        assertNull((1.januar til 3.januar).overlappendePeriode(4.januar til 5.januar))
+        assertNull((4.januar til 5.januar).overlappendePeriode(1.januar til 3.januar))
+        assertEquals(3.januar til 5.januar, ((1.januar til 10.januar).overlappendePeriode(3.januar til 5.januar)))
+        assertEquals(3.januar til 5.januar, ((1.januar til 5.januar).overlappendePeriode(3.januar til 10.januar)))
+        assertEquals(3.januar til 5.januar, ((3.januar til 10.januar).overlappendePeriode(1.januar til 5.januar)))
     }
 
     @Test

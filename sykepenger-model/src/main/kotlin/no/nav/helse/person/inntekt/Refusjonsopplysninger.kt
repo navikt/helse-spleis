@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.forrigeDag
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.til
@@ -89,9 +88,6 @@ class Refusjonsopplysning(
     }
 
     internal companion object {
-        private fun Periode.overlappendePeriode(other: Periode) =
-            intersect(other).takeUnless { it.isEmpty() }?.let { Periode(it.min(), it.max()) }
-
         private fun List<Refusjonsopplysning>.merge(nyeOpplysninger: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
             return nyeOpplysninger.fold(this, ::mergeNyOpplysning).sortedBy { it.fom }
         }

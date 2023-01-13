@@ -73,8 +73,14 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
         internal fun Periode.delvisOverlappMed(other: Periode) = overlapperMed(other) && !inneholder(other)
     }
 
-    fun overlapperMed(other: Periode) =
-        maxOf(this.start, other.start) <= minOf(this.endInclusive, other.endInclusive)
+    fun overlapperMed(other: Periode) = overlappendePeriode(other) != null
+
+    internal fun overlappendePeriode(other: Periode): Periode? {
+        val start = maxOf(this.start, other.start)
+        val slutt = minOf(this.endInclusive, other.endInclusive)
+        if (start > slutt) return null
+        return start til slutt
+    }
 
     internal fun slutterEtter(other: LocalDate) =
         other <= this.endInclusive
