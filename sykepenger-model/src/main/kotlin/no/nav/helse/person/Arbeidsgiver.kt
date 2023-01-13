@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
@@ -251,11 +250,10 @@ internal class Arbeidsgiver private constructor(
             .flatMap { it.vedtaksperioder }
             .filter { it.periode().overlapperMed(periode) }
             .all { vedtaksperiode -> vedtaksperiode.harNødvendigOpplysningerFraArbeidsgiver() }
-        internal fun Iterable<Arbeidsgiver>.trengerSøknadISammeMåned(skjæringstidspunkt: LocalDate) = this
-            .filter { !it.harSykdomFor(skjæringstidspunkt) }
-            .any { it.sykmeldingsperioder.harSykmeldingsperiodeI(YearMonth.from(skjæringstidspunkt)) }
-        internal fun Iterable<Arbeidsgiver>.trengerSøknadFør(periode: Periode) = this
-            .any { !it.sykmeldingsperioder.kanFortsetteBehandling(periode) }
+        internal fun Iterable<Arbeidsgiver>.avventerSøknad(skjæringstidspunkt: LocalDate) = this
+            .any { it.sykmeldingsperioder.avventerSøknad(skjæringstidspunkt) && !it.harSykdomFor(skjæringstidspunkt) }
+        internal fun Iterable<Arbeidsgiver>.avventerSøknad(periode: Periode) = this
+            .any { it.sykmeldingsperioder.avventerSøknad(periode) }
 
         internal fun Iterable<Arbeidsgiver>.gjenopptaBehandling(aktivitetslogg: IAktivitetslogg) {
             if (nåværendeVedtaksperioder(HAR_PÅGÅENDE_UTBETALINGER).isNotEmpty()) return aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående utbetaling")

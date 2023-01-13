@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.aldri
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
@@ -27,6 +26,9 @@ abstract class SykdomstidslinjeHendelse(
     private val aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
     personopplysninger: Personopplysninger? = null
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg, personopplysninger) {
+    private companion object {
+        private val aldri = LocalDate.MIN til LocalDate.MIN
+    }
 
     protected constructor(meldingsreferanseId: UUID, other: SykdomstidslinjeHendelse) : this(meldingsreferanseId, other.fødselsnummer, other.aktørId, other.organisasjonsnummer, other.opprettet, null, other.aktivitetslogg)
 
@@ -78,7 +80,7 @@ abstract class SykdomstidslinjeHendelse(
         nesteFom = dato.plusDays(1)
     }
 
-    private fun trimmetForbi() = periode() == aldri
+    protected fun trimmetForbi() = periode() == aldri
 
     internal fun periode(): Periode {
         val periode = overlappsperiode() ?: aldri

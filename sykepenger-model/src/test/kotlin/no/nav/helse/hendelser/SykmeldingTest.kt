@@ -29,6 +29,63 @@ internal class SykmeldingTest {
     private lateinit var sykmelding: Sykmelding
 
     @Test
+    fun `oppdaterer perioder`() {
+        sykmelding(Sykmeldingsperiode(10.januar, 15.januar, 100.prosent))
+
+        sykmelding.oppdaterSykmeldingsperioder(emptyList()).also { result ->
+            assertEquals(listOf(10.januar til 15.januar), result)
+        }
+
+        sykmelding.oppdaterSykmeldingsperioder(
+            listOf(1.januar til 2.januar)
+        ).also { result ->
+            assertEquals(listOf(
+                1.januar til 2.januar,
+                10.januar til 15.januar
+            ), result)
+        }
+
+        sykmelding.oppdaterSykmeldingsperioder(
+            listOf(17.januar til 20.januar)
+        ).also { result ->
+            assertEquals(listOf(
+                10.januar til 15.januar,
+                17.januar til 20.januar
+            ), result)
+        }
+
+        sykmelding.oppdaterSykmeldingsperioder(listOf(
+            1.januar til 2.januar,
+            6.januar til 10.januar,
+            15.januar til 20.januar,
+            23.januar til 25.januar
+        )).also { result ->
+            assertEquals(listOf(
+                1.januar til 2.januar,
+                6.januar til 20.januar,
+                23.januar til 25.januar
+            ), result)
+        }
+    }
+    @Test
+    fun `oppdaterer perioder - trimmet dager - en dag igjen`() {
+        sykmelding(Sykmeldingsperiode(10.januar, 15.januar, 100.prosent))
+        sykmelding.trimLeft(14.januar)
+        sykmelding.oppdaterSykmeldingsperioder(emptyList()).also { result ->
+            assertEquals(listOf(15.januar til 15.januar), result)
+        }
+    }
+    @Test
+    fun `oppdaterer perioder - trimmet forbi`() {
+        sykmelding(Sykmeldingsperiode(10.januar, 15.januar, 100.prosent))
+        sykmelding.trimLeft(15.januar)
+        val perioder = listOf(1.januar til 2.januar)
+        sykmelding.oppdaterSykmeldingsperioder(perioder).also { result ->
+            assertEquals(perioder, result)
+        }
+    }
+
+    @Test
     fun `sykdomsgrad som er 100 prosent støttes`() {
         sykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent), Sykmeldingsperiode(12.januar, 16.januar, 100.prosent))
         assertEquals(8 + 3, sykmelding.sykdomstidslinje().filterIsInstance<Sykedag>().size)

@@ -40,11 +40,10 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
+import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigOpplysningerFraArbeidsgiver
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigRefusjonsopplysninger
-import no.nav.helse.person.Arbeidsgiver.Companion.trengerSøknadFør
-import no.nav.helse.person.Arbeidsgiver.Companion.trengerSøknadISammeMåned
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.ForlengelseFraInfotrygd.IKKE_ETTERSPURT
@@ -229,10 +228,7 @@ internal class Vedtaksperiode private constructor(
     internal fun hendelseIder() = hendelseIder.ider()
 
     internal fun håndter(sykmelding: Sykmelding) {
-        val periodeFør = sykmelding.periode()
         sykmelding.trimLeft(periode.endInclusive)
-        kontekst(sykmelding)
-        sykmelding.info("Trimmer sykmelding som overlapper med vedtaksperiode. Før trimming $periodeFør, etter trimming ${sykmelding.periode()}")
     }
 
     internal fun håndter(søknad: Søknad) = overlapperMed(søknad).also {
@@ -1523,10 +1519,10 @@ internal class Vedtaksperiode private constructor(
             hendelse: IAktivitetslogg
         ) {
             when {
-                arbeidsgivere.trengerSøknadISammeMåned(vedtaksperiode.skjæringstidspunkt) -> return hendelse.info(
+                arbeidsgivere.avventerSøknad(vedtaksperiode.skjæringstidspunkt) -> return hendelse.info(
                     "Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding i samme måned som skjæringstidspunktet"
                 )
-                arbeidsgivere.trengerSøknadFør(vedtaksperiode.periode) -> return hendelse.info(
+                arbeidsgivere.avventerSøknad(vedtaksperiode.periode) -> return hendelse.info(
                     "Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding i samme måned som skjæringstidspunktet"
                 )
                 !vedtaksperiode.forventerInntekt() -> vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)

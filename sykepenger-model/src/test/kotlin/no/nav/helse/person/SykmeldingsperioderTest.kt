@@ -83,8 +83,9 @@ internal class SykmeldingsperioderTest {
     fun `sjekk om en periode kan behandles med ett innslag`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
         sykmeldingsperioder.lagre(1.januar til 31.januar)
-        assertTrue(sykmeldingsperioder.kanFortsetteBehandling(1.desember(2017) til 31.desember(2017)))
-        assertFalse(sykmeldingsperioder.kanFortsetteBehandling(1.februar til 28.februar))
+        assertFalse(sykmeldingsperioder.avventerSøknad(1.desember(2017) til 31.desember(2017)))
+        assertTrue(sykmeldingsperioder.avventerSøknad(1.desember(2017) til 1.januar))
+        assertTrue(sykmeldingsperioder.avventerSøknad(1.februar til 28.februar))
     }
 
     @Test
@@ -92,14 +93,14 @@ internal class SykmeldingsperioderTest {
         val sykmeldingsperioder = Sykmeldingsperioder()
         sykmeldingsperioder.lagre(1.februar til 28.februar)
         sykmeldingsperioder.lagre(1.januar til 31.januar)
-        assertTrue(sykmeldingsperioder.kanFortsetteBehandling(1.desember(2017) til 31.desember(2017)))
-        assertFalse(sykmeldingsperioder.kanFortsetteBehandling(1.februar til 28.februar))
+        assertFalse(sykmeldingsperioder.avventerSøknad(1.desember(2017) til 31.desember(2017)))
+        assertTrue(sykmeldingsperioder.avventerSøknad(1.februar til 28.februar))
     }
 
     @Test
     fun `kan behandle alt ved tom sykmeldingsperioder`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
-        assertTrue(sykmeldingsperioder.kanFortsetteBehandling(LocalDate.MAX til LocalDate.MAX))
+        assertFalse(sykmeldingsperioder.avventerSøknad(LocalDate.MAX til LocalDate.MAX))
     }
 
     @Test

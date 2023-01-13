@@ -18,7 +18,6 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
     }
 
     companion object {
-        internal val aldri = LocalDate.MIN til LocalDate.MIN
         private val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
         private val mergeOverHelg = { venstre: LocalDate, høyre: LocalDate ->
             venstre.erRettFør(høyre)

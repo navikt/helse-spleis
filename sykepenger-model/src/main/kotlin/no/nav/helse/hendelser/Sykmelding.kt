@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Personopplysninger
@@ -43,6 +44,18 @@ class Sykmelding(
 
     override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
         hendelseIder.add(Dokumentsporing.sykmelding(meldingsreferanseId()))
+    }
+
+    internal fun oppdaterSykmeldingsperioder(perioder: List<Periode>): List<Periode> {
+        if (trimmetForbi()) {
+            info("Sykmeldingsperiode har allerede blitt tidligere håndtert, mistenker korrigert sykmelding")
+            return perioder
+        }
+        val periode = periode()
+        val (overlappendePerioder, gapPerioder) = perioder.partition { it.overlapperMed(periode) }
+        val nyPeriode = periode + overlappendePerioder.periode()
+        info("Legger til ny periode $nyPeriode i sykmeldingsperioder")
+        return (gapPerioder + listOf(nyPeriode)).sortedBy { it.start }
     }
 }
 
