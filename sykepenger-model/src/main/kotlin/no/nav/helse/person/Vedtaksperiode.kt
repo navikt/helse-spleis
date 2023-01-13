@@ -282,7 +282,9 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding): Boolean {
-        val skalHåndtereInntektOgRefusjon = inntektOgRefusjon.skalHåndteresAv(periode)
+        val skalHåndtereInntektOgRefusjon = inntektOgRefusjon.skalHåndteresAv(periode) {
+            tilstand.forventerInntekt(this)
+        }
         if (erAlleredeHensyntatt(inntektOgRefusjon.meldingsreferanseId()) || !skalHåndtereInntektOgRefusjon) {
             return skalHåndtereInntektOgRefusjon
         }
@@ -1018,6 +1020,8 @@ internal class Vedtaksperiode private constructor(
             // Håndterer dagene som vedtaksperioden skal håndtere og oppdaterer sykdomstidslinjen
             vedtaksperiode.sykdomstidslinje = dager.håndter(vedtaksperiode.periode, vedtaksperiode.arbeidsgiver)!!
         }
+
+        fun forventerInntekt(vedtaksperiode: Vedtaksperiode): Boolean = true
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {}
 
         fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) {}
@@ -2048,6 +2052,8 @@ internal class Vedtaksperiode private constructor(
             if (!vedtaksperiode.forventerInntekt()) vedtaksperiode.emitVedtaksperiodeEndret(dager) // på stedet hvil!
         }
 
+        override fun forventerInntekt(vedtaksperiode: Vedtaksperiode) = vedtaksperiode.forventerInntekt()
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
             if (!vedtaksperiode.forventerInntekt()) return
             if (!revurderingStøttet(vedtaksperiode, inntektOgRefusjon)) return
@@ -2347,6 +2353,9 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.medSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
             this.filter { it.skjæringstidspunkt == skjæringstidspunkt }
+
+        internal fun List<Vedtaksperiode>.kommerTilÅHåndtere(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) =
+            any { inntektOgRefusjon.skalHåndteresAv(it.periode) { it.tilstand.forventerInntekt(it) } }
 
         internal fun harNyereForkastetPeriode(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) =
             forkastede

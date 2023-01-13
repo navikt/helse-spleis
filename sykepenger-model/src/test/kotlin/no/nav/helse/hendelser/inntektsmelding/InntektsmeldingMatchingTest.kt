@@ -262,6 +262,9 @@ internal class InntektsmeldingMatchingTest {
         return håndtertPeriode
     }
 
+    private fun InntektOgRefusjonFraInntektsmelding.skalHåndteresAv(periode: Periode, forventerInntekt: Boolean = true) =
+        skalHåndteresAv(periode) { forventerInntekt }
+
     private companion object {
         private fun inntektsmelding(
             førsteFraværsdag: LocalDate?,

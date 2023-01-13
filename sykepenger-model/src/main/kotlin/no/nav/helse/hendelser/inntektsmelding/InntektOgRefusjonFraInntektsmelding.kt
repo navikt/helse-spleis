@@ -47,7 +47,7 @@ internal class InntektOgRefusjonFraInntektsmelding(
     private val ingenArbeidsgiverperiode = sisteDagIArbeidsgiverperioden == null
 
     private var erHåndtert: Boolean = false
-    internal fun skalHåndteresAv(periode: Periode): Boolean {
+    internal fun skalHåndteresAv(periode: Periode, forventerInntekt:() -> Boolean): Boolean {
         if (erHåndtert) return false
         if (førsteFraværsdag == null && sisteDagIArbeidsgiverperioden == null) return false
         val bestemmendeDag = when (ingenArbeidsgiverperiode || førsteFraværsdagEtterArbeidsgiverperioden) {
@@ -55,7 +55,8 @@ internal class InntektOgRefusjonFraInntektsmelding(
             false -> sisteDagIArbeidsgiverperioden!!.nesteDag
         }
         if (periodeOrNull(bestemmendeDag, periode.endInclusive)?.kunHelg == true) return false
-        erHåndtert = bestemmendeDag in periode || bestemmendeDag.førsteArbeidsdag() in periode
+        val bestemmendeDagIPeriode = bestemmendeDag in periode || bestemmendeDag.førsteArbeidsdag() in periode
+        erHåndtert = bestemmendeDagIPeriode && forventerInntekt()
         return erHåndtert
     }
 
