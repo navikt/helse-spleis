@@ -525,7 +525,7 @@ internal class Arbeidsgiver private constructor(
 
         val noenKommerTilÅHåndtereInntektOgRefusjon = inntektsmelding.inntektOgRefusjon.let { inntektOgRefusjon ->
             noenHarHåndtert(inntektsmelding) {
-                inntektOgRefusjon.skalHåndteresAv(periode())
+                skalHåndtereInntektOgRefusjon(inntektOgRefusjon)
             }
         }
 

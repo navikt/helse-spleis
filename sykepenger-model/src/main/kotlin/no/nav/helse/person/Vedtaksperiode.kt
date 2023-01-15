@@ -278,7 +278,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding): Boolean {
-        val skalHåndtereInntektOgRefusjon = inntektOgRefusjon.skalHåndteresAv(periode)
+        val skalHåndtereInntektOgRefusjon = inntektOgRefusjon.skalHåndteresAv(periode) { tilstand != AvsluttetUtenUtbetaling || forventerInntekt() }
         if (erAlleredeHensyntatt(inntektOgRefusjon.meldingsreferanseId()) || !skalHåndtereInntektOgRefusjon) {
             return skalHåndtereInntektOgRefusjon
         }
@@ -976,6 +976,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     fun slutterEtter(dato: LocalDate) = periode.slutterEtter(dato)
+    internal fun skalHåndtereInntektOgRefusjon(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding): Boolean {
+        return inntektOgRefusjon.skalHåndteresAv(periode()
+        ) { tilstand != AvsluttetUtenUtbetaling || forventerInntekt() }
+    }
 
     // Gang of four State pattern
     internal sealed interface Vedtaksperiodetilstand : Aktivitetskontekst {
