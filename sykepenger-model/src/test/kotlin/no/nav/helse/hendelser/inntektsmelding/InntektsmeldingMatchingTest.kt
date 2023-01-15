@@ -32,7 +32,7 @@ internal class InntektsmeldingMatchingTest {
             inntektsmelding(1.januar, 1.januar til 16.januar)
 
         assertEquals(1.januar til 16.januar, dager.håndter(vedtaksperiode1))
-        assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode1))
+        assertFalse(inntektOgRefusjon.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode1))
         assertNull(dager.håndterGjenstående())
     }
 
@@ -44,10 +44,10 @@ internal class InntektsmeldingMatchingTest {
             inntektsmelding(1.januar, 1.januar til 16.januar)
 
         assertEquals(1.januar til 16.januar, dager.håndter(vedtaksperiode1))
-        assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode1))
+        assertFalse(inntektOgRefusjon.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode1))
 
         assertNull(dager.håndter(vedtaksperiode2))
-        assertTrue(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode2))
+        assertTrue(inntektOgRefusjon.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode2))
         assertNull(dager.håndterGjenstående())
     }
 
@@ -62,8 +62,8 @@ internal class InntektsmeldingMatchingTest {
         assertEquals(1.januar.somPeriode(), dager.håndterGjenståendeFør(vedtaksperiode1))
         assertNull(dager.håndter(vedtaksperiode2))
 
-        assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode1))
-        assertTrue(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode2))
+        assertFalse(inntektOgRefusjon.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode1))
+        assertTrue(inntektOgRefusjon.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode2))
         assertNull(dager.håndterGjenstående())
     }
 
@@ -78,8 +78,8 @@ internal class InntektsmeldingMatchingTest {
         assertNull(dager.håndterGjenståendeFør(vedtaksperiode1))
         assertNull(dager.håndter(vedtaksperiode2))
 
-        assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode1))
-        assertTrue(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode2))
+        assertFalse(inntektOgRefusjon.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode1))
+        assertTrue(inntektOgRefusjon.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode2))
         assertNull(dager.håndterGjenstående())
     }
 
@@ -94,8 +94,8 @@ internal class InntektsmeldingMatchingTest {
         assertNull(dager.håndterGjenståendeFør(vedtaksperiode1))
         assertNull(dager.håndter(vedtaksperiode2))
 
-        assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode1))
-        assertTrue(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode2))
+        assertFalse(inntektOgRefusjon.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode1))
+        assertTrue(inntektOgRefusjon.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode2))
 
         // TODO: Hva første fraværsdag er satt til har innvirkning på hvor lang sykdomstisdlinjen til IM er
         assertEquals(21.januar.somPeriode(), dager.håndterGjenstående())
@@ -109,7 +109,7 @@ internal class InntektsmeldingMatchingTest {
 
         assertNull(dager.håndter(vedtaksperiode1))
         assertNull(dager.håndterGjenståendeFør(vedtaksperiode1))
-        assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode1))
+        assertFalse(inntektOgRefusjon.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode1))
         assertEquals(1.mars til 16.mars, dager.håndterGjenstående()) // Om den kalles tas alt gjenstående med uavhengig
     }
 
@@ -126,7 +126,7 @@ internal class InntektsmeldingMatchingTest {
 
         assertEquals(1.januar til 20.januar, dager.håndter(vedtaksperiode1))
         assertNull(dager.håndterGjenståendeFør(vedtaksperiode1))
-        assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode1))
+        assertFalse(inntektOgRefusjon.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode1))
         assertEquals(21.januar til 22.januar, dager.håndterGjenstående())
     }
 
@@ -148,10 +148,10 @@ internal class InntektsmeldingMatchingTest {
         assertNull(dager.håndterGjenståendeFør(vedtaksperiode2))
         assertNull(dager.håndterGjenstående())
 
-        assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode1))
-        assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode2))
-        assertTrue(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode3))
-        assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode4))
+        assertFalse(inntektOgRefusjon.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode1))
+        assertFalse(inntektOgRefusjon.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode2))
+        assertTrue(inntektOgRefusjon.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode3))
+        assertFalse(inntektOgRefusjon.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode4))
     }
 
     @Test
@@ -167,8 +167,8 @@ internal class InntektsmeldingMatchingTest {
         assertNull(dager.håndter(vedtaksperiode2))
         assertNull(dager.håndterGjenstående())
 
-        assertFalse(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode1))
-        assertTrue(inntektOgRefusjon.skalHåndteresAv(vedtaksperiode2))
+        assertFalse(inntektOgRefusjon.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode1))
+        assertTrue(inntektOgRefusjon.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode2))
     }
 
     @Test
@@ -227,12 +227,12 @@ internal class InntektsmeldingMatchingTest {
         assertForventetFeil(
             forklaring = "Vi vet ikke noe om ferie, så vi tror mandag 22.januar skal håndtere inntekt",
             nå = {
-                assertTrue(inntekt.skalHåndteresAv(vedtaksperiode1))
-                assertFalse(inntekt.skalHåndteresAv(vedtaksperiode2))
+                assertTrue(inntekt.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode1))
+                assertFalse(inntekt.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode2))
             },
             ønsket = {
-                assertFalse(inntekt.skalHåndteresAv(vedtaksperiode1))
-                assertTrue(inntekt.skalHåndteresAv(vedtaksperiode2))
+                assertFalse(inntekt.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode1))
+                assertTrue(inntekt.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode2))
             }
         )
     }
@@ -277,11 +277,11 @@ internal class InntektsmeldingMatchingTest {
             forklaring = "Vi ser etter første dag etter arbeidsgierperioden, så treffer ingen periode",
             nå = {
                 val inntekt = inntektFraInntektsmelding()
-                assertFalse(inntekt.skalHåndteresAv(vedtaksperiode))
+                assertFalse(inntekt.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode))
             },
             ønsket = {
                 val inntekt = inntektFraInntektsmelding()
-                assertTrue(inntekt.skalHåndteresAv(vedtaksperiode))
+                assertTrue(inntekt.skalHåndteresPåForetrukkenMetodeAv(vedtaksperiode))
             }
         )
     }
@@ -312,7 +312,7 @@ internal class InntektsmeldingMatchingTest {
     }
 
     private fun InntektOgRefusjonFraInntektsmelding.skalHåndteresAv(periode: Periode, forventerInntekt: Boolean = true) =
-        skalHåndteresAv(periode) { forventerInntekt }
+        skalHåndteresPåForetrukkenMetodeAv(periode) { forventerInntekt }
 
     private companion object {
         private fun inntektsmelding(

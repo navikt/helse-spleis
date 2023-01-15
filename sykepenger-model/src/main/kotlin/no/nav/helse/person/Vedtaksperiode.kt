@@ -23,6 +23,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding
+import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding.Overlappsmetode
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
@@ -277,10 +278,13 @@ internal class Vedtaksperiode private constructor(
         dager.leggTil(hendelseIder)
     }
 
-    internal fun håndter(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding): Boolean {
-        val skalHåndtereInntektOgRefusjon = inntektOgRefusjon.skalHåndteresAv(periode) { tilstand != AvsluttetUtenUtbetaling || forventerInntekt() }
-        if (erAlleredeHensyntatt(inntektOgRefusjon.meldingsreferanseId()) || !skalHåndtereInntektOgRefusjon) {
-            return skalHåndtereInntektOgRefusjon
+    internal fun håndter(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding, overlappsmetode: Overlappsmetode): Boolean {
+        val skalHåndterePåForetrukkenMetode = inntektOgRefusjon.skalHåndteresPåForetrukkenMetodeAv(periode) { tilstand != AvsluttetUtenUtbetaling || forventerInntekt() }
+        val skalHåndterePåIkkeForetrukkenMetode = overlappsmetode == Overlappsmetode.IkkeForetrukken && inntektOgRefusjon.skalHåndteresPåIkkeForetrukkenMetodeAv(periode).first
+        val ingenOverlapp = !skalHåndterePåForetrukkenMetode && !skalHåndterePåIkkeForetrukkenMetode
+
+        if (erAlleredeHensyntatt(inntektOgRefusjon.meldingsreferanseId()) || ingenOverlapp) {
+            return skalHåndterePåForetrukkenMetode
         }
         kontekst(inntektOgRefusjon)
         inntektOgRefusjon.leggTil(hendelseIder)
@@ -976,9 +980,14 @@ internal class Vedtaksperiode private constructor(
     }
 
     fun slutterEtter(dato: LocalDate) = periode.slutterEtter(dato)
-    internal fun skalHåndtereInntektOgRefusjon(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding): Boolean {
-        return inntektOgRefusjon.skalHåndteresAv(periode()
+    internal fun skalHåndtereInntektOgRefusjon(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding): Pair<Boolean, Overlappsmetode> {
+        val foretrukketMetode = inntektOgRefusjon.skalHåndteresPåForetrukkenMetodeAv(
+            periode()
         ) { tilstand != AvsluttetUtenUtbetaling || forventerInntekt() }
+        if (foretrukketMetode){
+            return true to Overlappsmetode.Foretrukken
+        }
+        return inntektOgRefusjon.skalHåndteresPåIkkeForetrukkenMetodeAv(periode())
     }
 
     // Gang of four State pattern
@@ -2348,6 +2357,9 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.medSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
             this.filter { it.skjæringstidspunkt == skjæringstidspunkt }
+
+        internal fun List<Vedtaksperiode>.medId(vedtaksperiodeId: UUID) =
+            this.firstOrNull { it.id == vedtaksperiodeId }
 
         internal fun harNyereForkastetPeriode(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) =
             forkastede

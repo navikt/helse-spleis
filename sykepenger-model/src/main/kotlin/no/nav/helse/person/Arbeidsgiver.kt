@@ -19,6 +19,8 @@ import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding.Overlappsmetode
+import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding.Overlappsmetode.Foretrukken
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
@@ -523,8 +525,8 @@ internal class Arbeidsgiver private constructor(
             }}
         }
 
-        val noenKommerTilÅHåndtereInntektOgRefusjon = inntektsmelding.inntektOgRefusjon.let { inntektOgRefusjon ->
-            noenHarHåndtert(inntektsmelding) {
+        val (noenKommerTilÅHåndtereInntektOgRefusjon, overlappsmetode) = inntektsmelding.inntektOgRefusjon.let { inntektOgRefusjon ->
+            noenHarHåndtertInntektOgRefusjon(inntektsmelding) {
                 skalHåndtereInntektOgRefusjon(inntektOgRefusjon)
             }
         }
@@ -537,7 +539,7 @@ internal class Arbeidsgiver private constructor(
 
         val inntektOgRefusjon = inntektsmelding.inntektOgRefusjon
         val enHarHåndtertInntektOgRefusjon = énHarHåndtert(inntektsmelding) {
-            håndter(inntektOgRefusjon).also { håndtert ->
+            håndter(inntektOgRefusjon, overlappsmetode).also { håndtert ->
                 if (håndtert) {
                     // En av vedtaksperiodene har håndtert inntekt og refusjon
                     // vi må informere de andre vedtaksperiodene på arbeidsgiveren som berøres av dette
@@ -1068,6 +1070,16 @@ internal class Arbeidsgiver private constructor(
         var håndtert = false
         looper { håndtert = håndterer(it, hendelse) || håndtert }
         return håndtert
+    }
+    private fun <Hendelse : IAktivitetslogg> noenHarHåndtertInntektOgRefusjon(
+        hendelse: Hendelse,
+        håndterer: Vedtaksperiode.(Hendelse) -> Pair<Boolean, Overlappsmetode>
+    ): Pair<Boolean, Overlappsmetode> {
+        var håndtering = false to Overlappsmetode.Ingen
+        looper {
+            håndtering = if ( håndtering.first && håndtering.second == Foretrukken) håndtering else håndterer(it, hendelse)
+         }
+        return håndtering
     }
 
     // støtter å loope over vedtaksperioder som modifiseres pga. forkasting.

@@ -52,7 +52,7 @@ internal class InntektOgRefusjonFraInntektsmelding(
     private fun bestemmendeDag() = nesteBestemmendeDag ?: bestemmendeDagFraInntektsmelding
 
     private var erHåndtert: Boolean = false
-    internal fun skalHåndteresAv(periode: Periode, forventerInntekt: () -> Boolean = { true }): Boolean {
+    internal fun skalHåndteresPåForetrukkenMetodeAv(periode: Periode, forventerInntekt: () -> Boolean = { true }): Boolean {
         if (erHåndtert) return false
         if (førsteFraværsdag == null && sisteDagIArbeidsgiverperioden == null) return false
         val bestemmendeDag = bestemmendeDag()
@@ -66,5 +66,19 @@ internal class InntektOgRefusjonFraInntektsmelding(
         // Kan være at perioden rett etter oss skal håndtere inntekt
         nesteBestemmendeDag = periode.endInclusive.nesteDag
         return false
+    }
+
+    internal fun skalHåndteresPåIkkeForetrukkenMetodeAv(periode: Periode): Pair<Boolean, Overlappsmetode> {
+        if (inntektsmelding.erRelevant(periode)) {
+            return true to Overlappsmetode.IkkeForetrukken
+        }
+        return false to Overlappsmetode.Ingen
+    }
+
+    internal enum class Overlappsmetode
+    {
+        Ingen,
+        Foretrukken,
+        IkkeForetrukken
     }
 }
