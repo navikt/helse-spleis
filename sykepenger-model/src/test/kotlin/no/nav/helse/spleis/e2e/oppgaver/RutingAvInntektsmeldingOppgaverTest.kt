@@ -74,7 +74,7 @@ internal class RutingAvInntektsmeldingOppgaverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
+    @FeilerMedHåndterInntektsmeldingOppdelt("Vi kaller aldri inntektsmeldingIkkeHåndtert fordi vi har håndtert dager men ikke inntekt")
     fun `dersom vi har en nærliggende utbetaling og vi mottar inntektsmelding før søknad og søknaden feiler - skal det opprettes oppgave i speilkøen i gosys`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
