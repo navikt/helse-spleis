@@ -58,6 +58,7 @@ import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
@@ -461,7 +462,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterYtelser(2.vedtaksperiode)
 
         assertVarsel(RV_IM_2, 1.vedtaksperiode.filter(a1))
-        assertVarsel(RV_RV_1, 2.vedtaksperiode.filter(a1))
+        assertInfo(RV_RV_1.varseltekst, 2.vedtaksperiode.filter(a1))
         //assertNoWarnings(2.vedtaksperiode.filter(a1))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
@@ -507,7 +508,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterYtelser(3.vedtaksperiode)
 
         assertVarsel(RV_IM_2, 1.vedtaksperiode.filter(a1))
-        assertVarsel(RV_RV_1, 2.vedtaksperiode.filter(a1))
+        assertInfo(RV_RV_1.varseltekst, 2.vedtaksperiode.filter(a1))
         //assertNoWarnings(2.vedtaksperiode.filter(a1))
         assertIngenVarsler(3.vedtaksperiode.filter(a1))
 
@@ -567,7 +568,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterYtelser(2.vedtaksperiode)
 
         assertIngenVarsler(1.vedtaksperiode.filter(a1))
-        assertVarsel(RV_RV_1, 2.vedtaksperiode.filter(a1))
+        assertInfo(RV_RV_1.varseltekst, 2.vedtaksperiode.filter(a1))
         // assertNoWarnings(2.vedtaksperiode.filter(a1))
         assertIngenVarsler(3.vedtaksperiode.filter(a1))
 
@@ -1145,8 +1146,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         val nyttVilkårsgrunnlag = inspektør.vilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
-        assertVarsel(RV_RV_1, 1.vedtaksperiode.filter(ORGNUMMER))
-        assertVarsel(RV_RV_1, 2.vedtaksperiode.filter(ORGNUMMER))
+        assertInfo(RV_RV_1.varseltekst, 1.vedtaksperiode.filter(ORGNUMMER))
+        assertInfo(RV_RV_1.varseltekst, 2.vedtaksperiode.filter(ORGNUMMER))
 
         assertNotNull(gammeltVilkårsgrunnlag)
         assertNotNull(nyttVilkårsgrunnlag)

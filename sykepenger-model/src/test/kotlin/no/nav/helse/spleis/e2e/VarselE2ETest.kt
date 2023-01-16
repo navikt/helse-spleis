@@ -555,12 +555,12 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `varsel - Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden`() {
+    fun `ikke lenger varsel - Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 16.februar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(31.januar til 15.februar))
-        assertVarsel(RV_RV_1)
+        assertInfo(RV_RV_1.varseltekst)
     }
 
     @Test

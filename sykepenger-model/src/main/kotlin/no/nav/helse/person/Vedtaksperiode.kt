@@ -2026,7 +2026,7 @@ internal class Vedtaksperiode private constructor(
             if (!vedtaksperiode.forventerInntekt()) return
             if (!revurdering.inngåSomRevurdering(hendelse, vedtaksperiode, vedtaksperiode.periode)) return
             revurdering.loggDersomKorrigerendeSøknad(hendelse, "Startet revurdering grunnet korrigerende søknad")
-            hendelse.varsel(RV_RV_1)
+            hendelse.info(RV_RV_1.varseltekst)
             vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
         }
 

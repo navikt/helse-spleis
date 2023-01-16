@@ -29,6 +29,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -68,7 +69,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
                 assertVarsel(RV_IM_5, 1.vedtaksperiode.filter(ORGNUMMER))
             }
         )
-        assertVarsel(RV_RV_1, 1.vedtaksperiode.filter(ORGNUMMER))
+        assertInfo(RV_RV_1.varseltekst, 1.vedtaksperiode.filter(ORGNUMMER))
         assertTilstander(
             1.vedtaksperiode,
             START,
