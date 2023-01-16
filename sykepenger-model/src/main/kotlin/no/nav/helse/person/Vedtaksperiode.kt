@@ -289,10 +289,21 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterInntektOgRefusjon(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding, nesteTilstand: () -> Vedtaksperiodetilstand) {
         inntektsmeldingInfo = inntektOgRefusjon.addInntektsmelding(skjæringstidspunkt, arbeidsgiver, jurist)
-        inntektOgRefusjon.valider(periode, skjæringstidspunkt, finnArbeidsgiverperiode(), jurist())
+        inntektOgRefusjon.valider(periode, skjæringstidspunkt)
         inntektOgRefusjon.info("Fullført behandling av inntektsmelding")
         if (inntektOgRefusjon.harFunksjonelleFeilEllerVerre()) return forkast(inntektOgRefusjon)
         tilstand(inntektOgRefusjon, nesteTilstand())
+    }
+
+    private fun håndterDager(dager: DagerFraInntektsmelding) {
+        dager.leggTilArbeidsdagerFør(periode.start)
+        // Ettersom tilstanden kan strekke perioden tilbake må det gjøres _før_ vi hånderer dagene
+        // slik at det som håndteres er perioden slik den er når det er strukket tilbake.
+        tilstand.håndterStrekkingAvPeriode(this, dager)
+        // Håndterer dagene som vedtaksperioden skal håndtere og oppdaterer sykdomstidslinjen
+        sykdomstidslinje = dager.håndter(periode, arbeidsgiver)!!
+        // Vi validerer etter vi har oppdatert sykdomstidslinjene fordi det kan påvirke arbeidsgiverperiode-utregningen
+        dager.valider(finnArbeidsgiverperiode())
     }
 
     private fun erAlleredeHensyntatt(inntektsmelding: Inntektsmelding) =
@@ -1005,12 +1016,8 @@ internal class Vedtaksperiode private constructor(
 
         fun håndterStrekkingAvPeriode(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {}
         fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
-            dager.leggTilArbeidsdagerFør(vedtaksperiode.periode.start)
-            // Ettersom tilstanden kan strekke perioden tilbake må det gjøres _før_ vi hånderer dagene
-            // slik at det som håndteres er perioden slik den er når det er strukket tilbake.
-            vedtaksperiode.tilstand.håndterStrekkingAvPeriode(vedtaksperiode, dager)
-            // Håndterer dagene som vedtaksperioden skal håndtere og oppdaterer sykdomstidslinjen
-            vedtaksperiode.sykdomstidslinje = dager.håndter(vedtaksperiode.periode, vedtaksperiode.arbeidsgiver)!!
+            vedtaksperiode.håndterDager(dager)
+            dager.varsel(RV_IM_4)
         }
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {}
 
@@ -1428,7 +1435,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
-            super.håndter(vedtaksperiode, dager)
+            vedtaksperiode.håndterDager(dager)
             if (vedtaksperiode.forventerInntekt()) return
             vedtaksperiode.tilstand(dager, AvsluttetUtenUtbetaling)
         }
@@ -2038,7 +2045,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
             if (!revurderingStøttet(vedtaksperiode, dager)) return vedtaksperiode.emitVedtaksperiodeEndret(dager)
-            super.håndter(vedtaksperiode, dager)
+            vedtaksperiode.håndterDager(dager)
             if (!vedtaksperiode.forventerInntekt()) vedtaksperiode.emitVedtaksperiodeEndret(dager) // på stedet hvil!
         }
 
@@ -2167,6 +2174,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
+            vedtaksperiode.håndterDager(dager)
         }
     }
 

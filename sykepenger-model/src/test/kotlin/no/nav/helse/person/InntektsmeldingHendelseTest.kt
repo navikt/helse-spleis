@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -10,14 +9,15 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
+import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.inntekt.Inntektshistorikk
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
@@ -46,13 +46,12 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
 
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering")
     fun `flere inntektsmeldinger`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
-        person.håndter(søknad(Sykdom(6.januar, 20.januar, 100.prosent)))
+        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent)))
+        person.håndter(søknad(Sykdom(1.januar, 20.januar, 100.prosent)))
         person.håndter(inntektsmelding())
         person.håndter(inntektsmelding())
-        assertTrue(person.personLogg.harVarslerEllerVerre())
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING, inspektør.sisteTilstand(1.vedtaksperiode))

@@ -11,6 +11,7 @@ import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 
 internal class DagerFraInntektsmelding(
     private val inntektsmelding: Inntektsmelding
@@ -21,6 +22,7 @@ internal class DagerFraInntektsmelding(
     internal fun meldingsreferanseId() = inntektsmelding.meldingsreferanseId()
     internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = inntektsmelding.leggTil(hendelseIder)
 
+    internal fun valider(arbeidsgiverperiode: Arbeidsgiverperiode?) = inntektsmelding.validerArbeidsgiverperiode(arbeidsgiverperiode)
     internal fun vurdertTilOgMed(dato: LocalDate) = inntektsmelding.trimLeft(dato)
     internal fun oppdatertFom(periode: Periode) = inntektsmelding.oppdaterFom(periode)
     internal fun leggTilArbeidsdagerFør(dato: LocalDate) {

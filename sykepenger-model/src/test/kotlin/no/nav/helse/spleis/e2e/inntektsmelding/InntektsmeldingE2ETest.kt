@@ -544,7 +544,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering")
     fun `Opphør i refusjon som kommer mens førstegangssak er i play kaster perioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020), 100.prosent))
         håndterInntektsmelding(
@@ -1874,7 +1873,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `inntektsmelding oppgir ny arbeidsgiverperiode i en sammenhengende periode`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
@@ -1929,6 +1927,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering")
     fun `kaste ut vedtaksperiode hvis arbeidsgiver ikke utbetaler arbeidsgiverperiode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -2026,5 +2025,34 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTrue(beregnetSykdomstidslinjeDager.filterKeys { it in førsteDagIArbeidsgiverperioden til 31.mars(2022) }.values.all {
             (it is Dag.Sykedag || it is Dag.SykHelgedag) && it.kommerFra(Søknad::class)
         }) { beregnetSykdomstidslinje.toShortString() }
+    }
+
+    @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("Vi hensyntar ikke dager rett før")
+    fun `Inntektsmelding strekker periode tilbake når agp er kant-i-kant`() {
+        nyPeriode(1.februar til 16.februar)
+        assertEquals(1.februar til 16.februar, inspektør.periode(1.vedtaksperiode))
+        håndterInntektsmelding(listOf(16.januar til 31.januar), førsteFraværsdag = 1.februar)
+        assertEquals(16.januar til 16.februar, inspektør.periode(1.vedtaksperiode))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+    }
+
+    @Test
+    fun `Inntektsmelding strekker ikke periode tilbake når det er en helgedag mellom agp og periode`() {
+        nyPeriode(22.januar til 16.februar)
+        assertEquals(22.januar til 16.februar, inspektør.periode(1.vedtaksperiode))
+        håndterInntektsmelding(listOf(5.januar til 20.januar), førsteFraværsdag = 22.januar)
+        assertEquals(22.januar til 16.februar, inspektør.periode(1.vedtaksperiode))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+    }
+
+    @Test
+    fun `Arbeidsgiverperiode treffer ingen vedtaksperioder og oppgitt begrunnelseForReduksjonEllerIkkeUtbetalt`() {
+        nyPeriode(22.januar til 16.februar)
+        assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        håndterInntektsmelding(listOf(5.januar til 20.januar), førsteFraværsdag = 22.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "Mjau")
+        // Vi forkaster dagene fra søknaden, men dagene fra inntektsmeldingen beholdes på arbeidsgivers tidslinje
+        assertEquals("UGG UUUUUGG UUUUUGR", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
     }
 }

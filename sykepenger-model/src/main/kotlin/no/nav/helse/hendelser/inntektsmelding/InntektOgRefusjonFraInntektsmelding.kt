@@ -10,7 +10,6 @@ import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 
 internal class InntektOgRefusjonFraInntektsmelding(
     private val inntektsmelding: Inntektsmelding,
@@ -31,11 +30,9 @@ internal class InntektOgRefusjonFraInntektsmelding(
 
     internal fun valider(
         periode: Periode,
-        skjæringstidspunkt: LocalDate,
-        arbeidsgiverperiode: Arbeidsgiverperiode?,
-        jurist: SubsumsjonObserver
+        skjæringstidspunkt: LocalDate
     ) =
-        inntektsmelding.valider(periode, skjæringstidspunkt, arbeidsgiverperiode, jurist)
+        inntektsmelding.validerInntektOgRefusjon(periode, skjæringstidspunkt)
 
     internal fun addInntektsmelding(
         skjæringstidspunkt: LocalDate,
