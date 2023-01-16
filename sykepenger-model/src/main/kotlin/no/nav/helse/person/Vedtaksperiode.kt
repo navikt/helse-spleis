@@ -289,7 +289,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterInntektOgRefusjon(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding, nesteTilstand: () -> Vedtaksperiodetilstand) {
         inntektsmeldingInfo = inntektOgRefusjon.addInntektsmelding(skjæringstidspunkt, arbeidsgiver, jurist)
-        inntektOgRefusjon.valider(periode, skjæringstidspunkt, finnArbeidsgiverperiode(), jurist())
+        inntektOgRefusjon.valider(periode, skjæringstidspunkt)
         inntektOgRefusjon.info("Fullført behandling av inntektsmelding")
         if (inntektOgRefusjon.harFunksjonelleFeilEllerVerre()) return forkast(inntektOgRefusjon)
         tilstand(inntektOgRefusjon, nesteTilstand())
@@ -1012,6 +1012,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand.håndterStrekkingAvPeriode(vedtaksperiode, dager)
             // Håndterer dagene som vedtaksperioden skal håndtere og oppdaterer sykdomstidslinjen
             vedtaksperiode.sykdomstidslinje = dager.håndter(vedtaksperiode.periode, vedtaksperiode.arbeidsgiver)!!
+            // Vi validerer etter vi har oppdatert sykdomstidslinjene fordi det kan påvirke arbeidsgiverperiode-utregningen
+            dager.valider(vedtaksperiode.finnArbeidsgiverperiode())
+            if (vedtaksperiode.tilstand != AvventerInntektsmeldingEllerHistorikk) {
+                dager.varsel(RV_IM_4)
+            }
         }
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {}
 
