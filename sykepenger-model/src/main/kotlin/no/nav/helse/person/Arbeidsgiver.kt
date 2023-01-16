@@ -41,6 +41,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNN
 import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_REFUSJONSOPPLYSNINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.feiletRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
+import no.nav.helse.person.Vedtaksperiode.Companion.kommerTilÅHåndtere
 import no.nav.helse.person.Vedtaksperiode.Companion.lagRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
@@ -523,11 +524,8 @@ internal class Arbeidsgiver private constructor(
             }}
         }
 
-        val noenKommerTilÅHåndtereInntektOgRefusjon = inntektsmelding.inntektOgRefusjon.let { inntektOgRefusjon ->
-            noenHarHåndtert(inntektsmelding) {
-                inntektOgRefusjon.skalHåndteresAv(periode())
-            }
-        }
+        val noenKommerTilÅHåndtereInntektOgRefusjon =
+            vedtaksperioder.kommerTilÅHåndtere(inntektsmelding.inntektOgRefusjon)
 
         if (noenHarHåndtertDager || noenKommerTilÅHåndtereInntektOgRefusjon) {
             // Noen av dagene er håndtert, men ikke nødvendigvis alle. For å beholde dagens oppførsel

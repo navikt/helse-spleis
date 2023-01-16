@@ -277,8 +277,10 @@ internal class Vedtaksperiode private constructor(
         dager.leggTil(hendelseIder)
     }
 
+    private fun forventerInntektOgRefusjonFraInntektsmelding() = tilstand != AvsluttetUtenUtbetaling || forventerInntekt()
+
     internal fun håndter(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding): Boolean {
-        val skalHåndtereInntektOgRefusjon = inntektOgRefusjon.skalHåndteresAv(periode)
+        val skalHåndtereInntektOgRefusjon = inntektOgRefusjon.skalHåndteresAv(periode) { forventerInntektOgRefusjonFraInntektsmelding() }
         if (erAlleredeHensyntatt(inntektOgRefusjon.meldingsreferanseId()) || !skalHåndtereInntektOgRefusjon) {
             return skalHåndtereInntektOgRefusjon
         }
@@ -2344,6 +2346,9 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.medSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
             this.filter { it.skjæringstidspunkt == skjæringstidspunkt }
+
+        internal fun List<Vedtaksperiode>.kommerTilÅHåndtere(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) =
+            any { inntektOgRefusjon.skalHåndteresAv(it.periode) { it.forventerInntektOgRefusjonFraInntektsmelding() } }
 
         internal fun harNyereForkastetPeriode(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) =
             forkastede
