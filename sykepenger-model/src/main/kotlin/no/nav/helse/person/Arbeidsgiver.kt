@@ -41,10 +41,10 @@ import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNN
 import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_REFUSJONSOPPLYSNINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.feiletRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
-import no.nav.helse.person.Vedtaksperiode.Companion.kommerTilÅHåndtere
 import no.nav.helse.person.Vedtaksperiode.Companion.lagRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
+import no.nav.helse.person.Vedtaksperiode.Companion.skalHåndtere
 import no.nav.helse.person.Vedtaksperiode.Companion.sykefraværstilfelle
 import no.nav.helse.person.Vedtaksperiode.Companion.validerYtelser
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
@@ -524,32 +524,29 @@ internal class Arbeidsgiver private constructor(
             }}
         }
 
-        val noenKommerTilÅHåndtereInntektOgRefusjon =
-            vedtaksperioder.kommerTilÅHåndtere(inntektsmelding.inntektOgRefusjon)
+        val vedtaksperiodeSomSkalHåndtereInntektOgRefusjon =
+            vedtaksperioder.skalHåndtere(inntektsmelding.inntektOgRefusjon)
+        val inntektOgRefusjonHåndteres = vedtaksperiodeSomSkalHåndtereInntektOgRefusjon != null
 
-        if (noenHarHåndtertDager || noenKommerTilÅHåndtereInntektOgRefusjon) {
+        if (noenHarHåndtertDager || inntektOgRefusjonHåndteres) {
             // Noen av dagene er håndtert, men ikke nødvendigvis alle. For å beholde dagens oppførsel
             // må vi håndtere de gjenstående dagene også.
             dager.håndterGjenstående(this@Arbeidsgiver)
         }
 
-        val inntektOgRefusjon = inntektsmelding.inntektOgRefusjon
-        val enHarHåndtertInntektOgRefusjon = énHarHåndtert(inntektsmelding) {
-            håndter(inntektOgRefusjon).also { håndtert ->
-                if (håndtert) {
-                    // En av vedtaksperiodene har håndtert inntekt og refusjon
-                    // vi må informere de andre vedtaksperiodene på arbeidsgiveren som berøres av dette
-                    håndtertInntektPåSkjæringstidspunkt(this, inntektsmelding)
-                }
-            }
+        vedtaksperiodeSomSkalHåndtereInntektOgRefusjon?.håndter(inntektsmelding.inntektOgRefusjon)?.also {
+            // En av vedtaksperiodene har håndtert inntekt og refusjon
+            // vi må informere de andre vedtaksperiodene på arbeidsgiveren som berøres av dette
+            håndtertInntektPåSkjæringstidspunkt(vedtaksperiodeSomSkalHåndtereInntektOgRefusjon, inntektsmelding)
         }
+
         // Vedtaksperioder som kun har håndtert dager (og ikke inntekt) må også få dokumentsporing
         // Vi legger det til i en posthåndtering for at vedtaksperioder som både håndterer dager og inntekt ikke skal stoppes av erAlleredeHensyntatt
         if (noenHarHåndtertDager) {
             håndter(dager) { postHåndter(dager) }
         }
 
-        if (noenHarHåndtertDager || enHarHåndtertInntektOgRefusjon) return
+        if (noenHarHåndtertDager || inntektOgRefusjonHåndteres) return
         inntektsmeldingIkkeHåndtert(inntektsmelding, vedtaksperiodeId)
     }
 
