@@ -79,6 +79,32 @@ import org.junit.jupiter.api.Test
 internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
     @Test
+    fun `forlengelse etter revurdering uten endring`() {
+        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(1.april, 30.april)
+        forlengVedtak(1.mai, 31.mai)
+
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(31.januar, Feriedag)
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterYtelser(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+
+        forlengVedtak(1.juni, 30.juni)
+
+        val utbetaling4 = inspektør.utbetaling(4).inspektør
+        val utbetaling5 = inspektør.utbetaling(5).inspektør
+        assertEquals(utbetaling5.korrelasjonsId, utbetaling4.korrelasjonsId)
+        assertEquals(Utbetaling.GodkjentUtenUtbetaling, utbetaling4.tilstand)
+        assertEquals(Utbetaling.Utbetalt, utbetaling5.tilstand)
+    }
+
+    @Test
     fun `revurdere første periode`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
