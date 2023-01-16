@@ -59,6 +59,16 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
                 && vedtaksperiodeId?.equals(it.vedtaksperiodeIdFraSporing()) ?: true
         }
 
+    internal fun antallSubsumsjoner(
+        paragraf: Paragraf,
+        versjon: LocalDate?,
+        ledd: Ledd?,
+        punktum: Punktum?,
+        bokstav: Bokstav?,
+        utfall: Utfall? = null,
+        vedtaksperiodeId: UUID? = null
+    ) = finnSubsumsjoner(paragraf, versjon, ledd, punktum, bokstav, utfall, vedtaksperiodeId).size
+
     internal fun assertBeregnet(
         paragraf: Paragraf,
         versjon: LocalDate,

@@ -392,16 +392,6 @@ internal class ArbeidsgiverHendelsefabrikk(
         lagOverstyrArbeidsgiveropplysninger(hendelseId, skjæringstidspunkt, listOf(
             OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, "forklaring", null, emptyList())
         ))
-        /*OverstyrInntekt(
-            meldingsreferanseId = hendelseId,
-            fødselsnummer = personidentifikator.toString(),
-            aktørId = aktørId,
-            organisasjonsnummer = organisasjonsnummer,
-            inntekt = inntekt,
-            skjæringstidspunkt = skjæringstidspunkt,
-            forklaring = "test",
-            subsumsjon = null
-        )*/
 
     internal fun lagOverstyrArbeidsgiveropplysninger(hendelseId: UUID, skjæringstidspunkt: LocalDate, opplysninger: List<OverstyrtArbeidsgiveropplysning>) =
         OverstyrArbeidsgiveropplysninger(

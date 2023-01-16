@@ -18,11 +18,13 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.Kilde
 import no.nav.helse.inspectors.PersonInspektør
+import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Varselkode
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -61,6 +63,7 @@ internal abstract class AbstractDslTest {
         @JvmStatic
         protected infix fun List<String>.og(annen: String) = this.plus(annen)
     }
+    protected lateinit var jurist: MaskinellJurist
     protected lateinit var observatør: TestObservatør
     private lateinit var testperson: TestPerson
     private lateinit var deferredLog: DeferredLog
@@ -72,7 +75,7 @@ internal abstract class AbstractDslTest {
     protected val inspektør: TestArbeidsgiverInspektør get() = bareÈnArbeidsgiver(a1).inspektør
 
     private val TestPerson.TestArbeidsgiver.testArbeidsgiverAsserter get() = TestArbeidsgiverAssertions(observatør, inspektør, testperson.inspiser(personInspektør))
-    private val testPersonAsserter get() = TestPersonAssertions(testperson.inspiser(personInspektør))
+    private val testPersonAsserter get() = TestPersonAssertions(testperson.inspiser(personInspektør), jurist)
 
     protected fun forkastAlle() = testperson.forkastAlle()
 
@@ -139,6 +142,10 @@ internal abstract class AbstractDslTest {
             håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiodeId(orgnummer))
             håndterUtbetalt()
         }}
+    }
+
+    protected fun <R> assertSubsumsjoner(block: SubsumsjonInspektør.() -> R): R {
+        return testPersonAsserter.assertSubsumsjoner(block)
     }
 
     protected fun TestPerson.TestArbeidsgiver.assertTilstander(id: UUID, vararg tilstander: TilstandType, orgnummer: String = a1) {
@@ -405,17 +412,15 @@ internal abstract class AbstractDslTest {
         bareÈnArbeidsgiver(a1).nyttVedtak(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, inntekterBlock)
 
     protected fun medFødselsdato(fødselsdato: LocalDate) {
-        testperson = TestPerson(observatør = observatør, fødselsdato = fødselsdato, deferredLog = deferredLog)
-    }
-    protected fun medTidligereBehandledeIdenter() {
-        testperson = TestPerson(observatør = observatør, deferredLog = deferredLog)
+        testperson = TestPerson(observatør = observatør, fødselsdato = fødselsdato, deferredLog = deferredLog, jurist = jurist)
     }
 
     @BeforeEach
     fun setup() {
+        jurist = MaskinellJurist()
         observatør = TestObservatør()
         deferredLog = DeferredLog()
-        testperson = TestPerson(observatør = observatør, deferredLog = deferredLog)
+        testperson = TestPerson(observatør = observatør, deferredLog = deferredLog, jurist = jurist)
     }
 
     @AfterEach
