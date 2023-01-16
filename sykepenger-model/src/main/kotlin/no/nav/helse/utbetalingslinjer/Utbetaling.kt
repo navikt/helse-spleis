@@ -468,7 +468,7 @@ internal class Utbetaling private constructor(
         private fun List<Utbetaling>.grupperUtbetalinger(filter: (Utbetaling) -> Boolean) =
             this.groupBy { it.arbeidsgiverOppdrag.fagsystemId() }
                 .map { (_, utbetalinger) -> utbetalinger.sortedBy { it.tidsstempel } }
-                .sortedBy { it.first().tidsstempel }
+                .sortedBy { it.last().tidsstempel }
                 .mapNotNull { it.lastOrNull(filter) }
                 .filterNot(Utbetaling::erAnnullering)
 
