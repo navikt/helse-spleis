@@ -783,6 +783,21 @@ internal class Utbetaling private constructor(
             utbetaling.vurdering?.avsluttetUtenUtbetaling(utbetaling)
             utbetaling.avsluttet = LocalDateTime.now()
         }
+
+        override fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetaling): Utbetaling? {
+            if (utbetaling.oppdragsperiode == null) return super.annuller(utbetaling, hendelse)
+            return Utbetaling(
+                utbetaling.beregningId,
+                utbetaling,
+                utbetaling.utbetalingstidslinje,
+                utbetaling.arbeidsgiverOppdrag.annuller(hendelse),
+                utbetaling.personOppdrag.annuller(hendelse),
+                Utbetalingtype.ANNULLERING,
+                LocalDate.MAX,
+                null,
+                null
+            ).also { hendelse.info("Oppretter annullering med id ${it.id}") }
+        }
     }
 
     internal object Godkjent : Tilstand {
