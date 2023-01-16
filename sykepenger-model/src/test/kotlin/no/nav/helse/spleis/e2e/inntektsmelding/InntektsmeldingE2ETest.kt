@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -102,6 +103,7 @@ import org.junit.jupiter.api.Test
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("arbeidsgiver oppgir veldig lang arbeidsgiverperiode")
     fun `Lang og useriøs arbeidsgiverperiode`() {
         nyPeriode(1.januar til 31.januar)
         håndterInntektsmelding(listOf(1.januar til 31.januar))
@@ -125,6 +127,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("feilaktig arbeidsgiverperiode som dekker hele perioden som skal utbetales")
     fun `Arbeidsgiver opplyser om feilaktig ny arbeidsgiverperiode som dekker hele perioden som skal utbetales`() {
         nyttVedtak(1.januar, 20.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
         assertEquals(1.januar til 16.januar, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
@@ -133,6 +136,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `to inntektsmeldinger på rappen`() {
         nyPeriode(1.januar til 10.januar)
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -236,6 +240,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `ulik arbeidsgiverperiode - flere arbeidsgivere`() {
         håndterSykmelding(Sykmeldingsperiode(22.januar, 15.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(22.januar, 15.februar, 100.prosent), orgnummer = a1)
@@ -295,6 +300,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `Periode uten inntekt går ikke videre ved mottatt inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 6.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 6.januar, 100.prosent))
@@ -319,6 +325,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `Feilutbetaling på grunn av feilberegnet arbeidsgiverperiode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 6.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 6.januar, 100.prosent))
@@ -538,6 +545,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering")
     fun `Opphør i refusjon som kommer mens førstegangssak er i play kaster perioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020), 100.prosent))
         håndterInntektsmelding(
@@ -976,6 +984,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `Inntektsmelding med error som treffer flere perioder`() {
         håndterSykmelding(Sykmeldingsperiode(29.mars(2021), 31.mars(2021), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(6.april(2021), 17.april(2021), 100.prosent))
@@ -1017,6 +1026,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `Inntektsmelding med error som treffer flere perioder uten gap`() {
         håndterSykmelding(Sykmeldingsperiode(29.mars(2021), 31.mars(2021), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.april(2021), 17.april(2021), 100.prosent))
@@ -1056,6 +1066,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `inntektsmelding oppgir arbeidsgiverperiode senere`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 7.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 7.januar, 100.prosent))
@@ -1361,6 +1372,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `Ny inntektsmelding som treffer AvventerGodkjenning - hensyntar nye refusjonsopplysninger`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -1399,6 +1411,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `Ny inntektsmelding som treffer AvventerGodkjenning - hensyntar ikke ny inntekt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -1488,6 +1501,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering")
     fun `inntektsmelding oppgir første fraværsdag i en periode med ferie etter sykdom`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -1516,6 +1530,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering")
     fun `inntektsmelding oppgir første fraværsdag i en periode med ferie etter sykdom med kort periode først`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent))
@@ -1590,6 +1605,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `Går videre fra AVVENTER_UFERDIG hvis en gammel periode er i AVSLUTTET_UTEN_UTBETALING`() {
         håndterSykmelding(Sykmeldingsperiode(20.november(2017), 12.desember(2017), 100.prosent))
         håndterSøknad(Sykdom(20.november(2017), 12.desember(2017), 100.prosent))
@@ -1690,6 +1706,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("AventerIm->AUU utenom AvventerBlokkerende")
     fun `To tilstøtende perioder inntektsmelding først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 7.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(8.januar, 23.februar, 100.prosent))
@@ -1858,6 +1875,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `inntektsmelding oppgir ny arbeidsgiverperiode i en sammenhengende periode`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
@@ -1969,6 +1987,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `padding med arbeidsdager før arbeidsgiverperioden`() {
         håndterSykmelding(Sykmeldingsperiode(28.januar(2022), 16.februar(2022), 100.prosent))
         håndterSøknad(Sykdom(28.januar(2022), 16.februar(2022), 100.prosent))

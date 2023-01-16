@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -117,6 +118,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `inntektsmelding på kort periode gjør at en nyere kort periode skal utbetales`() {
         håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(10.januar, 20.januar, 100.prosent))
@@ -432,6 +434,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering")
     fun `inntektsmelding gjør om kort periode til arbeidsdager`() {
         håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
@@ -466,6 +469,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering")
     fun `inntektsmelding gjør om kort periode til arbeidsdager etter utbetalt`() = Toggle.InntektsmeldingKanTriggeRevurdering.enable {
         håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
@@ -647,6 +651,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `avsluttet periode trenger egen inntektsmelding etter at inntektsmelding treffer forrige`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
@@ -694,6 +699,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("AventerIm->AUU utenom AvventerBlokkerende")
     fun `gjenopptar behandling på neste periode dersom inntektsmelding treffer avsluttet periode`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
@@ -705,6 +711,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `revurderer ved mottatt inntektsmelding - påfølgende periode med im går i vanlig løype`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
@@ -728,6 +735,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `revurderer ved mottatt inntektsmelding - påfølgende periode med im går i vanlig løype - omvendt`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
@@ -1110,6 +1118,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ikke implementert revurdering i alle tilstander")
     fun `endrer arbeidsgiverperiode etter igangsatt revurdering`() {
         val forMyeInntekt = INNTEKT * 1.2
         val riktigInntekt = INNTEKT

@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
+import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
@@ -43,6 +44,11 @@ internal class InntektsmeldingTest {
     )
     private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var inntektsmelding: Inntektsmelding
+
+    @Test
+    fun `håndtering av oppdelt inntektsmelding er ei klart`() {
+        assertTrue(Toggle.HåndterInntektsmeldingOppdelt.disabled)
+    }
 
     @Test
     fun `inntektsmelding uten arbeidsgiverperiode og førsteFraværsdag er null`() {

@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.oppgaver
 
 import java.util.UUID
+import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -249,6 +250,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `søknad med ferie hele perioden + inntektsmelding - ingen faktisk utbetaling, ergo ikke speil-relatert`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent), Ferie(1.januar, 17.januar))
@@ -316,6 +318,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering")
     fun `Ferie teller likt som utbetaling når vi skal sjekke om vi har nærliggende utbetaling`() {
         nyttVedtak(1.mars, 31.mars)
 
@@ -340,6 +343,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `periode med utbetaling_uten_utbetaling teller ikke som nærliggende utbetaling`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent), Ferie(13.januar, 21.januar))

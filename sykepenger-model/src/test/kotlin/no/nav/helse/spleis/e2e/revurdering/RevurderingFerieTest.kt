@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
+import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -49,6 +50,7 @@ internal class RevurderingFerieTest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `Forlengelse med bare ferie, så kommer en tidligere periode med sykdom - ferie skal revurderes`() {
         nyttVedtak(5.februar, 28.februar)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))

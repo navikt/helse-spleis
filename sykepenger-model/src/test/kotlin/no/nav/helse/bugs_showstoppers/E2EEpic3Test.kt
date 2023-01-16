@@ -2,6 +2,7 @@ package no.nav.helse.bugs_showstoppers
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -321,6 +322,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("AventerIm->AUU utenom AvventerBlokkerende")
     fun `periode som begynner på siste dag i arbeidsgiverperioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.februar(2020), 17.februar(2020), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(18.februar(2020), 1.mars(2020), 100.prosent))
@@ -435,6 +437,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("AventerIm->AUU utenom AvventerBlokkerende")
     fun `simulering av periode der tilstøtende ikke ble utbetalt`() {
         håndterSykmelding(Sykmeldingsperiode(28.januar(2020), 10.februar(2020), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(11.februar(2020), 21.februar(2020), 100.prosent))
@@ -567,6 +570,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering")
     fun `helg i gap i arbeidsgiverperioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 10.januar, 100.prosent))

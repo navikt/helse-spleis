@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -45,6 +46,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
 
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering")
     fun `flere inntektsmeldinger`() {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
         person.håndter(søknad(Sykdom(6.januar, 20.januar, 100.prosent)))

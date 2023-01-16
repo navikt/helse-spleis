@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -117,6 +118,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("hendelseId ble lagt til etter vedtaksperiode_endret blir laget")
     fun `Sender vedtaksperiode_endret når inntektsmelidng kommer i AVSLUTTET_UTEN_UTBETALING`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 1.januar(2021), 100.prosent))
         håndterSøknad(Sykdom(1.januar(2021), 1.januar(2021), 100.prosent))

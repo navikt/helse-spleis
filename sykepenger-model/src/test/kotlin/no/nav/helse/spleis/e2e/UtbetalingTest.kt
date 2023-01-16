@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -59,6 +60,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `første periode er kun arbeidsgiverperiode og ferie`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 22.januar, 100.prosent))
         håndterSøknad(Sykdom(4.januar, 22.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(20.januar, 22.januar))

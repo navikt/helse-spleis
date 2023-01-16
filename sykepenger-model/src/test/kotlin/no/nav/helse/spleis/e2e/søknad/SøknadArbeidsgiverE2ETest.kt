@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.søknad
 
+import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.februar
@@ -207,6 +208,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("AventerIm->AUU utenom AvventerBlokkerende")
     fun `avslutter uferdig forlengelseperiode som bare strekkes inn i helg`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
@@ -230,6 +232,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("AventerIm->AUU utenom AvventerBlokkerende")
     fun `avslutter uferdig forlengelseperiode som dekkes av arbeidsgiverperioden etter IM`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
@@ -255,6 +258,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("AventerIm->AUU utenom AvventerBlokkerende")
     fun `avslutter ferdig forlengelseperiode som dekkes av arbeidsgiverperioden etter IM`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
@@ -311,6 +315,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `bare ferie - forlengelser`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(1.januar, 31.januar))

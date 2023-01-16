@@ -1,5 +1,6 @@
 package no.nav.helse.serde.api.v2.buildere
 
+import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -61,6 +62,7 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering?")
     fun `foregående uten utbetaling med warning og warning på periode to`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))

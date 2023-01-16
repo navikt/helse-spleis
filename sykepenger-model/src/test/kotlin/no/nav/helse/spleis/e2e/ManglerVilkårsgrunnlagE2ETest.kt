@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -129,6 +130,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `korrigert arbeidsgiverperiode under pågående revurdering`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         forlengVedtak(1.februar, 28.februar, 100.prosent)

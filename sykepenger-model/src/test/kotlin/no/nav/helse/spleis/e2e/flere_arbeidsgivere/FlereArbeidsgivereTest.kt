@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
+import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -908,6 +909,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `forlengelse av AVSLUTTET_UTEN_UTBETALING skal ikke gå til AVVENTER_HISTORIKK ved flere arbeidsgivere om IM kommer først`() {
         a1 { håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent)) }
         a2 { håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent)) }

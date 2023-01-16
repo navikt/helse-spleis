@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
+import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -527,6 +528,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `To arbeidsgivere, skjæringstidspunkt i måneden før ag2, ag2 sin forlengelse skal ikke vente på inntektsmelding etter inntektsmelding er mottatt`() {
         val periode1 = 31.januar til 20.februar
         val periode2 = 1.februar til 17.februar

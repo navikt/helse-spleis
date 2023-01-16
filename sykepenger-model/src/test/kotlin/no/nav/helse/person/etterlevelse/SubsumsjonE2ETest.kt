@@ -2,6 +2,7 @@ package no.nav.helse.person.etterlevelse
 
 import java.time.LocalDate
 import java.time.YearMonth
+import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -1346,6 +1347,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `§ 8-17 ledd 1 bokstav a - trygden yter ikke sykepenger dersom arbeidsgiverperioden ikke er fullført`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))

@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.revurdering
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.antallEtterspurteBehov
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
@@ -1363,6 +1364,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("feilaktig arbeidsgiverperiode som dekker hele perioden som skal utbetales")
     fun `revurder første dag i periode på en sykedag som forlenger tidligere arbeidsgiverperiode med nytt skjæringstidspunkt`() {
         nyttVedtak(1.januar, 20.januar)
         nyttVedtak(25.januar, 25.januar)

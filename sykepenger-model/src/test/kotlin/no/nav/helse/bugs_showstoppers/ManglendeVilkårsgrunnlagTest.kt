@@ -1,6 +1,7 @@
 package no.nav.helse.bugs_showstoppers
 
 import java.time.LocalDate
+import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -70,6 +71,7 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `inntektsmelding drar periode tilbake og lager tilstøtende`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
