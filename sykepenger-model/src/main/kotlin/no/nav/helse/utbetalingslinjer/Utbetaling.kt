@@ -425,7 +425,7 @@ internal class Utbetaling private constructor(
         }
 
         internal fun finnUtbetalingForAnnullering(utbetalinger: List<Utbetaling>, hendelse: AnnullerUtbetaling): Utbetaling? {
-            return utbetalinger.utbetalte().lastOrNull() ?: run {
+            return utbetalinger.aktiveMedUtbetaling().lastOrNull() ?: run {
                 hendelse.funksjonellFeil(RV_UT_4)
                 return null
             }
@@ -461,8 +461,8 @@ internal class Utbetaling private constructor(
             return byggOppdrag(sisteAktive, fødselsnummer, tidslinje, sisteDato, aktivitetslogg, forrige, Sykepenger)
         }
         internal fun List<Utbetaling>.aktive() = grupperUtbetalinger(Utbetaling::erAktiv)
-        internal fun List<Utbetaling>.aktiveMedUbetalte() = grupperUtbetalinger(Utbetaling::erAktivEllerUbetalt)
-        internal fun List<Utbetaling>.aktiveMedUtbetaling() = grupperUtbetalinger(Utbetaling::erAktiv).filterNot { it.tilstand == GodkjentUtenUtbetaling}
+        private fun List<Utbetaling>.aktiveMedUbetalte() = grupperUtbetalinger(Utbetaling::erAktivEllerUbetalt)
+        private fun List<Utbetaling>.aktiveMedUtbetaling() = aktive().filterNot { it.oppdragsperiode == null }
         private fun List<Utbetaling>.utbetalte() = grupperUtbetalinger { it.erUtbetalt() || it.erInFlight() }
 
         private fun List<Utbetaling>.grupperUtbetalinger(filter: (Utbetaling) -> Boolean) =
