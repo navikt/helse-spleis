@@ -297,7 +297,6 @@ class Inntektsmelding(
         }
     internal val inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding
         get() {
-            val sisteDagIArbeidsgiverperioden = arbeidsgiverperiode?.endInclusive
-            return InntektOgRefusjonFraInntektsmelding(this, førsteFraværsdag, sisteDagIArbeidsgiverperioden)
+            return InntektOgRefusjonFraInntektsmelding(this, førsteFraværsdag, arbeidsgiverperioder)
         }
 }

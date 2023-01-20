@@ -103,7 +103,6 @@ import org.junit.jupiter.api.Test
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("arbeidsgiver oppgir veldig lang arbeidsgiverperiode")
     fun `Lang og useriøs arbeidsgiverperiode`() {
         nyPeriode(1.januar til 31.januar)
         håndterInntektsmelding(listOf(1.januar til 31.januar))

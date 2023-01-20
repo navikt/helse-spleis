@@ -15,8 +15,14 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 internal class InntektOgRefusjonFraInntektsmelding(
     private val inntektsmelding: Inntektsmelding,
     private val førsteFraværsdag: LocalDate?,
-    private val sisteDagIArbeidsgiverperioden: LocalDate?
+    arbeidsgiverperioder: List<Periode>
 ): IAktivitetslogg by inntektsmelding {
+
+    private val sisteDagIArbeidsgiverperioden = arbeidsgiverperioder
+        .flatten()
+        .sorted()
+        .take(16)
+        .maxOrNull()
 
     internal fun meldingsreferanseId() = inntektsmelding.meldingsreferanseId()
     internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = inntektsmelding.leggTil(hendelseIder)

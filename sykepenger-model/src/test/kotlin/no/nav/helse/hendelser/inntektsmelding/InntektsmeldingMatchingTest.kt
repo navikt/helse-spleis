@@ -269,21 +269,8 @@ internal class InntektsmeldingMatchingTest {
     @Test
     fun `lang og useriøs arbeidsgiverperiode`() {
         val vedtaksperiode = 1.januar til 31.januar
-        val inntektFraInntektsmelding: () -> InntektOgRefusjonFraInntektsmelding = {
-            inntektsmelding(1.januar, 1.januar til 31.januar).second
-        }
-
-        assertForventetFeil(
-            forklaring = "Vi ser etter første dag etter arbeidsgierperioden, så treffer ingen periode",
-            nå = {
-                val inntekt = inntektFraInntektsmelding()
-                assertFalse(inntekt.skalHåndteresAv(vedtaksperiode))
-            },
-            ønsket = {
-                val inntekt = inntektFraInntektsmelding()
-                assertTrue(inntekt.skalHåndteresAv(vedtaksperiode))
-            }
-        )
+        val (_, inntekt) = inntektsmelding(1.januar, 1.januar til 31.januar)
+        assertTrue(inntekt.skalHåndteresAv(vedtaksperiode))
     }
 
     private fun DagerFraInntektsmelding.håndter(periode: Periode): Periode? {

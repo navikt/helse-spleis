@@ -1066,7 +1066,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `foreldet sykdomsdag etter opphold skal ikke bli til navdag`() {
         nyttVedtak(15.januar, 7.februar)
 
