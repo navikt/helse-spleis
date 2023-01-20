@@ -942,7 +942,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun startRevurdering(hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
-        // endringen gjelder fra start
         if (revurdering.ikkeRelevant(periode, skjæringstidspunkt)) return
         kontekst(hendelse)
         tilstand.startRevurdering(this, hendelse, revurdering)
