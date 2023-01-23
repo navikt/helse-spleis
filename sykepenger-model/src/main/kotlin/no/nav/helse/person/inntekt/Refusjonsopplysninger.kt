@@ -181,13 +181,42 @@ class Refusjonsopplysning(
 
         // finner første dato hvor refusjonsbeløpet for dagen er ulikt beløpet i forrige versjon
         internal fun finnFørsteDatoForEndring(other: Refusjonsopplysninger): LocalDate? {
-            return this
-                .validerteRefusjonsopplysninger
-                .sortedBy { it.fom }
-                .firstOrNull { refusjonsopplysning ->
-                    val overlappende = other.validerteRefusjonsopplysninger.filter { refusjonsopplysning.periode.overlapperMed(it.periode) }
-                    overlappende.isEmpty() || overlappende.any { it.beløp != refusjonsopplysning.beløp }
-                }?.fom
+            val sorterteOpplysninger = this.validerteRefusjonsopplysninger.sortedBy { it.fom }
+            return førsteDatoMedUliktBeløp(sorterteOpplysninger, other.validerteRefusjonsopplysninger)
+                ?: førsteUlikeFom(sorterteOpplysninger, other.validerteRefusjonsopplysninger)
+                ?: førsteUlikeTom(sorterteOpplysninger, other.validerteRefusjonsopplysninger)
+        }
+
+        private fun førsteDatoMedUliktBeløp(
+            nyeOpplysninger: List<Refusjonsopplysning>,
+            gamleOpplysninger: List<Refusjonsopplysning>
+        ): LocalDate? {
+            return nyeOpplysninger.firstOrNull { refusjonsopplysning ->
+                val overlappende = gamleOpplysninger.filter { refusjonsopplysning.periode.overlapperMed(it.periode) }
+                overlappende.isEmpty() || overlappende.any { it.beløp != refusjonsopplysning.beløp }
+            }?.fom
+        }
+
+        private fun førsteUlikeFom(
+            nyeOpplysninger: List<Refusjonsopplysning>,
+            gamleOpplysninger: List<Refusjonsopplysning>
+        ): LocalDate? {
+            return nyeOpplysninger.firstOrNull{ refusjonsopplysning ->
+                gamleOpplysninger.any {
+                    it.fom != refusjonsopplysning.fom
+                }
+            }?.fom
+        }
+
+        private fun førsteUlikeTom(
+            nyeOpplysninger: List<Refusjonsopplysning>,
+            gamleOpplysninger: List<Refusjonsopplysning>
+        ): LocalDate? {
+            return nyeOpplysninger.firstOrNull{ refusjonsopplysning ->
+                gamleOpplysninger.any {
+                    it.fom == refusjonsopplysning.fom && it.tom != refusjonsopplysning.tom
+                }
+            }?.tom?.nesteDag
         }
 
         internal companion object {

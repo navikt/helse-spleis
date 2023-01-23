@@ -704,7 +704,9 @@ class Person private constructor(
 
     internal fun nyeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, inntektsmelding: Inntektsmelding) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return
-        nyttVilkårsgrunnlag(inntektsmelding, grunnlag.nyeRefusjonsopplysninger(inntektsmelding))
+        val (nyttGrunnlag, eventyr) = (grunnlag.nyeRefusjonsopplysninger(inntektsmelding) ?: return)
+        nyttVilkårsgrunnlag(inntektsmelding, nyttGrunnlag)
+        startRevurdering(inntektsmelding, eventyr)
     }
 
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
