@@ -183,7 +183,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering")
+    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering: La oss undersøke om vi kan fjerne RV_IM_1")
     fun `varsel - Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første - bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt`() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 10.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 23.januar)

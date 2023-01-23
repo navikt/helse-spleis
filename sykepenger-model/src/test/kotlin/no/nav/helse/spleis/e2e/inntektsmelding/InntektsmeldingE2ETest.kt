@@ -1499,7 +1499,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering")
+    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering: Ikke legge på varsel ved håndtering av dager og uendret agp")
     fun `inntektsmelding oppgir første fraværsdag i en periode med ferie etter sykdom`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -1528,7 +1528,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering")
+    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering: Legge til RV_IM_4 som default på håndterInntektOgRefusjon?")
     fun `inntektsmelding oppgir første fraværsdag i en periode med ferie etter sykdom med kort periode først`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent))
@@ -1927,7 +1927,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering")
     fun `kaste ut vedtaksperiode hvis arbeidsgiver ikke utbetaler arbeidsgiverperiode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -2054,5 +2053,17 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         // Vi forkaster dagene fra søknaden, men dagene fra inntektsmeldingen beholdes på arbeidsgivers tidslinje
         assertEquals("UGG UUUUUGG UUUUUGR", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+    }
+
+    @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering: Løses om kun siste periode som håndterer dager validerer")
+    fun `Arbeidsgiverperiode skal ikke valideres før historikken er oppdatert`() {
+        nyPeriode(1.januar til 15.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        nyPeriode(16.januar til 31.januar)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertIngenVarsler(1.vedtaksperiode.filter())
+        assertIngenVarsler(2.vedtaksperiode.filter())
     }
 }

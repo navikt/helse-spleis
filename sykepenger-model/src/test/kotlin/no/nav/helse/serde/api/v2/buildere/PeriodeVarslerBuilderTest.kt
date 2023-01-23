@@ -62,7 +62,7 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering?")
+    @FeilerMedHåndterInntektsmeldingOppdelt("fikses når kun siste periode som håndterer dager validerer agp")
     fun `foregående uten utbetaling med warning og warning på periode to`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))

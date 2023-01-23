@@ -317,7 +317,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering")
+    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering: Legge til RV_IM_4 som default på håndterInntektOgRefusjon?")
     fun `Ferie teller likt som utbetaling når vi skal sjekke om vi har nærliggende utbetaling`() {
         nyttVedtak(1.mars, 31.mars)
 

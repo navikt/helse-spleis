@@ -435,7 +435,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering")
+    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering: 'riktig' vedtaksperiode håndter inntekt. der er FF=skjæringstidspunkt. Er det OK at dette automatiseres?")
     fun `inntektsmelding gjør om kort periode til arbeidsdager`() {
         håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
@@ -463,14 +463,13 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         assertVarsel(RV_IM_2, 1.vedtaksperiode.filter(a1))
         assertInfo(RV_RV_1.varseltekst, 2.vedtaksperiode.filter(a1))
-        //assertNoWarnings(2.vedtaksperiode.filter(a1))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING)
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering")
+    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering: 'riktig' vedtaksperiode håndter inntekt. der er FF=skjæringstidspunkt. Er det OK at dette automatiseres?")
     fun `inntektsmelding gjør om kort periode til arbeidsdager etter utbetalt`() = Toggle.InntektsmeldingKanTriggeRevurdering.enable {
         håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
@@ -509,7 +508,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         assertVarsel(RV_IM_2, 1.vedtaksperiode.filter(a1))
         assertInfo(RV_RV_1.varseltekst, 2.vedtaksperiode.filter(a1))
-        //assertNoWarnings(2.vedtaksperiode.filter(a1))
         assertIngenVarsler(3.vedtaksperiode.filter(a1))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
