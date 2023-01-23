@@ -578,6 +578,36 @@ internal class RefusjonsopplysningerTest {
         assertEquals(eksisterendeRefusjonsopplysninger, eksisterendeRefusjonsopplysninger.merge(ønskedeRefusjonsopplysninger))
     }
 
+    @Test
+    fun `ny refusjonsopplysning midt i forrige med samme beløp`() {
+        val meldingsreferanseId1 = UUID.randomUUID()
+        val refusjonsopplysninger = listOf(
+            Refusjonsopplysning(
+                meldingsreferanseId1,
+                1.januar,
+                null,
+                2000.daglig
+            )
+        ).refusjonsopplysninger()
+        val meldingsreferanseId2 = UUID.randomUUID()
+        val nyeRefusjonsopplysninger = listOf(
+            Refusjonsopplysning(
+                meldingsreferanseId2,
+                1.januar,
+                10.januar,
+                2000.daglig
+            ),
+            Refusjonsopplysning(
+                meldingsreferanseId2,
+                11.januar,
+                null,
+                2000.daglig)
+
+        ).refusjonsopplysninger()
+
+        assertEquals(11.januar, nyeRefusjonsopplysninger.finnFørsteDatoForEndring(refusjonsopplysninger))
+    }
+
     internal companion object {
         private fun harNødvendigeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode) =
             harNødvendigeRefusjonsopplysninger(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, Aktivitetslogg(), "")

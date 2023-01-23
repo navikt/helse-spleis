@@ -8,7 +8,6 @@ import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -588,51 +587,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         )
         assertTilstander(
             2.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-    }
-
-    @Test
-    fun `Sender ikke periode som allerede har behandlet inntektsmelding til infotrygd når man mottar en ny ugyldig inntektsmelding i etterkant`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-
-        assertIngenFunksjonelleFeil()
-        assertActivities()
-        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT,
-            refusjon = Refusjon(INNTEKT, 15.januar, emptyList())
-        )
-        assertTilstander(
-            1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,

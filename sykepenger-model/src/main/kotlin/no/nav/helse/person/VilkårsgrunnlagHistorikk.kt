@@ -255,9 +255,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             subsumsjonObserver: SubsumsjonObserver
         ): VilkårsgrunnlagElement?
 
-        internal fun nyeRefusjonsopplysninger(inntektsmelding: Inntektsmelding): VilkårsgrunnlagElement? {
+        internal fun nyeRefusjonsopplysninger(inntektsmelding: Inntektsmelding): Pair<VilkårsgrunnlagElement, Revurderingseventyr>?  {
             val sykepengegrunnlag = sykepengegrunnlag.nyeRefusjonsopplysninger(inntektsmelding) ?: return null
-            return kopierMed(inntektsmelding, sykepengegrunnlag, opptjening, SubsumsjonObserver.NullObserver)
+            val eventyr = sykepengegrunnlag.finnEventyr(this.sykepengegrunnlag)
+            return kopierMed(inntektsmelding, sykepengegrunnlag, opptjening, SubsumsjonObserver.NullObserver) to eventyr
         }
 
         protected abstract fun vilkårsgrunnlagtype(): String

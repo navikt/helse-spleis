@@ -142,6 +142,11 @@ internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(AKSEPTERT)
+
         håndterYtelser(2.vedtaksperiode)
 
         håndterSimulering(2.vedtaksperiode)
@@ -155,7 +160,12 @@ internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         assertTrue(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.harUtbetalinger())
         assertTrue(inspektør.utbetaling(1).inspektør.personOppdrag.harUtbetalinger())
         assertTrue(inspektør.utbetaling(1).inspektør.personOppdrag[0].erOpphør())
-        assertEquals(17.januar til 28.februar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag))
+        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag))
+
+        assertTrue(inspektør.utbetaling(2).inspektør.arbeidsgiverOppdrag.harUtbetalinger())
+        assertTrue(inspektør.utbetaling(2).inspektør.personOppdrag.harUtbetalinger())
+        assertTrue(inspektør.utbetaling(2).inspektør.personOppdrag[0].erOpphør())
+        assertEquals(17.januar til 28.februar, Oppdrag.periode(inspektør.utbetaling(2).inspektør.arbeidsgiverOppdrag))
         assertIngenVarsler(2.vedtaksperiode.filter())
     }
 }

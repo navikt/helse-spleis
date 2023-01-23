@@ -111,6 +111,10 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(18.januar, 1.februar)), førsteFraværsdag = 4.mars)
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         håndterYtelser(2.vedtaksperiode)
@@ -120,6 +124,10 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,

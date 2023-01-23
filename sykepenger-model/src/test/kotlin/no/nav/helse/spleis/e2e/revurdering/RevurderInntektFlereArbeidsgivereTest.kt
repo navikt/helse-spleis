@@ -489,6 +489,9 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING
             )
             assertDag(17.januar, 1062.daglig, aktuellDagsinntekt = 23000.månedlig)
@@ -511,6 +514,9 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -541,6 +547,9 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,

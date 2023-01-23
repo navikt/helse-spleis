@@ -506,9 +506,10 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         håndterYtelser(3.vedtaksperiode)
 
-        assertVarsel(RV_IM_2, 1.vedtaksperiode.filter(a1))
-        assertInfo(RV_RV_1.varseltekst, 2.vedtaksperiode.filter(a1))
-        assertIngenVarsler(3.vedtaksperiode.filter(a1))
+        assertIngenVarsler(1.vedtaksperiode.filter(a1))
+        assertIngenVarsler(2.vedtaksperiode.filter(a1))
+        assertVarsel(RV_IM_2, 3.vedtaksperiode.filter(a1))
+
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
@@ -1159,9 +1160,32 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         val førsteUtbetalingsdag = utbetalingInspektør.utbetalingstidslinje[7.februar]
         assertEquals(riktigInntekt, førsteUtbetalingsdag.økonomi.inspektør.aktuellDagsinntekt)
+        assertEquals(22.januar til 11.februar, inspektør.periode(1.vedtaksperiode))
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVVENTER_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVVENTER_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING
+        )
     }
 
     @Test
