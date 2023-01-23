@@ -11,19 +11,31 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.Varselkode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.assertUtbetalingsbeløp
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSøknad
+import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
 import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
+import no.nav.helse.spleis.e2e.håndterUtbetalt
+import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
+import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
@@ -54,6 +66,39 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
         assertFunksjonellFeil("Mangler inntekt for sykepengegrunnlag som følge av at skjæringstidspunktet har endret seg")
+    }
+
+    @Test
+    fun `Revurderer vegg-i-vegg-AUU når det ikke foreligger tidligere utbetaling`() {
+        nyPeriode(1.mars til 16.mars)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        assertVarsel(Varselkode.RV_OO_2, 1.vedtaksperiode.filter())
+        assertVarsel(Varselkode.RV_OO_1, 2.vedtaksperiode.filter())
+
+        håndterInntektsmelding(listOf(1.februar til 16.februar))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        assertUtbetalingsbeløp(
+            1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 1431,
+            forventetArbeidsgiverRefusjonsbeløp = 1431,
+            subset = 17.februar til 16.mars
+        )
+        assertIngenFunksjonelleFeil()
     }
 
     @Test
