@@ -140,15 +140,20 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
 
         håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar)
-        håndterYtelser(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
         assertForventetFeil(
             forklaring = "Inntektsmeldingen gjør at det tidligere sammenhengende sykefraværet i revurderingen nå har to skjæringstidspunkter",
             nå = {
-                assertIllegalArgumentException("krever vilkårsgrunnlag for 2018-01-01, men har ikke. Tildeles det utbetaling til en vedtaksperiode som ikke skal ha utbetaling?")
-                { håndterYtelser(2.vedtaksperiode) }
+                assertEquals(listOf(1.februar), person.skjæringstidspunkter())
             },
             ønsket = {
+                assertEquals(listOf(1.februar, 1.januar), person.skjæringstidspunkter())
+                håndterYtelser(1.vedtaksperiode)
+                håndterSimulering(1.vedtaksperiode)
+                håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+                håndterUtbetalt()
+
+                håndterYtelser(2.vedtaksperiode)
+                håndterVilkårsgrunnlag(2.vedtaksperiode)
                 håndterYtelser(2.vedtaksperiode)
                 håndterSimulering(2.vedtaksperiode)
             }
