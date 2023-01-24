@@ -27,6 +27,9 @@ import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.serde.api.dto.Refusjonselement
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
+import no.nav.helse.serde.api.speil.dagligAvrundet
+import no.nav.helse.serde.api.speil.måndligAvrundet
+import no.nav.helse.serde.api.speil.årligAvrundet
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosent
@@ -143,11 +146,7 @@ internal class IInfotrygdGrunnlag(
 }
 
 internal class InntektBuilder(private val inntekt: Inntekt) {
-    internal fun build(): IInntekt {
-        return inntekt.reflection { årlig, månedlig, daglig, _ ->
-            IInntekt(årlig, månedlig, daglig)
-        }
-    }
+    internal fun build() = IInntekt(inntekt.årligAvrundet, inntekt.måndligAvrundet, inntekt.dagligAvrundet)
 }
 
 internal class IVilkårsgrunnlagHistorikk {
@@ -287,8 +286,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                     inntektsopplysning.accept(this)
                 }
 
-                fun total() = inntekter
-                    .reflection { årlig, _, _, _ -> årlig }
+                fun total() = inntekter.årligAvrundet
 
                 override fun preVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
                     inntekter = skattComposite.rapportertInntekt()
@@ -397,7 +395,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                     Refusjonselement(
                         fom = fom,
                         tom = tom,
-                        beløp = beløp.reflection { _, månedlig, _, _ -> månedlig },
+                        beløp = beløp.måndligAvrundet,
                         meldingsreferanseId = meldingsreferanseId
                     )
                 )
