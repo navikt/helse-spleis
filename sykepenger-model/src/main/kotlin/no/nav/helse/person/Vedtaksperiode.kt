@@ -1019,7 +1019,9 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterDager(dager)
             dager.varsel(RV_IM_4)
         }
-        fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {}
+        fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
+            inntektOgRefusjon.varsel(RV_IM_4)
+        }
 
         fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) {}
 
@@ -2179,6 +2181,8 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
             vedtaksperiode.håndterDager(dager)
         }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) { }
     }
 
     internal object RevurderingFeilet : Vedtaksperiodetilstand {

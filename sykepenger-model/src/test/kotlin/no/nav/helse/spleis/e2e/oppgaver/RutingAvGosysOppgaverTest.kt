@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.oppgaver
 
 import java.util.UUID
-import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -317,7 +316,6 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering: Legge til RV_IM_4 som default på håndterInntektOgRefusjon?")
     fun `Ferie teller likt som utbetaling når vi skal sjekke om vi har nærliggende utbetaling`() {
         nyttVedtak(1.mars, 31.mars)
 

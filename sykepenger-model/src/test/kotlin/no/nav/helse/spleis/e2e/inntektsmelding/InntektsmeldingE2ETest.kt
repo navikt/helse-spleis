@@ -1528,7 +1528,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering: Legge til RV_IM_4 som default på håndterInntektOgRefusjon?")
+    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering: La oss undersøke om vi kan fjerne RV_IM_1")
     fun `inntektsmelding oppgir første fraværsdag i en periode med ferie etter sykdom med kort periode først`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent))

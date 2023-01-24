@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.brukerutbetaling
 
-import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -677,7 +676,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering: Legge til RV_IM_4 som default på håndterInntektOgRefusjon?")
     fun `Korrigerende inntektsmelding med feil skjæringstidspunkt går til manuell behandling på grunn av warning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
