@@ -108,23 +108,6 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    fun `første fraværsdag treffer midt i en sammenhengende periode`() {
-        inntektsmelding(listOf(3.januar til 18.januar), førsteFraværsdag = 5.februar)
-        val førstePeriode = 3.januar til 31.januar
-        val andrePeriode = 1.februar til 16.februar
-        val tredjePeriode = 17.februar til 28.februar
-        val perioder = listOf(førstePeriode, andrePeriode, tredjePeriode)
-        val tidslinjeFør = inntektsmelding.sykdomstidslinje()
-        assertFalse(inntektsmelding.erRelevant(førstePeriode, perioder))
-        assertEquals(tidslinjeFør, inntektsmelding.sykdomstidslinje())
-        assertFalse(inntektsmelding.harVarslerEllerVerre())
-        assertTrue(inntektsmelding.erRelevant(andrePeriode, perioder))
-        assertTrue(inntektsmelding.harVarslerEllerVerre())
-        assertTrue(inntektsmelding.erRelevant(tredjePeriode, perioder))
-        assertEquals(tidslinjeFør, inntektsmelding.sykdomstidslinje())
-    }
-
-    @Test
     fun `første fraværsdag treffer midt i en sammenhengende periode og arbeidsgiverperioden er forskjøvet`() {
         inntektsmelding(listOf(3.januar til 18.januar), førsteFraværsdag = 5.februar)
         val førstePeriode = 1.januar til 31.januar

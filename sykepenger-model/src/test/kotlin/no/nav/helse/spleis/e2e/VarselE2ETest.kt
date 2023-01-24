@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -33,7 +32,6 @@ import no.nav.helse.person.Varselkode.RV_AY_6
 import no.nav.helse.person.Varselkode.RV_AY_7
 import no.nav.helse.person.Varselkode.RV_AY_8
 import no.nav.helse.person.Varselkode.RV_AY_9
-import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_3
 import no.nav.helse.person.Varselkode.RV_IM_4
@@ -180,15 +178,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         nyPeriode(25.januar til 31.januar)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, TilstandType.START, TilstandType.TIL_INFOTRYGD)
         assertFunksjonellFeil(Varselkode.RV_SØ_28)
-    }
-
-    @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering: La oss undersøke om vi kan fjerne RV_IM_1")
-    fun `varsel - Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første - bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt`() {
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 10.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 23.januar)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(11.januar, 31.januar, 100.prosent))
-        assertVarsel(RV_IM_1, 2.vedtaksperiode.filter())
     }
 
     @Test

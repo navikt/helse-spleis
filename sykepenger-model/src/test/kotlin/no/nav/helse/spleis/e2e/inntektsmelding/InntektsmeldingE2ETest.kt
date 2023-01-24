@@ -41,7 +41,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_3
 import no.nav.helse.person.Varselkode.RV_IM_4
@@ -1080,10 +1079,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             RV_IM_4,
             1.vedtaksperiode.filter()
         )
-        assertIngenVarsel(
-            RV_IM_1,
-            2.vedtaksperiode.filter()
-        )
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertEquals(8.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
@@ -1515,13 +1510,11 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             RV_IM_4,
             1.vedtaksperiode.filter()
         )
-        assertIngenVarsel(RV_IM_1, 1.vedtaksperiode.filter())
         assertIngenVarsel(RV_IM_2, 1.vedtaksperiode.filter())
         assertVarsel(
             RV_IM_4,
             2.vedtaksperiode.filter()
         )
-        assertVarsel(RV_IM_1, 2.vedtaksperiode.filter())
         assertIngenVarsel(RV_IM_2, 2.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
@@ -1555,16 +1548,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             RV_IM_2,
             2.vedtaksperiode.filter()
         )
-        assertIngenVarsel(
-            RV_IM_1,
-            2.vedtaksperiode.filter()
-        )
         assertVarsel(
             RV_IM_4,
-            3.vedtaksperiode.filter()
-        )
-        assertVarsel(
-            RV_IM_1,
             3.vedtaksperiode.filter()
         )
         assertIngenVarsel(
@@ -1895,10 +1880,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
         assertIngenVarsel(
             RV_IM_2,
-            2.vedtaksperiode.filter()
-        )
-        assertIngenVarsel(
-            RV_IM_1,
             2.vedtaksperiode.filter()
         )
         assertIngenVarsel(

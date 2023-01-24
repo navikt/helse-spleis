@@ -18,7 +18,6 @@ import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Personopplysninger
-import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_3
 import no.nav.helse.person.Varselkode.RV_IM_4
@@ -116,9 +115,6 @@ class Inntektsmelding(
             trimLeft(periode.endInclusive)
             return false
         }
-
-        if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag) && perioder.size != relevantePerioder.size)
-            varsel(RV_IM_1)
         return true
     }
 
