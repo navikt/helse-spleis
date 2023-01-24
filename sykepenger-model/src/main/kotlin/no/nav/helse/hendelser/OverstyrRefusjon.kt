@@ -5,7 +5,7 @@ import java.util.UUID
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.PersonHendelse
-import no.nav.helse.person.inntekt.NyeRefusjonsopplysninger
+import no.nav.helse.person.inntekt.NyeArbeidsgiverInntektsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 
 class OverstyrRefusjon(
@@ -22,9 +22,9 @@ class OverstyrRefusjon(
         hendelseIder.add(Dokumentsporing.overstyrRefusjon(meldingsreferanseId()))
     }
 
-    internal fun overstyr(builder: NyeRefusjonsopplysninger) {
+    internal fun overstyr(builder: NyeArbeidsgiverInntektsopplysninger) {
         refusjon.forEach { (orgnummer, refusjonsopplysninger) ->
-            builder.leggTilRefusjonsopplysninger(orgnummer, refusjonsopplysninger)
+            builder.leggTilArbeidsgiverInntektsopplysninger(orgnummer, refusjonsopplysninger,)
         }
     }
 }

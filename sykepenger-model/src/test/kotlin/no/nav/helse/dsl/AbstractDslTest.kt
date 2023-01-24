@@ -27,6 +27,7 @@ import no.nav.helse.person.Varselkode
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.spleis.e2e.lagInntektperioder
@@ -38,6 +39,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
@@ -413,6 +415,15 @@ internal abstract class AbstractDslTest {
 
     protected fun medFødselsdato(fødselsdato: LocalDate) {
         testperson = TestPerson(observatør = observatør, fødselsdato = fødselsdato, deferredLog = deferredLog, jurist = jurist)
+    }
+
+    protected fun Refusjonsopplysning.Refusjonsopplysninger.assertRefusjonsbeløp(periode: Periode, beløp: Inntekt) {
+        periode.forEach { dag ->
+            Assertions.assertEquals(
+                beløp,
+                refusjonsbeløp(skjæringstidspunkt = LocalDate.MAX, dag = dag, manglerRefusjonsopplysning = { _, _ -> })
+            )
+        }
     }
 
     @BeforeEach

@@ -33,7 +33,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.inne
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.inntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medUtbetalingsopplysninger
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.nyeRefusjonsopplysninger
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.nyeArbeidsgiverInntektsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.omregnetÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.refusjonsopplysninger
@@ -190,7 +190,7 @@ internal class Sykepengegrunnlag(
         arbeidsgiverInntektsopplysninger.inntekt(organisasjonsnummer)
 
     internal fun nyeRefusjonsopplysninger(inntektsmelding: Inntektsmelding): Sykepengegrunnlag? {
-        val builder = NyeRefusjonsopplysninger(arbeidsgiverInntektsopplysninger)
+        val builder = NyeArbeidsgiverInntektsopplysninger(arbeidsgiverInntektsopplysninger)
         inntektsmelding.nyeRefusjonsopplysninger(builder)
         val resultat = builder.resultat() ?: return  null // ingen endring
         return kopierSykepengegrunnlag(resultat, deaktiverteArbeidsforhold)
@@ -352,11 +352,19 @@ internal class Sykepengegrunnlag(
 
 }
 
-internal class NyeRefusjonsopplysninger(private val opprinneligArbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>) {
+internal class NyeArbeidsgiverInntektsopplysninger(private val opprinneligArbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>) {
     private var nyeOpplysninger = opprinneligArbeidsgiverInntektsopplysninger
 
-    internal fun leggTilRefusjonsopplysninger(organisasjonsnummer: String, refusjonsopplysninger: Refusjonsopplysninger) {
-        nyeOpplysninger = nyeOpplysninger.nyeRefusjonsopplysninger(organisasjonsnummer, refusjonsopplysninger)
+    internal fun leggTilArbeidsgiverInntektsopplysninger(
+        organisasjonsnummer: String,
+        refusjonsopplysninger: Refusjonsopplysninger,
+        inntektsopplysning: Inntektsopplysning
+    ) {
+        nyeOpplysninger = nyeOpplysninger.nyeArbeidsgiverInntektsopplysninger(
+            organisasjonsnummer,
+            refusjonsopplysninger,
+            inntektsopplysning
+        )
     }
 
     internal fun resultat() = nyeOpplysninger.takeUnless { nyeOpplysninger == opprinneligArbeidsgiverInntektsopplysninger }

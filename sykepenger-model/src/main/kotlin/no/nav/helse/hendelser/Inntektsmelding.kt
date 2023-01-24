@@ -27,7 +27,7 @@ import no.nav.helse.person.Varselkode.RV_IM_7
 import no.nav.helse.person.Varselkode.RV_IM_8
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.Inntektshistorikk
-import no.nav.helse.person.inntekt.NyeRefusjonsopplysninger
+import no.nav.helse.person.inntekt.NyeArbeidsgiverInntektsopplysninger
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
@@ -197,8 +197,12 @@ class Inntektsmelding(
         hendelseIder.add(Dokumentsporing.inntektsmelding(meldingsreferanseId()))
     }
 
-    internal fun nyeRefusjonsopplysninger(builder: NyeRefusjonsopplysninger) {
-        builder.leggTilRefusjonsopplysninger(organisasjonsnummer, refusjon.refusjonsopplysninger(meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder))
+    internal fun nyeRefusjonsopplysninger(builder: NyeArbeidsgiverInntektsopplysninger) {
+        builder.leggTilArbeidsgiverInntektsopplysninger(
+            organisasjonsnummer,
+            refusjon.refusjonsopplysninger(meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder),
+
+        )
     }
 
     class Refusjon(

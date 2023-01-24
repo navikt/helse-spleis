@@ -9,6 +9,7 @@ import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
@@ -17,6 +18,7 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.readResource
 import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.somPersonidentifikator
@@ -24,8 +26,10 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 
 internal abstract class AbstractPersonTest {
@@ -150,10 +154,20 @@ internal abstract class AbstractPersonTest {
     fun Int.utbetaling(orgnummer: String) = inspektør(orgnummer).utbetalingId(this - 1)
     fun inspektør(orgnummer: String) = TestArbeidsgiverInspektør(person, orgnummer)
     fun inspektør(orgnummer: String, block: TestArbeidsgiverInspektør.() -> Unit) = inspektør(orgnummer).run(block)
+
 }
 
 internal fun AbstractPersonTest.nullstillTilstandsendringer() = observatør.nullstillTilstandsendringer()
 
 internal fun interface IdInnhenter {
     fun id(orgnummer: String): UUID
+}
+
+internal fun Refusjonsopplysning.Refusjonsopplysninger.assertRefusjonsbeløp(periode: Periode, beløp: Inntekt) {
+    periode.forEach { dag ->
+        Assertions.assertEquals(
+            beløp,
+            refusjonsbeløp(skjæringstidspunkt = LocalDate.MAX, dag = dag, manglerRefusjonsopplysning = { _, _ -> })
+        )
+    }
 }

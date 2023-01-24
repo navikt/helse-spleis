@@ -20,7 +20,7 @@ import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserve
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medInntekt
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.nyeRefusjonsopplysninger
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.nyeArbeidsgiverInntektsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
@@ -71,8 +71,14 @@ internal class ArbeidsgiverInntektsopplysningTest {
             inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 1000.månedlig),
             refusjonsopplysninger = refusjonsopplysninger
         )
-        assertTrue(arbeidsgiverInntektsopplysning == listOf(arbeidsgiverInntektsopplysning).nyeRefusjonsopplysninger("a1", refusjonsopplysninger).single())
-        assertTrue(arbeidsgiverInntektsopplysning === listOf(arbeidsgiverInntektsopplysning).nyeRefusjonsopplysninger("a1", refusjonsopplysninger).single())
+        assertTrue(arbeidsgiverInntektsopplysning == listOf(arbeidsgiverInntektsopplysning).nyeArbeidsgiverInntektsopplysninger(
+            "a1",
+            refusjonsopplysninger,
+        ).single())
+        assertTrue(arbeidsgiverInntektsopplysning === listOf(arbeidsgiverInntektsopplysning).nyeArbeidsgiverInntektsopplysninger(
+            "a1",
+            refusjonsopplysninger,
+        ).single())
     }
 
     @Test
