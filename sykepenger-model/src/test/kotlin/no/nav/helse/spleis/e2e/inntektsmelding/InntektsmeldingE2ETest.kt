@@ -2056,7 +2056,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering: Løses om kun siste periode som håndterer dager validerer")
     fun `Arbeidsgiverperiode skal ikke valideres før historikken er oppdatert`() {
         nyPeriode(1.januar til 15.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))

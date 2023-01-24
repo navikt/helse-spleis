@@ -22,7 +22,7 @@ internal class DagerFraInntektsmelding(
     internal fun meldingsreferanseId() = inntektsmelding.meldingsreferanseId()
     internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = inntektsmelding.leggTil(hendelseIder)
 
-    internal fun valider(arbeidsgiverperiode: Arbeidsgiverperiode?) = inntektsmelding.validerArbeidsgiverperiode(arbeidsgiverperiode)
+    private fun valider(arbeidsgiverperiode: Arbeidsgiverperiode?) = inntektsmelding.validerArbeidsgiverperiode(arbeidsgiverperiode)
     internal fun vurdertTilOgMed(dato: LocalDate) = inntektsmelding.trimLeft(dato)
     internal fun oppdatertFom(periode: Periode) = inntektsmelding.oppdaterFom(periode)
     internal fun leggTilArbeidsdagerFør(dato: LocalDate) {
@@ -58,10 +58,13 @@ internal class DagerFraInntektsmelding(
         arbeidsgiver.oppdaterSykdom(it)
     }
 
+    private var forrigePeriodeSomHåndterte: Periode? = null
+
     internal fun håndter(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Sykdomstidslinje): Sykdomstidslinje? {
         val overlappendeDager = overlappendeDager(periode).takeUnless { it.isEmpty() } ?: return null
         val arbeidsgiverSykedomstidslinje = oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, overlappendeDager.omsluttendePeriode!!))
         gjenståendeDager.removeAll(overlappendeDager)
+        forrigePeriodeSomHåndterte = periode
         return arbeidsgiverSykedomstidslinje.subset(periode)
     }
 
@@ -71,9 +74,17 @@ internal class DagerFraInntektsmelding(
         gjenståendeDager.clear()
     }
 
-    internal fun håndterGjenstående(arbeidsgiver: Arbeidsgiver) = håndterGjenstående {
-        arbeidsgiver.oppdaterSykdom(it)
+    internal fun håndterGjenstående(arbeidsgiver: Arbeidsgiver) {
+        håndterGjenstående {
+            arbeidsgiver.oppdaterSykdom(it)
+        }
+        forrigePeriodeSomHåndterte?.let {
+            // Vi ønsker kun å validere arbeidsgiverperioden en gang, og dette til slutt
+            // Dette for å unngå uenighet om agp hvis kun deler av historikken er lagt til
+            valider(arbeidsgiver.arbeidsgiverperiode(it, SubsumsjonObserver.NullObserver))
+        }
     }
+
 
     private class PeriodeFraInntektsmelding(
         private val inntektsmelding: Inntektsmelding,

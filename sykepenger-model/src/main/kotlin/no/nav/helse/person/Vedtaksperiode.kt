@@ -302,8 +302,6 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndterStrekkingAvPeriode(this, dager)
         // Håndterer dagene som vedtaksperioden skal håndtere og oppdaterer sykdomstidslinjen
         sykdomstidslinje = dager.håndter(periode, arbeidsgiver)!!
-        // Vi validerer etter vi har oppdatert sykdomstidslinjene fordi det kan påvirke arbeidsgiverperiode-utregningen
-        dager.valider(finnArbeidsgiverperiode())
     }
 
     private fun erAlleredeHensyntatt(inntektsmelding: Inntektsmelding) =

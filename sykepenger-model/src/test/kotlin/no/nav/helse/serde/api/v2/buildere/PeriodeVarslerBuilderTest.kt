@@ -1,9 +1,9 @@
 package no.nav.helse.serde.api.v2.buildere
 
-import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
 import no.nav.helse.hendelser.til
@@ -62,11 +62,10 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("fikses når kun siste periode som håndterer dager validerer agp")
     fun `foregående uten utbetaling med warning og warning på periode to`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.januar) // Warning
+        håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), merknaderFraSykmelding = listOf(Søknad.Merknad("UGYLDIG_TILBAKEDATERING")))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent), Utdanning(30.januar, 31.januar))
