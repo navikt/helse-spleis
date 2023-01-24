@@ -110,6 +110,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.sammenlign
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjerFilter
 import org.slf4j.LoggerFactory
@@ -1014,8 +1015,14 @@ internal class Vedtaksperiode private constructor(
 
         fun håndterStrekkingAvPeriode(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {}
         fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
+            val arbeidsgiverperiodeFør = vedtaksperiode.finnArbeidsgiverperiode()
             vedtaksperiode.håndterDager(dager)
-            dager.varsel(RV_IM_4)
+            val arbeidsgiverperiodeEtter = vedtaksperiode.finnArbeidsgiverperiode()
+            if (!arbeidsgiverperiodeFør.sammenlign(arbeidsgiverperiodeEtter)) {
+                // Hvis AGP er uendret så legger vi ikke til varsel om at det er mottatt flere inntektsmeldinger
+                // Det kan derimot være at inntekt- og refusjon legger på varselet
+                dager.varsel(RV_IM_4)
+            }
         }
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
             inntektOgRefusjon.varsel(RV_IM_4)

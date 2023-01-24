@@ -146,6 +146,12 @@ internal class Arbeidsgiverperiode private constructor(internal val perioder: Li
             periode in arbeidsgiverperiode
         }
 
+        internal fun Arbeidsgiverperiode?.sammenlign(other: Arbeidsgiverperiode?): Boolean {
+            if (this == null && other == null) return true
+            if (this == null || other == null) return false
+            return this.sammenlign(other.perioder)
+        }
+
         private fun Periode.justerForHelg() = when (endInclusive.dayOfWeek) {
             DayOfWeek.SATURDAY -> start til endInclusive.plusDays(1)
             DayOfWeek.FRIDAY -> start til endInclusive.plusDays(2)
