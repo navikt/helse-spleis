@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.refusjon
 
-import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
@@ -16,14 +15,12 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.oktober
-import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.Varselkode.RV_RE_1
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.september
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -187,9 +184,4 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         return vedtaksperiodeId
     }
 
-    private fun Refusjonsopplysninger.assertRefusjonsbeløp(periode: Periode, beløp: Inntekt) {
-        periode.forEach { dag ->
-            assertEquals(beløp, refusjonsbeløp(skjæringstidspunkt = LocalDate.MAX, dag = dag, manglerRefusjonsopplysning = { _, _->}))
-        }
-    }
 }

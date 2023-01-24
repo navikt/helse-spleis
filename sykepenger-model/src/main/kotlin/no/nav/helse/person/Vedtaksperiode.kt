@@ -255,7 +255,7 @@ internal class Vedtaksperiode private constructor(
             if (!it) return@also inntektsmelding.trimLeft(periode.endInclusive)
             kontekst(inntektsmelding)
             if (!inntektsmelding.erRelevant(periode, sammenhengendePerioder.map { periode -> periode.periode })) return@also
-            person.nyeRefusjonsopplysninger(skjæringstidspunkt, inntektsmelding)
+            person.nyeRefusjonsopplysninger(skjæringstidspunkt, inntektsmelding, jurist)
             tilstand.håndter(this, inntektsmelding)
         }
     }
