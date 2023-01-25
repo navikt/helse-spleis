@@ -22,7 +22,7 @@ class OverstyrArbeidsgiveropplysninger(
         hendelseIder.add(Dokumentsporing.overstyrArbeidsgiveropplysninger(meldingsreferanseId()))
     }
 
-    internal fun overstyr(builder: Sykepengegrunnlag.SaksbehandlerOverstyringer) {
+    internal fun overstyr(builder: Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer) {
         arbeidsgiveropplysninger.forEach { builder.leggTilInntekt(it) }
     }
 }

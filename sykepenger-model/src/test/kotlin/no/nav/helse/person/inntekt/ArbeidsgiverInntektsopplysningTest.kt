@@ -3,7 +3,7 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Grunnbeløp.Companion.`6G`
+import no.nav.helse.Grunnbeløp.Companion
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.hendelser.Subsumsjon
@@ -20,10 +20,8 @@ import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserve
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medInntekt
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.nyeRefusjonsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Skatt.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.inntekt.Skatt.Sykepengegrunnlag
 import no.nav.helse.testhelpers.assertNotNull
@@ -35,7 +33,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -60,19 +57,6 @@ internal class ArbeidsgiverInntektsopplysningTest {
         assertEquals(listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(opptjening, new, NullObserver))
         val forMange = listOf(a1Overstyrt, a3Overstyrt)
         assertEquals(listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(opptjening, forMange, NullObserver)) { "skal ikke kunne legge til inntekter som ikke finnes fra før" }
-    }
-
-    @Test
-    fun `To like refusjonsopplysninger`() {
-        val inntektsmeldingId = UUID.randomUUID()
-        val refusjonsopplysninger = Refusjonsopplysning(inntektsmeldingId, 1.januar, null, 1000.månedlig).refusjonsopplysninger
-        val arbeidsgiverInntektsopplysning = ArbeidsgiverInntektsopplysning(
-            orgnummer = "a1",
-            inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 1000.månedlig),
-            refusjonsopplysninger = refusjonsopplysninger
-        )
-        assertTrue(arbeidsgiverInntektsopplysning == listOf(arbeidsgiverInntektsopplysning).nyeRefusjonsopplysninger("a1", refusjonsopplysninger).single())
-        assertTrue(arbeidsgiverInntektsopplysning === listOf(arbeidsgiverInntektsopplysning).nyeRefusjonsopplysninger("a1", refusjonsopplysninger).single())
     }
 
     @Test

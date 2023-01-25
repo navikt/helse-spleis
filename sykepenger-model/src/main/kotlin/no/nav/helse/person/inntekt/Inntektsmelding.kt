@@ -21,7 +21,7 @@ internal class Inntektsmelding(
     }
 
     override fun overstyres(ny: Inntektsopplysning): Inntektsopplysning {
-        if (ny !is Saksbehandler) return this
+        if (ny !is Saksbehandler && ny !is Inntektsmelding) return this
         return super.overstyres(ny)
     }
 
