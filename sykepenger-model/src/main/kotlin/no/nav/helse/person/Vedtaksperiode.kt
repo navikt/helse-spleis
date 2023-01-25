@@ -2349,7 +2349,7 @@ internal class Vedtaksperiode private constructor(
             this.filter { it.skjæringstidspunkt == skjæringstidspunkt }
 
         internal fun List<Vedtaksperiode>.skalHåndtere(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding): Vedtaksperiode? {
-            listOf(inntektOgRefusjon.gammelStrategy).forEach { strategy ->
+            inntektOgRefusjon.stragier.forEach { strategy ->
                 forEach { vedtaksperiode ->
                     val match = inntektOgRefusjon.skalHåndteresAv(vedtaksperiode.periode, strategy) { vedtaksperiode.forventerInntektOgRefusjonFraInntektsmelding() }
                     if (match) return vedtaksperiode
