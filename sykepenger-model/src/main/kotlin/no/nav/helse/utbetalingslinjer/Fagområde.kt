@@ -1,7 +1,5 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag.Companion.reflectedArbeidsgiverBeløp
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag.Companion.reflectedPersonBeløp
 import java.time.LocalDate
 
 interface Beløpkilde {
@@ -14,8 +12,8 @@ internal enum class Fagområde(
     private val beløpStrategy: (Beløpkilde) -> Int,
     private val klassekode: Klassekode
 ) {
-    SykepengerRefusjon("SPREF", reflectedArbeidsgiverBeløp, Klassekode.RefusjonIkkeOpplysningspliktig),
-    Sykepenger("SP", reflectedPersonBeløp, Klassekode.SykepengerArbeidstakerOrdinær);
+    SykepengerRefusjon("SPREF", { beløpkilde: Beløpkilde -> beløpkilde.arbeidsgiverbeløp() }, Klassekode.RefusjonIkkeOpplysningspliktig),
+    Sykepenger("SP", { beløpkilde: Beløpkilde -> beløpkilde.personbeløp() }, Klassekode.SykepengerArbeidstakerOrdinær);
 
     override fun toString() = verdi
 

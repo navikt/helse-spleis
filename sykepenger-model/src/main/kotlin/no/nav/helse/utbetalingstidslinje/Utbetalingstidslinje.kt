@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.contains
 import no.nav.helse.person.UtbetalingsdagVisitor
-import no.nav.helse.utbetalingslinjer.Beløpkilde
 import no.nav.helse.utbetalingslinjer.BeløpkildeAdaptor
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
@@ -204,17 +203,6 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
             økonomi: Økonomi
         ) : Utbetalingsdag(dato, økonomi) {
             override val prioritet = 50
-
-            companion object {
-                internal val reflectedArbeidsgiverBeløp = { beløpkilde: Beløpkilde ->
-                    beløpkilde.arbeidsgiverbeløp()
-                }
-
-                internal val reflectedPersonBeløp = { beløpkilde: Beløpkilde ->
-                    beløpkilde.personbeløp()
-                }
-            }
-
             override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
         }
 
