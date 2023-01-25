@@ -7,6 +7,8 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.contains
 import no.nav.helse.person.UtbetalingsdagVisitor
+import no.nav.helse.utbetalingslinjer.Beløpkilde
+import no.nav.helse.utbetalingslinjer.BeløpkildeAdaptor
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
@@ -174,7 +176,7 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
         Comparable<Utbetalingsdag> {
 
         internal abstract val prioritet: Int
-
+        internal fun beløpkilde() = BeløpkildeAdaptor(økonomi)
         override fun compareTo(other: Utbetalingsdag): Int {
             return this.prioritet.compareTo(other.prioritet)
         }
@@ -204,12 +206,12 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
             override val prioritet = 50
 
             companion object {
-                internal val reflectedArbeidsgiverBeløp = { økonomi: Økonomi ->
-                    økonomi.medAvrundetData { _, _, _, _, _, _, arbeidsgiverbeløp, _, _ -> arbeidsgiverbeløp!! }
+                internal val reflectedArbeidsgiverBeløp = { beløpkilde: Beløpkilde ->
+                    beløpkilde.arbeidsgiverbeløp()
                 }
 
-                internal val reflectedPersonBeløp = { økonomi: Økonomi ->
-                    økonomi.medAvrundetData { _, _, _, _, _, _, _, personbeløp, _ -> personbeløp!! }
+                internal val reflectedPersonBeløp = { beløpkilde: Beløpkilde ->
+                    beløpkilde.personbeløp()
                 }
             }
 

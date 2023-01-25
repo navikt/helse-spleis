@@ -71,7 +71,7 @@ internal class OppdragBuilder(
     ) {
         // TODO: OppdragBuilder må bruke grad som Int, altså avrundetData
         økonomi.medAvrundetData { grad, _, _, _, _, aktuellDagsinntekt, _, _, _ ->
-            if (utbetalingslinjer.isNotEmpty() && fagområde.kanLinjeUtvides(linje, dag.økonomi, grad))
+            if (utbetalingslinjer.isNotEmpty() && fagområde.kanLinjeUtvides(linje, dag.beløpkilde(), grad))
                 tilstand.betalingsdag(dag, dato, grad, aktuellDagsinntekt)
             else
                 tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt)
@@ -134,7 +134,7 @@ internal class OppdragBuilder(
     }
 
     private fun addLinje(dag: Utbetalingsdag, dato: LocalDate, grad: Int, aktuellDagsinntekt: Int) {
-        utbetalingslinjer.add(0, fagområde.linje(fagsystemId, dag.økonomi, dato, grad, aktuellDagsinntekt))
+        utbetalingslinjer.add(0, fagområde.linje(fagsystemId, dag.beløpkilde(), dato, grad, aktuellDagsinntekt))
     }
 
     private fun addLinje(dato: LocalDate, grad: Int) {
@@ -282,7 +282,7 @@ internal class OppdragBuilder(
             grad: Int,
             aktuellDagsinntekt: Int
         ) {
-            fagområde.oppdaterLinje(linje, dag.dato, dag.økonomi, aktuellDagsinntekt)
+            fagområde.oppdaterLinje(linje, dag.dato, dag.beløpkilde(), aktuellDagsinntekt)
             tilstand = LinjeMedSats()
         }
 
