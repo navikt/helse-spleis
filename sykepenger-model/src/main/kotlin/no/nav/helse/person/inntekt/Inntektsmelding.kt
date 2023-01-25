@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
@@ -21,7 +22,9 @@ internal class Inntektsmelding(
     }
 
     override fun overstyres(ny: Inntektsopplysning): Inntektsopplysning {
-        if (ny !is Saksbehandler) return this
+        if (ny !is Saksbehandler && ny !is Inntektsmelding) return this
+        val måned = this.dato.withDayOfMonth(1) til this.dato.withDayOfMonth(this.dato.lengthOfMonth())
+        if (ny is Inntektsmelding && ny.dato !in måned) return this
         return super.overstyres(ny)
     }
 

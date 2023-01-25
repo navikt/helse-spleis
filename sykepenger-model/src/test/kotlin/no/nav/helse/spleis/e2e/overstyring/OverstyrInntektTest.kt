@@ -16,7 +16,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.Varselkode
-import no.nav.helse.person.inntekt.Saksbehandler
+import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -58,16 +58,8 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         nullstillTilstandsendringer()
-        håndterOverstyrInntekt(inntekt = overstyrtInntekt, orgnummer = ORGNUMMER, skjæringstidspunkt = fom)
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-
-        // dra saken til AVVENTER_GODKJENNING
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-
-        // assert at vi går gjennom restene av tilstandene som vanlig
-        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
         // assert at vi bruker den nye inntekten i beregning av penger til sjuk.
         val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
@@ -75,7 +67,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(ORGNUMMER)?.inspektør
             ?.also {
                 assertEquals(overstyrtInntekt, it.inntektsopplysning.omregnetÅrsinntekt())
-                assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
+                assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
     }
 

@@ -1405,14 +1405,14 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Ny inntektsmelding som treffer AvventerGodkjenning - hensyntar ikke ny inntekt`() {
+    fun `Ny inntektsmelding som treffer AvventerGodkjenning - hensyntar ny inntekt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), beregnetInntekt = INNTEKT)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), beregnetInntekt = INNTEKT * 2)
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), beregnetInntekt = INNTEKT + 1000.månedlig)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
@@ -1434,15 +1434,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             RV_IM_4,
             AktivitetsloggFilter.person()
         )
-        assertForventetFeil(
-            forklaring = "Benytter ikke inntekten i den nye inntektsmeldingen",
-            nå = {
-                assertInntektForDato(INNTEKT, 1.januar, inspektør = inspektør)
-            },
-            ønsket = {
-                assertInntektForDato(INNTEKT * 2, 1.januar, inspektør = inspektør)
-            }
-        )
+
+        assertInntektForDato(INNTEKT + 1000.månedlig, 1.januar, inspektør = inspektør)
 
     }
 

@@ -14,6 +14,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
@@ -25,6 +26,7 @@ import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
@@ -34,7 +36,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
@@ -547,32 +548,39 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
         val nyInntekt = INNTEKT * 1.25
 
-        val overstyr: () -> Unit = {
-            håndterOverstyrArbeidsgiveropplysninger(
-                skjæringstidspunkt = 1.januar,
-                arbeidsgiveropplysninger = listOf(
-                    OverstyrtArbeidsgiveropplysning(
-                        orgnummer = a1,
-                        inntekt = INNTEKT * 1.25,
-                        forklaring = "er i sykepengegrunnlaget",
-                        subsumsjon = null,
-                        refusjonsopplysninger = listOf(
-                            Triple(1.januar, null, nyInntekt)
-                        )
-                    ), OverstyrtArbeidsgiveropplysning(
-                        orgnummer = a2,
-                        inntekt = nyInntekt,
-                        forklaring = "er ikke i sykepengegrunnlaget",
-                        subsumsjon = null,
-                        refusjonsopplysninger = listOf(
-                            Triple(1.januar, null, nyInntekt)
-                        )
+
+        håndterOverstyrArbeidsgiveropplysninger(
+            skjæringstidspunkt = 1.januar,
+            arbeidsgiveropplysninger = listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a1,
+                    inntekt = INNTEKT * 1.25,
+                    forklaring = "er i sykepengegrunnlaget",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(
+                        Triple(1.januar, null, nyInntekt)
+                    )
+                ), OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a2,
+                    inntekt = nyInntekt,
+                    forklaring = "er ikke i sykepengegrunnlaget",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(
+                        Triple(1.januar, null, nyInntekt)
                     )
                 )
             )
-        }
+        )
 
-        assertEquals("De nye arbeidsgiveropplysningene inneholder arbeidsgivere som ikke er en del av sykepengegrunnlaget.", assertThrows<IllegalStateException>(overstyr).message)
+        val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode)
+        assertNotNull(vilkårsgrunnlag)
+        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør
+        assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+
+        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+            assertEquals(nyInntekt, it.inntektsopplysning.omregnetÅrsinntekt())
+            assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
+        }
     }
 
     @Test

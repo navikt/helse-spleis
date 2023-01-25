@@ -25,11 +25,13 @@ import no.nav.helse.person.Varselkode.RV_IM_6
 import no.nav.helse.person.Varselkode.RV_IM_7
 import no.nav.helse.person.Varselkode.RV_IM_8
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektshistorikk
-import no.nav.helse.person.inntekt.NyeRefusjonsopplysninger
+import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.inntekt.Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -221,8 +223,15 @@ class Inntektsmelding(
         hendelseIder.add(Dokumentsporing.inntektsmelding(meldingsreferanseId()))
     }
 
-    internal fun nyeRefusjonsopplysninger(builder: NyeRefusjonsopplysninger) {
-        builder.leggTilRefusjonsopplysninger(organisasjonsnummer, refusjon.refusjonsopplysninger(meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder))
+    internal fun nyeArbeidsgiverInntektsopplysninger(builder: ArbeidsgiverInntektsopplysningerOverstyringer) {
+        val inntektsdato = if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) førsteFraværsdag else arbeidsgiverperioder.maxOf { it.start }
+        builder.leggTilInntekt(
+            ArbeidsgiverInntektsopplysning(
+                organisasjonsnummer,
+                Inntektsmelding(UUID.randomUUID(), inntektsdato, meldingsreferanseId(), beregnetInntekt),
+                refusjon.refusjonsopplysninger(meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
+            )
+        )
     }
 
     class Refusjon(

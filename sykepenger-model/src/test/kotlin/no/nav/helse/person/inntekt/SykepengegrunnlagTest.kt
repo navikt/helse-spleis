@@ -23,6 +23,7 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.NAVDAGER
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -36,7 +37,6 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import kotlin.properties.Delegates
 
 internal class SykepengegrunnlagTest {
@@ -349,7 +349,7 @@ internal class SykepengegrunnlagTest {
                 leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, INGEN), LocalDateTime.now())
             }.build()),
         )
-        val overstyring = Sykepengegrunnlag.SaksbehandlerOverstyringer(opprinnelig, null, NullObserver)
+        val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(opprinnelig, null, NullObserver)
         val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", Saksbehandler(1.januar, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
         }.build())
@@ -371,7 +371,7 @@ internal class SykepengegrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Sykepengegrunnlag.SaksbehandlerOverstyringer(opprinnelig, null, NullObserver)
+        val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(opprinnelig, null, NullObserver)
         val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 2000.månedlig), LocalDateTime.now())
         }.build()
@@ -395,7 +395,7 @@ internal class SykepengegrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Sykepengegrunnlag.SaksbehandlerOverstyringer(opprinnelig, null, NullObserver)
+        val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(opprinnelig, null, NullObserver)
 
         val a1EndretInntektsopplysning = Saksbehandler(1.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
@@ -422,7 +422,7 @@ internal class SykepengegrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Sykepengegrunnlag.SaksbehandlerOverstyringer(opprinnelig, null, NullObserver)
+        val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(opprinnelig, null, NullObserver)
 
         val a1EndretInntektsopplysning = Saksbehandler(1.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
@@ -448,17 +448,29 @@ internal class SykepengegrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Sykepengegrunnlag.SaksbehandlerOverstyringer(opprinnelig, null, NullObserver)
+        val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(opprinnelig, null, NullObserver)
 
         val a3EndretInntektsopplysning = Saksbehandler(1.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val a3EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
         }.build()
 
-        val endretOpplysning = ArbeidsgiverInntektsopplysning("a3", a3EndretInntektsopplysning, a3EndretRefusjonsopplysninger)
-        overstyring.leggTilInntekt(endretOpplysning)
+        val a1EndretInntektsopplysning = Saksbehandler(1.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
+        val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
+            leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
+        }.build()
 
-        assertEquals("De nye arbeidsgiveropplysningene inneholder arbeidsgivere som ikke er en del av sykepengegrunnlaget.", assertThrows<IllegalStateException> { overstyring.resultat() }.message)
+        val endretOpplysningA3 = ArbeidsgiverInntektsopplysning("a3", a3EndretInntektsopplysning, a3EndretRefusjonsopplysninger)
+        overstyring.leggTilInntekt(endretOpplysningA3)
+
+        val endretOpplysningA1 = ArbeidsgiverInntektsopplysning("a1", a1EndretInntektsopplysning, a1EndretRefusjonsopplysninger)
+        overstyring.leggTilInntekt(endretOpplysningA1)
+
+
+        val resultat = overstyring.resultat()
+        assertNotNull(resultat)
+        assertEquals(2, resultat.size)
+        assertTrue(resultat.none{ it.inspektør.orgnummer == "a3" })
     }
 
     @Test

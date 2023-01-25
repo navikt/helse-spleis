@@ -117,14 +117,13 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     fun `revurdering av inntekt`() {
         nyttVedtak(1.januar, 31.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 35000.månedlig, refusjon = Refusjon(35000.månedlig, null, emptyList()))
-        håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser()
         håndterSimulering()
 
         val innslag = inspektør.vilkårsgrunnlagHistorikkInnslag()
 
         val generasjoner = vilkårsgrunnlag.build().toDTO()
-        assertEquals(3, generasjoner.size)
+        assertEquals(2, generasjoner.size)
 
         val førsteGenerasjon = requireNotNull(generasjoner[innslag.last().inspektør.id]?.vilkårsgrunnlagSpleis(1.januar))
         assertSpleisVilkårsprøving(

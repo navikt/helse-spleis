@@ -37,7 +37,7 @@ import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.Varselkode.RV_OS_1
 import no.nav.helse.person.Varselkode.RV_SV_1
-import no.nav.helse.person.inntekt.Saksbehandler
+import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -92,7 +92,6 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         val tidligereInntektInnslagId = inspektør.inntektInspektør.sisteInnslag?.innslagId
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 32000.månedlig, refusjon = Refusjon(32000.månedlig, null, emptyList()))
-        håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -112,9 +111,6 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
             TIL_UTBETALING,
@@ -125,7 +121,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
         val vilkårgrunnlagsinspektør = person.inspektør.vilkårsgrunnlagHistorikk.inspektør
         val grunnlagsdataInspektør = vilkårgrunnlagsinspektør.grunnlagsdata(0).inspektør
-        assertEquals(3, vilkårgrunnlagsinspektør.antallGrunnlagsdata())
+        assertEquals(2, vilkårgrunnlagsinspektør.antallGrunnlagsdata())
         assertEquals(3, grunnlagsdataInspektør.avviksprosent?.roundToInt())
 
         val tidligereBeregning = inspektør.utbetalingstidslinjeberegningData.first()
@@ -141,7 +137,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(ORGNUMMER)?.inspektør
             ?.also {
                 assertEquals(32000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-                assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
+                assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
             }
     }
 
@@ -149,7 +145,6 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     fun `revurder inntekt flere ganger`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 32000.månedlig, refusjon = Refusjon(32000.månedlig, null, emptyList()))
-        håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -157,7 +152,6 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 31000.månedlig, refusjon = Refusjon(31000.månedlig, null, emptyList()))
-        håndterOverstyrInntekt(inntekt = 31000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -172,7 +166,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(ORGNUMMER)?.inspektør
             ?.also {
                 assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-                assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
+                assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
             }
     }
 

@@ -702,9 +702,13 @@ class Person private constructor(
         return aktiveArbeidsforhold.size == 1 && aktiveArbeidsforhold.single().organisasjonsnummer() != orgnummer
     }
 
-    internal fun nyeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, inntektsmelding: Inntektsmelding) {
+    internal fun nyeArbeidsgiverInntektsopplysninger(
+        skjæringstidspunkt: LocalDate,
+        inntektsmelding: Inntektsmelding,
+        subsumsjonObserver: SubsumsjonObserver
+    ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return
-        val (nyttGrunnlag, eventyr) = (grunnlag.nyeRefusjonsopplysninger(inntektsmelding) ?: return)
+        val (nyttGrunnlag, eventyr) = (grunnlag.nyeArbeidsgiverInntektsopplysninger(inntektsmelding, subsumsjonObserver) ?: return)
         nyttVilkårsgrunnlag(inntektsmelding, nyttGrunnlag)
         startRevurdering(inntektsmelding, eventyr)
     }

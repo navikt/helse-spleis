@@ -29,11 +29,9 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deak
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.erOverstyrt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnEventyr
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harInntekt
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.inneholderAlleArbeidsgivereI
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.inntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medUtbetalingsopplysninger
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.nyeRefusjonsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.omregnetÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.refusjonsopplysninger
@@ -177,7 +175,7 @@ internal class Sykepengegrunnlag(
     }
 
     internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, opptjening: Opptjening?, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag? {
-        val builder = SaksbehandlerOverstyringer(arbeidsgiverInntektsopplysninger, opptjening, subsumsjonObserver)
+        val builder = ArbeidsgiverInntektsopplysningerOverstyringer(arbeidsgiverInntektsopplysninger, opptjening, subsumsjonObserver)
         hendelse.overstyr(builder)
         val resultat = builder.resultat() ?: return null
         return kopierSykepengegrunnlag(resultat, deaktiverteArbeidsforhold)
@@ -189,9 +187,9 @@ internal class Sykepengegrunnlag(
     internal fun inntekt(organisasjonsnummer: String): Inntekt? =
         arbeidsgiverInntektsopplysninger.inntekt(organisasjonsnummer)
 
-    internal fun nyeRefusjonsopplysninger(inntektsmelding: Inntektsmelding): Sykepengegrunnlag? {
-        val builder = NyeRefusjonsopplysninger(arbeidsgiverInntektsopplysninger)
-        inntektsmelding.nyeRefusjonsopplysninger(builder)
+    internal fun nyeArbeidsgiverInntektsopplysninger(inntektsmelding: Inntektsmelding, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag? {
+        val builder = ArbeidsgiverInntektsopplysningerOverstyringer(arbeidsgiverInntektsopplysninger, null, subsumsjonObserver)
+        inntektsmelding.nyeArbeidsgiverInntektsopplysninger(builder)
         val resultat = builder.resultat() ?: return  null // ingen endring
         return kopierSykepengegrunnlag(resultat, deaktiverteArbeidsforhold)
     }
@@ -329,7 +327,7 @@ internal class Sykepengegrunnlag(
         ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD
     }
 
-    internal class SaksbehandlerOverstyringer(
+    internal class ArbeidsgiverInntektsopplysningerOverstyringer(
         private val opprinneligArbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         private val opptjening: Opptjening?,
         private val subsumsjonObserver: SubsumsjonObserver
@@ -341,9 +339,9 @@ internal class Sykepengegrunnlag(
         }
 
         internal fun resultat(): List<ArbeidsgiverInntektsopplysning>? {
-            check(opprinneligArbeidsgiverInntektsopplysninger.inneholderAlleArbeidsgivereI(nyeInntektsopplysninger)) {
+         /*   check(opprinneligArbeidsgiverInntektsopplysninger.inneholderAlleArbeidsgivereI(nyeInntektsopplysninger)) {
                 "De nye arbeidsgiveropplysningene inneholder arbeidsgivere som ikke er en del av sykepengegrunnlaget."
-            }
+            }*/
             return opprinneligArbeidsgiverInntektsopplysninger.overstyrInntekter(opptjening, nyeInntektsopplysninger, subsumsjonObserver).takeUnless { resultat ->
                 resultat == opprinneligArbeidsgiverInntektsopplysninger
             }
@@ -352,12 +350,3 @@ internal class Sykepengegrunnlag(
 
 }
 
-internal class NyeRefusjonsopplysninger(private val opprinneligArbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>) {
-    private var nyeOpplysninger = opprinneligArbeidsgiverInntektsopplysninger
-
-    internal fun leggTilRefusjonsopplysninger(organisasjonsnummer: String, refusjonsopplysninger: Refusjonsopplysninger) {
-        nyeOpplysninger = nyeOpplysninger.nyeRefusjonsopplysninger(organisasjonsnummer, refusjonsopplysninger)
-    }
-
-    internal fun resultat() = nyeOpplysninger.takeUnless { nyeOpplysninger == opprinneligArbeidsgiverInntektsopplysninger }
-}

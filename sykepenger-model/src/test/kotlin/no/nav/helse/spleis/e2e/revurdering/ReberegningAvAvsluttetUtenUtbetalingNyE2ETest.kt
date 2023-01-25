@@ -47,6 +47,7 @@ import no.nav.helse.person.Varselkode.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
+import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -1141,14 +1142,20 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         assertNotNull(vilkårsgrunnlag)
 
+        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør
 
-        assertEquals(forMyeInntekt, vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
+        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+            assertEquals(riktigInntekt, it.inntektsopplysning.omregnetÅrsinntekt())
+            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+        }
+
+        assertEquals(riktigInntekt, vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
 
         val utbetaling = inspektør.gjeldendeUtbetalingForVedtaksperiode(2.vedtaksperiode)
         val utbetalingInspektør = utbetaling.inspektør
 
         val førsteUtbetalingsdag = utbetalingInspektør.utbetalingstidslinje[7.februar]
-        assertEquals(forMyeInntekt, førsteUtbetalingsdag.økonomi.inspektør.aktuellDagsinntekt)
+        assertEquals(riktigInntekt, førsteUtbetalingsdag.økonomi.inspektør.aktuellDagsinntekt)
         assertEquals(riktigInntekt, førsteUtbetalingsdag.økonomi.inspektør.arbeidsgiverRefusjonsbeløp)
         assertEquals(24.januar til 11.februar, inspektør.periode(1.vedtaksperiode))
 
