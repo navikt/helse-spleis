@@ -41,6 +41,20 @@ internal class InntektOgRefusjonFraInntektsmelding(
     ) =
         arbeidsgiver.addInntektsmelding(skjæringstidspunkt, inntektsmelding, jurist)
 
+    internal fun skalHåndteresAv(periode: Periode, strategy: InntektOgRefusjonMatchingStrategy, forventerInntekt: () -> Boolean)
+        = strategy.skalHåndteresAv(periode, forventerInntekt)
+
+    internal val gammelStrategy get() = GammelStrategy(førsteFraværsdag, sisteDagIArbeidsgiverperioden)
+}
+
+internal interface InntektOgRefusjonMatchingStrategy {
+    fun skalHåndteresAv(periode: Periode, forventerInntekt: () -> Boolean): Boolean
+}
+
+internal class GammelStrategy(
+    private val førsteFraværsdag: LocalDate?,
+    private val sisteDagIArbeidsgiverperioden: LocalDate?
+): InntektOgRefusjonMatchingStrategy {
 
 
     private val førsteFraværsdagEtterArbeidsgiverperioden =
@@ -53,9 +67,9 @@ internal class InntektOgRefusjonFraInntektsmelding(
         false -> sisteDagIArbeidsgiverperioden!!.nesteDag
     }
     private fun bestemmendeDag() = nesteBestemmendeDag ?: bestemmendeDagFraInntektsmelding
-
     private var erHåndtert: Boolean = false
-    internal fun skalHåndteresAv(periode: Periode, forventerInntekt: () -> Boolean): Boolean {
+
+    override fun skalHåndteresAv(periode: Periode, forventerInntekt: () -> Boolean): Boolean {
         if (erHåndtert) return false
         if (førsteFraværsdag == null && sisteDagIArbeidsgiverperioden == null) return false
         val bestemmendeDag = bestemmendeDag()
