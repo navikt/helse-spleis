@@ -10,9 +10,9 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.TilstandType
-import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -136,29 +136,35 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar, 100.prosent)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 80.prosent))
 
-        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING)
-        assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
-
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar)
-        assertForventetFeil(
-            forklaring = "Inntektsmeldingen gjør at det tidligere sammenhengende sykefraværet i revurderingen nå har to skjæringstidspunkter",
-            nå = {
-                assertEquals(listOf(1.februar), person.skjæringstidspunkter())
-            },
-            ønsket = {
-                assertEquals(listOf(1.februar, 1.januar), person.skjæringstidspunkter())
-                håndterYtelser(1.vedtaksperiode)
-                håndterSimulering(1.vedtaksperiode)
-                håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-                håndterUtbetalt()
+        assertEquals(listOf(1.januar), person.skjæringstidspunkter())
 
-                håndterYtelser(2.vedtaksperiode)
-                håndterVilkårsgrunnlag(2.vedtaksperiode)
-                håndterYtelser(2.vedtaksperiode)
-                håndterSimulering(2.vedtaksperiode)
-            }
-        )
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+    }
 
+    @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
+    fun `korrigert arbeidsgiverperiode under pågående revurdering - korrigert søknad for februar`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        forlengVedtak(1.februar, 28.februar, 100.prosent)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 80.prosent))
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar)
+        assertEquals(listOf(1.januar), person.skjæringstidspunkter())
+
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
     }
 
 

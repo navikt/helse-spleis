@@ -258,6 +258,7 @@ internal class Vedtaksperiode private constructor(
             if (!inntektsmelding.erRelevant(periode, sammenhengendePerioder.map { periode -> periode.periode })) return@also
             person.nyeRefusjonsopplysninger(skjæringstidspunkt, inntektsmelding)
             tilstand.håndter(this, inntektsmelding)
+            inntektsmelding.trimLeft(periode.endInclusive)
         }
     }
 
@@ -564,7 +565,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun oppdaterHistorikk(hendelse: SykdomstidslinjeHendelse) {
-        hendelse.trimLeft(periode.endInclusive)
         sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
     }
 
@@ -1008,10 +1008,7 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad)
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            inntektsmelding.trimLeft(vedtaksperiode.periode.endInclusive)
-            inntektsmelding.varsel(RV_IM_4)
-        }
+        fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {}
 
         fun håndterStrekkingAvPeriode(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {}
         fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
@@ -1204,7 +1201,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding) {this}
+            vedtaksperiode.inntektsmeldingInfo = vedtaksperiode.arbeidsgiver.addInntektsmelding(vedtaksperiode.skjæringstidspunkt, inntektsmelding, vedtaksperiode.jurist())
+            FunksjonelleFeilTilVarsler.wrap(inntektsmelding) {
+                inntektsmelding.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.finnArbeidsgiverperiode(), vedtaksperiode.jurist())
+            }
+            inntektsmelding.info("Fullført behandling av inntektsmelding")
             vedtaksperiode.trengerIkkeInntektsmelding()
             vedtaksperiode.person.gjenopptaBehandling(inntektsmelding)
         }
@@ -1327,10 +1328,6 @@ internal class Vedtaksperiode private constructor(
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
             val periode = vedtaksperiode.sykefraværstilfelle()
             vedtaksperiode.trengerYtelser(hendelse, periode)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding) {this}
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -1515,7 +1512,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_BLOKKERENDE_PERIODE
-
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
@@ -1561,6 +1557,10 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            inntektsmelding.varsel(RV_IM_4)
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vedtaksperiode.person.gjenopptaBehandling(påminnelse)
             if (vedtaksperiode.arbeidsgiver.harSykmeldingsperiodeFør(vedtaksperiode.periode.endInclusive.plusDays(1))) {
@@ -1597,6 +1597,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            inntektsmelding.varsel(RV_IM_4)
         }
     }
 
@@ -1783,10 +1787,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(simulering, AvventerGodkjenningRevurdering)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding) { AvventerHistorikkRevurdering }
-        }
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.revurderTidslinje(hendelse)
         }
@@ -1810,11 +1810,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad, AvventerBlokkerendePeriode)
             if (søknad.harFunksjonelleFeilEllerVerre()) return
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            super.håndter(vedtaksperiode, inntektsmelding)
-            vedtaksperiode.tilstand(inntektsmelding, AvventerBlokkerendePeriode)
         }
 
         override fun håndter(
@@ -1876,10 +1871,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.utbetalinger.forkast(aktivitetslogg)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding) { AvventerHistorikkRevurdering }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -2069,7 +2060,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             if (!revurderingStøttet(vedtaksperiode, inntektsmelding)) {
-                inntektsmelding.trimLeft(vedtaksperiode.periode.endInclusive)
                 return vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding)
             }
 
@@ -2152,10 +2142,6 @@ internal class Vedtaksperiode private constructor(
         override fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             if (!revurdering.inngåSomRevurdering(hendelse, vedtaksperiode, vedtaksperiode.periode)) return
             vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            inntektsmelding.trimLeft(vedtaksperiode.periode.endInclusive)
         }
 
         override fun håndter(

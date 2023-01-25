@@ -43,13 +43,7 @@ import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.Varselkode.RV_IM_2
-import no.nav.helse.person.Varselkode.RV_IT_1
-import no.nav.helse.person.Varselkode.RV_IT_3
-import no.nav.helse.person.Varselkode.RV_IV_2
-import no.nav.helse.person.Varselkode.RV_OS_2
-import no.nav.helse.person.Varselkode.RV_RV_1
-import no.nav.helse.person.Varselkode.RV_SØ_13
+import no.nav.helse.person.Varselkode.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
@@ -506,7 +500,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         håndterYtelser(3.vedtaksperiode)
 
-        assertIngenVarsler(1.vedtaksperiode.filter(a1))
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(a1))
         assertIngenVarsler(2.vedtaksperiode.filter(a1))
         assertVarsel(RV_IM_2, 3.vedtaksperiode.filter(a1))
 
@@ -1134,33 +1128,29 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         ), beregnetInntekt = forMyeInntekt)
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        val gammeltVilkårsgrunnlag = inspektør.vilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterInntektsmelding(listOf(
             22.januar til 6.februar
         ), beregnetInntekt = riktigInntekt)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        val nyttVilkårsgrunnlag = inspektør.vilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
+        val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(2.vedtaksperiode)
 
         assertInfo(RV_RV_1.varseltekst, 1.vedtaksperiode.filter(ORGNUMMER))
         assertInfo(RV_RV_1.varseltekst, 2.vedtaksperiode.filter(ORGNUMMER))
 
-        assertNotNull(gammeltVilkårsgrunnlag)
-        assertNotNull(nyttVilkårsgrunnlag)
-        assertNotEquals(gammeltVilkårsgrunnlag, nyttVilkårsgrunnlag)
+        assertNotNull(vilkårsgrunnlag)
 
-        assertEquals(forMyeInntekt, gammeltVilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
-        assertEquals(riktigInntekt, nyttVilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
+
+        assertEquals(forMyeInntekt, vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
 
         val utbetaling = inspektør.gjeldendeUtbetalingForVedtaksperiode(2.vedtaksperiode)
         val utbetalingInspektør = utbetaling.inspektør
 
         val førsteUtbetalingsdag = utbetalingInspektør.utbetalingstidslinje[7.februar]
-        assertEquals(riktigInntekt, førsteUtbetalingsdag.økonomi.inspektør.aktuellDagsinntekt)
-        assertEquals(22.januar til 11.februar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(forMyeInntekt, førsteUtbetalingsdag.økonomi.inspektør.aktuellDagsinntekt)
+        assertEquals(riktigInntekt, førsteUtbetalingsdag.økonomi.inspektør.arbeidsgiverRefusjonsbeløp)
+        assertEquals(24.januar til 11.februar, inspektør.periode(1.vedtaksperiode))
 
         assertTilstander(
             1.vedtaksperiode,
@@ -1182,9 +1172,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_VILKÅRSPRØVING_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING
         )
     }
 

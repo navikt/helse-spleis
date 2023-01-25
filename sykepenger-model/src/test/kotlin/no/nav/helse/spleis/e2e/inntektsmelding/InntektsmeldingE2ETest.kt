@@ -1871,13 +1871,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterInntektsmelding(listOf(27.februar til 14.mars))
         // Siden vi tidligere fylte ut 2. vedtaksperiode med arbeidsdager ville vi regne ut et ekstra skjæringstidspunkt i den sammenhengende perioden
-        assertEquals(listOf(27.februar, 1.januar), person.skjæringstidspunkter())
+        assertEquals(listOf(1.januar), person.skjæringstidspunkter())
         håndterYtelser(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
 
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -1891,7 +1887,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             RV_IM_2,
             2.vedtaksperiode.filter()
         )
-        assertIngenVarsel(
+        assertVarsel(
             RV_IM_4,
             2.vedtaksperiode.filter()
         )
@@ -1899,7 +1895,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             RV_IM_4,
             3.vedtaksperiode.filter()
         )
-        assertEquals(15.mars til 31.mars, inspektør.utbetalinger.last().inspektør.periode)
+        assertEquals(17.januar til 31.mars, inspektør.utbetalinger.last().inspektør.periode)
     }
 
     @Test

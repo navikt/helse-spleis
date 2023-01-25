@@ -258,6 +258,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun nyeRefusjonsopplysninger(inntektsmelding: Inntektsmelding): Pair<VilkårsgrunnlagElement, Revurderingseventyr>?  {
             val sykepengegrunnlag = sykepengegrunnlag.nyeRefusjonsopplysninger(inntektsmelding) ?: return null
             val eventyr = sykepengegrunnlag.finnEventyr(this.sykepengegrunnlag)
+            inntektsmelding.varsel(Varselkode.RV_IM_4)
             return kopierMed(inntektsmelding, sykepengegrunnlag, opptjening, SubsumsjonObserver.NullObserver) to eventyr
         }
 
