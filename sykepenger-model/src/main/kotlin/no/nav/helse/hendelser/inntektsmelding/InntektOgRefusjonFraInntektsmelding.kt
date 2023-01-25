@@ -14,7 +14,8 @@ import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 internal class InntektOgRefusjonFraInntektsmelding(
     private val inntektsmelding: Inntektsmelding,
     private val førsteFraværsdag: LocalDate?,
-    arbeidsgiverperioder: List<Periode>
+    arbeidsgiverperioder: List<Periode>,
+    dagerFraInntektsmelding: DagerFraInntektsmelding
 ): IAktivitetslogg by inntektsmelding {
 
     private val sisteDagIArbeidsgiverperioden = arbeidsgiverperioder
@@ -97,7 +98,22 @@ internal class InntektOgRefusjonFraInntektsmelding(
         }
     }
 
-    internal val strategier = listOf(FørsteFraværsdagStrategi(), FørsteDagEtterArbeidsgiverperiodenStrategi(), FørsteFraværsdagForskyvningsstragi(), FørsteDagEtterArbeidsgiverperiodenForskyvningsstragi())
+    internal inner class HarHåndtertDagerFraInntektsmeldingenStrategi(private val dagerFraInntektsmelding: DagerFraInntektsmelding) : InntektOgRefusjonMatchingstrategi {
+        // Denne er en slags fallback-strategi hvis ingen av de andre strategiene fungerer, for å beholde dagens oppførsel
+        override fun matcher(periode: Periode, forventerInntekt: () -> Boolean): Boolean {
+            if (førsteFraværsdag?.isAfter(periode.endInclusive) == true) return false
+            return dagerFraInntektsmelding.harBlittHåndtertAv(periode) && forventerInntekt()
+        }
+
+    }
+
+    internal val strategier = listOf(
+        FørsteFraværsdagStrategi(),
+        FørsteDagEtterArbeidsgiverperiodenStrategi(),
+        FørsteFraværsdagForskyvningsstragi(),
+        FørsteDagEtterArbeidsgiverperiodenForskyvningsstragi(),
+        HarHåndtertDagerFraInntektsmeldingenStrategi(dagerFraInntektsmelding)
+    )
 }
 
 internal interface InntektOgRefusjonMatchingstrategi {

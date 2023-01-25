@@ -319,8 +319,12 @@ class Inntektsmelding(
         get() {
             return DagerFraInntektsmelding(this)
         }
-    internal val inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding
-        get() {
-            return InntektOgRefusjonFraInntektsmelding(this, førsteFraværsdag, arbeidsgiverperioder)
-        }
+    internal fun inntektOgRefusjon(dagerFraInntektsmelding: DagerFraInntektsmelding): InntektOgRefusjonFraInntektsmelding {
+        return InntektOgRefusjonFraInntektsmelding(
+            this,
+            førsteFraværsdag,
+            arbeidsgiverperioder,
+            dagerFraInntektsmelding
+        )
+    }
 }

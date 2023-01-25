@@ -525,7 +525,7 @@ internal class Arbeidsgiver private constructor(
         }
 
         val vedtaksperiodeSomSkalHåndtereInntektOgRefusjon =
-            vedtaksperioder.skalHåndtere(inntektsmelding.inntektOgRefusjon)
+            vedtaksperioder.skalHåndtere(inntektsmelding.inntektOgRefusjon(dager))
         val inntektOgRefusjonHåndteres = vedtaksperiodeSomSkalHåndtereInntektOgRefusjon != null
 
         if (noenHarHåndtertDager || inntektOgRefusjonHåndteres) {
@@ -534,7 +534,7 @@ internal class Arbeidsgiver private constructor(
             dager.håndterGjenstående(this@Arbeidsgiver)
         }
 
-        vedtaksperiodeSomSkalHåndtereInntektOgRefusjon?.håndter(inntektsmelding.inntektOgRefusjon)?.also {
+        vedtaksperiodeSomSkalHåndtereInntektOgRefusjon?.håndter(inntektsmelding.inntektOgRefusjon(dager))?.also {
             // En av vedtaksperiodene har håndtert inntekt og refusjon
             // vi må informere de andre vedtaksperiodene på arbeidsgiveren som berøres av dette
             håndtertInntektPåSkjæringstidspunkt(vedtaksperiodeSomSkalHåndtereInntektOgRefusjon, inntektsmelding)
