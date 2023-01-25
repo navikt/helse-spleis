@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
@@ -241,7 +241,7 @@ internal class TestArbeidsgiverInspektør(
         status: Oppdragstatus?,
         overføringstidspunkt: LocalDateTime?,
         erSimulert: Boolean,
-        simuleringsResultat: Simulering.SimuleringResultat?
+        simuleringsResultat: SimuleringResultat?
     ) {
         if (inFeriepengeutbetaling) feriepengeoppdrag.add(Feriepengeoppdrag(oppdrag.fagsystemId()))
 

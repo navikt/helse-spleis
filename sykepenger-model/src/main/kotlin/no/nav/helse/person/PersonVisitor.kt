@@ -8,7 +8,7 @@ import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
@@ -778,7 +778,7 @@ internal interface OppdragVisitor {
         status: Oppdragstatus?,
         overføringstidspunkt: LocalDateTime?,
         erSimulert: Boolean,
-        simuleringsResultat: Simulering.SimuleringResultat?
+        simuleringsResultat: SimuleringResultat?
     ) {
     }
 
@@ -817,7 +817,7 @@ internal interface OppdragVisitor {
         status: Oppdragstatus?,
         overføringstidspunkt: LocalDateTime?,
         erSimulert: Boolean,
-        simuleringsResultat: Simulering.SimuleringResultat?
+        simuleringsResultat: SimuleringResultat?
     ) {
     }
 }

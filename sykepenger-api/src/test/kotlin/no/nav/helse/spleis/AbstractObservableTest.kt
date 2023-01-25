@@ -19,6 +19,7 @@ import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -258,32 +259,32 @@ abstract class AbstractObservableTest {
             simuleringOK = simuleringOK,
             melding = "",
             utbetalingId = utbetalingId,
-            simuleringResultat = Simulering.SimuleringResultat(
+            simuleringResultat = SimuleringResultat(
                 totalbeløp = 2000,
                 perioder = listOf(
-                    Simulering.SimulertPeriode(
+                    SimuleringResultat.SimulertPeriode(
                         periode = Periode(fom, tom),
                         utbetalinger = listOf(
-                            Simulering.SimulertUtbetaling(
+                            SimuleringResultat.SimulertUtbetaling(
                                 forfallsdato = tom.plusDays(1),
-                                utbetalesTil = Simulering.Mottaker(
+                                utbetalesTil = SimuleringResultat.Mottaker(
                                     id = orgnummer,
                                     navn = "Org Orgesen AS"
                                 ),
                                 feilkonto = false,
                                 detaljer = listOf(
-                                    Simulering.Detaljer(
+                                    SimuleringResultat.Detaljer(
                                         periode = Periode(fom, tom),
                                         konto = "81549300",
                                         beløp = 2000,
-                                        klassekode = Simulering.Klassekode(
+                                        klassekode = SimuleringResultat.Klassekode(
                                             kode = "SPREFAG-IOP",
                                             beskrivelse = "Sykepenger, Refusjon arbeidsgiver"
                                         ),
                                         uføregrad = 100,
                                         utbetalingstype = "YTEL",
                                         tilbakeføring = false,
-                                        sats = Simulering.Sats(
+                                        sats = SimuleringResultat.Sats(
                                             sats = 1000.0,
                                             antall = 2,
                                             type = "DAG"

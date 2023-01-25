@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
@@ -33,7 +34,7 @@ internal class Oppdrag private constructor(
     private var status: Oppdragstatus? = null,
     private val tidsstempel: LocalDateTime,
     private var erSimulert: Boolean = false,
-    private var simuleringsResultat: Simulering.SimuleringResultat? = null
+    private var simuleringsResultat: SimuleringResultat? = null
 ) : MutableList<Utbetalingslinje> by linjer, Aktivitetskontekst {
     internal companion object {
         internal fun periode(vararg oppdrag: Oppdrag): Periode? {
@@ -69,7 +70,7 @@ internal class Oppdrag private constructor(
             status: Oppdragstatus?,
             tidsstempel: LocalDateTime,
             erSimulert: Boolean,
-            simuleringResultat: Simulering.SimuleringResultat?
+            simuleringResultat: SimuleringResultat?
         ): Oppdrag = Oppdrag(
             mottaker = mottaker,
             fagområde = from,

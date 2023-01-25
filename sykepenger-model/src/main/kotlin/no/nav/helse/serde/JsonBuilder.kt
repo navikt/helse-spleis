@@ -10,7 +10,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsforholdhistorikk
@@ -556,7 +556,7 @@ internal class JsonBuilder : AbstractBuilder() {
             status: Oppdragstatus?,
             overføringstidspunkt: LocalDateTime?,
             erSimulert: Boolean,
-            simuleringsResultat: Simulering.SimuleringResultat?
+            simuleringsResultat: SimuleringResultat?
         ) {
             oppdragMap["mottaker"] = mottaker
             oppdragMap["fagområde"] = "$fagområde"

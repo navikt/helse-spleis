@@ -28,6 +28,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
@@ -416,7 +417,7 @@ internal fun AbstractEndToEndTest.simulering(
     simuleringOK: Boolean = true,
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    simuleringsresultat: Simulering.SimuleringResultat? = standardSimuleringsresultat(orgnummer)
+    simuleringsresultat: SimuleringResultat? = standardSimuleringsresultat(orgnummer)
 ) = person.personLogg.etterspurteBehov(vedtaksperiodeIdInnhenter, orgnummer).filter { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering }.map { simuleringsBehov ->
     Simulering(
         meldingsreferanseId = UUID.randomUUID(),
@@ -435,32 +436,32 @@ internal fun AbstractEndToEndTest.simulering(
     }
 }
 
-internal fun standardSimuleringsresultat(orgnummer: String, totalbeløp: Int = 2000) = Simulering.SimuleringResultat(
+internal fun standardSimuleringsresultat(orgnummer: String, totalbeløp: Int = 2000) = SimuleringResultat(
     totalbeløp = totalbeløp,
     perioder = listOf(
-        Simulering.SimulertPeriode(
+        SimuleringResultat.SimulertPeriode(
             periode = Periode(17.januar, 20.januar),
             utbetalinger = listOf(
-                Simulering.SimulertUtbetaling(
+                SimuleringResultat.SimulertUtbetaling(
                     forfallsdato = 21.januar,
-                    utbetalesTil = Simulering.Mottaker(
+                    utbetalesTil = SimuleringResultat.Mottaker(
                         id = orgnummer,
                         navn = "Org Orgesen AS"
                     ),
                     feilkonto = false,
                     detaljer = listOf(
-                        Simulering.Detaljer(
+                        SimuleringResultat.Detaljer(
                             periode = Periode(17.januar, 20.januar),
                             konto = "81549300",
                             beløp = 2000,
-                            klassekode = Simulering.Klassekode(
+                            klassekode = SimuleringResultat.Klassekode(
                                 kode = "SPREFAG-IOP",
                                 beskrivelse = "Sykepenger, Refusjon arbeidsgiver"
                             ),
                             uføregrad = 100,
                             utbetalingstype = "YTEL",
                             tilbakeføring = false,
-                            sats = Simulering.Sats(
+                            sats = SimuleringResultat.Sats(
                                 sats = 1000.toDouble(),
                                 antall = 2,
                                 type = "DAG"

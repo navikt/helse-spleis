@@ -24,6 +24,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -285,7 +286,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         fagsystemId: String,
         fagområde: String,
         simuleringOK: Boolean,
-        simuleringsresultat: Simulering.SimuleringResultat?
+        simuleringsresultat: SimuleringResultat?
     ): Simulering {
         return Simulering(
             meldingsreferanseId = UUID.randomUUID(),

@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.person.Vedtaksperiode
@@ -346,7 +346,7 @@ internal class OppdragBuilder(utbetaling: InternUtbetaling) : UtbetalingVisitor 
         status: Oppdragstatus?,
         overføringstidspunkt: LocalDateTime?,
         erSimulert: Boolean,
-        simuleringsResultat: Simulering.SimuleringResultat?
+        simuleringsResultat: SimuleringResultat?
     ) {
         linjer = mutableListOf()
     }
@@ -366,7 +366,7 @@ internal class OppdragBuilder(utbetaling: InternUtbetaling) : UtbetalingVisitor 
         status: Oppdragstatus?,
         overføringstidspunkt: LocalDateTime?,
         erSimulert: Boolean,
-        simuleringsResultat: Simulering.SimuleringResultat?
+        simuleringsResultat: SimuleringResultat?
     ) {
         speilOppdrag.putIfAbsent(
             fagsystemId,

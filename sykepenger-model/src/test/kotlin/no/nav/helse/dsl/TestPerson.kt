@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -384,32 +385,32 @@ internal fun List<String>.lagStandardSykepengegrunnlag(inntekt: Inntekt, skjæri
         arbeidsforhold = emptyList()
     )
 
-internal fun standardSimuleringsresultat(orgnummer: String) = no.nav.helse.hendelser.Simulering.SimuleringResultat(
+internal fun standardSimuleringsresultat(orgnummer: String) = SimuleringResultat(
     totalbeløp = 2000,
     perioder = listOf(
-        no.nav.helse.hendelser.Simulering.SimulertPeriode(
+        SimuleringResultat.SimulertPeriode(
             periode = Periode(17.januar, 20.januar),
             utbetalinger = listOf(
-                no.nav.helse.hendelser.Simulering.SimulertUtbetaling(
+                SimuleringResultat.SimulertUtbetaling(
                     forfallsdato = 21.januar,
-                    utbetalesTil = no.nav.helse.hendelser.Simulering.Mottaker(
+                    utbetalesTil = SimuleringResultat.Mottaker(
                         id = orgnummer,
                         navn = "Org Orgesen AS"
                     ),
                     feilkonto = false,
                     detaljer = listOf(
-                        no.nav.helse.hendelser.Simulering.Detaljer(
+                        SimuleringResultat.Detaljer(
                             periode = Periode(17.januar, 20.januar),
                             konto = "81549300",
                             beløp = 2000,
-                            klassekode = no.nav.helse.hendelser.Simulering.Klassekode(
+                            klassekode = SimuleringResultat.Klassekode(
                                 kode = "SPREFAG-IOP",
                                 beskrivelse = "Sykepenger, Refusjon arbeidsgiver"
                             ),
                             uføregrad = 100,
                             utbetalingstype = "YTEL",
                             tilbakeføring = false,
-                            sats = no.nav.helse.hendelser.Simulering.Sats(
+                            sats = SimuleringResultat.Sats(
                                 sats = 1000.toDouble(),
                                 antall = 2,
                                 type = "DAG"

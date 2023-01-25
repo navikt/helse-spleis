@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
@@ -761,7 +762,7 @@ internal class UtbetalingTest {
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
         val simulering = opprettSimulering(
-            utbetaling.inspektør.personOppdrag.fagsystemId(), Fagområde.Sykepenger, utbetaling.inspektør.utbetalingId, Simulering.SimuleringResultat(
+            utbetaling.inspektør.personOppdrag.fagsystemId(), Fagområde.Sykepenger, utbetaling.inspektør.utbetalingId, SimuleringResultat(
                 totalbeløp = 1000,
                 perioder = emptyList()
             )
@@ -777,7 +778,7 @@ internal class UtbetalingTest {
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
         val simulering = opprettSimulering(
-            utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), Fagområde.SykepengerRefusjon, utbetaling.inspektør.utbetalingId, Simulering.SimuleringResultat(
+            utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), Fagområde.SykepengerRefusjon, utbetaling.inspektør.utbetalingId, SimuleringResultat(
                 totalbeløp = 1000,
                 perioder = emptyList()
             )
@@ -794,13 +795,13 @@ internal class UtbetalingTest {
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
 
         val simuleringArbeidsgiver = opprettSimulering(
-            utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), Fagområde.SykepengerRefusjon, utbetaling.inspektør.utbetalingId, Simulering.SimuleringResultat(
+            utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), Fagområde.SykepengerRefusjon, utbetaling.inspektør.utbetalingId, SimuleringResultat(
                 totalbeløp = 500,
                 perioder = emptyList()
             )
         )
         val simuleringPerson = opprettSimulering(
-            utbetaling.inspektør.personOppdrag.fagsystemId(), Fagområde.Sykepenger, utbetaling.inspektør.utbetalingId, Simulering.SimuleringResultat(
+            utbetaling.inspektør.personOppdrag.fagsystemId(), Fagområde.Sykepenger, utbetaling.inspektør.utbetalingId, SimuleringResultat(
                 totalbeløp = 500,
                 perioder = emptyList()
             )
@@ -812,7 +813,7 @@ internal class UtbetalingTest {
         assertNotNull(utbetaling.inspektør.personOppdrag.inspektør.simuleringsResultat())
     }
 
-    private fun opprettSimulering(fagsystemId: String, fagområde: Fagområde, utbetalingId: UUID, simuleringResultat: Simulering.SimuleringResultat? = null) =
+    private fun opprettSimulering(fagsystemId: String, fagområde: Fagområde, utbetalingId: UUID, simuleringResultat: SimuleringResultat? = null) =
         Simulering(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = "1",

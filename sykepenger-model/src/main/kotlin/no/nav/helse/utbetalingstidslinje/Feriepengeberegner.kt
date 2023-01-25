@@ -6,7 +6,7 @@ import java.time.Year
 import java.util.UUID
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
@@ -272,7 +272,7 @@ internal class Feriepengeberegner(
                 status: Oppdragstatus?,
                 overføringstidspunkt: LocalDateTime?,
                 erSimulert: Boolean,
-                simuleringsResultat: Simulering.SimuleringResultat?
+                simuleringsResultat: SimuleringResultat?
             ) {
                 if (utbetaltUtbetaling || annullertUtbetaling) {
                     utbetalteDagerForOppdrag = mutableListOf()

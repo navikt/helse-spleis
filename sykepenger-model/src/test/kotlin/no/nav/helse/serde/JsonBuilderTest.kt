@@ -24,6 +24,7 @@ import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -836,7 +837,7 @@ class JsonBuilderTest {
         simuleringOK = true,
         melding = "Hei Aron",
         utbetalingId = UUID.fromString(personLogg.sisteBehov(Behovtype.Simulering).kontekst().getValue("utbetalingId")),
-        simuleringResultat = Simulering.SimuleringResultat(
+        simuleringResultat = SimuleringResultat(
             totalbeløp = 1000,
             perioder = emptyList()
         )

@@ -9,7 +9,7 @@ import java.util.UUID
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
@@ -974,7 +974,7 @@ internal data class PersonData(
                 private val totalbeløp: Int,
                 private val perioder: List<SimulertPeriode>
             ) {
-                internal fun parseDataForSimulering() = Simulering.SimuleringResultat(
+                internal fun parseDataForSimulering() = SimuleringResultat(
                     totalbeløp = totalbeløp,
                     perioder = perioder.map { it.parsePeriode() }
                 )
@@ -985,8 +985,8 @@ internal data class PersonData(
                     private val utbetalinger: List<SimulertUtbetaling>
                 ) {
 
-                    internal fun parsePeriode(): Simulering.SimulertPeriode {
-                        return Simulering.SimulertPeriode(
+                    internal fun parsePeriode(): SimuleringResultat.SimulertPeriode {
+                        return SimuleringResultat.SimulertPeriode(
                             periode = Periode(fom, tom),
                             utbetalinger = utbetalinger.map { it.parseUtbetaling() }
                         )
@@ -999,10 +999,10 @@ internal data class PersonData(
                     private val feilkonto: Boolean,
                     private val detaljer: List<Detaljer>
                 ) {
-                    internal fun parseUtbetaling(): Simulering.SimulertUtbetaling {
-                        return Simulering.SimulertUtbetaling(
+                    internal fun parseUtbetaling(): SimuleringResultat.SimulertUtbetaling {
+                        return SimuleringResultat.SimulertUtbetaling(
                             forfallsdato = forfallsdato,
-                            utbetalesTil = Simulering.Mottaker(
+                            utbetalesTil = SimuleringResultat.Mottaker(
                                 id = utbetalesTil.id,
                                 navn = utbetalesTil.navn
                             ),
@@ -1024,19 +1024,19 @@ internal data class PersonData(
                     private val sats: Sats,
                     private val refunderesOrgnummer: String
                 ) {
-                    internal fun parseDetaljer(): Simulering.Detaljer {
-                        return Simulering.Detaljer(
+                    internal fun parseDetaljer(): SimuleringResultat.Detaljer {
+                        return SimuleringResultat.Detaljer(
                             periode = Periode(fom, tom),
                             konto = konto,
                             beløp = beløp,
-                            klassekode = Simulering.Klassekode(
+                            klassekode = SimuleringResultat.Klassekode(
                                 kode = klassekode.kode,
                                 beskrivelse = klassekode.beskrivelse
                             ),
                             uføregrad = uføregrad,
                             utbetalingstype = utbetalingstype,
                             tilbakeføring = tilbakeføring,
-                            sats = Simulering.Sats(
+                            sats = SimuleringResultat.Sats(
                                 sats = sats.sats,
                                 antall = sats.antall,
                                 type = sats.type

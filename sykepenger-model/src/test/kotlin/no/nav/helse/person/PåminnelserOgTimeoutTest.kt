@@ -20,6 +20,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -254,32 +255,32 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             simuleringOK = true,
             melding = "",
             utbetalingId = UUID.fromString(person.personLogg.sisteBehov(Behovtype.Simulering).kontekst().getValue("utbetalingId")),
-            simuleringResultat = Simulering.SimuleringResultat(
+            simuleringResultat = SimuleringResultat(
                 totalbeløp = 2000,
                 perioder = listOf(
-                    Simulering.SimulertPeriode(
+                    SimuleringResultat.SimulertPeriode(
                         periode = Periode(17.januar, 20.januar),
                         utbetalinger = listOf(
-                            Simulering.SimulertUtbetaling(
+                            SimuleringResultat.SimulertUtbetaling(
                                 forfallsdato = 21.januar,
-                                utbetalesTil = Simulering.Mottaker(
+                                utbetalesTil = SimuleringResultat.Mottaker(
                                     id = ORGNUMMER,
                                     navn = "Org Orgesen AS"
                                 ),
                                 feilkonto = false,
                                 detaljer = listOf(
-                                    Simulering.Detaljer(
+                                    SimuleringResultat.Detaljer(
                                         periode = Periode(17.januar, 20.januar),
                                         konto = "81549300",
                                         beløp = 2000,
-                                        klassekode = Simulering.Klassekode(
+                                        klassekode = SimuleringResultat.Klassekode(
                                             kode = "SPREFAG-IOP",
                                             beskrivelse = "Sykepenger, Refusjon arbeidsgiver"
                                         ),
                                         uføregrad = 100,
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,
-                                        sats = Simulering.Sats(
+                                        sats = SimuleringResultat.Sats(
                                             sats = 1000.0,
                                             antall = 2,
                                             type = "DAGLIG"

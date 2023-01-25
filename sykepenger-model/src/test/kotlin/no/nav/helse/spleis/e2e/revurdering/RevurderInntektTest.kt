@@ -9,7 +9,7 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -742,7 +742,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             status: Oppdragstatus?,
             overføringstidspunkt: LocalDateTime?,
             erSimulert: Boolean,
-            simuleringsResultat: Simulering.SimuleringResultat?
+            simuleringsResultat: SimuleringResultat?
         ) {
             assertEquals(ønsketEndringskode, endringskode, message)
         }

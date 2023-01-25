@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -29,28 +30,28 @@ internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val simuleringResultat =
         packet["@løsning.${Behovtype.Simulering.name}.simulering"].takeUnless(JsonNode::isMissingOrNull)
             ?.let {
-                Simulering.SimuleringResultat(
+                SimuleringResultat(
                     totalbeløp = it.path("totalBelop").asInt(),
                     perioder = it.path("periodeList").map { periode ->
-                        Simulering.SimulertPeriode(
+                        SimuleringResultat.SimulertPeriode(
                             periode = Periode(periode.path("fom").asLocalDate(), periode.path("tom").asLocalDate()),
                             utbetalinger = periode.path("utbetaling").map { utbetaling ->
-                                Simulering.SimulertUtbetaling(
+                                SimuleringResultat.SimulertUtbetaling(
                                     forfallsdato = utbetaling.path("forfall").asLocalDate(),
-                                    utbetalesTil = Simulering.Mottaker(
+                                    utbetalesTil = SimuleringResultat.Mottaker(
                                         id = utbetaling.path("utbetalesTilId").asText(),
                                         navn = utbetaling.path("utbetalesTilNavn").asText()
                                     ),
                                     feilkonto = utbetaling.path("feilkonto").asBoolean(),
                                     detaljer = utbetaling.path("detaljer").map { detalj ->
-                                        Simulering.Detaljer(
+                                        SimuleringResultat.Detaljer(
                                             periode = Periode(
                                                 detalj.path("faktiskFom").asLocalDate(),
                                                 detalj.path("faktiskTom").asLocalDate()
                                             ),
                                             konto = detalj.path("konto").asText(),
                                             beløp = detalj.path("belop").asInt(),
-                                            klassekode = Simulering.Klassekode(
+                                            klassekode = SimuleringResultat.Klassekode(
                                                 kode = detalj.path("klassekode").asText(),
                                                 beskrivelse = detalj.path("klassekodeBeskrivelse").asText()
                                             ),
@@ -58,7 +59,7 @@ internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
                                             utbetalingstype = detalj.path("utbetalingsType").asText(),
                                             refunderesOrgnummer = detalj.path("refunderesOrgNr").asText(),
                                             tilbakeføring = detalj.path("tilbakeforing").asBoolean(),
-                                            sats = Simulering.Sats(
+                                            sats = SimuleringResultat.Sats(
                                                 sats = detalj.path("sats").asDouble(),
                                                 antall = detalj.path("antallSats").asInt(),
                                                 type = detalj.path("typeSats").asText()

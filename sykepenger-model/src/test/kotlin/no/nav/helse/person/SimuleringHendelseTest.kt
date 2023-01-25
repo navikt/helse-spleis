@@ -18,6 +18,7 @@ import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -240,55 +241,61 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             simuleringOK = simuleringOK,
             melding = "",
             utbetalingId = utbetalingId,
-            simuleringResultat = if (!simuleringOK) null else Simulering.SimuleringResultat(
+            simuleringResultat = if (!simuleringOK) null else SimuleringResultat(
                 totalbeløp = 44361,
                 perioder = listOf(
-                    Simulering.SimulertPeriode(
+                    SimuleringResultat.SimulertPeriode(
                         periode = Periode(17.januar, 31.januar),
                         utbetalinger = listOf(
-                            Simulering.SimulertUtbetaling(
+                            SimuleringResultat.SimulertUtbetaling(
                                 forfallsdato = 1.februar,
-                                utbetalesTil = Simulering.Mottaker(UNG_PERSON_FNR_2018.toString(), "Ung Person"),
+                                utbetalesTil = SimuleringResultat.Mottaker(
+                                    UNG_PERSON_FNR_2018.toString(),
+                                    "Ung Person"
+                                ),
                                 feilkonto = false,
                                 detaljer = listOf(
-                                    Simulering.Detaljer(
+                                    SimuleringResultat.Detaljer(
                                         periode = Periode(17.januar, 31.januar),
                                         konto = "11111111111",
                                         beløp = dagsats * 11,
-                                        klassekode = Simulering.Klassekode(
+                                        klassekode = SimuleringResultat.Klassekode(
                                             "SPREFAG-IOP",
                                             "Sykepenger, Refusjon arbeidsgiver"
                                         ),
                                         uføregrad = 100,
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,
-                                        sats = Simulering.Sats(dagsats.toDouble(), 11, "DAGLIG"),
+                                        sats = SimuleringResultat.Sats(dagsats.toDouble(), 11, "DAGLIG"),
                                         refunderesOrgnummer = ORGNUMMER
                                     )
                                 )
                             )
                         )
                     ),
-                    Simulering.SimulertPeriode(
+                    SimuleringResultat.SimulertPeriode(
                         periode = Periode(1.februar, 28.februar),
                         utbetalinger = listOf(
-                            Simulering.SimulertUtbetaling(
+                            SimuleringResultat.SimulertUtbetaling(
                                 forfallsdato = 1.mars,
-                                utbetalesTil = Simulering.Mottaker(UNG_PERSON_FNR_2018.toString(), "Ung Person"),
+                                utbetalesTil = SimuleringResultat.Mottaker(
+                                    UNG_PERSON_FNR_2018.toString(),
+                                    "Ung Person"
+                                ),
                                 feilkonto = false,
                                 detaljer = listOf(
-                                    Simulering.Detaljer(
+                                    SimuleringResultat.Detaljer(
                                         periode = Periode(1.februar, 28.februar),
                                         konto = "11111111111",
                                         beløp = dagsats * 20,
-                                        klassekode = Simulering.Klassekode(
+                                        klassekode = SimuleringResultat.Klassekode(
                                             "SPREFAG-IOP",
                                             "Sykepenger, Refusjon arbeidsgiver"
                                         ),
                                         uføregrad = 100,
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,
-                                        sats = Simulering.Sats(dagsats.toDouble(), 20, "DAGLIG"),
+                                        sats = SimuleringResultat.Sats(dagsats.toDouble(), 20, "DAGLIG"),
                                         refunderesOrgnummer = ORGNUMMER
                                     )
                                 )
