@@ -3,8 +3,8 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 
 class SimuleringResultat(
-    internal val totalbeløp: Int,
-    internal val perioder: List<SimulertPeriode>
+    val totalbeløp: Int,
+    val perioder: List<SimulertPeriode>
 ) {
     fun toMap() = mapOf(
         "totalbeløp" to totalbeløp,
@@ -48,42 +48,42 @@ class SimuleringResultat(
     )
 
     class SimulertPeriode(
-        internal val periode: Periode,
-        internal val utbetalinger: List<SimulertUtbetaling>
+        val periode: ClosedRange<LocalDate>,
+        val utbetalinger: List<SimulertUtbetaling>
     )
 
     class SimulertUtbetaling(
-        internal val forfallsdato: LocalDate,
-        internal val utbetalesTil: Mottaker,
-        internal val feilkonto: Boolean,
-        internal val detaljer: List<Detaljer>
+        val forfallsdato: LocalDate,
+        val utbetalesTil: Mottaker,
+        val feilkonto: Boolean,
+        val detaljer: List<Detaljer>
     )
 
     class Detaljer(
-        internal val periode: Periode,
-        internal val konto: String,
-        internal val beløp: Int,
-        internal val klassekode: Klassekode,
-        internal val uføregrad: Int,
-        internal val utbetalingstype: String,
-        internal val tilbakeføring: Boolean,
-        internal val sats: Sats,
-        internal val refunderesOrgnummer: String
+        val periode: ClosedRange<LocalDate>,
+        val konto: String,
+        val beløp: Int,
+        val klassekode: Klassekode,
+        val uføregrad: Int,
+        val utbetalingstype: String,
+        val tilbakeføring: Boolean,
+        val sats: Sats,
+        val refunderesOrgnummer: String
     )
 
     class Sats(
-        internal val sats: Double,
-        internal val antall: Int,
-        internal val type: String
+        val sats: Double,
+        val antall: Int,
+        val type: String
     )
 
     class Klassekode(
-        internal val kode: String,
-        internal val beskrivelse: String
+        val kode: String,
+        val beskrivelse: String
     )
 
     class Mottaker(
-        internal val id: String,
-        internal val navn: String
+        val id: String,
+        val navn: String
     )
 }
