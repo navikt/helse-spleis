@@ -1,0 +1,1 @@
+En liten modul for å håndtere tid, datoer, og perioder.

@@ -210,7 +210,8 @@ internal class Arbeidsgiver private constructor(
         ): GhostPeriode? {
             val perioder = flatMap { it.vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).map { it.periode() } }
             if (perioder.isEmpty()) return null
-            return vilkårsgrunnlagHistorikk.ghostPeriode(skjæringstidspunkt, arbeidsgiver.organisasjonsnummer, perioder.reduce(Periode::plus))
+            return vilkårsgrunnlagHistorikk.ghostPeriode(skjæringstidspunkt, arbeidsgiver.organisasjonsnummer, perioder.reduce(
+                Periode::plus))
         }
 
         internal fun Iterable<Arbeidsgiver>.beregnFeriepengerForAlleArbeidsgivere(

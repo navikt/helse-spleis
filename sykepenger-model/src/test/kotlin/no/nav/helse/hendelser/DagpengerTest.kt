@@ -22,19 +22,23 @@ class DagpengerTest {
 
     @Test
     fun `Dagpenger eldre enn 4 uker`() {
-        assertFalse(undersøke(Periode(
+        assertFalse(undersøke(
+            Periode(
             fom = førsteFraværsdag.minusMonths(8),
             tom = førsteFraværsdag.minusWeeks(4).minusDays(1)
-        )))
+        )
+        ))
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
     fun `Dagpenger innenfor 4 uker`() {
-        assertFalse(undersøke(Periode(
+        assertFalse(undersøke(
+            Periode(
             fom = førsteFraværsdag.minusMonths(8),
             tom = førsteFraværsdag.minusWeeks(4)
-        )))
+        )
+        ))
         assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 

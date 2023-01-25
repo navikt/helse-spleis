@@ -9,8 +9,8 @@ import java.util.stream.Collectors.toMap
 import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.contains
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.Varselkode.RV_ST_1
@@ -59,7 +59,8 @@ internal class Sykdomstidslinje private constructor(
 
     internal fun merge(other: Sykdomstidslinje, beste: BesteStrategy = default): Sykdomstidslinje {
         val nyeDager = dager.toMap(mutableMapOf<LocalDate, Dag>())
-        other.dager.filter { it.key !in låstePerioder }.forEach { (dato, dag) -> nyeDager.merge(dato, dag, beste) }
+        other.dager.filter {it.key !in låstePerioder
+        }.forEach { (dato, dag) -> nyeDager.merge(dato, dag, beste) }
         return Sykdomstidslinje(
             nyeDager.toSortedMap(),
             this.periode?.plus(other.periode) ?: other.periode,
@@ -185,8 +186,6 @@ internal class Sykdomstidslinje private constructor(
     private fun erSisteDagArbeidsdag() = this.dager.keys.lastOrNull()?.let(::erArbeidsdag) ?: true
 
     internal fun harSykedager() = any { it is Sykedag || it is SykHelgedag || it is ForeldetSykedag }
-
-    internal fun harForeldedeDager() = any { it is ForeldetSykedag }
 
     private fun sisteOppholdsdag() = periode?.lastOrNull { erOppholdsdag(it) }
     private fun sisteOppholdsdag(før: LocalDate) = periode?.filter { erOppholdsdag(it) }?.lastOrNull { it.isBefore(før) }

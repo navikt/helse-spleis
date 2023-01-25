@@ -4,6 +4,7 @@ val jacksonVersion = "2.14.0"
 
 dependencies {
     api("commons-codec:commons-codec:$commonsCodecVersion")
+    implementation(project(":sykepenger-tid"))
     implementation(libs.bundles.jackson)
     implementation(libs.bundles.logging) {
         exclude("com.fasterxml.jackson.core")

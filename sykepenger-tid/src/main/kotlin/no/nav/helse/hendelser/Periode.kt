@@ -28,13 +28,15 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
 
         fun List<Periode>.slutterEtter(grense: LocalDate) = any { it.slutterEtter(grense) }
 
-        internal fun Iterable<Periode>.periode() = if (!iterator().hasNext()) null else minOf { it.start } til maxOf { it.endInclusive }
-        internal fun Iterable<LocalDate>.grupperSammenhengendePerioder() = map(LocalDate::somPeriode).merge(mergeKantIKant)
-        internal fun List<Periode>.grupperSammenhengendePerioder() = merge(mergeKantIKant)
-        internal fun List<Periode>.grupperSammenhengendePerioderMedHensynTilHelg() = merge(mergeOverHelg)
+        fun Iterable<Periode>.periode() = if (!iterator().hasNext()) null else minOf { it.start } til maxOf { it.endInclusive }
+        fun Iterable<LocalDate>.grupperSammenhengendePerioder() = map(LocalDate::somPeriode).merge(
+            mergeKantIKant
+        )
+        fun List<Periode>.grupperSammenhengendePerioder() = merge(mergeKantIKant)
+        fun List<Periode>.grupperSammenhengendePerioderMedHensynTilHelg() = merge(mergeOverHelg)
 
-        internal val Iterable<LocalDate>.omsluttendePeriode get() = this.takeIf { it.iterator().hasNext() }?.let { min() til max() }
-        internal fun Iterable<LocalDate>.periodeRettFør(dato: LocalDate): Periode? {
+        val Iterable<LocalDate>.omsluttendePeriode get() = this.takeIf { it.iterator().hasNext() }?.let { min() til max() }
+        fun Iterable<LocalDate>.periodeRettFør(dato: LocalDate): Periode? {
             var forrigeFom = dato
             val rettFør = mutableSetOf<LocalDate>()
             while (forrigeFom.forrigeDag in this) {
@@ -56,68 +58,68 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
             return resultat
         }
 
-        internal fun Collection<Periode>.sammenhengende(skjæringstidspunkt: LocalDate) = sortedByDescending { it.start }
+        fun Collection<Periode>.sammenhengende(skjæringstidspunkt: LocalDate) = sortedByDescending { it.start }
             .fold(skjæringstidspunkt til skjæringstidspunkt) { acc, periode ->
                 if (periode.rettFørEllerOverlapper(acc.start)) periode.start til acc.endInclusive
                 else acc
             }
 
-        internal fun Iterable<Periode>.overlapper(): Boolean {
+        fun Iterable<Periode>.overlapper(): Boolean {
             sortedBy { it.start }.zipWithNext { nåværende, neste ->
                 if (nåværende.overlapperMed(neste)) return true
             }
             return false
         }
 
-        internal fun Periode.delvisOverlappMed(other: Periode) = overlapperMed(other) && !inneholder(other)
+        fun Periode.delvisOverlappMed(other: Periode) = overlapperMed(other) && !inneholder(other)
     }
 
     fun overlapperMed(other: Periode) = overlappendePeriode(other) != null
 
-    internal fun overlappendePeriode(other: Periode): Periode? {
+    fun overlappendePeriode(other: Periode): Periode? {
         val start = maxOf(this.start, other.start)
         val slutt = minOf(this.endInclusive, other.endInclusive)
         if (start > slutt) return null
         return start til slutt
     }
 
-    internal fun slutterEtter(other: LocalDate) =
+    fun slutterEtter(other: LocalDate) =
         other <= this.endInclusive
 
-    internal fun utenfor(other: Periode) =
+    fun utenfor(other: Periode) =
         this.start < other.start || this.endInclusive > other.endInclusive
 
-    internal fun starterEtter(other: Periode) =
+    fun starterEtter(other: Periode) =
         this.start > other.endInclusive
 
-    internal fun inneholder(other: Periode) = other in this
+    fun inneholder(other: Periode) = other in this
 
-    internal fun erRettFør(other: Periode) = erRettFør(other.start)
-    internal fun erRettFør(other: LocalDate) = this.endInclusive.erRettFør(other)
+    fun erRettFør(other: Periode) = erRettFør(other.start)
+    fun erRettFør(other: LocalDate) = this.endInclusive.erRettFør(other)
 
     private fun rettFørEllerOverlapper(dato: LocalDate) = start < dato && endInclusive.nesteArbeidsdag() >= dato
 
-    internal fun periodeMellom(other: LocalDate): Periode? {
+    fun periodeMellom(other: LocalDate): Periode? {
         val enDagFør = other.minusDays(1)
         if (slutterEtter(enDagFør)) return null
         return Periode(endInclusive.plusDays(1), enDagFør)
     }
 
-    internal operator fun contains(other: Periode) =
+    operator fun contains(other: Periode) =
         this.start <= other.start && this.endInclusive >= other.endInclusive
 
-    internal operator fun contains(datoer: Iterable<LocalDate>) = datoer.any { it in this }
+    operator fun contains(datoer: Iterable<LocalDate>) = datoer.any { it in this }
 
     override fun toString(): String {
         return start.format(formatter) + " til " + endInclusive.format(formatter)
     }
 
-    internal fun oppdaterFom(other: LocalDate) = Periode(minOf(this.start, other), endInclusive)
-    internal fun oppdaterFom(other: Periode) = oppdaterFom(other.start)
-    internal fun oppdaterTom(other: LocalDate) = Periode(this.start, maxOf(other, this.endInclusive))
-    internal fun oppdaterTom(other: Periode) = oppdaterTom(other.endInclusive)
+    fun oppdaterFom(other: LocalDate) = Periode(minOf(this.start, other), endInclusive)
+    fun oppdaterFom(other: Periode) = oppdaterFom(other.start)
+    fun oppdaterTom(other: LocalDate) = Periode(this.start, maxOf(other, this.endInclusive))
+    fun oppdaterTom(other: Periode) = oppdaterTom(other.endInclusive)
 
-    internal fun beholdDagerEtter(cutoff: LocalDate): Periode? = when {
+    fun beholdDagerEtter(cutoff: LocalDate): Periode? = when {
         endInclusive <= cutoff -> null
         start > cutoff -> this
         else -> cutoff.plusDays(1) til endInclusive
@@ -131,14 +133,14 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
 
     override fun hashCode() = start.hashCode() * 37 + endInclusive.hashCode()
 
-    internal fun merge(other: Periode, erForlengelseStrategy: (LocalDate, LocalDate) -> Boolean): Periode {
+    fun merge(other: Periode, erForlengelseStrategy: (LocalDate, LocalDate) -> Boolean): Periode {
         if (this.overlapperMed(other) || erForlengelseStrategy(this.endInclusive, other.start) || erForlengelseStrategy(other.endInclusive, this.start)) {
             return this + other
         }
         return this
     }
 
-    internal operator fun plus(annen: Periode?): Periode {
+    operator fun plus(annen: Periode?): Periode {
         if (annen == null) return this
         return Periode(minOf(this.start, annen.start), maxOf(this.endInclusive, annen.endInclusive))
     }
@@ -152,11 +154,11 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
             currentDate.also { currentDate = it.plusDays(1) }
     }
 
-    internal fun subset(periode: Periode) =
+    fun subset(periode: Periode) =
         Periode(start.coerceAtLeast(periode.start), endInclusive.coerceAtMost(periode.endInclusive))
 }
 
-internal operator fun List<Periode>.contains(dato: LocalDate) = this.any { dato in it }
+operator fun List<Periode>.contains(dato: LocalDate) = this.any { dato in it }
 
-internal infix fun LocalDate.til(tom: LocalDate) = Periode(this, tom)
-internal fun LocalDate.somPeriode() = Periode(this, this)
+infix fun LocalDate.til(tom: LocalDate) = Periode(this, tom)
+fun LocalDate.somPeriode() = Periode(this, this)

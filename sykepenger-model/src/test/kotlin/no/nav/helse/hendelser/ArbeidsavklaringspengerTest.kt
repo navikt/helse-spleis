@@ -22,19 +22,23 @@ internal class ArbeidsavklaringspengerTest {
 
     @Test
     fun `AAP eldre enn 6 måneder`() {
-        assertFalse(undersøke(Periode(
+        assertFalse(undersøke(
+            Periode(
             fom = skjæringstidspunkt.minusMonths(8),
             tom = skjæringstidspunkt.minusMonths(6).minusDays(1)
-        )))
+        )
+        ))
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
     fun `AAP innenfor 6 måneder`() {
-        assertFalse(undersøke(Periode(
+        assertFalse(undersøke(
+            Periode(
             fom = skjæringstidspunkt.minusMonths(8),
             tom = skjæringstidspunkt.minusMonths(6)
-        )))
+        )
+        ))
         assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 

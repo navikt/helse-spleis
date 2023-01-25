@@ -20,13 +20,13 @@ fun Int.oktober(year: Int): LocalDate = LocalDate.of(year, 10, this)
 fun Int.november(year: Int): LocalDate = LocalDate.of(year, 11, this)
 fun Int.desember(year: Int): LocalDate = LocalDate.of(year, 12, this)
 
-internal fun YearMonth.isWithinRangeOf(dato: LocalDate, måneder: Long) =
+fun YearMonth.isWithinRangeOf(dato: LocalDate, måneder: Long) =
     this in YearMonth.from(dato).let { it.minusMonths(måneder)..it.minusMonths(1) }
 
 
-internal val Int.ukedager get() = Ukedager(this)
-internal operator fun LocalDate.plus(other: Ukedager) = other + this
-internal class Ukedager(private val antallUkedager: Int) {
+val Int.ukedager get() = Ukedager(this)
+operator fun LocalDate.plus(other: Ukedager) = other + this
+class Ukedager(private val antallUkedager: Int) {
     private companion object {
         // tabellen er en sammenslått tabell på 5 kolonner og 7 rader (én for hver ukedag) som angir hvor mange
         // dager man skal addere med gitt ukedagen til datoen og hvor mange ukedager man skal addere
@@ -41,15 +41,15 @@ internal class Ukedager(private val antallUkedager: Int) {
     operator fun plus(other: LocalDate): LocalDate = other.plusDays(dager(other).toLong())
 }
 
-internal val LocalDate.forrigeDag get() = this.minusDays(1)
-internal val LocalDate.nesteDag get() = this.plusDays(1)
-internal fun LocalDate.førsteArbeidsdag(): LocalDate = this + 0.ukedager
-internal fun LocalDate.nesteArbeidsdag(): LocalDate = this + 1.ukedager
+val LocalDate.forrigeDag get() = this.minusDays(1)
+val LocalDate.nesteDag get() = this.plusDays(1)
+fun LocalDate.førsteArbeidsdag(): LocalDate = this + 0.ukedager
+fun LocalDate.nesteArbeidsdag(): LocalDate = this + 1.ukedager
 
 private val helgedager = listOf(SATURDAY, SUNDAY)
-internal fun LocalDate.erHelg() = this.dayOfWeek in helgedager
+fun LocalDate.erHelg() = this.dayOfWeek in helgedager
 
-internal fun LocalDate.erRettFør(other: LocalDate): Boolean {
+fun LocalDate.erRettFør(other: LocalDate): Boolean {
     if (this >= other) return false
     if (this.nesteDag == other) return true
     return when (this.dayOfWeek) {
@@ -60,7 +60,7 @@ internal fun LocalDate.erRettFør(other: LocalDate): Boolean {
 }
 
 // antall ukedager mellom start og endInclusive, ikke medregnet endInclusive i seg selv
-internal fun ClosedRange<LocalDate>.ukedager(): Int {
+fun ClosedRange<LocalDate>.ukedager(): Int {
     val epochStart = start.toEpochDay()
     val epochEnd = endInclusive.toEpochDay()
     if (epochStart >= epochEnd) return 0

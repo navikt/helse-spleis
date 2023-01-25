@@ -4,8 +4,8 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.contains
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag

@@ -623,7 +623,8 @@ internal class MaksimumSykepengedagerfilterTest {
         periode: Periode? = null,
         personTidslinje: Utbetalingstidslinje = Utbetalingstidslinje()
     ): List<LocalDate> {
-        val filterperiode = periode ?: (this + listOf(personTidslinje)).filterNot { it.isEmpty() }.map(Utbetalingstidslinje::periode).reduce(Periode::plus)
+        val filterperiode = periode ?: (this + listOf(personTidslinje)).filterNot { it.isEmpty() }.map(Utbetalingstidslinje::periode).reduce(
+            Periode::plus)
         maksimumSykepenger = MaksimumSykepengedagerfilter(
             fødselsdato.alder,
             NormalArbeidstaker,
