@@ -48,7 +48,6 @@ internal class InntektOgRefusjonFraInntektsmelding(
 
     private fun LocalDate.erIPeriode(periode: Periode) = this in periode || this.førsteArbeidsdag() in periode
 
-    internal val førsteFraværsdagStrategi get() = FørsteFraværsdagStrategi()
     internal inner class FørsteFraværsdagStrategi : InntektOgRefusjonMatchingstrategi {
         override fun matcher(periode: Periode, forventerInntekt: () -> Boolean): Boolean {
             if (ingenArbeidsgiverperiode || førsteFraværsdagEtterArbeidsgiverperioden) {
@@ -58,7 +57,6 @@ internal class InntektOgRefusjonFraInntektsmelding(
         }
     }
 
-    internal val førsteFraværsdagForskyvningsstragi get() = FørsteFraværsdagForskyvningsstragi()
     internal inner class FørsteFraværsdagForskyvningsstragi : InntektOgRefusjonMatchingstrategi {
         // Bruker matching på først fraværsdag, men forskyver første fraværsdag om vedtaksperioden(e) som treffes ikke forventer inntekt
         private var forskjøvetFørsteFraværsdag = førsteFraværsdag
@@ -74,18 +72,16 @@ internal class InntektOgRefusjonFraInntektsmelding(
         }
     }
 
-    internal val førsteDagEtterArbeidsgiverperiodenStrategi get() = FørsteDagEtterArbeidsgiverperiodenStrategi()
     internal inner class FørsteDagEtterArbeidsgiverperiodenStrategi: InntektOgRefusjonMatchingstrategi {
         override fun matcher(periode: Periode, forventerInntekt: () -> Boolean): Boolean {
             if (sisteDagIArbeidsgiverperioden == null) return false
             if (førsteFraværsdag?.isAfter(sisteDagIArbeidsgiverperioden) == true) return false
             val førsteDagEtterArbeidsgiverperioden = sisteDagIArbeidsgiverperioden.nesteDag
-            val dagIPeriode = førsteDagEtterArbeidsgiverperioden in periode || førsteDagEtterArbeidsgiverperioden.førsteArbeidsdag() in periode
+            val dagIPeriode = førsteDagEtterArbeidsgiverperioden.erIPeriode(periode)
             return dagIPeriode && forventerInntekt()
         }
     }
 
-    internal val førsteDagEtterArbeidsgiverperiodenForskyvningsstragi get() = FørsteDagEtterArbeidsgiverperiodenForskyvningsstragi()
     internal inner class FørsteDagEtterArbeidsgiverperiodenForskyvningsstragi : InntektOgRefusjonMatchingstrategi {
         // Bruker matching på første dag etter arbeidsgiverprioden, men forskyver dagen om vedtaksperioden(e) som treffes ikke forventer inntekt
         private var forskjøvetFørsteDagEtterArbeidsgiverperioden = sisteDagIArbeidsgiverperioden?.nesteDag
@@ -101,7 +97,7 @@ internal class InntektOgRefusjonFraInntektsmelding(
         }
     }
 
-    internal val stragier get() = listOf(førsteFraværsdagStrategi, førsteDagEtterArbeidsgiverperiodenStrategi, førsteFraværsdagForskyvningsstragi, førsteDagEtterArbeidsgiverperiodenForskyvningsstragi)
+    internal val strategier = listOf(FørsteFraværsdagStrategi(), FørsteDagEtterArbeidsgiverperiodenStrategi(), FørsteFraværsdagForskyvningsstragi(), FørsteDagEtterArbeidsgiverperiodenForskyvningsstragi())
 }
 
 internal interface InntektOgRefusjonMatchingstrategi {
