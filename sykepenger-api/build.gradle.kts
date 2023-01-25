@@ -9,6 +9,7 @@ val mainClass = "no.nav.helse.spleis.AppKt"
 dependencies {
     implementation(project(":sykepenger-model"))
     implementation(project(":sykepenger-tid"))
+    implementation(project(":sykepenger-utbetaling"))
 
     implementation(libs.bundles.jackson)
     implementation(libs.bundles.logging) {

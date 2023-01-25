@@ -8,6 +8,7 @@ dependencies {
     implementation(libs.rapids.and.rivers)
     implementation(libs.bundles.database)
     implementation(libs.cloudsql)
+    implementation(project(":sykepenger-utbetaling"))
 
     testImplementation(project(":sykepenger-mediators")) // for å få  tilgang på db/migrations-filene
     testImplementation(libs.flyway)
