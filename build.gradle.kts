@@ -41,6 +41,9 @@ allprojects {
         withType<Wrapper> {
             gradleVersion = "7.4.2"
         }
+        withType<Jar> {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        }
 
     }
 }
