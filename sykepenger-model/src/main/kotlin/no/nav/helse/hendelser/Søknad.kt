@@ -57,7 +57,7 @@ class Søknad(
         sykdomstidslinje = perioder
             .map { it.sykdomstidslinje(sykdomsperiode, avskjæringsdato(), kilde) }
             .filter { it.periode()?.start?.isAfter(sykdomsperiode.start.minusDays(tidslinjegrense)) ?: false }
-            .merge(Dagturnering.SØKNAD::beste)
+            .merge(Dagturnering.SØKNAD)
             .subset(sykdomsperiode)
     }
 

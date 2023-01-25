@@ -59,7 +59,7 @@ internal class Sykdomstidslinje private constructor(
 
     internal fun merge(other: Sykdomstidslinje, beste: BesteStrategy = default): Sykdomstidslinje {
         val nyeDager = dager.toMap(mutableMapOf<LocalDate, Dag>())
-        other.dager.filter { it.key !in låstePerioder }.forEach { (dato, dag) -> nyeDager.merge(dato, dag, beste) }
+        other.dager.filter { it.key !in låstePerioder }.forEach { (dato, dag) -> nyeDager.merge(dato, dag, beste::beste) }
         return Sykdomstidslinje(
             nyeDager.toSortedMap(),
             this.periode?.plus(other.periode) ?: other.periode,

@@ -77,9 +77,9 @@ internal class BesteDagTest {
         dag1: Dag,
         dag2: Dag,
         expectedWinner: Dag,
-        turnering: (Dag, Dag) -> Dag = Dagturnering.TURNERING::beste
+        turnering: BesteStrategy = Dagturnering.TURNERING
     ) {
-        val winner = turnering(dag1, dag2)
+        val winner = turnering.beste(dag1, dag2)
         assertEquals(expectedWinner, winner)
     }
 
@@ -87,7 +87,7 @@ internal class BesteDagTest {
         dag1: Dag,
         dag2: Dag,
         expectedWinner: Dag,
-        turnering: (Dag, Dag) -> Dag = Dagturnering.TURNERING::beste
+        turnering: BesteStrategy = Dagturnering.TURNERING
     ) {
         assertWinner(dag1, dag2, expectedWinner, turnering)
         assertWinner(dag2, dag1, expectedWinner, turnering)

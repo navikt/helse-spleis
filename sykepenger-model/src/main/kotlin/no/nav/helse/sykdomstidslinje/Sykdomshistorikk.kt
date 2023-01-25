@@ -58,7 +58,7 @@ internal class Sykdomshistorikk private constructor(
         val tidslinje = if (elementer.isEmpty())
             hendelseSykdomstidslinje
         else
-            sykdomstidslinje().merge(hendelseSykdomstidslinje, Dagturnering.TURNERING::beste)
+            sykdomstidslinje().merge(hendelseSykdomstidslinje, Dagturnering.TURNERING)
         return tidslinje.also { it.valider(hendelse) }
     }
 

@@ -4,7 +4,9 @@ import java.time.LocalDate
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.økonomi.Økonomi
 
-internal typealias BesteStrategy = (Dag, Dag) -> Dag
+internal fun interface BesteStrategy {
+    fun beste(venstre: Dag, høyre: Dag): Dag
+}
 
 internal sealed class Dag(
     protected val dato: LocalDate,
@@ -13,17 +15,17 @@ internal sealed class Dag(
     private fun name() = javaClass.canonicalName.split('.').last()
 
     companion object {
-        internal val default: BesteStrategy = { venstre: Dag, høyre: Dag ->
+        internal val default = BesteStrategy { venstre: Dag, høyre: Dag ->
             require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
             if (venstre == høyre) venstre else høyre.problem(venstre)
         }
 
-        internal val override: BesteStrategy = { venstre: Dag, høyre: Dag ->
+        internal val override = BesteStrategy { venstre: Dag, høyre: Dag ->
             require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
             høyre
         }
 
-        internal val sammenhengendeSykdom: BesteStrategy = { venstre: Dag, høyre: Dag ->
+        internal val sammenhengendeSykdom = BesteStrategy { venstre: Dag, høyre: Dag ->
             require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
             when (venstre) {
                 is Sykedag,
@@ -42,12 +44,12 @@ internal sealed class Dag(
             }
         }
 
-        internal val noOverlap: BesteStrategy = { venstre: Dag, høyre: Dag ->
+        internal val noOverlap = BesteStrategy { venstre: Dag, høyre: Dag ->
             require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
             høyre.problem(venstre, "Støtter ikke overlappende perioder (${venstre.kilde} og ${høyre.kilde})")
         }
 
-        internal val replace: BesteStrategy = { venstre: Dag, høyre: Dag ->
+        internal val replace = BesteStrategy { venstre: Dag, høyre: Dag ->
             if (høyre is UkjentDag) venstre
             else høyre
         }
