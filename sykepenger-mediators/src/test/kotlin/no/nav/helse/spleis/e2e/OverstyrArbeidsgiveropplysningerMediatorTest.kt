@@ -24,7 +24,8 @@ internal class OverstyrArbeidsgiveropplysningerMediatorTest : AbstractEndToEndMe
         sendUtbetaling()
         sendOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
-            arbeidsgiveropplysninger = mapOf(ORGNUMMER to Arbeidsgiveropplysning(
+            arbeidsgiveropplysninger = listOf(Arbeidsgiveropplysning(
+                organisasjonsnummer = ORGNUMMER,
                 månedligInntekt = INNTEKT*1.25,
                 forklaring = "forklaring",
                 subsumsjon = null,

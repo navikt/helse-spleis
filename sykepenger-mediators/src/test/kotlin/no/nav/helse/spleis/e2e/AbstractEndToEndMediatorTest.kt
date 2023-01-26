@@ -485,7 +485,7 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     protected fun sendOverstyrArbeidsgiveropplysninger(
         skjæringstidspunkt: LocalDate,
-        arbeidsgiveropplysninger: Map<String, Arbeidsgiveropplysning>
+        arbeidsgiveropplysninger: List<Arbeidsgiveropplysning>
     ) {
         val (_, message) = meldingsfabrikk.lagOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = skjæringstidspunkt,

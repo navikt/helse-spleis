@@ -34,17 +34,18 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage) : He
             context
         )
 
-    private fun JsonNode.asArbeidsgiveropplysninger() =
-        this.fields().asSequence().toList().map { (orgnummer, arbeidsgiveropplysning) ->
-            val månedligInntekt = arbeidsgiveropplysning["månedligInntekt"].asDouble().månedlig
-            val forklaring = arbeidsgiveropplysning["forklaring"].asText()
-            val subsumsjon = arbeidsgiveropplysning.path("subsumsjon").asSubsumsjon()
+    private fun JsonNode.asArbeidsgiveropplysninger() = map { arbeidsgiveropplysning ->
+        val orgnummer = arbeidsgiveropplysning["organisasjonsnummer"].asText()
+        val månedligInntekt = arbeidsgiveropplysning["månedligInntekt"].asDouble().månedlig
+        val forklaring = arbeidsgiveropplysning["forklaring"].asText()
+        val subsumsjon = arbeidsgiveropplysning.path("subsumsjon").asSubsumsjon()
 
-            val saksbehandlerinntekt = Saksbehandler(skjæringstidspunkt, id, månedligInntekt, forklaring, subsumsjon, opprettet)
-            val refusjonsopplysninger = arbeidsgiveropplysning["refusjonsopplysninger"].asRefusjonsopplysninger()
+        val saksbehandlerinntekt =
+            Saksbehandler(skjæringstidspunkt, id, månedligInntekt, forklaring, subsumsjon, opprettet)
+        val refusjonsopplysninger = arbeidsgiveropplysning["refusjonsopplysninger"].asRefusjonsopplysninger()
 
-            ArbeidsgiverInntektsopplysning(orgnummer, saksbehandlerinntekt, refusjonsopplysninger)
-        }
+        ArbeidsgiverInntektsopplysning(orgnummer, saksbehandlerinntekt, refusjonsopplysninger)
+    }
 
     private fun JsonNode.asSubsumsjon() = this.takeUnless(JsonNode::isMissingOrNull)?.let {
         Subsumsjon(

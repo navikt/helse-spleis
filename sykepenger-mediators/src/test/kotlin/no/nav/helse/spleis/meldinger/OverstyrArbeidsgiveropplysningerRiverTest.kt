@@ -27,7 +27,8 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
         assertNoErrors(
             testMessageFactory.lagOverstyrArbeidsgiveropplysninger(
                 1.januar,
-                mapOf(ORGNUMMER to Arbeidsgiveropplysning(
+                listOf(Arbeidsgiveropplysning(
+                    organisasjonsnummer = ORGNUMMER,
                     månedligInntekt = INNTEKT,
                     forklaring = "forklaring",
                     subsumsjon = Subsumsjon("8-15", null, null),
@@ -42,14 +43,16 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
         assertNoErrors(
             testMessageFactory.lagOverstyrArbeidsgiveropplysninger(
                 1.januar,
-                mapOf(
-                    "a1" to Arbeidsgiveropplysning(
+                listOf(
+                    Arbeidsgiveropplysning(
+                        organisasjonsnummer = "a1",
                         månedligInntekt = INNTEKT,
                         forklaring = "forklaring",
                         subsumsjon = Subsumsjon("8-15", null, null),
                         refusjonsopplysninger = listOf(Refusjonsopplysning(1.januar, null, 0.0))
                     ),
-                     "a2" to Arbeidsgiveropplysning(
+                    Arbeidsgiveropplysning(
+                         organisasjonsnummer = "a2",
                          månedligInntekt = INNTEKT,
                          forklaring = "forklaring",
                          subsumsjon = Subsumsjon("8-15", null, null),
@@ -65,7 +68,32 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
         assertErrors(
             testMessageFactory.lagOverstyrArbeidsgiveropplysninger(
                 1.januar,
-                emptyMap()
+                emptyList()
+            )
+        )
+    }
+
+    @Test
+    fun `skal feile om samme arbeisdgiver inngår flere ganger`() {
+        assertErrors(
+            testMessageFactory.lagOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(
+                    Arbeidsgiveropplysning(
+                        organisasjonsnummer = "a1",
+                        månedligInntekt = INNTEKT,
+                        forklaring = "forklaring",
+                        subsumsjon = Subsumsjon("8-15", null, null),
+                        refusjonsopplysninger = listOf(Refusjonsopplysning(1.januar, null, 0.0))
+                    ),
+                    Arbeidsgiveropplysning(
+                        organisasjonsnummer = "a1",
+                        månedligInntekt = INNTEKT,
+                        forklaring = "forklaring",
+                        subsumsjon = Subsumsjon("8-15", null, null),
+                        refusjonsopplysninger = listOf(Refusjonsopplysning(1.januar, null, 0.0))
+                    )
+                )
             )
         )
     }
@@ -75,7 +103,8 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
         assertErrors(
             testMessageFactory.lagOverstyrArbeidsgiveropplysninger(
                 1.januar,
-                mapOf(ORGNUMMER to Arbeidsgiveropplysning(
+                listOf(Arbeidsgiveropplysning(
+                    organisasjonsnummer = ORGNUMMER,
                     månedligInntekt = INNTEKT,
                     forklaring = "forklaring",
                     subsumsjon = Subsumsjon("8-15", null, null),
@@ -89,7 +118,8 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
         assertNoErrors(
             testMessageFactory.lagOverstyrArbeidsgiveropplysninger(
                 1.januar,
-                mapOf(ORGNUMMER to Arbeidsgiveropplysning(
+                listOf(Arbeidsgiveropplysning(
+                    organisasjonsnummer = ORGNUMMER,
                     månedligInntekt = INNTEKT,
                     forklaring = "forklaring",
                     subsumsjon = Subsumsjon("8-15", null, null),
@@ -104,7 +134,8 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
         assertErrors(
             testMessageFactory.lagOverstyrArbeidsgiveropplysninger(
                 1.januar,
-                mapOf(ORGNUMMER to Arbeidsgiveropplysning(
+                listOf(Arbeidsgiveropplysning(
+                    organisasjonsnummer = ORGNUMMER,
                     månedligInntekt = INNTEKT,
                     forklaring = null,
                     subsumsjon = Subsumsjon("8-15", null, null),
@@ -119,14 +150,16 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
         assertErrors(
             testMessageFactory.lagOverstyrArbeidsgiveropplysninger(
                 1.januar,
-                mapOf(
-                    "a1" to Arbeidsgiveropplysning(
+                listOf(
+                    Arbeidsgiveropplysning(
+                        organisasjonsnummer = "a1",
                         månedligInntekt = INNTEKT,
                         forklaring = "forklaring",
                         subsumsjon = Subsumsjon("8-15", null, null),
                         refusjonsopplysninger = listOf(Refusjonsopplysning(1.januar, null, 0.0))
                     ),
-                    "a2" to Arbeidsgiveropplysning(
+                    Arbeidsgiveropplysning(
+                        organisasjonsnummer = "a2",
                         månedligInntekt = INNTEKT,
                         forklaring = " ",
                         subsumsjon = Subsumsjon("8-15", null, null),
@@ -142,7 +175,8 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
         assertErrors(
             testMessageFactory.lagOverstyrArbeidsgiveropplysninger(
                 1.januar,
-                mapOf(ORGNUMMER to Arbeidsgiveropplysning(
+                listOf(Arbeidsgiveropplysning(
+                    organisasjonsnummer = ORGNUMMER,
                     månedligInntekt = INNTEKT,
                     forklaring = "forklaring",
                     subsumsjon = Subsumsjon(null, null, null),
@@ -156,14 +190,16 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
     fun `lager riktig format på OverstyrArbeidsgiveropplysninger-hendelsen`() {
         val overstyrArbeidsgiveropplysninger = testMessageFactory.lagOverstyrArbeidsgiveropplysninger(
             1.januar,
-            mapOf(
-                ORGNUMMER to Arbeidsgiveropplysning(
+            listOf(
+                Arbeidsgiveropplysning(
+                    organisasjonsnummer = ORGNUMMER,
                     månedligInntekt = INNTEKT,
                     forklaring = "forklaring",
                     subsumsjon = Subsumsjon("8-15", null, null),
                     refusjonsopplysninger = listOf(Refusjonsopplysning(1.januar, 31.januar, INNTEKT/2), Refusjonsopplysning(1.februar, null, 0.0))
                 ),
-                "987654322" to Arbeidsgiveropplysning(
+                Arbeidsgiveropplysning(
+                    organisasjonsnummer = "987654322",
                     månedligInntekt = INNTEKT/2,
                     forklaring = "forklaring2",
                     subsumsjon = Subsumsjon("8-14", "1", "a"),
@@ -179,8 +215,9 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
               "aktørId": "42",
               "fødselsnummer": "12029240045",
               "skjæringstidspunkt": "2018-01-01",
-              "arbeidsgiveropplysninger": {
-                "987654321": {
+              "arbeidsgiveropplysninger": [
+                {
+                  "organisasjonsnummer": "987654321",
                   "månedligInntekt": 31000.0,
                   "forklaring": "forklaring",
                   "refusjonsopplysninger": [
@@ -198,7 +235,8 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
                     "paragraf": "8-15"
                   }
                 },
-                "987654322": {
+                {
+                  "organisasjonsnummer": "987654322",
                   "månedligInntekt": 15500.0,
                   "forklaring": "forklaring2",
                   "refusjonsopplysninger": [
@@ -213,7 +251,7 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
                     "bokstav": "a"
                   }
                 }
-              }
+              ]
             }"""
 
         val faktiskResultat =

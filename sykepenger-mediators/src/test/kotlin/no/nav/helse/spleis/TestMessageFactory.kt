@@ -466,6 +466,7 @@ internal class TestMessageFactory(
     }
 
     data class Arbeidsgiveropplysning(
+        val organisasjonsnummer: String,
         val månedligInntekt: Double?,
         val forklaring: String?,
         val subsumsjon: Subsumsjon?,
@@ -980,19 +981,20 @@ internal class TestMessageFactory(
 
     fun lagOverstyrArbeidsgiveropplysninger(
         skjæringstidspunkt: LocalDate,
-        arbeidsgiveropplysninger: Map<String, Arbeidsgiveropplysning>
+        arbeidsgiveropplysninger: List<Arbeidsgiveropplysning>
     ) = nyHendelse(
         "overstyr_arbeidsgiveropplysninger", mutableMapOf(
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "skjæringstidspunkt" to skjæringstidspunkt,
-            "arbeidsgiveropplysninger" to arbeidsgiveropplysninger.mapValues { (_, arbeidsgiveropplysning) ->
+            "arbeidsgiveropplysninger" to arbeidsgiveropplysninger.map { arbeidgiver ->
                 mutableMapOf(
-                    "månedligInntekt" to arbeidsgiveropplysning.månedligInntekt,
-                    "forklaring" to arbeidsgiveropplysning.forklaring,
-                    "refusjonsopplysninger" to arbeidsgiveropplysning.refusjonsopplysninger?.map { it.toMap }
+                    "organisasjonsnummer" to arbeidgiver.organisasjonsnummer,
+                    "månedligInntekt" to arbeidgiver.månedligInntekt,
+                    "forklaring" to arbeidgiver.forklaring,
+                    "refusjonsopplysninger" to arbeidgiver.refusjonsopplysninger?.map { it.toMap }
                 ).apply {
-                    arbeidsgiveropplysning.subsumsjon?.let {
+                    arbeidgiver.subsumsjon?.let {
                         this["subsumsjon"] = it.toMap
                     }
                 }
