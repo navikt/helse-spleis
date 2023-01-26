@@ -1,7 +1,6 @@
 package no.nav.helse.person.aktivitetslogg
 
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov
-import no.nav.helse.serde.reflection.AktivitetsloggMap
 
 // Understands issues that arose when analyzing a JSON message
 // Implements Collecting Parameter in Refactoring by Martin Fowler
@@ -86,7 +85,7 @@ class Aktivitetslogg(
         kontekst(kontekst as Aktivitetskontekst)
     }
 
-    override fun toMap(): Map<String, List<Map<String, Any>>> = AktivitetsloggMap(this).toMap()
+    override fun toMap(mapper: AktivitetsloggMappingPort): Map<String, List<Map<String, Any>>> = mapper.map(this)
 
     internal fun logg(vararg kontekst: Aktivitetskontekst): Aktivitetslogg {
         return Aktivitetslogg(this).also {
@@ -128,3 +127,6 @@ class Aktivitetslogg(
 
 }
 
+interface AktivitetsloggMappingPort {
+    fun map(log: Aktivitetslogg): Map<String, List<Map<String, Any>>> // sorry
+}

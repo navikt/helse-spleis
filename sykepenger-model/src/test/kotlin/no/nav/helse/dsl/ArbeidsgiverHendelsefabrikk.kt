@@ -413,11 +413,12 @@ internal class OverstyrtArbeidsgiveropplysning(
     private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>
 ) {
     internal companion object {
-        internal fun List<OverstyrtArbeidsgiveropplysning>.tilOverstyrt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) = map {
-            ArbeidsgiverInntektsopplysning(it.orgnummer, Saksbehandler(skjæringstidspunkt, meldingsreferanseId, it.inntekt, it.forklaring, it.subsumsjon, LocalDateTime.now()), Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder()
-                .apply {
-                it.refusjonsopplysninger.forEach { (fom, tom, refusjonsbeløp) -> leggTil(Refusjonsopplysning(meldingsreferanseId, fom, tom, refusjonsbeløp), LocalDateTime.now())}
-            }.build())
-        }
+        internal fun List<OverstyrtArbeidsgiveropplysning>.tilOverstyrt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) =
+            map {
+                ArbeidsgiverInntektsopplysning(it.orgnummer, Saksbehandler(skjæringstidspunkt, meldingsreferanseId, it.inntekt, it.forklaring, it.subsumsjon, LocalDateTime.now()), Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder()
+                    .apply {
+                        it.refusjonsopplysninger.forEach { (fom, tom, refusjonsbeløp) -> leggTil(Refusjonsopplysning(meldingsreferanseId, fom, tom, refusjonsbeløp), LocalDateTime.now())}
+                    }.build())
+            }
     }
 }

@@ -19,6 +19,7 @@ import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeUtbetalinger
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
+import no.nav.helse.serde.reflection.AktivitetsloggMap
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Prosentdel
@@ -53,7 +54,8 @@ private class AktivitetsloggMixin
 
 internal class AktivitetsloggSerializer : JsonSerializer<Aktivitetslogg>() {
     override fun serialize(value: Aktivitetslogg?, gen: JsonGenerator, serializers: SerializerProvider?) {
-        gen.writeObject(value?.toMap().toString())
+        if (value == null) return
+        gen.writeObject(AktivitetsloggMap().map(value).toString())
     }
 }
 internal class BigDecimalSerializer : JsonSerializer<BigDecimal>() {

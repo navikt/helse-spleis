@@ -393,12 +393,13 @@ internal data class PersonData(
                 private val ansattPerioder: List<ArbeidsgiverData.ArbeidsforholdhistorikkInnslagData.ArbeidsforholdData>
             ) {
                 companion object {
-                    fun List<ArbeidsgiverOpptjeningsgrunnlagData>.tilArbeidsgiverOpptjeningsgrunnlag() = map { arbeidsgiverOpptjeningsgrunnlag ->
-                        Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
-                            arbeidsgiverOpptjeningsgrunnlag.orgnummer,
-                            arbeidsgiverOpptjeningsgrunnlag.ansattPerioder.map { it.tilArbeidsforhold() }
-                        )
-                    }
+                    fun List<ArbeidsgiverOpptjeningsgrunnlagData>.tilArbeidsgiverOpptjeningsgrunnlag() =
+                        map { arbeidsgiverOpptjeningsgrunnlag ->
+                            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                                arbeidsgiverOpptjeningsgrunnlag.orgnummer,
+                                arbeidsgiverOpptjeningsgrunnlag.ansattPerioder.map { it.tilArbeidsforhold() }
+                            )
+                        }
                 }
             }
         }

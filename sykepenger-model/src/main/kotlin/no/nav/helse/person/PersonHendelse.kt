@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
+import no.nav.helse.person.aktivitetslogg.AktivitetsloggMappingPort
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggObserver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -99,7 +100,7 @@ abstract class PersonHendelse protected constructor(
     override fun kontekst(kontekst: Aktivitetskontekst) = aktivitetslogg.kontekst(kontekst)
     override fun kontekst(kontekst: Subaktivitetskontekst) = aktivitetslogg.kontekst(kontekst)
     override fun kontekster() = aktivitetslogg.kontekster()
-    override fun toMap() = aktivitetslogg.toMap()
+    override fun toMap(mapper: AktivitetsloggMappingPort) = aktivitetslogg.toMap(mapper)
 
     override fun register(observer: AktivitetsloggObserver) {
         aktivitetslogg.register(observer)

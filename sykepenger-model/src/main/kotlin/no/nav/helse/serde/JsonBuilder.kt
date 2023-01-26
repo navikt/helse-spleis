@@ -145,7 +145,7 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
-            personMap["aktivitetslogg"] = AktivitetsloggMap(aktivitetslogg).toMap()
+            personMap["aktivitetslogg"] = AktivitetsloggMap().map(aktivitetslogg)
         }
 
         override fun preVisitArbeidsgivere() {

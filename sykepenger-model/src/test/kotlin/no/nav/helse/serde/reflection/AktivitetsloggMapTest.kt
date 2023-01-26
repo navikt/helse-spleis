@@ -17,7 +17,7 @@ internal class AktivitetsloggMapTest {
     @Test
     fun `serialisering av aktiviteter med varselkode`() {
         aktivitetslogg.varsel(RV_SØ_1)
-        val serialisert = AktivitetsloggMap(aktivitetslogg).toMap()
+        val serialisert = AktivitetsloggMap().map(aktivitetslogg)
 
         val varsel = serialisert["aktiviteter"]!![0]
         assertEquals("RV_SØ_1", varsel["kode"].toString())

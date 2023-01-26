@@ -18,7 +18,7 @@ interface IAktivitetslogg {
     fun kontekst(kontekst: Aktivitetskontekst)
     fun kontekst(kontekst: Subaktivitetskontekst)
     fun kontekster(): List<IAktivitetslogg>
-    fun toMap(): Map<String, List<Map<String, Any>>>
+    fun toMap(mapper: AktivitetsloggMappingPort): Map<String, List<Map<String, Any>>>
 
     fun register(observer: AktivitetsloggObserver)
 }

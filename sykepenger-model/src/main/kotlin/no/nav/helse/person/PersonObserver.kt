@@ -119,16 +119,19 @@ interface PersonObserver {
                         )
                     }
                 )
+
                 is Inntekt -> mapOf(
                     "opplysningstype" to "Inntekt",
                     "forslag" to mapOf(
                         "beregningsmåneder" to forespurtOpplysning.forslag.beregningsmåneder
                     )
                 )
+
                 is FastsattInntekt -> mapOf(
                     "opplysningstype" to "FastsattInntekt",
                     "fastsattInntekt" to forespurtOpplysning.fastsattInntekt.reflection { _, månedlig, _, _ -> månedlig }
                 )
+
                 Refusjon -> mapOf("opplysningstype" to "Refusjon")
             }
         }

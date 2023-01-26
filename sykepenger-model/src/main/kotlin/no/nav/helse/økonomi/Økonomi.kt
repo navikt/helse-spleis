@@ -52,7 +52,8 @@ internal class Økonomi private constructor(
             Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.grad() to it.aktuellDagsinntekt })
 
         internal fun List<Økonomi>.avgrensTilArbeidsgiverperiode(periode: Periode): Periode? {
-            return map { it.arbeidsgiverperiode }.firstOrNull()?.firstOrNull()?.let { førsteArbeidsgiverperiodedag ->
+            return map { it.arbeidsgiverperiode }
+                .firstOrNull()?.firstOrNull()?.let { førsteArbeidsgiverperiodedag ->
                 Periode(førsteArbeidsgiverperiodedag, periode.endInclusive)
             }?.takeUnless { it == periode }
         }

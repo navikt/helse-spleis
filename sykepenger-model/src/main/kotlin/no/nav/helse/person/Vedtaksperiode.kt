@@ -108,6 +108,7 @@ import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.serde.reflection.AktivitetsloggMap
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -747,7 +748,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiodeId = id,
             gjeldendeTilstand = tilstand.type,
             forrigeTilstand = previousState.type,
-            aktivitetslogg = aktivitetslogg.toMap(),
+            aktivitetslogg = when (aktivitetslogg) {
+                is Aktivitetslogg -> AktivitetsloggMap().map(aktivitetslogg)
+                else -> emptyMap()
+            },
             harVedtaksperiodeWarnings = person.aktivitetslogg.logg(this)
                 .let { it.harVarslerEllerVerre() && !it.harFunksjonelleFeilEllerVerre() },
             hendelser = hendelseIder(),
