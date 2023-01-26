@@ -528,7 +528,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("❌")
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅AventerIm->AUU utenom AvventerBlokkerende")
     fun `To arbeidsgivere, skjæringstidspunkt i måneden før ag2, ag2 sin forlengelse skal ikke vente på inntektsmelding etter inntektsmelding er mottatt`() {
         val periode1 = 31.januar til 20.februar
         val periode2 = 1.februar til 17.februar

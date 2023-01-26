@@ -1347,7 +1347,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("❌")
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅ Fordi vi ikke lagrer inntekten så subsummerer vi bare 1 gang, bør være greit")
+    // Nå så subsummeres det først i kontekst av [søknad] ved trengerInntektsmelding(), deretter i kontekst av [søknad, im] ved finnFørsteFraværsdag()
     fun `§ 8-17 ledd 1 bokstav a - trygden yter ikke sykepenger dersom arbeidsgiverperioden ikke er fullført`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
