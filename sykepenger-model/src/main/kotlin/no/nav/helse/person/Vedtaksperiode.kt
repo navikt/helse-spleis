@@ -281,8 +281,9 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun postHåndter(dager: DagerFraInntektsmelding) {
-        if (!dager.harBlittHåndtertAv(periode)) return
-        dager.leggTil(hendelseIder)
+        if (dager.harBlittHåndtertAv(periode) || dager.skalHåndteresAv(periode)) {
+            dager.leggTil(hendelseIder)
+        }
     }
 
     private fun forventerInntektOgRefusjonFraInntektsmelding() = tilstand != AvsluttetUtenUtbetaling || forventerInntekt()

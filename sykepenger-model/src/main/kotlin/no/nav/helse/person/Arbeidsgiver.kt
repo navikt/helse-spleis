@@ -546,9 +546,7 @@ internal class Arbeidsgiver private constructor(
 
         // Vedtaksperioder som kun har håndtert dager (og ikke inntekt) må også få dokumentsporing
         // Vi legger det til i en posthåndtering for at vedtaksperioder som både håndterer dager og inntekt ikke skal stoppes av erAlleredeHensyntatt
-        if (noenHarHåndtertDager) {
-            håndter(dager) { postHåndter(dager) }
-        }
+        håndter(dager) { postHåndter(dager) }
 
         if (noenHarHåndtertDager || inntektOgRefusjonHåndteres) return
         inntektsmeldingIkkeHåndtert(inntektsmelding, vedtaksperiodeId)
