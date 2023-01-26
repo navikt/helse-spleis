@@ -45,13 +45,11 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
-import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.UtbetalingslinjeVisitor
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -762,7 +760,7 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
     }
 }
 
-internal interface OppdragVisitor {
+internal interface OppdragVisitor: UtbetalingslinjeVisitor {
     fun preVisitOppdrag(
         oppdrag: Oppdrag,
         fagområde: Fagområde,
@@ -779,26 +777,6 @@ internal interface OppdragVisitor {
         overføringstidspunkt: LocalDateTime?,
         erSimulert: Boolean,
         simuleringsResultat: SimuleringResultat?
-    ) {
-    }
-
-    fun visitUtbetalingslinje(
-        linje: Utbetalingslinje,
-        fom: LocalDate,
-        tom: LocalDate,
-        stønadsdager: Int,
-        totalbeløp: Int,
-        satstype: Satstype,
-        beløp: Int?,
-        aktuellDagsinntekt: Int?,
-        grad: Int?,
-        delytelseId: Int,
-        refDelytelseId: Int?,
-        refFagsystemId: String?,
-        endringskode: Endringskode,
-        datoStatusFom: LocalDate?,
-        statuskode: String?,
-        klassekode: Klassekode
     ) {
     }
 

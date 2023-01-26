@@ -3,13 +3,12 @@ package no.nav.helse.utbetalingslinjer
 import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.utbetalingslinjer.Klassekode.RefusjonIkkeOpplysningspliktig
 
-internal class Utbetalingslinje internal constructor(
+class Utbetalingslinje internal constructor(
     internal var fom: LocalDate,
     internal var tom: LocalDate,
     internal var satstype: Satstype = Satstype.Daglig,
@@ -71,7 +70,7 @@ internal class Utbetalingslinje internal constructor(
 
     override fun toString() = "$fom til $tom $endringskode $grad ${datoStatusFom?.let { "opphører fom $it" }}"
 
-    internal fun accept(visitor: OppdragVisitor) {
+    internal fun accept(visitor: UtbetalingslinjeVisitor) {
         visitor.visitUtbetalingslinje(
             this,
             fom,
@@ -193,3 +192,24 @@ internal class Utbetalingslinje internal constructor(
     )
 }
 
+interface UtbetalingslinjeVisitor {
+    fun visitUtbetalingslinje(
+        linje: Utbetalingslinje,
+        fom: LocalDate,
+        tom: LocalDate,
+        stønadsdager: Int,
+        totalbeløp: Int,
+        satstype: Satstype,
+        beløp: Int?,
+        aktuellDagsinntekt: Int?,
+        grad: Int?,
+        delytelseId: Int,
+        refDelytelseId: Int?,
+        refFagsystemId: String?,
+        endringskode: Endringskode,
+        datoStatusFom: LocalDate?,
+        statuskode: String?,
+        klassekode: Klassekode
+    ) {
+    }
+}
