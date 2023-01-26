@@ -2,7 +2,7 @@ package no.nav.helse.person.aktivitetslogg
 
 import java.util.UUID
 
-internal interface AktivitetsloggVisitor {
+interface AktivitetsloggVisitor {
     fun preVisitAktivitetslogg(aktivitetslogg: Aktivitetslogg) {}
     fun visitInfo(
         id: UUID,

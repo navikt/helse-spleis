@@ -13,7 +13,7 @@ sealed class Aktivitet(
     protected val label: Char,
     private var melding: String,
     private val tidsstempel: String,
-    internal val kontekster: List<SpesifikkKontekst>
+    val kontekster: List<SpesifikkKontekst>
 ) : Comparable<Aktivitet> {
     private companion object {
         private val tidsstempelformat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
@@ -43,7 +43,7 @@ sealed class Aktivitet(
     }
 
     operator fun contains(kontekst: Aktivitetskontekst) = kontekst.toSpesifikkKontekst() in kontekster
-    internal class Info private constructor(
+    class Info private constructor(
         id: UUID,
         kontekster: List<SpesifikkKontekst>,
         private val melding: String,
@@ -65,7 +65,7 @@ sealed class Aktivitet(
         }
     }
 
-    internal class Varsel private constructor(
+    class Varsel private constructor(
         id: UUID,
         kontekster: List<SpesifikkKontekst>,
         private val kode: Varselkode? = null,
@@ -76,7 +76,7 @@ sealed class Aktivitet(
             internal fun filter(aktiviteter: List<Aktivitet>): List<Varsel> {
                 return aktiviteter.filterIsInstance<Varsel>()
             }
-            internal fun gjennopprett(id: UUID, kontekster: List<SpesifikkKontekst>, kode: Varselkode?, melding: String, tidsstempel: String) =
+            fun gjennopprett(id: UUID, kontekster: List<SpesifikkKontekst>, kode: Varselkode?, melding: String, tidsstempel: String) =
                 Varsel(id, kontekster, kode, melding, tidsstempel)
 
             internal fun opprett(kontekster: List<SpesifikkKontekst>, kode: Varselkode? = null, melding: String) =
@@ -110,7 +110,7 @@ sealed class Aktivitet(
             internal fun opprett(type: Behovtype, kontekster: List<SpesifikkKontekst>, melding: String, detaljer: Map<String, Any?>) = Behov(
                 UUID.randomUUID(), type, kontekster, melding, detaljer)
 
-            internal fun utbetalingshistorikk(
+            fun utbetalingshistorikk(
                 aktivitetslogg: IAktivitetslogg,
                 periode: Periode
             ) {
@@ -122,14 +122,14 @@ sealed class Aktivitet(
                 )
             }
 
-            internal fun foreldrepenger(aktivitetslogg: IAktivitetslogg) {
+            fun foreldrepenger(aktivitetslogg: IAktivitetslogg) {
                 aktivitetslogg.behov(
                     Behovtype.Foreldrepenger,
                     "Trenger informasjon om foreldrepengeytelser fra FPSAK"
                 )
             }
 
-            internal fun pleiepenger(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+            fun pleiepenger(aktivitetslogg: IAktivitetslogg, periode: Periode) {
                 aktivitetslogg.behov(
                     Behovtype.Pleiepenger,
                     "Trenger informasjon om pleiepengeytelser fra Infotrygd", mapOf(
@@ -139,7 +139,7 @@ sealed class Aktivitet(
                 )
             }
 
-            internal fun omsorgspenger(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+            fun omsorgspenger(aktivitetslogg: IAktivitetslogg, periode: Periode) {
                 aktivitetslogg.behov(
                     Behovtype.Omsorgspenger,
                     "Trenger informasjon om omsorgspengerytelser fra Infotrygd", mapOf(
@@ -149,7 +149,7 @@ sealed class Aktivitet(
                 )
             }
 
-            internal fun opplæringspenger(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+            fun opplæringspenger(aktivitetslogg: IAktivitetslogg, periode: Periode) {
                 aktivitetslogg.behov(
                     Behovtype.Opplæringspenger,
                     "Trenger informasjon om opplæringspengerytelser fra Infotrygd", mapOf(
@@ -159,7 +159,7 @@ sealed class Aktivitet(
                 )
             }
 
-            internal fun institusjonsopphold(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+            fun institusjonsopphold(aktivitetslogg: IAktivitetslogg, periode: Periode) {
                 aktivitetslogg.behov(
                     Behovtype.Institusjonsopphold,
                     "Trenger informasjon om institusjonsopphold fra Inst2", mapOf(
@@ -169,14 +169,14 @@ sealed class Aktivitet(
                 )
             }
 
-            internal fun dødsinformasjon(aktivitetslogg: IAktivitetslogg) {
+            fun dødsinformasjon(aktivitetslogg: IAktivitetslogg) {
                 aktivitetslogg.behov(
                     Behovtype.Dødsinfo,
                     "Trenger informasjon om dødsdato fra PDL"
                 )
             }
 
-            internal fun inntekterForSammenligningsgrunnlag(
+            fun inntekterForSammenligningsgrunnlag(
                 aktivitetslogg: IAktivitetslogg,
                 beregningStart: YearMonth,
                 beregningSlutt: YearMonth
@@ -191,7 +191,7 @@ sealed class Aktivitet(
                 )
             }
 
-            internal fun inntekterForSykepengegrunnlag(
+            fun inntekterForSykepengegrunnlag(
                 aktivitetslogg: IAktivitetslogg,
                 beregningStart: YearMonth,
                 beregningSlutt: YearMonth
@@ -206,11 +206,11 @@ sealed class Aktivitet(
                 )
             }
 
-            internal fun arbeidsforhold(aktivitetslogg: IAktivitetslogg) {
+            fun arbeidsforhold(aktivitetslogg: IAktivitetslogg) {
                 aktivitetslogg.behov(Behovtype.ArbeidsforholdV2, "Trenger informasjon om arbeidsforhold")
             }
 
-            internal fun dagpenger(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
+            fun dagpenger(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
                 aktivitetslogg.behov(
                     Behovtype.Dagpenger, "Trenger informasjon om dagpenger", mapOf(
                         "periodeFom" to fom.toString(),
@@ -219,7 +219,7 @@ sealed class Aktivitet(
                 )
             }
 
-            internal fun arbeidsavklaringspenger(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
+            fun arbeidsavklaringspenger(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
                 aktivitetslogg.behov(
                     Behovtype.Arbeidsavklaringspenger, "Trenger informasjon om arbeidsavklaringspenger", mapOf(
                         "periodeFom" to fom.toString(),
@@ -228,7 +228,7 @@ sealed class Aktivitet(
                 )
             }
 
-            internal fun medlemskap(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
+            fun medlemskap(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
                 aktivitetslogg.behov(
                     Behovtype.Medlemskap, "Trenger informasjon om medlemskap", mapOf(
                         "medlemskapPeriodeFom" to fom.toString(),
@@ -237,7 +237,7 @@ sealed class Aktivitet(
                 )
             }
 
-            internal fun godkjenning(
+            fun godkjenning(
                 aktivitetslogg: IAktivitetslogg,
                 periodeFom: LocalDate,
                 periodeTom: LocalDate,
@@ -298,7 +298,7 @@ sealed class Aktivitet(
         }
     }
 
-    internal class FunksjonellFeil private constructor(
+    class FunksjonellFeil private constructor(
         id: UUID,
         kontekster: List<SpesifikkKontekst>,
         private val melding: String,
@@ -319,7 +319,7 @@ sealed class Aktivitet(
         }
     }
 
-    internal class LogiskFeil private constructor(
+    class LogiskFeil private constructor(
         id: UUID,
         kontekster: List<SpesifikkKontekst>,
         private val melding: String,

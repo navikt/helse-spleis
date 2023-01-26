@@ -1,7 +1,7 @@
 package no.nav.helse.person.aktivitetslogg
 
 // Alle Varselkoder må følge formatet
-internal const val varselkodeformat = "RV_\\D{2}_\\d{1,3}"
+const val varselkodeformat = "RV_\\D{2}_\\d{1,3}"
 private val regex = "^$varselkodeformat$".toRegex()
 
 enum class Varselkode(
@@ -239,12 +239,12 @@ enum class Varselkode(
 
     override fun toString() = "${this.name}: $varseltekst"
 
-    internal companion object {
-        internal val aktiveVarselkoder = values().filterNot { it.avviklet }
+    companion object {
+        val aktiveVarselkoder = values().filterNot { it.avviklet }
 
-        internal val `Mottatt søknad out of order innenfor 18 dager` = RV_SØ_14
-        internal val `Mottatt søknad out of order` = RV_SØ_11
-        internal val `Mottatt søknad som overlapper` = RV_SØ_12
-        internal val `Mottatt søknad som delvis overlapper` = RV_SØ_13
+        val `Mottatt søknad out of order innenfor 18 dager` = RV_SØ_14
+        val `Mottatt søknad out of order` = RV_SØ_11
+        val `Mottatt søknad som overlapper` = RV_SØ_12
+        val `Mottatt søknad som delvis overlapper` = RV_SØ_13
     }
 }

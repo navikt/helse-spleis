@@ -8,11 +8,11 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov
 class Aktivitetslogg(
     private var forelder: Aktivitetslogg? = null
 ) : IAktivitetslogg {
-    internal val aktiviteter = mutableListOf<Aktivitet>()
+    val aktiviteter = mutableListOf<Aktivitet>()
     private val kontekster = mutableListOf<Aktivitetskontekst>()  // Doesn't need serialization
     private val observers = mutableListOf<AktivitetsloggObserver>()
 
-    internal fun accept(visitor: AktivitetsloggVisitor) {
+    fun accept(visitor: AktivitetsloggVisitor) {
         visitor.preVisitAktivitetslogg(this)
         aktiviteter.forEach { it.accept(visitor) }
         visitor.postVisitAktivitetslogg(this)
@@ -87,7 +87,7 @@ class Aktivitetslogg(
 
     override fun toMap(mapper: AktivitetsloggMappingPort): Map<String, List<Map<String, Any>>> = mapper.map(this)
 
-    internal fun logg(vararg kontekst: Aktivitetskontekst): Aktivitetslogg {
+    fun logg(vararg kontekst: Aktivitetskontekst): Aktivitetslogg {
         return Aktivitetslogg(this).also {
             it.aktiviteter.addAll(this.aktiviteter.filter { aktivitet ->
                 kontekst.any { it in aktivitet }
@@ -109,7 +109,7 @@ class Aktivitetslogg(
             .map { Aktivitetslogg(this).apply { aktiviteter.addAll(it.value) } }
 
     private fun info() = Aktivitet.Info.filter(aktiviteter)
-    internal fun varsel() = Aktivitet.Varsel.filter(aktiviteter)
+    fun varsel() = Aktivitet.Varsel.filter(aktiviteter)
     override fun behov() = Behov.filter(aktiviteter)
     private fun funksjonellFeil() = Aktivitet.FunksjonellFeil.filter(aktiviteter)
     private fun logiskFeil() = Aktivitet.LogiskFeil.filter(aktiviteter)

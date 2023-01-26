@@ -16,7 +16,6 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Com
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.ManglerRefusjonsopplysning
