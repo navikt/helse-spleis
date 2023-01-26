@@ -6,7 +6,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
-import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.RefusjonshistorikkVisitor
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.Companion.leggTilRefusjon
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.Companion.somOverlapperMedArbeidsgiverperiode

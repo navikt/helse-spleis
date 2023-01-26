@@ -28,18 +28,18 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.memoized
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.dødsinformasjon
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSammenligningsgrunnlag
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSykepengegrunnlag
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.institusjonsopphold
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenger
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Companion.dødsinformasjon
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSammenligningsgrunnlag
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSykepengegrunnlag
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Companion.institusjonsopphold
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenger
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigOpplysningerFraArbeidsgiver
@@ -99,6 +99,10 @@ import no.nav.helse.person.Varselkode.RV_VT_7
 import no.nav.helse.person.Varselkode.RV_VV_2
 import no.nav.helse.person.Varselkode.RV_VV_8
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
+import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -487,7 +491,7 @@ internal class Vedtaksperiode private constructor(
         return true
     }
 
-    private fun forkast(hendelse: IAktivitetslogg ) {
+    private fun forkast(hendelse: IAktivitetslogg) {
         person.søppelbøtte(hendelse, TIDLIGERE_OG_ETTERGØLGENDE(this))
     }
 

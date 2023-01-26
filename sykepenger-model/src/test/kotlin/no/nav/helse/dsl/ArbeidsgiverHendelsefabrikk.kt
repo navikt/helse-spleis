@@ -37,7 +37,7 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FØDSELSDATO
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement

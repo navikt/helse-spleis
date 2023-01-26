@@ -2,9 +2,9 @@ package no.nav.helse.dsl
 
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import org.junit.jupiter.api.Assertions.assertTrue

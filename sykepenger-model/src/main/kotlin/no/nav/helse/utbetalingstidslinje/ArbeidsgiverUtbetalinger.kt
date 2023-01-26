@@ -3,7 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.RevurderingUtbetalinger
 import no.nav.helse.person.VilkårsgrunnlagHistorikk

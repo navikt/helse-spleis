@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test

@@ -5,11 +5,11 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import kotlin.reflect.KClass

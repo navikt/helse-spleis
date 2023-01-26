@@ -5,7 +5,7 @@ import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Varselkode.RV_RE_1
 import no.nav.helse.person.Varselkode.RV_UT_3
 import no.nav.helse.person.inntekt.ManglerRefusjonsopplysning

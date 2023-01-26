@@ -14,7 +14,7 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.AbstractPersonTest
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger

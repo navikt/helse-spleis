@@ -7,7 +7,7 @@ import java.time.Year
 import java.time.temporal.ChronoUnit.YEARS
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.AlderVisitor
-import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.plus
 import no.nav.helse.ukedager

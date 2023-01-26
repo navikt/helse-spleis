@@ -10,7 +10,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.oktober
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.september
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent

@@ -16,8 +16,8 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.november
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogg.AktivitetException
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.AktivitetException
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag

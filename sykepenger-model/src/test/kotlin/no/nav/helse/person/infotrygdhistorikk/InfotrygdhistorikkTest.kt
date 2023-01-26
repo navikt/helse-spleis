@@ -9,7 +9,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElementTest.Companion.eksisterendeInfotrygdHistorikkelement
 import no.nav.helse.person.inntekt.Inntektsmelding
@@ -354,7 +354,8 @@ internal class InfotrygdhistorikkTest {
             ).somVilkårsgrunnlagHistorikk("a1"),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonObserver = SubsumsjonObserver.NullObserver
-        ), beregningsperiode = 1.januar til 31.januar, Aktivitetslogg())
+        ), beregningsperiode = 1.januar til 31.januar, Aktivitetslogg()
+        )
         val utbetalingstidslinje = historikk.buildUtbetalingstidslinje("ag1", sykdomstidslinje, builder, SubsumsjonObserver.NullObserver).let { builder.result() }
         assertEquals(1.januar til 31.januar, utbetalingstidslinje.periode())
     }
@@ -373,7 +374,8 @@ internal class InfotrygdhistorikkTest {
             ).somVilkårsgrunnlagHistorikk("a1"),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonObserver = SubsumsjonObserver.NullObserver
-        ), beregningsperiode = 1.februar til 28.februar, Aktivitetslogg())
+        ), beregningsperiode = 1.februar til 28.februar, Aktivitetslogg()
+        )
         val utbetalingstidslinje = historikk.buildUtbetalingstidslinje("ag1", sykdomstidslinje, builder, SubsumsjonObserver.NullObserver).let { builder.result()}
         assertEquals(1.februar til 28.februar, utbetalingstidslinje.periode())
     }

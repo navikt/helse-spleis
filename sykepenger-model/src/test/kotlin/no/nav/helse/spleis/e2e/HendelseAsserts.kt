@@ -9,12 +9,12 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.person.AbstractPersonTest
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.AktivitetsloggVisitor
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
-import no.nav.helse.person.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Varselkode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje

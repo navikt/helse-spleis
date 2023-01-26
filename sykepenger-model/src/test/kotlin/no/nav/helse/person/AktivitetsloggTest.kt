@@ -4,6 +4,11 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.person.Varselkode.RV_SØ_1
 import no.nav.helse.person.Varselkode.RV_VT_1
+import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -193,7 +198,8 @@ internal class AktivitetsloggTest {
         hendelse1.kontekst(person)
         val param1 = "value"
         val param2 = LocalDate.now()
-        hendelse1.behov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning, "Trenger godkjenning", mapOf(
+        hendelse1.behov(
+            Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning, "Trenger godkjenning", mapOf(
             "param1" to param1,
             "param2" to param2
         ))

@@ -3,7 +3,7 @@ package no.nav.helse.utbetalingslinjer
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.desember
 import no.nav.helse.januar
 import org.junit.jupiter.api.Assertions.*

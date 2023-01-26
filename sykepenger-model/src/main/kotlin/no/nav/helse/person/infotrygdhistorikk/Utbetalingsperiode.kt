@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.util.Objects
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_IT_1

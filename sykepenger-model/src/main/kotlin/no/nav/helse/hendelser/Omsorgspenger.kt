@@ -1,6 +1,6 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class Omsorgspenger(
     private val perioder: List<Periode>

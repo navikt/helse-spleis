@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning

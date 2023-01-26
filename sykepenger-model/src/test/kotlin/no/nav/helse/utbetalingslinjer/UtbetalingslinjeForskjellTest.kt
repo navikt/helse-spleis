@@ -11,9 +11,9 @@ import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mars
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.AktivitetsloggVisitor
-import no.nav.helse.person.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
+import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_OS_2
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get

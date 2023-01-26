@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import java.util.UUID
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 
 abstract class ArbeidstakerHendelse protected constructor(
     meldingsreferanseId: UUID,

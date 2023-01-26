@@ -5,7 +5,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.Inntektsmelding
@@ -40,7 +40,8 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
             organisasjonsnummer = "a1",
             regler = NormalArbeidstaker,
             subsumsjonObserver = MaskinellJurist(),
-        ), beregningsperiode = 1.februar til 28.februar, Aktivitetslogg())
+        ), beregningsperiode = 1.februar til 28.februar, Aktivitetslogg()
+        )
         val dekoratør = InfotrygdUtbetalingstidslinjedekoratør(builder, 1.februar til 28.februar, emptyList())
         val tidslinje = 31.S + 28.S + 31.S
         tidslinje.accept(ArbeidsgiverperiodeBuilder(Arbeidsgiverperiodeteller.NormalArbeidstaker, dekoratør, SubsumsjonObserver.NullObserver))
@@ -56,7 +57,8 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
             organisasjonsnummer = "a1",
             regler = NormalArbeidstaker,
             subsumsjonObserver = MaskinellJurist()
-        ), beregningsperiode = 1.februar til 28.februar, Aktivitetslogg())
+        ), beregningsperiode = 1.februar til 28.februar, Aktivitetslogg()
+        )
         val dekoratør = InfotrygdUtbetalingstidslinjedekoratør(builder, 1.februar til 28.februar, listOf(1.januar til 10.februar))
         val tidslinje = 31.S + 28.S
         tidslinje.accept(ArbeidsgiverperiodeBuilder(Arbeidsgiverperiodeteller.NormalArbeidstaker, dekoratør, SubsumsjonObserver.NullObserver))
@@ -72,7 +74,8 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
             organisasjonsnummer = "a1",
             regler = NormalArbeidstaker,
             subsumsjonObserver = MaskinellJurist()
-        ), beregningsperiode = 1.januar til 31.januar, Aktivitetslogg())
+        ), beregningsperiode = 1.januar til 31.januar, Aktivitetslogg()
+        )
         val dekoratør = InfotrygdUtbetalingstidslinjedekoratør(builder, 1.januar til 31.januar, listOf(20.januar til 28.februar))
         val tidslinje = 31.S + 28.S
         tidslinje.accept(ArbeidsgiverperiodeBuilder(Arbeidsgiverperiodeteller.NormalArbeidstaker, dekoratør, SubsumsjonObserver.NullObserver))
@@ -88,7 +91,8 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
             organisasjonsnummer = "a1",
             regler = NormalArbeidstaker,
             subsumsjonObserver = MaskinellJurist()
-        ), beregningsperiode = 1.januar til 31.mars, Aktivitetslogg())
+        ), beregningsperiode = 1.januar til 31.mars, Aktivitetslogg()
+        )
         val dekoratør = InfotrygdUtbetalingstidslinjedekoratør(builder, 1.januar til 31.mars, listOf(
             1.februar til 28.februar, // ag1 i IT
             1.februar til 28.februar // ag2 i IT

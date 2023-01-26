@@ -9,7 +9,7 @@ import no.nav.helse.januar
 import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.onsdag
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.F

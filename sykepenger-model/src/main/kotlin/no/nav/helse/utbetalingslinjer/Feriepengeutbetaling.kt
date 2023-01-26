@@ -8,12 +8,12 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.person.Aktivitetskontekst
+import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.FeriepengeutbetalingVisitor
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.infotrygdhistorikk.Nødnummer
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype

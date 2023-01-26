@@ -1,6 +1,6 @@
 package no.nav.helse.hendelser.utbetaling
 
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import java.time.Duration

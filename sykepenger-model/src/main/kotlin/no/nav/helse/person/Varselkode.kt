@@ -1,5 +1,8 @@
 package no.nav.helse.person
 
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+
 // Alle Varselkoder må følge formatet
 internal const val varselkodeformat = "RV_\\D{2}_\\d{1,3}"
 private val regex = "^$varselkodeformat$".toRegex()

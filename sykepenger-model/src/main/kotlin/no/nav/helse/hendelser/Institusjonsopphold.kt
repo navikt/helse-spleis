@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
-import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class Institusjonsopphold(
     private val perioder: List<Institusjonsoppholdsperiode>

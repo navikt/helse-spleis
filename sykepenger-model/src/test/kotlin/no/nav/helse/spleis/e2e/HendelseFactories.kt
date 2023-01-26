@@ -45,7 +45,7 @@ import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.AbstractPersonTest.Companion.AKTØRID
 import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FØDSELSDATO
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement

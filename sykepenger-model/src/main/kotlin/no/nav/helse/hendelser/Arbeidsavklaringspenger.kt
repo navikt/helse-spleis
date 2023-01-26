@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import no.nav.helse.hendelser.Periode.Companion.slutterEtter
-import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Varselkode
 
 class Arbeidsavklaringspenger(private val perioder: List<Periode>) {

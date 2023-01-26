@@ -11,7 +11,7 @@ import no.nav.helse.erRettFør
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.contains
-import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.Varselkode.RV_ST_1
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag

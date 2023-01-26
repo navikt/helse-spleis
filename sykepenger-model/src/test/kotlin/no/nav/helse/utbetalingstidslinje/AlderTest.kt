@@ -9,7 +9,7 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Ledd.LEDD_1
 import no.nav.helse.person.Paragraf.PARAGRAF_8_3
 import no.nav.helse.person.Punktum.Companion.punktum

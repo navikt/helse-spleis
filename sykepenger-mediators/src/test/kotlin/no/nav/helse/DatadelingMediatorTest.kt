@@ -2,10 +2,10 @@ package no.nav.helse
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.person.Aktivitetskontekst
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.PersonHendelse
-import no.nav.helse.person.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.Varselkode.RV_SØ_1
 import no.nav.helse.person.Varselkode.RV_VT_1
 import no.nav.helse.spleis.DatadelingMediator

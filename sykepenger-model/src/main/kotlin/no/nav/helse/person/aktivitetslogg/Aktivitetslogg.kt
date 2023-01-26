@@ -1,4 +1,4 @@
-package no.nav.helse.person
+package no.nav.helse.person.aktivitetslogg
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -6,7 +6,11 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
+import no.nav.helse.person.Inntektskilde
+import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Person
+import no.nav.helse.person.Varselkode
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.serde.reflection.AktivitetsloggMap
 
 interface AktivitetsloggObserver {

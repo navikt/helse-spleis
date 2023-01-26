@@ -3,7 +3,7 @@ package no.nav.helse.spleis.graphql
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.spleis.AbstractObservableTest
 import no.nav.helse.spleis.objectMapper

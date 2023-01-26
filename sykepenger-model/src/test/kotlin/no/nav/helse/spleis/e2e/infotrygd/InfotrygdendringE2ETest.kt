@@ -3,7 +3,7 @@ package no.nav.helse.spleis.e2e.infotrygd
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.harBehov
 import no.nav.helse.inspectors.personLogg
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.håndterInfotrygdendring
 import org.junit.jupiter.api.Assertions.assertFalse

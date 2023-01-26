@@ -9,6 +9,7 @@ import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiverper
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.KorrigertSøknad
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.NyPeriode
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Sykdomstidslinje
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class Revurderingseventyr private constructor(
     private val hvorfor: RevurderingÅrsak,

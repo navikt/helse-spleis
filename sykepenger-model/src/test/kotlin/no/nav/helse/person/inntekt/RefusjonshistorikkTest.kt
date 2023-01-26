@@ -12,9 +12,9 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.AktivitetsloggVisitor
-import no.nav.helse.person.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
+import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 
 internal class RefusjonshistorikkTest {
 
