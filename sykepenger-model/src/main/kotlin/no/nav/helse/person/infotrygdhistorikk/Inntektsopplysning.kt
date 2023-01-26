@@ -5,9 +5,9 @@ import java.time.LocalDateTime
 import java.util.Objects
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
-import no.nav.helse.person.Varselkode.RV_IT_11
-import no.nav.helse.person.Varselkode.RV_IT_12
-import no.nav.helse.person.Varselkode.RV_IT_13
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_11
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_12
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_13
 import no.nav.helse.økonomi.Inntekt
 
 class Inntektsopplysning private constructor(

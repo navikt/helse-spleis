@@ -8,7 +8,7 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.lagreInntekter
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.utenOffentligeYtelser
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Person
-import no.nav.helse.person.Varselkode.RV_IV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_1
 
 class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
     init {

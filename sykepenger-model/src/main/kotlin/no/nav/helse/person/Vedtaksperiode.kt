@@ -68,41 +68,42 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
-import no.nav.helse.person.Varselkode.Companion.`Mottatt søknad out of order`
-import no.nav.helse.person.Varselkode.Companion.`Mottatt søknad out of order innenfor 18 dager`
-import no.nav.helse.person.Varselkode.Companion.`Mottatt søknad som delvis overlapper`
-import no.nav.helse.person.Varselkode.Companion.`Mottatt søknad som overlapper`
-import no.nav.helse.person.Varselkode.RV_AY_10
-import no.nav.helse.person.Varselkode.RV_IM_4
-import no.nav.helse.person.Varselkode.RV_OO_1
-import no.nav.helse.person.Varselkode.RV_RE_2
-import no.nav.helse.person.Varselkode.RV_RV_1
-import no.nav.helse.person.Varselkode.RV_RV_2
-import no.nav.helse.person.Varselkode.RV_SI_2
-import no.nav.helse.person.Varselkode.RV_SV_2
-import no.nav.helse.person.Varselkode.RV_SV_3
-import no.nav.helse.person.Varselkode.RV_SØ_15
-import no.nav.helse.person.Varselkode.RV_SØ_16
-import no.nav.helse.person.Varselkode.RV_SØ_19
-import no.nav.helse.person.Varselkode.RV_SØ_20
-import no.nav.helse.person.Varselkode.RV_SØ_28
-import no.nav.helse.person.Varselkode.RV_UT_1
-import no.nav.helse.person.Varselkode.RV_UT_16
-import no.nav.helse.person.Varselkode.RV_UT_5
-import no.nav.helse.person.Varselkode.RV_VT_1
-import no.nav.helse.person.Varselkode.RV_VT_2
-import no.nav.helse.person.Varselkode.RV_VT_3
-import no.nav.helse.person.Varselkode.RV_VT_4
-import no.nav.helse.person.Varselkode.RV_VT_5
-import no.nav.helse.person.Varselkode.RV_VT_6
-import no.nav.helse.person.Varselkode.RV_VT_7
-import no.nav.helse.person.Varselkode.RV_VV_2
-import no.nav.helse.person.Varselkode.RV_VV_8
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad out of order`
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad out of order innenfor 18 dager`
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad som delvis overlapper`
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad som overlapper`
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_10
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SI_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_15
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_16
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_19
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_20
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_28
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_16
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_5
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_6
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_7
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver

@@ -21,9 +21,9 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.Varselkode.RV_IV_1
-import no.nav.helse.person.Varselkode.RV_VV_1
-import no.nav.helse.person.Varselkode.RV_VV_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand

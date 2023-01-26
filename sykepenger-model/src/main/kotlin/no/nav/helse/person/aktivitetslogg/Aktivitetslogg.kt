@@ -1,7 +1,6 @@
 package no.nav.helse.person.aktivitetslogg
 
 import no.nav.helse.person.Person
-import no.nav.helse.person.Varselkode
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.serde.reflection.AktivitetsloggMap
 

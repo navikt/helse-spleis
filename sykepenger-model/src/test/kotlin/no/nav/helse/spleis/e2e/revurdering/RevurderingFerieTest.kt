@@ -13,8 +13,8 @@ import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.Varselkode.RV_OO_1
-import no.nav.helse.person.Varselkode.RV_OO_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteTilstand

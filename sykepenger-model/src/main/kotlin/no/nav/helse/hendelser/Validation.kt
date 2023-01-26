@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode
 
 internal class Validation private constructor(private val hendelse: IAktivitetslogg) : IAktivitetslogg by(hendelse) {
     private var hasErrors = false

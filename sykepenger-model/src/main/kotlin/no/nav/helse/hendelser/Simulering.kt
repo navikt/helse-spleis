@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import java.util.UUID
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Varselkode.RV_SI_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SI_1
 import no.nav.helse.serde.serdeObjectMapper
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdrag

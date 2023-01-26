@@ -13,7 +13,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
-import no.nav.helse.person.Varselkode.RV_SI_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SI_3
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag

@@ -6,8 +6,8 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.Varselkode.RV_SØ_1
-import no.nav.helse.person.Varselkode.RV_VT_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.spleis.DatadelingMediator
 import no.nav.helse.spleis.meldinger.TestRapid

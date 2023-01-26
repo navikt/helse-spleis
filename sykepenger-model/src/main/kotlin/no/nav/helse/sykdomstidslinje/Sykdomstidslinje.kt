@@ -13,7 +13,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.contains
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.person.Varselkode.RV_ST_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_ST_1
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag

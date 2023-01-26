@@ -8,7 +8,6 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
-import no.nav.helse.person.Varselkode
 
 sealed class Aktivitet(
     protected val id: UUID,

@@ -4,8 +4,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.Varselkode.RV_UT_18
-import no.nav.helse.person.Varselkode.RV_UT_19
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_18
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_19
 import no.nav.helse.utbetalingslinjer.Utbetaling
 
 class Utbetalingsgodkjenning(

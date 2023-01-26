@@ -10,8 +10,8 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.Varselkode.RV_IM_2
-import no.nav.helse.person.Varselkode.RV_MV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_1
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.api.dto.AktivitetDTO
 import no.nav.helse.serde.api.speil.builders.PeriodeVarslerBuilder

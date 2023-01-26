@@ -10,9 +10,9 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.Varselkode.RV_IM_2
-import no.nav.helse.person.Varselkode.RV_IM_3
-import no.nav.helse.person.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertTrue

@@ -6,8 +6,8 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.Varselkode.RV_RE_1
-import no.nav.helse.person.Varselkode.RV_UT_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_3
 import no.nav.helse.person.inntekt.ManglerRefusjonsopplysning
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse

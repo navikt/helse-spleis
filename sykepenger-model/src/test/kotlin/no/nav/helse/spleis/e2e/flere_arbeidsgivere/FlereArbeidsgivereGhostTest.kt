@@ -20,9 +20,9 @@ import no.nav.helse.november
 import no.nav.helse.person.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.Inntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.Varselkode.RV_SØ_10
-import no.nav.helse.person.Varselkode.RV_VV_2
-import no.nav.helse.person.Varselkode.RV_VV_8
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
 import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.SkattComposite
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest

@@ -10,6 +10,7 @@ import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.KorrigertSøkna
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.NyPeriode
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Sykdomstidslinje
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
 
 class Revurderingseventyr private constructor(
     private val hvorfor: RevurderingÅrsak,

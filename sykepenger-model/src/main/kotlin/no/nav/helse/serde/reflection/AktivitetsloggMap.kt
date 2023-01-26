@@ -5,7 +5,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Varsel
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.serde.PersonData.AktivitetsloggData.AlvorlighetsgradData.WARN
 
 internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : AktivitetsloggVisitor {

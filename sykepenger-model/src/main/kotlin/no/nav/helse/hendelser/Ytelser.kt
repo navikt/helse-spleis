@@ -6,11 +6,11 @@ import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Person
-import no.nav.helse.person.Varselkode.RV_AY_5
-import no.nav.helse.person.Varselkode.RV_AY_6
-import no.nav.helse.person.Varselkode.RV_AY_7
-import no.nav.helse.person.Varselkode.RV_AY_8
-import no.nav.helse.person.Varselkode.RV_AY_9
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_5
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_6
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_7
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_8
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_9
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 

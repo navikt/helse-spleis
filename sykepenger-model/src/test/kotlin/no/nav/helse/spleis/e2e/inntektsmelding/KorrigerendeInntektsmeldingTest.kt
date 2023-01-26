@@ -3,7 +3,7 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertVarsel

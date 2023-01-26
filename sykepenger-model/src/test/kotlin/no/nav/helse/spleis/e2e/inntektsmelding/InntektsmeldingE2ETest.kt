@@ -40,11 +40,11 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.Varselkode.RV_IM_2
-import no.nav.helse.person.Varselkode.RV_IM_3
-import no.nav.helse.person.Varselkode.RV_IM_4
-import no.nav.helse.person.Varselkode.RV_RE_1
-import no.nav.helse.person.Varselkode.RV_VT_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_2
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning

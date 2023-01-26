@@ -17,9 +17,9 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.Inntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.Varselkode.RV_IV_2
-import no.nav.helse.person.Varselkode.RV_OV_1
-import no.nav.helse.person.Varselkode.RV_SV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkattComposite

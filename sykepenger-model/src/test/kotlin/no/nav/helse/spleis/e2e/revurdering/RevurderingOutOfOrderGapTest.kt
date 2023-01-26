@@ -37,12 +37,12 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
-import no.nav.helse.person.Varselkode.Companion.`Mottatt søknad out of order`
-import no.nav.helse.person.Varselkode.Companion.`Mottatt søknad out of order innenfor 18 dager`
-import no.nav.helse.person.Varselkode.RV_OO_1
-import no.nav.helse.person.Varselkode.RV_OO_2
-import no.nav.helse.person.Varselkode.RV_SØ_10
-import no.nav.helse.person.Varselkode.RV_SØ_13
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad out of order`
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad out of order innenfor 18 dager`
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander

@@ -16,10 +16,10 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.SykepengegrunnlagVisitor
-import no.nav.helse.person.Varselkode
-import no.nav.helse.person.Varselkode.RV_IV_2
-import no.nav.helse.person.Varselkode.RV_SV_1
-import no.nav.helse.person.Varselkode.RV_SV_2
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver

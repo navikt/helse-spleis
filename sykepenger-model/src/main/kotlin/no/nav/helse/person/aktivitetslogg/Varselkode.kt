@@ -1,7 +1,4 @@
-package no.nav.helse.person
-
-import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+package no.nav.helse.person.aktivitetslogg
 
 // Alle Varselkoder må følge formatet
 internal const val varselkodeformat = "RV_\\D{2}_\\d{1,3}"

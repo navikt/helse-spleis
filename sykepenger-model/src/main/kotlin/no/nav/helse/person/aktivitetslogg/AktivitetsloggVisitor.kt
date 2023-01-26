@@ -1,7 +1,6 @@
 package no.nav.helse.person.aktivitetslogg
 
 import java.util.UUID
-import no.nav.helse.person.Varselkode
 
 internal interface AktivitetsloggVisitor {
     fun preVisitAktivitetslogg(aktivitetslogg: Aktivitetslogg) {}

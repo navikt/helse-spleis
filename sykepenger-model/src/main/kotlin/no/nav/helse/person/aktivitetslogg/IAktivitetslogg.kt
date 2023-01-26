@@ -1,7 +1,6 @@
 package no.nav.helse.person.aktivitetslogg
 
 import no.nav.helse.person.Person
-import no.nav.helse.person.Varselkode
 
 interface IAktivitetslogg {
     fun info(melding: String, vararg params: Any?)

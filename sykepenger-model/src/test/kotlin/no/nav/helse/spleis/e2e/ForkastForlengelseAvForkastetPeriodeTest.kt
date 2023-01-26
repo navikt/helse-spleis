@@ -17,9 +17,9 @@ import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.Varselkode.RV_SØ_19
-import no.nav.helse.person.Varselkode.RV_SØ_20
-import no.nav.helse.person.Varselkode.RV_SØ_28
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_19
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_20
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_28
 import no.nav.helse.serde.serialize
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals

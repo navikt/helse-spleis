@@ -14,9 +14,9 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.nesteDag
 import no.nav.helse.person.*
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.Varselkode.RV_OS_1
-import no.nav.helse.person.Varselkode.RV_OS_2
-import no.nav.helse.person.Varselkode.RV_OS_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst

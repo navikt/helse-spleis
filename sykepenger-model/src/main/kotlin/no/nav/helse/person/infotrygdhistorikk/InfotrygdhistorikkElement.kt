@@ -9,8 +9,8 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.person.Varselkode.RV_IT_14
-import no.nav.helse.person.Varselkode.RV_IT_15
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_15
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje

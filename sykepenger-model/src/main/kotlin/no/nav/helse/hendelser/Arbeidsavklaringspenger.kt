@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import no.nav.helse.hendelser.Periode.Companion.slutterEtter
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode
 
 class Arbeidsavklaringspenger(private val perioder: List<Periode>) {
     internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate): IAktivitetslogg {

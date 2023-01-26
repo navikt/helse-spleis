@@ -26,11 +26,11 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.Varselkode.RV_OS_2
-import no.nav.helse.person.Varselkode.RV_SØ_10
-import no.nav.helse.person.Varselkode.RV_SØ_13
-import no.nav.helse.person.Varselkode.RV_SØ_15
-import no.nav.helse.person.Varselkode.RV_SØ_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_15
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_4
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander

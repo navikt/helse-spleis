@@ -17,7 +17,7 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.PersonVisitor
-import no.nav.helse.person.Varselkode.RV_OV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkattComposite
