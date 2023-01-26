@@ -13,6 +13,7 @@ dependencies {
     implementation(libs.bundles.database)
     implementation(libs.flyway)
     implementation(project(":sykepenger-tid"))
+    implementation(project(":sykepenger-aktivitetslogg"))
 
     testImplementation(libs.testcontainers) {
         exclude("com.fasterxml.jackson.core")

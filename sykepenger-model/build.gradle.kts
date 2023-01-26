@@ -6,6 +6,7 @@ dependencies {
     api("commons-codec:commons-codec:$commonsCodecVersion")
     implementation(project(":sykepenger-tid"))
     implementation(project(":sykepenger-utbetaling"))
+    implementation(project(":sykepenger-aktivitetslogg"))
     implementation(libs.bundles.jackson)
     implementation(libs.bundles.logging) {
         exclude("com.fasterxml.jackson.core")
