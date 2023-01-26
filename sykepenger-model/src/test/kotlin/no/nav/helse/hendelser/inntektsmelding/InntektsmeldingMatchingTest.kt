@@ -392,6 +392,28 @@ internal class InntektsmeldingMatchingTest {
         }
     }
 
+    @Test
+    fun `håndter gjenstående skal kun ta med seg halen`() {
+        val vedtaksperiode1 = 2.januar til 3.januar
+        val vedtaksperiode2 = 8.januar til 9.januar
+        val vedtaksperiode3 = 11.januar til 12.januar
+
+        val (dager, _) = inntektsmelding(null, 1.januar til 16.januar)
+
+        assertEquals(2.januar til 3.januar, dager.håndter(vedtaksperiode1))
+        assertEquals(8.januar til 9.januar, dager.håndter(vedtaksperiode2))
+        assertEquals(11.januar til 12.januar, dager.håndter(vedtaksperiode3))
+
+        assertEquals(13.januar til 16.januar, dager.håndterGjenstående())
+    }
+
+    @Test
+    fun `håndter gjenstående når ingen dager er håndtert skal håndtere alt`() {
+        // Dette for å beholde dagens oppførsel hvor en vedtaksperiode håndterer inntekt, men ingen håndterer noen dager
+        val (dager, _) = inntektsmelding(null, 1.januar til 16.januar)
+        assertEquals(1.januar til 16.januar, dager.håndterGjenstående())
+    }
+
     private fun DagerFraInntektsmelding.håndter(periode: Periode): Periode? {
         var håndtertPeriode: Periode? = null
         håndter(periode) {

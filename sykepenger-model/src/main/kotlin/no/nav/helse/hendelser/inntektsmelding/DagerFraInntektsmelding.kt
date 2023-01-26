@@ -5,10 +5,13 @@ import java.util.UUID
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
+import no.nav.helse.hendelser.tilOrNull
+import no.nav.helse.nesteDag
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -18,6 +21,7 @@ internal class DagerFraInntektsmelding(
 ): IAktivitetslogg by inntektsmelding {
     private val opprinneligPeriode = inntektsmelding.sykdomstidslinje().periode()
     private val gjenståendeDager = opprinneligPeriode?.toMutableSet() ?: mutableSetOf()
+    private val håndterteDager get() = (opprinneligPeriode?: emptySet()).minus(gjenståendeDager)
 
     internal fun meldingsreferanseId() = inntektsmelding.meldingsreferanseId()
     internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = inntektsmelding.leggTil(hendelseIder)
@@ -48,11 +52,7 @@ internal class DagerFraInntektsmelding(
     private fun overlappendeDager(periode: Periode) = periode.intersect(gjenståendeDager)
     internal fun skalHåndteresAv(periode: Periode) = overlappendeDager(periode).isNotEmpty()
 
-    internal fun harBlittHåndtertAv(periode: Periode): Boolean {
-        val overlappendeDagerOpprinnelig = periode.intersect(opprinneligPeriode?.toSet() ?: emptySet())
-        val overlappendeDagerNå = overlappendeDager(periode)
-        return overlappendeDagerOpprinnelig.isNotEmpty() && overlappendeDagerNå.isEmpty()
-    }
+    internal fun harBlittHåndtertAv(periode: Periode) = håndterteDager.any { it in periode }
 
     internal fun håndter(periode: Periode, arbeidsgiver: Arbeidsgiver) = håndter(periode) {
         arbeidsgiver.oppdaterSykdom(it)
@@ -70,8 +70,12 @@ internal class DagerFraInntektsmelding(
 
     internal fun håndterGjenstående(oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit) {
         if (gjenståendeDager.isEmpty()) return
-        oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, gjenståendeDager.omsluttendePeriode!!))
-        gjenståendeDager.clear()
+        // Om vi har håndtert noen dager skal vi kun ta med "halen" etter den siste perioden.
+        // Om ingen dager er håndtert skal vi håndtere alle dager
+        val håndterGjenståendeFraOgMed = håndterteDager.maxOrNull()?.nesteDag ?: gjenståendeDager.min()
+        val gjenståendePeriode = (håndterGjenståendeFraOgMed tilOrNull gjenståendeDager.max()) ?: return
+        oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, gjenståendePeriode.omsluttendePeriode!!))
+        gjenståendeDager.removeAll(gjenståendePeriode)
     }
 
     internal fun håndterGjenstående(arbeidsgiver: Arbeidsgiver) {
@@ -81,7 +85,7 @@ internal class DagerFraInntektsmelding(
         forrigePeriodeSomHåndterte?.let {
             // Vi ønsker kun å validere arbeidsgiverperioden en gang, og dette til slutt
             // Dette for å unngå uenighet om agp hvis kun deler av historikken er lagt til
-            valider(arbeidsgiver.arbeidsgiverperiode(it, SubsumsjonObserver.NullObserver))
+            valider(arbeidsgiver.arbeidsgiverperiode(it, NullObserver))
         }
     }
 

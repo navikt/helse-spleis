@@ -161,4 +161,5 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
 operator fun List<Periode>.contains(dato: LocalDate) = this.any { dato in it }
 
 infix fun LocalDate.til(tom: LocalDate) = Periode(this, tom)
+infix fun LocalDate.tilOrNull(tom: LocalDate) = if (tom < this) null else this til tom
 fun LocalDate.somPeriode() = Periode(this, this)
