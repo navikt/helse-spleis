@@ -275,9 +275,9 @@ internal class Vedtaksperiode private constructor(
             return skalHåndtereDager
         }
         kontekst(dager)
-        tilstand.håndter(this, dager)
-        dager.vurdertTilOgMed(periode.endInclusive)
-        return true
+        return tilstand.håndter(this, dager).also {
+            dager.vurdertTilOgMed(periode.endInclusive)
+        }
     }
 
     internal fun postHåndter(dager: DagerFraInntektsmelding) {
@@ -1020,7 +1020,7 @@ internal class Vedtaksperiode private constructor(
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {}
 
         fun håndterStrekkingAvPeriode(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {}
-        fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
+        fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
             val arbeidsgiverperiodeFør = vedtaksperiode.finnArbeidsgiverperiode()
             vedtaksperiode.håndterDager(dager)
             val arbeidsgiverperiodeEtter = vedtaksperiode.finnArbeidsgiverperiode()
@@ -1029,6 +1029,7 @@ internal class Vedtaksperiode private constructor(
                 // Det kan derimot være at inntekt- og refusjon legger på varselet
                 dager.varsel(RV_IM_4)
             }
+            return true
         }
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
             inntektOgRefusjon.varsel(RV_IM_4)
@@ -1447,10 +1448,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.periode = dager.oppdatertFom(vedtaksperiode.periode)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
             vedtaksperiode.håndterDager(dager)
-            if (vedtaksperiode.forventerInntekt()) return
+            if (vedtaksperiode.forventerInntekt()) return true
             vedtaksperiode.tilstand(dager, AvsluttetUtenUtbetaling)
+            return true
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
@@ -2050,10 +2052,16 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.periode = dager.oppdatertFom(vedtaksperiode.periode)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
-            if (!revurderingStøttet(vedtaksperiode, dager)) return vedtaksperiode.emitVedtaksperiodeEndret(dager)
+        override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
+            if (!revurderingStøttet(vedtaksperiode, dager)) {
+                vedtaksperiode.emitVedtaksperiodeEndret(dager)
+                return false
+            }
             vedtaksperiode.håndterDager(dager)
-            if (!vedtaksperiode.forventerInntekt()) vedtaksperiode.emitVedtaksperiodeEndret(dager) // på stedet hvil!
+            if (!vedtaksperiode.forventerInntekt()) {
+                vedtaksperiode.emitVedtaksperiodeEndret(dager)
+            }
+            return true
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
@@ -2178,8 +2186,9 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
             vedtaksperiode.håndterDager(dager)
+            return true
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) { }
