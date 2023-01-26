@@ -768,7 +768,7 @@ internal class Utbetaling private constructor(
                 skjæringstidspunkt = skjæringstidspunkt,
                 periodetype = periodetype,
                 førstegangsbehandling = førstegangsbehandling,
-                utbetalingtype = utbetaling.type,
+                utbetalingtype = utbetaling.type.name,
                 inntektskilde = inntektskilde,
                 orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
                 arbeidsforholdId = arbeidsforholdId

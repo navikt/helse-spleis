@@ -8,8 +8,6 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.serde.reflection.AktivitetsloggMap
-import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
-
 
 interface AktivitetsloggObserver {
     fun aktivitet(id: UUID, label: Char, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: LocalDateTime)
@@ -373,7 +371,7 @@ class Aktivitetslogg(
                     skjæringstidspunkt: LocalDate,
                     periodetype: Periodetype,
                     førstegangsbehandling: Boolean,
-                    utbetalingtype: Utbetalingtype,
+                    utbetalingtype: String,
                     inntektskilde: Inntektskilde,
                     orgnummereMedRelevanteArbeidsforhold: List<String>,
                     arbeidsforholdId: String?,
@@ -385,7 +383,7 @@ class Aktivitetslogg(
                             "skjæringstidspunkt" to skjæringstidspunkt.toString(),
                             "periodetype" to periodetype.name,
                             "førstegangsbehandling" to førstegangsbehandling,
-                            "utbetalingtype" to utbetalingtype.name,
+                            "utbetalingtype" to utbetalingtype,
                             "inntektskilde" to inntektskilde.name,
                             "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
                             "arbeidsforholdId" to arbeidsforholdId
