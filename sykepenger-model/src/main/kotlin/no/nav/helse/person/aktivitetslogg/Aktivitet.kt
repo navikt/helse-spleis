@@ -6,8 +6,6 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Inntektskilde
-import no.nav.helse.person.Periodetype
 
 sealed class Aktivitet(
     protected val id: UUID,
@@ -244,10 +242,10 @@ sealed class Aktivitet(
                 periodeFom: LocalDate,
                 periodeTom: LocalDate,
                 skjæringstidspunkt: LocalDate,
-                periodetype: Periodetype,
+                periodetype: String,
                 førstegangsbehandling: Boolean,
                 utbetalingtype: String,
-                inntektskilde: Inntektskilde,
+                inntektskilde: String,
                 orgnummereMedRelevanteArbeidsforhold: List<String>,
                 arbeidsforholdId: String?,
             ) {
@@ -256,10 +254,10 @@ sealed class Aktivitet(
                         "periodeFom" to periodeFom.toString(),
                         "periodeTom" to periodeTom.toString(),
                         "skjæringstidspunkt" to skjæringstidspunkt.toString(),
-                        "periodetype" to periodetype.name,
+                        "periodetype" to periodetype,
                         "førstegangsbehandling" to førstegangsbehandling,
                         "utbetalingtype" to utbetalingtype,
-                        "inntektskilde" to inntektskilde.name,
+                        "inntektskilde" to inntektskilde,
                         "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
                         "arbeidsforholdId" to arbeidsforholdId
                     )

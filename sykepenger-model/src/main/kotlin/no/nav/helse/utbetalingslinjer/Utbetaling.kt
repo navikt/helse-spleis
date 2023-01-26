@@ -766,10 +766,10 @@ internal class Utbetaling private constructor(
                 periodeFom = periode.start,
                 periodeTom = periode.endInclusive,
                 skjæringstidspunkt = skjæringstidspunkt,
-                periodetype = periodetype,
+                periodetype = periodetype.name,
                 førstegangsbehandling = førstegangsbehandling,
                 utbetalingtype = utbetaling.type.name,
-                inntektskilde = inntektskilde,
+                inntektskilde = inntektskilde.name,
                 orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
                 arbeidsforholdId = arbeidsforholdId
             )
