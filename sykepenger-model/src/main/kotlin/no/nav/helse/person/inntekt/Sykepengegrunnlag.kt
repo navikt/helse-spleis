@@ -15,7 +15,6 @@ import no.nav.helse.person.GhostPeriode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Opptjening
-import no.nav.helse.person.Revurderingseventyr
 import no.nav.helse.person.SykepengegrunnlagVisitor
 import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_IV_2
@@ -27,7 +26,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.akti
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.build
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.erOverstyrt
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnEventyr
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnEndringsdato
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.inntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medInntekt
@@ -316,11 +315,11 @@ internal class Sykepengegrunnlag(
         )
     }
 
-    internal fun finnEventyr(other: Sykepengegrunnlag): Revurderingseventyr {
+    internal fun finnEndringsdato(other: Sykepengegrunnlag): LocalDate {
         check(this.skjæringstidspunkt == other.skjæringstidspunkt) {
             "Skal bare sammenlikne med samme skjæringstidspunkt"
         }
-        return arbeidsgiverInntektsopplysninger.finnEventyr(this.skjæringstidspunkt, other.arbeidsgiverInntektsopplysninger)
+        return arbeidsgiverInntektsopplysninger.finnEndringsdato(this.skjæringstidspunkt, other.arbeidsgiverInntektsopplysninger)
     }
 
     enum class Begrensning {

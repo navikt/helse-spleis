@@ -25,6 +25,7 @@ class Revurderingseventyr private constructor(
         fun sykdomstidslinje(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Sykdomstidslinje, skjæringstidspunkt, periodeForEndring)
         fun arbeidsgiveropplysninger(skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(Arbeidsgiveropplysninger, skjæringstidspunkt, endringsdato.somPeriode())
         fun arbeidsgiverperiode(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Arbeidsgiverperiode, skjæringstidspunkt, periodeForEndring)
+        fun korrigertInntektsmelding(skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(RevurderingÅrsak.KorrigertInntektsmelding, skjæringstidspunkt, endringsdato.somPeriode())
     }
 
     private val vedtaksperioder = mutableListOf<PersonObserver.RevurderingIgangsattEvent.VedtaksperiodeData>()
@@ -101,6 +102,16 @@ class Revurderingseventyr private constructor(
 
         object KorrigertSøknad : RevurderingÅrsak {
             override fun navn() = "KORRIGERT_SØKNAD"
+        }
+
+        object KorrigertInntektsmelding : RevurderingÅrsak {
+
+            override fun dersomInngått(hendelse: IAktivitetslogg) {
+                hendelse.varsel(Varselkode.RV_IM_4)
+                hendelse.info("korrigert inntektsmelding trigget revurdering")
+            }
+
+            override fun navn() = "KORRIGERT_INNTEKTSMELDING"
         }
 
         class NyPeriode(private val overstyrtForventerInntekt: Boolean) : RevurderingÅrsak {

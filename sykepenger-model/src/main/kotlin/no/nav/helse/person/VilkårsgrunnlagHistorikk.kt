@@ -242,9 +242,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, subsumsjonObserver: SubsumsjonObserver): Pair<VilkårsgrunnlagElement?, Revurderingseventyr> {
             // TODO: gir ikke mening å starte revurdering når sykepengegrunnlaget er lik det forrige
-            val sykepengegrunnlag = sykepengegrunnlag.overstyrArbeidsgiveropplysninger(hendelse, opptjening, subsumsjonObserver) ?: return null to this.sykepengegrunnlag.finnEventyr(this.sykepengegrunnlag)
-            val eventyr = sykepengegrunnlag.finnEventyr(this.sykepengegrunnlag)
-            return kopierMed(hendelse, sykepengegrunnlag, opptjening, subsumsjonObserver) to eventyr
+            val sykepengegrunnlag = sykepengegrunnlag.overstyrArbeidsgiveropplysninger(hendelse, opptjening, subsumsjonObserver)
+            val endringsdato = sykepengegrunnlag?.finnEndringsdato(this.sykepengegrunnlag)
+            val eventyr = Revurderingseventyr.arbeidsgiveropplysninger(skjæringstidspunkt, endringsdato ?: skjæringstidspunkt)
+            return sykepengegrunnlag?.let {
+                kopierMed(hendelse, sykepengegrunnlag, opptjening, subsumsjonObserver)
+            } to eventyr
         }
         protected abstract fun kopierMed(
             hendelse: IAktivitetslogg,
@@ -263,8 +266,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             subsumsjonObserver: SubsumsjonObserver
         ): Pair<VilkårsgrunnlagElement, Revurderingseventyr>?  {
             val sykepengegrunnlag = sykepengegrunnlag.nyeArbeidsgiverInntektsopplysninger(inntektsmelding, subsumsjonObserver) ?: return null
-            val eventyr = sykepengegrunnlag.finnEventyr(this.sykepengegrunnlag)
-            inntektsmelding.varsel(Varselkode.RV_IM_4)
+            val endringsdato = sykepengegrunnlag.finnEndringsdato(this.sykepengegrunnlag)
+            val eventyr = Revurderingseventyr.korrigertInntektsmelding(skjæringstidspunkt, endringsdato)
             return kopierMed(inntektsmelding, sykepengegrunnlag, opptjening, SubsumsjonObserver.NullObserver) to eventyr
         }
 

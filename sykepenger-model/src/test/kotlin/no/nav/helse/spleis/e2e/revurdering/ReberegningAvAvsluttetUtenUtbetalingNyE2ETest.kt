@@ -501,9 +501,10 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         håndterYtelser(3.vedtaksperiode)
 
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(a1))
+        assertIngenVarsel(RV_IM_4, 1.vedtaksperiode.filter(a1))
         assertIngenVarsler(2.vedtaksperiode.filter(a1))
         assertVarsel(RV_IM_2, 3.vedtaksperiode.filter(a1))
+        assertVarsel(RV_IM_4, 3.vedtaksperiode.filter(a1))
 
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)

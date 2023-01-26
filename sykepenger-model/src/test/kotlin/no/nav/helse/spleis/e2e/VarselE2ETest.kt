@@ -198,7 +198,17 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     fun `varsel - Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn, Utbetal kun hvis det blir korrekt`() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), harFlereInntektsmeldinger = true)
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel - Mottatt flere inntektsmeldinger - legger begge til grunn`() {
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 31000.månedlig)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 32000.månedlig)
+
         assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
     }
 

@@ -4,7 +4,6 @@ import java.time.LocalDate
 import no.nav.helse.person.ArbeidsgiverInntektsopplysningVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Opptjening
-import no.nav.helse.person.Revurderingseventyr
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.valider
@@ -165,13 +164,11 @@ class ArbeidsgiverInntektsopplysning(
             )
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.inneholderAlleArbeidsgivereI(other: List<ArbeidsgiverInntektsopplysning>) =
-            this.map { it.orgnummer }.containsAll(other.map { it.orgnummer })
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.finnEventyr(
+        internal fun List<ArbeidsgiverInntektsopplysning>.finnEndringsdato(
             skjæringstidspunkt: LocalDate,
             other: List<ArbeidsgiverInntektsopplysning>
-        ): Revurderingseventyr {
+        ): LocalDate {
             val endringsDatoer = this.mapNotNull { ny ->
                 val gammel = other.singleOrNull { it.orgnummer == ny.orgnummer }
                 when {
@@ -179,7 +176,7 @@ class ArbeidsgiverInntektsopplysning(
                     else -> ny.refusjonsopplysninger.finnFørsteDatoForEndring(gammel.refusjonsopplysninger)
                 }
             }
-            return Revurderingseventyr.arbeidsgiveropplysninger(skjæringstidspunkt, endringsDatoer.minOrNull() ?: skjæringstidspunkt)
+            return endringsDatoer.minOrNull() ?: skjæringstidspunkt
         }
     }
 }
