@@ -34,9 +34,6 @@ internal class Infotrygd(
         throw IllegalStateException("Kan ikke overstyre arbeidsforhold for en arbeidsgiver som har sykdom")
     }
 
-    override fun skalErstattesAv(other: Inntektsopplysning) =
-        other is Infotrygd && this.dato == other.dato
-
     override fun erSamme(other: Inntektsopplysning): Boolean {
         if (other !is Infotrygd) return false
         return this.dato == other.dato && this.beløp == other.beløp

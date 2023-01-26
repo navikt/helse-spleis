@@ -48,8 +48,6 @@ internal class Inntektsmelding(
 
     override fun rapportertInntekt(): Inntekt = error("Inntektsmelding har ikke grunnlag for sammenligningsgrunnlag")
 
-    override fun kanLagres(other: Inntektsopplysning) = !skalErstattesAv(other)
-
     override fun skalErstattesAv(other: Inntektsopplysning) =
         other is Inntektsmelding && this.dato == other.dato
 

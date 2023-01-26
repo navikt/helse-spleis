@@ -1,9 +1,9 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.Varselkode
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
 
@@ -18,7 +18,7 @@ abstract class Inntektsopplysning protected constructor(
     internal abstract fun omregnetÅrsinntekt(): Inntekt
     internal open fun rapportertInntekt(dato: LocalDate): Inntektsopplysning? = null
     internal abstract fun rapportertInntekt(): Inntekt
-    internal open fun kanLagres(other: Inntektsopplysning) = this != other
+    internal fun kanLagres(other: Inntektsopplysning) = this != other
     internal open fun skalErstattesAv(other: Inntektsopplysning) = this == other
 
     internal open fun overstyres(ny: Inntektsopplysning): Inntektsopplysning {

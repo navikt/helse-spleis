@@ -39,9 +39,6 @@ class Saksbehandler internal constructor(
 
     override fun rapportertInntekt(): Inntekt = error("Saksbehandler har ikke grunnlag for sammenligningsgrunnlag")
 
-    override fun skalErstattesAv(other: Inntektsopplysning) =
-        other is Saksbehandler && this.dato == other.dato
-
     override fun erSamme(other: Inntektsopplysning) =
         other is Saksbehandler && this.dato == other.dato && this.beløp == other.beløp
 
