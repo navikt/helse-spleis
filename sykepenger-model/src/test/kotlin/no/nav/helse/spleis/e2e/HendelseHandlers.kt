@@ -41,7 +41,7 @@ import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.IdInnhenter

@@ -31,6 +31,7 @@ import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -215,7 +216,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
         }
 
     private fun håndterSimuleringer(simuleringsdetaljer: Map<Fagområde, Pair<Boolean, Int>> = mapOf(Fagområde.SykepengerRefusjon to Pair(true, 1431))) {
-        hendelse.behov().filter { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering }.forEach { simuleringsBehov ->
+        hendelse.behov().filter { it.type == Aktivitet.Behov.Behovtype.Simulering }.forEach { simuleringsBehov ->
             val fagsystemId = simuleringsBehov.detaljer().getValue("fagsystemId") as String
             val fagområde = Fagområde.from(simuleringsBehov.detaljer().getValue("fagområde") as String)
             val utbetalingId = UUID.fromString(simuleringsBehov.kontekst().getValue("utbetalingId"))

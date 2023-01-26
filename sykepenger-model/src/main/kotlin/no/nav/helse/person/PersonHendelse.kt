@@ -3,8 +3,8 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggObserver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -84,7 +84,7 @@ abstract class PersonHendelse protected constructor(
     override fun info(melding: String, vararg params: Any?) = aktivitetslogg.info(melding, *params)
     override fun varsel(melding: String) = aktivitetslogg.varsel(melding)
     override fun varsel(kode: Varselkode) = aktivitetslogg.varsel(kode)
-    override fun behov(type: Aktivitetslogg.Aktivitet.Behov.Behovtype, melding: String, detaljer: Map<String, Any?>) =
+    override fun behov(type: Aktivitet.Behov.Behovtype, melding: String, detaljer: Map<String, Any?>) =
         aktivitetslogg.behov(type, melding, detaljer)
     override fun funksjonellFeil(kode: Varselkode) = aktivitetslogg.funksjonellFeil(kode)
     override fun logiskFeil(melding: String, vararg params: Any?) = aktivitetslogg.logiskFeil(melding, *params)

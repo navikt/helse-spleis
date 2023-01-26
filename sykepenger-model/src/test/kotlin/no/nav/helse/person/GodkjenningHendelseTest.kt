@@ -27,7 +27,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.oktober
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg

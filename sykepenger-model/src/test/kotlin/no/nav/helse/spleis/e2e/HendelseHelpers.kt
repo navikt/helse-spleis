@@ -5,9 +5,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.InntektsmeldingDTO
 import no.nav.helse.serde.api.dto.SykmeldingDTO
@@ -15,17 +15,17 @@ import no.nav.helse.serde.api.dto.SøknadNavDTO
 import no.nav.helse.serde.api.serializePersonForSpeil
 
 internal class EtterspurtBehov(
-    private val type: Aktivitetslogg.Aktivitet.Behov.Behovtype,
+    private val type: Aktivitet.Behov.Behovtype,
     private val tilstand: TilstandType,
     private val orgnummer: String,
     private val vedtaksperiodeId: UUID
 ) {
     companion object {
-        internal fun fjern(liste: MutableList<EtterspurtBehov>, orgnummer: String, type: Aktivitetslogg.Aktivitet.Behov.Behovtype) {
+        internal fun fjern(liste: MutableList<EtterspurtBehov>, orgnummer: String, type: Aktivitet.Behov.Behovtype) {
             liste.removeIf { it.orgnummer == orgnummer && it.type == type }
         }
 
-        internal fun finnEtterspurteBehov(behovsliste: List<Aktivitetslogg.Aktivitet.Behov>) =
+        internal fun finnEtterspurteBehov(behovsliste: List<Aktivitet.Behov>) =
             behovsliste
                 .filter { "tilstand" in it.kontekst() }
                 .filter { "organisasjonsnummer" in it.kontekst() }
@@ -41,7 +41,7 @@ internal class EtterspurtBehov(
 
         internal fun finnEtterspurtBehov(
             ikkeBesvarteBehov: MutableList<EtterspurtBehov>,
-            type: Aktivitetslogg.Aktivitet.Behov.Behovtype,
+            type: Aktivitet.Behov.Behovtype,
             vedtaksperiodeIdInnhenter: IdInnhenter,
             orgnummer: String
         ) =
@@ -49,7 +49,7 @@ internal class EtterspurtBehov(
 
         internal fun finnEtterspurtBehov(
             ikkeBesvarteBehov: MutableList<EtterspurtBehov>,
-            type: Aktivitetslogg.Aktivitet.Behov.Behovtype,
+            type: Aktivitet.Behov.Behovtype,
             vedtaksperiodeIdInnhenter: IdInnhenter,
             orgnummer: String,
             tilstand: TilstandType

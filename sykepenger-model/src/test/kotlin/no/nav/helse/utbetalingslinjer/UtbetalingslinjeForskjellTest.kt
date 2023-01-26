@@ -16,6 +16,7 @@ import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_OS_2
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
@@ -1018,7 +1019,7 @@ internal class UtbetalingslinjeForskjellTest {
         override fun visitVarsel(
             id: UUID,
             kontekster: List<SpesifikkKontekst>,
-            aktivitet: Aktivitetslogg.Aktivitet.Varsel,
+            aktivitet: Aktivitet.Varsel,
             kode: Varselkode?,
             melding: String,
             tidsstempel: String

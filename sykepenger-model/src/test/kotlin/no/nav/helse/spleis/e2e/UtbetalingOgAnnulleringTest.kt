@@ -10,7 +10,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -23,6 +22,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -325,7 +325,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         assertEquals(2,
             person.personLogg.behov()
                 .filter { it.detaljer()["fagsystemId"] == inspektør.fagsystemId(1.vedtaksperiode) }
-                .filter { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }
+                .filter { it.type == Aktivitet.Behov.Behovtype.Utbetaling }
                 .size
         )
         assertEquals(2, inspektør.utbetalinger.size)

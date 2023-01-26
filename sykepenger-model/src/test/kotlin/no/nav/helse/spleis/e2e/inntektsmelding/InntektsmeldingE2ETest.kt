@@ -27,7 +27,6 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -46,6 +45,7 @@ import no.nav.helse.person.Varselkode.RV_IM_3
 import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.Varselkode.RV_RE_1
 import no.nav.helse.person.Varselkode.RV_VT_2
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.inntekt.SkattComposite
@@ -1165,7 +1165,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        val godkjenningsbehov = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning)
+        val godkjenningsbehov = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning)
         assertEquals(arbeidsforholdId, godkjenningsbehov.detaljer()["arbeidsforholdId"])
     }
 
@@ -1178,7 +1178,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        val godkjenningsbehov = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning)
+        val godkjenningsbehov = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning)
         assertNull(godkjenningsbehov.detaljer()["arbeidsforholdId"])
     }
 

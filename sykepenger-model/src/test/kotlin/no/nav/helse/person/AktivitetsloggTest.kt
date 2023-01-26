@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.person.Varselkode.RV_SØ_1
 import no.nav.helse.person.Varselkode.RV_VT_1
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
@@ -102,7 +103,7 @@ internal class AktivitetsloggTest {
         hendelse1.kontekst(arbeidsgiver1)
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
         hendelse1.kontekst(vedtaksperiode1)
-        hendelse1.behov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning, "Trenger godkjenning")
+        hendelse1.behov(Aktivitet.Behov.Behovtype.Godkjenning, "Trenger godkjenning")
         hendelse1.varsel(RV_SØ_1)
         val hendelse2 = TestHendelse(aktivitetslogg.barn())
         hendelse2.kontekst(person)
@@ -110,7 +111,7 @@ internal class AktivitetsloggTest {
         hendelse2.kontekst(arbeidsgiver2)
         val tilstand = TestKontekst("Tilstand", "Tilstand 1")
         hendelse2.kontekst(tilstand)
-        hendelse2.behov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling, "Skal utbetale")
+        hendelse2.behov(Aktivitet.Behov.Behovtype.Utbetaling, "Skal utbetale")
         hendelse2.info("Infomelding")
 
         assertEquals(2, aktivitetslogg.kontekster().size)
@@ -199,7 +200,7 @@ internal class AktivitetsloggTest {
         val param1 = "value"
         val param2 = LocalDate.now()
         hendelse1.behov(
-            Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning, "Trenger godkjenning", mapOf(
+            Aktivitet.Behov.Behovtype.Godkjenning, "Trenger godkjenning", mapOf(
             "param1" to param1,
             "param2" to param2
         ))
@@ -234,7 +235,7 @@ internal class AktivitetsloggTest {
     private fun assertInfo(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
         var visitorCalled = false
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitInfo(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
+            override fun visitInfo(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.Info, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertEquals(message, melding)
             }
@@ -245,7 +246,7 @@ internal class AktivitetsloggTest {
     private fun assertVarsel(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
         var visitorCalled = false
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
+            override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertEquals(message, melding)
             }
@@ -256,7 +257,7 @@ internal class AktivitetsloggTest {
     private fun assertVarsel(forventetKode: Varselkode?, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
         var visitorCalled = false
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
+            override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertEquals(forventetKode, kode)
             }
@@ -267,7 +268,7 @@ internal class AktivitetsloggTest {
     private fun assertFunksjonellFeil(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
         var visitorCalled = false
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitFunksjonellFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.FunksjonellFeil, melding: String, tidsstempel: String) {
+            override fun visitFunksjonellFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.FunksjonellFeil, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertTrue(message in aktivitet.toString(), aktivitetslogg.toString())
             }
@@ -278,7 +279,7 @@ internal class AktivitetsloggTest {
     private fun assertLogiskFeil(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
         var visitorCalled = false
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitLogiskFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.LogiskFeil, melding: String, tidsstempel: String) {
+            override fun visitLogiskFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.LogiskFeil, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertEquals(message, melding)
             }

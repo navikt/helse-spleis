@@ -21,7 +21,6 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -36,6 +35,7 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.Varselkode.RV_SØ_4
 import no.nav.helse.person.Varselkode.RV_SØ_8
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.september
@@ -890,7 +890,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        val godkjenningsbehov = inspiser(personInspektør).aktivitetslogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning)
+        val godkjenningsbehov = inspiser(personInspektør).aktivitetslogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning)
         assertEquals(1.januar.toString(), godkjenningsbehov.detaljer()["skjæringstidspunkt"])
     }
 

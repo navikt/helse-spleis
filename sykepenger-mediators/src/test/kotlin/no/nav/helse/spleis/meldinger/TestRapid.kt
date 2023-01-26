@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.util.UUID
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.junit.jupiter.api.fail
 import org.slf4j.LoggerFactory
@@ -104,7 +104,7 @@ internal class TestRapid : RapidsConnection() {
             get() = tilstander.filter { it.key !in forkastedeVedtaksperiodeIder }
 
         private val behov
-            get() = mutableMapOf<UUID, MutableList<Pair<Aktivitetslogg.Aktivitet.Behov.Behovtype, TilstandType>>>().apply {
+            get() = mutableMapOf<UUID, MutableList<Pair<Aktivitet.Behov.Behovtype, TilstandType>>>().apply {
                 events("behov") {
                     val vedtaksperiodeIdString = it.path("vedtaksperiodeId")
                         .takeIf { id -> !id.isMissingNode }
@@ -114,17 +114,17 @@ internal class TestRapid : RapidsConnection() {
                     val tilstand = TilstandType.valueOf(it.path("tilstand").asText())
                     this.getOrPut(id) { mutableListOf() }.apply {
                         it.path("@behov").onEach {
-                            add(Aktivitetslogg.Aktivitet.Behov.Behovtype.valueOf(it.asText()) to tilstand)
+                            add(Aktivitet.Behov.Behovtype.valueOf(it.asText()) to tilstand)
                         }
                     }
                 }
             }
 
         private val behovmeldinger
-            get() = mutableListOf<Pair<Aktivitetslogg.Aktivitet.Behov.Behovtype, JsonNode>>().apply {
+            get() = mutableListOf<Pair<Aktivitet.Behov.Behovtype, JsonNode>>().apply {
                 events("behov") { message ->
                     message.path("@behov").onEach {
-                        add(Aktivitetslogg.Aktivitet.Behov.Behovtype.valueOf(it.asText()) to message)
+                        add(Aktivitet.Behov.Behovtype.valueOf(it.asText()) to message)
                     }
                 }
             }
@@ -134,7 +134,7 @@ internal class TestRapid : RapidsConnection() {
             if (name == message.path("@event_name").asText()) onEach(message)
         }
 
-        internal fun behovtypeSisteMelding(behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
+        internal fun behovtypeSisteMelding(behovtype: Aktivitet.Behov.Behovtype) =
             melding(antall() - 1)["@behov"][0].asText() == behovtype.toString()
 
         val vedtaksperiodeteller get() = vedtaksperiodeIder.size
@@ -162,16 +162,16 @@ internal class TestRapid : RapidsConnection() {
         fun tilstanderUtenForkastede(vedtaksperiodeId: UUID) = tilstanderUtenForkastede[vedtaksperiodeId]?.toList() ?: emptyList()
         fun forkastedeTilstander(vedtaksperiodeId: UUID) = forkastedeTilstander[vedtaksperiodeId]?.toList() ?: emptyList()
 
-        fun harEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
+        fun harEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitet.Behov.Behovtype) =
             behov[vedtaksperiodeId(vedtaksperiodeIndeks)]?.any { it.first == behovtype } ?: false
 
-        fun etterspurteBehov(behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
+        fun etterspurteBehov(behovtype: Aktivitet.Behov.Behovtype) =
             behovmeldinger.last { it.first == behovtype }.second
 
-        fun alleEtterspurteBehov(behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
+        fun alleEtterspurteBehov(behovtype: Aktivitet.Behov.Behovtype) =
             behovmeldinger.filter { it.first == behovtype }.map { it.second }
 
-        fun tilstandForEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
+        fun tilstandForEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitet.Behov.Behovtype) =
             behov.getValue(vedtaksperiodeId(vedtaksperiodeIndeks)).last { it.first == behovtype }.second
     }
 }

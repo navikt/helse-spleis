@@ -20,7 +20,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.serde.reflection.Utbetalingstatus

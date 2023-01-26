@@ -48,6 +48,7 @@ import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -72,7 +73,7 @@ internal fun AbstractEndToEndTest.utbetaling(
         fødselsnummer = fnr.toString(),
         orgnummer = orgnummer,
         fagsystemId = fagsystemId,
-        utbetalingId = utbetalingId?.toString() ?: person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId"),
+        utbetalingId = utbetalingId?.toString() ?: person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId"),
         status = status,
         melding = "hei",
         avstemmingsnøkkel = 123456L,
@@ -94,7 +95,7 @@ internal fun AbstractEndToEndTest.feriepengeutbetaling(
         fødselsnummer = fnr.toString(),
         orgnummer = orgnummer,
         fagsystemId = fagsystemId,
-        utbetalingId = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId"),
+        utbetalingId = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId"),
         status = status,
         melding = "hey",
         avstemmingsnøkkel = 654321L,
@@ -187,7 +188,7 @@ internal fun AbstractEndToEndTest.inntektsmelding(
     }
     inntektsmeldinger[id] = inntektsmeldinggenerator
     inntekter[id] = beregnetInntekt
-    EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk)
+    EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Aktivitet.Behov.Behovtype.Sykepengehistorikk)
     return inntektsmeldinggenerator().apply { hendelselogg = this }
 }
 
@@ -338,16 +339,16 @@ internal fun AbstractEndToEndTest.ytelser(
     val meldingsreferanseId = UUID.randomUUID()
 
     val bedtOmSykepengehistorikk = erEtterspurt(
-        Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk, vedtaksperiodeIdInnhenter, orgnummer,
+        Aktivitet.Behov.Behovtype.Sykepengehistorikk, vedtaksperiodeIdInnhenter, orgnummer,
         TilstandType.AVVENTER_HISTORIKK
     )
         || erEtterspurt(
-        Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk, vedtaksperiodeIdInnhenter, orgnummer,
+        Aktivitet.Behov.Behovtype.Sykepengehistorikk, vedtaksperiodeIdInnhenter, orgnummer,
         TilstandType.AVVENTER_HISTORIKK_REVURDERING
     )
     if (bedtOmSykepengehistorikk) assertEtterspurt(
         Ytelser::class,
-        Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk,
+        Aktivitet.Behov.Behovtype.Sykepengehistorikk,
         vedtaksperiodeIdInnhenter,
         orgnummer
     )
@@ -418,7 +419,7 @@ internal fun AbstractEndToEndTest.simulering(
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     simuleringsresultat: SimuleringResultat? = standardSimuleringsresultat(orgnummer)
-) = person.personLogg.etterspurteBehov(vedtaksperiodeIdInnhenter, orgnummer).filter { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering }.map { simuleringsBehov ->
+) = person.personLogg.etterspurteBehov(vedtaksperiodeIdInnhenter, orgnummer).filter { it.type == Aktivitet.Behov.Behovtype.Simulering }.map { simuleringsBehov ->
     Simulering(
         meldingsreferanseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
@@ -482,10 +483,10 @@ internal fun AbstractEndToEndTest.utbetalingsgodkjenning(
     orgnummer: String,
     automatiskBehandling: Boolean,
     utbetalingId: UUID = UUID.fromString(
-        person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning).kontekst()["utbetalingId"]
+        person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning).kontekst()["utbetalingId"]
             ?: throw IllegalStateException(
                 "Finner ikke utbetalingId i: ${
-                    person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning).kontekst()
+                    person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning).kontekst()
                 }"
             )
     ),

@@ -5,7 +5,7 @@ import no.nav.helse.person.Varselkode
 
 interface IAktivitetslogg {
     fun info(melding: String, vararg params: Any?)
-    fun behov(type: Aktivitetslogg.Aktivitet.Behov.Behovtype, melding: String, detaljer: Map<String, Any?> = emptyMap())
+    fun behov(type: Aktivitet.Behov.Behovtype, melding: String, detaljer: Map<String, Any?> = emptyMap())
     fun varsel(melding: String)
     fun varsel(kode: Varselkode)
     fun funksjonellFeil(kode: Varselkode)
@@ -16,7 +16,7 @@ interface IAktivitetslogg {
     fun harFunksjonelleFeilEllerVerre(): Boolean
 
     fun aktivitetsteller(): Int
-    fun behov(): List<Aktivitetslogg.Aktivitet.Behov>
+    fun behov(): List<Aktivitet.Behov>
     fun barn(): Aktivitetslogg
     fun kontekst(kontekst: Aktivitetskontekst)
     fun kontekst(person: Person)

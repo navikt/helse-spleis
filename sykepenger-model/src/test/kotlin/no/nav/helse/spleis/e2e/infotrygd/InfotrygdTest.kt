@@ -8,10 +8,10 @@ import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -89,7 +89,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
 
         assertEtterspurt(
             løsning = Utbetalingshistorikk::class,
-            type = Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk,
+            type = Aktivitet.Behov.Behovtype.Sykepengehistorikk,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = ORGNUMMER
         )
@@ -105,7 +105,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
 
         assertEtterspurt(
             løsning = Utbetalingshistorikk::class,
-            type = Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk,
+            type = Aktivitet.Behov.Behovtype.Sykepengehistorikk,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = ORGNUMMER
         )

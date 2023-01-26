@@ -10,13 +10,13 @@ import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.sisteBehov
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -152,7 +152,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertIngenAnnulleringsbehov()
     }
 
-    private fun Aktivitetslogg.Aktivitet.Behov.hentLinjer() =
+    private fun Aktivitet.Behov.hentLinjer() =
         @Suppress("UNCHECKED_CAST")
         (detaljer()["linjer"] as List<Map<String, Any>>)
 

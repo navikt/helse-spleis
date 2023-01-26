@@ -9,6 +9,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.Varselkode
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.serde.api.dto.AktivitetDTO
 
 internal class PeriodeVarslerBuilder(
@@ -21,7 +22,7 @@ internal class PeriodeVarslerBuilder(
         aktivitetslogg.accept(this)
     }
 
-    override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
+    override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
         kontekster.find { it.kontekstType == "Vedtaksperiode" }
             ?.let { it.kontekstMap["vedtaksperiodeId"] }
             ?.let(UUID::fromString)

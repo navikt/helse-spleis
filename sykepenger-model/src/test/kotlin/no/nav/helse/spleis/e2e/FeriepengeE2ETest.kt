@@ -24,7 +24,7 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.september
@@ -548,7 +548,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             opptjeningsår = Year.of(2020)
         )
 
-        val fagsystemIdFeriepenger = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling).detaljer()["fagsystemId"] as String
+        val fagsystemIdFeriepenger = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).detaljer()["fagsystemId"] as String
         håndterFeriepengerUtbetalt(fagsystemId = fagsystemIdFeriepenger)
 
         assertTrue(person.personLogg.toString().contains("Data for feriepenger fra Oppdrag/UR"))
@@ -588,7 +588,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             opptjeningsår = Year.of(2020)
         )
 
-        val fagsystemIdFeriepenger = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling).detaljer()["fagsystemId"] as String
+        val fagsystemIdFeriepenger = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).detaljer()["fagsystemId"] as String
         håndterFeriepengerUtbetalt(fagsystemId = fagsystemIdFeriepenger)
 
         håndterSykmelding(Sykmeldingsperiode(1.juli(2020), 10.juli(2020), 100.prosent))
@@ -1209,10 +1209,10 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     }
 
     private fun engangsutbetalinger() = person.personLogg.behov()
-        .filter { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }
+        .filter { it.type == Aktivitet.Behov.Behovtype.Utbetaling }
         .filter { utbetaling -> utbetaling.detaljer()["linjer"].castAsList<Map<String, Any>>().any { linje -> linje["satstype"] == "ENG" } }
 
-    private fun Aktivitetslogg.Aktivitet.Behov.linje() = this
+    private fun Aktivitet.Behov.linje() = this
         .detaljer()["linjer"].castAsList<Map<String, Any?>>()
         .single()
 }

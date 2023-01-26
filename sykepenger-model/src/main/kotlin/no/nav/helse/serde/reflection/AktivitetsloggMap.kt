@@ -2,7 +2,7 @@ package no.nav.helse.serde.reflection
 
 import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Varsel
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Varsel
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.Varselkode

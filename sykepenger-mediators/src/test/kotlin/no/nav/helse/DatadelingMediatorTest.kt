@@ -8,6 +8,7 @@ import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.Varselkode.RV_SØ_1
 import no.nav.helse.person.Varselkode.RV_VT_1
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.spleis.DatadelingMediator
 import no.nav.helse.spleis.meldinger.TestRapid
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -71,7 +72,7 @@ internal class DatadelingMediatorTest {
 
     @Test
     fun `publiserer behov-aktiviteter`() {
-        testhendelse.behov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning, "melding")
+        testhendelse.behov(Aktivitet.Behov.Behovtype.Godkjenning, "melding")
         datadelingMediator.finalize(testRapid)
         assertEquals(1, testRapid.inspektør.antall())
     }

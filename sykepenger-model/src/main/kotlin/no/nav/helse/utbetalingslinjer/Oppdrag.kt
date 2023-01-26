@@ -13,7 +13,7 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.nesteDag
 import no.nav.helse.person.*
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Varselkode.RV_OS_1
 import no.nav.helse.person.Varselkode.RV_OS_2
 import no.nav.helse.person.Varselkode.RV_OS_3

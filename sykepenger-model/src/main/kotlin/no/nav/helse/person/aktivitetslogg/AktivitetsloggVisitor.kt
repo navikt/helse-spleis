@@ -8,7 +8,7 @@ internal interface AktivitetsloggVisitor {
     fun visitInfo(
         id: UUID,
         kontekster: List<SpesifikkKontekst>,
-        aktivitet: Aktivitetslogg.Aktivitet.Info,
+        aktivitet: Aktivitet.Info,
         melding: String,
         tidsstempel: String
     ) {
@@ -17,7 +17,7 @@ internal interface AktivitetsloggVisitor {
     fun visitVarsel(
         id: UUID,
         kontekster: List<SpesifikkKontekst>,
-        aktivitet: Aktivitetslogg.Aktivitet.Varsel,
+        aktivitet: Aktivitet.Varsel,
         kode: Varselkode?,
         melding: String,
         tidsstempel: String
@@ -27,8 +27,8 @@ internal interface AktivitetsloggVisitor {
     fun visitBehov(
         id: UUID,
         kontekster: List<SpesifikkKontekst>,
-        aktivitet: Aktivitetslogg.Aktivitet.Behov,
-        type: Aktivitetslogg.Aktivitet.Behov.Behovtype,
+        aktivitet: Aktivitet.Behov,
+        type: Aktivitet.Behov.Behovtype,
         melding: String,
         detaljer: Map<String, Any?>,
         tidsstempel: String
@@ -38,7 +38,7 @@ internal interface AktivitetsloggVisitor {
     fun visitFunksjonellFeil(
         id: UUID,
         kontekster: List<SpesifikkKontekst>,
-        aktivitet: Aktivitetslogg.Aktivitet.FunksjonellFeil,
+        aktivitet: Aktivitet.FunksjonellFeil,
         melding: String,
         tidsstempel: String
     ) {
@@ -47,7 +47,7 @@ internal interface AktivitetsloggVisitor {
     fun visitLogiskFeil(
         id: UUID,
         kontekster: List<SpesifikkKontekst>,
-        aktivitet: Aktivitetslogg.Aktivitet.LogiskFeil,
+        aktivitet: Aktivitet.LogiskFeil,
         melding: String,
         tidsstempel: String
     ) {

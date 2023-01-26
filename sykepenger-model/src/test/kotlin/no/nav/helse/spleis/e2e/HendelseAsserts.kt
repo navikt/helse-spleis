@@ -17,6 +17,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Varselkode
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -37,11 +38,11 @@ internal fun assertInntektForDato(forventetInntekt: Inntekt?, dato: LocalDate, i
     }
 }
 
-internal fun AbstractEndToEndTest.erEtterspurt(type: Aktivitetslogg.Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String, tilstand: TilstandType): Boolean {
+internal fun AbstractEndToEndTest.erEtterspurt(type: Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String, tilstand: TilstandType): Boolean {
     return EtterspurtBehov.finnEtterspurtBehov(ikkeBesvarteBehov, type, vedtaksperiodeIdInnhenter, orgnummer, tilstand) != null
 }
 
-internal fun <T : ArbeidstakerHendelse> AbstractEndToEndTest.assertEtterspurt(løsning: KClass<T>, type: Aktivitetslogg.Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String) {
+internal fun <T : ArbeidstakerHendelse> AbstractEndToEndTest.assertEtterspurt(løsning: KClass<T>, type: Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String) {
     val etterspurtBehov = EtterspurtBehov.finnEtterspurtBehov(ikkeBesvarteBehov, type, vedtaksperiodeIdInnhenter, orgnummer)
     assertTrue(ikkeBesvarteBehov.remove(etterspurtBehov)) {
         "Forventer at $type skal være etterspurt før ${løsning.simpleName} håndteres. Perioden er i ${
@@ -50,7 +51,7 @@ internal fun <T : ArbeidstakerHendelse> AbstractEndToEndTest.assertEtterspurt(l�
     }
 }
 
-internal fun <T : ArbeidstakerHendelse> AbstractEndToEndTest.assertIkkeEtterspurt(løsning: KClass<T>, type: Aktivitetslogg.Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String) {
+internal fun <T : ArbeidstakerHendelse> AbstractEndToEndTest.assertIkkeEtterspurt(løsning: KClass<T>, type: Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String) {
     val etterspurtBehov = EtterspurtBehov.finnEtterspurtBehov(ikkeBesvarteBehov, type, vedtaksperiodeIdInnhenter, orgnummer)
     assertFalse(etterspurtBehov in ikkeBesvarteBehov) {
         "Forventer ikke at $type skal være etterspurt før ${løsning.simpleName} håndteres. Perioden er i ${
@@ -244,7 +245,7 @@ internal fun Aktivitetslogg.assertLogiskFeil(severe: String, vararg filtre: Akti
 internal fun Aktivitetslogg.collectInfo(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val info = mutableListOf<String>()
     this.accept(object : AktivitetsloggVisitor {
-        override fun visitInfo(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
+        override fun visitInfo(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.Info, melding: String, tidsstempel: String) {
             if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
                 info.add(melding)
             }
@@ -256,7 +257,7 @@ internal fun Aktivitetslogg.collectInfo(vararg filtre: AktivitetsloggFilter): Mu
 internal fun Aktivitetslogg.collectVarsler(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val warnings = mutableListOf<String>()
     this.accept(object : AktivitetsloggVisitor {
-        override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
+        override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
             if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
                 warnings.add(melding)
             }
@@ -267,7 +268,7 @@ internal fun Aktivitetslogg.collectVarsler(vararg filtre: AktivitetsloggFilter):
 internal fun Aktivitetslogg.collectVarselkoder(vararg filtre: AktivitetsloggFilter): List<Varselkode> {
     val varselkoder = mutableListOf<Varselkode>()
     accept(object : AktivitetsloggVisitor {
-        override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
+        override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
             if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } } && kode != null) {
                 varselkoder.add(kode)
             }
@@ -279,7 +280,7 @@ internal fun Aktivitetslogg.collectVarselkoder(vararg filtre: AktivitetsloggFilt
 internal fun Aktivitetslogg.collectFunksjonelleFeil(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val errors = mutableListOf<String>()
     accept(object : AktivitetsloggVisitor {
-        override fun visitFunksjonellFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.FunksjonellFeil, melding: String, tidsstempel: String) {
+        override fun visitFunksjonellFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.FunksjonellFeil, melding: String, tidsstempel: String) {
             if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
                 errors.add(melding)
             }
@@ -291,7 +292,7 @@ internal fun Aktivitetslogg.collectFunksjonelleFeil(vararg filtre: Aktivitetslog
 internal fun Aktivitetslogg.collectLogiskeFeil(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val severes = mutableListOf<String>()
     accept(object : AktivitetsloggVisitor {
-        override fun visitLogiskFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.LogiskFeil, melding: String, tidsstempel: String) {
+        override fun visitLogiskFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.LogiskFeil, melding: String, tidsstempel: String) {
             if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
                 severes.add(melding)
             }

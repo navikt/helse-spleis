@@ -1,6 +1,6 @@
 package no.nav.helse.person
 
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 
 // Alle Varselkoder må følge formatet
@@ -235,10 +235,10 @@ enum class Varselkode(
         require(this.name.matches(regex)) {"Ugyldig varselkode-format: ${this.name}"}
     }
 
-    internal fun varsel(kontekster: List<SpesifikkKontekst>): Aktivitetslogg.Aktivitet.Varsel =
-        Aktivitetslogg.Aktivitet.Varsel.opprett(kontekster, this, varseltekst)
-    internal fun funksjonellFeil(kontekster: List<SpesifikkKontekst>): Aktivitetslogg.Aktivitet.FunksjonellFeil =
-        Aktivitetslogg.Aktivitet.FunksjonellFeil.opprett(kontekster, funksjonellFeilTekst)
+    internal fun varsel(kontekster: List<SpesifikkKontekst>): Aktivitet.Varsel =
+        Aktivitet.Varsel.opprett(kontekster, this, varseltekst)
+    internal fun funksjonellFeil(kontekster: List<SpesifikkKontekst>): Aktivitet.FunksjonellFeil =
+        Aktivitet.FunksjonellFeil.opprett(kontekster, funksjonellFeilTekst)
 
     override fun toString() = "${this.name}: $varseltekst"
 

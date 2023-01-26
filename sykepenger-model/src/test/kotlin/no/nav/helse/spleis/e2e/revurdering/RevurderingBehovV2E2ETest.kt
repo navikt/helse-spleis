@@ -10,7 +10,7 @@ import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sisteBehov
@@ -108,37 +108,37 @@ internal class RevurderingBehovV2E2ETest : AbstractEndToEndTest() {
     }
 
     private fun assertArbeidsavklaringspengerdetaljer(fom: LocalDate, tom: LocalDate) {
-        val behov = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger).detaljer()
+        val behov = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger).detaljer()
         assertEquals(fom, (LocalDate.parse(behov["periodeFom"] as String)))
         assertEquals(tom, (LocalDate.parse(behov["periodeTom"] as String)))
     }
 
     private fun assertDagpengerdetaljer(fom: LocalDate, tom: LocalDate) {
-        val behov = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger).detaljer()
+        val behov = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Dagpenger).detaljer()
         assertEquals(fom, (LocalDate.parse(behov["periodeFom"] as String)))
         assertEquals(tom, (LocalDate.parse(behov["periodeTom"] as String)))
     }
 
     private fun assertInstitusjonsoppholddetaljer(fom: LocalDate, tom: LocalDate) {
-        val behov = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold).detaljer()
+        val behov = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Institusjonsopphold).detaljer()
         assertEquals(fom, (LocalDate.parse(behov["institusjonsoppholdFom"] as String)))
         assertEquals(tom, (LocalDate.parse(behov["institusjonsoppholdTom"] as String)))
     }
 
     private fun assertOmsorgspengerdetaljer(fom: LocalDate, tom: LocalDate) {
-        val behov = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenger).detaljer()
+        val behov = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Omsorgspenger).detaljer()
         assertEquals(fom, (LocalDate.parse(behov["omsorgspengerFom"] as String)))
         assertEquals(tom, (LocalDate.parse(behov["omsorgspengerTom"] as String)))
     }
 
     private fun assertOpplæringspengerdetaljer(fom: LocalDate, tom: LocalDate) {
-        val behov = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger).detaljer()
+        val behov = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Opplæringspenger).detaljer()
         assertEquals(fom, (LocalDate.parse(behov["opplæringspengerFom"] as String)))
         assertEquals(tom, (LocalDate.parse(behov["opplæringspengerTom"] as String)))
     }
 
     private fun assertPleiepengerdetaljer(fom: LocalDate, tom: LocalDate) {
-        val behov = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger).detaljer()
+        val behov = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Pleiepenger).detaljer()
         assertEquals(fom, (LocalDate.parse(behov["pleiepengerFom"] as String)))
         assertEquals(tom, (LocalDate.parse(behov["pleiepengerTom"] as String)))
     }

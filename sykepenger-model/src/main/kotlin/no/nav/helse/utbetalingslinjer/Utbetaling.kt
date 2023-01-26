@@ -14,7 +14,7 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Inntektskilde

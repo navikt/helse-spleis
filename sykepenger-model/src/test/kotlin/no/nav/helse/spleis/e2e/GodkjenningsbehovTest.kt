@@ -10,7 +10,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.oktober
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.september
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -48,7 +48,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
 
         val orgnummereMedRelevanteArbeidsforhold = hendelselogg.etterspurtBehov<List<String>>(
             vedtaksperiodeId = 1.vedtaksperiode.id(a1),
-            behov = Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning,
+            behov = Aktivitet.Behov.Behovtype.Godkjenning,
             felt = "orgnummereMedRelevanteArbeidsforhold"
         )
         assertEquals(listOf(a1, a2), orgnummereMedRelevanteArbeidsforhold)

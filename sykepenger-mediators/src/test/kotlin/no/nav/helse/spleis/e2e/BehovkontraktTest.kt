@@ -7,8 +7,8 @@ import java.time.YearMonth
 import java.util.*
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
+import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.*
@@ -133,17 +133,17 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertUtbetalingdetaljer(behov, true)
     }
 
-    private fun assertVedtaksperiodeBehov(behov: JsonNode, vararg typer: Aktivitetslogg.Aktivitet.Behov.Behovtype) {
+    private fun assertVedtaksperiodeBehov(behov: JsonNode, vararg typer: Aktivitet.Behov.Behovtype) {
         assertBehov(behov, *typer)
         assertTrue(behov.path("vedtaksperiodeId").asText().isNotEmpty())
     }
 
-    private fun assertUtbetalingBehov(behov: JsonNode, vararg typer: Aktivitetslogg.Aktivitet.Behov.Behovtype) {
+    private fun assertUtbetalingBehov(behov: JsonNode, vararg typer: Aktivitet.Behov.Behovtype) {
         assertBehov(behov, *typer)
         assertTrue(behov.path("utbetalingId").asText().isNotEmpty())
     }
 
-    private fun assertBehov(behov: JsonNode, vararg typer: Aktivitetslogg.Aktivitet.Behov.Behovtype) {
+    private fun assertBehov(behov: JsonNode, vararg typer: Aktivitet.Behov.Behovtype) {
         val id = behov.path("@id").asText()
         assertEquals("behov", behov.path("@event_name").asText())
         assertTrue(behov.path("fødselsnummer").asText().isNotEmpty())

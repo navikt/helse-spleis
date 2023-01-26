@@ -24,7 +24,7 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.person.Inntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING

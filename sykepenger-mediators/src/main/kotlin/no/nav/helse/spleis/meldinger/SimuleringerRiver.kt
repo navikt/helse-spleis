@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.meldinger
 
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator

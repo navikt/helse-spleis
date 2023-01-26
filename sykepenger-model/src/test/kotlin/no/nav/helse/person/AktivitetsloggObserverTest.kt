@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.Varselkode.RV_SØ_1
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggObserver
@@ -62,7 +63,7 @@ internal class AktivitetsloggObserverTest {
 
         aktivitetslogg.register(testObserver)
         aktivitetslogg.kontekst(personkontekst)
-        aktivitetslogg.behov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning, "Dette er et behov", emptyMap())
+        aktivitetslogg.behov(Aktivitet.Behov.Behovtype.Godkjenning, "Dette er et behov", emptyMap())
         assertFalse(testObserver.isEmpty())
     }
 

@@ -19,7 +19,6 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -41,6 +40,7 @@ import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.Varselkode.RV_IT_1
 import no.nav.helse.person.Varselkode.RV_IT_3
 import no.nav.helse.person.Varselkode.RV_UT_1
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -1165,11 +1165,11 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode)
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
-        assertEquals(3, person.personLogg.antallEtterspurteBehov(1.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
+        assertEquals(3, person.personLogg.antallEtterspurteBehov(1.vedtaksperiode, Aktivitet.Behov.Behovtype.Simulering))
 
         håndterSimulering(1.vedtaksperiode)
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-        assertEquals(3, person.personLogg.antallEtterspurteBehov(1.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning))
+        assertEquals(3, person.personLogg.antallEtterspurteBehov(1.vedtaksperiode, Aktivitet.Behov.Behovtype.Godkjenning))
     }
 
     @Test
@@ -1414,14 +1414,14 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     }
 
     private fun assertEtterspurteYtelser(expected: Int, vedtaksperiodeIdInnhenter: IdInnhenter) {
-        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger))
-        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger))
-        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenger))
-        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger))
-        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger))
-        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger))
-        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold))
-        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Dødsinfo))
+        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Foreldrepenger))
+        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Pleiepenger))
+        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Omsorgspenger))
+        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Opplæringspenger))
+        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger))
+        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Dagpenger))
+        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Institusjonsopphold))
+        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Dødsinfo))
     }
 
 
