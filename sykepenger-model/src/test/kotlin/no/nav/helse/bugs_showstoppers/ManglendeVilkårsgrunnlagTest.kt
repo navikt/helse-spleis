@@ -1,7 +1,6 @@
 package no.nav.helse.bugs_showstoppers
 
 import java.time.LocalDate
-import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -9,10 +8,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSammenligningsgrunnlag
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -20,6 +15,10 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSammenligningsgrunnlag
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -71,7 +70,6 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
     fun `inntektsmelding drar periode tilbake og lager tilstøtende`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))

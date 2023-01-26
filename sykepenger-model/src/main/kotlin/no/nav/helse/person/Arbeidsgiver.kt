@@ -520,13 +520,7 @@ internal class Arbeidsgiver private constructor(
 
     private fun håndterInntektsmeldingOppdelt(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID?) {
         val dager = inntektsmelding.dager
-        val noenHarHåndtertDager = noenHarHåndtert(inntektsmelding) {
-            håndter(dager).also { håndtert -> if (håndtert) {
-                // Vedtaksperioden har potensielt blitt strukket tilbake og håndtert sin nye periode.
-                // så det som gjenstår å håndtere nå er dager som ikke gjenspeiles i noen vedtaksperioder.
-                dager.håndterGjenståendeFør(periode(), this@Arbeidsgiver)
-            }}
-        }
+        val noenHarHåndtertDager = noenHarHåndtert(inntektsmelding) { håndter(dager) }
 
         val vedtaksperiodeSomSkalHåndtereInntektOgRefusjon =
             vedtaksperioder.skalHåndtere(inntektsmelding.inntektOgRefusjon(dager))

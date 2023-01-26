@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -15,6 +16,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -29,6 +31,7 @@ import org.junit.jupiter.api.assertThrows
 internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅Løses med oppdelt håndtering av inntektsmelding")
     fun `Inntektsmelding opplyser om endret arbeidsgiverperiode - Avsluttet periode får nytt skjæringstidspunkt`() {
         nyttVedtak(2.januar, 31.januar)
         nyPeriode(12.februar til 28.februar)
@@ -38,14 +41,26 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), førsteFraværsdag = 12.februar)
 
-        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        assertNotNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
-        assertIllegalStateException("Fant ikke vilkårsgrunnlag for 2018-01-17. Må ha et vilkårsgrunnlag for å legge til utbetalingsopplysninger. Har vilkårsgrunnlag på skjæringstidspunktene [2018-02-12]") {
-            håndterYtelser(2.vedtaksperiode)
-        }
+        assertForventetFeil(
+            forklaring = "Løses med oppdelt håndtering av inntektsmelding",
+            nå = {
+                assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+                assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+                håndterVilkårsgrunnlag(2.vedtaksperiode)
+                assertNotNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
+                assertIllegalStateException("Fant ikke vilkårsgrunnlag for 2018-01-17. Må ha et vilkårsgrunnlag for å legge til utbetalingsopplysninger. Har vilkårsgrunnlag på skjæringstidspunktene [2018-02-12]") {
+                    håndterYtelser(2.vedtaksperiode)
+                }
+            },
+            ønsket = {
+                assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+                assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+                håndterVilkårsgrunnlag(2.vedtaksperiode)
+                assertNotNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
+                håndterYtelser(2.vedtaksperiode)
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
+            }
+        )
     }
 
     @Test
@@ -174,10 +189,6 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     private companion object {
         private fun assertIllegalStateException(melding: String, block: () -> Unit) {
             assertEquals(melding, assertThrows<IllegalStateException>(melding) { block() }.message)
-        }
-
-        private fun assertIllegalArgumentException(melding: String, block: () -> Unit) {
-            assertEquals(melding, assertThrows<IllegalArgumentException>(melding) { block() }.message)
         }
     }
 }

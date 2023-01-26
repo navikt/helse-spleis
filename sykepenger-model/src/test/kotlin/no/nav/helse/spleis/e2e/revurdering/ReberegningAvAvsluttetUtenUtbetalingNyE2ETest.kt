@@ -1114,7 +1114,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ikke implementert revurdering i alle tilstander")
     fun `endrer arbeidsgiverperiode etter igangsatt revurdering`() {
         val forMyeInntekt = INNTEKT * 1.2
         val riktigInntekt = INNTEKT
