@@ -36,9 +36,12 @@ internal class InntektsmeldingMatchingTest {
         val (dager, inntekt) =
             inntektsmelding(1.januar, 1.januar til 16.januar)
 
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(vedtaksperiode1))
         assertEquals(1.januar til 16.januar, dager.håndter(vedtaksperiode1))
         assertNull(dager.håndterGjenstående())
+
+        inntekt.evaluerer(vedtaksperiode1 som ikkeForventerInntekt) {
+            bleIkkeHåndtert
+        }
     }
 
     @Test
@@ -49,11 +52,15 @@ internal class InntektsmeldingMatchingTest {
             inntektsmelding(1.januar, 1.januar til 16.januar)
 
         assertEquals(1.januar til 16.januar, dager.håndter(vedtaksperiode1))
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(vedtaksperiode1, forventerInntekt = false))
-
         assertNull(dager.håndter(vedtaksperiode2))
-        assertEquals(FørsteDagEtterArbeidsgiverperiodenStrategi::class, inntekt.skalHåndteresAv(vedtaksperiode2))
         assertNull(dager.håndterGjenstående())
+
+        inntekt.evaluerer(
+            vedtaksperiode1 som ikkeForventerInntekt,
+            vedtaksperiode2 som forventerInntekt
+        ) {
+            this bleHåndtertMed FørsteDagEtterArbeidsgiverperiodenStrategi::class av vedtaksperiode2
+        }
     }
 
     @Test
@@ -66,10 +73,14 @@ internal class InntektsmeldingMatchingTest {
         assertEquals(2.januar til 16.januar, dager.håndter(vedtaksperiode1))
         assertEquals(1.januar.somPeriode(), dager.håndterGjenståendeFør(vedtaksperiode1))
         assertNull(dager.håndter(vedtaksperiode2))
-
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(vedtaksperiode1, forventerInntekt = false))
-        assertEquals(FørsteFraværsdagStrategi::class, inntekt.skalHåndteresAv(vedtaksperiode2))
         assertNull(dager.håndterGjenstående())
+
+        inntekt.evaluerer(
+            vedtaksperiode1 som ikkeForventerInntekt,
+            vedtaksperiode2 som forventerInntekt
+        ) {
+            this bleHåndtertMed FørsteFraværsdagStrategi::class av vedtaksperiode2
+        }
     }
 
     @Test
@@ -82,11 +93,14 @@ internal class InntektsmeldingMatchingTest {
         assertEquals(5.januar til 20.januar, dager.håndter(vedtaksperiode1))
         assertNull(dager.håndterGjenståendeFør(vedtaksperiode1))
         assertNull(dager.håndter(vedtaksperiode2))
-
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(vedtaksperiode1, forventerInntekt = false))
-        assertEquals(FørsteDagEtterArbeidsgiverperiodenStrategi::class, inntekt.skalHåndteresAv(vedtaksperiode2))
-
         assertNull(dager.håndterGjenstående())
+
+        inntekt.evaluerer(
+            vedtaksperiode1 som ikkeForventerInntekt,
+            vedtaksperiode2 som forventerInntekt
+        ) {
+            this bleHåndtertMed FørsteDagEtterArbeidsgiverperiodenStrategi::class av vedtaksperiode2
+        }
     }
 
     @Test
@@ -99,12 +113,15 @@ internal class InntektsmeldingMatchingTest {
         assertEquals(5.januar til 20.januar, dager.håndter(vedtaksperiode1))
         assertNull(dager.håndterGjenståendeFør(vedtaksperiode1))
         assertNull(dager.håndter(vedtaksperiode2))
-
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(vedtaksperiode1, forventerInntekt = false))
-        assertEquals(FørsteFraværsdagStrategi::class, inntekt.skalHåndteresAv(vedtaksperiode2))
-
         // TODO: Hva første fraværsdag er satt til har innvirkning på hvor lang sykdomstisdlinjen til IM er
         assertEquals(21.januar.somPeriode(), dager.håndterGjenstående())
+
+        inntekt.evaluerer(
+            vedtaksperiode1 som ikkeForventerInntekt,
+            vedtaksperiode2 som forventerInntekt
+        ) {
+            this bleHåndtertMed FørsteFraværsdagStrategi::class av vedtaksperiode2
+        }
     }
 
     @Test
@@ -113,11 +130,13 @@ internal class InntektsmeldingMatchingTest {
         val (dager, inntekt) =
             inntektsmelding(1.mars, 1.mars til 16.mars)
 
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(vedtaksperiode1))
-
         assertNull(dager.håndter(vedtaksperiode1))
         assertNull(dager.håndterGjenståendeFør(vedtaksperiode1))
         assertEquals(1.mars til 16.mars, dager.håndterGjenstående()) // Om den kalles tas alt gjenstående med uavhengig
+
+        inntekt.evaluerer(vedtaksperiode1 som forventerInntekt) {
+            bleIkkeHåndtert
+        }
     }
 
     @Test
@@ -132,10 +151,13 @@ internal class InntektsmeldingMatchingTest {
                 22.januar.somPeriode() // mandag
             )
 
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(vedtaksperiode1))
         assertEquals(1.januar til 20.januar, dager.håndter(vedtaksperiode1))
         assertNull(dager.håndterGjenståendeFør(vedtaksperiode1))
         assertEquals(21.januar til 22.januar, dager.håndterGjenstående())
+
+        inntekt.evaluerer(vedtaksperiode1 som ikkeForventerInntekt) {
+            bleIkkeHåndtert
+        }
     }
 
     @Test
@@ -156,10 +178,14 @@ internal class InntektsmeldingMatchingTest {
         assertNull(dager.håndterGjenståendeFør(vedtaksperiode2))
         assertNull(dager.håndterGjenstående())
 
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(vedtaksperiode1, forventerInntekt = false))
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(vedtaksperiode2, forventerInntekt = false))
-        assertEquals(FørsteDagEtterArbeidsgiverperiodenStrategi::class, inntekt.skalHåndteresAv(vedtaksperiode3))
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(vedtaksperiode4))
+        inntekt.evaluerer(
+            vedtaksperiode1 som ikkeForventerInntekt,
+            vedtaksperiode2 som ikkeForventerInntekt,
+            vedtaksperiode3 som forventerInntekt,
+            vedtaksperiode4 som forventerInntekt
+        ) {
+            this bleHåndtertMed FørsteDagEtterArbeidsgiverperiodenStrategi::class av vedtaksperiode3
+        }
     }
 
     @Test
@@ -167,8 +193,13 @@ internal class InntektsmeldingMatchingTest {
         val vedtaksperiode1 = 1.januar til 20.januar
         val vedtaksperiode2 = 22.januar til 31.januar
         val (_, inntekt) = inntektsmelding(20.januar, 1.januar til 16.januar)
-        assertEquals(FørsteFraværsdagStrategi::class, inntekt.skalHåndteresAv(vedtaksperiode1))
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(vedtaksperiode2))
+
+        inntekt.evaluerer(
+            vedtaksperiode1 som forventerInntekt,
+            vedtaksperiode2 som forventerInntekt
+        ) {
+            this bleHåndtertMed FørsteFraværsdagStrategi::class av vedtaksperiode1
+        }
     }
 
     @Test
@@ -184,8 +215,12 @@ internal class InntektsmeldingMatchingTest {
         assertNull(dager.håndter(vedtaksperiode2))
         assertNull(dager.håndterGjenstående())
 
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(vedtaksperiode1, forventerInntekt = false))
-        assertEquals(FørsteFraværsdagStrategi::class, inntekt.skalHåndteresAv(vedtaksperiode2))
+        inntekt.evaluerer(
+            vedtaksperiode1 som ikkeForventerInntekt,
+            vedtaksperiode2 som forventerInntekt
+        ) {
+            this bleHåndtertMed FørsteFraværsdagStrategi::class av vedtaksperiode2
+        }
     }
 
     @Test
@@ -196,8 +231,12 @@ internal class InntektsmeldingMatchingTest {
         val (_, inntekt) =
             inntektsmelding(20.januar, 1.januar til 16.januar)
 
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(vedtaksperiode1, forventerInntekt = false))
-        assertEquals(FørsteFraværsdagStrategi::class, inntekt.skalHåndteresAv(vedtaksperiode2, forventerInntekt = true))
+        inntekt.evaluerer(
+            vedtaksperiode1 som ikkeForventerInntekt,
+            vedtaksperiode2 som forventerInntekt
+        ) {
+            this bleHåndtertMed FørsteFraværsdagStrategi::class av vedtaksperiode2
+        }
     }
 
     @Test
@@ -231,8 +270,12 @@ internal class InntektsmeldingMatchingTest {
         val (_, inntekt) =
             inntektsmelding(4.januar, 4.januar til 19.januar)
 
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(vedtaksperiodeAuu, forventerInntekt = false))
-        assertEquals(FørsteDagEtterArbeidsgiverperiodenStrategi::class, inntekt.skalHåndteresAv(vedtaksperiodeMedUtbetaling, forventerInntekt = true))
+        inntekt.evaluerer(
+            vedtaksperiodeAuu som ikkeForventerInntekt,
+            vedtaksperiodeMedUtbetaling som forventerInntekt
+        ) {
+            this bleHåndtertMed FørsteDagEtterArbeidsgiverperiodenStrategi::class av vedtaksperiodeMedUtbetaling
+        }
     }
 
     @Test
@@ -243,8 +286,12 @@ internal class InntektsmeldingMatchingTest {
         val (_, inntekt) =
             inntektsmelding(1.januar, 4.januar til 19.januar)
 
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(vedtaksperiode1, forventerInntekt = false))
-        assertEquals(FørsteDagEtterArbeidsgiverperiodenForskyvningsstragi::class, inntekt.skalHåndteresAv(vedtaksperiode2, forventerInntekt = true))
+        inntekt.evaluerer(
+            vedtaksperiode1 som ikkeForventerInntekt,
+            vedtaksperiode2 som forventerInntekt
+        ) {
+            this bleHåndtertMed FørsteDagEtterArbeidsgiverperiodenForskyvningsstragi::class av vedtaksperiode2
+        }
     }
 
     @Test
@@ -255,10 +302,14 @@ internal class InntektsmeldingMatchingTest {
         val skalUtbetales = 17.januar til 31.januar
         val (_, inntekt) = inntektsmelding(førsteFraværsdag = 5.januar)
 
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(auu1, forventerInntekt = false))
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(auu2, forventerInntekt = false))
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(auu3, forventerInntekt = false))
-        assertEquals(FørsteFraværsdagForskyvningsstragi::class, inntekt.skalHåndteresAv(skalUtbetales))
+        inntekt.evaluerer(
+            auu1 som ikkeForventerInntekt,
+            auu2 som ikkeForventerInntekt,
+            auu3 som ikkeForventerInntekt,
+            skalUtbetales som forventerInntekt
+        ) {
+            this bleHåndtertMed FørsteFraværsdagForskyvningsstragi::class av skalUtbetales
+        }
     }
 
     @Test
@@ -271,10 +322,14 @@ internal class InntektsmeldingMatchingTest {
 
         val (_, inntekt) = inntektsmelding(førsteFraværsdag = 5.januar)
 
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(auu1, forventerInntekt = false))
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(auu2, forventerInntekt = false))
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(auu3, forventerInntekt = false))
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(skalUtbetales, forventerInntekt = true))
+        inntekt.evaluerer(
+            auu1 som ikkeForventerInntekt,
+            auu2 som ikkeForventerInntekt,
+            auu3 som ikkeForventerInntekt,
+            skalUtbetales som forventerInntekt
+        ) {
+            bleIkkeHåndtert
+        }
     }
 
     @Test
@@ -282,7 +337,11 @@ internal class InntektsmeldingMatchingTest {
         val vedtaksperiode = 1.januar til 31.januar
         val (_, inntekt) = inntektsmelding(1.januar, 1.januar til 31.januar)
 
-        assertEquals(FørsteDagEtterArbeidsgiverperiodenStrategi::class, inntekt.skalHåndteresAv(vedtaksperiode))
+        inntekt.evaluerer(
+            vedtaksperiode som forventerInntekt,
+        ) {
+            this bleHåndtertMed FørsteDagEtterArbeidsgiverperiodenStrategi::class av vedtaksperiode
+        }
     }
 
     @Test
@@ -291,8 +350,12 @@ internal class InntektsmeldingMatchingTest {
         val vedtaksperiode2 = 22.januar til 31.januar
         val (_, inntekt) = inntektsmelding(21.januar, 4.januar til 19.januar)
 
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(vedtaksperiode1, forventerInntekt = false))
-        assertEquals(FørsteFraværsdagStrategi::class, inntekt.skalHåndteresAv(vedtaksperiode2, forventerInntekt = true))
+        inntekt.evaluerer(
+            vedtaksperiode1 som ikkeForventerInntekt,
+            vedtaksperiode2 som forventerInntekt
+        ) {
+            this bleHåndtertMed FørsteFraværsdagStrategi::class av vedtaksperiode2
+        }
     }
 
     @Test
@@ -304,9 +367,14 @@ internal class InntektsmeldingMatchingTest {
         assertNull(dager.håndter(vedtaksperiode1))
         assertEquals(25.januar til 25.januar, dager.håndter(vedtaksperiode2))
 
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(vedtaksperiode1, forventerInntekt = true))
-        assertEquals(HarHåndtertDagerFraInntektsmeldingenStrategi::class, inntekt.skalHåndteresAv(vedtaksperiode2, forventerInntekt = true))
+        inntekt.evaluerer(
+            vedtaksperiode1 som forventerInntekt,
+            vedtaksperiode2 som forventerInntekt
+        ) {
+            this bleHåndtertMed HarHåndtertDagerFraInntektsmeldingenStrategi::class av vedtaksperiode2
+        }
     }
+
     @Test
     fun `arbeidsgiverperioden strekker seg utover vedtaksperioden, men første fraværsdag er etter perioden`() {
         val vedtaksperiode1 = 1.januar til 20.januar
@@ -316,8 +384,12 @@ internal class InntektsmeldingMatchingTest {
         assertNull(dager.håndter(vedtaksperiode1))
         assertEquals(25.januar til 25.januar, dager.håndter(vedtaksperiode2))
 
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(vedtaksperiode1, forventerInntekt = true))
-        assertEquals(IkkeHåndtert, inntekt.skalHåndteresAv(vedtaksperiode2, forventerInntekt = true))
+        inntekt.evaluerer(
+            vedtaksperiode1 som forventerInntekt,
+            vedtaksperiode2 som forventerInntekt
+        ) {
+            bleIkkeHåndtert
+        }
     }
 
     private fun DagerFraInntektsmelding.håndter(periode: Periode): Periode? {
@@ -345,19 +417,24 @@ internal class InntektsmeldingMatchingTest {
         return håndtertPeriode
     }
 
-    private fun InntektOgRefusjonFraInntektsmelding.skalHåndteresAv(periode: Periode, forventerInntekt: Boolean = true): KClass<out InntektOgRefusjonMatchingstrategi> {
-        // TODO: Burde vi sendt inn alle periodene i testen og prøvd seg på hver av strategiene i tur og orden på periodene
+    private fun InntektOgRefusjonFraInntektsmelding.periodeSomHåndterer(vararg perioder:Pair<Periode, Boolean>): Pair<Periode, KClass<out InntektOgRefusjonMatchingstrategi>>? {
         strategier.forEach { strategi ->
-            if (skalHåndteresAv(periode, strategi) { forventerInntekt }) return strategi::class
+            perioder.forEach { (periode, forventerInntekt) ->
+                if (skalHåndteresAv(periode, strategi) { forventerInntekt }) return periode to strategi::class
+            }
         }
-        return IkkeHåndtert
+        return null
     }
 
-    private val IkkeHåndtert = IkkeHåndtertStrategi()::class
-
-    private class IkkeHåndtertStrategi: InntektOgRefusjonMatchingstrategi {
-        override fun matcher(periode: Periode, forventerInntekt: () -> Boolean) = throw IllegalStateException()
+    private val forventerInntekt =  "forventerInntekt"
+    private val ikkeForventerInntekt =  "ikkeForventerInntekt"
+    private infix fun Periode.som(inntekt: String) = this to (inntekt == forventerInntekt)
+    private fun InntektOgRefusjonFraInntektsmelding.evaluerer(vararg perioder: Pair<Periode, Boolean>, assertBlock: Pair<Periode, KClass<out InntektOgRefusjonMatchingstrategi>>?.() -> Unit) {
+        periodeSomHåndterer(*perioder).assertBlock()
     }
+    private val Pair<Periode, KClass<out InntektOgRefusjonMatchingstrategi>>?.bleIkkeHåndtert get() = assertNull(this)
+    private infix fun Pair<Periode, KClass<out InntektOgRefusjonMatchingstrategi>>?.bleHåndtertMed(strategi: KClass<out InntektOgRefusjonMatchingstrategi>) = also { assertEquals(strategi, this?.second) }
+    private infix fun Pair<Periode, KClass<out InntektOgRefusjonMatchingstrategi>>?.av(periode: Periode) = also { assertEquals(periode, this?.first) }
 
     private companion object {
         private fun inntektsmelding(
