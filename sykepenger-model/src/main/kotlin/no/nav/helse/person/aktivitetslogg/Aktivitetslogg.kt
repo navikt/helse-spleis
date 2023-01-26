@@ -1,6 +1,5 @@
 package no.nav.helse.person.aktivitetslogg
 
-import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.serde.reflection.AktivitetsloggMap
 
@@ -82,9 +81,9 @@ class Aktivitetslogg(
         repeat(antall) { kontekster.removeLast() }
     }
 
-    override fun kontekst(person: Person) {
-        forelder = person.aktivitetslogg
-        kontekst(person as Aktivitetskontekst)
+    override fun kontekst(kontekst: Subaktivitetskontekst) {
+        forelder = kontekst.aktivitetslogg
+        kontekst(kontekst as Aktivitetskontekst)
     }
 
     override fun toMap(): Map<String, List<Map<String, Any>>> = AktivitetsloggMap(this).toMap()

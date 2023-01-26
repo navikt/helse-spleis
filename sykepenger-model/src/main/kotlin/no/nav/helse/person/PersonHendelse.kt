@@ -8,6 +8,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggObserver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.Subaktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.utbetalingstidslinje.Alder
@@ -96,7 +97,7 @@ abstract class PersonHendelse protected constructor(
     override fun behov() = aktivitetslogg.behov()
     override fun barn() = aktivitetslogg.barn()
     override fun kontekst(kontekst: Aktivitetskontekst) = aktivitetslogg.kontekst(kontekst)
-    override fun kontekst(person: Person) = aktivitetslogg.kontekst(person)
+    override fun kontekst(kontekst: Subaktivitetskontekst) = aktivitetslogg.kontekst(kontekst)
     override fun kontekster() = aktivitetslogg.kontekster()
     override fun toMap() = aktivitetslogg.toMap()
 

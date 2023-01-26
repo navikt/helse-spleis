@@ -51,10 +51,10 @@ import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AG_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
-import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.Subaktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -81,7 +81,7 @@ class Person private constructor(
     private val personidentifikator: Personidentifikator,
     private val alder: Alder,
     private val arbeidsgivere: MutableList<Arbeidsgiver>,
-    internal val aktivitetslogg: Aktivitetslogg,
+    override val aktivitetslogg: Aktivitetslogg,
     private val opprettet: LocalDateTime,
     private val infotrygdhistorikk: Infotrygdhistorikk,
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
@@ -89,7 +89,7 @@ class Person private constructor(
     private val jurist: MaskinellJurist,
     private val tidligereBehandlinger: List<Person> = emptyList(),
     private val regler: ArbeidsgiverRegler = NormalArbeidstaker
-) : Aktivitetskontekst {
+) : Subaktivitetskontekst {
     internal companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         internal fun ferdigPerson(

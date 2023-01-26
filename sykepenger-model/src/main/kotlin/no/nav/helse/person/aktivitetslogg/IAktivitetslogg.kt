@@ -1,7 +1,5 @@
 package no.nav.helse.person.aktivitetslogg
 
-import no.nav.helse.person.Person
-
 interface IAktivitetslogg {
     fun info(melding: String, vararg params: Any?)
     fun behov(type: Aktivitet.Behov.Behovtype, melding: String, detaljer: Map<String, Any?> = emptyMap())
@@ -18,9 +16,13 @@ interface IAktivitetslogg {
     fun behov(): List<Aktivitet.Behov>
     fun barn(): Aktivitetslogg
     fun kontekst(kontekst: Aktivitetskontekst)
-    fun kontekst(person: Person)
+    fun kontekst(kontekst: Subaktivitetskontekst)
     fun kontekster(): List<IAktivitetslogg>
     fun toMap(): Map<String, List<Map<String, Any>>>
 
     fun register(observer: AktivitetsloggObserver)
+}
+
+interface Subaktivitetskontekst: Aktivitetskontekst {
+    val aktivitetslogg: Aktivitetslogg
 }
