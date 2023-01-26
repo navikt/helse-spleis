@@ -8,14 +8,14 @@ import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.utbetalingslinjer.Klassekode.RefusjonIkkeOpplysningspliktig
 
-class Utbetalingslinje internal constructor(
-    internal var fom: LocalDate,
-    internal var tom: LocalDate,
+class Utbetalingslinje(
+    var fom: LocalDate,
+    var tom: LocalDate,
     internal var satstype: Satstype = Satstype.Daglig,
-    internal var beløp: Int?,
-    internal var aktuellDagsinntekt: Int?,
-    internal val grad: Int?,
-    internal var refFagsystemId: String? = null,
+    var beløp: Int?,
+    var aktuellDagsinntekt: Int?,
+    val grad: Int?,
+    var refFagsystemId: String? = null,
     private var delytelseId: Int = 1,
     private var refDelytelseId: Int? = null,
     private var endringskode: Endringskode = NY,
@@ -23,8 +23,8 @@ class Utbetalingslinje internal constructor(
     private var datoStatusFom: LocalDate? = null
 ) : Iterable<LocalDate> {
 
-    internal companion object {
-        internal fun stønadsdager(linjer: List<Utbetalingslinje>): Int {
+    companion object {
+        fun stønadsdager(linjer: List<Utbetalingslinje>): Int {
             return linjer
                 .filterNot { it.erOpphør() }
                 .flatten()
@@ -33,7 +33,7 @@ class Utbetalingslinje internal constructor(
                 .size
         }
 
-        internal fun ferdigUtbetalingslinje(
+        fun ferdigUtbetalingslinje(
             fom: LocalDate,
             tom: LocalDate,
             satstype: Satstype,
@@ -64,13 +64,13 @@ class Utbetalingslinje internal constructor(
 
     private val statuskode get() = datoStatusFom?.let { "OPPH" }
 
-    internal val periode get() = fom til tom
+    val periode get() = fom til tom
 
     override operator fun iterator() = periode.iterator()
 
     override fun toString() = "$fom til $tom $endringskode $grad ${datoStatusFom?.let { "opphører fom $it" }}"
 
-    internal fun accept(visitor: UtbetalingslinjeVisitor) {
+    fun accept(visitor: UtbetalingslinjeVisitor) {
         visitor.visitUtbetalingslinje(
             this,
             fom,
@@ -91,16 +91,16 @@ class Utbetalingslinje internal constructor(
         )
     }
 
-    internal fun kobleTil(other: Utbetalingslinje) {
+    fun kobleTil(other: Utbetalingslinje) {
         this.delytelseId = other.delytelseId + 1
         this.refDelytelseId = other.delytelseId
     }
 
-    internal fun datoStatusFom() = datoStatusFom
-    internal fun totalbeløp() = satstype.totalbeløp(beløp ?: 0, stønadsdager())
-    internal fun stønadsdager() = if (!erOpphør()) filterNot(LocalDate::erHelg).size else 0
+    fun datoStatusFom() = datoStatusFom
+    fun totalbeløp() = satstype.totalbeløp(beløp ?: 0, stønadsdager())
+    fun stønadsdager() = if (!erOpphør()) filterNot(LocalDate::erHelg).size else 0
 
-    internal fun dager() = fom
+    fun dager() = fom
         .datesUntil(tom.plusDays(1))
         .filter { !it.erHelg() }
         .toList()
@@ -114,14 +114,14 @@ class Utbetalingslinje internal constructor(
             this.grad == other.grad &&
             this.datoStatusFom == other.datoStatusFom
 
-    internal fun kanEndreEksisterendeLinje(other: Utbetalingslinje, sisteLinjeITidligereOppdrag: Utbetalingslinje) =
+    fun kanEndreEksisterendeLinje(other: Utbetalingslinje, sisteLinjeITidligereOppdrag: Utbetalingslinje) =
         other == sisteLinjeITidligereOppdrag &&
         this.fom == other.fom &&
             this.beløp == other.beløp &&
             this.grad == other.grad &&
             this.datoStatusFom == other.datoStatusFom
 
-    internal fun skalOpphøreOgErstatte(other: Utbetalingslinje, sisteLinjeITidligereOppdrag: Utbetalingslinje) =
+    fun skalOpphøreOgErstatte(other: Utbetalingslinje, sisteLinjeITidligereOppdrag: Utbetalingslinje) =
         other == sisteLinjeITidligereOppdrag &&
         (this.fom > other.fom)
 
@@ -134,9 +134,9 @@ class Utbetalingslinje internal constructor(
             datoStatusFom.hashCode() * 23
     }
 
-    internal fun markerUendret(tidligere: Utbetalingslinje) = copyWith(UEND, tidligere)
+    fun markerUendret(tidligere: Utbetalingslinje) = copyWith(UEND, tidligere)
 
-    internal fun endreEksisterendeLinje(tidligere: Utbetalingslinje) = copyWith(ENDR, tidligere)
+    fun endreEksisterendeLinje(tidligere: Utbetalingslinje) = copyWith(ENDR, tidligere)
         .also {
             this.refDelytelseId = null
             this.refFagsystemId = null
@@ -151,9 +151,9 @@ class Utbetalingslinje internal constructor(
         this.datoStatusFom = tidligere.datoStatusFom
     }
 
-    internal fun erForskjell() = endringskode != UEND
+    fun erForskjell() = endringskode != UEND
 
-    internal fun opphørslinje(datoStatusFom: LocalDate) =
+    fun opphørslinje(datoStatusFom: LocalDate) =
         Utbetalingslinje(
             fom = fom,
             tom = tom,
@@ -169,9 +169,9 @@ class Utbetalingslinje internal constructor(
             klassekode = klassekode
         )
 
-    internal fun erOpphør() = datoStatusFom != null
+    fun erOpphør() = datoStatusFom != null
 
-    internal fun toHendelseMap() = mapOf<String, Any?>(
+    fun toHendelseMap() = mapOf<String, Any?>(
         "fom" to fom.toString(),
         "tom" to tom.toString(),
         "satstype" to "$satstype",
