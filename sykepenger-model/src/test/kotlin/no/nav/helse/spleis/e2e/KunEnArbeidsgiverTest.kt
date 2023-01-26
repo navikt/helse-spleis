@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDateTime
 import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
+import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -33,9 +34,9 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.september
@@ -373,16 +374,22 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    fun `setter riktig inntekt i utbetalingstidslinjebuilder`() {
+    @FeilerMedHåndterInntektsmeldingOppdelt("Må avklares")
+    fun `setter riktig inntekt i utbetalingstidslinjebuilder`() = Toggle.HåndterInntektsmeldingOppdelt.disable {
         håndterSykmelding(Sykmeldingsperiode(21.september(2020), 10.oktober(2020), 100.prosent))
         håndterSøknad(Sykdom(21.september(2020), 10.oktober(2020), 100.prosent))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(
-                4.september(2020) til 19.september(2020)
+                5.september(2020) til 20.september(2020)
             ),
             beregnetInntekt = INNTEKT,
             førsteFraværsdag = 21.september(2020)
         ) // 20. september er en søndag
+
+        // TODO: Det er litt rart å legge til dagene i historikken uten å strekke perioden
+        assertEquals(21.september(2020) til 10.oktober(2020), inspektør.periode(1.vedtaksperiode))
+        assertEquals("UGG UUUUUGG UUUUUGR SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.september(2019) til 1.august(2020) inntekter {

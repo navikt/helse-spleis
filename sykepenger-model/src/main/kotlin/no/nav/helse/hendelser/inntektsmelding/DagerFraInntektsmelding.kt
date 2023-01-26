@@ -18,6 +18,7 @@ internal class DagerFraInntektsmelding(
 ): IAktivitetslogg by inntektsmelding {
     private val opprinneligPeriode = inntektsmelding.sykdomstidslinje().periode()
     private val gjenståendeDager = opprinneligPeriode?.toMutableSet() ?: mutableSetOf()
+    private val håndterteDager = mutableSetOf<LocalDate>()
 
     internal fun meldingsreferanseId() = inntektsmelding.meldingsreferanseId()
     internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = inntektsmelding.leggTil(hendelseIder)
@@ -39,6 +40,7 @@ internal class DagerFraInntektsmelding(
         val dagerFør = dagerFør(periode).takeUnless { it.isEmpty() } ?: return
         oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, dagerFør.omsluttendePeriode!!))
         gjenståendeDager.removeAll(dagerFør)
+        håndterteDager.addAll(dagerFør)
     }
 
     internal fun håndterGjenståendeFør(periode: Periode, arbeidsgiver: Arbeidsgiver) = håndterGjenståendeFør(periode) {
@@ -49,9 +51,7 @@ internal class DagerFraInntektsmelding(
     internal fun skalHåndteresAv(periode: Periode) = overlappendeDager(periode).isNotEmpty()
 
     internal fun harBlittHåndtertAv(periode: Periode): Boolean {
-        val overlappendeDagerOpprinnelig = periode.intersect(opprinneligPeriode?.toSet() ?: emptySet())
-        val overlappendeDagerNå = overlappendeDager(periode)
-        return overlappendeDagerOpprinnelig.isNotEmpty() && overlappendeDagerNå.isEmpty()
+        return håndterteDager.any { it in periode } || skalHåndteresAv(periode)
     }
 
     internal fun håndter(periode: Periode, arbeidsgiver: Arbeidsgiver) = håndter(periode) {
@@ -64,18 +64,21 @@ internal class DagerFraInntektsmelding(
         val overlappendeDager = overlappendeDager(periode).takeUnless { it.isEmpty() } ?: return null
         val arbeidsgiverSykedomstidslinje = oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, overlappendeDager.omsluttendePeriode!!))
         gjenståendeDager.removeAll(overlappendeDager)
+        håndterteDager.addAll(overlappendeDager)
         forrigePeriodeSomHåndterte = periode
         return arbeidsgiverSykedomstidslinje.subset(periode)
     }
 
-    internal fun håndterGjenstående(oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit) {
+    internal fun håndterGjenståendeArbeidsgiverperiodeHale(oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit) {
+        val sisteDatoViHarHåndtert = håndterteDager.maxOrNull() ?: return
+        gjenståendeDager.removeAll { it <= sisteDatoViHarHåndtert }
         if (gjenståendeDager.isEmpty()) return
         oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, gjenståendeDager.omsluttendePeriode!!))
         gjenståendeDager.clear()
     }
 
-    internal fun håndterGjenstående(arbeidsgiver: Arbeidsgiver) {
-        håndterGjenstående {
+    internal fun håndterGjenståendeArbeidsgiverperiodeHale(arbeidsgiver: Arbeidsgiver) {
+        håndterGjenståendeArbeidsgiverperiodeHale {
             arbeidsgiver.oppdaterSykdom(it)
         }
         forrigePeriodeSomHåndterte?.let {

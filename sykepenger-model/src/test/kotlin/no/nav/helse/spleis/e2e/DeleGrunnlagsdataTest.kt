@@ -149,7 +149,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("AventerIm->AUU utenom AvventerBlokkerende")
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅AventerIm->AUU utenom AvventerBlokkerende")
     fun `setter ikke inntektsmeldingId flere ganger`() {
         håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(20.februar, 28.februar, 100.prosent))

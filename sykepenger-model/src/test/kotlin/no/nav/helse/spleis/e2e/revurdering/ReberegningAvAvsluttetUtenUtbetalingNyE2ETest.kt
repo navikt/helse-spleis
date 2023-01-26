@@ -24,7 +24,6 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.person.Inntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -43,7 +42,15 @@ import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Varselkode.*
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
@@ -174,6 +181,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterSøknad(Sykdom(1.mai, 15.mai, 100.prosent))
         håndterUtbetalingshistorikk(3.vedtaksperiode)
         håndterSøknad(Sykdom(16.mai, 28.mai, 100.prosent))
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
 
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
@@ -695,7 +703,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("AventerIm->AUU utenom AvventerBlokkerende")
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅AventerIm->AUU utenom AvventerBlokkerende")
     fun `gjenopptar behandling på neste periode dersom inntektsmelding treffer avsluttet periode`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
@@ -1114,8 +1122,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ikke implementert revurdering i alle tilstander")
-    fun `endrer arbeidsgiverperiode etter igangsatt revurdering`() {
+    fun `endrer arbeidsgiverperiode etter igangsatt revurdering`() = Toggle.HåndterInntektsmeldingOppdelt.enable {
         val forMyeInntekt = INNTEKT * 1.2
         val riktigInntekt = INNTEKT
 
@@ -1125,15 +1132,27 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterSykmelding(Sykmeldingsperiode(12.februar, 20.februar, 100.prosent))
         håndterSøknad(Sykdom(12.februar, 20.februar, 100.prosent))
         nullstillTilstandsendringer()
+        assertEquals(5.februar til 11.februar, inspektør.periode(1.vedtaksperiode))
         håndterInntektsmelding(listOf(
             24.januar til 8.februar
         ), beregnetInntekt = forMyeInntekt)
+
+        assertEquals(24.januar til 11.februar, inspektør.periode(1.vedtaksperiode))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
+
         håndterInntektsmelding(listOf(
             22.januar til 6.februar
         ), beregnetInntekt = riktigInntekt)
+        assertEquals("UUUGG UUUUUGG SSSSSHH SSSSSHH SS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(2.vedtaksperiode)

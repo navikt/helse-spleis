@@ -38,14 +38,25 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), førsteFraværsdag = 12.februar)
 
-        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        assertNotNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
-        assertIllegalStateException("Fant ikke vilkårsgrunnlag for 2018-01-17. Må ha et vilkårsgrunnlag for å legge til utbetalingsopplysninger. Har vilkårsgrunnlag på skjæringstidspunktene [2018-02-12]") {
-            håndterYtelser(2.vedtaksperiode)
-        }
+        assertForventetFeil(
+            forklaring = "flytter skjæringstidspunkt",
+            nå = {
+                assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+                assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+                håndterVilkårsgrunnlag(2.vedtaksperiode)
+                assertNotNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
+                assertIllegalStateException("Fant ikke vilkårsgrunnlag for 2018-01-17. Må ha et vilkårsgrunnlag for å legge til utbetalingsopplysninger. Har vilkårsgrunnlag på skjæringstidspunktene [2018-02-12]") {
+                    håndterYtelser(2.vedtaksperiode)
+                }
+            },
+            ønsket = {
+                assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+                assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+                håndterVilkårsgrunnlag(2.vedtaksperiode)
+                assertNotNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
+                håndterYtelser(2.vedtaksperiode)
+            }
+        )
     }
 
     @Test

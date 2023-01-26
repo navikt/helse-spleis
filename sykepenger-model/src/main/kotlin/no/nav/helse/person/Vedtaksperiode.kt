@@ -28,18 +28,6 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.memoized
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dødsinformasjon
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSammenligningsgrunnlag
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSykepengegrunnlag
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.institusjonsopphold
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigOpplysningerFraArbeidsgiver
@@ -68,6 +56,24 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
+import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dødsinformasjon
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSammenligningsgrunnlag
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSykepengegrunnlag
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.institusjonsopphold
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
+import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad out of order`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad out of order innenfor 18 dager`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad som delvis overlapper`
@@ -98,12 +104,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
-import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
-import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -1445,10 +1445,12 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndterStrekkingAvPeriode(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
             vedtaksperiode.periode = dager.oppdatertFom(vedtaksperiode.periode)
+            dager.håndterGjenståendeFør(vedtaksperiode.periode, vedtaksperiode.arbeidsgiver)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
             vedtaksperiode.håndterDager(dager)
+            // har vi noe før oss, håndter gjenståendeFør
             if (vedtaksperiode.forventerInntekt()) return
             vedtaksperiode.tilstand(dager, AvsluttetUtenUtbetaling)
         }
@@ -2048,6 +2050,7 @@ internal class Vedtaksperiode private constructor(
         }
         override fun håndterStrekkingAvPeriode(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
             vedtaksperiode.periode = dager.oppdatertFom(vedtaksperiode.periode)
+            dager.håndterGjenståendeFør(vedtaksperiode.periode, vedtaksperiode.arbeidsgiver)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {

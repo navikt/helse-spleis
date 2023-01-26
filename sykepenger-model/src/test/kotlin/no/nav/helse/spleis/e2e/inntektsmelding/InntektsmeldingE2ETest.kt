@@ -3,10 +3,12 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
+import no.nav.helse.dsl.TestPerson
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -40,12 +42,12 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_2
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.inntekt.SkattComposite
@@ -81,6 +83,7 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.lønnsinntekt
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -294,6 +297,21 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+    }
+
+    @Test
+    fun `Korrigert inntektsmelding informerer om dager i et hull, men de legges ikke til i historikken`() {
+        nyttVedtak(1.januar, 31.januar)
+        tilGodkjenning(5.februar, 28.februar, a1)
+        håndterInntektsmelding(listOf(25.januar til 25.januar.plusDays(15)), førsteFraværsdag = 5.februar)
+        assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS???? SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+    }
+
+    @Test
+    fun `arbeidsgiverperiode utover periode`() = Toggle.HåndterInntektsmeldingOppdelt.enable {
+        nyPeriode(5.februar til 10.februar)
+        håndterInntektsmelding(listOf(5.februar til 20.februar))
+        assertEquals("SSSSSHG UUUUUGG UU", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
     }
 
     @Test
@@ -1680,7 +1698,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("AventerIm->AUU utenom AvventerBlokkerende")
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅AventerIm->AUU utenom AvventerBlokkerende")
     fun `To tilstøtende perioder inntektsmelding først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 7.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(8.januar, 23.februar, 100.prosent))
@@ -2022,9 +2040,30 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         nyPeriode(22.januar til 16.februar)
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         håndterInntektsmelding(listOf(5.januar til 20.januar), førsteFraværsdag = 22.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "Mjau")
-        // Vi forkaster dagene fra søknaden, men dagene fra inntektsmeldingen beholdes på arbeidsgivers tidslinje
-        assertEquals("UGG UUUUUGG UUUUUGR", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        assertForventetFeil(
+            forklaring = "Vi forkaster dagene fra søknaden, men dagene fra inntektsmeldingen beholdes på arbeidsgivers tidslinje",
+            nå = {
+                assertEquals("UGG UUUUUGG UUUUUGR", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            },
+            ønsket = {
+                assertEquals("Tom tidslinje", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            }
+        )
+    }
+
+    @Test
+    fun `AGP rett før periode med første fraværsdag`() = Toggle.HåndterInntektsmeldingOppdelt.disable {
+        håndterSykmelding(Sykmeldingsperiode(21.september(2020), 10.oktober(2020), 100.prosent))
+        håndterSøknad(Sykdom(21.september(2020), 10.oktober(2020), 100.prosent))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(
+                1.september(2020) til 16.september(2020)
+            ),
+            beregnetInntekt = TestPerson.INNTEKT,
+            førsteFraværsdag = 21.september(2020)
+        ) // 20. september 2020 er en søndag
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
     }
 
     @Test
