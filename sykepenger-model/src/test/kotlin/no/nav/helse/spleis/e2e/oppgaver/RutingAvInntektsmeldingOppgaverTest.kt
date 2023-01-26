@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.oppgaver
 
 import java.util.UUID
-import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -74,7 +73,6 @@ internal class RutingAvInntektsmeldingOppgaverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("❓Vi kaller aldri inntektsmeldingIkkeHåndtert fordi vi har håndtert dager men ikke inntekt")
     fun `dersom vi har en nærliggende utbetaling og vi mottar inntektsmelding før søknad og søknaden feiler - skal det opprettes oppgave i speilkøen i gosys`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))

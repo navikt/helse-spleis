@@ -542,7 +542,7 @@ internal class Arbeidsgiver private constructor(
         // Vi legger det til i en posthåndtering for at vedtaksperioder som både håndterer dager og inntekt ikke skal stoppes av erAlleredeHensyntatt
         håndter(dager) { postHåndter(dager) }
 
-        if (noenHarHåndtertDager || inntektOgRefusjonHåndteres) return
+        if (noenHarHåndtertDager && inntektOgRefusjonHåndteres) return
         inntektsmeldingIkkeHåndtert(inntektsmelding, vedtaksperiodeId)
     }
 
