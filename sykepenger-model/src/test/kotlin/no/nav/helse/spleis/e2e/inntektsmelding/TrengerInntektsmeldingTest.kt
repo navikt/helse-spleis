@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test
 internal class TrengerInntektsmeldingTest : AbstractEndToEndTest() {
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("antall innslag i sykdomshistorikk")
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅antall innslag i sykdomshistorikk")
     fun `Kort periode ber om inntektsmelding når den går inn i AvventerRevurdering, og sier fra om at inntektsmelding ikke trengs etter at den er mottatt`() {
         nyPeriode(5.januar til 17.januar)
         håndterUtbetalingshistorikk(1.vedtaksperiode)

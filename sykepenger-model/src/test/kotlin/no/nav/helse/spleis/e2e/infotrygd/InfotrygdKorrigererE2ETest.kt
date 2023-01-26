@@ -63,7 +63,7 @@ import org.junit.jupiter.api.Test
 internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
+    @FeilerMedHåndterInntektsmeldingOppdelt("❌")
     fun `infotrygd har betalt ut auu-periode - inntektsmelding trigger revurdering`() = Toggle.InntektsmeldingKanTriggeRevurdering.enable {
         createOverlappendeFraInfotrygdPerson()
 

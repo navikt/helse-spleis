@@ -50,7 +50,7 @@ internal class RevurderingFerieTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
+    @FeilerMedHåndterInntektsmeldingOppdelt("❌")
     fun `Forlengelse med bare ferie, så kommer en tidligere periode med sykdom - ferie skal revurderes`() {
         nyttVedtak(5.februar, 28.februar)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))

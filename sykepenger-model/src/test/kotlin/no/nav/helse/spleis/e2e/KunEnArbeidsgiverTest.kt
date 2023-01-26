@@ -99,7 +99,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("vi lagrer ikke lengre inntekt i AUU")
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅vi lagrer ikke lengre inntekt i AUU")
     fun `ingen historie med søknad til arbeidsgiver først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 8.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 8.januar, 100.prosent))
@@ -118,7 +118,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("antall innslag i sykdomshistorikk")
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅antall innslag i sykdomshistorikk")
     fun `ingen historie med to søknader til arbeidsgiver før inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 5.januar, 100.prosent))
@@ -166,7 +166,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("antall innslag i sykdomshistorikk")
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅antall innslag i sykdomshistorikk")
     fun `ingen historie med to søknader (med gap mellom) til arbeidsgiver først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 4.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 4.januar, 100.prosent))
@@ -215,7 +215,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("vi lagrer ikke lengre inntekt i AUU")
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅vi lagrer ikke lengre inntekt i AUU")
     fun `ingen historie med inntektsmelding, så søknad til arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 8.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
@@ -408,7 +408,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅Vi hensyntar ikke dager rett før - hva med rett før med bare helg mellom?")
     fun `vedtaksperioder som avventer inntektsmelding strekkes tilbake til å dekke arbeidsgiverperiode`() {
         nyPeriode(1.januar til 31.januar, a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)

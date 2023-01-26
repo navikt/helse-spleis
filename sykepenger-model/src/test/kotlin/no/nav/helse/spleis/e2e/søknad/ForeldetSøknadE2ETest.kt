@@ -96,7 +96,7 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
         )
     }
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("AventerIm->AUU utenom AvventerBlokkerende")
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅AventerIm->AUU utenom AvventerBlokkerende")
     fun `foreldet dag innenfor agp -- kan lukkes uten manuell behandling`() {
         håndterSykmelding(Sykmeldingsperiode(16.januar, 16.februar, 100.prosent))
         håndterSøknad(

@@ -114,7 +114,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
+    @FeilerMedHåndterInntektsmeldingOppdelt("❌")
     fun `inntektsmelding på kort periode gjør at en nyere kort periode skal utbetales`() {
         håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(10.januar, 20.januar, 100.prosent))
@@ -430,7 +430,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering: 'riktig' vedtaksperiode håndter inntekt. der er FF=skjæringstidspunkt. Er det OK at dette automatiseres?")
+    @FeilerMedHåndterInntektsmeldingOppdelt("💡ufullstendig validering: 'riktig' vedtaksperiode håndter inntekt. der er FF=skjæringstidspunkt. Er det OK at dette automatiseres?")
     fun `inntektsmelding gjør om kort periode til arbeidsdager`() {
         håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
@@ -464,7 +464,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ufullstendig validering: 'riktig' vedtaksperiode håndter inntekt. der er FF=skjæringstidspunkt. Er det OK at dette automatiseres?")
+    @FeilerMedHåndterInntektsmeldingOppdelt("💡ufullstendig validering: 'riktig' vedtaksperiode håndter inntekt. der er FF=skjæringstidspunkt. Er det OK at dette automatiseres?")
     fun `inntektsmelding gjør om kort periode til arbeidsdager etter utbetalt`() = Toggle.InntektsmeldingKanTriggeRevurdering.enable {
         håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
@@ -647,7 +647,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
+    @FeilerMedHåndterInntektsmeldingOppdelt("❌")
     fun `avsluttet periode trenger egen inntektsmelding etter at inntektsmelding treffer forrige`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
@@ -695,7 +695,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("AventerIm->AUU utenom AvventerBlokkerende")
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅AventerIm->AUU utenom AvventerBlokkerende")
     fun `gjenopptar behandling på neste periode dersom inntektsmelding treffer avsluttet periode`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
@@ -707,7 +707,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
+    @FeilerMedHåndterInntektsmeldingOppdelt("❌")
     fun `revurderer ved mottatt inntektsmelding - påfølgende periode med im går i vanlig løype`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
@@ -731,7 +731,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("ukjent")
+    @FeilerMedHåndterInntektsmeldingOppdelt("❌")
     fun `revurderer ved mottatt inntektsmelding - påfølgende periode med im går i vanlig løype - omvendt`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
