@@ -360,9 +360,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                     sammenligningsgrunnlagBuilder = sammenligningsgrunnlagBuilder,
                     deaktivert = deaktivert
                 )
-                inntekterPerArbeidsgiver.addAll(
-                    inntektsopplysningBuilder.buildInntekter()
-                )
+                inntekterPerArbeidsgiver.add(inntektsopplysningBuilder.build())
                 refusjonsopplysningerPerArbeidsgiver.add(
                     inntektsopplysningBuilder.buildRefusjonsopplysninger()
                 )
@@ -376,14 +374,14 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             private val sammenligningsgrunnlagBuilder: SammenligningsgrunnlagBuilder?,
             private val deaktivert: Boolean,
         ) : VilkårsgrunnlagHistorikkVisitor {
-            private val inntekter = mutableListOf<IArbeidsgiverinntekt>()
+            private lateinit var inntekt: IArbeidsgiverinntekt
             private val refusjonsopplysninger = mutableListOf<Refusjonselement>()
 
             init {
                 inntektsopplysning.accept(this)
             }
 
-            fun buildInntekter() = inntekter.toList()
+            fun build() = inntekt
 
             fun buildRefusjonsopplysninger() = IArbeidsgiverrefusjon(organisasjonsnummer, refusjonsopplysninger.toList())
 
@@ -414,16 +412,9 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 deaktivert = deaktivert
             )
 
-            override fun visitInfotrygd(
-                infotrygd: Infotrygd,
-                id: UUID,
-                dato: LocalDate,
-                hendelseId: UUID,
-                beløp: Inntekt,
-                tidsstempel: LocalDateTime
-            ) {
+            override fun visitInfotrygd(infotrygd: Infotrygd, id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) {
                 val inntekt = InntektBuilder(beløp).build()
-                inntekter.add(nyArbeidsgiverInntekt(IInntektkilde.Infotrygd, inntekt))
+                this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.Infotrygd, inntekt)
             }
 
             override fun visitSaksbehandler(
@@ -437,7 +428,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 tidsstempel: LocalDateTime
             ) {
                 val inntekt = InntektBuilder(beløp).build()
-                inntekter.add(nyArbeidsgiverInntekt(IInntektkilde.Saksbehandler, inntekt))
+                this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.Saksbehandler, inntekt)
             }
 
             override fun visitInntektsmelding(
@@ -449,17 +440,17 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 tidsstempel: LocalDateTime
             ) {
                 val inntekt = InntektBuilder(beløp).build()
-                inntekter.add(nyArbeidsgiverInntekt(IInntektkilde.Inntektsmelding, inntekt))
+                this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.Inntektsmelding, inntekt)
             }
 
             override fun visitIkkeRapportert(id: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
                 val inntekt = IInntekt(0.0, 0.0, 0.0)
-                inntekter.add(nyArbeidsgiverInntekt(IInntektkilde.IkkeRapportert, inntekt))
+                this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.IkkeRapportert, inntekt)
             }
 
             override fun preVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
                 val (inntekt, inntekterFraAOrdningen) = SkattBuilder(skattComposite).build()
-                inntekter.add(nyArbeidsgiverInntekt(IInntektkilde.AOrdningen, inntekt, inntekterFraAOrdningen))
+                this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.AOrdningen, inntekt, inntekterFraAOrdningen)
             }
 
             class SkattBuilder(skattComposite: SkattComposite) : InntekthistorikkVisitor {
@@ -470,8 +461,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                     skattComposite.accept(this)
                 }
 
-                fun build() =
-                    inntekt to inntekterFraAOrdningen.map { (måned, sum) -> IInntekterFraAOrdningen(måned, sum) }
+                fun build() = inntekt to inntekterFraAOrdningen.map { (måned, sum) -> IInntekterFraAOrdningen(måned, sum) }
 
                 override fun visitSkattSykepengegrunnlag(
                     sykepengegrunnlag: Skatt.Sykepengegrunnlag,
