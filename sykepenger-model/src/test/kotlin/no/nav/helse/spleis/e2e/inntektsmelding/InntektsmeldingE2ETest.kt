@@ -133,7 +133,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("❌")
     fun `to inntektsmeldinger på rappen`() {
         nyPeriode(1.januar til 10.januar)
         håndterUtbetalingshistorikk(1.vedtaksperiode)

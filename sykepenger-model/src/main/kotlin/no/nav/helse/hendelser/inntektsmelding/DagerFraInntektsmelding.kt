@@ -89,6 +89,13 @@ internal class DagerFraInntektsmelding(
         }
     }
 
+    internal fun håndterHaleEtter(periode: Periode, arbeidsgiver: Arbeidsgiver) {
+        val fom = periode.endInclusive.nesteDag
+        val tom = gjenståendeDager.maxOrNull() ?: return
+        val hale = (fom tilOrNull tom) ?: return
+        håndter(hale, arbeidsgiver)
+    }
+
 
     private class PeriodeFraInntektsmelding(
         private val inntektsmelding: Inntektsmelding,

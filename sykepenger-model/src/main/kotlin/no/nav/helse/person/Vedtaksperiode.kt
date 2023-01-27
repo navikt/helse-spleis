@@ -1221,6 +1221,14 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.gjenopptaBehandling(inntektsmelding)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
+            inntektOgRefusjon.wrap {
+                vedtaksperiode.håndterInntektOgRefusjon(inntektOgRefusjon) { this }
+            }
+            vedtaksperiode.trengerIkkeInntektsmelding()
+            vedtaksperiode.person.gjenopptaBehandling(inntektOgRefusjon)
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
@@ -2037,6 +2045,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             if (!vedtaksperiode.forventerInntekt()) return
+            //if (!revurderingStøttet(vedtaksperiode, hendelse)) return
             if (!revurdering.inngåSomRevurdering(hendelse, vedtaksperiode, vedtaksperiode.periode)) return
             revurdering.loggDersomKorrigerendeSøknad(hendelse, "Startet revurdering grunnet korrigerende søknad")
             hendelse.info(RV_RV_1.varseltekst)
@@ -2063,6 +2072,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterDager(dager)
             if (!vedtaksperiode.forventerInntekt()) {
                 vedtaksperiode.emitVedtaksperiodeEndret(dager)
+                vedtaksperiode.person.igangsettOverstyring(
+                    dager,
+                    Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
+                )
             }
             return true
         }
@@ -2377,6 +2390,11 @@ internal class Vedtaksperiode private constructor(
                 }
             }
             return null
+        }
+
+        internal fun List<Vedtaksperiode>.håndterHale(dager: DagerFraInntektsmelding) {
+            val sisteVedtaksperiodeSomOverlapper = lastOrNull { dager.skalHåndteresAv(it.periode) } ?: return
+            dager.håndterHaleEtter(sisteVedtaksperiodeSomOverlapper.periode, sisteVedtaksperiodeSomOverlapper.arbeidsgiver)
         }
 
         internal fun harNyereForkastetPeriode(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) =

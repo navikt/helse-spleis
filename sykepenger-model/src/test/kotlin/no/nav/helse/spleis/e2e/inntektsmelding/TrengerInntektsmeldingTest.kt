@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -17,7 +16,6 @@ import org.junit.jupiter.api.Test
 internal class TrengerInntektsmeldingTest : AbstractEndToEndTest() {
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("✅antall innslag i sykdomshistorikk")
     fun `Kort periode ber om inntektsmelding når den går inn i AvventerRevurdering, og sier fra om at inntektsmelding ikke trengs etter at den er mottatt`() {
         nyPeriode(5.januar til 17.januar)
         håndterUtbetalingshistorikk(1.vedtaksperiode)

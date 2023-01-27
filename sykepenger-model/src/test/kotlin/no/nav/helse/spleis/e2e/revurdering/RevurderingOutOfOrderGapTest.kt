@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
-import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
@@ -902,7 +901,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("❌")
     fun `kort periode, lang periode kommer out of order og fører til utbetaling på kort periode som nå trenger IM`() {
         nyPeriode(1.mars til 16.mars)
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -1026,7 +1024,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("❌")
     fun `Out of order gjør at AUU revurderes fordi de ikke lenger er innen AGP - ber om inntektsmelding`() {
         nyPeriode(1.mars til 10.mars)
         håndterUtbetalingshistorikk(1.vedtaksperiode)

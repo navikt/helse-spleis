@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.FunksjonelleFeilTilVarsler
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -38,6 +39,8 @@ internal class InntektOgRefusjonFraInntektsmelding(
 
     internal fun addInntektsmelding(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver, jurist: SubsumsjonObserver) =
         arbeidsgiver.addInntektsmelding(skjæringstidspunkt, inntektsmelding, jurist)
+
+    internal fun wrap(block: () -> Unit) = FunksjonelleFeilTilVarsler.wrap(inntektsmelding) { block() }
 
     private var håndtert: Boolean = false
     internal fun skalHåndteresAv(periode: Periode, strategy: InntektOgRefusjonMatchingstrategi, forventerInntekt: () -> Boolean): Boolean {

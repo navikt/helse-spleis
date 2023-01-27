@@ -40,6 +40,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.SAMMENHENGENDE_MED_SAMME_SKJ
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
 import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_REFUSJONSOPPLYSNINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.feiletRevurdering
+import no.nav.helse.person.Vedtaksperiode.Companion.håndterHale
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.lagRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
@@ -519,7 +520,18 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun håndterInntektsmeldingOppdelt(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID?) {
-        val dager = inntektsmelding.dager
+        val dager = inntektsmelding.dager.also {
+            /* Den eventuelle "halen" som ikke håndteres av noen vedtaksperioder må legges til _først_
+            for at vedtaksperioder skal forstå at de før var innenfor AGP, men nå skal utbetales
+            selv om de selv ikke overlapper med inntektsmeldingen på noen måte;
+
+                Før:    |---AUU---|     > 16 dager    |---AUU---|
+                IM:     |------ AGP ------|
+                Halen:             |------|
+                Etter:  |---AUU---|        < 16 dager |---$$$---|
+            */
+            vedtaksperioder.håndterHale(it)
+        }
         val noenHarHåndtertDager = noenHarHåndtert(inntektsmelding) { håndter(dager) }
 
         val vedtaksperiodeSomSkalHåndtereInntektOgRefusjon =
@@ -527,6 +539,7 @@ internal class Arbeidsgiver private constructor(
         val inntektOgRefusjonHåndteres = vedtaksperiodeSomSkalHåndtereInntektOgRefusjon != null
 
         if (noenHarHåndtertDager || inntektOgRefusjonHåndteres) {
+            // TODO: Håndter gjenstående trenger nå bare å håndtere om ingen dager er håndtert
             // Noen av dagene er håndtert, men ikke nødvendigvis alle. For å beholde dagens oppførsel
             // må vi håndtere de gjenstående dagene også.
             dager.håndterGjenstående(this@Arbeidsgiver)
