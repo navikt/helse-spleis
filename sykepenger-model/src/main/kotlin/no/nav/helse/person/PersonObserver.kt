@@ -248,7 +248,7 @@ interface PersonObserver {
         val vedtakFattetTidspunkt: LocalDateTime
     )
 
-    data class RevurderingIgangsattEvent(
+    data class OverstyringIgangsatt(
         val årsak: String,
         val skjæringstidspunkt: LocalDate,
         val periodeForEndring: Periode,
@@ -292,7 +292,5 @@ interface PersonObserver {
         vedtaksperiodeId: UUID
     ) {}
 
-    fun revurderingIgangsatt(
-        event: RevurderingIgangsattEvent
-    ) {}
+    fun overstyringIgangsatt(event: OverstyringIgangsatt) {}
 }

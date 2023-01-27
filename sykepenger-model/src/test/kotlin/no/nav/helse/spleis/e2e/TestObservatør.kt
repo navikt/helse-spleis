@@ -25,7 +25,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val utbetaltEndretEventer = mutableListOf<PersonObserver.UtbetalingEndretEvent>()
     val vedtakFattetEvent = mutableMapOf<UUID, PersonObserver.VedtakFattetEvent>()
 
-    val revurderingIgangsattEvent = mutableListOf<PersonObserver.RevurderingIgangsattEvent>()
+    val overstyringIgangsatt = mutableListOf<PersonObserver.OverstyringIgangsatt>()
 
     val opprettOppgaverTilSpeilsaksbehandlerEventer = mutableListOf<PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent>()
     val opprettOppgaverEventer = mutableListOf<PersonObserver.OpprettOppgaveEvent>()
@@ -140,9 +140,9 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         utsettOppgaveEventer.add(event)
     }
 
-    override fun revurderingIgangsatt(
-        event: PersonObserver.RevurderingIgangsattEvent
+    override fun overstyringIgangsatt(
+        event: PersonObserver.OverstyringIgangsatt
     ) {
-        revurderingIgangsattEvent.add(event)
+        overstyringIgangsatt.add(event)
     }
 }

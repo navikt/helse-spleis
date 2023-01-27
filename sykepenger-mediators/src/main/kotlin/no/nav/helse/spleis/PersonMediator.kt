@@ -145,12 +145,8 @@ internal class PersonMediator(
         )).toJson())
     }
 
-    override fun revurderingIgangsatt(
-        event: PersonObserver.RevurderingIgangsattEvent
-    ) {
-        if (event.typeEndring != "REVURDERING") return // TODO: Fjern når konsumenter kan skille på type endring
-        val eventName = "revurdering_igangsatt"
-        queueMessage(JsonMessage.newMessage(eventName, mapOf(
+    override fun overstyringIgangsatt(event: PersonObserver.OverstyringIgangsatt) {
+        queueMessage(JsonMessage.newMessage("overstyring_igangsatt", mapOf(
             "revurderingId" to UUID.randomUUID(),
             "kilde" to message.id,
             "skjæringstidspunkt" to event.skjæringstidspunkt,

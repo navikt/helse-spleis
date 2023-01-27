@@ -36,6 +36,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyrArbeidsgiveropplysninger
+import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.inntekterForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.lagRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
@@ -43,19 +44,18 @@ import no.nav.helse.person.Arbeidsgiver.Companion.nekterOpprettelseAvPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.slettUtgåtteSykmeldingsperioder
-import no.nav.helse.person.Arbeidsgiver.Companion.startRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.sykefraværstilfelle
 import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.validerYtelserForSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AG_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Subaktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AG_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -452,8 +452,8 @@ class Person private constructor(
         observers.forEach { it.vedtakFattet(vedtakFattetEvent) }
     }
 
-    internal fun emitRevurderingIgangsattEvent(event: PersonObserver.RevurderingIgangsattEvent) {
-        observers.forEach { it.revurderingIgangsatt(event) }
+    internal fun emitOverstyringIgangsattEvent(event: PersonObserver.OverstyringIgangsatt) {
+        observers.forEach { it.overstyringIgangsatt(event) }
     }
 
     internal fun feriepengerUtbetalt(feriepengerUtbetaltEvent: PersonObserver.FeriepengerUtbetaltEvent) {
@@ -715,7 +715,7 @@ class Person private constructor(
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return
         val (nyttGrunnlag, eventyr) = (grunnlag.nyeArbeidsgiverInntektsopplysninger(inntektsmelding, subsumsjonObserver) ?: return)
         nyttVilkårsgrunnlag(inntektsmelding, nyttGrunnlag)
-        startRevurdering(inntektsmelding, eventyr)
+        igangsettOverstyring(inntektsmelding, eventyr)
     }
 
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
@@ -726,7 +726,7 @@ class Person private constructor(
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
         val (nyttGrunnlag, eventyr) = (grunnlag.overstyrArbeidsgiveropplysninger(hendelse, subsumsjonObserver) ?: return)
         nyttVilkårsgrunnlag(hendelse, nyttGrunnlag)
-        startRevurdering(hendelse, eventyr)
+        igangsettOverstyring(hendelse, eventyr)
     }
 
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
@@ -736,7 +736,7 @@ class Person private constructor(
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
         nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrArbeidsforhold(hendelse, subsumsjonObserver))
-        startRevurdering(hendelse, Revurderingseventyr.arbeidsforhold(skjæringstidspunkt))
+        igangsettOverstyring(hendelse, Revurderingseventyr.arbeidsforhold(skjæringstidspunkt))
     }
 
 
@@ -759,9 +759,9 @@ class Person private constructor(
         }
     }
 
-    internal fun startRevurdering(hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
-        arbeidsgivere.startRevurdering(hendelse, revurdering)
-        revurdering.sendRevurderingIgangsattEvent(this)
+    internal fun igangsettOverstyring(hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
+        arbeidsgivere.igangsettOverstyring(hendelse, revurdering)
+        revurdering.sendOverstyringIgangsattEvent(this)
     }
 
     internal fun slettUtgåtteSykmeldingsperioder(tom: LocalDate) {

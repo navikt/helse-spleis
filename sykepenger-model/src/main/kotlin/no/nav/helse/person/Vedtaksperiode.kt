@@ -28,18 +28,6 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.memoized
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dødsinformasjon
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSammenligningsgrunnlag
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSykepengegrunnlag
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.institusjonsopphold
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigOpplysningerFraArbeidsgiver
@@ -68,6 +56,24 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
+import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dødsinformasjon
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSammenligningsgrunnlag
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSykepengegrunnlag
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.institusjonsopphold
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
+import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad out of order`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad out of order innenfor 18 dager`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad som delvis overlapper`
@@ -98,12 +104,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
-import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
-import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -500,7 +500,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun revurderTidslinje(hendelse: OverstyrTidslinje) {
         oppdaterHistorikk(hendelse)
-        person.startRevurdering(hendelse, Revurderingseventyr.sykdomstidslinje(skjæringstidspunkt, periode))
+        person.igangsettOverstyring(hendelse, Revurderingseventyr.sykdomstidslinje(skjæringstidspunkt, periode))
     }
 
     internal fun periode() = periode
@@ -608,7 +608,7 @@ internal class Vedtaksperiode private constructor(
             if (tilstand == Avsluttet) lås()
         }
 
-        person.startRevurdering(søknad, Revurderingseventyr.korrigertSøknad(skjæringstidspunkt, periode))
+        person.igangsettOverstyring(søknad, Revurderingseventyr.korrigertSøknad(skjæringstidspunkt, periode))
     }
 
     private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
@@ -961,10 +961,10 @@ internal class Vedtaksperiode private constructor(
         tilstand.ferdigstillRevurdering(this, hendelse)
     }
 
-    internal fun startRevurdering(hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
+    internal fun igangsettOverstyring(hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
         if (revurdering.ikkeRelevant(periode, skjæringstidspunkt)) return
         kontekst(hendelse)
-        tilstand.startRevurdering(this, hendelse, revurdering)
+        tilstand.igangsettOverstyring(this, hendelse, revurdering)
     }
 
     private fun validerYtelser(ytelser: Ytelser, skjæringstidspunkt: LocalDate, infotrygdhistorikk: Infotrygdhistorikk) {
@@ -973,11 +973,11 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun inngåIRevurderingseventyret(
-        vedtaksperioder: MutableList<PersonObserver.RevurderingIgangsattEvent.VedtaksperiodeData>,
+        vedtaksperioder: MutableList<PersonObserver.OverstyringIgangsatt.VedtaksperiodeData>,
         typeEndring: String
     ) {
         vedtaksperioder.add(
-            PersonObserver.RevurderingIgangsattEvent.VedtaksperiodeData(
+            PersonObserver.OverstyringIgangsatt.VedtaksperiodeData(
                 orgnummer = organisasjonsnummer,
                 vedtaksperiodeId = id,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -1127,7 +1127,7 @@ internal class Vedtaksperiode private constructor(
         fun ferdigstillRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
         }
 
-        fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
+        fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             if (!revurdering.inngåSomRevurdering(hendelse, vedtaksperiode)) return
             vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
         }
@@ -1162,14 +1162,14 @@ internal class Vedtaksperiode private constructor(
             }
             søknad.info("Fullført behandling av søknad")
             if (!søknad.harFunksjonelleFeilEllerVerre()) {
-                vedtaksperiode.person.startRevurdering(
+                vedtaksperiode.person.igangsettOverstyring(
                     søknad,
                     Revurderingseventyr.nyPeriode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, vedtaksperiode.forventerInntekt())
                 )
             }
         }
 
-        override fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
+        override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             throw IllegalStateException("Har startet revurdering før den nyopprettede perioden har håndtert søknaden")
         }
     }
@@ -1481,7 +1481,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.arbeidsgiver.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) &&
                     vedtaksperiode.arbeidsgiver.harNødvendigRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, hendelse)
 
-        override fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {}
+        override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {}
 
         override fun håndter(
             person: Person,
@@ -1580,7 +1580,7 @@ internal class Vedtaksperiode private constructor(
                 sikkerlogg.warn("Har sykmeldingsperiode før eller lik tom. VedtaksperiodeId=${vedtaksperiode.id}, aktørId=${påminnelse.aktørId()}")
             }
         }
-        override fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {}
+        override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {}
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.utbetalinger.forkast(aktivitetslogg)
@@ -1608,7 +1608,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikk)
         }
 
-        override fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
+        override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
@@ -1713,7 +1713,7 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        override fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
+        override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
     }
@@ -1729,7 +1729,7 @@ internal class Vedtaksperiode private constructor(
             trengerSimulering(vedtaksperiode, hendelse)
         }
 
-        override fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
+        override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
@@ -1868,8 +1868,8 @@ internal class Vedtaksperiode private constructor(
 
             vedtaksperiode.trengerGodkjenning(hendelse)
         }
-        override fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
-            revurdering.inngåSomOverstyring(hendelse, vedtaksperiode)
+        override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
+            revurdering.inngåSomEndring(hendelse, vedtaksperiode)
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
@@ -2015,7 +2015,7 @@ internal class Vedtaksperiode private constructor(
             hendelse.info("Overstyrer ikke en vedtaksperiode med utbetaling som har feilet")
         }
 
-        override fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {}
+        override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {}
 
         private fun sjekkUtbetalingstatus(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             if (!vedtaksperiode.utbetalinger.erUtbetalt()) return
@@ -2035,7 +2035,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.ferdigstillVedtak(hendelse)
         }
 
-        override fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
+        override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             if (!vedtaksperiode.forventerInntekt()) return
             if (!revurdering.inngåSomRevurdering(hendelse, vedtaksperiode, vedtaksperiode.periode)) return
             revurdering.loggDersomKorrigerendeSøknad(hendelse, "Startet revurdering grunnet korrigerende søknad")
@@ -2072,7 +2072,7 @@ internal class Vedtaksperiode private constructor(
             if (!revurderingStøttet(vedtaksperiode, inntektOgRefusjon)) return
             vedtaksperiode.håndterInntektOgRefusjon(inntektOgRefusjon) { this }
             inntektOgRefusjon.info("Varsler revurdering i tilfelle inntektsmelding påvirker andre perioder.")
-            vedtaksperiode.person.startRevurdering(
+            vedtaksperiode.person.igangsettOverstyring(
                 inntektOgRefusjon,
                 Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
             )
@@ -2090,7 +2090,7 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
             }
             inntektsmelding.info("Varsler revurdering i tilfelle inntektsmelding påvirker andre perioder.")
-            vedtaksperiode.person.startRevurdering(
+            vedtaksperiode.person.igangsettOverstyring(
                 inntektsmelding,
                 Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
             )
@@ -2159,7 +2159,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.låsOpp()
         }
 
-        override fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
+        override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             if (!revurdering.inngåSomRevurdering(hendelse, vedtaksperiode, vedtaksperiode.periode)) return
             vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
         }
@@ -2177,7 +2177,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.låsOpp()
             vedtaksperiode.oppdaterHistorikk(hendelse)
             vedtaksperiode.lås()
-            vedtaksperiode.person.startRevurdering(
+            vedtaksperiode.person.igangsettOverstyring(
                 hendelse,
                 Revurderingseventyr.sykdomstidslinje(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
             )
@@ -2226,7 +2226,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.gjenopptaBehandling(påminnelse)
         }
 
-        override fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {}
+        override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {}
     }
 
     internal object TilInfotrygd : Vedtaksperiodetilstand {
@@ -2257,7 +2257,7 @@ internal class Vedtaksperiode private constructor(
             hendelse.info("Overstyrer ikke en vedtaksperiode som er sendt til Infotrygd")
         }
 
-        override fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
+        override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             throw IllegalStateException("Revurdering håndteres av en periode i til_infotrygd")
         }
     }

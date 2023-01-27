@@ -134,10 +134,10 @@ internal class Arbeidsgiver private constructor(
                        || arbeidsgiver.vedtaksperioder.nåværendeVedtaksperiode(KLAR_TIL_BEHANDLING) != null
            }.map { it.organisasjonsnummer }
 
-        internal fun List<Arbeidsgiver>.startRevurdering(hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
+        internal fun List<Arbeidsgiver>.igangsettOverstyring(hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             forEach { arbeidsgiver ->
                 arbeidsgiver.vedtaksperioder.forEach { vedtaksperiode ->
-                    vedtaksperiode.startRevurdering(hendelse, revurdering)
+                    vedtaksperiode.igangsettOverstyring(hendelse, revurdering)
                 }
             }
         }

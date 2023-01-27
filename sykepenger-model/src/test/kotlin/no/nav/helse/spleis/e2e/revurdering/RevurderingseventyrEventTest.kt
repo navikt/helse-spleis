@@ -11,7 +11,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.RevurderingIgangsattEvent.VedtaksperiodeData
+import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeData
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
@@ -175,27 +175,27 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         }
     }
 
-    private fun revurderingIgangsattEvent(nr: Int = 0, assertBlock: PersonObserver.RevurderingIgangsattEvent.() -> Unit) {
-       val revurderingIgangsattEvent = observatør.revurderingIgangsattEvent[nr]
+    private fun revurderingIgangsattEvent(nr: Int = 0, assertBlock: PersonObserver.OverstyringIgangsatt.() -> Unit) {
+       val revurderingIgangsattEvent = observatør.overstyringIgangsatt[nr]
         revurderingIgangsattEvent.run(assertBlock)
     }
 
-    private infix fun PersonObserver.RevurderingIgangsattEvent.bleForårsaketAv(årsak: String): PersonObserver.RevurderingIgangsattEvent {
+    private infix fun PersonObserver.OverstyringIgangsatt.bleForårsaketAv(årsak: String): PersonObserver.OverstyringIgangsatt {
         assertEquals(årsak, this.årsak)
         return this
     }
 
-    private infix fun PersonObserver.RevurderingIgangsattEvent.medSkjæringstidspunkt(dato: LocalDate): PersonObserver.RevurderingIgangsattEvent {
+    private infix fun PersonObserver.OverstyringIgangsatt.medSkjæringstidspunkt(dato: LocalDate): PersonObserver.OverstyringIgangsatt {
         assertEquals(dato, this.skjæringstidspunkt)
         return this
     }
 
-    private infix fun PersonObserver.RevurderingIgangsattEvent.avTypeEndring(typeEndring: String): PersonObserver.RevurderingIgangsattEvent {
+    private infix fun PersonObserver.OverstyringIgangsatt.avTypeEndring(typeEndring: String): PersonObserver.OverstyringIgangsatt {
         assertEquals(typeEndring, this.typeEndring)
         return this
     }
 
-    private infix fun PersonObserver.RevurderingIgangsattEvent.medførteRevurderingAv(vedtaksperiodeIder: List<UUID>): PersonObserver.RevurderingIgangsattEvent {
+    private infix fun PersonObserver.OverstyringIgangsatt.medførteRevurderingAv(vedtaksperiodeIder: List<UUID>): PersonObserver.OverstyringIgangsatt {
         assertEquals(vedtaksperiodeIder, this.berørtePerioder.map { it.vedtaksperiodeId })
         return this
     }

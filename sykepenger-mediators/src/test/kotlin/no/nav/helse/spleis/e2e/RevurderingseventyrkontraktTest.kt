@@ -39,7 +39,7 @@ internal class RevurderingseventyrkontraktTest : AbstractEndToEndMediatorTest() 
 
         sendOverstyringInntekt(20000.0, 1.januar, subsumsjon = null)
 
-        val eventyr = testRapid.inspektør.siste("revurdering_igangsatt")
+        val eventyr = testRapid.inspektør.siste("overstyring_igangsatt")
         assertRevurderingIgangsatt(eventyr)
     }
 

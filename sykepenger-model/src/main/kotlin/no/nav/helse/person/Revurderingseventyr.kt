@@ -29,7 +29,7 @@ class Revurderingseventyr private constructor(
         fun korrigertInntektsmelding(skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(RevurderingÅrsak.KorrigertInntektsmelding, skjæringstidspunkt, endringsdato.somPeriode())
     }
 
-    private val vedtaksperioder = mutableListOf<PersonObserver.RevurderingIgangsattEvent.VedtaksperiodeData>()
+    private val vedtaksperioder = mutableListOf<PersonObserver.OverstyringIgangsatt.VedtaksperiodeData>()
 
     internal fun inngåSomRevurdering(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, periode: Periode): Boolean {
         if (periodeForEndring.starterEtter(periode)) return false
@@ -38,8 +38,8 @@ class Revurderingseventyr private constructor(
     internal fun inngåSomRevurdering(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode) =
         inngå(hendelse, vedtaksperiode, TypeEndring.REVURDERING)
 
-    internal fun inngåSomOverstyring(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode) =
-        inngå(hendelse, vedtaksperiode, TypeEndring.OVERSTYRING)
+    internal fun inngåSomEndring(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode) =
+        inngå(hendelse, vedtaksperiode, TypeEndring.ENDRING)
 
     private fun inngå(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, typeEndring: TypeEndring) : Boolean {
         if (!hvorfor.kanInngå(hendelse)) return false
@@ -54,10 +54,10 @@ class Revurderingseventyr private constructor(
         return hvorfor.ikkeRelevant(periodeForEndring, periode)
     }
 
-    internal fun sendRevurderingIgangsattEvent(person: Person) {
+    internal fun sendOverstyringIgangsattEvent(person: Person) {
         if (vedtaksperioder.isEmpty()) return
-        person.emitRevurderingIgangsattEvent(
-            PersonObserver.RevurderingIgangsattEvent(
+        person.emitOverstyringIgangsattEvent(
+            PersonObserver.OverstyringIgangsatt(
                 årsak = hvorfor.navn(),
                 berørtePerioder = vedtaksperioder.toList(),
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -73,7 +73,7 @@ class Revurderingseventyr private constructor(
     }
 
     private enum class TypeEndring {
-        OVERSTYRING,
+        ENDRING,
         REVURDERING
     }
 
