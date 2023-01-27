@@ -3,7 +3,6 @@ package no.nav.helse.serde.api.speil
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Vedtaksperiode.AvsluttetUtenUtbetaling
@@ -15,6 +14,7 @@ import no.nav.helse.person.Vedtaksperiode.AvventerHistorikk
 import no.nav.helse.person.Vedtaksperiode.AvventerRevurdering
 import no.nav.helse.person.Vedtaksperiode.AvventerVilkårsprøving
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.Generasjon
 import no.nav.helse.serde.api.dto.HendelseDTO
@@ -49,7 +49,6 @@ import no.nav.helse.serde.api.speil.Tidslinjeberegninger.ITidslinjeberegning
 import no.nav.helse.serde.api.speil.builders.BeregningId
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlag
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
-import no.nav.helse.serde.api.speil.builders.InntektsmeldingId
 import no.nav.helse.serde.api.speil.builders.PeriodeVarslerBuilder
 import no.nav.helse.utbetalingstidslinje.Alder
 import kotlin.properties.Delegates
@@ -339,9 +338,6 @@ internal class IVedtaksperiode(
     }
 
     fun tilGodkjenning() = tilstand in listOf(AvventerGodkjenning, AvventerGodkjenningRevurdering)
-
-    fun inntektsmeldingId(): InntektsmeldingId? =
-        hendelser.find { it.type == "INNTEKTSMELDING" }?.let { UUID.fromString(it.id) }
 
     internal companion object {
         fun List<IVedtaksperiode>.tilGodkjenning(utbetaling: IUtbetaling) =

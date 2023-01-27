@@ -2,6 +2,7 @@ package no.nav.helse.spleis
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
@@ -65,7 +66,7 @@ class HendelseDaoTest {
         meldingsReferanse: UUID,
         meldingstype: HendelseDao.Meldingstype = HendelseDao.Meldingstype.INNTEKTSMELDING,
         fødselsnummer: String = UNG_PERSON_FNR,
-        data: String = "{}"
+        data: String = """{ "@opprettet": "${LocalDateTime.now()}" }"""
     ) {
         sessionOf(this).use {
             it.run(
@@ -90,7 +91,7 @@ class HendelseDaoTest {
     @Test
     fun `hentHendelser sql er valid`() {
         val dao = HendelseDao(dataSource)
-        val ingenEvents = dao.hentHendelser(setOf(meldingsReferanse))
+        val ingenEvents = dao.hentHendelser(UNG_PERSON_FNR.toLong())
         Assertions.assertEquals(1, ingenEvents.size)
     }
 

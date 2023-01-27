@@ -1,11 +1,14 @@
 package no.nav.helse.spleis.dao
 
+import java.util.*
+import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.serde.migration.Json
 import no.nav.helse.serde.migration.Navn
-import java.util.*
-import javax.sql.DataSource
+import no.nav.helse.spleis.HendelseDTO
+import no.nav.helse.spleis.objectMapper
+import org.intellij.lang.annotations.Language
 
 internal class HendelseDao(private val dataSource: DataSource) {
 
@@ -24,20 +27,25 @@ internal class HendelseDao(private val dataSource: DataSource) {
         }
     }
 
-    fun hentHendelser(referanser: Set<UUID>): List<Pair<Meldingstype, String>> {
-        if (referanser.isEmpty()) return emptyList()
+    fun hentHendelser(fødselsnummer: Long): List<HendelseDTO> {
+        @Language("PostgreSQL")
+        val statement = """
+            SELECT melding_type, data FROM melding 
+            WHERE fnr=? AND melding_type IN ('NY_SØKNAD', 'SENDT_SØKNAD_NAV', 'SENDT_SØKNAD_ARBEIDSGIVER', 'INNTEKTSMELDING')
+        """
         return sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    "SELECT * FROM melding WHERE " +
-                        "melding_type IN (${Meldingstype.values().joinToString { "?" }}) " +
-                        "AND melding_id IN (${referanser.joinToString { "?" }})",
-                    *Meldingstype.values().map(Enum<*>::name).toTypedArray(),
-                    *referanser.map { it.toString() }.toTypedArray()
-                ).map {
-                    Meldingstype.valueOf(it.string("melding_type")) to it.string("data")
-                }.asList
-            )
+            session.run(queryOf(statement, fødselsnummer).map { row ->
+                Meldingstype.valueOf(row.string("melding_type")) to row.string("data")
+            }.asList)
+        }.mapNotNull { (type, data) ->
+            objectMapper.readTree(data)?.let { node ->
+                when (type) {
+                    Meldingstype.NY_SØKNAD -> HendelseDTO.NySøknadDTO(node)
+                    Meldingstype.SENDT_SØKNAD_NAV -> HendelseDTO.SendtSøknadNavDTO(node)
+                    Meldingstype.SENDT_SØKNAD_ARBEIDSGIVER -> HendelseDTO.SendtSøknadArbeidsgiverDTO(node)
+                    Meldingstype.INNTEKTSMELDING -> HendelseDTO.InntektsmeldingDTO(node)
+                }
+            }
         }.onEach {
             PostgresProbe.hendelseLestFraDb()
         }

@@ -1,28 +1,18 @@
 package no.nav.helse.spleis.dto
 
 import no.nav.helse.person.Person
-import no.nav.helse.serde.api.dto.PersonDTO
-import no.nav.helse.serde.api.hendelseReferanserForPerson
-import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.api.dto.InntektsmeldingDTO
+import no.nav.helse.serde.api.dto.PersonDTO
 import no.nav.helse.serde.api.dto.SykmeldingDTO
 import no.nav.helse.serde.api.dto.SøknadArbeidsgiverDTO
 import no.nav.helse.serde.api.dto.SøknadNavDTO
+import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.spleis.HendelseDTO
 import no.nav.helse.spleis.dao.HendelseDao
-import no.nav.helse.spleis.objectMapper
 
 
-internal fun håndterPerson(person: Person, hendelseDao: HendelseDao): PersonDTO {
-    val hendelseReferanser = hendelseReferanserForPerson(person)
-    val hendelser = hendelseDao.hentHendelser(hendelseReferanser).map { (type, hendelseJson) ->
-        when (type) {
-            HendelseDao.Meldingstype.NY_SØKNAD -> HendelseDTO.NySøknadDTO(objectMapper.readTree(hendelseJson))
-            HendelseDao.Meldingstype.SENDT_SØKNAD_NAV -> HendelseDTO.SendtSøknadNavDTO(objectMapper.readTree(hendelseJson))
-            HendelseDao.Meldingstype.SENDT_SØKNAD_ARBEIDSGIVER -> HendelseDTO.SendtSøknadArbeidsgiverDTO(objectMapper.readTree(hendelseJson))
-            HendelseDao.Meldingstype.INNTEKTSMELDING -> HendelseDTO.InntektsmeldingDTO(objectMapper.readTree(hendelseJson))
-        }
-    }.mapHendelseDTO()
+internal fun håndterPerson(fødselsnummer: Long, person: Person, hendelseDao: HendelseDao): PersonDTO {
+    val hendelser = hendelseDao.hentHendelser(fødselsnummer).mapHendelseDTO()
     return serializePersonForSpeil(person, hendelser)
 }
 
