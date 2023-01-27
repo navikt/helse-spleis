@@ -1024,7 +1024,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("❌")
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅ Burde være ok med ekstra AUU-transisjoner her")
     fun `Inntektsmelding med error som treffer flere perioder uten gap`() {
         håndterSykmelding(Sykmeldingsperiode(29.mars(2021), 31.mars(2021), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.april(2021), 17.april(2021), 100.prosent))

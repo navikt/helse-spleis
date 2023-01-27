@@ -705,7 +705,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("❌")
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅ Burde være ok med ekstra AUU-transisjoner her")
     fun `revurderer ved mottatt inntektsmelding - påfølgende periode med im går i vanlig løype`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
@@ -729,7 +729,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("❌")
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅ Burde være ok med ekstra AUU-transisjoner her")
     fun `revurderer ved mottatt inntektsmelding - påfølgende periode med im går i vanlig løype - omvendt`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
