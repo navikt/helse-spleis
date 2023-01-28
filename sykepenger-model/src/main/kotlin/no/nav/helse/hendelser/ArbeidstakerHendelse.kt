@@ -1,6 +1,7 @@
-package no.nav.helse.person
+package no.nav.helse.hendelser
 
 import java.util.UUID
+import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 
 abstract class ArbeidstakerHendelse protected constructor(

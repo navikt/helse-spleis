@@ -1,8 +1,7 @@
-package no.nav.helse.person
+package no.nav.helse.hendelser
 
-import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Personidentifikator
+import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggMappingPort
@@ -12,8 +11,6 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Subaktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.utbetalingstidslinje.Alder
-import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 
 internal class FunksjonelleFeilTilVarsler(private val other: IAktivitetslogg) : IAktivitetslogg by other {
     override fun funksjonellFeil(kode: Varselkode) = varsel(kode)
@@ -21,25 +18,6 @@ internal class FunksjonelleFeilTilVarsler(private val other: IAktivitetslogg) : 
     internal companion object {
         internal fun wrap(hendelse: PersonHendelse, block: () -> Unit) = hendelse.wrap(::FunksjonelleFeilTilVarsler, block)
     }
-}
-
-class Personopplysninger internal constructor(
-    private val personidentifikator: Personidentifikator,
-    private val aktørId: String,
-    private val alder: Alder
-) {
-    constructor(
-        personidentifikator: Personidentifikator,
-        aktørId: String,
-        fødselsdato: LocalDate
-    ) : this(personidentifikator, aktørId, fødselsdato.alder)
-
-    internal fun nyPerson(jurist: MaskinellJurist) = Person(
-        aktørId = aktørId,
-        personidentifikator = personidentifikator,
-        alder = alder,
-        jurist = jurist
-    )
 }
 
 abstract class PersonHendelse protected constructor(

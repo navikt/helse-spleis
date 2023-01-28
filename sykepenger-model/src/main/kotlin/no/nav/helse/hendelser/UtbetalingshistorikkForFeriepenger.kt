@@ -5,7 +5,6 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger.Com
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger.Companion.utbetalteFeriepengerTilPerson
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.FeriepengeutbetalingsperiodeVisitor
-import no.nav.helse.person.PersonHendelse
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.Year

@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg

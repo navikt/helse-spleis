@@ -6,6 +6,8 @@ import java.time.YearMonth
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Toggle
+import no.nav.helse.hendelser.ArbeidstakerHendelse
+import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger

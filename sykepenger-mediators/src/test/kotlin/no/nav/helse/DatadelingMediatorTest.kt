@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.PersonHendelse
+import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1

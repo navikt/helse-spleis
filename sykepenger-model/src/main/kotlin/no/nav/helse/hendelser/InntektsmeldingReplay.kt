@@ -1,7 +1,6 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.ArbeidstakerHendelse
 import java.util.*
 
 class InntektsmeldingReplay(

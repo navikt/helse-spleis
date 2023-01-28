@@ -6,6 +6,7 @@ import no.nav.helse.desember
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Dødsinfo
 import no.nav.helse.hendelser.Foreldrepermisjon

@@ -7,7 +7,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Personopplysninger

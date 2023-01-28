@@ -9,7 +9,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.person.PersonHendelse
+import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.JsonMessage

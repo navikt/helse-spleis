@@ -42,7 +42,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehis
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Person
-import no.nav.helse.person.PersonHendelse
+import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType

@@ -11,7 +11,7 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.FeriepengeutbetalingVisitor
 import no.nav.helse.person.Person
-import no.nav.helse.person.PersonHendelse
+import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.infotrygdhistorikk.Nødnummer

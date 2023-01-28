@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser.utbetaling
 
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import java.time.LocalDateTime
 import java.util.*

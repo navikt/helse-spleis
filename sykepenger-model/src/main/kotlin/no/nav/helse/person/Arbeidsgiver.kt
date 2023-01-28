@@ -5,12 +5,14 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
+import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding

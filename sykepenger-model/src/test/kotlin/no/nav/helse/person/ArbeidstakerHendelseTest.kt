@@ -3,6 +3,7 @@ package no.nav.helse.person
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*
+import no.nav.helse.hendelser.ArbeidstakerHendelse
 
 internal class ArbeidstakerHendelseTest {
 

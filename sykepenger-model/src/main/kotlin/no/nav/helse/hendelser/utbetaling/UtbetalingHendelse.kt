@@ -2,7 +2,7 @@ package no.nav.helse.hendelser.utbetaling
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_17
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_2
 import no.nav.helse.utbetalingslinjer.Oppdragstatus

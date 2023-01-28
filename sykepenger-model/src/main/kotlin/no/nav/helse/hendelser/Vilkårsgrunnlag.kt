@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.Periode.Companion.sammenhengende
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.beregnOpptjening
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsforholdhistorikk.Companion.opptjening
-import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person

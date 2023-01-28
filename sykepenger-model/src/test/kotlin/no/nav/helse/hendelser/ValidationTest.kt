@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import java.util.UUID
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.ArbeidstakerHendelse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

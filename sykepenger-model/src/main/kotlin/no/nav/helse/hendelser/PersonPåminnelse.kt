@@ -1,7 +1,6 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.PersonHendelse
 import java.util.*
 
 class PersonPåminnelse(

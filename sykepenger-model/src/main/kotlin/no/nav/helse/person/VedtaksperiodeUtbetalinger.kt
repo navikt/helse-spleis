@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse

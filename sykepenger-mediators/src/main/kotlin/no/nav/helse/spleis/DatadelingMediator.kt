@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggObserver
-import no.nav.helse.person.PersonHendelse
+import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.rapids_rivers.JsonMessage

@@ -1,6 +1,6 @@
 package no.nav.helse.spleis
 
-import no.nav.helse.person.PersonHendelse
+import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext

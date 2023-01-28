@@ -3,7 +3,7 @@ package no.nav.helse.sykdomstidslinje
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.PersonHendelse
+import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.nyesteId
 import no.nav.helse.tournament.Dagturnering
