@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.UUID
-import no.nav.helse.hendelser.Periode
 
 sealed class Aktivitet(
     protected val id: UUID,
@@ -112,7 +111,7 @@ sealed class Aktivitet(
 
             fun utbetalingshistorikk(
                 aktivitetslogg: IAktivitetslogg,
-                periode: Periode
+                periode: ClosedRange<LocalDate>
             ) {
                 aktivitetslogg.behov(
                     Behovtype.Sykepengehistorikk, "Trenger sykepengehistorikk fra Infotrygd", mapOf(
@@ -129,7 +128,7 @@ sealed class Aktivitet(
                 )
             }
 
-            fun pleiepenger(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+            fun pleiepenger(aktivitetslogg: IAktivitetslogg, periode: ClosedRange<LocalDate>) {
                 aktivitetslogg.behov(
                     Behovtype.Pleiepenger,
                     "Trenger informasjon om pleiepengeytelser fra Infotrygd", mapOf(
@@ -139,7 +138,7 @@ sealed class Aktivitet(
                 )
             }
 
-            fun omsorgspenger(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+            fun omsorgspenger(aktivitetslogg: IAktivitetslogg, periode: ClosedRange<LocalDate>) {
                 aktivitetslogg.behov(
                     Behovtype.Omsorgspenger,
                     "Trenger informasjon om omsorgspengerytelser fra Infotrygd", mapOf(
@@ -149,7 +148,7 @@ sealed class Aktivitet(
                 )
             }
 
-            fun opplæringspenger(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+            fun opplæringspenger(aktivitetslogg: IAktivitetslogg, periode: ClosedRange<LocalDate>) {
                 aktivitetslogg.behov(
                     Behovtype.Opplæringspenger,
                     "Trenger informasjon om opplæringspengerytelser fra Infotrygd", mapOf(
@@ -159,7 +158,7 @@ sealed class Aktivitet(
                 )
             }
 
-            fun institusjonsopphold(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+            fun institusjonsopphold(aktivitetslogg: IAktivitetslogg, periode: ClosedRange<LocalDate>) {
                 aktivitetslogg.behov(
                     Behovtype.Institusjonsopphold,
                     "Trenger informasjon om institusjonsopphold fra Inst2", mapOf(
