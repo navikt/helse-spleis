@@ -63,7 +63,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
     internal fun setup() {
         aktivitetslogg = Aktivitetslogg()
 
-        person = sykmelding.person(MaskinellJurist()).apply {
+        person = Person.fraHendelse(sykmelding, MaskinellJurist()).apply {
             håndter(sykmelding)
             håndter(søknad)
         }

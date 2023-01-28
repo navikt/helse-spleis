@@ -169,7 +169,7 @@ internal class RestApiTest {
             harFlereInntektsmeldinger = false,
             personopplysninger = personopplysninger
         )
-        val person = sykmelding.person(MaskinellJurist())
+        val person = Person.fraHendelse(sykmelding, MaskinellJurist())
         person.håndter(sykmelding)
         person.håndter(inntektsmelding)
         dataSource.lagrePerson(AKTØRID, UNG_PERSON_FNR, person)

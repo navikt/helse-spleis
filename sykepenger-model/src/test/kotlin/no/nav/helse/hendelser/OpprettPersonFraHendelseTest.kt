@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
+import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somPersonidentifikator
@@ -23,23 +24,33 @@ internal class OpprettPersonFraHendelseTest {
 
     @Test
     fun `sykmelding skal kunne opprette ny person`() {
-        fabrikk.lagSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent)).person(MaskinellJurist())
+        Person.fraHendelse(
+            fabrikk.lagSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent)),
+            MaskinellJurist()
+        )
     }
 
     @Test
     fun `søknad skal kunne opprette ny person`() {
-        fabrikk.lagSøknad(Sykdom(1.januar, 31.januar, 100.prosent)).person(MaskinellJurist())
+        Person.fraHendelse(
+            fabrikk.lagSøknad(Sykdom(1.januar, 31.januar, 100.prosent)),
+            MaskinellJurist()
+        )
     }
 
     @Test
     fun `inntektsmelding skal kunne opprette ny person`() {
-        fabrikk.lagInntektsmelding(listOf(1.januar til 16.januar), 1000.månedlig).person(MaskinellJurist())
+        Person.fraHendelse(
+            fabrikk.lagInntektsmelding(listOf(1.januar til 16.januar), 1000.månedlig),
+            MaskinellJurist()
+        )
     }
 
     @Test
     fun `andre hendelser skal ikke kunne opprette ny person`() {
         assertThrows<IllegalStateException> {
-            fabrikk.lagPåminnelse(UUID.randomUUID(), AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, LocalDateTime.now()).person(
+            Person.fraHendelse(
+                fabrikk.lagPåminnelse(UUID.randomUUID(), AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, LocalDateTime.now()),
                 MaskinellJurist()
             )
         }

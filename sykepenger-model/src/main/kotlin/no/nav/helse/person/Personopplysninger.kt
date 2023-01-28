@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import no.nav.helse.Personidentifikator
-import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 
@@ -17,10 +16,5 @@ class Personopplysninger internal constructor(
         fødselsdato: LocalDate
     ) : this(personidentifikator, aktørId, fødselsdato.alder)
 
-    internal fun nyPerson(jurist: MaskinellJurist) = Person(
-        aktørId = aktørId,
-        personidentifikator = personidentifikator,
-        alder = alder,
-        jurist = jurist
-    )
+    internal fun <T> brukPersonOpplysninger(visitor: (id: Personidentifikator, aktørId: String, alder: Alder) -> T): T = visitor(personidentifikator, aktørId, alder)
 }

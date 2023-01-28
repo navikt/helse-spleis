@@ -281,7 +281,7 @@ internal class HendelseMediator(
         val tidligereBehandlinger = personDao.lesOppPersoner(tidligereBehandledeIdenter.map { tidligereBehandletIdent -> tidligereBehandletIdent.somPersonidentifikator() })
             .map { serialisertPerson -> serialisertPerson.second.deserialize(jurist) { hendelseRepository.hentAlleHendelser(serialisertPerson.first) } }
         personDao.hentEllerOpprettPerson(personidentifikator, hendelse.aktørId(), message, {
-            hendelse.person(jurist).serialize()
+            Person.fraHendelse(hendelse, jurist).serialize()
         }) { serialisertPerson ->
             serialisertPerson.deserialize(jurist, tidligereBehandlinger) { hendelseRepository.hentAlleHendelser(personidentifikator) }.also(block).serialize()
         }

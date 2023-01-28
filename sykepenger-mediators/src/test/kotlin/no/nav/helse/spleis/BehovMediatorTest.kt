@@ -15,6 +15,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepeng
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.hendelser.ArbeidstakerHendelse
+import no.nav.helse.person.Person
 import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -234,7 +235,7 @@ class BehovMediatorTest {
             fødselsdato = 24.desember(2000)
         )
     ), Aktivitetskontekst {
-        private val person = person(MaskinellJurist())
+        private val person = Person.fraHendelse(this, MaskinellJurist())
         init {
             kontekst(person)
         }

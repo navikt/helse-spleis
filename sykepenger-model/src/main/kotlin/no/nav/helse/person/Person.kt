@@ -92,7 +92,7 @@ class Person private constructor(
     private val tidligereBehandlinger: List<Person> = emptyList(),
     private val regler: ArbeidsgiverRegler = NormalArbeidstaker
 ) : Subaktivitetskontekst {
-    internal companion object {
+    companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         internal fun ferdigPerson(
             aktørId: String,
@@ -119,6 +119,9 @@ class Person private constructor(
             tidligereBehandlinger = tidligereBehandlinger,
             jurist = jurist
         )
+
+        fun fraHendelse(personHendelse: PersonHendelse, jurist: MaskinellJurist): Person =
+            personHendelse.brukPersonOpplysninger { id, aktørId, alder -> Person(aktørId, id, alder, jurist) }
     }
 
     internal constructor(
