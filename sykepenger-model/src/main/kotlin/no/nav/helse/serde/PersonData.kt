@@ -693,7 +693,7 @@ internal data class PersonData(
                         )
                     null -> SkattSykepengegrunnlag(
                         id = requireNotNull(id),
-                        dato = requireNotNull(dato ?: skatteopplysninger?.first()?.dato), // todo: migrere dato fra skatteopplysninger i json opp et nivå, til SkattSykepengegrunnlag
+                        dato = requireNotNull(dato),
                         inntektsopplysninger = requireNotNull(skatteopplysninger).map { skatteData ->
                             when (skatteData.kilde?.let(Inntektsopplysningskilde::valueOf)) {
                                 Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG ->
@@ -706,12 +706,12 @@ internal data class PersonData(
                                         beskrivelse = requireNotNull(skatteData.beskrivelse),
                                         tidsstempel = requireNotNull(skatteData.tidsstempel)
                                     )
-                                else -> error("Kan kun være skatteopplysninger i SkattComposite")
+                                else -> error("Kan kun være skatteopplysninger i SkattSykepengegrunnlag")
                             }
                         }
                     )
-                    Inntektsopplysningskilde.SKATT_SAMMENLIGNINGSGRUNNLAG,
-                    Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG -> error("Fant ${kilde}. Kan kun være i SkattComposite")
+                    Inntektsopplysningskilde.SKATT_SAMMENLIGNINGSGRUNNLAG -> error("Fant ${kilde}. Det kan ikke eksistere i Inntektshistorikken")
+                    Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG -> error("Fant ${kilde}. Kan kun være i SkattSykepengegrunnlag")
                 }
         }
 

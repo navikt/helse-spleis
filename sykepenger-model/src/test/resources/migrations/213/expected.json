@@ -1,0 +1,143 @@
+{
+  "arbeidsgivere": [
+    {
+      "inntektshistorikk": [
+        {
+          "inntektsopplysninger": [
+            {
+              "kilde": "INFOTRYGD"
+            },
+            {
+              "skatteopplysninger": [
+                {
+                  "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                  "dato": "2023-01-24"
+                }
+              ],
+              "dato": "2023-01-24"
+            }
+          ]
+        },
+        {
+          "inntektsopplysninger": [
+            {
+              "skatteopplysninger": [
+                {
+                  "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                  "dato": "2023-01-01"
+                }
+              ],
+              "dato": "2023-01-01"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "inntektshistorikk": [
+        {
+          "inntektsopplysninger": [
+            {
+              "skatteopplysninger": [
+                {
+                  "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                  "dato": "2023-01-15"
+                }
+              ],
+              "dato": "2023-01-15"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "vilkårsgrunnlag": [
+        {
+          "sykepengegrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "inntektsopplysning": {
+                  "skatteopplysninger": [
+                    {
+                      "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                      "dato": "2023-01-15"
+                    }
+                  ],
+                  "dato": "2023-01-15"
+                }
+              }
+            ],
+            "deaktiverteArbeidsforhold": [
+              {
+                "inntektsopplysning": {
+                  "skatteopplysninger": [
+                    {
+                      "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                      "dato": "2023-01-08"
+                    }
+                  ],
+                  "dato": "2023-01-08"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "sykepengegrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "inntektsopplysning": {
+                  "skatteopplysninger": [
+                    {
+                      "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                      "dato": "2023-01-15"
+                    }
+                  ],
+                  "dato": "2023-01-15"
+                }
+              }
+            ],
+            "deaktiverteArbeidsforhold": []
+          }
+        }
+      ]
+    },
+    {
+      "vilkårsgrunnlag": [
+        {
+          "sykepengegrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "inntektsopplysning": {
+                  "skatteopplysninger": [
+                    {
+                      "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                      "dato": "2023-01-15"
+                    }
+                  ],
+                  "dato": "2023-01-15"
+                }
+              }
+            ],
+            "deaktiverteArbeidsforhold": [
+              {
+                "inntektsopplysning": {
+                  "skatteopplysninger": [
+                    {
+                      "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                      "dato": "2023-01-08"
+                    }
+                  ],
+                  "dato": "2023-01-08"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 213
+}

@@ -1137,7 +1137,7 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun preVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {
-            pushState(SkattSykepengegrunnlagState(dato, inntektsopplysninger))
+            pushState(SkattSykepengegrunnlagState(inntektsopplysninger))
         }
 
         override fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
@@ -1152,7 +1152,7 @@ internal class JsonBuilder : AbstractBuilder() {
         }
     }
 
-    class SkattSykepengegrunnlagState(private val dato: LocalDate, private val inntektsopplysninger: MutableList<Map<String, Any?>>) : BuilderState() {
+    class SkattSykepengegrunnlagState(private val inntektsopplysninger: MutableList<Map<String, Any?>>) : BuilderState() {
         private val skatteopplysninger = mutableListOf<Map<String, Any>>()
 
         override fun visitSkatteopplysning(
@@ -1166,7 +1166,6 @@ internal class JsonBuilder : AbstractBuilder() {
             tidsstempel: LocalDateTime
         ) {
             skatteopplysninger.add(mapOf(
-                "dato" to dato, // todo: dato lagres pga. bakoverkompatibilitet. kan fjernes etter jsonmigrering hvor dato lagres på nivå over
                 "kilde" to "SKATT_SYKEPENGEGRUNNLAG",
                 "hendelseId" to hendelseId,
                 "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
@@ -1471,7 +1470,7 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun preVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {
-            pushState(SkattSykepengegrunnlagState(dato, inntektsopplysninger))
+            pushState(SkattSykepengegrunnlagState(inntektsopplysninger))
         }
 
         override fun postVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) = popState()
