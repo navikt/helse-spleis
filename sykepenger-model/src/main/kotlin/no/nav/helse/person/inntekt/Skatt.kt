@@ -7,6 +7,7 @@ import java.util.UUID
 import no.nav.helse.isWithinRangeOf
 import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.summer
 
 internal sealed class Skatt(
     dato: LocalDate,
@@ -64,8 +65,6 @@ internal sealed class Skatt(
 
         override fun omregnetÅrsinntekt(): Inntekt = beløp
 
-        override fun rapportertInntekt(): Inntekt = error("Sykepengegrunnlag har ikke grunnlag for sammenligningsgrunnlag")
-
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Sykepengegrunnlag && skalErstattesAv(other)
 
@@ -100,11 +99,6 @@ internal sealed class Skatt(
             )
         }
 
-        override fun rapportertInntekt(dato: LocalDate) =
-            takeIf { this.dato == dato && måned.isWithinRangeOf(dato, 12) }?.let { listOf(this) }
-
-        override fun rapportertInntekt(): Inntekt = beløp
-
         override fun omregnetÅrsinntekt(): Inntekt = error("Sammenligningsgrunnlag har ikke grunnlag for sykepengegrunnlag")
 
         override fun skalErstattesAv(other: Inntektsopplysning) =
@@ -112,5 +106,12 @@ internal sealed class Skatt(
 
         override fun erSamme(other: Inntektsopplysning) =
             other is RapportertInntekt && erSammeSkatteinntekt(other)
+
+        companion object {
+            fun rapportertInntekt(liste: List<RapportertInntekt>) = liste
+                .map { it.beløp }
+                .summer()
+                .div(12)
+        }
     }
 }

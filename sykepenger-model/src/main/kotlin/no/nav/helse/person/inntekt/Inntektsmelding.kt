@@ -46,8 +46,6 @@ internal class Inntektsmelding(
 
     override fun omregnetÅrsinntekt(): Inntekt = beløp
 
-    override fun rapportertInntekt(): Inntekt = error("Inntektsmelding har ikke grunnlag for sammenligningsgrunnlag")
-
     override fun kanLagres(other: Inntektsopplysning) = !skalErstattesAv(other)
 
     override fun skalErstattesAv(other: Inntektsopplysning) =

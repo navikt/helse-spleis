@@ -23,8 +23,6 @@ internal class Infotrygd(
 
     override fun omregnetÅrsinntekt(): Inntekt = beløp
 
-    override fun rapportertInntekt(): Inntekt = error("Infotrygd har ikke grunnlag for sammenligningsgrunnlag")
-
     override fun subsumerArbeidsforhold(
         subsumsjonObserver: SubsumsjonObserver,
         organisasjonsnummer: String,

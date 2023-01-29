@@ -15,17 +15,10 @@ import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Skatt
 import no.nav.helse.person.inntekt.SkattComposite
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.summer
 
 internal enum class Kilde {
     SKATT, INFOTRYGD, INNTEKTSMELDING, SAKSBEHANDLER
 }
-
-internal fun List<Skatt.RapportertInntekt>.rapportertInntekt() = this
-    .map(Skatt::rapportertInntekt)
-    .summer()
-    .div(12)
-
 
 internal data class Innslag(
     val innslagId: UUID,
@@ -141,7 +134,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
             Opplysning(
                 skattedato,
                 skattComposite.omregnetÅrsinntekt(skattedato, skattedato)?.omregnetÅrsinntekt(),
-                skattComposite.rapportertInntekt(skattedato)?.rapportertInntekt(),
+                null,
                 Kilde.SKATT
             )
         )

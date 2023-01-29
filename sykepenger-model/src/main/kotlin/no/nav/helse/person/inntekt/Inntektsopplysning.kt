@@ -16,8 +16,6 @@ abstract class Inntektsopplysning protected constructor(
     internal abstract fun accept(visitor: InntekthistorikkVisitor)
     internal open fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? = null
     internal abstract fun omregnetÅrsinntekt(): Inntekt
-    internal open fun rapportertInntekt(dato: LocalDate): List<Skatt.RapportertInntekt>? = null
-    internal abstract fun rapportertInntekt(): Inntekt
     internal open fun kanLagres(other: Inntektsopplysning) = this != other
     internal open fun skalErstattesAv(other: Inntektsopplysning) = this == other
 

@@ -55,7 +55,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
@@ -196,22 +196,17 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(2, a1Inspektør.inntektInspektør.antallInnslag)
         assertEquals(1, a2Inspektør.inntektInspektør.antallInnslag)
 
-        assertNull(a2Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.firstOrNull { it.kilde == Kilde.INFOTRYGD })
-        assertNull(a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.firstOrNull { it.kilde == Kilde.INFOTRYGD })
-        assertEquals(
-            24000.månedlig,
-            a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.first { it.kilde == Kilde.SKATT && it.sammenligningsgrunnlag != null }?.sammenligningsgrunnlag
-        )
+        val a1Opplysninger = a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger ?: fail { "forventet innslag" }
+        val a2Opplysninger = a2Inspektør.inntektInspektør.sisteInnslag?.opplysninger ?: fail { "forventet innslag" }
+        assertTrue(a2Opplysninger.none { it.kilde == Kilde.INFOTRYGD })
+        assertTrue(a1Opplysninger.none { it.kilde == Kilde.INFOTRYGD })
 
-        assertEquals(
-            23500.månedlig,
-            a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.first { it.kilde == Kilde.SKATT && it.sykepengegrunnlag != null }?.sykepengegrunnlag
-        )
+        assertEquals(2, a1Opplysninger.size)
+        assertEquals(1, a2Opplysninger.size)
 
-        assertEquals(
-            25000.månedlig,
-            a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.first { it.kilde == Kilde.INNTEKTSMELDING }?.sykepengegrunnlag
-        )
+        assertEquals(23500.månedlig, a1Opplysninger.first { it.kilde == Kilde.SKATT }.sykepengegrunnlag)
+        assertEquals(25000.månedlig, a1Opplysninger.first { it.kilde == Kilde.INNTEKTSMELDING }.sykepengegrunnlag)
+        assertEquals(4900.månedlig, a2Opplysninger.single().sykepengegrunnlag)
     }
 
     @Test
@@ -235,12 +230,12 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold
         ).håndter(Person::håndter)
 
-        assertEquals(3, a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.size)
-        assertEquals(2, a1Inspektør.inntektInspektør.antallInnslag)
-        assertEquals(25000.månedlig, a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.get(0)?.sykepengegrunnlag)
-        assertEquals(24000.månedlig, a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.get(1)?.sammenligningsgrunnlag)
-        assertEquals(15000.månedlig, a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.get(2)?.sykepengegrunnlag)
-
+        val inntektInspektør = a1Inspektør.inntektInspektør
+        val opplysninger = inntektInspektør.sisteInnslag?.opplysninger
+        assertEquals(2, opplysninger?.size)
+        assertEquals(2, inntektInspektør.antallInnslag)
+        assertEquals(25000.månedlig, opplysninger?.get(0)?.sykepengegrunnlag)
+        assertEquals(15000.månedlig, opplysninger?.get(1)?.sykepengegrunnlag)
     }
 
     @Test

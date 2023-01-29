@@ -38,19 +38,6 @@ internal class SkattComposite(
             .div(3)
     }
 
-    override fun rapportertInntekt(dato: LocalDate) =
-        inntektsopplysninger
-            .mapNotNull { it.rapportertInntekt(dato) }
-            .flatten()
-            .takeIf { it.isNotEmpty() }
-
-    override fun rapportertInntekt(): Inntekt =
-        inntektsopplysninger
-            .filter { it.erRelevant(12) }
-            .map(Skatt::rapportertInntekt)
-            .summer()
-            .div(12)
-
     override fun subsumerSykepengegrunnlag(subsumsjonObserver: SubsumsjonObserver, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) {
         subsumsjonObserver.`§ 8-28 ledd 3 bokstav a`(
             organisasjonsnummer = organisasjonsnummer,

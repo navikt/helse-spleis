@@ -24,9 +24,6 @@ class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
         return true
     }
 
-    internal fun lagreInntekter(hendelse: IAktivitetslogg, person: Person, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, other: List<ArbeidsgiverInntekt>) =
-        (this.inntekter + other).lagreInntekter(hendelse, person, skjæringstidspunkt, meldingsreferanseId)
-
     internal fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, subsumsjonObserver: SubsumsjonObserver): Sammenligningsgrunnlag {
         val arbeidsgiverInntektsopplysninger = inntekter.map {
             it.tilSammenligningsgrunnlag(skjæringstidspunkt, meldingsreferanseId)

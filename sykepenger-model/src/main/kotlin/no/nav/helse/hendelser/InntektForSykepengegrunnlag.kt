@@ -5,6 +5,7 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektFor
+import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.lagreInntekter
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
@@ -51,14 +52,15 @@ class InntektForSykepengegrunnlag(
         }
     }
 
-    internal fun lagreInntekter(hendelse: IAktivitetslogg, person: Person, opptjening: Opptjening, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, inntektsvurdering: Inntektsvurdering) {
-        inntektsvurdering.lagreInntekter(
-            hendelse,
-            person,
-            skjæringstidspunkt,
-            meldingsreferanseId,
-            this.inntekter.filter { it.ansattVedSkjæringstidspunkt(opptjening) }
-        )
+    internal fun lagreInntekter(hendelse: IAktivitetslogg, person: Person, opptjening: Opptjening, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) {
+        this.inntekter
+            .filter { it.ansattVedSkjæringstidspunkt(opptjening) }
+            .lagreInntekter(
+                hendelse,
+                person,
+                skjæringstidspunkt,
+                meldingsreferanseId
+            )
     }
 
     class Arbeidsforhold(

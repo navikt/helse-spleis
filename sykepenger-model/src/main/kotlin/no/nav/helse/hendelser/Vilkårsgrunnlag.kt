@@ -72,7 +72,7 @@ class Vilkårsgrunnlag(
     internal fun lagre(person: Person, skjæringstidspunkt: LocalDate) {
         val opptjening = arbeidsforhold.beregnOpptjening(skjæringstidspunkt, NullObserver)
         opptjening.lagreArbeidsforhold(person, this)
-         inntektsvurderingForSykepengegrunnlag.lagreInntekter(this, person, opptjening, skjæringstidspunkt, meldingsreferanseId(), inntektsvurdering)
+         inntektsvurderingForSykepengegrunnlag.lagreInntekter(this, person, opptjening, skjæringstidspunkt, meldingsreferanseId())
         if (person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(skjæringstidspunkt)) {
             varsel(RV_VV_1)
         }

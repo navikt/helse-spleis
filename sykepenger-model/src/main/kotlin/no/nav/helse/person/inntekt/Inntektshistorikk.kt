@@ -44,8 +44,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
     internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?, arbeidsforholdhistorikk: Arbeidsforholdhistorikk): Inntektsopplysning? =
         nyesteInnslag()?.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag) ?: nyoppstartetArbeidsforhold(skjæringstidspunkt, arbeidsforholdhistorikk)
 
-    internal fun rapportertInntekt(dato: LocalDate) = nyesteInnslag()?.rapportertInntekt(dato)
-
     private fun nyoppstartetArbeidsforhold(skjæringstidspunkt: LocalDate, arbeidsforholdhistorikk: Arbeidsforholdhistorikk) =
         IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt).takeIf {
             arbeidsforholdhistorikk.harArbeidsforholdNyereEnn(skjæringstidspunkt,
@@ -66,12 +64,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
             inntekter
                 .mapNotNull { it.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag) }
                 .minOrNull()
-
-        internal fun rapportertInntekt(dato: LocalDate) =
-            inntekter
-                .sorted()
-                .mapNotNull { it.rapportertInntekt(dato) }
-                .firstOrNull()
 
         override fun equals(other: Any?): Boolean {
             return other is Innslag && this.inntekter == other.inntekter

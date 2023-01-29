@@ -8,10 +8,7 @@ internal class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
     private val orgnummer: String,
     private val inntektsopplysninger: List<Skatt.RapportertInntekt>
 ) {
-    private val rapportertInntekt = inntektsopplysninger
-        .map(Skatt::rapportertInntekt)
-        .summer()
-        .div(12)
+    private val rapportertInntekt = Skatt.RapportertInntekt.rapportertInntekt(inntektsopplysninger)
 
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
 

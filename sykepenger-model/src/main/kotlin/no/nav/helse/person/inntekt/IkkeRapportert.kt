@@ -21,8 +21,6 @@ internal class IkkeRapportert(
 
     override fun omregnetÅrsinntekt() = Inntekt.INGEN
 
-    override fun rapportertInntekt() = Inntekt.INGEN
-
     override fun subsumerArbeidsforhold(
         subsumsjonObserver: SubsumsjonObserver,
         organisasjonsnummer: String,
