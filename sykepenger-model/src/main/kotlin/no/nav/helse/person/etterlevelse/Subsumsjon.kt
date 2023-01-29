@@ -4,10 +4,6 @@ import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.Bokstav
-import no.nav.helse.person.Ledd
-import no.nav.helse.person.Paragraf
-import no.nav.helse.person.Punktum
 import no.nav.helse.person.etterlevelse.MaskinellJurist.KontekstType
 
 internal abstract class Subsumsjon {

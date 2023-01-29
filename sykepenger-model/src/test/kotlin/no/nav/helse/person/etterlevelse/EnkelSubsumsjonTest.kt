@@ -1,11 +1,7 @@
 package no.nav.helse.person.etterlevelse
 
 import java.time.LocalDate
-import no.nav.helse.person.Bokstav
-import no.nav.helse.person.Ledd
-import no.nav.helse.person.Ledd.Companion.ledd
-import no.nav.helse.person.Paragraf
-import no.nav.helse.person.Punktum
+import no.nav.helse.person.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.person.etterlevelse.MaskinellJurist.KontekstType
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT

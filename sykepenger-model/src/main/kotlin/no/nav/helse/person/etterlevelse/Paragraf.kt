@@ -1,4 +1,4 @@
-package no.nav.helse.person
+package no.nav.helse.person.etterlevelse
 
 import java.time.LocalDate
 

@@ -16,8 +16,8 @@ import no.nav.helse.inspectors.Vilkårgrunnlagsinspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
-import no.nav.helse.person.Ledd.Companion.ledd
-import no.nav.helse.person.Paragraf.PARAGRAF_8_2
+import no.nav.helse.person.etterlevelse.Ledd.Companion.ledd
+import no.nav.helse.person.etterlevelse.Paragraf.PARAGRAF_8_2
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -25,7 +25,6 @@ import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserve
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Skatt
-import no.nav.helse.person.inntekt.SkattComposite
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.AP

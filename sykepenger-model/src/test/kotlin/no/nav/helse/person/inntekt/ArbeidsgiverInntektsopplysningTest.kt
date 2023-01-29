@@ -11,10 +11,10 @@ import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.Arbeidsforholdhistorikk
-import no.nav.helse.person.Bokstav
-import no.nav.helse.person.Ledd
+import no.nav.helse.person.etterlevelse.Bokstav
+import no.nav.helse.person.etterlevelse.Ledd
 import no.nav.helse.person.Opptjening
-import no.nav.helse.person.Paragraf
+import no.nav.helse.person.etterlevelse.Paragraf
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver

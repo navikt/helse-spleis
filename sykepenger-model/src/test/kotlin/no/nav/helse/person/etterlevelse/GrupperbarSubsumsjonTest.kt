@@ -3,11 +3,7 @@ package no.nav.helse.person.etterlevelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.Bokstav
-import no.nav.helse.person.Ledd
-import no.nav.helse.person.Ledd.Companion.ledd
-import no.nav.helse.person.Paragraf
-import no.nav.helse.person.Punktum
+import no.nav.helse.person.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.person.etterlevelse.MaskinellJurist.*
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import org.junit.jupiter.api.Assertions.assertEquals

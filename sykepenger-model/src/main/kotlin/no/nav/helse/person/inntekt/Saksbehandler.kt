@@ -4,10 +4,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Subsumsjon
-import no.nav.helse.person.Bokstav
+import no.nav.helse.person.etterlevelse.Bokstav
 import no.nav.helse.person.InntekthistorikkVisitor
-import no.nav.helse.person.Ledd
-import no.nav.helse.person.Paragraf
+import no.nav.helse.person.etterlevelse.Ledd
+import no.nav.helse.person.etterlevelse.Paragraf
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
