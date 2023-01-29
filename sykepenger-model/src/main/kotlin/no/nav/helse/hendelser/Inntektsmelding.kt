@@ -204,13 +204,7 @@ class Inntektsmelding(
 
         val (årligInntekt, dagligInntekt) = beregnetInntekt.reflection { årlig, _, daglig, _ -> årlig to daglig }
         subsumsjonObserver.`§ 8-10 ledd 3`(årligInntekt, dagligInntekt)
-        inntektshistorikk.append {
-            addInntektsmelding(
-                inntektsdato,
-                meldingsreferanseId(),
-                beregnetInntekt
-            )
-        }
+        inntektshistorikk.leggTil(Inntektsmelding(UUID.randomUUID(), inntektsdato, meldingsreferanseId(), beregnetInntekt, LocalDateTime.now()))
     }
 
     internal fun cacheRefusjon(refusjonshistorikk: Refusjonshistorikk) {

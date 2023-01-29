@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.etterlevelse.Bokstav
 import no.nav.helse.person.InntekthistorikkVisitor
+import no.nav.helse.person.InntektsopplysningVisitor
 import no.nav.helse.person.etterlevelse.Ledd
 import no.nav.helse.person.etterlevelse.Paragraf
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -24,7 +25,7 @@ class Saksbehandler internal constructor(
 
     constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, forklaring: String, subsumsjon: Subsumsjon?, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
 
-    override fun accept(visitor: InntekthistorikkVisitor) {
+    override fun accept(visitor: InntektsopplysningVisitor) {
         visitor.visitSaksbehandler(this, id, dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
     }
 

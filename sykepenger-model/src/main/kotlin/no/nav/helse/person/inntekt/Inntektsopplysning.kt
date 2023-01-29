@@ -3,6 +3,7 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.InntekthistorikkVisitor
+import no.nav.helse.person.InntektsopplysningVisitor
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
@@ -11,9 +12,7 @@ abstract class Inntektsopplysning protected constructor(
     protected val dato: LocalDate,
     private val prioritet: Int
 ): Comparable<Inntektsopplysning> {
-    protected constructor(other: Inntektsopplysning) : this(other.dato, other.prioritet)
-
-    internal abstract fun accept(visitor: InntekthistorikkVisitor)
+    internal abstract fun accept(visitor: InntektsopplysningVisitor)
     internal open fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? = null
     internal abstract fun omregnetÅrsinntekt(): Inntekt
     internal open fun kanLagres(other: Inntektsopplysning) = this != other

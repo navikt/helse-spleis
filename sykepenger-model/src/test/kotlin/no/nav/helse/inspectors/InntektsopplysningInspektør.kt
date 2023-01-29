@@ -6,6 +6,7 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.InntekthistorikkVisitor
+import no.nav.helse.person.InntektsopplysningVisitor
 import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmelding
@@ -18,7 +19,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
 internal val Inntektsopplysning.inspektør get() = InntektsopplysningInspektør(this)
 
-internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysning) : InntekthistorikkVisitor {
+internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysning) : InntektsopplysningVisitor {
 
     internal var beløp = INGEN
         private set

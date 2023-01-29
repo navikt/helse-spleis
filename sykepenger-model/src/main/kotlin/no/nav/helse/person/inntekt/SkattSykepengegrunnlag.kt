@@ -3,6 +3,7 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.person.InntekthistorikkVisitor
+import no.nav.helse.person.InntektsopplysningVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
 import no.nav.helse.økonomi.Inntekt
@@ -15,7 +16,7 @@ internal class SkattSykepengegrunnlag(
 
     private val inntektsopplysninger = Skatteopplysning.sisteTreMåneder(dato, inntektsopplysninger)
 
-    override fun accept(visitor: InntekthistorikkVisitor) {
+    override fun accept(visitor: InntektsopplysningVisitor) {
         visitor.preVisitSkattSykepengegrunnlag(this, id, dato)
         inntektsopplysninger.forEach { it.accept(visitor) }
         visitor.postVisitSkattSykepengegrunnlag(this, id, dato)

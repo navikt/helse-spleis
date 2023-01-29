@@ -8,6 +8,7 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.InntekthistorikkVisitor
+import no.nav.helse.person.InntektsopplysningVisitor
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.person.SkatteopplysningVisitor
@@ -448,7 +449,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.AOrdningen, inntekt, inntekterFraAOrdningen)
             }
 
-            class SkattBuilder(skattComposite: SkattSykepengegrunnlag) : InntekthistorikkVisitor {
+            class SkattBuilder(skattComposite: SkattSykepengegrunnlag) : InntektsopplysningVisitor {
                 private val inntekt = InntektBuilder(skattComposite.omregnetÅrsinntekt()).build()
                 private val inntekterFraAOrdningen = mutableMapOf<YearMonth, Double>()
 

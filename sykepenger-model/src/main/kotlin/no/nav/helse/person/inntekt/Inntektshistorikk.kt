@@ -25,8 +25,11 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
         visitor.postVisitInntekthistorikk(this)
     }
 
-    internal fun leggTil(inntekter: List<Inntektsopplysning>) {
+    internal fun leggTil(inntekter: List<SkattSykepengegrunnlag>) {
         leggTil(Innslag(inntekter))
+    }
+    internal fun leggTil(inntekt: Inntektsmelding) {
+        leggTil(Innslag(listOf(inntekt)))
     }
 
     private fun leggTil(nyttInnslag: Innslag) {
@@ -83,28 +86,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
                 Innslag(id, inntektsopplysninger)
 
             internal fun nyesteId(inntektshistorikk: Inntektshistorikk) = inntektshistorikk.nyesteInnslag()!!.id
-        }
-    }
-
-    internal fun append(block: InnslagBuilder.() -> Unit) {
-        leggTil(InnslagBuilder().build(block))
-    }
-
-    internal class InnslagBuilder() {
-        private val tidsstempel = LocalDateTime.now()
-        private val skatt = mutableListOf<Skatteopplysning>()
-        private var inntektsopplysninger = listOf<Inntektsopplysning>()
-
-        internal fun build(builder: InnslagBuilder.() -> Unit): Innslag {
-            apply(builder)
-            return Innslag(inntektsopplysninger)
-        }
-
-        internal fun addInntektsmelding(dato: LocalDate, hendelseId: UUID, beløp: Inntekt) =
-            add(Inntektsmelding(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel))
-
-        internal fun add(opplysning: Inntektsopplysning) {
-            inntektsopplysninger = opplysning.lagre(inntektsopplysninger)
         }
     }
 }

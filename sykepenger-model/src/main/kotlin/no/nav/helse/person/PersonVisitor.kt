@@ -622,12 +622,7 @@ internal interface SkatteopplysningVisitor {
     ) {}
 }
 
-internal interface InntekthistorikkVisitor : SkatteopplysningVisitor {
-    fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
-    fun preVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) {}
-
-    fun postVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) {}
-    fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
+internal interface InntektsopplysningVisitor : SkatteopplysningVisitor {
     fun visitSaksbehandler(
         saksbehandler: Saksbehandler,
         id: UUID,
@@ -670,6 +665,13 @@ internal interface InntekthistorikkVisitor : SkatteopplysningVisitor {
     fun preVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {}
 
     fun postVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {}
+}
+internal interface InntekthistorikkVisitor : InntektsopplysningVisitor {
+    fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
+    fun preVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) {}
+
+    fun postVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) {}
+    fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
 }
 
 internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
