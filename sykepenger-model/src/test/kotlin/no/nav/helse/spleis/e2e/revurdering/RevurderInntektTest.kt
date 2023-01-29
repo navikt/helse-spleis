@@ -17,7 +17,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.OppdragVisitor
+import no.nav.helse.utbetalingslinjer.OppdragVisitor
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -720,7 +720,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         UtbetalingSkalHaEndringskode(kode, message)
     )
 
-    private class UtbetalingSkalHaEndringskode(private val ønsketEndringskode: Endringskode, private val message: String = "") : OppdragVisitor {
+    private class UtbetalingSkalHaEndringskode(private val ønsketEndringskode: Endringskode, private val message: String = "") :
+        OppdragVisitor {
         override fun preVisitOppdrag(
             oppdrag: Oppdrag,
             fagområde: Fagområde,

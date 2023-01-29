@@ -9,7 +9,6 @@ import no.nav.helse.AlderVisitor
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -45,14 +44,11 @@ import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
-import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.OppdragVisitor
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
-import no.nav.helse.utbetalingslinjer.UtbetalingslinjeVisitor
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
@@ -766,42 +762,3 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
     }
 }
 
-internal interface OppdragVisitor: UtbetalingslinjeVisitor {
-    fun preVisitOppdrag(
-        oppdrag: Oppdrag,
-        fagområde: Fagområde,
-        fagsystemId: String,
-        mottaker: String,
-        sisteArbeidsgiverdag: LocalDate?,
-        stønadsdager: Int,
-        totalBeløp: Int,
-        nettoBeløp: Int,
-        tidsstempel: LocalDateTime,
-        endringskode: Endringskode,
-        avstemmingsnøkkel: Long?,
-        status: Oppdragstatus?,
-        overføringstidspunkt: LocalDateTime?,
-        erSimulert: Boolean,
-        simuleringsResultat: SimuleringResultat?
-    ) {
-    }
-
-    fun postVisitOppdrag(
-        oppdrag: Oppdrag,
-        fagområde: Fagområde,
-        fagsystemId: String,
-        mottaker: String,
-        sisteArbeidsgiverdag: LocalDate?,
-        stønadsdager: Int,
-        totalBeløp: Int,
-        nettoBeløp: Int,
-        tidsstempel: LocalDateTime,
-        endringskode: Endringskode,
-        avstemmingsnøkkel: Long?,
-        status: Oppdragstatus?,
-        overføringstidspunkt: LocalDateTime?,
-        erSimulert: Boolean,
-        simuleringsResultat: SimuleringResultat?
-    ) {
-    }
-}
