@@ -507,7 +507,7 @@ private fun AbstractEndToEndTest.håndterInntektsmeldingReplay(
 }
 
 internal fun YearMonth.lønnsinntekt(inntekt: Inntekt = INNTEKT) =
-    ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
+    ArbeidsgiverInntekt.MånedligInntekt(
         yearMonth = this,
         type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
         inntekt = inntekt,
@@ -532,7 +532,7 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
         inntekter = listOf(
             ArbeidsgiverInntekt(orgnummer, (0..2).map {
                 val yearMonth = YearMonth.from(inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)).minusMonths(3L - it)
-                ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
+                ArbeidsgiverInntekt.MånedligInntekt(
                     yearMonth = yearMonth,
                     type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
                     inntekt = inntekt,

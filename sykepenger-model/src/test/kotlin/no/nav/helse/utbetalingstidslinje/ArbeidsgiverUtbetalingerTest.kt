@@ -27,7 +27,7 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Skatt
+import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.sykepengegrunnlag
@@ -381,12 +381,11 @@ internal class ArbeidsgiverUtbetalingerTest {
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag("orgnummer",
                 (0 until 12).map {
-                    Skatt.RapportertInntekt(
-                        dato = LocalDate.now(),
+                    Skatteopplysning(
                         hendelseId = UUID.randomUUID(),
                         beløp = inntekt,
                         måned = YearMonth.of(2017, it + 1),
-                        type = Skatt.Inntekttype.LØNNSINNTEKT,
+                        type = Skatteopplysning.Inntekttype.LØNNSINNTEKT,
                         fordel = "fordel",
                         beskrivelse = "beskrivelse"
                     )

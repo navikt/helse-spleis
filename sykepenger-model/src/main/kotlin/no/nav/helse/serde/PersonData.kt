@@ -51,8 +51,8 @@ import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.gjennopprett
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Skatt
-import no.nav.helse.person.inntekt.SkattComposite
+import no.nav.helse.person.inntekt.Skatteopplysning
+import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.ArbeidsforholdhistorikkInnslagData.Companion.tilArbeidsforholdhistorikk
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingInfoHistorikkElementData.Companion.finn
@@ -376,7 +376,6 @@ internal data class PersonData(
                     }
             }
             data class SammenligningsgrunnlagInntektsopplysningData(
-                private val dato: LocalDate,
                 private val hendelseId: UUID,
                 private val beløp: Double,
                 private val måned: YearMonth,
@@ -392,15 +391,14 @@ internal data class PersonData(
                     YTELSE_FRA_OFFENTLIGE;
 
                     fun tilModellenum() = when(this) {
-                        LØNNSINNTEKT -> Skatt.Inntekttype.LØNNSINNTEKT
-                        NÆRINGSINNTEKT -> Skatt.Inntekttype.NÆRINGSINNTEKT
-                        PENSJON_ELLER_TRYGD -> Skatt.Inntekttype.PENSJON_ELLER_TRYGD
-                        YTELSE_FRA_OFFENTLIGE -> Skatt.Inntekttype.YTELSE_FRA_OFFENTLIGE
+                        LØNNSINNTEKT -> Skatteopplysning.Inntekttype.LØNNSINNTEKT
+                        NÆRINGSINNTEKT -> Skatteopplysning.Inntekttype.NÆRINGSINNTEKT
+                        PENSJON_ELLER_TRYGD -> Skatteopplysning.Inntekttype.PENSJON_ELLER_TRYGD
+                        YTELSE_FRA_OFFENTLIGE -> Skatteopplysning.Inntekttype.YTELSE_FRA_OFFENTLIGE
                     }
                 }
-                fun tilModellobjekt(): Skatt.RapportertInntekt =
-                    Skatt.RapportertInntekt(
-                        dato = dato,
+                fun tilModellobjekt(): Skatteopplysning =
+                    Skatteopplysning(
                         hendelseId = hendelseId,
                         beløp = beløp.månedlig,
                         måned = måned,
@@ -693,24 +691,13 @@ internal data class PersonData(
                             subsumsjon = subsumsjon?.tilModellobjekt(),
                             tidsstempel = requireNotNull(tidsstempel)
                         )
-                    null -> SkattComposite(
+                    null -> SkattSykepengegrunnlag(
                         id = requireNotNull(id),
+                        dato = requireNotNull(dato ?: skatteopplysninger?.first()?.dato), // todo: migrere dato fra skatteopplysninger i json opp et nivå, til SkattSykepengegrunnlag
                         inntektsopplysninger = requireNotNull(skatteopplysninger).map { skatteData ->
                             when (skatteData.kilde?.let(Inntektsopplysningskilde::valueOf)) {
-                                Inntektsopplysningskilde.SKATT_SAMMENLIGNINGSGRUNNLAG ->
-                                    Skatt.RapportertInntekt(
-                                        dato = requireNotNull(skatteData.dato),
-                                        hendelseId = requireNotNull(skatteData.hendelseId),
-                                        beløp = requireNotNull(skatteData.beløp).månedlig,
-                                        måned = requireNotNull(skatteData.måned),
-                                        type = enumValueOf(requireNotNull(skatteData.type)),
-                                        fordel = requireNotNull(skatteData.fordel),
-                                        beskrivelse = requireNotNull(skatteData.beskrivelse),
-                                        tidsstempel = requireNotNull(skatteData.tidsstempel)
-                                    )
                                 Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG ->
-                                    Skatt.Sykepengegrunnlag(
-                                        dato = requireNotNull(skatteData.dato),
+                                    Skatteopplysning(
                                         hendelseId = requireNotNull(skatteData.hendelseId),
                                         beløp = requireNotNull(skatteData.beløp).månedlig,
                                         måned = requireNotNull(skatteData.måned),

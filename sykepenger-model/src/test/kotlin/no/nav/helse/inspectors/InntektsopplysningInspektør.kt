@@ -11,22 +11,20 @@ import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
+import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
-internal class Inntektsinspektør(historikk: Inntektshistorikk) : InntekthistorikkVisitor {
-    var inntektTeller = mutableListOf<Int>()
+internal val Inntektsopplysning.inspektør get() = InntektsopplysningInspektør(this)
+
+internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysning) : InntekthistorikkVisitor {
+
+    internal var beløp = INGEN
+        private set
 
     init {
-        historikk.accept(this)
-    }
-
-    override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
-        inntektTeller.clear()
-    }
-
-    override fun preVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) {
-        inntektTeller.add(0)
+        inntektsopplysning.accept(this)
     }
 
     override fun visitSaksbehandler(
@@ -39,7 +37,7 @@ internal class Inntektsinspektør(historikk: Inntektshistorikk) : Inntekthistori
         subsumsjon: Subsumsjon?,
         tidsstempel: LocalDateTime
     ) {
-        inntektTeller.add(inntektTeller.removeLast() + 1)
+        this.beløp = beløp
     }
 
     override fun visitInntektsmelding(
@@ -50,7 +48,11 @@ internal class Inntektsinspektør(historikk: Inntektshistorikk) : Inntekthistori
         beløp: Inntekt,
         tidsstempel: LocalDateTime
     ) {
-        inntektTeller.add(inntektTeller.removeLast() + 1)
+        this.beløp = beløp
+    }
+
+    override fun visitIkkeRapportert(id: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
+        this.beløp = INGEN
     }
 
     override fun visitInfotrygd(
@@ -61,7 +63,7 @@ internal class Inntektsinspektør(historikk: Inntektshistorikk) : Inntekthistori
         beløp: Inntekt,
         tidsstempel: LocalDateTime
     ) {
-        inntektTeller.add(inntektTeller.removeLast() + 1)
+        this.beløp = beløp
     }
 
     override fun visitSkatteopplysning(
@@ -74,6 +76,6 @@ internal class Inntektsinspektør(historikk: Inntektshistorikk) : Inntekthistori
         beskrivelse: String,
         tidsstempel: LocalDateTime
     ) {
-        inntektTeller.add(inntektTeller.removeLast() + 1)
+        this.beløp += beløp
     }
 }

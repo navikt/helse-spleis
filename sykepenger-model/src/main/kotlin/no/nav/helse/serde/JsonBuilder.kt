@@ -40,8 +40,8 @@ import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Skatt
-import no.nav.helse.person.inntekt.SkattComposite
+import no.nav.helse.person.inntekt.Skatteopplysning
+import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSDAG
@@ -1136,8 +1136,8 @@ internal class JsonBuilder : AbstractBuilder() {
             ))
         }
 
-        override fun preVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
-            pushState(SkattSykepengegrunnlagState(inntektsopplysninger))
+        override fun preVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {
+            pushState(SkattSykepengegrunnlagState(dato, inntektsopplysninger))
         }
 
         override fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
@@ -1152,22 +1152,21 @@ internal class JsonBuilder : AbstractBuilder() {
         }
     }
 
-    class SkattSykepengegrunnlagState(private val inntektsopplysninger: MutableList<Map<String, Any?>>) : BuilderState() {
+    class SkattSykepengegrunnlagState(private val dato: LocalDate, private val inntektsopplysninger: MutableList<Map<String, Any?>>) : BuilderState() {
         private val skatteopplysninger = mutableListOf<Map<String, Any>>()
 
-        override fun visitSkattSykepengegrunnlag(
-            sykepengegrunnlag: Skatt.Sykepengegrunnlag,
-            dato: LocalDate,
+        override fun visitSkatteopplysning(
+            skatteopplysning: Skatteopplysning,
             hendelseId: UUID,
             beløp: Inntekt,
             måned: YearMonth,
-            type: Skatt.Inntekttype,
+            type: Skatteopplysning.Inntekttype,
             fordel: String,
             beskrivelse: String,
             tidsstempel: LocalDateTime
         ) {
             skatteopplysninger.add(mapOf(
-                "dato" to dato,
+                "dato" to dato, // todo: dato lagres pga. bakoverkompatibilitet. kan fjernes etter jsonmigrering hvor dato lagres på nivå over
                 "kilde" to "SKATT_SYKEPENGEGRUNNLAG",
                 "hendelseId" to hendelseId,
                 "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
@@ -1179,9 +1178,10 @@ internal class JsonBuilder : AbstractBuilder() {
             ))
         }
 
-        override fun postVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
+        override fun postVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {
             this.inntektsopplysninger.add(mapOf(
                 "id" to id,
+                "dato" to dato,
                 "skatteopplysninger" to skatteopplysninger
             ))
             popState()
@@ -1206,19 +1206,17 @@ internal class JsonBuilder : AbstractBuilder() {
     class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagState(private val arbeidsgiverInntektsopplysninger: MutableList<Map<String, Any>>) : BuilderState() {
         private val inntektsopplysninger = mutableListOf<Map<String, Any>>()
 
-        override fun visitSkattRapportertInntekt(
-            rapportertInntekt: Skatt.RapportertInntekt,
-            dato: LocalDate,
+        override fun visitSkatteopplysning(
+            skatteopplysning: Skatteopplysning,
             hendelseId: UUID,
             beløp: Inntekt,
             måned: YearMonth,
-            type: Skatt.Inntekttype,
+            type: Skatteopplysning.Inntekttype,
             fordel: String,
             beskrivelse: String,
             tidsstempel: LocalDateTime
         ) {
             inntektsopplysninger.add(mapOf(
-                "dato" to dato,
                 "hendelseId" to hendelseId,
                 "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
                 "tidsstempel" to tidsstempel,
@@ -1472,90 +1470,10 @@ internal class JsonBuilder : AbstractBuilder() {
             ))
         }
 
-        override fun preVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
-            val skatteopplysninger = mutableListOf<Map<String, Any?>>()
-            this.inntektsopplysninger.add(
-                mutableMapOf(
-                    "id" to id,
-                    "skatteopplysninger" to skatteopplysninger
-                )
-            )
-            pushState(InntektsendringState(skatteopplysninger))
+        override fun preVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {
+            pushState(SkattSykepengegrunnlagState(dato, inntektsopplysninger))
         }
 
-
-        override fun visitSkattSykepengegrunnlag(
-            sykepengegrunnlag: Skatt.Sykepengegrunnlag,
-            dato: LocalDate,
-            hendelseId: UUID,
-            beløp: Inntekt,
-            måned: YearMonth,
-            type: Skatt.Inntekttype,
-            fordel: String,
-            beskrivelse: String,
-            tidsstempel: LocalDateTime
-        ) {
-            inntektsopplysninger.add(skattMap(
-                Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG,
-                dato,
-                hendelseId,
-                beløp,
-                måned,
-                type,
-                fordel,
-                beskrivelse,
-                tidsstempel
-            ))
-        }
-
-        override fun visitSkattRapportertInntekt(
-            rapportertInntekt: Skatt.RapportertInntekt,
-            dato: LocalDate,
-            hendelseId: UUID,
-            beløp: Inntekt,
-            måned: YearMonth,
-            type: Skatt.Inntekttype,
-            fordel: String,
-            beskrivelse: String,
-            tidsstempel: LocalDateTime
-        ) {
-            inntektsopplysninger.add(skattMap(
-                Inntektsopplysningskilde.SKATT_SAMMENLIGNINGSGRUNNLAG,
-                dato,
-                hendelseId,
-                beløp,
-                måned,
-                type,
-                fordel,
-                beskrivelse,
-                tidsstempel
-            ))
-        }
-
-        private fun skattMap(
-            kilde: Inntektsopplysningskilde,
-            dato: LocalDate,
-            hendelseId: UUID,
-            beløp: Inntekt,
-            måned: YearMonth,
-            type: Skatt.Inntekttype,
-            fordel: String,
-            beskrivelse: String,
-            tidsstempel: LocalDateTime
-        ) =
-            mapOf(
-                "dato" to dato,
-                "hendelseId" to hendelseId,
-                "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
-                "kilde" to kilde,
-                "tidsstempel" to tidsstempel,
-                "måned" to måned,
-                "type" to type,
-                "fordel" to fordel,
-                "beskrivelse" to beskrivelse
-            )
-
-        override fun postVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) = popState()
         override fun postVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) = popState()
     }
 

@@ -2,15 +2,14 @@ package no.nav.helse.spleis.testhelpers
 
 import java.time.YearMonth
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
-import no.nav.helse.hendelser.InntektCreator
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
-internal fun inntektperioderForSammenligningsgrunnlag(block: Inntektperioder.() -> Unit) = Inntektperioder(ArbeidsgiverInntekt.MånedligInntekt::RapportertInntekt, block).inntekter()
-internal fun inntektperioderForSykepengegrunnlag(block: Inntektperioder.() -> Unit) = Inntektperioder(ArbeidsgiverInntekt.MånedligInntekt::Sykepengegrunnlag, block).inntekter()
+internal fun inntektperioderForSammenligningsgrunnlag(block: Inntektperioder.() -> Unit) = Inntektperioder(block).inntekter()
+internal fun inntektperioderForSykepengegrunnlag(block: Inntektperioder.() -> Unit) = Inntektperioder(block).inntekter()
 
-internal class Inntektperioder(private val inntektCreator: InntektCreator, block: Inntektperioder.() -> Unit) {
+internal class Inntektperioder(block: Inntektperioder.() -> Unit) {
     private val liste = mutableListOf<Pair<String, List<ArbeidsgiverInntekt.MånedligInntekt>>>()
 
     init {
@@ -28,7 +27,7 @@ internal class Inntektperioder(private val inntektCreator: InntektCreator, block
             .distinct()
             .flatMap { yearMonth ->
                 Inntekter(block).toList().groupBy({ (arbeidsgiver, _) -> arbeidsgiver }) { (_, inntekt) ->
-                    inntektCreator(
+                    ArbeidsgiverInntekt.MånedligInntekt(
                         yearMonth,
                         inntekt,
                         ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,

@@ -27,8 +27,8 @@ import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Skatt
-import no.nav.helse.person.inntekt.SkattComposite
+import no.nav.helse.person.inntekt.Skatteopplysning
+import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
@@ -142,7 +142,7 @@ internal interface ArbeidsgiverInntektsopplysningVisitor : InntekthistorikkVisit
     fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {}
 }
 
-internal interface ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagVisitor : InntekthistorikkVisitor {
+internal interface ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagVisitor : SkatteopplysningVisitor {
     fun preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
         arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag,
         orgnummer: String,
@@ -609,26 +609,23 @@ internal interface ArbeidsforholdhistorikkVisitor: ArbeidsforholdVisitor {
     fun postVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {}
 }
 
-internal interface InntekthistorikkVisitor {
+internal interface SkatteopplysningVisitor {
+    fun visitSkatteopplysning(
+        skatteopplysning: Skatteopplysning,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        måned: YearMonth,
+        type: Skatteopplysning.Inntekttype,
+        fordel: String,
+        beskrivelse: String,
+        tidsstempel: LocalDateTime
+    ) {}
+}
+
+internal interface InntekthistorikkVisitor : SkatteopplysningVisitor {
     fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
     fun preVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) {}
-    fun visitInntekt(
-        inntektsopplysning: Inntektsopplysning,
-        id: UUID,
-        fom: LocalDate,
-        tidsstempel: LocalDateTime
-    ) {
-    }
 
-    fun visitInntektSkatt(
-        id: UUID,
-        fom: LocalDate,
-        måned: YearMonth,
-        tidsstempel: LocalDateTime
-    ) {
-    }
-
-    fun visitInntektSaksbehandler(id: UUID, fom: LocalDate, tidsstempel: LocalDateTime) {}
     fun postVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) {}
     fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
     fun visitSaksbehandler(
@@ -670,34 +667,9 @@ internal interface InntekthistorikkVisitor {
     ) {
     }
 
-    fun preVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {}
-    fun visitSkattSykepengegrunnlag(
-        sykepengegrunnlag: Skatt.Sykepengegrunnlag,
-        dato: LocalDate,
-        hendelseId: UUID,
-        beløp: Inntekt,
-        måned: YearMonth,
-        type: Skatt.Inntekttype,
-        fordel: String,
-        beskrivelse: String,
-        tidsstempel: LocalDateTime
-    ) {
-    }
+    fun preVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {}
 
-    fun visitSkattRapportertInntekt(
-        rapportertInntekt: Skatt.RapportertInntekt,
-        dato: LocalDate,
-        hendelseId: UUID,
-        beløp: Inntekt,
-        måned: YearMonth,
-        type: Skatt.Inntekttype,
-        fordel: String,
-        beskrivelse: String,
-        tidsstempel: LocalDateTime
-    ) {
-    }
-
-    fun postVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {}
+    fun postVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {}
 }
 
 internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {

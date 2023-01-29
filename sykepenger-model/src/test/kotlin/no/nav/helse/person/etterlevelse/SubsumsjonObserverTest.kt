@@ -6,8 +6,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.januar
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Skatt
-import no.nav.helse.person.inntekt.SkattComposite
+import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag
@@ -125,21 +124,19 @@ internal class SubsumsjonObserverTest {
                 ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
                     AG1,
                     listOf(
-                        Skatt.RapportertInntekt(
-                            dato = 1.januar,
+                        Skatteopplysning(
                             hendelseId = UUID.randomUUID(),
                             beløp = 20000.månedlig,
                             måned = YearMonth.of(2069, 12),
-                            type = Skatt.Inntekttype.LØNNSINNTEKT,
+                            type = Skatteopplysning.Inntekttype.LØNNSINNTEKT,
                             fordel = "fordel",
                             beskrivelse = "beskrivelse"
                         ),
-                        Skatt.RapportertInntekt(
-                            dato = 1.januar,
+                        Skatteopplysning(
                             hendelseId = UUID.randomUUID(),
                             beløp = 20000.månedlig,
                             måned = YearMonth.of(2069, 11),
-                            type = Skatt.Inntekttype.LØNNSINNTEKT,
+                            type = Skatteopplysning.Inntekttype.LØNNSINNTEKT,
                             fordel = "fordel",
                             beskrivelse = "beskrivelse"
                         )
@@ -148,21 +145,19 @@ internal class SubsumsjonObserverTest {
                 ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
                     AG2,
                     listOf(
-                        Skatt.RapportertInntekt(
-                            dato = 1.januar,
+                        Skatteopplysning(
                             hendelseId = UUID.randomUUID(),
                             beløp = 15000.månedlig,
                             måned = YearMonth.of(2069, 10),
-                            type = Skatt.Inntekttype.LØNNSINNTEKT,
+                            type = Skatteopplysning.Inntekttype.LØNNSINNTEKT,
                             fordel = "fordel",
                             beskrivelse = "beskrivelse"
                         ),
-                        Skatt.RapportertInntekt(
-                            dato = 1.januar,
+                        Skatteopplysning(
                             hendelseId = UUID.randomUUID(),
                             beløp = 15000.månedlig,
                             måned = YearMonth.of(2069, 9),
-                            type = Skatt.Inntekttype.LØNNSINNTEKT,
+                            type = Skatteopplysning.Inntekttype.LØNNSINNTEKT,
                             fordel = "fordel",
                             beskrivelse = "beskrivelse"
                         )

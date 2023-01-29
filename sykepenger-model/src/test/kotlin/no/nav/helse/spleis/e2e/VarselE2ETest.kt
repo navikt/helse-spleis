@@ -713,7 +713,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
             1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(
                     ArbeidsgiverInntekt(ORGNUMMER, (10..12).map {
-                        ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
+                        ArbeidsgiverInntekt.MånedligInntekt(
                             yearMonth = YearMonth.of(2017, it),
                             type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
                             inntekt = INNTEKT,

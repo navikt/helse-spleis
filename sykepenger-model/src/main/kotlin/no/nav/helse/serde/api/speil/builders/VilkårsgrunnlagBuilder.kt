@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.SammenligningsgrunnlagVisitor
+import no.nav.helse.person.SkatteopplysningVisitor
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.Grunnlagsdata
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
@@ -20,8 +21,8 @@ import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Skatt
-import no.nav.helse.person.inntekt.SkattComposite
+import no.nav.helse.person.inntekt.Skatteopplysning
+import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.serde.api.dto.Refusjonselement
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
@@ -442,12 +443,12 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.IkkeRapportert, inntekt)
             }
 
-            override fun preVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
-                val (inntekt, inntekterFraAOrdningen) = SkattBuilder(skattComposite).build()
+            override fun preVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {
+                val (inntekt, inntekterFraAOrdningen) = SkattBuilder(skattSykepengegrunnlag).build()
                 this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.AOrdningen, inntekt, inntekterFraAOrdningen)
             }
 
-            class SkattBuilder(skattComposite: SkattComposite) : InntekthistorikkVisitor {
+            class SkattBuilder(skattComposite: SkattSykepengegrunnlag) : InntekthistorikkVisitor {
                 private val inntekt = InntektBuilder(skattComposite.omregnetÅrsinntekt()).build()
                 private val inntekterFraAOrdningen = mutableMapOf<YearMonth, Double>()
 
@@ -457,13 +458,12 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
 
                 fun build() = inntekt to inntekterFraAOrdningen.map { (måned, sum) -> IInntekterFraAOrdningen(måned, sum) }
 
-                override fun visitSkattSykepengegrunnlag(
-                    sykepengegrunnlag: Skatt.Sykepengegrunnlag,
-                    dato: LocalDate,
+                override fun visitSkatteopplysning(
+                    skatteopplysning: Skatteopplysning,
                     hendelseId: UUID,
                     beløp: Inntekt,
                     måned: YearMonth,
-                    type: Skatt.Inntekttype,
+                    type: Skatteopplysning.Inntekttype,
                     fordel: String,
                     beskrivelse: String,
                     tidsstempel: LocalDateTime

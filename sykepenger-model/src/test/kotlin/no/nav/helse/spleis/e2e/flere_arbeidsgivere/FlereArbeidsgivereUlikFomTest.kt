@@ -22,7 +22,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
 import no.nav.helse.person.inntekt.Inntektsmelding
-import no.nav.helse.person.inntekt.SkattComposite
+import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
@@ -143,7 +143,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(20000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(SkattSykepengegrunnlag::class, it.inntektsopplysning::class)
         }
 
         assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
@@ -287,7 +287,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(21000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(SkattSykepengegrunnlag::class, it.inntektsopplysning::class)
         }
 
         assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
@@ -1310,7 +1310,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(20000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
-            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(SkattSykepengegrunnlag::class, it.inntektsopplysning::class)
         }
 
         assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)

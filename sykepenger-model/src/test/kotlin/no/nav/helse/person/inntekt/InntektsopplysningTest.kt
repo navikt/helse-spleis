@@ -37,10 +37,10 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `lagre inntektsopplysninger`() {
-        val sykepengegrunnlag1 = Skatt.Sykepengegrunnlag(1.januar, UUID.randomUUID(), INNTEKT, januar(2018), Skatt.Inntekttype.LØNNSINNTEKT, "fordel", "beskrivelse")
-        val sykepengegrunnlag2 = Skatt.Sykepengegrunnlag(1.februar, UUID.randomUUID(), INNTEKT, februar(2018), Skatt.Inntekttype.LØNNSINNTEKT, "fordel", "beskrivelse")
-        val skattComposite1 = SkattComposite(UUID.randomUUID(), listOf(sykepengegrunnlag1))
-        val skattComposite2 = SkattComposite(UUID.randomUUID(), listOf(sykepengegrunnlag1, sykepengegrunnlag2))
+        val sykepengegrunnlag1 = Skatteopplysning(UUID.randomUUID(), INNTEKT, januar(2018), Skatteopplysning.Inntekttype.LØNNSINNTEKT, "fordel", "beskrivelse")
+        val sykepengegrunnlag2 = Skatteopplysning(UUID.randomUUID(), INNTEKT, februar(2018), Skatteopplysning.Inntekttype.LØNNSINNTEKT, "fordel", "beskrivelse")
+        val skattComposite1 = SkattSykepengegrunnlag(UUID.randomUUID(), 1.januar, listOf(sykepengegrunnlag1))
+        val skattComposite2 = SkattSykepengegrunnlag(UUID.randomUUID(), 1.januar, listOf(sykepengegrunnlag1, sykepengegrunnlag2))
 
         var list = listOf<Inntektsopplysning>()
         list = skattComposite1.lagre(list)
@@ -60,13 +60,12 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `skatt composite erstatter andre`() {
-        val sykepengegrunnlag1 = Skatt.Sykepengegrunnlag(1.januar, UUID.randomUUID(), INNTEKT, januar(2018), Skatt.Inntekttype.LØNNSINNTEKT, "fordel", "beskrivelse")
-        val sykepengegrunnlag2 = Skatt.Sykepengegrunnlag(1.februar, UUID.randomUUID(), INNTEKT, februar(2018), Skatt.Inntekttype.LØNNSINNTEKT, "fordel", "beskrivelse")
-        val skattComposite1 = SkattComposite(UUID.randomUUID(), listOf(sykepengegrunnlag1))
-        val skattComposite2 = SkattComposite(UUID.randomUUID(), listOf(sykepengegrunnlag1, sykepengegrunnlag2))
+        val sykepengegrunnlag1 = Skatteopplysning(UUID.randomUUID(), INNTEKT, januar(2018), Skatteopplysning.Inntekttype.LØNNSINNTEKT, "fordel", "beskrivelse")
+        val sykepengegrunnlag2 = Skatteopplysning(UUID.randomUUID(), INNTEKT, februar(2018), Skatteopplysning.Inntekttype.LØNNSINNTEKT, "fordel", "beskrivelse")
+        val skattComposite1 = SkattSykepengegrunnlag(UUID.randomUUID(), 1.januar, listOf(sykepengegrunnlag1))
+        val skattComposite2 = SkattSykepengegrunnlag(UUID.randomUUID(), 1.januar, listOf(sykepengegrunnlag1, sykepengegrunnlag2))
 
         assertTrue(skattComposite1.kanLagres(skattComposite2))
-        assertTrue(sykepengegrunnlag1.skalErstattesAv(sykepengegrunnlag1))
         assertTrue(skattComposite1.skalErstattesAv(skattComposite2))
     }
 

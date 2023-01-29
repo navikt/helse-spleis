@@ -28,8 +28,8 @@ import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Skatt
-import no.nav.helse.person.inntekt.SkattComposite
+import no.nav.helse.person.inntekt.Skatteopplysning
+import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -873,18 +873,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.preVisitInnslag(innslag, id)
     }
 
-    override fun visitInntekt(inntektsopplysning: Inntektsopplysning, id: UUID, fom: LocalDate, tidsstempel: LocalDateTime) {
-        delegatee.visitInntekt(inntektsopplysning, id, fom, tidsstempel)
-    }
-
-    override fun visitInntektSkatt(id: UUID, fom: LocalDate, måned: YearMonth, tidsstempel: LocalDateTime) {
-        delegatee.visitInntektSkatt(id, fom, måned, tidsstempel)
-    }
-
-    override fun visitInntektSaksbehandler(id: UUID, fom: LocalDate, tidsstempel: LocalDateTime) {
-        delegatee.visitInntektSaksbehandler(id, fom, tidsstempel)
-    }
-
     override fun postVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) {
         delegatee.postVisitInnslag(innslag, id)
     }
@@ -925,40 +913,25 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitInfotrygd(infotrygd, id, dato, hendelseId, beløp, tidsstempel)
     }
 
-    override fun preVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
-        delegatee.preVisitSkatt(skattComposite, id, dato)
+    override fun preVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {
+        delegatee.preVisitSkattSykepengegrunnlag(skattSykepengegrunnlag, id, dato)
     }
 
-    override fun visitSkattSykepengegrunnlag(
-        sykepengegrunnlag: Skatt.Sykepengegrunnlag,
-        dato: LocalDate,
+    override fun postVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {
+        delegatee.postVisitSkattSykepengegrunnlag(skattSykepengegrunnlag, id, dato)
+    }
+
+    override fun visitSkatteopplysning(
+        skatteopplysning: Skatteopplysning,
         hendelseId: UUID,
         beløp: Inntekt,
         måned: YearMonth,
-        type: Skatt.Inntekttype,
+        type: Skatteopplysning.Inntekttype,
         fordel: String,
         beskrivelse: String,
         tidsstempel: LocalDateTime
     ) {
-        delegatee.visitSkattSykepengegrunnlag(sykepengegrunnlag, dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel)
-    }
-
-    override fun visitSkattRapportertInntekt(
-        rapportertInntekt: Skatt.RapportertInntekt,
-        dato: LocalDate,
-        hendelseId: UUID,
-        beløp: Inntekt,
-        måned: YearMonth,
-        type: Skatt.Inntekttype,
-        fordel: String,
-        beskrivelse: String,
-        tidsstempel: LocalDateTime
-    ) {
-        delegatee.visitSkattRapportertInntekt(rapportertInntekt, dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel)
-    }
-
-    override fun postVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
-        delegatee.postVisitSkatt(skattComposite, id, dato)
+        delegatee.visitSkatteopplysning(skatteopplysning, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel)
     }
 
     override fun preVisitUtbetaling(

@@ -357,7 +357,7 @@ private fun lagStandardSykepengegrunnlag(orgnummer: String, inntekt: Inntekt, sk
         inntekter = listOf(
             ArbeidsgiverInntekt(orgnummer, (0..2).map {
                 val yearMonth = YearMonth.from(skjæringstidspunkt).minusMonths(3L - it)
-                ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
+                ArbeidsgiverInntekt.MånedligInntekt(
                     yearMonth = yearMonth,
                     type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
                     inntekt = inntekt,
@@ -373,7 +373,7 @@ internal fun List<String>.lagStandardSykepengegrunnlag(inntekt: Inntekt, skjæri
         inntekter = map { orgnummer ->
             ArbeidsgiverInntekt(orgnummer, (0..2).map {
                 val yearMonth = YearMonth.from(skjæringstidspunkt).minusMonths(3L - it)
-                ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
+                ArbeidsgiverInntekt.MånedligInntekt(
                     yearMonth = yearMonth,
                     type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
                     inntekt = inntekt,

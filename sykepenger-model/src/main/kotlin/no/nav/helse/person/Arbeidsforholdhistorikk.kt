@@ -83,8 +83,6 @@ internal class Arbeidsforholdhistorikk private constructor(
         internal fun aktiver() = Arbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, deaktivert = false)
 
         companion object {
-            const val MAKS_INNTEKT_GAP = 2L
-
             private fun List<Arbeidsforhold>.harArbeidetMindreEnn(skjæringstidspunkt: LocalDate, antallMåneder: Long) = this
                 .filter { it.harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder) }
                 .filter { it.gjelder(skjæringstidspunkt) }

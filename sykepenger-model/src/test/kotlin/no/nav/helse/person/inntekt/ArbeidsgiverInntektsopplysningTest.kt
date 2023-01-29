@@ -22,8 +22,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deak
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.person.inntekt.Skatt.Inntekttype.LØNNSINNTEKT
-import no.nav.helse.person.inntekt.Skatt.Sykepengegrunnlag
+import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt
@@ -240,10 +239,9 @@ internal class ArbeidsgiverInntektsopplysningTest {
     fun `setter negativt omregnet årsinntekt til 0`() {
         val arbeidsgiverInntektsopplysning = ArbeidsgiverInntektsopplysning(
             "orgnummer",
-            SkattComposite(
-                UUID.randomUUID(), inntektsopplysninger = listOf(
-                    Sykepengegrunnlag(
-                        dato = 1.januar,
+            SkattSykepengegrunnlag(
+                UUID.randomUUID(), 1.januar, inntektsopplysninger = listOf(
+                    Skatteopplysning(
                         hendelseId = UUID.randomUUID(),
                         beløp = (-2500).daglig,
                         måned = desember(2017),

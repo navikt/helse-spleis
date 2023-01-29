@@ -6,9 +6,9 @@ import no.nav.helse.økonomi.Inntekt.Companion.summer
 
 internal class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
     private val orgnummer: String,
-    private val inntektsopplysninger: List<Skatt.RapportertInntekt>
+    private val inntektsopplysninger: List<Skatteopplysning>
 ) {
-    private val rapportertInntekt = Skatt.RapportertInntekt.rapportertInntekt(inntektsopplysninger)
+    private val rapportertInntekt = Skatteopplysning.rapportertInntekt(inntektsopplysninger)
 
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
 

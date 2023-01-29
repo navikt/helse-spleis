@@ -1299,7 +1299,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             InntektForSykepengegrunnlag(inntekter = listOf(a1, a2).map { arbeidsgiver ->
                 ArbeidsgiverInntekt(arbeidsgiver, (0..2).map {
                     val yearMonth = YearMonth.from(skjæringstidspunkt).minusMonths(3L - it)
-                    ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
+                    ArbeidsgiverInntekt.MånedligInntekt(
                         yearMonth = yearMonth,
                         type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
                         inntekt = INNTEKT,

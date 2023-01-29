@@ -13,11 +13,11 @@ import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
-import no.nav.helse.person.inntekt.Skatt
-import no.nav.helse.person.inntekt.SkattComposite
+import no.nav.helse.person.inntekt.Skatteopplysning
+import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 
-typealias InntektCreator = (
+internal typealias InntektCreator = (
     yearMonth: YearMonth,
     inntekt: Inntekt,
     type: ArbeidsgiverInntekt.MånedligInntekt.Inntekttype,
@@ -32,36 +32,29 @@ class ArbeidsgiverInntekt(
     internal fun ansattVedSkjæringstidspunkt(opptjening: Opptjening) =
         opptjening.ansattVedSkjæringstidspunkt(arbeidsgiver)
 
-    internal fun tilSammenligningsgrunnlag(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) =
+    internal fun tilSykepengegrunnlag(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) =
+        SkattSykepengegrunnlag(
+            id = UUID.randomUUID(),
+            dato = skjæringstidspunkt,
+            inntektsopplysninger = inntekter.map { it.somInntekt(meldingsreferanseId) }
+        )
+
+    internal fun tilSammenligningsgrunnlag(meldingsreferanseId: UUID) =
         ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
             orgnummer = arbeidsgiver,
-            inntektsopplysninger = inntekter.map { it.somInntekt(skjæringstidspunkt, meldingsreferanseId) }.filterIsInstance<Skatt.RapportertInntekt>()
+            inntektsopplysninger = inntekter.map { it.somInntekt(meldingsreferanseId) }
         )
 
     private fun harInntekter() = inntekter.isNotEmpty()
 
     internal companion object {
-        internal fun List<ArbeidsgiverInntekt>.lagreInntekter(orgnummer: String, inntektshistorikk: Inntektshistorikk, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) {
-            inntektshistorikk.append {
-                this@lagreInntekter.tilSkatt(skjæringstidspunkt, meldingsreferanseId).forEach { (orgnr, inntekter) ->
-                    if (orgnr == orgnummer) inntekter.forEach { add(it) }
-                }
-            }
-        }
         internal fun List<ArbeidsgiverInntekt>.lagreInntekter(hendelse: IAktivitetslogg, person: Person, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) {
             this
-                .tilSkatt(skjæringstidspunkt, meldingsreferanseId)
+                .groupBy({ it.arbeidsgiver }) { it.tilSykepengegrunnlag(skjæringstidspunkt, meldingsreferanseId) }
                 .forEach { (arbeidsgiver, inntekter) ->
                     person.lagreInntekter(hendelse, arbeidsgiver, inntekter)
                 }
         }
-
-        private fun List<ArbeidsgiverInntekt>.tilSkatt(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) = this
-            .groupBy({ it.arbeidsgiver }) { opplysning ->
-                SkattComposite(UUID.randomUUID(), opplysning.inntekter.map {
-                    it.somInntekt(skjæringstidspunkt, meldingsreferanseId)
-                })
-            }
 
         internal fun List<ArbeidsgiverInntekt>.kilder(antallMåneder: Int) = this
             .map { ArbeidsgiverInntekt(it.arbeidsgiver, it.inntekter.nylig(månedFørSlutt(this, antallMåneder))) }
@@ -80,55 +73,21 @@ class ArbeidsgiverInntekt(
             MånedligInntekt.antallMåneder(flatMap { it.inntekter })
     }
 
-    sealed class MånedligInntekt(
-        protected val yearMonth: YearMonth,
-        protected val inntekt: Inntekt,
-        protected val type: Inntekttype,
-        protected val fordel: String,
-        protected val beskrivelse: String
+    class MånedligInntekt(
+        private val yearMonth: YearMonth,
+        private val inntekt: Inntekt,
+        private val type: Inntekttype,
+        private val fordel: String,
+        private val beskrivelse: String
     ) {
-        internal abstract fun somInntekt(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID): Skatt
-
-        class RapportertInntekt(
-            yearMonth: YearMonth,
-            inntekt: Inntekt,
-            type: Inntekttype,
-            fordel: String,
-            beskrivelse: String
-        ) : MånedligInntekt(yearMonth, inntekt, type, fordel, beskrivelse) {
-            override fun somInntekt(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID): Skatt {
-                return Skatt.RapportertInntekt(
-                    skjæringstidspunkt,
-                    meldingsreferanseId,
-                    inntekt,
-                    yearMonth,
-                    enumValueOf(type.name),
-                    fordel,
-                    beskrivelse
-                )
-            }
-        }
-
-        class Sykepengegrunnlag(
-            yearMonth: YearMonth,
-            inntekt: Inntekt,
-            type: Inntekttype,
-            fordel: String,
-            beskrivelse: String
-        ) : MånedligInntekt(yearMonth, inntekt, type, fordel, beskrivelse) {
-            override fun somInntekt(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID): Skatt {
-                return Skatt.Sykepengegrunnlag(
-                    skjæringstidspunkt,
-                    meldingsreferanseId,
-                    inntekt,
-                    yearMonth,
-                    enumValueOf(type.name),
-                    fordel,
-                    beskrivelse
-                )
-            }
-
-        }
+        internal fun somInntekt(meldingsreferanseId: UUID) = Skatteopplysning(
+            meldingsreferanseId,
+            inntekt,
+            yearMonth,
+            enumValueOf(type.name),
+            fordel,
+            beskrivelse
+        )
 
         companion object {
             internal fun List<MånedligInntekt>.nylig(månedFørSlutt: YearMonth?): List<MånedligInntekt> {

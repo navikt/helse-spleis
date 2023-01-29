@@ -12,7 +12,7 @@ import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Saksbehandler
-import no.nav.helse.person.inntekt.SkattComposite
+import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 
 internal val ArbeidsgiverInntektsopplysning.inspektør get() = ArbeidsgiverInntektsopplysningInspektør(this)
@@ -76,8 +76,8 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
         this.inntektsopplysning = infotrygd
     }
 
-    override fun preVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
-        this.inntektsopplysning = skattComposite
+    override fun preVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {
+        this.inntektsopplysning = skattSykepengegrunnlag
     }
 
     override fun preVisitRefusjonsopplysninger(refusjonsopplysninger: Refusjonsopplysninger) {

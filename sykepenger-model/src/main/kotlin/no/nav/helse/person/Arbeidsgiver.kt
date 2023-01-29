@@ -62,7 +62,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
-import no.nav.helse.person.inntekt.SkattComposite
+import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -924,7 +924,7 @@ internal class Arbeidsgiver private constructor(
         return inntektsmeldingInfo.opprett(skjæringstidspunkt, inntektsmelding)
     }
 
-    internal fun lagreInntekter(inntekter: List<SkattComposite>) {
+    internal fun lagreInntekter(inntekter: List<SkattSykepengegrunnlag>) {
         inntektshistorikk.leggTil(inntekter)
     }
 

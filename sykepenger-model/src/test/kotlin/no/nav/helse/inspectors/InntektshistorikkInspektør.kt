@@ -12,8 +12,8 @@ import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Saksbehandler
-import no.nav.helse.person.inntekt.Skatt
-import no.nav.helse.person.inntekt.SkattComposite
+import no.nav.helse.person.inntekt.Skatteopplysning
+import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 
 internal enum class Kilde {
@@ -101,39 +101,19 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
 
     private lateinit var skattedato: LocalDate
 
-    override fun visitSkattSykepengegrunnlag(
-        sykepengegrunnlag: Skatt.Sykepengegrunnlag,
-        dato: LocalDate,
-        hendelseId: UUID,
-        beløp: Inntekt,
-        måned: YearMonth,
-        type: Skatt.Inntekttype,
-        fordel: String,
-        beskrivelse: String,
-        tidsstempel: LocalDateTime
+    override fun preVisitSkattSykepengegrunnlag(
+        skattSykepengegrunnlag: SkattSykepengegrunnlag,
+        id: UUID,
+        dato: LocalDate
     ) {
         skattedato = dato
     }
 
-    override fun visitSkattRapportertInntekt(
-        rapportertInntekt: Skatt.RapportertInntekt,
-        dato: LocalDate,
-        hendelseId: UUID,
-        beløp: Inntekt,
-        måned: YearMonth,
-        type: Skatt.Inntekttype,
-        fordel: String,
-        beskrivelse: String,
-        tidsstempel: LocalDateTime
-    ) {
-        skattedato = dato
-    }
-
-    override fun postVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
+    override fun postVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {
         inntektsopplysninger.add(
             Opplysning(
                 skattedato,
-                skattComposite.omregnetÅrsinntekt(skattedato, skattedato)?.omregnetÅrsinntekt(),
+                skattSykepengegrunnlag.omregnetÅrsinntekt(skattedato, skattedato)?.omregnetÅrsinntekt(),
                 null,
                 Kilde.SKATT
             )

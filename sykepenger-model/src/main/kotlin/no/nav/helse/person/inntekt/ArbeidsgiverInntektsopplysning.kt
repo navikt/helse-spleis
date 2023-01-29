@@ -24,7 +24,7 @@ class ArbeidsgiverInntektsopplysning(
     }
 
     internal fun harInntektFraAOrdningen() =
-        inntektsopplysning is SkattComposite || inntektsopplysning is IkkeRapportert
+        inntektsopplysning is SkattSykepengegrunnlag || inntektsopplysning is IkkeRapportert
 
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
 

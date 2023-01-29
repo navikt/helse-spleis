@@ -7,18 +7,18 @@ import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.SammenligningsgrunnlagVisitor
+import no.nav.helse.person.SkatteopplysningVisitor
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag.Tidslinjeperiode.Companion.dager
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Skatt
-import no.nav.helse.person.inntekt.Skatt.Inntekttype.LØNNSINNTEKT
-import no.nav.helse.person.inntekt.Skatt.Inntekttype.NÆRINGSINNTEKT
-import no.nav.helse.person.inntekt.Skatt.Inntekttype.PENSJON_ELLER_TRYGD
-import no.nav.helse.person.inntekt.Skatt.Inntekttype.YTELSE_FRA_OFFENTLIGE
+import no.nav.helse.person.inntekt.Skatteopplysning
+import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
+import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.NÆRINGSINNTEKT
+import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.PENSJON_ELLER_TRYGD
+import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.YTELSE_FRA_OFFENTLIGE
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -602,7 +602,7 @@ interface SubsumsjonObserver {
         }
     }
 
-    private class SkattBuilder(skatt: Skatt) : InntekthistorikkVisitor {
+    private class SkattBuilder(skatt: Skatteopplysning) : SkatteopplysningVisitor {
         private lateinit var inntekt: Map<String, Any>
 
         init {
@@ -611,13 +611,12 @@ interface SubsumsjonObserver {
 
         fun inntekt() = inntekt
 
-        override fun visitSkattSykepengegrunnlag(
-            sykepengegrunnlag: Skatt.Sykepengegrunnlag,
-            dato: LocalDate,
+        override fun visitSkatteopplysning(
+            skatteopplysning: Skatteopplysning,
             hendelseId: UUID,
             beløp: Inntekt,
             måned: YearMonth,
-            type: Skatt.Inntekttype,
+            type: Skatteopplysning.Inntekttype,
             fordel: String,
             beskrivelse: String,
             tidsstempel: LocalDateTime
@@ -631,7 +630,7 @@ interface SubsumsjonObserver {
             )
         }
 
-        private fun Skatt.Inntekttype.fromInntekttype() = when (this) {
+        private fun Skatteopplysning.Inntekttype.fromInntekttype() = when (this) {
             LØNNSINNTEKT -> "LØNNSINNTEKT"
             NÆRINGSINNTEKT -> "NÆRINGSINNTEKT"
             PENSJON_ELLER_TRYGD -> "PENSJON_ELLER_TRYGD"
@@ -662,13 +661,12 @@ interface SubsumsjonObserver {
             inntekter[orgnummer] = inntektliste
         }
 
-        override fun visitSkattRapportertInntekt(
-            rapportertInntekt: Skatt.RapportertInntekt,
-            dato: LocalDate,
+        override fun visitSkatteopplysning(
+            skatteopplysning: Skatteopplysning,
             hendelseId: UUID,
             beløp: Inntekt,
             måned: YearMonth,
-            type: Skatt.Inntekttype,
+            type: Skatteopplysning.Inntekttype,
             fordel: String,
             beskrivelse: String,
             tidsstempel: LocalDateTime
@@ -684,7 +682,7 @@ interface SubsumsjonObserver {
             )
         }
 
-        private fun Skatt.Inntekttype.fromInntekttype() = when (this) {
+        private fun Skatteopplysning.Inntekttype.fromInntekttype() = when (this) {
             LØNNSINNTEKT -> "LØNNSINNTEKT"
             NÆRINGSINNTEKT -> "NÆRINGSINNTEKT"
             PENSJON_ELLER_TRYGD -> "PENSJON_ELLER_TRYGD"
@@ -703,7 +701,7 @@ interface SubsumsjonObserver {
             .filter { it.isNotEmpty() }
         internal fun Utbetalingstidslinje.subsumsjonsformat(): List<Tidslinjedag> = UtbetalingstidslinjeBuilder(this).dager()
         internal fun Sykdomstidslinje.subsumsjonsformat(): List<Tidslinjedag> = SykdomstidslinjeBuilder(this).dager()
-        internal fun Iterable<Skatt>.subsumsjonsformat(): List<Map<String, Any>> = map { SkattBuilder(it).inntekt() }
+        internal fun Iterable<Skatteopplysning>.subsumsjonsformat(): List<Map<String, Any>> = map { SkattBuilder(it).inntekt() }
         internal fun Sammenligningsgrunnlag.subsumsjonsformat(): SammenligningsgrunnlagDTO = SammenligningsgrunnlagBuilder(this).build()
     }
 }

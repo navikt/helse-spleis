@@ -29,7 +29,7 @@ internal class FrilanserTest : AbstractEndToEndTest() {
             1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(
                     ArbeidsgiverInntekt(ORGNUMMER, (10..12).map {
-                        ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
+                        ArbeidsgiverInntekt.MånedligInntekt(
                             yearMonth = YearMonth.of(2017, it),
                             type = LØNNSINNTEKT,
                             inntekt = INNTEKT,
@@ -70,7 +70,7 @@ internal class FrilanserTest : AbstractEndToEndTest() {
             1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(
                     ArbeidsgiverInntekt(a1, (10..12).map {
-                        ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
+                        ArbeidsgiverInntekt.MånedligInntekt(
                             yearMonth = YearMonth.of(2017, it),
                             type = LØNNSINNTEKT,
                             inntekt = INNTEKT,
@@ -79,7 +79,7 @@ internal class FrilanserTest : AbstractEndToEndTest() {
                         )
                     }),
                     ArbeidsgiverInntekt(a2, (10..12).map {
-                        ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
+                        ArbeidsgiverInntekt.MånedligInntekt(
                             yearMonth = YearMonth.of(2017, it),
                             type = LØNNSINNTEKT,
                             inntekt = INNTEKT,

@@ -4,7 +4,6 @@ import java.time.YearMonth
 import no.nav.helse.april
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT
-import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -21,7 +20,7 @@ internal class InntektForSykepengegrunnlagTest {
             ArbeidsgiverInntekt(
                 "orgnummer",
                 (1..3).map {
-                    Sykepengegrunnlag(
+                    ArbeidsgiverInntekt.MånedligInntekt(
                         YearMonth.of(2017, it),
                         31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
                     )
@@ -29,7 +28,7 @@ internal class InntektForSykepengegrunnlagTest {
             ),
             ArbeidsgiverInntekt(
                 "orgnummer2", (1..2).map {
-                    Sykepengegrunnlag(
+                    ArbeidsgiverInntekt.MånedligInntekt(
                         YearMonth.of(2017, it),
                         31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
                     )
@@ -46,7 +45,7 @@ internal class InntektForSykepengegrunnlagTest {
             ArbeidsgiverInntekt(
                 "orgnummer",
                 (1..2).map {
-                    Sykepengegrunnlag(
+                    ArbeidsgiverInntekt.MånedligInntekt(
                         YearMonth.of(2017, it),
                         31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
                     )
@@ -54,7 +53,7 @@ internal class InntektForSykepengegrunnlagTest {
             ),
             ArbeidsgiverInntekt(
                 "orgnummer2", (1..2).map {
-                    Sykepengegrunnlag(
+                    ArbeidsgiverInntekt.MånedligInntekt(
                         YearMonth.of(2017, it),
                         31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
                     )
@@ -71,7 +70,7 @@ internal class InntektForSykepengegrunnlagTest {
             ArbeidsgiverInntekt(
                 "orgnummer",
                 (1..4).map {
-                    Sykepengegrunnlag(
+                    ArbeidsgiverInntekt.MånedligInntekt(
                         YearMonth.of(2017, it),
                         31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
                     )
@@ -93,7 +92,7 @@ internal class InntektForSykepengegrunnlagTest {
             ArbeidsgiverInntekt(
                 "orgnummer",
                 (1..3).map {
-                    Sykepengegrunnlag(
+                    ArbeidsgiverInntekt.MånedligInntekt(
                         YearMonth.of(2017, it),
                         31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
                     )
@@ -111,7 +110,7 @@ internal class InntektForSykepengegrunnlagTest {
             ArbeidsgiverInntekt(
                 "orgnummer",
                 (1..3).map {
-                    Sykepengegrunnlag(
+                    ArbeidsgiverInntekt.MånedligInntekt(
                         YearMonth.of(2017, it),
                         31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
                     )
@@ -144,7 +143,7 @@ internal class InntektForSykepengegrunnlagTest {
             ArbeidsgiverInntekt(
                 "orgnummer",
                 listOf(
-                    Sykepengegrunnlag(
+                    ArbeidsgiverInntekt.MånedligInntekt(
                         YearMonth.of(2017, 1),
                         31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
                     )
@@ -173,7 +172,7 @@ internal class InntektForSykepengegrunnlagTest {
             ArbeidsgiverInntekt(
                 "orgnummer",
                 (1..3).map {
-                    Sykepengegrunnlag(
+                    ArbeidsgiverInntekt.MånedligInntekt(
                         YearMonth.of(2017, it),
                         31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
                     )
@@ -203,7 +202,7 @@ internal class InntektForSykepengegrunnlagTest {
             ArbeidsgiverInntekt(
                 "orgnummer",
                 (1..3).map {
-                    Sykepengegrunnlag(
+                    ArbeidsgiverInntekt.MånedligInntekt(
                         YearMonth.of(2017, it),
                         31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
                     )
@@ -220,7 +219,7 @@ internal class InntektForSykepengegrunnlagTest {
             ArbeidsgiverInntekt(
                 "orgnummer",
                 (1..3).map {
-                    Sykepengegrunnlag(
+                    ArbeidsgiverInntekt.MånedligInntekt(
                         YearMonth.of(2017, it),
                         31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
                     )
@@ -249,7 +248,7 @@ internal class InntektForSykepengegrunnlagTest {
             ArbeidsgiverInntekt(
                 "orgnummer",
                 (1..2).map {
-                    Sykepengegrunnlag(
+                    ArbeidsgiverInntekt.MånedligInntekt(
                         YearMonth.of(2017, it),
                         31000.månedlig, LØNNSINNTEKT, "hva som helst", "hva som helst"
                     )

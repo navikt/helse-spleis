@@ -15,8 +15,8 @@ import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Saksbehandler
-import no.nav.helse.person.inntekt.Skatt
-import no.nav.helse.person.inntekt.SkattComposite
+import no.nav.helse.person.inntekt.Skatteopplysning
+import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 
 internal class UgyldigeSituasjonerObservatør(private val person: Person): PersonObserver {
@@ -129,11 +129,11 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
             this.innslag.add(id)
         }
 
-        override fun preVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
+        override fun preVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {
             this.skatt.add(id)
         }
 
-        override fun postVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
+        override fun postVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {
             leggTilInntekt("SkattComposite dato=$dato, inntekter=${skattInntekterFor(id)} ")
         }
 
@@ -158,11 +158,8 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         override fun visitIkkeRapportert(id: UUID, dato: LocalDate, tidsstempel: LocalDateTime) =
             leggTilInntekt("IkkeRapportert dato=$dato")
 
-        override fun visitSkattSykepengegrunnlag(sykepengegrunnlag: Skatt.Sykepengegrunnlag, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, måned: YearMonth, type: Skatt.Inntekttype, fordel: String, beskrivelse: String, tidsstempel: LocalDateTime) =
-            leggTilSkattInntekt("SkattSykepengegrunnlag id=$hendelseId, dato=$dato, beløp=$beløp, måned=$måned, type=$type, fordel=$fordel, beskrivelse=$beskrivelse")
-
-        override fun visitSkattRapportertInntekt(rapportertInntekt: Skatt.RapportertInntekt, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, måned: YearMonth, type: Skatt.Inntekttype, fordel: String, beskrivelse: String, tidsstempel: LocalDateTime) =
-            leggTilSkattInntekt("SkattRapportertInntekt id=$hendelseId, dato=$dato, beløp=$beløp, måned=$måned, type=$type, fordel=$fordel, beskrivelse=$beskrivelse")
+        override fun visitSkatteopplysning(skatteopplysning: Skatteopplysning, hendelseId: UUID, beløp: Inntekt, måned: YearMonth, type: Skatteopplysning.Inntekttype, fordel: String, beskrivelse: String, tidsstempel: LocalDateTime) =
+            leggTilSkattInntekt("SkattSykepengegrunnlag id=$hendelseId, beløp=$beløp, måned=$måned, type=$type, fordel=$fordel, beskrivelse=$beskrivelse")
     }
 
     private companion object {

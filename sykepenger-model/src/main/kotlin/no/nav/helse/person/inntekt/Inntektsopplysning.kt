@@ -53,7 +53,7 @@ abstract class Inntektsopplysning protected constructor(
         }
 
         internal fun List<Inntektsopplysning>.valider(aktivitetslogg: IAktivitetslogg) {
-            if (all { it is SkattComposite }) {
+            if (all { it is SkattSykepengegrunnlag }) {
                 aktivitetslogg.funksjonellFeil(Varselkode.RV_VV_5)
             }
         }

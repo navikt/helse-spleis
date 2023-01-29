@@ -14,7 +14,6 @@ import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Dødsinfo
 import no.nav.helse.hendelser.Foreldrepermisjon
-import no.nav.helse.hendelser.InntektCreator
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
@@ -510,23 +509,22 @@ internal fun grunnlag(
     orgnummer: String,
     skjæringstidspunkt: LocalDate,
     inntekter: List<Inntekt>
-) = lagMånedsinntekter(orgnummer, skjæringstidspunkt, inntekter, creator = ArbeidsgiverInntekt.MånedligInntekt::Sykepengegrunnlag)
+) = lagMånedsinntekter(orgnummer, skjæringstidspunkt, inntekter)
 
 internal fun sammenligningsgrunnlag(
     orgnummer: String,
     skjæringstidspunkt: LocalDate,
     inntekter: List<Inntekt>
-) = lagMånedsinntekter(orgnummer, skjæringstidspunkt, inntekter, creator = ArbeidsgiverInntekt.MånedligInntekt::RapportertInntekt)
+) = lagMånedsinntekter(orgnummer, skjæringstidspunkt, inntekter)
 
 private fun lagMånedsinntekter(
     orgnummer: String,
     skjæringstidspunkt: LocalDate,
-    inntekter: List<Inntekt>,
-    creator: InntektCreator
+    inntekter: List<Inntekt>
 ) = ArbeidsgiverInntekt(
     orgnummer, inntekter.mapIndexed { index, inntekt ->
         val sluttMnd = YearMonth.from(skjæringstidspunkt)
-        creator(
+        ArbeidsgiverInntekt.MånedligInntekt(
             sluttMnd.minusMonths((inntekter.size - index).toLong()),
             inntekt,
             ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,

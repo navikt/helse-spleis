@@ -8,8 +8,8 @@ import no.nav.helse.person.ArbeidsgiverInntektsopplysningForSammenligningsgrunnl
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Inntektsopplysning
-import no.nav.helse.person.inntekt.Skatt
-import no.nav.helse.person.inntekt.SkattComposite
+import no.nav.helse.person.inntekt.Skatteopplysning
+import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 
 internal val ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag.inspektør get() = ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagInspektør(this)
@@ -17,7 +17,7 @@ internal val ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag.inspektør 
 internal class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagInspektør(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag) : ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagVisitor {
     internal lateinit var orgnummer: String
         private set
-    internal val inntektsopplysning = mutableListOf<Skatt.RapportertInntekt>()
+    internal val inntektsopplysning = mutableListOf<Skatteopplysning>()
     internal lateinit var rapportertInntekt: Inntekt
         private set
 
@@ -34,17 +34,16 @@ internal class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagInspektør
         this.rapportertInntekt = rapportertInntekt
     }
 
-    override fun visitSkattRapportertInntekt(
-        rapportertInntekt: Skatt.RapportertInntekt,
-        dato: LocalDate,
+    override fun visitSkatteopplysning(
+        skatteopplysning: Skatteopplysning,
         hendelseId: UUID,
         beløp: Inntekt,
         måned: YearMonth,
-        type: Skatt.Inntekttype,
+        type: Skatteopplysning.Inntekttype,
         fordel: String,
         beskrivelse: String,
         tidsstempel: LocalDateTime
     ) {
-        inntektsopplysning.add(rapportertInntekt)
+        inntektsopplysning.add(skatteopplysning)
     }
 }
