@@ -64,7 +64,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             vilkårsgrunnlag.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.let { arbeidsgiverInntektsopplysninger ->
                 assertEquals(1, arbeidsgiverInntektsopplysninger.size)
                 arbeidsgiverInntektsopplysninger.single().inspektør.also { overstyring ->
-                    assertEquals(nyInntekt, overstyring.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(nyInntekt, overstyring.inntektsopplysning.inspektør.beløp)
                     assertEquals(listOf(Refusjonsopplysning(overstyringId, 1.januar, null, nyInntekt)), overstyring.refusjonsopplysninger.inspektør.refusjonsopplysninger)
                 }
             }
@@ -109,7 +109,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             vilkårsgrunnlag.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.let { arbeidsgiverInntektsopplysninger ->
                 assertEquals(1, arbeidsgiverInntektsopplysninger.size)
                 arbeidsgiverInntektsopplysninger.single().inspektør.also { overstyring ->
-                    assertEquals(nyInntekt, overstyring.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(nyInntekt, overstyring.inntektsopplysning.inspektør.beløp)
                     assertEquals(listOf(Refusjonsopplysning(overstyringId, 1.januar, null, nyInntekt)), overstyring.refusjonsopplysninger.inspektør.refusjonsopplysninger)
                 }
             }
@@ -158,7 +158,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             vilkårsgrunnlag.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.let { arbeidsgiverInntektsopplysninger ->
                 assertEquals(1, arbeidsgiverInntektsopplysninger.size)
                 arbeidsgiverInntektsopplysninger.single().inspektør.also { overstyring ->
-                    assertEquals(INNTEKT, overstyring.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(INNTEKT, overstyring.inntektsopplysning.inspektør.beløp)
                     assertEquals(listOf(
                         Refusjonsopplysning(overstyring.refusjonsopplysninger.inspektør.refusjonsopplysninger.first().inspektør.meldingsreferanseId, 1.januar, 28.februar, INNTEKT),
                         Refusjonsopplysning(overstyringId, 1.mars, null, INNTEKT/2)
@@ -578,7 +578,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
 
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(nyInntekt, it.inntektsopplysning.omregnetÅrsinntekt())
+            assertEquals(nyInntekt, it.inntektsopplysning.inspektør.beløp)
             assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
         }
     }
@@ -624,7 +624,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     private fun TestArbeidsgiverInspektør.inntektISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =
-        vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.inntektsopplysning.omregnetÅrsinntekt()
+        vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.inntektsopplysning.inspektør.beløp
 
     private fun TestArbeidsgiverInspektør.refusjonsopplysningerISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =
         vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.refusjonsopplysninger.inspektør.refusjonsopplysninger

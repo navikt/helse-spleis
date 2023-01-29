@@ -6,6 +6,7 @@ import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Arbeidsforholdhistorikk
@@ -588,7 +589,7 @@ internal class InntektsmeldingTest {
         inntektsmelding(listOf(Periode(1.januar, 16.januar)), refusjonBeløp = 2000.månedlig, beregnetInntekt = 2000.månedlig, førsteFraværsdag = 3.februar)
         val inntektshistorikk = Inntektshistorikk()
         inntektsmelding.addInntekt(inntektshistorikk, 1.februar, MaskinellJurist())
-        assertEquals(2000.månedlig, inntektshistorikk.omregnetÅrsinntekt(1.februar, 1.februar, Arbeidsforholdhistorikk())?.omregnetÅrsinntekt())
+        assertEquals(2000.månedlig, inntektshistorikk.omregnetÅrsinntekt(1.februar, 1.februar, Arbeidsforholdhistorikk())?.inspektør?.beløp)
         assertNull(inntektshistorikk.omregnetÅrsinntekt(3.februar, 3.februar, Arbeidsforholdhistorikk()))
     }
 

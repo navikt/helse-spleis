@@ -7,11 +7,9 @@ import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Subsumsjon
-import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.InntektsopplysningVisitor
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.SammenligningsgrunnlagVisitor
-import no.nav.helse.person.SkatteopplysningVisitor
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.Grunnlagsdata
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
@@ -444,7 +442,12 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.IkkeRapportert, inntekt)
             }
 
-            override fun preVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {
+            override fun preVisitSkattSykepengegrunnlag(
+                skattSykepengegrunnlag: SkattSykepengegrunnlag,
+                id: UUID,
+                dato: LocalDate,
+                beløp: Inntekt
+            ) {
                 val (inntekt, inntekterFraAOrdningen) = SkattBuilder(skattSykepengegrunnlag).build()
                 this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.AOrdningen, inntekt, inntekterFraAOrdningen)
             }

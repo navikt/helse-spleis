@@ -123,7 +123,7 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
         assertEquals(8, vilkårsgrunnlag.avviksprosent?.roundToInt())
         assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+            assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
             assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
         assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)

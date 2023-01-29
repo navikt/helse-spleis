@@ -2,18 +2,14 @@ package no.nav.helse.inspectors
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.hendelser.Subsumsjon
-import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.InntektsopplysningVisitor
 import no.nav.helse.person.inntekt.Infotrygd
-import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
-import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
@@ -21,7 +17,7 @@ internal val Inntektsopplysning.inspektør get() = InntektsopplysningInspektør(
 
 internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysning) : InntektsopplysningVisitor {
 
-    internal var beløp = INGEN
+    internal lateinit var beløp: Inntekt
         private set
 
     init {
@@ -67,16 +63,12 @@ internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysni
         this.beløp = beløp
     }
 
-    override fun visitSkatteopplysning(
-        skatteopplysning: Skatteopplysning,
-        hendelseId: UUID,
-        beløp: Inntekt,
-        måned: YearMonth,
-        type: Skatteopplysning.Inntekttype,
-        fordel: String,
-        beskrivelse: String,
-        tidsstempel: LocalDateTime
+    override fun preVisitSkattSykepengegrunnlag(
+        skattSykepengegrunnlag: SkattSykepengegrunnlag,
+        id: UUID,
+        dato: LocalDate,
+        beløp: Inntekt
     ) {
-        this.beløp += beløp
+        this.beløp = beløp
     }
 }

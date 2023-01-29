@@ -44,7 +44,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
 
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(INNTEKT, it.inntektsopplysning.omregnetÅrsinntekt())
+            assertEquals(INNTEKT, it.inntektsopplysning.inspektør.beløp)
             assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
         assertNull(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a2])

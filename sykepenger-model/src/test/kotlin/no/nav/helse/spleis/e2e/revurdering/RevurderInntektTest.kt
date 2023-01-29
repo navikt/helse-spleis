@@ -136,7 +136,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.sykepengegrunnlag?.inspektør
         sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(ORGNUMMER)?.inspektør
             ?.also {
-                assertEquals(32000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                assertEquals(32000.månedlig, it.inntektsopplysning.inspektør.beløp)
                 assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
             }
     }
@@ -165,7 +165,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.sykepengegrunnlag?.inspektør
         sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(ORGNUMMER)?.inspektør
             ?.also {
-                assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
                 assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
             }
     }

@@ -23,7 +23,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenlignin
 import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmelding
-import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
@@ -913,12 +912,22 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitInfotrygd(infotrygd, id, dato, hendelseId, beløp, tidsstempel)
     }
 
-    override fun preVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {
-        delegatee.preVisitSkattSykepengegrunnlag(skattSykepengegrunnlag, id, dato)
+    override fun preVisitSkattSykepengegrunnlag(
+        skattSykepengegrunnlag: SkattSykepengegrunnlag,
+        id: UUID,
+        dato: LocalDate,
+        beløp: Inntekt
+    ) {
+        delegatee.preVisitSkattSykepengegrunnlag(skattSykepengegrunnlag, id, dato, beløp)
     }
 
-    override fun postVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {
-        delegatee.postVisitSkattSykepengegrunnlag(skattSykepengegrunnlag, id, dato)
+    override fun postVisitSkattSykepengegrunnlag(
+        skattSykepengegrunnlag: SkattSykepengegrunnlag,
+        id: UUID,
+        dato: LocalDate,
+        beløp: Inntekt
+    ) {
+        delegatee.postVisitSkattSykepengegrunnlag(skattSykepengegrunnlag, id, dato, beløp)
     }
 
     override fun visitSkatteopplysning(

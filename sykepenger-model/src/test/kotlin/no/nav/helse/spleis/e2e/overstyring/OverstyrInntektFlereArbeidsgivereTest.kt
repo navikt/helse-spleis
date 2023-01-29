@@ -73,11 +73,11 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
             assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
             assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
             sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-                assertEquals(20000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                assertEquals(20000.månedlig, it.inntektsopplysning.inspektør.beløp)
                 assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
             }
             sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-                assertEquals(20000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                assertEquals(20000.månedlig, it.inntektsopplysning.inspektør.beløp)
                 assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
             }
 
@@ -109,11 +109,11 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
             assertEquals(3, vilkårsgrunnlag.avviksprosent?.roundToInt())
             assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
             sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-                assertEquals(19000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                assertEquals(19000.månedlig, it.inntektsopplysning.inspektør.beløp)
                 assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
             }
             sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-                assertEquals(20000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                assertEquals(20000.månedlig, it.inntektsopplysning.inspektør.beløp)
                 assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
             }
 
@@ -149,11 +149,11 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         assertEquals(3, vilkårsgrunnlag.avviksprosent?.roundToInt())
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(20000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+            assertEquals(20000.månedlig, it.inntektsopplysning.inspektør.beløp)
             assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(19000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+            assertEquals(19000.månedlig, it.inntektsopplysning.inspektør.beløp)
             assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
         }
 
@@ -190,11 +190,11 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         assertEquals(3, vilkårsgrunnlag.avviksprosent?.roundToInt())
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(20000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+            assertEquals(20000.månedlig, it.inntektsopplysning.inspektør.beløp)
             assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(19000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+            assertEquals(19000.månedlig, it.inntektsopplysning.inspektør.beløp)
             assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
         }
 
@@ -231,11 +231,11 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         assertEquals(3, vilkårsgrunnlag.avviksprosent?.roundToInt())
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(29000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+            assertEquals(29000.månedlig, it.inntektsopplysning.inspektør.beløp)
             assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(1000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+            assertEquals(1000.månedlig, it.inntektsopplysning.inspektør.beløp)
             assertEquals(SkattSykepengegrunnlag::class, it.inntektsopplysning::class)
         }
 
@@ -283,11 +283,11 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         assertEquals(65, vilkårsgrunnlag.avviksprosent?.roundToInt())
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(10000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+            assertEquals(10000.månedlig, it.inntektsopplysning.inspektør.beløp)
             assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(1000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+            assertEquals(1000.månedlig, it.inntektsopplysning.inspektør.beløp)
             assertEquals(SkattSykepengegrunnlag::class, it.inntektsopplysning::class)
         }
 
@@ -322,11 +322,11 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         assertEquals(25, vilkårsgrunnlag.avviksprosent?.roundToInt())
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(9999.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+            assertEquals(9999.månedlig, it.inntektsopplysning.inspektør.beløp)
             assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
         }
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(20000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+            assertEquals(20000.månedlig, it.inntektsopplysning.inspektør.beløp)
             assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
 

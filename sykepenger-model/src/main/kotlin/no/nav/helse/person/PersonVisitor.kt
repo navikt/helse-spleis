@@ -22,7 +22,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenlignin
 import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmelding
-import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
@@ -662,9 +661,19 @@ internal interface InntektsopplysningVisitor : SkatteopplysningVisitor {
     ) {
     }
 
-    fun preVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {}
+    fun preVisitSkattSykepengegrunnlag(
+        skattSykepengegrunnlag: SkattSykepengegrunnlag,
+        id: UUID,
+        dato: LocalDate,
+        beløp: Inntekt
+    ) {}
 
-    fun postVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {}
+    fun postVisitSkattSykepengegrunnlag(
+        skattSykepengegrunnlag: SkattSykepengegrunnlag,
+        id: UUID,
+        dato: LocalDate,
+        beløp: Inntekt
+    ) {}
 }
 internal interface InntekthistorikkVisitor : InntektsopplysningVisitor {
     fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}

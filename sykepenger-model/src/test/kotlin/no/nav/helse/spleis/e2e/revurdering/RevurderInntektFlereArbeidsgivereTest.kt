@@ -635,7 +635,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertEquals(19, vilkårsgrunnlag.avviksprosent?.roundToInt())
             assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
             sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-                assertEquals(25000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                assertEquals(25000.månedlig, it.inntektsopplysning.inspektør.beløp)
                 assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
             }
         }

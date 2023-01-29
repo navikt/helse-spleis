@@ -129,11 +129,21 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
             this.innslag.add(id)
         }
 
-        override fun preVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {
+        override fun preVisitSkattSykepengegrunnlag(
+            skattSykepengegrunnlag: SkattSykepengegrunnlag,
+            id: UUID,
+            dato: LocalDate,
+            beløp: Inntekt
+        ) {
             this.skatt.add(id)
         }
 
-        override fun postVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {
+        override fun postVisitSkattSykepengegrunnlag(
+            skattSykepengegrunnlag: SkattSykepengegrunnlag,
+            id: UUID,
+            dato: LocalDate,
+            beløp: Inntekt
+        ) {
             leggTilInntekt("SkattComposite dato=$dato, inntekter=${skattInntekterFor(id)} ")
         }
 

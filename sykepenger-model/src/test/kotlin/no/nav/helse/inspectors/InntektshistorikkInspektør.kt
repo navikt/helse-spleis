@@ -2,7 +2,6 @@ package no.nav.helse.inspectors
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.Arbeidsforholdhistorikk
@@ -12,7 +11,6 @@ import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Saksbehandler
-import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 
@@ -74,7 +72,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
         inntektsopplysninger.add(
             Opplysning(
                 dato,
-                inntektsmelding.omregnetÅrsinntekt(dato, dato)?.omregnetÅrsinntekt(),
+                inntektsmelding.inspektør.beløp,
                 null,
                 Kilde.INNTEKTSMELDING
             )
@@ -92,7 +90,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
         inntektsopplysninger.add(
             Opplysning(
                 dato,
-                infotrygd.omregnetÅrsinntekt(dato, dato)?.omregnetÅrsinntekt(),
+                infotrygd.inspektør.beløp,
                 null,
                 Kilde.INFOTRYGD
             )
@@ -104,16 +102,22 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
     override fun preVisitSkattSykepengegrunnlag(
         skattSykepengegrunnlag: SkattSykepengegrunnlag,
         id: UUID,
-        dato: LocalDate
+        dato: LocalDate,
+        beløp: Inntekt
     ) {
         skattedato = dato
     }
 
-    override fun postVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {
+    override fun postVisitSkattSykepengegrunnlag(
+        skattSykepengegrunnlag: SkattSykepengegrunnlag,
+        id: UUID,
+        dato: LocalDate,
+        beløp: Inntekt
+    ) {
         inntektsopplysninger.add(
             Opplysning(
                 skattedato,
-                skattSykepengegrunnlag.omregnetÅrsinntekt(skattedato, skattedato)?.omregnetÅrsinntekt(),
+                skattSykepengegrunnlag.inspektør.beløp,
                 null,
                 Kilde.SKATT
             )
@@ -133,7 +137,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
         inntektsopplysninger.add(
             Opplysning(
                 dato,
-                saksbehandler.omregnetÅrsinntekt(dato, dato)?.omregnetÅrsinntekt(),
+                saksbehandler.inspektør.beløp,
                 null,
                 Kilde.SAKSBEHANDLER
             )

@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.Opptjening
@@ -16,8 +17,8 @@ internal fun Map<LocalDate, Inntektsopplysning>.somVilkårsgrunnlagHistorikk(org
     forEach { (skjæringstidspunkt, inntektsopplysning) ->
         vilkårsgrunnlagHistorikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
-            sykepengegrunnlag = inntektsopplysning.omregnetÅrsinntekt().sykepengegrunnlag(orgnr = organisasjonsnummer, skjæringstidspunkt = skjæringstidspunkt, virkningstidspunkt = skjæringstidspunkt),
-            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntektsopplysning.omregnetÅrsinntekt(), emptyList()),
+            sykepengegrunnlag = inntektsopplysning.inspektør.beløp.sykepengegrunnlag(orgnr = organisasjonsnummer, skjæringstidspunkt = skjæringstidspunkt, virkningstidspunkt = skjæringstidspunkt),
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntektsopplysning.inspektør.beløp, emptyList()),
             avviksprosent = Prosent.prosent(0.0),
             opptjening = Opptjening.gjenopprett(skjæringstidspunkt, emptyList(), 1.januar til 31.januar),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,

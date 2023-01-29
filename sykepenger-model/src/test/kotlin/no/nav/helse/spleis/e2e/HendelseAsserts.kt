@@ -28,13 +28,13 @@ import kotlin.reflect.KClass
 
 
 internal fun assertInntektshistorikkForDato(forventetInntekt: Inntekt?, dato: LocalDate, førsteFraværsdag: LocalDate = dato, inspektør: TestArbeidsgiverInspektør) {
-    assertEquals(forventetInntekt, inspektør.inntektInspektør.omregnetÅrsinntekt(dato, førsteFraværsdag)?.omregnetÅrsinntekt())
+    assertEquals(forventetInntekt, inspektør.inntektInspektør.omregnetÅrsinntekt(dato, førsteFraværsdag)?.inspektør?.beløp)
 }
 internal fun assertInntektForDato(forventetInntekt: Inntekt?, dato: LocalDate, inspektør: TestArbeidsgiverInspektør) {
     val grunnlagsdataInspektør = inspektør.vilkårsgrunnlagHistorikkInnslag().firstOrNull()?.vilkårsgrunnlagFor(dato)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag for $dato" }
     val sykepengegrunnlagInspektør = grunnlagsdataInspektør.sykepengegrunnlag.inspektør
     sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[inspektør.orgnummer]?.inspektør.also {
-        assertEquals(forventetInntekt, it?.inntektsopplysning?.omregnetÅrsinntekt())
+        assertEquals(forventetInntekt, it?.inntektsopplysning?.inspektør?.beløp)
     }
 }
 

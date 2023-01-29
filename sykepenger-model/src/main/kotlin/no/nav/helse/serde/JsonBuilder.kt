@@ -1136,7 +1136,12 @@ internal class JsonBuilder : AbstractBuilder() {
             ))
         }
 
-        override fun preVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {
+        override fun preVisitSkattSykepengegrunnlag(
+            skattSykepengegrunnlag: SkattSykepengegrunnlag,
+            id: UUID,
+            dato: LocalDate,
+            beløp: Inntekt
+        ) {
             pushState(SkattSykepengegrunnlagState(inntektsopplysninger))
         }
 
@@ -1177,7 +1182,12 @@ internal class JsonBuilder : AbstractBuilder() {
             ))
         }
 
-        override fun postVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {
+        override fun postVisitSkattSykepengegrunnlag(
+            skattSykepengegrunnlag: SkattSykepengegrunnlag,
+            id: UUID,
+            dato: LocalDate,
+            beløp: Inntekt
+        ) {
             this.inntektsopplysninger.add(mapOf(
                 "id" to id,
                 "dato" to dato,
@@ -1469,7 +1479,12 @@ internal class JsonBuilder : AbstractBuilder() {
             ))
         }
 
-        override fun preVisitSkattSykepengegrunnlag(skattSykepengegrunnlag: SkattSykepengegrunnlag, id: UUID, dato: LocalDate) {
+        override fun preVisitSkattSykepengegrunnlag(
+            skattSykepengegrunnlag: SkattSykepengegrunnlag,
+            id: UUID,
+            dato: LocalDate,
+            beløp: Inntekt
+        ) {
             pushState(SkattSykepengegrunnlagState(inntektsopplysninger))
         }
 

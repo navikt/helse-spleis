@@ -66,7 +66,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.sykepengegrunnlag?.inspektør
         sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(ORGNUMMER)?.inspektør
             ?.also {
-                assertEquals(overstyrtInntekt, it.inntektsopplysning.omregnetÅrsinntekt())
+                assertEquals(overstyrtInntekt, it.inntektsopplysning.inspektør.beløp)
                 assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
     }

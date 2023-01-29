@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.inntekt.Inntektshistorikk
@@ -28,7 +29,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
         val inntekthistorikk = Inntektshistorikk()
         inntektsmelding(beregnetInntekt = INNTEKT_PR_MÅNED, førsteFraværsdag = 1.januar)
             .addInntekt(inntekthistorikk, 1.januar, MaskinellJurist())
-        assertEquals(INNTEKT_PR_MÅNED, inntekthistorikk.omregnetÅrsinntekt(1.januar, 1.januar, Arbeidsforholdhistorikk())?.omregnetÅrsinntekt())
+        assertEquals(INNTEKT_PR_MÅNED, inntekthistorikk.omregnetÅrsinntekt(1.januar, 1.januar, Arbeidsforholdhistorikk())?.inspektør?.beløp)
     }
 
     @Test
