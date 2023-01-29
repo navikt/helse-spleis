@@ -1,0 +1,64 @@
+{
+  "arbeidsgivere": [
+    {
+      "inntektshistorikk": [
+        {
+          "inntektsopplysninger": [
+            {
+              "kilde": "INFOTRYGD"
+            },
+            {
+              "skatteopplysninger": [
+                {
+                  "kilde": "SKATT_SYKEPENGEGRUNNLAG"
+                }
+              ]
+            },
+            {
+              "skatteopplysninger": [
+                {
+                  "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG"
+                }
+              ]
+            },
+            {
+              "kilde": "IKKE_RAPPORTERT"
+            },
+            {
+              "kilde": "INNTEKTSMELDING"
+            }
+          ]
+        },
+        {
+          "inntektsopplysninger": [
+            {
+              "skatteopplysninger": [
+                {
+                  "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },{
+      "inntektshistorikk": [
+        {
+          "inntektsopplysninger": [
+            {
+              "skatteopplysninger": [
+                {
+                  "kilde": "SKATT_SYKEPENGEGRUNNLAG"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "inntektsopplysninger": []
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 211
+}
