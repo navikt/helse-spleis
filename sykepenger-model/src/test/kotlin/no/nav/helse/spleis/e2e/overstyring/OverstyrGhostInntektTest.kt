@@ -163,12 +163,9 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
             assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
         }
 
-        assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+        assertEquals(1, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(30000.månedlig, it.rapportertInntekt)
-        }
-        sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(INGEN, it.rapportertInntekt)
         }
 
         nullstillTilstandsendringer()

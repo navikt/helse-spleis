@@ -186,7 +186,7 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.inntekterForSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
             this.mapNotNull { arbeidsgiver ->
-                val inntektsopplysning = arbeidsgiver.inntektshistorikk.rapportertInntekt(skjæringstidspunkt, arbeidsgiver.arbeidsforholdhistorikk)
+                val inntektsopplysning = arbeidsgiver.inntektshistorikk.rapportertInntekt(skjæringstidspunkt)
                 when {
                     inntektsopplysning != null -> ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
                     else -> null

@@ -586,12 +586,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             assertEquals(IkkeRapportert::class, it.inntektsopplysning::class)
         }
 
-        assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+        assertEquals(1, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(10000.månedlig, it.rapportertInntekt)
-        }
-        sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(INGEN, it.rapportertInntekt)
         }
     }
 
@@ -824,12 +821,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             assertEquals(IkkeRapportert::class, it.inntektsopplysning::class)
         }
 
-        assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+        assertEquals(1, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(30000.månedlig, it.rapportertInntekt)
-        }
-        sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(INGEN, it.rapportertInntekt)
         }
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(a1))
     }
@@ -890,12 +884,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             assertEquals(no.nav.helse.person.inntekt.Inntektsmelding::class, it.inntektsopplysning::class)
         }
 
-        assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+        assertEquals(1, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(30000.månedlig, it.rapportertInntekt)
-        }
-        sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(INGEN, it.rapportertInntekt)
         }
 
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(a1))
@@ -986,7 +977,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
         val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag.inspektør
 
-        assertEquals(listOf(a1, a2), person.relevanteArbeidsgivere(skjæringstidspunkt))
+        assertEquals(listOf(a1), person.relevanteArbeidsgivere(skjæringstidspunkt))
         assertEquals(listOf(a2), sykepengegrunnlagInspektør.deaktiverteArbeidsforhold)
 
         assertEquals(372000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
@@ -999,12 +990,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(no.nav.helse.person.inntekt.Inntektsmelding::class, it.inntektsopplysning::class)
         }
-        assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+        assertEquals(1, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(31000.månedlig, it.rapportertInntekt)
-        }
-        sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(INGEN, it.rapportertInntekt)
         }
     }
 }

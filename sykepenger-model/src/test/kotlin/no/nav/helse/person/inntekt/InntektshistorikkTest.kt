@@ -110,10 +110,8 @@ internal class InntektshistorikkTest {
         arbeidsforholdhistorikk.lagre(listOf(
             Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, null, false)
         ), 1.februar)
-        val opplysning = historikk.rapportertInntekt(1.februar, arbeidsforholdhistorikk)
-        assertNotNull(opplysning)
-        assertEquals(IkkeRapportert::class, opplysning::class)
-        assertEquals(INGEN, opplysning.rapportertInntekt())
+        val opplysning = historikk.rapportertInntekt(1.februar)
+        assertNull(opplysning)
     }
 
     @Test
@@ -122,10 +120,8 @@ internal class InntektshistorikkTest {
         arbeidsforholdhistorikk.lagre(listOf(
             Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, null, true)
         ), 1.februar)
-        val opplysning = historikk.rapportertInntekt(1.februar, arbeidsforholdhistorikk)
-        assertNotNull(opplysning)
-        assertEquals(IkkeRapportert::class, opplysning::class)
-        assertEquals(INGEN, opplysning.rapportertInntekt())
+        val opplysning = historikk.rapportertInntekt(1.februar)
+        assertNull(opplysning)
     }
 
     @Test
@@ -154,7 +150,7 @@ internal class InntektshistorikkTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(30, inspektør.inntektTeller.first())
         assertEquals(17, inspektør.inntektTeller.last())
-        assertEquals(254000.årlig, historikk.rapportertInntekt(31.desember(2017), Arbeidsforholdhistorikk())?.rapportertInntekt())
+        assertEquals(254000.årlig, historikk.rapportertInntekt(31.desember(2017))?.rapportertInntekt())
     }
 
     @Test
@@ -183,7 +179,7 @@ internal class InntektshistorikkTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(30, inspektør.inntektTeller.first())
         assertEquals(17, inspektør.inntektTeller.last())
-        assertEquals(258000.årlig, historikk.rapportertInntekt(1.januar, Arbeidsforholdhistorikk())?.rapportertInntekt())
+        assertEquals(258000.årlig, historikk.rapportertInntekt(1.januar)?.rapportertInntekt())
     }
 
     @Test
@@ -359,7 +355,7 @@ internal class InntektshistorikkTest {
             }.lagreInntekter(ORGNUMMER, historikk, 1.januar, meldingsreferanseId)
         }
         assertEquals(13, inspektør.inntektTeller.first())
-        assertEquals(INNTEKT, historikk.rapportertInntekt(1.januar, Arbeidsforholdhistorikk())?.rapportertInntekt())
+        assertEquals(INNTEKT, historikk.rapportertInntekt(1.januar)?.rapportertInntekt())
     }
 
     @Test
