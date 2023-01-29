@@ -21,7 +21,6 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.FEIL
-import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 
 internal class Oppdrag private constructor(
     private val mottaker: String,

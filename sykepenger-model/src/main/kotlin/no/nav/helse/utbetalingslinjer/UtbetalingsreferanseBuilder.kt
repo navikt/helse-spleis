@@ -1,4 +1,4 @@
-package no.nav.helse.utbetalingstidslinje
+package no.nav.helse.utbetalingslinjer
 
 import org.apache.commons.codec.binary.Base32
 import java.nio.ByteBuffer

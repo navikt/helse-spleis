@@ -18,7 +18,6 @@ import no.nav.helse.person.infotrygdhistorikk.Nødnummer
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
-import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import org.slf4j.LoggerFactory
 import kotlin.math.roundToInt
 

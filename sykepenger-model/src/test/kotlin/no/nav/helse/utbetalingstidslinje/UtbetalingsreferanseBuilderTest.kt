@@ -3,6 +3,8 @@ package no.nav.helse.utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*
+import no.nav.helse.utbetalingslinjer.decodeUtbetalingsreferanse
+import no.nav.helse.utbetalingslinjer.genererUtbetalingsreferanse
 
 internal class UtbetalingsreferanseBuilderTest {
 

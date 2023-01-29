@@ -5,7 +5,6 @@ import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
-import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.util.*

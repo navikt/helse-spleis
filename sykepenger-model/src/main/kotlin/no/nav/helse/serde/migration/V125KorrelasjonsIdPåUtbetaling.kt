@@ -2,7 +2,7 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.util.UUID
-import no.nav.helse.utbetalingstidslinje.decodeUtbetalingsreferanse
+import no.nav.helse.utbetalingslinjer.decodeUtbetalingsreferanse
 import org.slf4j.LoggerFactory
 
 internal class V125KorrelasjonsIdPåUtbetaling : JsonMigration(version = 125) {
