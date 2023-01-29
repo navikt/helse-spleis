@@ -1,11 +1,12 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
+import no.nav.helse.Alder
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mai
-import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
+import no.nav.helse.Alder.Companion.alder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

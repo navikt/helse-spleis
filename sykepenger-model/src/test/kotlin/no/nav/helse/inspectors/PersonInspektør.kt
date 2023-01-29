@@ -13,7 +13,7 @@ import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
-import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.Alder
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
 

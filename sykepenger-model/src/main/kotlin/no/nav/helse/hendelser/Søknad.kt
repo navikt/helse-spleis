@@ -23,7 +23,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.Dagturnering
-import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.Alder
 import no.nav.helse.økonomi.Prosentdel
 
 class Søknad(

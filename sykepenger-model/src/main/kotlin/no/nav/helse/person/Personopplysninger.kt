@@ -2,8 +2,8 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import no.nav.helse.Personidentifikator
-import no.nav.helse.utbetalingstidslinje.Alder
-import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
+import no.nav.helse.Alder
+import no.nav.helse.Alder.Companion.alder
 
 class Personopplysninger internal constructor(
     private val personidentifikator: Personidentifikator,

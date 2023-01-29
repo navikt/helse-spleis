@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
+import no.nav.helse.Alder
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
@@ -16,7 +17,7 @@ import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.plus
 import no.nav.helse.ukedager
-import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
+import no.nav.helse.Alder.Companion.alder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

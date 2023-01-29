@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.DayOfWeek.SATURDAY
 import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
+import no.nav.helse.Alder
 import kotlin.math.max
 
 internal class UtbetalingTeller(

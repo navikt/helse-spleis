@@ -6,7 +6,7 @@ import no.nav.helse.hendelser.til
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.Year
-import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
+import no.nav.helse.Alder.Companion.alder
 
 internal class FeriepengeberegnerTest {
     private companion object {

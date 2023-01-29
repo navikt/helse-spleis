@@ -27,7 +27,7 @@ import no.nav.helse.serde.api.speil.VedtaksperiodeAkkumulator
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
-import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.Alder
 
 internal data class GenerasjonIder(
     val beregningId: BeregningId,

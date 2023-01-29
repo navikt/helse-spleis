@@ -50,7 +50,7 @@ import no.nav.helse.serde.api.speil.builders.BeregningId
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlag
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.speil.builders.PeriodeVarslerBuilder
-import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.Alder
 import kotlin.properties.Delegates
 
 internal class Generasjoner(perioder: Tidslinjeperioder) {

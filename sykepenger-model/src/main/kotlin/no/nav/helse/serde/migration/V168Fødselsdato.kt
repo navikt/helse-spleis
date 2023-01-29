@@ -2,8 +2,8 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
-import no.nav.helse.person.AlderVisitor
-import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.AlderVisitor
+import no.nav.helse.Alder
 
 internal class V168Fødselsdato: JsonMigration(168) {
     override val description = "Fødselsdato fra fnr/dnr"

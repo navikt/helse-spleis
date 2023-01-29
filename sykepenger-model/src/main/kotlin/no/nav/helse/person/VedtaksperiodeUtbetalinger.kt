@@ -14,7 +14,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
-import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.Alder
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver, utbetalinger: List<Pair<VilkårsgrunnlagElement, Utbetaling>>) {

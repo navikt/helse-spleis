@@ -12,7 +12,7 @@ import no.nav.helse.serde.api.BuilderState
 import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.PersonDTO
 import no.nav.helse.serde.api.speil.builders.ArbeidsgiverBuilder.Companion.vilkårsgrunnlagSomPekesPåAvGhostPerioder
-import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.Alder
 
 internal class PersonBuilder(
     builder: AbstractBuilder,

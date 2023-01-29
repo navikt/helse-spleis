@@ -7,7 +7,7 @@ import no.nav.helse.serde.api.dto.ArbeidsgiverDTO
 import no.nav.helse.serde.api.dto.GhostPeriodeDTO
 import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
-import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.Alder
 
 internal class ArbeidsgiverBuilder(
     private val arbeidsgiver: Arbeidsgiver,

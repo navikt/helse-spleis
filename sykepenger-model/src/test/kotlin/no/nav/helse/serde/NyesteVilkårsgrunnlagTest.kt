@@ -12,7 +12,7 @@ import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.Sammenligningsg
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagInnslagData.Companion.grunnlagMap
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
-import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.Alder
 import no.nav.helse.økonomi.Prosent.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

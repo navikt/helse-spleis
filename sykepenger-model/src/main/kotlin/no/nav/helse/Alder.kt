@@ -1,4 +1,4 @@
-package no.nav.helse.utbetalingstidslinje
+package no.nav.helse
 
 import java.time.DayOfWeek.MONDAY
 import java.time.DayOfWeek.SUNDAY
@@ -6,11 +6,9 @@ import java.time.LocalDate
 import java.time.Year
 import java.time.temporal.ChronoUnit.YEARS
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.AlderVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.plus
-import no.nav.helse.ukedager
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
 
 // TODO: alder bør ha dødsdato for å regne alder riktig i tilfelle død
 internal class Alder(private val fødselsdato: LocalDate) {
@@ -105,8 +103,10 @@ internal class Alder(private val fødselsdato: LocalDate) {
 
     internal fun maksimumSykepenger(dato: LocalDate, forbrukteDager: Int, gjenståendeSykepengedager: Int, gjenståendeSykepengedagerOver67: Int): MaksimumSykepenger {
         val maksdatoOrdinærRett = MaksimumSykepenger.ordinærRett(dato, forbrukteDager, gjenståendeSykepengedager)
-        val maksdatoBegrensetRett = MaksimumSykepenger.begrensetRett(dato, forbrukteDager, this, gjenståendeSykepengedagerOver67)
-        val absoluttSisteDagMedSykepenger = MaksimumSykepenger.absoluttSisteDagMedSykepenger(dato, forbrukteDager, sisteVirkedagFørFylte70år)
+        val maksdatoBegrensetRett =
+            MaksimumSykepenger.begrensetRett(dato, forbrukteDager, this, gjenståendeSykepengedagerOver67)
+        val absoluttSisteDagMedSykepenger =
+            MaksimumSykepenger.absoluttSisteDagMedSykepenger(dato, forbrukteDager, sisteVirkedagFørFylte70år)
         return MaksimumSykepenger.minsteAv(maksdatoOrdinærRett, maksdatoBegrensetRett, absoluttSisteDagMedSykepenger)
     }
 
@@ -146,7 +146,8 @@ internal class Alder(private val fødselsdato: LocalDate) {
             }
             object Over67 : Tilstand {
                 override fun sporBegrunnelse() = Begrunnelse::`§ 8-51 ledd 3`
-                override fun begrunnAvvisning() = no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbruktOver67
+                override fun begrunnAvvisning() =
+                    no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbruktOver67
             }
             object Over70 : Tilstand {
                 override fun sporBegrunnelse() = Begrunnelse::`§ 8-3 ledd 1 punktum 2`
