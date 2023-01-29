@@ -1,6 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
+import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.InntektsopplysningVisitor
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -10,9 +11,9 @@ import no.nav.helse.økonomi.Inntekt
 abstract class Inntektsopplysning protected constructor(
     protected val dato: LocalDate,
     private val prioritet: Int
-): Comparable<Inntektsopplysning> {
+) {
     internal abstract fun accept(visitor: InntektsopplysningVisitor)
-    internal open fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? = null
+    protected open fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? = null
     internal abstract fun omregnetÅrsinntekt(): Inntekt
     internal open fun kanLagres(other: Inntektsopplysning) = this != other
     internal open fun skalErstattesAv(other: Inntektsopplysning) = this == other
@@ -41,10 +42,24 @@ abstract class Inntektsopplysning protected constructor(
         oppfylt: Boolean
     ) {}
 
-    final override fun compareTo(other: Inntektsopplysning) =
-        (-this.dato.compareTo(other.dato)).takeUnless { it == 0 } ?: -this.prioritet.compareTo(other.prioritet)
+    private fun beste(other: Inntektsopplysning): Inntektsopplysning {
+        if (this.dato > other.dato) return this
+        if (this.prioritet >= other.prioritet) return this
+        return other
+    }
 
     internal companion object {
+        internal fun List<Inntektsopplysning>?.avklarSykepengegrunnlag(
+            skjæringstidspunkt: LocalDate,
+            førsteFraværsdag: LocalDate?,
+            arbeidsforholdhistorikk: Arbeidsforholdhistorikk
+        ): Inntektsopplysning? {
+            val reserve = Skatteopplysning.nyoppstartetArbeidsforhold(skjæringstidspunkt, arbeidsforholdhistorikk)
+            val kandidater = this?.mapNotNull { it.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag) }
+            if (kandidater.isNullOrEmpty()) return reserve
+            return kandidater.reduce { champion, challenger -> champion.beste(challenger) }
+        }
+
         internal fun <Opplysning: Inntektsopplysning> Opplysning.lagre(liste: List<Opplysning>): List<Opplysning> {
             if (liste.any { !it.kanLagres(this) }) return liste
             return liste.filterNot { it.skalErstattesAv(this) } + this

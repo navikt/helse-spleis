@@ -2,12 +2,12 @@ package no.nav.helse.person.inntekt
 
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.InntekthistorikkVisitor
+import no.nav.helse.person.inntekt.Inntektshistorikk.Innslag.Companion.avklarSykepengegrunnlag
+import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.avklarSykepengegrunnlag
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.lagre
-import no.nav.helse.økonomi.Inntekt
 
 internal class Inntektshistorikk private constructor(private val historikk: MutableList<Innslag>) {
 
@@ -44,8 +44,8 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
 
     internal fun isNotEmpty() = historikk.isNotEmpty()
 
-    internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?, arbeidsforholdhistorikk: Arbeidsforholdhistorikk): Inntektsopplysning? =
-        nyesteInnslag()?.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag) ?: Skatteopplysning.nyoppstartetArbeidsforhold(skjæringstidspunkt, arbeidsforholdhistorikk)
+    internal fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?, arbeidsforholdhistorikk: Arbeidsforholdhistorikk): Inntektsopplysning? =
+        nyesteInnslag().avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, arbeidsforholdhistorikk)
 
     internal class Innslag private constructor(private val id: UUID, private val inntekter: List<Inntektsopplysning>) {
         constructor(inntekter: List<Inntektsopplysning> = emptyList()) : this(UUID.randomUUID(), inntekter)
@@ -55,11 +55,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
             inntekter.forEach { it.accept(visitor) }
             visitor.postVisitInnslag(this, id)
         }
-
-        internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
-            inntekter
-                .mapNotNull { it.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag) }
-                .minOrNull()
 
         override fun equals(other: Any?): Boolean {
             return other is Innslag && this.inntekter == other.inntekter
@@ -82,6 +77,12 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
         }
 
         internal companion object {
+            internal fun Innslag?.avklarSykepengegrunnlag(
+                skjæringstidspunkt: LocalDate,
+                førsteFraværsdag: LocalDate?,
+                arbeidsforholdhistorikk: Arbeidsforholdhistorikk
+            ) =
+                this?.inntekter.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, arbeidsforholdhistorikk)
             internal fun gjenopprett(id: UUID, inntektsopplysninger: List<Inntektsopplysning>) =
                 Innslag(id, inntektsopplysninger)
 

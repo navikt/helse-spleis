@@ -44,6 +44,7 @@ import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
@@ -115,8 +116,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
         )
-        Assertions.assertEquals(1, inspektør(a1).arbeidsgiver.inspektør.arbeidsforholdhistorikk.inspektør.antallInnslag())
-        Assertions.assertEquals(1, inspektør(a2).arbeidsgiver.inspektør.arbeidsforholdhistorikk.inspektør.antallInnslag())
+        assertEquals(1, inspektør(a1).arbeidsgiver.inspektør.arbeidsforholdhistorikk.inspektør.antallInnslag())
+        assertEquals(1, inspektør(a2).arbeidsgiver.inspektør.arbeidsforholdhistorikk.inspektør.antallInnslag())
     }
 
     @Test
@@ -233,13 +234,13 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        Assertions.assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
+        assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
 
         assertIngenVarsler(1.vedtaksperiode.filter(orgnummer = a1))
-        Assertions.assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(2.vedtaksperiode))
+        assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(2.vedtaksperiode))
     }
 
     @Test
@@ -320,13 +321,13 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
-        Assertions.assertEquals(
+        assertEquals(
             692.0,
             inspektør(a2).utbetalinger.last().inspektør.utbetalingstidslinje[19.mars].økonomi.inspektør.arbeidsgiverbeløp?.reflection { _, _, daglig, _ -> daglig })
         val a2Linje = inspektør(a2).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
-        Assertions.assertEquals(17.mars, a2Linje.fom)
-        Assertions.assertEquals(30.mars, a2Linje.tom)
-        Assertions.assertEquals(692, a2Linje.beløp)
+        assertEquals(17.mars, a2Linje.fom)
+        assertEquals(30.mars, a2Linje.tom)
+        assertEquals(692, a2Linje.beløp)
 
         assertIngenVarsler()
     }
@@ -359,7 +360,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             ),
             arbeidsforhold = arbeidsforhold1
         )
-        Assertions.assertEquals(5, inspektør(a1).arbeidsgiver.inspektør.arbeidsforholdhistorikk.inspektør.arbeidsforholdSisteInnslag())
+        assertEquals(5, inspektør(a1).arbeidsgiver.inspektør.arbeidsforholdhistorikk.inspektør.arbeidsforholdSisteInnslag())
     }
 
     @Test
@@ -475,15 +476,15 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
 
         val utbetaling = inspektør(a2).utbetalinger.single()
         val linje = utbetaling.inspektør.arbeidsgiverOppdrag.linjerUtenOpphør().single()
-        Assertions.assertEquals(
+        assertEquals(
             100.0,
             utbetaling.utbetalingstidslinje()[20.februar].økonomi.medData { _, _, _, _, totalGrad, _, _, _, _ -> totalGrad })
-        Assertions.assertEquals(
+        assertEquals(
             2077,
             linje.beløp
         ) // Ikke cappet på 6G, siden personen ikke jobber hos a1 ved dette skjæringstidspunktet
-        Assertions.assertEquals(18.februar, linje.fom)
-        Assertions.assertEquals(20.februar, linje.tom)
+        assertEquals(18.februar, linje.fom)
+        assertEquals(20.februar, linje.tom)
     }
 
     @Test
@@ -521,7 +522,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        Assertions.assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
+        assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
     }
 
     @Test
@@ -554,7 +555,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             ),
             arbeidsforhold = arbeidsforhold
         )
-        Assertions.assertEquals(listOf(a1, a2).map(String::toString), arbeidsgivere())
+        assertEquals(listOf(a1, a2).map(String::toString), person.inspektør.arbeidsgivere())
     }
 
     @Test
@@ -651,15 +652,5 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
 
         assertVarsel(RV_IV_1, 1.vedtaksperiode.filter(a1))
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a1)
-    }
-
-    fun arbeidsgivere(): List<String> {
-        val arbeidsforhold = mutableListOf<String>()
-        person.accept(object : PersonVisitor {
-            override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
-                arbeidsforhold.add(organisasjonsnummer)
-            }
-        })
-        return arbeidsforhold
     }
 }

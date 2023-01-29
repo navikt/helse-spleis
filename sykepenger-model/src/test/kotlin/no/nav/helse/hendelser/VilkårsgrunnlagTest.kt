@@ -88,7 +88,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         )
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 27, false)
-        assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
+        assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand())
         assertTrue(vilkårsgrunnlag.harVarslerEllerVerre())
     }
 
@@ -99,7 +99,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         )
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 0, false)
-        assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
+        assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand())
         assertTrue(vilkårsgrunnlag.harVarslerEllerVerre())
     }
 
@@ -110,7 +110,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         )
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 28, true)
-        assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
+        assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand())
         assertFalse(vilkårsgrunnlag.harVarslerEllerVerre())
     }
 
@@ -121,7 +121,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         )
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 28, true)
-        assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
+        assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand())
         assertVarsel(RV_VV_1, AktivitetsloggFilter.person())
     }
 
@@ -132,7 +132,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         )
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 0, false)
-        assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
+        assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand())
         assertTrue(vilkårsgrunnlag.harVarslerEllerVerre())
     }
 
@@ -167,55 +167,10 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         assertEquals(forventetHarOpptjening, grunnlagsdataInspektør.harOpptjening)
     }
 
-    private fun hentTilstand(): Vedtaksperiodetilstand? {
-        var _tilstand: Vedtaksperiodetilstand? = null
-        person.accept(object : PersonVisitor {
-            override fun preVisitVedtaksperiode(
-                vedtaksperiode: Vedtaksperiode,
-                id: UUID,
-                tilstand: Vedtaksperiodetilstand,
-                opprettet: LocalDateTime,
-                oppdatert: LocalDateTime,
-                periode: Periode,
-                opprinneligPeriode: Periode,
-                periodetype: () -> Periodetype,
-                skjæringstidspunkt: () -> LocalDate,
-                skjæringstidspunktFraInfotrygd: LocalDate?,
-                forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-                hendelseIder: Set<Dokumentsporing>,
-                inntektsmeldingInfo: InntektsmeldingInfo?,
-                inntektskilde: () -> Inntektskilde
-            ) {
-                _tilstand = tilstand
-            }
-        })
-        return _tilstand
-    }
+    private fun hentTilstand() =
+        person.inspektør.sisteVedtaksperiodeTilstander().entries.single().value
 
-    private fun vedtaksperiodeId(): String {
-        lateinit var _id: UUID
-        person.accept(object : PersonVisitor {
-            override fun preVisitVedtaksperiode(
-                vedtaksperiode: Vedtaksperiode,
-                id: UUID,
-                tilstand: Vedtaksperiodetilstand,
-                opprettet: LocalDateTime,
-                oppdatert: LocalDateTime,
-                periode: Periode,
-                opprinneligPeriode: Periode,
-                periodetype: () -> Periodetype,
-                skjæringstidspunkt: () -> LocalDate,
-                skjæringstidspunktFraInfotrygd: LocalDate?,
-                forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-                hendelseIder: Set<Dokumentsporing>,
-                inntektsmeldingInfo: InntektsmeldingInfo?,
-                inntektskilde: () -> Inntektskilde
-            ) {
-                _id = id
-            }
-        })
-        return _id.toString()
-    }
+    private fun vedtaksperiodeId() = person.inspektør.sisteVedtaksperiodeTilstander().entries.single().key.toString()
 
     private fun vilkårsgrunnlag(
         inntektsmåneder: List<ArbeidsgiverInntekt> = inntektperioderForSammenligningsgrunnlag {

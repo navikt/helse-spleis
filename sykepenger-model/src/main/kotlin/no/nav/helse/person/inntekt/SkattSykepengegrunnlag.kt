@@ -21,7 +21,7 @@ internal class SkattSykepengegrunnlag(
         visitor.postVisitSkattSykepengegrunnlag(this, id, dato, beløp)
     }
 
-    override fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
+    override fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
         takeIf { this.dato == skjæringstidspunkt && inntektsopplysninger.any { it.erRelevantForSykepengegrunnlag(skjæringstidspunkt) } }
 
     override fun omregnetÅrsinntekt(): Inntekt {

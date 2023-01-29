@@ -610,27 +610,10 @@ class JsonBuilderTest {
     }
 
     private fun Person.fangeVedtaksperiode() {
-        accept(object : PersonVisitor {
-            override fun preVisitVedtaksperiode(
-                vedtaksperiode: Vedtaksperiode,
-                id: UUID,
-                tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
-                opprettet: LocalDateTime,
-                oppdatert: LocalDateTime,
-                periode: Periode,
-                opprinneligPeriode: Periode,
-                periodetype: () -> Periodetype,
-                skjæringstidspunkt: () -> LocalDate,
-                skjæringstidspunktFraInfotrygd: LocalDate?,
-                forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-                hendelseIder: Set<Dokumentsporing>,
-                inntektsmeldingInfo: InntektsmeldingInfo?,
-                inntektskilde: () -> Inntektskilde
-            ) {
-                vedtaksperiodeId = id.toString()
-                this@JsonBuilderTest.tilstand = tilstand.type
-            }
-        })
+        inspektør.sisteVedtaksperiodeTilstander().entries.single().also { (id, tilstandtype) ->
+            vedtaksperiodeId = id.toString()
+            tilstand = tilstandtype
+        }
     }
 
     private fun Person.fangeArbeidsgiverFagsystemId(): String {

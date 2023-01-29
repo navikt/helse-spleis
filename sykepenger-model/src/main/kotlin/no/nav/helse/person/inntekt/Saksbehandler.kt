@@ -35,7 +35,6 @@ class Saksbehandler internal constructor(
         return ny
     }
 
-    override fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) = takeIf { it.dato == skjæringstidspunkt }
     override fun omregnetÅrsinntekt(): Inntekt = beløp
 
     override fun skalErstattesAv(other: Inntektsopplysning) =
