@@ -888,7 +888,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(30000.månedlig, it.rapportertInntekt)
         }
-
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(a1))
     }
 

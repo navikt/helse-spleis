@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.Y
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Skatt
 import no.nav.helse.person.inntekt.SkattComposite
@@ -30,6 +31,12 @@ class ArbeidsgiverInntekt(
 ) {
     internal fun ansattVedSkjæringstidspunkt(opptjening: Opptjening) =
         opptjening.ansattVedSkjæringstidspunkt(arbeidsgiver)
+
+    internal fun tilSammenligningsgrunnlag(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) =
+        ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
+            orgnummer = arbeidsgiver,
+            inntektsopplysninger = inntekter.map { it.somInntekt(skjæringstidspunkt, meldingsreferanseId) }.filterIsInstance<Skatt.RapportertInntekt>()
+        )
 
     private fun harInntekter() = inntekter.isNotEmpty()
 

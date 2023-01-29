@@ -10,8 +10,8 @@ import no.nav.helse.person.Arbeidsforholdhistorikk.Companion.opptjening
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
@@ -35,11 +35,12 @@ class Vilkårsgrunnlag(
 
     internal fun valider(
         grunnlagForSykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Sammenligningsgrunnlag,
         skjæringstidspunkt: LocalDate,
         antallArbeidsgivereFraAareg: Int,
         subsumsjonObserver: SubsumsjonObserver
     ): IAktivitetslogg {
+        val sammenligningsgrunnlag = sammenligningsgrunnlag(skjæringstidspunkt, subsumsjonObserver)
+
         val sykepengegrunnlagOk = grunnlagForSykepengegrunnlag.valider(this)
         inntektsvurderingForSykepengegrunnlag.valider(this)
         inntektsvurderingForSykepengegrunnlag.loggInteressantFrilanserInformasjon(skjæringstidspunkt)
@@ -75,6 +76,10 @@ class Vilkårsgrunnlag(
         if (person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(skjæringstidspunkt)) {
             varsel(RV_VV_1)
         }
+    }
+
+    private fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Sammenligningsgrunnlag {
+        return inntektsvurdering.sammenligningsgrunnlag(skjæringstidspunkt, meldingsreferanseId(), subsumsjonObserver)
     }
 
     class Arbeidsforhold(

@@ -28,7 +28,6 @@ import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Skatt
-import no.nav.helse.person.inntekt.SkattComposite
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.sykepengegrunnlag

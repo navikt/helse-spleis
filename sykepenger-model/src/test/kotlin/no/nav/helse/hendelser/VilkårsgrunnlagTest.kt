@@ -144,7 +144,6 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         ))
         vilkårsgrunnlag.valider(
             grunnlagForSykepengegrunnlag = INNTEKT.sykepengegrunnlag,
-            sammenligningsgrunnlag = sammenligningsgrunnlag(skjæringstidspunkt = 31.januar),
             skjæringstidspunkt = 31.januar,
             antallArbeidsgivereFraAareg = 1,
             subsumsjonObserver = MaskinellJurist()
@@ -284,23 +283,5 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
         dagpenger = Dagpenger(emptyList()),
         aktivitetslogg = Aktivitetslogg()
-    )
-
-    private fun sammenligningsgrunnlag(inntekt: Inntekt = INNTEKT, skjæringstidspunkt: LocalDate) = Sammenligningsgrunnlag(
-        arbeidsgiverInntektsopplysninger = listOf(
-            ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag("ORGNR1",
-                (0 until 12).map {
-                    Skatt.RapportertInntekt(
-                        dato = skjæringstidspunkt,
-                        hendelseId = UUID.randomUUID(),
-                        beløp = inntekt,
-                        måned = YearMonth.from(skjæringstidspunkt).minusMonths(12L - it),
-                        type = Skatt.Inntekttype.LØNNSINNTEKT,
-                        fordel = "fordel",
-                        beskrivelse = "beskrivelse"
-                    )
-                }
-            )
-        ),
     )
 }

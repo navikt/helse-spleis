@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -24,9 +25,9 @@ import no.nav.helse.oktober
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertInntektForDato
@@ -134,29 +135,28 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
         nyPeriode(1.januar til 31.januar, a1, INNTEKT)
 
-        person.håndter(
-            vilkårsgrunnlag(
-                1.vedtaksperiode,
-                orgnummer = a1,
-                inntekter = inntektperioderForSammenligningsgrunnlag {
-                    1.januar(2017) til 1.desember(2017) inntekter {
-                        a1 inntekt 15000
-                    }
-                    1.januar(2017) til 1.juni(2017) inntekter {
-                        a2 inntekt 5000
-                        a3 inntekt 3000
-                        a4 inntekt 2000
-                    }
-                    1.juli(2017) til 1.desember(2017) inntekter {
-                        a3 inntekt 7500
-                        a4 inntekt 2500
-                    }
-                },
-                inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
-                arbeidsforhold = arbeidsforhold
-            )
+        val vilkårsgrunnlag = vilkårsgrunnlag(
+            1.vedtaksperiode,
+            orgnummer = a1,
+            inntekter = inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt 15000
+                }
+                1.januar(2017) til 1.juni(2017) inntekter {
+                    a2 inntekt 5000
+                    a3 inntekt 3000
+                    a4 inntekt 2000
+                }
+                1.juli(2017) til 1.desember(2017) inntekter {
+                    a3 inntekt 7500
+                    a4 inntekt 2500
+                }
+            },
+            inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
+            arbeidsforhold = arbeidsforhold
         )
-        assertEquals(300000.årlig, person.beregnSammenligningsgrunnlag(1.januar, NullObserver).inspektør.sammenligningsgrunnlag)
+        vilkårsgrunnlag.valider(Sykepengegrunnlag(1.januar.alder, emptyList(), 1.januar, NullObserver, false), 1.januar, 1, NullObserver)
+        assertEquals(300000.årlig, vilkårsgrunnlag.grunnlagsdata().inspektør.sammenligningsgrunnlag.inspektør.sammenligningsgrunnlag)
     }
 
     @Test

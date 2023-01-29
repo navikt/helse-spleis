@@ -39,7 +39,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkår
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
-import no.nav.helse.person.Arbeidsgiver.Companion.inntekterForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.lagRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.nekterOpprettelseAvPeriode
@@ -616,16 +615,6 @@ class Person private constructor(
             skjæringstidspunkt,
             subsumsjonObserver
         )
-    }
-
-    internal fun beregnSammenligningsgrunnlag(
-        skjæringstidspunkt: LocalDate,
-        subsumsjonObserver: SubsumsjonObserver
-    ): Sammenligningsgrunnlag {
-        val arbeidsgiverInntektsopplysninger = arbeidsgivere.inntekterForSammenligningsgrunnlag(skjæringstidspunkt)
-        val sammenligningsgrunnlag = Sammenligningsgrunnlag(arbeidsgiverInntektsopplysninger)
-        subsumsjonObserver.`§ 8-30 ledd 2`(skjæringstidspunkt, sammenligningsgrunnlag.subsumsjonsformat())
-        return sammenligningsgrunnlag
     }
 
     private fun arbeidsgivereMedSykdom() = arbeidsgivere.filter(Arbeidsgiver::harSykdom)

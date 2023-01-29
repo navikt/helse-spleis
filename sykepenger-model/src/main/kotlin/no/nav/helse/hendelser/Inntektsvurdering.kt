@@ -9,6 +9,10 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.utenOffentligeYtelse
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_1
+import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
+import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 
 class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
     init {
@@ -22,4 +26,13 @@ class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
 
     internal fun lagreInntekter(hendelse: IAktivitetslogg, person: Person, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, other: List<ArbeidsgiverInntekt>) =
         (this.inntekter + other).lagreInntekter(hendelse, person, skjæringstidspunkt, meldingsreferanseId)
+
+    internal fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, subsumsjonObserver: SubsumsjonObserver): Sammenligningsgrunnlag {
+        val arbeidsgiverInntektsopplysninger = inntekter.map {
+            it.tilSammenligningsgrunnlag(skjæringstidspunkt, meldingsreferanseId)
+        }
+        val sammenligningsgrunnlag = Sammenligningsgrunnlag(arbeidsgiverInntektsopplysninger)
+        subsumsjonObserver.`§ 8-30 ledd 2`(skjæringstidspunkt, sammenligningsgrunnlag.subsumsjonsformat())
+        return sammenligningsgrunnlag
+    }
 }

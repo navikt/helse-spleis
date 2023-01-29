@@ -302,7 +302,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlag.valider(
             10000.månedlig.sykepengegrunnlag,
-            sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             1,
             MaskinellJurist()
@@ -331,7 +330,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         val jurist = MaskinellJurist()
         vilkårsgrunnlag.valider(
             10000.månedlig.sykepengegrunnlag,
-            sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             1,
             jurist
@@ -366,14 +364,12 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlag1.valider(
             10000.månedlig.sykepengegrunnlag,
-            sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             1,
             MaskinellJurist()
         )
         vilkårsgrunnlag2.valider(
             10000.månedlig.sykepengegrunnlag,
-            sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             1,
             MaskinellJurist()
@@ -408,7 +404,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlag.valider(
             10000.månedlig.sykepengegrunnlag,
-            sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             1,
             MaskinellJurist()
@@ -416,7 +411,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         historikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         vilkårsgrunnlag.valider(
             10000.månedlig.sykepengegrunnlag,
-            sammenligningsgrunnlag(10000.månedlig, 1.januar),
             4.januar,
             1,
             MaskinellJurist()
@@ -442,7 +436,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlag.valider(
             10000.månedlig.sykepengegrunnlag,
-            sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             1,
             MaskinellJurist()
@@ -469,7 +462,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlag.valider(
             10000.månedlig.sykepengegrunnlag,
-            sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             1,
             MaskinellJurist()
@@ -497,7 +489,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlag1.valider(
             10000.månedlig.sykepengegrunnlag,
-            sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             1,
             MaskinellJurist()
@@ -515,7 +506,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlag2.valider(
             10000.månedlig.sykepengegrunnlag,
-            sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             1,
             MaskinellJurist()
@@ -543,7 +533,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlag.valider(
             10.månedlig.sykepengegrunnlag,
-            sammenligningsgrunnlag(10.månedlig, 1.januar),
             1.januar,
             1,
             MaskinellJurist()
@@ -581,7 +570,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlag.valider(
             10.månedlig.sykepengegrunnlag(fødselsdato.alder),
-            sammenligningsgrunnlag(10.månedlig, 1.januar),
             1.januar,
             1,
             MaskinellJurist()
@@ -635,23 +623,4 @@ internal class VilkårsgrunnlagHistorikkTest {
             )
         )
     }
-
-    private fun sammenligningsgrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate) = Sammenligningsgrunnlag(
-        arbeidsgiverInntektsopplysninger = listOf(
-            ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
-                "ORGNR1",
-                (0 until 12).map {
-                    Skatt.RapportertInntekt(
-                        dato = skjæringstidspunkt,
-                        hendelseId = UUID.randomUUID(),
-                        beløp = inntekt,
-                        måned = YearMonth.from(skjæringstidspunkt).minusMonths(12L - it),
-                        type = Skatt.Inntekttype.LØNNSINNTEKT,
-                        fordel = "fordel",
-                        beskrivelse = "beskrivelse"
-                    )
-                }
-            )
-        ),
-    )
 }
