@@ -124,53 +124,47 @@ internal class SubsumsjonObserverTest {
             arbeidsgiverInntektsopplysninger = listOf(
                 ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
                     AG1,
-                    SkattComposite(
-                        UUID.randomUUID(),
-                        listOf(
-                            Skatt.RapportertInntekt(
-                                dato = 1.januar,
-                                hendelseId = UUID.randomUUID(),
-                                beløp = 20000.månedlig,
-                                måned = YearMonth.of(2069, 12),
-                                type = Skatt.Inntekttype.LØNNSINNTEKT,
-                                fordel = "fordel",
-                                beskrivelse = "beskrivelse"
-                            ),
-                            Skatt.RapportertInntekt(
-                                dato = 1.januar,
-                                hendelseId = UUID.randomUUID(),
-                                beløp = 20000.månedlig,
-                                måned = YearMonth.of(2069, 11),
-                                type = Skatt.Inntekttype.LØNNSINNTEKT,
-                                fordel = "fordel",
-                                beskrivelse = "beskrivelse"
-                            )
+                    listOf(
+                        Skatt.RapportertInntekt(
+                            dato = 1.januar,
+                            hendelseId = UUID.randomUUID(),
+                            beløp = 20000.månedlig,
+                            måned = YearMonth.of(2069, 12),
+                            type = Skatt.Inntekttype.LØNNSINNTEKT,
+                            fordel = "fordel",
+                            beskrivelse = "beskrivelse"
+                        ),
+                        Skatt.RapportertInntekt(
+                            dato = 1.januar,
+                            hendelseId = UUID.randomUUID(),
+                            beløp = 20000.månedlig,
+                            måned = YearMonth.of(2069, 11),
+                            type = Skatt.Inntekttype.LØNNSINNTEKT,
+                            fordel = "fordel",
+                            beskrivelse = "beskrivelse"
                         )
                     )
                 ),
                 ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
                     AG2,
-                    SkattComposite(
-                        UUID.randomUUID(),
-                        listOf(
-                            Skatt.RapportertInntekt(
-                                dato = 1.januar,
-                                hendelseId = UUID.randomUUID(),
-                                beløp = 15000.månedlig,
-                                måned = YearMonth.of(2069, 10),
-                                type = Skatt.Inntekttype.LØNNSINNTEKT,
-                                fordel = "fordel",
-                                beskrivelse = "beskrivelse"
-                            ),
-                            Skatt.RapportertInntekt(
-                                dato = 1.januar,
-                                hendelseId = UUID.randomUUID(),
-                                beløp = 15000.månedlig,
-                                måned = YearMonth.of(2069, 9),
-                                type = Skatt.Inntekttype.LØNNSINNTEKT,
-                                fordel = "fordel",
-                                beskrivelse = "beskrivelse"
-                            )
+                    listOf(
+                        Skatt.RapportertInntekt(
+                            dato = 1.januar,
+                            hendelseId = UUID.randomUUID(),
+                            beløp = 15000.månedlig,
+                            måned = YearMonth.of(2069, 10),
+                            type = Skatt.Inntekttype.LØNNSINNTEKT,
+                            fordel = "fordel",
+                            beskrivelse = "beskrivelse"
+                        ),
+                        Skatt.RapportertInntekt(
+                            dato = 1.januar,
+                            hendelseId = UUID.randomUUID(),
+                            beløp = 15000.månedlig,
+                            måned = YearMonth.of(2069, 9),
+                            type = Skatt.Inntekttype.LØNNSINNTEKT,
+                            fordel = "fordel",
+                            beskrivelse = "beskrivelse"
                         )
                     )
                 )

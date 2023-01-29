@@ -39,7 +39,10 @@ internal class SkattComposite(
     }
 
     override fun rapportertInntekt(dato: LocalDate) =
-        takeIf { inntektsopplysninger.any { it.rapportertInntekt(dato) != null } }
+        inntektsopplysninger
+            .mapNotNull { it.rapportertInntekt(dato) }
+            .flatten()
+            .takeIf { it.isNotEmpty() }
 
     override fun rapportertInntekt(): Inntekt =
         inntektsopplysninger

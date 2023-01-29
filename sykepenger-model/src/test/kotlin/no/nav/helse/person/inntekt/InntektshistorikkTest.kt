@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.Inntektsinspektør
+import no.nav.helse.inspectors.rapportertInntekt
 import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.oktober

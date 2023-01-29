@@ -38,7 +38,6 @@ import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonshistorikk
-import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Skatt
@@ -135,6 +134,7 @@ internal class JsonBuilder : AbstractBuilder() {
             "opprettet" to opprettet,
             "dødsdato" to dødsdato
         )
+        private val vilkårsgrunnlagHistorikk = mutableListOf<Map<String, Any?>>()
 
         private val arbeidsgivere = mutableListOf<MutableMap<String, Any?>>()
 
@@ -162,6 +162,17 @@ internal class JsonBuilder : AbstractBuilder() {
             pushState(ArbeidsgiverState(arbeidsgiverMap))
         }
 
+        override fun preVisitInfotrygdhistorikk() {
+            val historikk = mutableListOf<Map<String, Any?>>()
+            personMap["infotrygdhistorikk"] = historikk
+            pushState(InfotrygdhistorikkState(historikk))
+        }
+
+        override fun preVisitVilkårsgrunnlagHistorikk() {
+            personMap["vilkårsgrunnlagHistorikk"] = vilkårsgrunnlagHistorikk
+            pushState(VilkårsgrunnlagHistorikkState(vilkårsgrunnlagHistorikk))
+        }
+
         override fun postVisitPerson(
             person: Person,
             opprettet: LocalDateTime,
@@ -171,18 +182,6 @@ internal class JsonBuilder : AbstractBuilder() {
             vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
         ) {
             popState()
-        }
-
-        override fun preVisitInfotrygdhistorikk() {
-            val historikk = mutableListOf<Map<String, Any?>>()
-            personMap["infotrygdhistorikk"] = historikk
-            pushState(InfotrygdhistorikkState(historikk))
-        }
-
-        override fun preVisitVilkårsgrunnlagHistorikk() {
-            val historikk = mutableListOf<Map<String, Any?>>()
-            personMap["vilkårsgrunnlagHistorikk"] = historikk
-            pushState(VilkårsgrunnlagHistorikkState(historikk))
         }
     }
 
@@ -786,21 +785,12 @@ internal class JsonBuilder : AbstractBuilder() {
 
 
     private class VilkårsgrunnlagHistorikkState(private val historikk: MutableList<Map<String, Any?>>) : BuilderState() {
-
         override fun preVisitInnslag(
             innslag: VilkårsgrunnlagHistorikk.Innslag,
             id: UUID,
             opprettet: LocalDateTime
         ) {
-            val vilkårsgrunnlag = mutableListOf<Map<String, Any?>>()
-            this.historikk.add(
-                mutableMapOf(
-                    "id" to id,
-                    "opprettet" to opprettet,
-                    "vilkårsgrunnlag" to vilkårsgrunnlag
-                )
-            )
-            pushState(VilkårsgrunnlagElementState(vilkårsgrunnlag))
+            pushState(VilkårsgrunnlagInnslagState(this.historikk))
         }
 
         override fun postVisitVilkårsgrunnlagHistorikk() {
@@ -808,7 +798,8 @@ internal class JsonBuilder : AbstractBuilder() {
         }
     }
 
-    private class VilkårsgrunnlagElementState(private val vilkårsgrunnlagElement: MutableList<Map<String, Any?>>) : BuilderState() {
+    private class VilkårsgrunnlagInnslagState(private val innslag: MutableList<Map<String, Any?>>) : BuilderState() {
+        private val vilkårsgrunnlagelementer = mutableListOf<Map<String, Any?>>()
 
         override fun preVisitGrunnlagsdata(
             skjæringstidspunkt: LocalDate,
@@ -822,7 +813,7 @@ internal class JsonBuilder : AbstractBuilder() {
             vilkårsgrunnlagId: UUID,
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
         ) {
-            pushState(GrunnlagsdataState(vilkårsgrunnlagElement))
+            pushState(GrunnlagsdataState(vilkårsgrunnlagelementer))
         }
 
         override fun preVisitInfotrygdVilkårsgrunnlag(
@@ -831,21 +822,16 @@ internal class JsonBuilder : AbstractBuilder() {
             sykepengegrunnlag: Sykepengegrunnlag,
             vilkårsgrunnlagId: UUID
         ) {
-            val sykepengegrunnlagMap = mutableMapOf<String, Any>()
-            vilkårsgrunnlagElement.add(
-                mapOf(
-                    "skjæringstidspunkt" to skjæringstidspunkt,
-                    "type" to "Infotrygd",
-                    "sykepengegrunnlag" to sykepengegrunnlagMap,
-                    "vilkårsgrunnlagId" to vilkårsgrunnlagId
-                )
-            )
-
-            pushState(SykepengegrunnlagState(sykepengegrunnlagMap))
+            pushState(InfotrygdvilkårsgrunnlagState(vilkårsgrunnlagelementer))
         }
 
 
         override fun postVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {
+            this.innslag.add(mutableMapOf(
+                "id" to id,
+                "opprettet" to opprettet,
+                "vilkårsgrunnlag" to this.vilkårsgrunnlagelementer
+            ))
             popState()
         }
     }
@@ -876,6 +862,42 @@ internal class JsonBuilder : AbstractBuilder() {
                 "opptjeningFom" to opptjeningsperiode.start,
                 "opptjeningTom" to opptjeningsperiode.endInclusive
             ))
+            popState()
+        }
+    }
+
+    class InfotrygdvilkårsgrunnlagState(private val vilkårsgrunnlagelementer: MutableList<Map<String, Any?>>) : BuilderState() {
+        private val sykepengegrunnlagMap = mutableMapOf<String, Any>()
+
+        override fun preVisitSykepengegrunnlag(
+            sykepengegrunnlag1: Sykepengegrunnlag,
+            skjæringstidspunkt: LocalDate,
+            sykepengegrunnlag: Inntekt,
+            skjønnsmessigFastsattÅrsinntekt: Inntekt?,
+            beregningsgrunnlag: Inntekt,
+            `6G`: Inntekt,
+            begrensning: Sykepengegrunnlag.Begrensning,
+            vurdertInfotrygd: Boolean,
+            minsteinntekt: Inntekt,
+            oppfyllerMinsteinntektskrav: Boolean
+        ) {
+            pushState(SykepengegrunnlagState(sykepengegrunnlagMap))
+        }
+
+        override fun postVisitInfotrygdVilkårsgrunnlag(
+            infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
+            skjæringstidspunkt: LocalDate,
+            sykepengegrunnlag: Sykepengegrunnlag,
+            vilkårsgrunnlagId: UUID
+        ) {
+            vilkårsgrunnlagelementer.add(
+                mapOf(
+                    "skjæringstidspunkt" to skjæringstidspunkt,
+                    "type" to "Infotrygd",
+                    "sykepengegrunnlag" to sykepengegrunnlagMap,
+                    "vilkårsgrunnlagId" to vilkårsgrunnlagId
+                )
+            )
             popState()
         }
     }
@@ -946,6 +968,14 @@ internal class JsonBuilder : AbstractBuilder() {
         private val arbeidsgiverInntektsopplysninger = mutableListOf<Map<String, Any>>()
         private val deaktiverteArbeidsgiverInntektsopplysninger = mutableListOf<Map<String, Any>>()
 
+        override fun preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
+            pushState(ArbeidsgiverInntektsopplysningerState(arbeidsgiverInntektsopplysninger))
+        }
+
+        override fun preVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
+            pushState(ArbeidsgiverInntektsopplysningerState(deaktiverteArbeidsgiverInntektsopplysninger))
+        }
+
         override fun postVisitSykepengegrunnlag(
             sykepengegrunnlag1: Sykepengegrunnlag,
             skjæringstidspunkt: LocalDate,
@@ -975,18 +1005,10 @@ internal class JsonBuilder : AbstractBuilder() {
             )
             popState()
         }
-
-        override fun preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
-            pushState(ArbeidsgiverInntektsopplysningerState(arbeidsgiverInntektsopplysninger))
-        }
-
-        override fun preVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
-            pushState(ArbeidsgiverInntektsopplysningerState(deaktiverteArbeidsgiverInntektsopplysninger))
-        }
     }
 
     class SammenlingningsgrunnlagState(private val sammenligningsgrunnlag: MutableMap<String, Any>) : BuilderState() {
-        val arbeidsgiverInntektsopplysninger = mutableListOf<Map<String, Any>>()
+        private val arbeidsgiverInntektsopplysninger = mutableListOf<Map<String, Any>>()
 
         override fun postVisitSammenligningsgrunnlag(sammenligningsgrunnlag1: Sammenligningsgrunnlag, sammenligningsgrunnlag: Inntekt) {
             this.sammenligningsgrunnlag.putAll(
@@ -1003,27 +1025,27 @@ internal class JsonBuilder : AbstractBuilder() {
         }
     }
 
-    class ArbeidsgiverInntektsopplysningerState(private val arbeidsgiverInntektsopplysninger: MutableList<Map<String, Any>>) : AbstractArbeidsgiverInntektsopplysningerState() {
-
-        private var refusjonsopplysninger: MutableList<Map<String, Any?>> = mutableListOf()
-
-        override fun preVisitRefusjonsopplysninger(refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger) {
-            this.refusjonsopplysninger.clear()
-        }
+    class ArbeidsgiverInntektsopplysningerState(private val arbeidsgiverInntektsopplysninger: MutableList<Map<String, Any>>) : BuilderState() {
+        private val opplysninger = mutableListOf<Map<String, Any>>()
 
         override fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
-            inntektsopplysninger = null
+            pushState(ArbeidsgiverInntektsopplysningState(opplysninger))
         }
 
-        override fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
-            this.arbeidsgiverInntektsopplysninger.add(
-                mapOf(
-                    "orgnummer" to orgnummer,
-                    "inntektsopplysning" to inntektsopplysninger!!,
-                    "refusjonsopplysninger" to refusjonsopplysninger.toList()
-                )
-            )
+        override fun postVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
+            this.arbeidsgiverInntektsopplysninger.addAll(opplysninger)
+            popState()
         }
+
+        override fun postVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
+            this.arbeidsgiverInntektsopplysninger.addAll(opplysninger)
+            popState()
+        }
+
+    }
+    class ArbeidsgiverInntektsopplysningState(private val arbeidsgiverInntektsopplysninger: MutableList<Map<String, Any>>) : BuilderState() {
+        private var inntektsopplysninger = mutableListOf<Map<String, Any?>>()
+        private var refusjonsopplysninger = mutableListOf<Map<String, Any?>>()
 
         override fun visitRefusjonsopplysning(
             meldingsreferanseId: UUID,
@@ -1041,46 +1063,6 @@ internal class JsonBuilder : AbstractBuilder() {
             )
         }
 
-        override fun postVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
-            popState()
-        }
-
-        override fun postVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
-            popState()
-        }
-
-    }
-    class ArbeidsgiverInntektsopplysningerForSammenligningsgrunnlagState(private val arbeidsgiverInntektsopplysninger: MutableList<Map<String, Any>>) : AbstractArbeidsgiverInntektsopplysningerState() {
-
-        override fun preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
-            arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag,
-            orgnummer: String,
-            rapportertInntekt: Inntekt
-        ) {
-            inntektsopplysninger = null
-        }
-
-        override fun postVisitArbeidsgiverInntektsopplysningerForSammenligningsgrunnlag(arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>) {
-            popState()
-        }
-
-        override fun postVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
-            arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag,
-            orgnummer: String,
-            rapportertInntekt: Inntekt
-        ) {
-            this.arbeidsgiverInntektsopplysninger.add(
-                mapOf(
-                    "orgnummer" to orgnummer,
-                    "inntektsopplysning" to inntektsopplysninger!!
-                )
-            )
-        }
-    }
-    abstract class AbstractArbeidsgiverInntektsopplysningerState : BuilderState() {
-
-        protected var inntektsopplysninger: Map<String, Any?>? = null
-
         override fun visitSaksbehandler(
             saksbehandler: Saksbehandler,
             id: UUID,
@@ -1091,7 +1073,7 @@ internal class JsonBuilder : AbstractBuilder() {
             subsumsjon: Subsumsjon?,
             tidsstempel: LocalDateTime
         ) {
-            inntektsopplysninger = mapOf(
+            inntektsopplysninger.add(mapOf(
                 "id" to id,
                 "dato" to dato,
                 "hendelseId" to hendelseId,
@@ -1106,7 +1088,7 @@ internal class JsonBuilder : AbstractBuilder() {
                     )
                 },
                 "tidsstempel" to tidsstempel
-            )
+            ))
         }
 
         override fun visitInntektsmelding(
@@ -1117,23 +1099,23 @@ internal class JsonBuilder : AbstractBuilder() {
             beløp: Inntekt,
             tidsstempel: LocalDateTime
         ) {
-            inntektsopplysninger = mapOf(
+            inntektsopplysninger.add(mapOf(
                 "id" to id,
                 "dato" to dato,
                 "hendelseId" to hendelseId,
                 "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
                 "kilde" to Inntektsopplysningskilde.INNTEKTSMELDING,
                 "tidsstempel" to tidsstempel
-            )
+            ))
         }
 
         override fun visitIkkeRapportert(id: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
-            inntektsopplysninger = mapOf(
+            inntektsopplysninger.add(mapOf(
                 "id" to id,
                 "dato" to dato,
                 "kilde" to Inntektsopplysningskilde.IKKE_RAPPORTERT,
                 "tidsstempel" to tidsstempel
-            )
+            ))
         }
 
         override fun visitInfotrygd(
@@ -1144,23 +1126,121 @@ internal class JsonBuilder : AbstractBuilder() {
             beløp: Inntekt,
             tidsstempel: LocalDateTime
         ) {
-            inntektsopplysninger = mapOf(
+            inntektsopplysninger.add(mapOf(
                 "id" to id,
                 "dato" to dato,
                 "hendelseId" to hendelseId,
                 "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
                 "kilde" to Inntektsopplysningskilde.INFOTRYGD,
                 "tidsstempel" to tidsstempel
-            )
+            ))
         }
 
         override fun preVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
-            val skatteopplysninger = mutableListOf<Map<String, Any?>>()
-            this.inntektsopplysninger = mapOf(
+            pushState(SkattSykepengegrunnlagState(inntektsopplysninger))
+        }
+
+        override fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
+            this.arbeidsgiverInntektsopplysninger.add(
+                mapOf(
+                    "orgnummer" to orgnummer,
+                    "inntektsopplysning" to inntektsopplysninger.single(),
+                    "refusjonsopplysninger" to refusjonsopplysninger.toList()
+                )
+            )
+            popState()
+        }
+    }
+
+    class SkattSykepengegrunnlagState(private val inntektsopplysninger: MutableList<Map<String, Any?>>) : BuilderState() {
+        private val skatteopplysninger = mutableListOf<Map<String, Any>>()
+
+        override fun visitSkattSykepengegrunnlag(
+            sykepengegrunnlag: Skatt.Sykepengegrunnlag,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            måned: YearMonth,
+            type: Skatt.Inntekttype,
+            fordel: String,
+            beskrivelse: String,
+            tidsstempel: LocalDateTime
+        ) {
+            skatteopplysninger.add(mapOf(
+                "dato" to dato,
+                "kilde" to "SKATT_SYKEPENGEGRUNNLAG",
+                "hendelseId" to hendelseId,
+                "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
+                "tidsstempel" to tidsstempel,
+                "måned" to måned,
+                "type" to type,
+                "fordel" to fordel,
+                "beskrivelse" to beskrivelse
+            ))
+        }
+
+        override fun postVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
+            this.inntektsopplysninger.add(mapOf(
                 "id" to id,
                 "skatteopplysninger" to skatteopplysninger
+            ))
+            popState()
+        }
+    }
+
+    class ArbeidsgiverInntektsopplysningerForSammenligningsgrunnlagState(private val arbeidsgiverInntektsopplysninger: MutableList<Map<String, Any>>) : BuilderState() {
+
+        override fun preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
+            arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag,
+            orgnummer: String,
+            rapportertInntekt: Inntekt
+        ) {
+            pushState(ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagState(arbeidsgiverInntektsopplysninger))
+        }
+
+        override fun postVisitArbeidsgiverInntektsopplysningerForSammenligningsgrunnlag(arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>) {
+            popState()
+        }
+    }
+
+    class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagState(private val arbeidsgiverInntektsopplysninger: MutableList<Map<String, Any>>) : BuilderState() {
+        private val inntektsopplysninger = mutableListOf<Map<String, Any>>()
+
+        override fun visitSkattRapportertInntekt(
+            rapportertInntekt: Skatt.RapportertInntekt,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            måned: YearMonth,
+            type: Skatt.Inntekttype,
+            fordel: String,
+            beskrivelse: String,
+            tidsstempel: LocalDateTime
+        ) {
+            inntektsopplysninger.add(mapOf(
+                "dato" to dato,
+                "hendelseId" to hendelseId,
+                "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
+                "tidsstempel" to tidsstempel,
+                "måned" to måned,
+                "type" to type,
+                "fordel" to fordel,
+                "beskrivelse" to beskrivelse
+            ))
+        }
+
+        override fun postVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
+            arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag,
+            orgnummer: String,
+            rapportertInntekt: Inntekt
+        ) {
+            this.arbeidsgiverInntektsopplysninger.add(
+                mapOf(
+                    "orgnummer" to orgnummer,
+                    "skatteopplysninger" to inntektsopplysninger
+                )
             )
-            pushState(InntektsendringState(skatteopplysninger))
+            popState()
         }
     }
 

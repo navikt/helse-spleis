@@ -381,7 +381,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     private fun sammenligningsgrunnlag(inntekt: Inntekt) = Sammenligningsgrunnlag(
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag("orgnummer",
-                SkattComposite(UUID.randomUUID(), (0 until 12).map {
+                (0 until 12).map {
                     Skatt.RapportertInntekt(
                         dato = LocalDate.now(),
                         hendelseId = UUID.randomUUID(),
@@ -391,7 +391,7 @@ internal class ArbeidsgiverUtbetalingerTest {
                         fordel = "fordel",
                         beskrivelse = "beskrivelse"
                     )
-                })
+                }
             )
         ),
     )

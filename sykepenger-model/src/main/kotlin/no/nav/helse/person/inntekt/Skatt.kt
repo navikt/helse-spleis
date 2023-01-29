@@ -101,7 +101,7 @@ internal sealed class Skatt(
         }
 
         override fun rapportertInntekt(dato: LocalDate) =
-            takeIf { this.dato == dato && måned.isWithinRangeOf(dato, 12) }
+            takeIf { this.dato == dato && måned.isWithinRangeOf(dato, 12) }?.let { listOf(this) }
 
         override fun rapportertInntekt(): Inntekt = beløp
 

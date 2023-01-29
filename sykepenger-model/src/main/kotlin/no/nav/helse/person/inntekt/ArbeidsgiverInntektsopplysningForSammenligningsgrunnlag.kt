@@ -6,15 +6,18 @@ import no.nav.helse.økonomi.Inntekt.Companion.summer
 
 internal class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
     private val orgnummer: String,
-    private val inntektsopplysning: Inntektsopplysning
+    private val inntektsopplysninger: List<Skatt.RapportertInntekt>
 ) {
-    private val rapportertInntekt = inntektsopplysning.rapportertInntekt()
+    private val rapportertInntekt = inntektsopplysninger
+        .map(Skatt::rapportertInntekt)
+        .summer()
+        .div(12)
 
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
 
     internal fun accept(visitor: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagVisitor) {
         visitor.preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(this, orgnummer, rapportertInntekt)
-        inntektsopplysning.accept(visitor)
+        inntektsopplysninger.forEach { it.accept(visitor) }
         visitor.postVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(this, orgnummer, rapportertInntekt)
     }
 
@@ -22,13 +25,13 @@ internal class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
         if (this === other) return true
         if (other !is ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag) return false
         if (orgnummer != other.orgnummer) return false
-        if (inntektsopplysning != other.inntektsopplysning) return false
+        if (inntektsopplysninger != other.inntektsopplysninger) return false
         return true
     }
 
     override fun hashCode(): Int {
         var result = orgnummer.hashCode()
-        result = 31 * result + inntektsopplysning.hashCode()
+        result = 31 * result + inntektsopplysninger.hashCode()
         return result
     }
 

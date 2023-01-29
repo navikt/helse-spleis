@@ -367,13 +367,48 @@ internal data class PersonData(
 
         data class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData(
             private val orgnummer: String,
-            private val inntektsopplysning: ArbeidsgiverData.InntektsopplysningData
+            private val skatteopplysninger: List<SammenligningsgrunnlagInntektsopplysningData>
         ) {
             companion object {
                 internal fun List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData>.parseArbeidsgiverInntektsopplysninger(): List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag> =
                     map {
-                        ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(it.orgnummer, it.inntektsopplysning.tilModellobjekt())
+                        ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(it.orgnummer, it.skatteopplysninger.map { it.tilModellobjekt() })
                     }
+            }
+            data class SammenligningsgrunnlagInntektsopplysningData(
+                private val dato: LocalDate,
+                private val hendelseId: UUID,
+                private val beløp: Double,
+                private val måned: YearMonth,
+                private val type: InntekttypeData,
+                private val fordel: String,
+                private val beskrivelse: String,
+                private val tidsstempel: LocalDateTime,
+            ) {
+                internal enum class InntekttypeData {
+                    LØNNSINNTEKT,
+                    NÆRINGSINNTEKT,
+                    PENSJON_ELLER_TRYGD,
+                    YTELSE_FRA_OFFENTLIGE;
+
+                    fun tilModellenum() = when(this) {
+                        LØNNSINNTEKT -> Skatt.Inntekttype.LØNNSINNTEKT
+                        NÆRINGSINNTEKT -> Skatt.Inntekttype.NÆRINGSINNTEKT
+                        PENSJON_ELLER_TRYGD -> Skatt.Inntekttype.PENSJON_ELLER_TRYGD
+                        YTELSE_FRA_OFFENTLIGE -> Skatt.Inntekttype.YTELSE_FRA_OFFENTLIGE
+                    }
+                }
+                fun tilModellobjekt(): Skatt.RapportertInntekt =
+                    Skatt.RapportertInntekt(
+                        dato = dato,
+                        hendelseId = hendelseId,
+                        beløp = beløp.månedlig,
+                        måned = måned,
+                        type = type.tilModellenum(),
+                        fordel = fordel,
+                        beskrivelse = beskrivelse,
+                        tidsstempel = tidsstempel
+                    )
             }
         }
 

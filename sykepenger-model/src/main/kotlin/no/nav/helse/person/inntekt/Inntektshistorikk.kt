@@ -44,8 +44,7 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
     internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?, arbeidsforholdhistorikk: Arbeidsforholdhistorikk): Inntektsopplysning? =
         nyesteInnslag()?.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag) ?: nyoppstartetArbeidsforhold(skjæringstidspunkt, arbeidsforholdhistorikk)
 
-    internal fun rapportertInntekt(dato: LocalDate): Inntektsopplysning? =
-        nyesteInnslag()?.rapportertInntekt(dato)
+    internal fun rapportertInntekt(dato: LocalDate) = nyesteInnslag()?.rapportertInntekt(dato)
 
     private fun nyoppstartetArbeidsforhold(skjæringstidspunkt: LocalDate, arbeidsforholdhistorikk: Arbeidsforholdhistorikk) =
         IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt).takeIf {

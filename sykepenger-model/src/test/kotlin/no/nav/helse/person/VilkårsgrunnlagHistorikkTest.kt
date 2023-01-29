@@ -641,7 +641,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
                 "ORGNR1",
-                SkattComposite(UUID.randomUUID(), (0 until 12).map {
+                (0 until 12).map {
                     Skatt.RapportertInntekt(
                         dato = skjæringstidspunkt,
                         hendelseId = UUID.randomUUID(),
@@ -651,7 +651,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                         fordel = "fordel",
                         beskrivelse = "beskrivelse"
                     )
-                })
+                }
             )
         ),
     )

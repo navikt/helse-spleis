@@ -24,7 +24,8 @@ import no.nav.helse.oktober
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
@@ -155,7 +156,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 arbeidsforhold = arbeidsforhold
             )
         )
-        assertEquals(300000.årlig, person.beregnSammenligningsgrunnlag(1.januar, MaskinellJurist()).inspektør.sammenligningsgrunnlag)
+        assertEquals(300000.årlig, person.beregnSammenligningsgrunnlag(1.januar, NullObserver).inspektør.sammenligningsgrunnlag)
     }
 
     @Test

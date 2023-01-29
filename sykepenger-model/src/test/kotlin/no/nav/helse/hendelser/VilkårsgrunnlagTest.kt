@@ -30,7 +30,6 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Skatt
-import no.nav.helse.person.inntekt.SkattComposite
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykepengegrunnlag
@@ -290,7 +289,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
     private fun sammenligningsgrunnlag(inntekt: Inntekt = INNTEKT, skjæringstidspunkt: LocalDate) = Sammenligningsgrunnlag(
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag("ORGNR1",
-                SkattComposite(UUID.randomUUID(), (0 until 12).map {
+                (0 until 12).map {
                     Skatt.RapportertInntekt(
                         dato = skjæringstidspunkt,
                         hendelseId = UUID.randomUUID(),
@@ -300,7 +299,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
                         fordel = "fordel",
                         beskrivelse = "beskrivelse"
                     )
-                })
+                }
             )
         ),
     )
