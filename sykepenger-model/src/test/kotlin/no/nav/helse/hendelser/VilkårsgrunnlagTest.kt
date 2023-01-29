@@ -9,10 +9,10 @@ import no.nav.helse.desember
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.oktober
 import no.nav.helse.person.AbstractPersonTest
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.IdInnhenter
@@ -22,9 +22,10 @@ import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
@@ -162,7 +163,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         val idInnhenter = IdInnhenter { observatør.vedtaksperiode(ORGNUMMER, 0) }
         val grunnlagsdata = TestArbeidsgiverInspektør(person, ORGNUMMER).vilkårsgrunnlag(idInnhenter) ?: fail("Forventet at vilkårsgrunnlag er satt")
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(grunnlagsdata)
-        assertEquals(forventetSammenligningsgrunnlag, grunnlagsdataInspektør.sammenligningsgrunnlag)
+        assertEquals(forventetSammenligningsgrunnlag, grunnlagsdataInspektør.sammenligningsgrunnlag.inspektør.sammenligningsgrunnlag)
         assertEquals(forventetAvviksprosent, grunnlagsdataInspektør.avviksprosent)
         assertEquals(forventetAntallOpptjeningsdager, grunnlagsdataInspektør.antallOpptjeningsdagerErMinst)
         assertEquals(forventetHarOpptjening, grunnlagsdataInspektør.harOpptjening)

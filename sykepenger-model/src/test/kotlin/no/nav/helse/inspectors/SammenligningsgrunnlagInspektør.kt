@@ -1,8 +1,8 @@
 package no.nav.helse.inspectors
 
+import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.økonomi.Inntekt
 
 internal val Sammenligningsgrunnlag.inspektør get() = SammenligningsgrunnlagInspektør(this)
@@ -32,7 +32,8 @@ internal class SammenligningsgrunnlagInspektør(sammenligningsgrunnlag: Sammenli
 
     override fun preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
         arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag,
-        orgnummer: String
+        orgnummer: String,
+        rapportertInntekt: Inntekt
     ) {
         arbeidsgiverInntektsopplysningerPerArbeidsgiver[orgnummer] = arbeidsgiverInntektsopplysning
     }

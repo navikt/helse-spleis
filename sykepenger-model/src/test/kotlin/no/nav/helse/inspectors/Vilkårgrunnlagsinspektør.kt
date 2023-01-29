@@ -7,11 +7,10 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Opptjening
-import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
-import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
+import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.økonomi.Prosent
 import org.junit.jupiter.api.fail
 import kotlin.properties.Delegates
@@ -116,9 +115,8 @@ internal val VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.inspektør get() 
 internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) : VilkårsgrunnlagHistorikkVisitor {
     internal lateinit var sykepengegrunnlag: Sykepengegrunnlag
         private set
-    internal lateinit var sammenligningsgrunnlag1: Sammenligningsgrunnlag
+    internal lateinit var sammenligningsgrunnlag: Sammenligningsgrunnlag
         private set
-    internal val sammenligningsgrunnlag: Inntekt get() = sammenligningsgrunnlag1.sammenligningsgrunnlag
     internal var avviksprosent: Prosent? = null
         private set
     internal var antallOpptjeningsdagerErMinst by Delegates.notNull<Int>()
@@ -155,7 +153,7 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
     ) {
         this.sykepengegrunnlag = sykepengegrunnlag
-        this.sammenligningsgrunnlag1 = sammenligningsgrunnlag
+        this.sammenligningsgrunnlag = sammenligningsgrunnlag
         this.avviksprosent = avviksprosent
         this.meldingsreferanseId = meldingsreferanseId
         this.harMinimumInntekt = harMinimumInntekt

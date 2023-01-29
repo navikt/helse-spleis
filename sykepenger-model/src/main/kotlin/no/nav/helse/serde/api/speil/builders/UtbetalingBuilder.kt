@@ -129,7 +129,7 @@ internal class UtbetalingerBuilder(
             vilkårsgrunnlag = ISpleisGrunnlag(
                 skjæringstidspunkt = skjæringstidspunkt,
                 omregnetÅrsinntekt = compositeSykepengegrunnlag.omregnetÅrsinntekt,
-                sammenligningsgrunnlag = InntektBuilder(sammenligningsgrunnlag.sammenligningsgrunnlag).build().årlig,
+                sammenligningsgrunnlag = sammenligningsgrunnlagBuilder.total(),
                 inntekter = compositeSykepengegrunnlag.inntekterPerArbeidsgiver,
                 refusjonsopplysningerPerArbeidsgiver = compositeSykepengegrunnlag.refusjonsopplysningerPerArbeidsgiver,
                 sykepengegrunnlag = compositeSykepengegrunnlag.sykepengegrunnlag,

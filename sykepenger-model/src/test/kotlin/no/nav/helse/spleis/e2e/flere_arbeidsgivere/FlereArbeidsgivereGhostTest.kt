@@ -25,7 +25,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
 import no.nav.helse.person.inntekt.IkkeRapportert
-import no.nav.helse.person.inntekt.SkattComposite
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
@@ -47,6 +46,8 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -512,7 +513,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
-        val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+        val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag.inspektør
 
         assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
         assertEquals(120000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
@@ -526,7 +527,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         }
         assertEquals(1, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(10000.månedlig, it.rapportertInntekt)
         }
     }
 
@@ -569,7 +570,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
-        val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+        val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag.inspektør
 
         assertEquals(120000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
         assertEquals(120000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
@@ -587,10 +588,10 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(10000.månedlig, it.rapportertInntekt)
         }
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(IkkeRapportert::class, it.inntektsopplysning::class)
+            assertEquals(INGEN, it.rapportertInntekt)
         }
     }
 
@@ -634,7 +635,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
-        val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+        val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag.inspektør
 
         assertEquals(120000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
         assertEquals(120000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
@@ -648,7 +649,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         }
         assertEquals(1, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(10000.månedlig, it.rapportertInntekt)
         }
     }
 
@@ -807,7 +808,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
-        val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+        val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag.inspektør
 
         assertEquals(360000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
         assertEquals(360000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
@@ -825,10 +826,10 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(30000.månedlig, it.rapportertInntekt)
         }
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(IkkeRapportert::class, it.inntektsopplysning::class)
+            assertEquals(INGEN, it.rapportertInntekt)
         }
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(a1))
     }
@@ -876,7 +877,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
-        val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+        val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag.inspektør
 
         assertEquals(360000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
         assertEquals(360000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
@@ -891,10 +892,10 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(30000.månedlig, it.rapportertInntekt)
         }
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(IkkeRapportert::class, it.inntektsopplysning::class)
+            assertEquals(INGEN, it.rapportertInntekt)
         }
 
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(a1))
@@ -983,7 +984,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
-        val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+        val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag.inspektør
 
         assertEquals(listOf(a1, a2), person.relevanteArbeidsgivere(skjæringstidspunkt))
         assertEquals(listOf(a2), sykepengegrunnlagInspektør.deaktiverteArbeidsforhold)
@@ -1000,10 +1001,10 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         }
         assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(31000.månedlig, it.rapportertInntekt)
         }
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(IkkeRapportert::class, it.inntektsopplysning::class)
+            assertEquals(INGEN, it.rapportertInntekt)
         }
     }
 }

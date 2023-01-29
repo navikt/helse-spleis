@@ -12,10 +12,10 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.GhostPeriode
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.SykepengegrunnlagVisitor
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
@@ -141,7 +141,7 @@ internal class Sykepengegrunnlag(
     }
 
     internal fun validerAvvik(aktivitetslogg: IAktivitetslogg, sammenligningsgrunnlag: Sammenligningsgrunnlag) {
-        val avvik = avviksprosent(sammenligningsgrunnlag.sammenligningsgrunnlag, SubsumsjonObserver.NullObserver)
+        val avvik = avviksprosent(sammenligningsgrunnlag, SubsumsjonObserver.NullObserver)
         if (harAkseptabeltAvvik(avvik)) aktivitetslogg.info("Har %.0f %% eller mindre avvik i inntekt (%.2f %%)", Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent(), avvik.prosent())
         else valideringstrategi()(aktivitetslogg, RV_IV_2)
     }
@@ -242,9 +242,9 @@ internal class Sykepengegrunnlag(
         )
     }
 
-    internal fun avviksprosent(sammenligningsgrunnlag: Inntekt, subsumsjonObserver: SubsumsjonObserver) = beregningsgrunnlag.avviksprosent(sammenligningsgrunnlag).also { avvik ->
-        subsumsjonObserver.`§ 8-30 ledd 2 punktum 1`(Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, beregningsgrunnlag, sammenligningsgrunnlag, avvik)
-    }
+    internal fun avviksprosent(sammenligningsgrunnlag: Sammenligningsgrunnlag, subsumsjonObserver: SubsumsjonObserver) =
+        sammenligningsgrunnlag.avviksprosent(beregningsgrunnlag, subsumsjonObserver)
+
     internal fun inntektskilde() = when {
         arbeidsgiverInntektsopplysninger.size > 1 -> Inntektskilde.FLERE_ARBEIDSGIVERE
         else -> Inntektskilde.EN_ARBEIDSGIVER

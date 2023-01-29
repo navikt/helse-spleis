@@ -2,8 +2,8 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import no.nav.helse.person.ArbeidsgiverInntektsopplysningVisitor
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Opptjening
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.valider
@@ -30,10 +30,8 @@ class ArbeidsgiverInntektsopplysning(
 
     internal fun accept(visitor: ArbeidsgiverInntektsopplysningVisitor) {
         visitor.preVisitArbeidsgiverInntektsopplysning(this, orgnummer)
-        visitor.preVisitRefusjonsopplysninger(refusjonsopplysninger)
         inntektsopplysning.accept(visitor)
         refusjonsopplysninger.accept(visitor)
-        visitor.postVisitRefusjonsopplysninger(refusjonsopplysninger)
         visitor.postVisitArbeidsgiverInntektsopplysning(this, orgnummer)
     }
 

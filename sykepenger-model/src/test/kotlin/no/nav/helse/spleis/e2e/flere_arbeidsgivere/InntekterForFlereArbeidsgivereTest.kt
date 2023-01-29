@@ -54,6 +54,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
@@ -112,7 +113,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertInntektForDato(2250.månedlig, 1.januar, inspektør = a4Inspektør)
 
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(a1Inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!)
-        assertEquals(300000.årlig, grunnlagsdataInspektør.sammenligningsgrunnlag)
+        assertEquals(300000.årlig, grunnlagsdataInspektør.sammenligningsgrunnlag.inspektør.sammenligningsgrunnlag)
 
     }
 
@@ -154,7 +155,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 arbeidsforhold = arbeidsforhold
             )
         )
-        assertEquals(300000.årlig, person.beregnSammenligningsgrunnlag(1.januar, MaskinellJurist()).sammenligningsgrunnlag)
+        assertEquals(300000.årlig, person.beregnSammenligningsgrunnlag(1.januar, MaskinellJurist()).inspektør.sammenligningsgrunnlag)
     }
 
     @Test
@@ -267,8 +268,9 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold
         ).håndter(Person::håndter)
 
-        assertEquals(552000.årlig, person.vilkårsgrunnlagFor(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør?.sykepengegrunnlag)
-        assertEquals(528000.årlig, person.beregnSammenligningsgrunnlag(1.januar, MaskinellJurist()).sammenligningsgrunnlag)
+        val grunnlagsdataInspektør = person.vilkårsgrunnlagFor(1.januar)?.inspektør ?: fail { "fant ikke vilkårsgrunnlag" }
+        assertEquals(552000.årlig, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
+        assertEquals(528000.årlig, grunnlagsdataInspektør.sammenligningsgrunnlag.inspektør.sammenligningsgrunnlag)
 
     }
 

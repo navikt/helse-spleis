@@ -151,8 +151,16 @@ internal interface ArbeidsgiverInntektsopplysningVisitor : InntekthistorikkVisit
 }
 
 internal interface ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagVisitor : InntekthistorikkVisitor {
-    fun preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag, orgnummer: String) {}
-    fun postVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag, orgnummer: String) {}
+    fun preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
+        arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag,
+        orgnummer: String,
+        rapportertInntekt: Inntekt
+    ) {}
+    fun postVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
+        arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag,
+        orgnummer: String,
+        rapportertInntekt: Inntekt
+    ) {}
 }
 internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisitor {
     fun preVisitSykepengegrunnlag(

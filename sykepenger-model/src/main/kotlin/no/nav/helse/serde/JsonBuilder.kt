@@ -1054,10 +1054,10 @@ internal class JsonBuilder : AbstractBuilder() {
 
         override fun preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
             arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag,
-            orgnummer: String
+            orgnummer: String,
+            rapportertInntekt: Inntekt
         ) {
             inntektsopplysninger = null
-
         }
 
         override fun postVisitArbeidsgiverInntektsopplysningerForSammenligningsgrunnlag(arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>) {
@@ -1066,7 +1066,8 @@ internal class JsonBuilder : AbstractBuilder() {
 
         override fun postVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
             arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag,
-            orgnummer: String
+            orgnummer: String,
+            rapportertInntekt: Inntekt
         ) {
             this.arbeidsgiverInntektsopplysninger.add(
                 mapOf(

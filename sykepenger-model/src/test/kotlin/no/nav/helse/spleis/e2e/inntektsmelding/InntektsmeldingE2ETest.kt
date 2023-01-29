@@ -48,7 +48,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_2
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.person.inntekt.SkattComposite
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.september
 import no.nav.helse.sisteBehov
@@ -1134,7 +1133,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
-        val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+        val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag.inspektør
 
         assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
@@ -1146,7 +1145,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         }
         assertEquals(1, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(31000.månedlig, it.rapportertInntekt)
         }
     }
 

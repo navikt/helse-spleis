@@ -533,14 +533,25 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         val vilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag[vilkårsgrunnlagId]
         assertEquals(listOf(a1, a2), vilkårsgrunnlag?.inntekter?.map { it.organisasjonsnummer })
-        assertEquals(
+        assertEquals(listOf(
+            Arbeidsgiverinntekt(
+                organisasjonsnummer = a1,
+                omregnetÅrsinntekt = OmregnetÅrsinntekt(
+                    kilde = Inntektkilde.Inntektsmelding,
+                    beløp = 372000.0,
+                    månedsbeløp = 31000.0,
+                    inntekterFraAOrdningen = null
+                ),
+                sammenligningsgrunnlag = 372000.0,
+                deaktivert = false
+            ),
             Arbeidsgiverinntekt(
                 organisasjonsnummer = a2,
                 omregnetÅrsinntekt = null,
                 sammenligningsgrunnlag = 9000.0,
                 deaktivert = false
-            ),
-            vilkårsgrunnlag?.inntekter?.find { it.organisasjonsnummer == a2 }
+            )),
+            vilkårsgrunnlag?.inntekter
         )
         assertEquals(listOf(a1, a2), personDto.arbeidsgivere.map { it.organisasjonsnummer })
     }

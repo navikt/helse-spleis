@@ -8,13 +8,14 @@ internal class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
     private val orgnummer: String,
     private val inntektsopplysning: Inntektsopplysning
 ) {
+    private val rapportertInntekt = inntektsopplysning.rapportertInntekt()
 
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
 
     internal fun accept(visitor: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagVisitor) {
-        visitor.preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(this, orgnummer)
+        visitor.preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(this, orgnummer, rapportertInntekt)
         inntektsopplysning.accept(visitor)
-        visitor.postVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(this, orgnummer)
+        visitor.postVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(this, orgnummer, rapportertInntekt)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -33,7 +34,7 @@ internal class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
 
     internal companion object {
         internal fun List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>.sammenligningsgrunnlag(): Inntekt {
-            return map { it.inntektsopplysning.rapportertInntekt() }.summer()
+            return map { it.rapportertInntekt }.summer()
         }
     }
 }

@@ -653,7 +653,11 @@ interface SubsumsjonObserver {
         override fun preVisitSammenligningsgrunnlag(sammenligningsgrunnlag1: Sammenligningsgrunnlag, sammenligningsgrunnlag: Inntekt) {
             this.sammenligningsgrunnlag = sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
         }
-        override fun preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag, orgnummer: String) {
+        override fun preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
+            arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag,
+            orgnummer: String,
+            rapportertInntekt: Inntekt
+        ) {
             inntektliste = mutableListOf()
             inntekter[orgnummer] = inntektliste
         }

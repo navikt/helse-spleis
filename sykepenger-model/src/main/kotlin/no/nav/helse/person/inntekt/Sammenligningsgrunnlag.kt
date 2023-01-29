@@ -4,14 +4,17 @@ import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag.Companion.sammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosent
 
 internal class Sammenligningsgrunnlag(
-    internal val sammenligningsgrunnlag: Inntekt,
+    private val sammenligningsgrunnlag: Inntekt,
     private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>,
 ) {
 
-    internal fun avviksprosent(sykepengegrunnlag: Sykepengegrunnlag, subsumsjonObserver: SubsumsjonObserver) =
-        sykepengegrunnlag.avviksprosent(sammenligningsgrunnlag, subsumsjonObserver)
+    internal fun avviksprosent(beregningsgrunnlag: Inntekt, subsumsjonObserver: SubsumsjonObserver) =
+        beregningsgrunnlag.avviksprosent(sammenligningsgrunnlag).also { avvik ->
+            subsumsjonObserver.`§ 8-30 ledd 2 punktum 1`(Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, beregningsgrunnlag, sammenligningsgrunnlag, avvik)
+        }
 
     internal constructor(arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>) : this(
         arbeidsgiverInntektsopplysninger.sammenligningsgrunnlag(),

@@ -10,12 +10,12 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_16
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_11
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_16
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_11
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.ManglerRefusjonsopplysning
@@ -461,7 +461,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 skjæringstidspunkt = skjæringstidspunkt,
                 sykepengegrunnlag = sykepengegrunnlag,
                 sammenligningsgrunnlag = sammenligningsgrunnlag,
-                avviksprosent = sykepengegrunnlag.avviksprosent(this.sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver),
+                avviksprosent = sykepengegrunnlag.avviksprosent(this.sammenligningsgrunnlag, subsumsjonObserver),
                 opptjening = opptjening ?: this.opptjening,
                 medlemskapstatus = medlemskapstatus,
                 vurdertOk = vurdertOk && sykepengegrunnlagOk && (opptjeningOk ?: true),

@@ -17,10 +17,9 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.PersonVisitor
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.inntekt.Inntektsmelding
-import no.nav.helse.person.inntekt.SkattComposite
 import no.nav.helse.spleis.e2e.OpptjeningE2ETest.ArbeidsforholdVisitor.Companion.assertHarArbeidsforhold
 import no.nav.helse.spleis.e2e.OpptjeningE2ETest.ArbeidsforholdVisitor.Companion.assertHarIkkeArbeidsforhold
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -114,7 +113,7 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
-        val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+        val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag.inspektør
 
         assertEquals(372000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
         assertEquals(372000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
@@ -129,10 +128,10 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
         }
         assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(31000.månedlig, it.rapportertInntekt)
         }
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
-            assertEquals(SkattComposite::class, it.inntektsopplysning::class)
+            assertEquals(31000.årlig, it.rapportertInntekt)
         }
     }
 

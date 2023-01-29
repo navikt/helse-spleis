@@ -7,7 +7,6 @@ import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Subsumsjon
-import no.nav.helse.person.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagVisitor
 import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.SammenligningsgrunnlagVisitor
@@ -28,7 +27,6 @@ import no.nav.helse.serde.api.dto.Refusjonselement
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosent
 import kotlin.properties.Delegates
 
@@ -221,7 +219,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             vilkårsgrunnlag[skjæringstidspunkt] = ISpleisGrunnlag(
                 skjæringstidspunkt = skjæringstidspunkt,
                 omregnetÅrsinntekt = compositeSykepengegrunnlag.omregnetÅrsinntekt,
-                sammenligningsgrunnlag = InntektBuilder(sammenligningsgrunnlag.sammenligningsgrunnlag).build().årlig,
+                sammenligningsgrunnlag = sammenligningsgrunnlagBuilder.total(),
                 inntekter = compositeSykepengegrunnlag.inntekterPerArbeidsgiver,
                 refusjonsopplysningerPerArbeidsgiver = compositeSykepengegrunnlag.refusjonsopplysningerPerArbeidsgiver,
                 sykepengegrunnlag = compositeSykepengegrunnlag.sykepengegrunnlag,
@@ -257,11 +255,14 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         }
 
         internal class SammenligningsgrunnlagBuilder(sammenligningsgrunnlag: Sammenligningsgrunnlag) : SammenligningsgrunnlagVisitor {
+            private lateinit var total: Inntekt
             private val beløp = mutableMapOf<String, Double>()
+
             init {
                 sammenligningsgrunnlag.accept(this)
             }
 
+            internal fun total() = InntektBuilder(total).build().årlig
             internal fun totalFor(orgnummer: String) = beløp[orgnummer]
 
             internal fun inntekter() = beløp.map { (orgnummer, beløp) ->
@@ -273,26 +274,19 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 )
             }
 
-            override fun preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
-                arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag,
-                orgnummer: String
+            override fun preVisitSammenligningsgrunnlag(
+                sammenligningsgrunnlag1: Sammenligningsgrunnlag,
+                sammenligningsgrunnlag: Inntekt
             ) {
-                beløp[orgnummer] = SkattBuilder(arbeidsgiverInntektsopplysning).total()
+                this.total = sammenligningsgrunnlag
             }
 
-            private class SkattBuilder(inntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag) : ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagVisitor {
-                private var inntekter = INGEN
-
-                init {
-                    inntektsopplysning.accept(this)
-                }
-
-                fun total() = inntekter
-                    .reflection { årlig, _, _, _ -> årlig }
-
-                override fun preVisitSkatt(skattComposite: SkattComposite, id: UUID, dato: LocalDate) {
-                    inntekter = skattComposite.rapportertInntekt()
-                }
+            override fun preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
+                arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag,
+                orgnummer: String,
+                rapportertInntekt: Inntekt
+            ) {
+                beløp[orgnummer] = InntektBuilder(rapportertInntekt).build().årlig
             }
         }
 
