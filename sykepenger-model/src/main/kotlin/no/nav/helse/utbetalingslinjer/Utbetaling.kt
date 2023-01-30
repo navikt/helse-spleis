@@ -12,14 +12,13 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
-import no.nav.helse.hendelser.SimuleringResultat
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
-import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.UtbetalingVisitor
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
+import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_12
@@ -1011,25 +1010,6 @@ class Utbetaling private constructor(
     }
 
     enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }
-}
-
-class OverføringsinformasjonAdapter(private val hendelse: UtbetalingHendelse): OverføringsinformasjonPort {
-    override val avstemmingsnøkkel: Long = hendelse.avstemmingsnøkkel
-    override val overføringstidspunkt: LocalDateTime = hendelse.overføringstidspunkt
-    override val status: Oppdragstatus = hendelse.status
-    override fun erRelevant(fagsystemId: String): Boolean = hendelse.erRelevant(fagsystemId)
-}
-class OverføringsinformasjonOverførtAdapter(private val hendelse: UtbetalingOverført): OverføringsinformasjonPort {
-    override val avstemmingsnøkkel: Long = hendelse.avstemmingsnøkkel
-    override val overføringstidspunkt: LocalDateTime = hendelse.overføringstidspunkt
-    override val status: Oppdragstatus = Oppdragstatus.OVERFØRT
-    override fun erRelevant(fagsystemId: String): Boolean = hendelse.erRelevant(fagsystemId)
-}
-
-class SimuleringAdapter(private val simulering: Simulering): SimuleringPort {
-    override val simuleringResultat: SimuleringResultat? = simulering.simuleringResultat
-    override fun valider(oppdrag: Oppdrag): SimuleringPort = this.apply { simulering.valider(oppdrag) }
-    override fun erRelevantFor(fagområde: Fagområde, fagsystemId: String): Boolean = simulering.erRelevantFor(fagområde, fagsystemId)
 }
 
 interface AnnullerUtbetalingPort: IAktivitetslogg {
