@@ -57,8 +57,8 @@ internal class InntektsmeldingMatchingTest {
         assertNull(dager.håndterGjenstående())
 
         inntekt.evaluerer(
-            vedtaksperiode1 som ikkeForventerInntekt,
-            vedtaksperiode2 som forventerInntekt
+            vedtaksperiode1 medSkjæringstidspunkt 1.januar som ikkeForventerInntekt,
+            vedtaksperiode2 medSkjæringstidspunkt 1.januar som forventerInntekt
         ) {
             this bleHåndtertMed FørsteDagEtterArbeidsgiverperiodenStrategi::class av vedtaksperiode2
         }
@@ -97,8 +97,8 @@ internal class InntektsmeldingMatchingTest {
         assertNull(dager.håndterGjenstående())
 
         inntekt.evaluerer(
-            vedtaksperiode1 som ikkeForventerInntekt,
-            vedtaksperiode2 som forventerInntekt
+            vedtaksperiode1 medSkjæringstidspunkt 5.januar som ikkeForventerInntekt,
+            vedtaksperiode2 medSkjæringstidspunkt 5.januar som forventerInntekt
         ) {
             this bleHåndtertMed FørsteDagEtterArbeidsgiverperiodenStrategi::class av vedtaksperiode2
         }
@@ -118,8 +118,8 @@ internal class InntektsmeldingMatchingTest {
         assertEquals(21.januar.somPeriode(), dager.håndterGjenstående())
 
         inntekt.evaluerer(
-            vedtaksperiode1 som ikkeForventerInntekt,
-            vedtaksperiode2 som forventerInntekt
+            vedtaksperiode1 medSkjæringstidspunkt 5.januar som ikkeForventerInntekt,
+            vedtaksperiode2 medSkjæringstidspunkt 5.januar som forventerInntekt
         ) {
             this bleHåndtertMed FørsteFraværsdagStrategi::class av vedtaksperiode2
         }
@@ -186,10 +186,10 @@ internal class InntektsmeldingMatchingTest {
         assertNull(dager.håndterGjenstående())
 
         inntekt.evaluerer(
-            vedtaksperiode1 som ikkeForventerInntekt,
-            vedtaksperiode2 som ikkeForventerInntekt,
-            vedtaksperiode3 som forventerInntekt,
-            vedtaksperiode4 som forventerInntekt
+            vedtaksperiode1 medSkjæringstidspunkt 3.januar som ikkeForventerInntekt,
+            vedtaksperiode2 medSkjæringstidspunkt 8.januar som ikkeForventerInntekt,
+            vedtaksperiode3 medSkjæringstidspunkt 11.januar som forventerInntekt,
+            vedtaksperiode4 medSkjæringstidspunkt 11.januar som forventerInntekt
         ) {
             this bleHåndtertMed FørsteDagEtterArbeidsgiverperiodenStrategi::class av vedtaksperiode3
         }
@@ -206,8 +206,8 @@ internal class InntektsmeldingMatchingTest {
         )
 
         inntekt.evaluerer(
-            vedtaksperiode1 som forventerInntekt,
-            vedtaksperiode2 som forventerInntekt
+            vedtaksperiode1 medSkjæringstidspunkt 1.januar som forventerInntekt,
+            vedtaksperiode2 medSkjæringstidspunkt 1.januar som forventerInntekt
         ) {
             this bleHåndtertMed FørsteFraværsdagStrategi::class av vedtaksperiode1
         }
@@ -243,8 +243,8 @@ internal class InntektsmeldingMatchingTest {
             inntektsmelding(listOf(vedtaksperiode1, vedtaksperiode2), 20.januar, 1.januar til 16.januar)
 
         inntekt.evaluerer(
-            vedtaksperiode1 som ikkeForventerInntekt,
-            vedtaksperiode2 som forventerInntekt
+            vedtaksperiode1 medSkjæringstidspunkt 1.januar som ikkeForventerInntekt,
+            vedtaksperiode2 medSkjæringstidspunkt 1.januar som forventerInntekt
         ) {
             this bleHåndtertMed FørsteFraværsdagStrategi::class av vedtaksperiode2
         }
@@ -282,8 +282,8 @@ internal class InntektsmeldingMatchingTest {
             inntektsmelding(listOf(vedtaksperiodeAuu, vedtaksperiodeMedUtbetaling), 4.januar, 4.januar til 19.januar)
 
         inntekt.evaluerer(
-            vedtaksperiodeAuu som ikkeForventerInntekt,
-            vedtaksperiodeMedUtbetaling som forventerInntekt
+            vedtaksperiodeAuu medSkjæringstidspunkt 4.januar som ikkeForventerInntekt,
+            vedtaksperiodeMedUtbetaling medSkjæringstidspunkt 4.januar som forventerInntekt
         ) {
             this bleHåndtertMed FørsteDagEtterArbeidsgiverperiodenStrategi::class av vedtaksperiodeMedUtbetaling
         }
@@ -298,8 +298,8 @@ internal class InntektsmeldingMatchingTest {
             inntektsmelding(listOf(vedtaksperiode1, vedtaksperiode2), 1.januar, 4.januar til 19.januar)
 
         inntekt.evaluerer(
-            vedtaksperiode1 som ikkeForventerInntekt,
-            vedtaksperiode2 som forventerInntekt
+            vedtaksperiode1 medSkjæringstidspunkt 4.januar som ikkeForventerInntekt,
+            vedtaksperiode2 medSkjæringstidspunkt 23.januar som forventerInntekt
         ) {
             this bleHåndtertMed FørsteDagEtterArbeidsgiverperiodenForskyvningsstragi::class av vedtaksperiode2
         }
@@ -314,10 +314,10 @@ internal class InntektsmeldingMatchingTest {
         val (_, inntekt) = inntektsmelding(listOf(auu1, auu2, auu3), førsteFraværsdag = 5.januar)
 
         inntekt.evaluerer(
-            auu1 som ikkeForventerInntekt,
-            auu2 som ikkeForventerInntekt,
-            auu3 som ikkeForventerInntekt,
-            skalUtbetales som forventerInntekt
+            auu1 medSkjæringstidspunkt 1.januar som ikkeForventerInntekt,
+            auu2 medSkjæringstidspunkt 1.januar som ikkeForventerInntekt,
+            auu3 medSkjæringstidspunkt 1.januar som ikkeForventerInntekt,
+            skalUtbetales medSkjæringstidspunkt 1.januar som forventerInntekt
         ) {
             this bleHåndtertMed FørsteFraværsdagForskyvningsstragi::class av skalUtbetales
         }
@@ -334,10 +334,10 @@ internal class InntektsmeldingMatchingTest {
         val (_, inntekt) = inntektsmelding(listOf(auu1, auu2, auu3), førsteFraværsdag = 5.januar)
 
         inntekt.evaluerer(
-            auu1 som ikkeForventerInntekt,
-            auu2 som ikkeForventerInntekt,
-            auu3 som ikkeForventerInntekt,
-            skalUtbetales som forventerInntekt
+            auu1 medSkjæringstidspunkt 1.januar som ikkeForventerInntekt,
+            auu2 medSkjæringstidspunkt 1.januar som ikkeForventerInntekt,
+            auu3 medSkjæringstidspunkt 1.januar som ikkeForventerInntekt,
+            skalUtbetales medSkjæringstidspunkt 19.januar som forventerInntekt
         ) {
             bleIkkeHåndtert
         }
@@ -362,8 +362,8 @@ internal class InntektsmeldingMatchingTest {
         val (_, inntekt) = inntektsmelding(listOf(vedtaksperiode1, vedtaksperiode2), 21.januar, 4.januar til 19.januar)
 
         inntekt.evaluerer(
-            vedtaksperiode1 som ikkeForventerInntekt,
-            vedtaksperiode2 som forventerInntekt
+            vedtaksperiode1 medSkjæringstidspunkt 4.januar som ikkeForventerInntekt,
+            vedtaksperiode2 medSkjæringstidspunkt 4.januar som forventerInntekt
         ) {
             this bleHåndtertMed FørsteFraværsdagStrategi::class av vedtaksperiode2
         }
@@ -458,10 +458,10 @@ internal class InntektsmeldingMatchingTest {
         return håndtertPeriode
     }
 
-    private fun InntektOgRefusjonFraInntektsmelding.periodeSomHåndterer(vararg perioder:Pair<Periode, Boolean>): Pair<Periode, KClass<out InntektOgRefusjonMatchingstrategi>>? {
+    private fun InntektOgRefusjonFraInntektsmelding.periodeSomHåndterer(vararg perioder: InntektOgRefusjonPeriode): Pair<Periode, KClass<out InntektOgRefusjonMatchingstrategi>>? {
         strategier.forEach { strategi ->
-            perioder.forEach { (periode, forventerInntekt) ->
-                if (skalHåndteresAv(periode, strategi) { forventerInntekt }) return periode to strategi::class
+            perioder.forEach { (skjæringstidspunkt, periode, forventerInntekt) ->
+                if (skalHåndteresAv(skjæringstidspunkt, periode, strategi) { forventerInntekt }) return periode to strategi::class
             }
         }
         return null
@@ -469,13 +469,22 @@ internal class InntektsmeldingMatchingTest {
 
     private val forventerInntekt =  "forventerInntekt"
     private val ikkeForventerInntekt =  "ikkeForventerInntekt"
-    private infix fun Periode.som(inntekt: String) = this to (inntekt == forventerInntekt)
-    private fun InntektOgRefusjonFraInntektsmelding.evaluerer(vararg perioder: Pair<Periode, Boolean>, assertBlock: Pair<Periode, KClass<out InntektOgRefusjonMatchingstrategi>>?.() -> Unit) {
+    private fun InntektOgRefusjonFraInntektsmelding.evaluerer(vararg perioder: InntektOgRefusjonPeriode, assertBlock: Pair<Periode, KClass<out InntektOgRefusjonMatchingstrategi>>?.() -> Unit) {
         periodeSomHåndterer(*perioder).assertBlock()
     }
     private val Pair<Periode, KClass<out InntektOgRefusjonMatchingstrategi>>?.bleIkkeHåndtert get() = assertNull(this)
     private infix fun Pair<Periode, KClass<out InntektOgRefusjonMatchingstrategi>>?.bleHåndtertMed(strategi: KClass<out InntektOgRefusjonMatchingstrategi>) = also { assertEquals(strategi, this?.second) }
     private infix fun Pair<Periode, KClass<out InntektOgRefusjonMatchingstrategi>>?.av(periode: Periode) = also { assertEquals(periode, this?.first) }
+
+
+    private infix fun Periode.medSkjæringstidspunkt(skjæringstidspunkt: LocalDate) = this to skjæringstidspunkt
+    private infix fun Periode.som(inntekt: String) = InntektOgRefusjonPeriode(start, this, inntekt == forventerInntekt)
+    private infix fun Pair<Periode, LocalDate>.som(inntekt: String) = InntektOgRefusjonPeriode(second, first, inntekt == forventerInntekt)
+    private data class InntektOgRefusjonPeriode(
+        val skjæringstidspunkt: LocalDate,
+        val periode: Periode,
+        val forventerInntekt: Boolean
+    )
 
     private companion object {
         private fun inntektsmelding(

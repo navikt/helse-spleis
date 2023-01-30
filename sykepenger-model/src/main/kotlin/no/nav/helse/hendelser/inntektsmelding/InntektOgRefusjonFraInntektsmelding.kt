@@ -43,9 +43,9 @@ internal class InntektOgRefusjonFraInntektsmelding(
     internal fun wrap(block: () -> Unit) = FunksjonelleFeilTilVarsler.wrap(inntektsmelding) { block() }
 
     private var håndtert: Boolean = false
-    internal fun skalHåndteresAv(periode: Periode, strategy: InntektOgRefusjonMatchingstrategi, forventerInntekt: () -> Boolean): Boolean {
+    internal fun skalHåndteresAv(skjæringstidspunkt: LocalDate, periode: Periode, strategy: InntektOgRefusjonMatchingstrategi, forventerInntekt: () -> Boolean): Boolean {
         if (håndtert) return false
-        if (!strategy.matcher(periode, forventerInntekt)) return false
+        if (!strategy.matcher(skjæringstidspunkt, periode, forventerInntekt)) return false
         håndtert = true
         return true
     }
@@ -53,7 +53,7 @@ internal class InntektOgRefusjonFraInntektsmelding(
     private fun LocalDate.erIPeriode(periode: Periode) = this in periode || this.førsteArbeidsdag() in periode
 
     internal inner class FørsteFraværsdagStrategi : InntektOgRefusjonMatchingstrategi {
-        override fun matcher(periode: Periode, forventerInntekt: () -> Boolean): Boolean {
+        override fun matcher(skjæringstidspunkt: LocalDate, periode: Periode, forventerInntekt: () -> Boolean): Boolean {
             if (ingenArbeidsgiverperiode || førsteFraværsdagEtterArbeidsgiverperioden) {
                 return førsteFraværsdag!!.erIPeriode(periode) && forventerInntekt()
             }
@@ -64,7 +64,7 @@ internal class InntektOgRefusjonFraInntektsmelding(
     internal inner class FørsteFraværsdagForskyvningsstragi : InntektOgRefusjonMatchingstrategi {
         // Bruker matching på først fraværsdag, men forskyver første fraværsdag om vedtaksperioden(e) som treffes ikke forventer inntekt
         private var forskjøvetFørsteFraværsdag = førsteFraværsdag
-        override fun matcher(periode: Periode, forventerInntekt: () -> Boolean): Boolean {
+        override fun matcher(skjæringstidspunkt: LocalDate, periode: Periode, forventerInntekt: () -> Boolean): Boolean {
             if (ingenArbeidsgiverperiode || førsteFraværsdagEtterArbeidsgiverperioden) {
                 val førsteFraværsdagIPeriode = forskjøvetFørsteFraværsdag!!.erIPeriode(periode)
                 if (!førsteFraværsdagIPeriode) return false
@@ -77,7 +77,7 @@ internal class InntektOgRefusjonFraInntektsmelding(
     }
 
     internal inner class FørsteDagEtterArbeidsgiverperiodenStrategi: InntektOgRefusjonMatchingstrategi {
-        override fun matcher(periode: Periode, forventerInntekt: () -> Boolean): Boolean {
+        override fun matcher(skjæringstidspunkt: LocalDate, periode: Periode, forventerInntekt: () -> Boolean): Boolean {
             if (sisteDagIArbeidsgiverperioden == null) return false
             if (førsteFraværsdag?.isAfter(sisteDagIArbeidsgiverperioden) == true) return false
             val førsteDagEtterArbeidsgiverperioden = sisteDagIArbeidsgiverperioden.nesteDag
@@ -89,7 +89,7 @@ internal class InntektOgRefusjonFraInntektsmelding(
     internal inner class FørsteDagEtterArbeidsgiverperiodenForskyvningsstragi : InntektOgRefusjonMatchingstrategi {
         // Bruker matching på første dag etter arbeidsgiverprioden, men forskyver dagen om vedtaksperioden(e) som treffes ikke forventer inntekt
         private var forskjøvetFørsteDagEtterArbeidsgiverperioden = sisteDagIArbeidsgiverperioden?.nesteDag
-        override fun matcher(periode: Periode, forventerInntekt: () -> Boolean): Boolean {
+        override fun matcher(skjæringstidspunkt: LocalDate, periode: Periode, forventerInntekt: () -> Boolean): Boolean {
             if (sisteDagIArbeidsgiverperioden == null) return false
             if (førsteFraværsdag?.isAfter(sisteDagIArbeidsgiverperioden) == true) return false
 
@@ -103,7 +103,7 @@ internal class InntektOgRefusjonFraInntektsmelding(
 
     internal inner class HarHåndtertDagerFraInntektsmeldingenStrategi(private val dagerFraInntektsmelding: DagerFraInntektsmelding) : InntektOgRefusjonMatchingstrategi {
         // Denne er en slags fallback-strategi hvis ingen av de andre strategiene fungerer, for å beholde dagens oppførsel
-        override fun matcher(periode: Periode, forventerInntekt: () -> Boolean): Boolean {
+        override fun matcher(skjæringstidspunkt: LocalDate, periode: Periode, forventerInntekt: () -> Boolean): Boolean {
             if (førsteFraværsdag?.isAfter(periode.endInclusive) == true) return false
             return dagerFraInntektsmelding.harBlittHåndtertAv(periode) && forventerInntekt()
         }
@@ -120,5 +120,5 @@ internal class InntektOgRefusjonFraInntektsmelding(
 }
 
 internal interface InntektOgRefusjonMatchingstrategi {
-    fun matcher(periode: Periode, forventerInntekt: () -> Boolean): Boolean
+    fun matcher(skjæringstidspunkt: LocalDate, periode: Periode, forventerInntekt: () -> Boolean): Boolean
 }
