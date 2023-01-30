@@ -7,7 +7,6 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.til
-import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
@@ -42,7 +41,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 // Understands related payment activities for an Arbeidsgiver
-internal class Utbetaling private constructor(
+class Utbetaling private constructor(
     private val id: UUID,
     private val korrelasjonsId: UUID,
     private val beregningId: UUID,
@@ -252,11 +251,11 @@ internal class Utbetaling private constructor(
         vurdering?.build(builder)
     }
 
-    internal fun håndter(hendelse: AnnullerUtbetaling) {
+    internal fun håndter(hendelse: AnnullerUtbetalingPort) {
         godkjenn(hendelse, hendelse.vurdering())
     }
 
-    internal fun annuller(hendelse: AnnullerUtbetaling): Utbetaling? {
+    internal fun annuller(hendelse: AnnullerUtbetalingPort): Utbetaling? {
         if (!hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId())) {
             hendelse.info("Kan ikke annullere: hendelsen er ikke relevant for ${arbeidsgiverOppdrag.fagsystemId()}.")
             hendelse.funksjonellFeil(RV_UT_15)
@@ -423,7 +422,7 @@ internal class Utbetaling private constructor(
             return sisteUtbetalte
         }
 
-        internal fun finnUtbetalingForAnnullering(utbetalinger: List<Utbetaling>, hendelse: AnnullerUtbetaling): Utbetaling? {
+        internal fun finnUtbetalingForAnnullering(utbetalinger: List<Utbetaling>, hendelse: AnnullerUtbetalingPort): Utbetaling? {
             return utbetalinger.aktiveMedUtbetaling().lastOrNull() ?: run {
                 hendelse.funksjonellFeil(RV_UT_4)
                 return null
@@ -676,7 +675,7 @@ internal class Utbetaling private constructor(
             return null
         }
 
-        fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetaling): Utbetaling? {
+        fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetalingPort): Utbetaling? {
             hendelse.info("Forventet ikke å annullere på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
             hendelse.funksjonellFeil(RV_UT_9)
             return null
@@ -775,7 +774,7 @@ internal class Utbetaling private constructor(
             utbetaling.avsluttet = LocalDateTime.now()
         }
 
-        override fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetaling): Utbetaling? {
+        override fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetalingPort): Utbetaling? {
             if (utbetaling.oppdragsperiode == null) return super.annuller(utbetaling, hendelse)
             return Utbetaling(
                 utbetaling.beregningId,
@@ -861,7 +860,7 @@ internal class Utbetaling private constructor(
             utbetaling.avsluttet = LocalDateTime.now()
         }
 
-        override fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetaling) =
+        override fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetalingPort) =
             Utbetaling(
                 utbetaling.beregningId,
                 utbetaling,
@@ -921,7 +920,7 @@ internal class Utbetaling private constructor(
     internal object IkkeGodkjent : Tilstand
     internal object Forkastet : Tilstand
 
-    internal class Vurdering(
+    class Vurdering(
         private val godkjent: Boolean,
         private val ident: String,
         private val epost: String,
@@ -1031,5 +1030,9 @@ class SimuleringAdapter(private val simulering: Simulering): SimuleringPort {
     override val simuleringResultat: SimuleringResultat? = simulering.simuleringResultat
     override fun valider(oppdrag: Oppdrag): SimuleringPort = this.apply { simulering.valider(oppdrag) }
     override fun erRelevantFor(fagområde: Fagområde, fagsystemId: String): Boolean = simulering.erRelevantFor(fagområde, fagsystemId)
+}
 
+interface AnnullerUtbetalingPort: IAktivitetslogg {
+    fun vurdering(): Utbetaling.Vurdering
+    fun erRelevant(fagsystemId: String): Boolean
 }

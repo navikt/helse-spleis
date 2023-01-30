@@ -935,7 +935,7 @@ internal class UtbetalingTest {
         }
 
     private fun annuller(utbetaling: Utbetaling, fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId()) =
-        utbetaling.annuller(AnnullerUtbetaling(UUID.randomUUID(), "aktør", "fnr", "orgnr", fagsystemId, "Z123456", "tbd@nav.no", LocalDateTime.now()))?.also {
+        utbetaling.annuller(AnnullerUtbetaling(UUID.randomUUID(), "aktør", "fnr", "orgnr", fagsystemId, "Z123456", "tbd@nav.no", LocalDateTime.now()).utbetalingport())?.also {
             it.opprett(aktivitetslogg)
         }
 }

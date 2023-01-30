@@ -76,6 +76,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAv
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
+import no.nav.helse.utbetalingslinjer.utbetalingport
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -637,10 +638,10 @@ internal class Arbeidsgiver private constructor(
         hendelse.kontekst(this)
         hendelse.info("Håndterer annullering")
 
-        val sisteUtbetalte = Utbetaling.finnUtbetalingForAnnullering(utbetalinger, hendelse) ?: return
-        val annullering = sisteUtbetalte.annuller(hendelse) ?: return
+        val sisteUtbetalte = Utbetaling.finnUtbetalingForAnnullering(utbetalinger, hendelse.utbetalingport()) ?: return
+        val annullering = sisteUtbetalte.annuller(hendelse.utbetalingport()) ?: return
         nyUtbetaling(hendelse, annullering)
-        annullering.håndter(hendelse)
+        annullering.håndter(hendelse.utbetalingport())
         håndter(hendelse) { håndter(it, annullering) }
     }
 
