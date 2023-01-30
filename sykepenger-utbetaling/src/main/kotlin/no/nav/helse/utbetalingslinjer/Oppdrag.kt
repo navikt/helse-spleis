@@ -34,28 +34,28 @@ class Oppdrag private constructor(
     private var erSimulert: Boolean = false,
     private var simuleringsResultat: SimuleringResultat? = null
 ) : MutableList<Utbetalingslinje> by linjer, Aktivitetskontekst {
-    internal companion object {
-        internal fun periode(vararg oppdrag: Oppdrag): Periode? {
+    companion object {
+        fun periode(vararg oppdrag: Oppdrag): Periode? {
             return oppdrag
                 .mapNotNull { it.linjeperiode ?: it.sisteArbeidsgiverdag?.nesteDag?.somPeriode() }
                 .takeIf(List<*>::isNotEmpty)
                 ?.reduce(Periode::plus)
         }
 
-        internal fun List<Oppdrag>.trekkerTilbakePenger() = sumOf { it.nettoBeløp() } < 0
+        fun List<Oppdrag>.trekkerTilbakePenger() = sumOf { it.nettoBeløp() } < 0
 
-        internal fun stønadsdager(vararg oppdrag: Oppdrag): Int {
+        fun stønadsdager(vararg oppdrag: Oppdrag): Int {
             return Utbetalingslinje.stønadsdager(oppdrag.toList().flatten())
         }
 
-        internal fun synkronisert(vararg oppdrag: Oppdrag): Boolean {
+        fun synkronisert(vararg oppdrag: Oppdrag): Boolean {
             val endrede = oppdrag.filter { it.harUtbetalinger() }
             return endrede.all { it.status == endrede.first().status }
         }
 
-        internal fun ingenFeil(vararg oppdrag: Oppdrag) = oppdrag.none { it.status in listOf(AVVIST, FEIL) }
-        internal fun kanIkkeForsøkesPåNy(vararg oppdrag: Oppdrag) = oppdrag.any { it.status == AVVIST }
-        internal fun ferdigOppdrag(
+        fun ingenFeil(vararg oppdrag: Oppdrag) = oppdrag.none { it.status in listOf(AVVIST, FEIL) }
+        fun kanIkkeForsøkesPåNy(vararg oppdrag: Oppdrag) = oppdrag.any { it.status == AVVIST }
+        fun ferdigOppdrag(
             mottaker: String,
             from: Fagområde,
             utbetalingslinjer: List<Utbetalingslinje>,
@@ -93,7 +93,7 @@ class Oppdrag private constructor(
     }
     private val linjeperiode get() = firstOrNull()?.let { (it.datoStatusFom() ?: it.fom) til last().tom }
 
-    internal constructor(
+    constructor(
         mottaker: String,
         fagområde: Fagområde,
         linjer: List<Utbetalingslinje> = listOf(),
@@ -109,7 +109,7 @@ class Oppdrag private constructor(
         tidsstempel = LocalDateTime.now()
     )
 
-    internal fun accept(visitor: OppdragVisitor) {
+    fun accept(visitor: OppdragVisitor) {
         visitor.preVisitOppdrag(
             this,
             fagområde,
@@ -147,18 +147,18 @@ class Oppdrag private constructor(
         )
     }
 
-    internal fun fagsystemId() = fagsystemId
+    fun fagsystemId() = fagsystemId
 
     private operator fun contains(other: Oppdrag) = this.tilhører(other) || this.overlapperMed(other) || sammenhengendeUtbetalingsperiode(other)
 
-    internal fun tilhører(other: Oppdrag) = this.fagsystemId == other.fagsystemId && this.fagområde == other.fagområde
+    fun tilhører(other: Oppdrag) = this.fagsystemId == other.fagsystemId && this.fagområde == other.fagområde
     private fun overlapperMed(other: Oppdrag) =
         this.overlapperiode?.let { other.overlapperiode?.overlapperMed(it) } ?: false
 
     private fun sammenhengendeUtbetalingsperiode(other: Oppdrag) =
         this.sisteArbeidsgiverdag != null && this.sisteArbeidsgiverdag == other.sisteArbeidsgiverdag
 
-    internal fun overfør(
+    fun overfør(
         aktivitetslogg: IAktivitetslogg,
         maksdato: LocalDate?,
         saksbehandler: String
@@ -170,7 +170,7 @@ class Oppdrag private constructor(
         aktivitetslogg.behov(Behovtype.Utbetaling, "Trenger å sende utbetaling til Oppdrag", behovdetaljer(saksbehandler, maksdato))
     }
 
-    internal fun simuler(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, saksbehandler: String) {
+    fun simuler(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, saksbehandler: String) {
         if (!harUtbetalinger()) return aktivitetslogg.info("Simulerer ikke oppdrag uten endring fagområde=$fagområde med fagsystemId=$fagsystemId")
         check(endringskode != Endringskode.UEND)
         check(status == null)
@@ -195,30 +195,30 @@ class Oppdrag private constructor(
         }
     }
 
-    internal fun totalbeløp() = linjerUtenOpphør().sumOf { it.totalbeløp() }
-    internal fun stønadsdager() = sumOf { it.stønadsdager() }
+    fun totalbeløp() = linjerUtenOpphør().sumOf { it.totalbeløp() }
+    fun stønadsdager() = sumOf { it.stønadsdager() }
 
-    internal fun nettoBeløp() = nettoBeløp
+    fun nettoBeløp() = nettoBeløp
 
     private fun nettoBeløp(tidligere: Oppdrag) {
         nettoBeløp = this.totalbeløp() - tidligere.totalbeløp()
     }
 
-    internal fun harUtbetalinger() = any(Utbetalingslinje::erForskjell)
+    fun harUtbetalinger() = any(Utbetalingslinje::erForskjell)
 
-    internal fun erRelevant(fagsystemId: String, fagområde: Fagområde) =
+    fun erRelevant(fagsystemId: String, fagområde: Fagområde) =
         this.fagsystemId == fagsystemId && this.fagområde == fagområde
 
-    internal fun valider(simulering: SimuleringPort) =
+    fun valider(simulering: SimuleringPort) =
         simulering.valider(this)
 
     private fun kopierKunLinjerMedEndring() = kopierMed(filter(Utbetalingslinje::erForskjell))
 
     private fun kopierUtenOpphørslinjer() = kopierMed(linjerUtenOpphør())
 
-    internal fun linjerUtenOpphør() = filter { !it.erOpphør() }
+    fun linjerUtenOpphør() = filter { !it.erOpphør() }
 
-    internal fun annuller(aktivitetslogg: IAktivitetslogg): Oppdrag {
+    fun annuller(aktivitetslogg: IAktivitetslogg): Oppdrag {
         return tomtOppdrag().minus(this, aktivitetslogg)
     }
 
@@ -230,7 +230,7 @@ class Oppdrag private constructor(
             sisteArbeidsgiverdag = sisteArbeidsgiverdag
         )
 
-    internal fun minus(eldre: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
+    fun minus(eldre: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
         // Vi ønsker ikke å forlenge et oppdrag vi ikke overlapper med, eller et tomt oppdrag
         if (harIngenKoblingTilTidligereOppdrag(eldre)) return this
         // overtar fagsystemId fra tidligere Oppdrag uten utbetaling, gitt at det er samme arbeidsgiverperiode
@@ -373,7 +373,7 @@ class Oppdrag private constructor(
         tilstand = Ny()
     }
 
-    internal fun toHendelseMap() = mapOf(
+    fun toHendelseMap() = mapOf(
         "mottaker" to mottaker,
         "fagområde" to "$fagområde",
         "linjer" to map(Utbetalingslinje::toHendelseMap),
@@ -391,20 +391,20 @@ class Oppdrag private constructor(
         "simuleringsResultat" to simuleringsResultat?.toMap()
     )
 
-    internal fun lagreOverføringsinformasjon(hendelse: OverføringsinformasjonPort) {
+    fun lagreOverføringsinformasjon(hendelse: OverføringsinformasjonPort) {
         if (!hendelse.erRelevant(fagsystemId)) return
         if (this.avstemmingsnøkkel == null) this.avstemmingsnøkkel = hendelse.avstemmingsnøkkel
         if (this.overføringstidspunkt == null) this.overføringstidspunkt = hendelse.overføringstidspunkt
         this.status = hendelse.status
     }
 
-    internal fun håndter(simulering: SimuleringPort) {
+    fun håndter(simulering: SimuleringPort) {
         if (!simulering.erRelevantFor(fagområde, fagsystemId)) return
         this.erSimulert = true
         this.simuleringsResultat = simulering.simuleringResultat
     }
 
-    internal fun erKlarForGodkjenning() = !harUtbetalinger() || erSimulert
+    fun erKlarForGodkjenning() = !harUtbetalinger() || erSimulert
 
     private interface Tilstand {
         fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg)

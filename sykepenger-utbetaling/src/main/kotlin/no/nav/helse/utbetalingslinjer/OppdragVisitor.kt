@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.hendelser.SimuleringResultat
 
-internal interface OppdragVisitor: UtbetalingslinjeVisitor {
+interface OppdragVisitor: UtbetalingslinjeVisitor {
     fun preVisitOppdrag(
         oppdrag: Oppdrag,
         fagområde: Fagområde,
