@@ -49,8 +49,8 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
     ): Inntektsopplysning? =
         nyesteInnslag().avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skattSykepengegrunnlag, arbeidsforholdhistorikk)
 
-    internal class Innslag private constructor(private val id: UUID, private val inntekter: List<Inntektsopplysning>) {
-        constructor(inntekter: List<Inntektsopplysning> = emptyList()) : this(UUID.randomUUID(), inntekter)
+    internal class Innslag private constructor(private val id: UUID, private val inntekter: List<Inntektsmelding>) {
+        constructor(inntekter: List<Inntektsmelding> = emptyList()) : this(UUID.randomUUID(), inntekter)
 
         internal fun accept(visitor: InntekthistorikkVisitor) {
             visitor.preVisitInnslag(this, id)
@@ -86,7 +86,7 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
                 arbeidsforholdhistorikk: Arbeidsforholdhistorikk
             ) =
                 this?.inntekter.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skattSykepengegrunnlag, arbeidsforholdhistorikk)
-            internal fun gjenopprett(id: UUID, inntektsopplysninger: List<Inntektsopplysning>) =
+            internal fun gjenopprett(id: UUID, inntektsopplysninger: List<Inntektsmelding>) =
                 Innslag(id, inntektsopplysninger)
 
             internal fun nyesteId(inntektshistorikk: Inntektshistorikk) = inntektshistorikk.nyesteInnslag()!!.id

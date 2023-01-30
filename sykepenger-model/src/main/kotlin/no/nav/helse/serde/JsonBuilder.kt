@@ -1423,25 +1423,6 @@ internal class JsonBuilder : AbstractBuilder() {
 
     private class InntektsendringState(private val inntektsopplysninger: MutableList<Map<String, Any?>>) :
         BuilderState() {
-        override fun visitSaksbehandler(
-            saksbehandler: Saksbehandler,
-            id: UUID,
-            dato: LocalDate,
-            hendelseId: UUID,
-            beløp: Inntekt,
-            forklaring: String?,
-            subsumsjon: Subsumsjon?,
-            tidsstempel: LocalDateTime
-        ) {
-            inntektsopplysninger.add(mapOf(
-                "id" to id,
-                "dato" to dato,
-                "hendelseId" to hendelseId,
-                "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
-                "kilde" to Inntektsopplysningskilde.SAKSBEHANDLER,
-                "tidsstempel" to tidsstempel
-            ))
-        }
 
         override fun visitInntektsmelding(
             inntektsmelding: Inntektsmelding,
@@ -1456,36 +1437,8 @@ internal class JsonBuilder : AbstractBuilder() {
                 "dato" to dato,
                 "hendelseId" to hendelseId,
                 "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
-                "kilde" to Inntektsopplysningskilde.INNTEKTSMELDING,
                 "tidsstempel" to tidsstempel
             ))
-        }
-
-        override fun visitInfotrygd(
-            infotrygd: Infotrygd,
-            id: UUID,
-            dato: LocalDate,
-            hendelseId: UUID,
-            beløp: Inntekt,
-            tidsstempel: LocalDateTime
-        ) {
-            inntektsopplysninger.add(mapOf(
-                "id" to id,
-                "dato" to dato,
-                "hendelseId" to hendelseId,
-                "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
-                "kilde" to Inntektsopplysningskilde.INFOTRYGD,
-                "tidsstempel" to tidsstempel
-            ))
-        }
-
-        override fun preVisitSkattSykepengegrunnlag(
-            skattSykepengegrunnlag: SkattSykepengegrunnlag,
-            id: UUID,
-            dato: LocalDate,
-            beløp: Inntekt
-        ) {
-            pushState(SkattSykepengegrunnlagState(inntektsopplysninger))
         }
 
         override fun postVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) = popState()

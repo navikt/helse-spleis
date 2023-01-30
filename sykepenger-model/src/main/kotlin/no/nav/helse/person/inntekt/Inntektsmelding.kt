@@ -4,8 +4,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.InntekthistorikkVisitor
+import no.nav.helse.person.InntektsmeldingVisitor
 import no.nav.helse.person.InntektsopplysningVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
@@ -19,6 +21,10 @@ internal class Inntektsmelding(
 ) : Inntektsopplysning(dato, 60) {
 
     override fun accept(visitor: InntektsopplysningVisitor) {
+        accept(visitor as InntektsmeldingVisitor)
+    }
+
+    internal fun accept(visitor: InntektsmeldingVisitor) {
         visitor.visitInntektsmelding(this, id, dato, hendelseId, beløp, tidsstempel)
     }
 

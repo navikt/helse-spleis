@@ -29,49 +29,12 @@ internal class Inntektsinspektør(historikk: Inntektshistorikk) : Inntekthistori
         inntektTeller.add(0)
     }
 
-    override fun visitSaksbehandler(
-        saksbehandler: Saksbehandler,
-        id: UUID,
-        dato: LocalDate,
-        hendelseId: UUID,
-        beløp: Inntekt,
-        forklaring: String?,
-        subsumsjon: Subsumsjon?,
-        tidsstempel: LocalDateTime
-    ) {
-        inntektTeller.add(inntektTeller.removeLast() + 1)
-    }
-
     override fun visitInntektsmelding(
         inntektsmelding: Inntektsmelding,
         id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
-        tidsstempel: LocalDateTime
-    ) {
-        inntektTeller.add(inntektTeller.removeLast() + 1)
-    }
-
-    override fun visitInfotrygd(
-        infotrygd: Infotrygd,
-        id: UUID,
-        dato: LocalDate,
-        hendelseId: UUID,
-        beløp: Inntekt,
-        tidsstempel: LocalDateTime
-    ) {
-        inntektTeller.add(inntektTeller.removeLast() + 1)
-    }
-
-    override fun visitSkatteopplysning(
-        skatteopplysning: Skatteopplysning,
-        hendelseId: UUID,
-        beløp: Inntekt,
-        måned: YearMonth,
-        type: Skatteopplysning.Inntekttype,
-        fordel: String,
-        beskrivelse: String,
         tidsstempel: LocalDateTime
     ) {
         inntektTeller.add(inntektTeller.removeLast() + 1)

@@ -136,7 +136,7 @@ interface RefusjonsopplysningerVisitor {
     fun postVisitRefusjonsopplysninger(refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger) {}
 }
 
-internal interface ArbeidsgiverInntektsopplysningVisitor : InntekthistorikkVisitor, RefusjonsopplysningerVisitor {
+internal interface ArbeidsgiverInntektsopplysningVisitor : InntektsopplysningVisitor, RefusjonsopplysningerVisitor {
     fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {}
     fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {}
 }
@@ -621,7 +621,19 @@ internal interface SkatteopplysningVisitor {
     ) {}
 }
 
-internal interface InntektsopplysningVisitor : SkatteopplysningVisitor {
+internal interface InntektsmeldingVisitor {
+    fun visitInntektsmelding(
+        inntektsmelding: Inntektsmelding,
+        id: UUID,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        tidsstempel: LocalDateTime
+    ) {
+    }
+}
+
+internal interface InntektsopplysningVisitor : InntektsmeldingVisitor, SkatteopplysningVisitor {
     fun visitSaksbehandler(
         saksbehandler: Saksbehandler,
         id: UUID,
@@ -630,16 +642,6 @@ internal interface InntektsopplysningVisitor : SkatteopplysningVisitor {
         beløp: Inntekt,
         forklaring: String?,
         subsumsjon: Subsumsjon?,
-        tidsstempel: LocalDateTime
-    ) {
-    }
-
-    fun visitInntektsmelding(
-        inntektsmelding: Inntektsmelding,
-        id: UUID,
-        dato: LocalDate,
-        hendelseId: UUID,
-        beløp: Inntekt,
         tidsstempel: LocalDateTime
     ) {
     }
@@ -675,7 +677,7 @@ internal interface InntektsopplysningVisitor : SkatteopplysningVisitor {
         beløp: Inntekt
     ) {}
 }
-internal interface InntekthistorikkVisitor : InntektsopplysningVisitor {
+internal interface InntekthistorikkVisitor : InntektsmeldingVisitor {
     fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
     fun preVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) {}
 

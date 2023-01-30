@@ -14,9 +14,6 @@ import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.Arbeidsforholdhistorikk
-import no.nav.helse.person.inntekt.Infotrygd
-import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenInfo
 import no.nav.helse.sykdomstidslinje.Dag
@@ -31,7 +28,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -700,21 +696,6 @@ internal class InfotrygdhistorikkElementTest {
     fun `lagrer inntekter låser elementet`() {
         val element = eksisterendeInfotrygdHistorikkelement(lagretInntekter = true)
         assertFalse(element.kanSlettes())
-    }
-
-    @Test
-    fun `hensyntar ikke inntekter fra Infotrygd`() {
-        val inntektshistorikk = Inntektshistorikk.gjenopprett(
-            listOf(
-                Inntektshistorikk.Innslag(
-                    listOf(
-                        Infotrygd(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 1234.månedlig),
-                        Infotrygd(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 4321.månedlig)
-                    )
-                )
-            )
-        )
-        assertNull(inntektshistorikk.avklarSykepengegrunnlag(1.januar, 1.januar, null, Arbeidsforholdhistorikk())?.inspektør?.beløp)
     }
 
     private fun assertFlereInntekterInfotrygd() {
