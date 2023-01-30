@@ -307,12 +307,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterDager(dager: DagerFraInntektsmelding) {
-        dager.leggTilArbeidsdagerFør(periode.start)
-        // Ettersom tilstanden kan strekke perioden tilbake må det gjøres _før_ vi hånderer dagene
-        // slik at det som håndteres er perioden slik den er når det er strukket tilbake.
-        tilstand.håndterStrekkingAvPeriode(this, dager)
-        // Håndterer dagene som vedtaksperioden skal håndtere og oppdaterer sykdomstidslinjen
-        sykdomstidslinje = dager.håndter(periode, arbeidsgiver)!!
+        tilstand.håndterDagerFør(this, dager)
+        dager.håndter(periode, arbeidsgiver)?.let { oppdatertSykdomstidslinje ->
+            sykdomstidslinje = oppdatertSykdomstidslinje
+        }
     }
 
     private fun erAlleredeHensyntatt(inntektsmelding: Inntektsmelding) =
@@ -1020,7 +1018,7 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {}
 
-        fun håndterStrekkingAvPeriode(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {}
+        fun håndterDagerFør(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {}
         fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
             val arbeidsgiverperiodeFør = vedtaksperiode.finnArbeidsgiverperiode()
             vedtaksperiode.håndterDager(dager)
@@ -1453,7 +1451,8 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        override fun håndterStrekkingAvPeriode(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
+        override fun håndterDagerFør(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
+            dager.leggTilArbeidsdagerFør(vedtaksperiode.periode.start)
             vedtaksperiode.periode = dager.oppdatertFom(vedtaksperiode.periode)
             dager.håndterGjenståendeFør(vedtaksperiode.periode, vedtaksperiode.arbeidsgiver)
         }
@@ -2058,7 +2057,8 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.emitVedtaksperiodeEndret(søknad) // TODO: for å unngå at flex oppretter oppgaver
             }
         }
-        override fun håndterStrekkingAvPeriode(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
+        override fun håndterDagerFør(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
+            dager.leggTilArbeidsdagerFør(vedtaksperiode.periode.start)
             vedtaksperiode.periode = dager.oppdatertFom(vedtaksperiode.periode)
             dager.håndterGjenståendeFør(vedtaksperiode.periode, vedtaksperiode.arbeidsgiver)
         }

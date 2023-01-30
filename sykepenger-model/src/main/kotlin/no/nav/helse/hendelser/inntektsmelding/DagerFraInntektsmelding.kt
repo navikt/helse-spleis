@@ -50,7 +50,12 @@ internal class DagerFraInntektsmelding(
     }
 
     private fun overlappendeDager(periode: Periode) = periode.intersect(gjenståendeDager)
-    internal fun skalHåndteresAv(periode: Periode) = overlappendeDager(periode).isNotEmpty()
+    internal fun skalHåndteresAv(periode: Periode) = overlappendeDager(periode).isNotEmpty() || arbeidsgiverperiodenStarterRettEtter(periode)
+
+    private fun arbeidsgiverperiodenStarterRettEtter(periode: Periode): Boolean {
+        if (opprinneligPeriode == null) return false
+        return periode.erRettFør(opprinneligPeriode)
+    }
 
     internal fun harBlittHåndtertAv(periode: Periode) = håndterteDager.any { it in periode }
 

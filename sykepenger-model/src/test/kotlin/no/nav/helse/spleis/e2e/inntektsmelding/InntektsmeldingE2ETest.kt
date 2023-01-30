@@ -243,6 +243,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(22.januar, 15.februar, 100.prosent), orgnummer = a2)
 
         håndterInntektsmelding(listOf(11.januar til 13.januar, 20.januar til 2.februar), orgnummer = a1)
+
+        assertEquals("UUGR AAAAAGG SSSSSHH SSSSSHH SSSSSHH SSSS", inspektør(a1).sykdomshistorikk.sykdomstidslinje().toShortString())
         håndterInntektsmelding(listOf(16.februar til 3.mars), orgnummer = a2)
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
@@ -250,6 +252,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(16.februar, 10.mars, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(16.februar, 10.mars, 100.prosent), orgnummer = a2)
+        assertEquals("AAAAARR AAAAARR AAAAARR AAAASHH SSSSSHH SSSSSHH SSSSSH", inspektør(a2).sykdomshistorikk.sykdomstidslinje().toShortString())
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
@@ -304,7 +307,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(9.januar, 19.januar, 100.prosent))
         håndterSøknad(Sykdom(9.januar, 19.januar, 100.prosent))
-        håndterInntektsmelding(listOf(9.januar til 19.januar, 23.januar til 27.januar))
+        håndterInntektsmelding(listOf(9.januar til 19.januar, 23.januar til 27.januar), førsteFraværsdag = 23.januar)
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
         assertForventetFeil(
@@ -1063,7 +1066,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("❌")
     fun `inntektsmelding oppgir arbeidsgiverperiode senere`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 7.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 7.januar, 100.prosent))
