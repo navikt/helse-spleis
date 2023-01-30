@@ -1,0 +1,28 @@
+{
+  "arbeidsgivere": [
+    {
+      "inntektshistorikk": [
+        {
+          "inntektsopplysninger": [
+            {
+              "kilde": "INNTEKTSMELDING"
+            }
+          ]
+        },
+        {
+          "inntektsopplysninger": []
+        }
+      ]
+    },{
+      "inntektshistorikk": [
+        {
+          "inntektsopplysninger": []
+        },
+        {
+          "inntektsopplysninger": []
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 214
+}
