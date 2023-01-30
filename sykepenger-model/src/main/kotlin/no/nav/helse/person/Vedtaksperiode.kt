@@ -1464,20 +1464,19 @@ internal class Vedtaksperiode private constructor(
             return true
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
-            vedtaksperiode.håndterInntektOgRefusjon(inntektOgRefusjon) { when {
-                !vedtaksperiode.arbeidsgiver.kanBeregneSykepengegrunnlag(vedtaksperiode.skjæringstidspunkt) -> AvsluttetUtenUtbetaling
-                else -> AvventerBlokkerendePeriode
+        private fun tilstandEtterInntektPåSkjæringstidspunkt(vedtaksperiode: Vedtaksperiode) = when {
+            !vedtaksperiode.forventerInntekt() -> AvsluttetUtenUtbetaling
+            else -> AvventerBlokkerendePeriode.also { require(vedtaksperiode.arbeidsgiver.kanBeregneSykepengegrunnlag(vedtaksperiode.skjæringstidspunkt)) {
+                "Feil vedtaksperiode har håndtert inntekt og refusjon. Kan ikke beregne sykepengegrunnlag på skjæringstidspunkt ${vedtaksperiode.skjæringstidspunkt} for arbeidsgiver ${vedtaksperiode.arbeidsgiver.organisasjonsnummer()}"
             }}
         }
-        override fun håndtertInntektPåSkjæringstidspunktet(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: SykdomstidslinjeHendelse
-        ) {
-            when {
-                !vedtaksperiode.arbeidsgiver.kanBeregneSykepengegrunnlag(vedtaksperiode.skjæringstidspunkt) -> vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
-                else -> vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
-            }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
+            vedtaksperiode.håndterInntektOgRefusjon(inntektOgRefusjon) { tilstandEtterInntektPåSkjæringstidspunkt(vedtaksperiode) }
+        }
+
+        override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) {
+            vedtaksperiode.tilstand(hendelse, tilstandEtterInntektPåSkjæringstidspunkt(vedtaksperiode))
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
