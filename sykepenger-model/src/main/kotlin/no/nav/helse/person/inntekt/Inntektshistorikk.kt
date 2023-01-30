@@ -25,9 +25,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
         visitor.postVisitInntekthistorikk(this)
     }
 
-    internal fun leggTil(inntekter: List<SkattSykepengegrunnlag>) {
-        leggTil(Innslag(inntekter))
-    }
     internal fun leggTil(inntekt: Inntektsmelding) {
         leggTil(Innslag(listOf(inntekt)))
     }
@@ -44,8 +41,13 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
 
     internal fun isNotEmpty() = historikk.isNotEmpty()
 
-    internal fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?, arbeidsforholdhistorikk: Arbeidsforholdhistorikk): Inntektsopplysning? =
-        nyesteInnslag().avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, arbeidsforholdhistorikk)
+    internal fun avklarSykepengegrunnlag(
+        skjæringstidspunkt: LocalDate,
+        førsteFraværsdag: LocalDate?,
+        skattSykepengegrunnlag: SkattSykepengegrunnlag?,
+        arbeidsforholdhistorikk: Arbeidsforholdhistorikk
+    ): Inntektsopplysning? =
+        nyesteInnslag().avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skattSykepengegrunnlag, arbeidsforholdhistorikk)
 
     internal class Innslag private constructor(private val id: UUID, private val inntekter: List<Inntektsopplysning>) {
         constructor(inntekter: List<Inntektsopplysning> = emptyList()) : this(UUID.randomUUID(), inntekter)
@@ -80,9 +82,10 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
             internal fun Innslag?.avklarSykepengegrunnlag(
                 skjæringstidspunkt: LocalDate,
                 førsteFraværsdag: LocalDate?,
+                skattSykepengegrunnlag: SkattSykepengegrunnlag?,
                 arbeidsforholdhistorikk: Arbeidsforholdhistorikk
             ) =
-                this?.inntekter.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, arbeidsforholdhistorikk)
+                this?.inntekter.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skattSykepengegrunnlag, arbeidsforholdhistorikk)
             internal fun gjenopprett(id: UUID, inntektsopplysninger: List<Inntektsopplysning>) =
                 Innslag(id, inntektsopplysninger)
 

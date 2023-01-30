@@ -193,24 +193,24 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         ).håndter(Person::håndter)
 
-        assertEquals(2, a1Inspektør.inntektInspektør.antallInnslag)
-        assertEquals(1, a2Inspektør.inntektInspektør.antallInnslag)
+        assertEquals(1, a1Inspektør.inntektInspektør.antallInnslag)
+        assertEquals(0, a2Inspektør.inntektInspektør.antallInnslag)
+
+        val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.januar) ?: fail { "forventet vilkårsgrunnlag" }
 
         val a1Opplysninger = a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger ?: fail { "forventet innslag" }
-        val a2Opplysninger = a2Inspektør.inntektInspektør.sisteInnslag?.opplysninger ?: fail { "forventet innslag" }
-        assertTrue(a2Opplysninger.none { it.kilde == Kilde.INFOTRYGD })
+
         assertTrue(a1Opplysninger.none { it.kilde == Kilde.INFOTRYGD })
 
-        assertEquals(2, a1Opplysninger.size)
-        assertEquals(1, a2Opplysninger.size)
-
-        assertEquals(23500.månedlig, a1Opplysninger.first { it.kilde == Kilde.SKATT }.sykepengegrunnlag)
-        assertEquals(25000.månedlig, a1Opplysninger.first { it.kilde == Kilde.INNTEKTSMELDING }.sykepengegrunnlag)
-        assertEquals(4900.månedlig, a2Opplysninger.single().sykepengegrunnlag)
+        assertEquals(1, a1Opplysninger.size)
+        assertEquals(25000.månedlig, a1Opplysninger.single().sykepengegrunnlag)
+        assertEquals(Kilde.INNTEKTSMELDING, a1Opplysninger.single().kilde)
+        assertEquals(25000.månedlig, vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.inntektsopplysning.inspektør.beløp)
+        assertEquals(4900.månedlig, vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.inntektsopplysning.inspektør.beløp)
     }
 
     @Test
-    fun `Skatteinntekter for sykepengegrunnlag legges i inntektshistorikken`() {
+    fun `Skatteinntekter for sykepengegrunnlag legges ikke i inntektshistorikken`() {
         val inntekterForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
             1.oktober(2017) til 1.desember(2017) inntekter {
                 a1 inntekt 15000
@@ -231,11 +231,10 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         ).håndter(Person::håndter)
 
         val inntektInspektør = a1Inspektør.inntektInspektør
-        val opplysninger = inntektInspektør.sisteInnslag?.opplysninger
-        assertEquals(2, opplysninger?.size)
-        assertEquals(2, inntektInspektør.antallInnslag)
-        assertEquals(25000.månedlig, opplysninger?.get(0)?.sykepengegrunnlag)
-        assertEquals(15000.månedlig, opplysninger?.get(1)?.sykepengegrunnlag)
+        val opplysninger = inntektInspektør.sisteInnslag?.opplysninger ?: fail { "forventet opplysninger" }
+        assertEquals(1, opplysninger.size)
+        assertEquals(1, inntektInspektør.antallInnslag)
+        assertEquals(25000.månedlig, opplysninger.single().sykepengegrunnlag)
     }
 
     @Test

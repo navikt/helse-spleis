@@ -33,6 +33,11 @@ class Vilkårsgrunnlag(
 
     internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
 
+    internal fun beregnSykepengegrunnlag(person: Person, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
+        val opptjening = arbeidsforhold.beregnOpptjening(skjæringstidspunkt, NullObserver)
+        return inntektsvurderingForSykepengegrunnlag.beregnSykepengegrunnlag(this, person, opptjening, skjæringstidspunkt, meldingsreferanseId(), subsumsjonObserver)
+    }
+
     internal fun valider(
         grunnlagForSykepengegrunnlag: Sykepengegrunnlag,
         skjæringstidspunkt: LocalDate,
@@ -72,7 +77,6 @@ class Vilkårsgrunnlag(
     internal fun lagre(person: Person, skjæringstidspunkt: LocalDate) {
         val opptjening = arbeidsforhold.beregnOpptjening(skjæringstidspunkt, NullObserver)
         opptjening.lagreArbeidsforhold(person, this)
-         inntektsvurderingForSykepengegrunnlag.lagreInntekter(this, person, opptjening, skjæringstidspunkt, meldingsreferanseId())
         if (person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(skjæringstidspunkt)) {
             varsel(RV_VV_1)
         }

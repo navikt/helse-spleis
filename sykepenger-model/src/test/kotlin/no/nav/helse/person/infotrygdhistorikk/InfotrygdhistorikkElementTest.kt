@@ -714,7 +714,7 @@ internal class InfotrygdhistorikkElementTest {
                 )
             )
         )
-        assertNull(inntektshistorikk.avklarSykepengegrunnlag(1.januar, 1.januar, Arbeidsforholdhistorikk())?.inspektør?.beløp)
+        assertNull(inntektshistorikk.avklarSykepengegrunnlag(1.januar, 1.januar, null, Arbeidsforholdhistorikk())?.inspektør?.beløp)
     }
 
     private fun assertFlereInntekterInfotrygd() {

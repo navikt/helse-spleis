@@ -52,11 +52,13 @@ abstract class Inntektsopplysning protected constructor(
         internal fun List<Inntektsopplysning>?.avklarSykepengegrunnlag(
             skjæringstidspunkt: LocalDate,
             førsteFraværsdag: LocalDate?,
+            skattSykepengegrunnlag: SkattSykepengegrunnlag?,
             arbeidsforholdhistorikk: Arbeidsforholdhistorikk
         ): Inntektsopplysning? {
             val reserve = Skatteopplysning.nyoppstartetArbeidsforhold(skjæringstidspunkt, arbeidsforholdhistorikk)
-            val kandidater = this?.mapNotNull { it.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag) }
-            if (kandidater.isNullOrEmpty()) return reserve
+            val tilgjengelige = listOfNotNull(skattSykepengegrunnlag) + (this ?: emptyList())
+            val kandidater = tilgjengelige.mapNotNull { it.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag) }
+            if (kandidater.isEmpty()) return reserve
             return kandidater.reduce { champion, challenger -> champion.beste(challenger) }
         }
 

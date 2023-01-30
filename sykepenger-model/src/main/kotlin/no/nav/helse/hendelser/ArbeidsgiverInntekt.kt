@@ -11,19 +11,11 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.Y
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
-
-internal typealias InntektCreator = (
-    yearMonth: YearMonth,
-    inntekt: Inntekt,
-    type: ArbeidsgiverInntekt.MånedligInntekt.Inntekttype,
-    fordel: String,
-    beskrivelse: String
-) -> ArbeidsgiverInntekt.MånedligInntekt
 
 class ArbeidsgiverInntekt(
     private val arbeidsgiver: String,
@@ -48,13 +40,8 @@ class ArbeidsgiverInntekt(
     private fun harInntekter() = inntekter.isNotEmpty()
 
     internal companion object {
-        internal fun List<ArbeidsgiverInntekt>.lagreInntekter(hendelse: IAktivitetslogg, person: Person, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) {
-            this
-                .groupBy({ it.arbeidsgiver }) { it.tilSykepengegrunnlag(skjæringstidspunkt, meldingsreferanseId) }
-                .forEach { (arbeidsgiver, inntekter) ->
-                    person.lagreInntekter(hendelse, arbeidsgiver, inntekter)
-                }
-        }
+        internal fun List<ArbeidsgiverInntekt>.beregnSykepengegrunnlag(hendelse: IAktivitetslogg, person: Person, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, subsumsjonObserver: SubsumsjonObserver) =
+            person.avklarSykepengegrunnlag(hendelse, skjæringstidspunkt, this.associateBy({ it.arbeidsgiver }) { it.tilSykepengegrunnlag(skjæringstidspunkt, meldingsreferanseId) }, subsumsjonObserver)
 
         internal fun List<ArbeidsgiverInntekt>.kilder(antallMåneder: Int) = this
             .map { ArbeidsgiverInntekt(it.arbeidsgiver, it.inntekter.nylig(månedFørSlutt(this, antallMåneder))) }

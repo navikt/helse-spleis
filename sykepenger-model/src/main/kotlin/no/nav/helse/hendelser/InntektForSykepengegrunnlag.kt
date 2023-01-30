@@ -4,12 +4,13 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
+import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.beregnSykepengegrunnlag
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektFor
-import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.lagreInntekter
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_3
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import org.slf4j.LoggerFactory
 
 class InntektForSykepengegrunnlag(
@@ -23,6 +24,11 @@ class InntektForSykepengegrunnlag(
     init {
         require(inntekter.antallMåneder() <= 3L) { "Forventer maks 3 inntektsmåneder" }
     }
+
+    internal fun beregnSykepengegrunnlag(hendelse: IAktivitetslogg, person: Person, opptjening: Opptjening, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, subsumsjonObserver: SubsumsjonObserver) = this
+        .inntekter
+        .filter { it.ansattVedSkjæringstidspunkt(opptjening) }
+        .beregnSykepengegrunnlag(hendelse, person, skjæringstidspunkt, meldingsreferanseId, subsumsjonObserver)
 
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,
@@ -50,17 +56,6 @@ class InntektForSykepengegrunnlag(
                 it.erFrilanser && inntekter.harInntektFor(arbeidsforhold.orgnummer, månedFørSkjæringstidspunkt)
             }
         }
-    }
-
-    internal fun lagreInntekter(hendelse: IAktivitetslogg, person: Person, opptjening: Opptjening, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) {
-        this.inntekter
-            .filter { it.ansattVedSkjæringstidspunkt(opptjening) }
-            .lagreInntekter(
-                hendelse,
-                person,
-                skjæringstidspunkt,
-                meldingsreferanseId
-            )
     }
 
     class Arbeidsforhold(

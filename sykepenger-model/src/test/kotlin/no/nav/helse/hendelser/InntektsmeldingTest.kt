@@ -589,8 +589,8 @@ internal class InntektsmeldingTest {
         inntektsmelding(listOf(Periode(1.januar, 16.januar)), refusjonBeløp = 2000.månedlig, beregnetInntekt = 2000.månedlig, førsteFraværsdag = 3.februar)
         val inntektshistorikk = Inntektshistorikk()
         inntektsmelding.addInntekt(inntektshistorikk, 1.februar, MaskinellJurist())
-        assertEquals(2000.månedlig, inntektshistorikk.avklarSykepengegrunnlag(1.februar, 1.februar, Arbeidsforholdhistorikk())?.inspektør?.beløp)
-        assertNull(inntektshistorikk.avklarSykepengegrunnlag(3.februar, 3.februar, Arbeidsforholdhistorikk()))
+        assertEquals(2000.månedlig, inntektshistorikk.avklarSykepengegrunnlag(1.februar, 1.februar, null, Arbeidsforholdhistorikk())?.inspektør?.beløp)
+        assertNull(inntektshistorikk.avklarSykepengegrunnlag(3.februar, 3.februar, null, Arbeidsforholdhistorikk()))
     }
 
     private fun inntektsmelding(

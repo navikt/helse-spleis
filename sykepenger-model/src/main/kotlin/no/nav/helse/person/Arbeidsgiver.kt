@@ -182,8 +182,11 @@ internal class Arbeidsgiver private constructor(
             flatMap { it.vedtaksperioder }.lagRevurdering(vedtaksperiode, arbeidsgiverUtbetalinger, hendelse)
         }
 
-        internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
-            mapNotNull { arbeidsgiver -> arbeidsgiver.beregnSykepengegrunnlag(skjæringstidspunkt) }
+        internal fun List<Arbeidsgiver>.avklarSykepengegrunnlag(
+            skjæringstidspunkt: LocalDate,
+            skatteopplysninger: Map<String, SkattSykepengegrunnlag>
+        ) =
+            mapNotNull { arbeidsgiver -> arbeidsgiver.avklarSykepengegrunnlag(skjæringstidspunkt, skatteopplysninger[arbeidsgiver.organisasjonsnummer]) }
 
         internal fun skjæringstidspunkt(arbeidsgivere: List<Arbeidsgiver>, periode: Periode, infotrygdhistorikk: Infotrygdhistorikk) =
             infotrygdhistorikk.skjæringstidspunkt(periode, arbeidsgivere.map(Arbeidsgiver::sykdomstidslinje))
@@ -310,11 +313,11 @@ internal class Arbeidsgiver private constructor(
     private fun harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
         person.vilkårsgrunnlagFor(skjæringstidspunkt)?.harNødvendigInntektForVilkårsprøving(organisasjonsnummer)
 
-    internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate) = beregnSykepengegrunnlag(skjæringstidspunkt) != null
+    internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate) = avklarSykepengegrunnlag(skjæringstidspunkt) != null
 
-    private fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate) : ArbeidsgiverInntektsopplysning? {
+    private fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, skattSykepengegrunnlag: SkattSykepengegrunnlag? = null) : ArbeidsgiverInntektsopplysning? {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
-        val inntektsopplysning = inntektshistorikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, arbeidsforholdhistorikk)
+        val inntektsopplysning = inntektshistorikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skattSykepengegrunnlag, arbeidsforholdhistorikk)
         return when {
             inntektsopplysning != null -> ArbeidsgiverInntektsopplysning(organisasjonsnummer, inntektsopplysning, refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt))
             else -> null
@@ -924,10 +927,6 @@ internal class Arbeidsgiver private constructor(
         if (førsteFraværsdag != null) inntektsmelding.addInntekt(inntektshistorikk, førsteFraværsdag, subsumsjonObserver)
         inntektsmelding.cacheRefusjon(refusjonshistorikk)
         return inntektsmeldingInfo.opprett(skjæringstidspunkt, inntektsmelding)
-    }
-
-    internal fun lagreInntekter(inntekter: List<SkattSykepengegrunnlag>) {
-        inntektshistorikk.leggTil(inntekter)
     }
 
     private fun søppelbøtte(hendelse: IAktivitetslogg, filter: VedtaksperiodeFilter) {

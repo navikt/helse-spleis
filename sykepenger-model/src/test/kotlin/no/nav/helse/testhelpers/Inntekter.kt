@@ -12,12 +12,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 internal fun inntektperioderForSammenligningsgrunnlag(block: Inntektperioder.() -> Unit) = Inntektperioder(block).inntekter()
 internal fun inntektperioderForSykepengegrunnlag(block: Inntektperioder.() -> Unit) = Inntektperioder(block).inntekter()
 
-internal fun List<ArbeidsgiverInntekt>.lagreInntekter(inntektshistorikk: Inntektshistorikk, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) {
-    this
-        .map { it.tilSykepengegrunnlag(skjæringstidspunkt, meldingsreferanseId) }
-        .also { inntekter -> inntektshistorikk.leggTil(inntekter) }
-}
-
 internal class Inntektperioder(block: Inntektperioder.() -> Unit) {
     private val liste = mutableListOf<Pair<String, List<ArbeidsgiverInntekt.MånedligInntekt>>>()
 

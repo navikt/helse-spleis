@@ -31,7 +31,7 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
-import no.nav.helse.person.Arbeidsgiver.Companion.beregnSykepengegrunnlag
+import no.nav.helse.person.Arbeidsgiver.Companion.avklarSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
@@ -60,9 +60,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -597,14 +595,11 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
 
-    internal fun lagreInntekter(hendelse: IAktivitetslogg, orgnummer: String, inntekter: List<SkattSykepengegrunnlag>) {
-        finnEllerOpprettArbeidsgiver(orgnummer, hendelse).lagreInntekter(inntekter)
-    }
-
-    internal fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
+    internal fun avklarSykepengegrunnlag(hendelse: IAktivitetslogg, skjæringstidspunkt: LocalDate, skatteopplysninger: Map<String, SkattSykepengegrunnlag>, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
+        skatteopplysninger.keys.forEach { orgnr -> finnEllerOpprettArbeidsgiver(orgnr, hendelse) } // oppretter evt. nye arbeidsgivere
         return Sykepengegrunnlag.opprett(
             alder,
-            arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt),
+            arbeidsgivere.avklarSykepengegrunnlag(skjæringstidspunkt, skatteopplysninger),
             skjæringstidspunkt,
             subsumsjonObserver
         )

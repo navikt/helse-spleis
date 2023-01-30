@@ -19,7 +19,6 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
-import no.nav.helse.testhelpers.lagreInntekter
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -61,7 +60,12 @@ internal class InntektshistorikkTest {
         arbeidsforholdhistorikk.lagre(listOf(
             Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, null, false)
         ), 1.februar)
-        val opplysning = historikk.avklarSykepengegrunnlag(1.februar, 1.februar, arbeidsforholdhistorikk)
+        val opplysning = historikk.avklarSykepengegrunnlag(
+            1.februar,
+            1.februar,
+            null,
+            arbeidsforholdhistorikk
+        )
         assertNotNull(opplysning)
         assertEquals(IkkeRapportert::class, opplysning::class)
         assertEquals(INGEN, opplysning.inspektør.beløp)
@@ -73,7 +77,12 @@ internal class InntektshistorikkTest {
         arbeidsforholdhistorikk.lagre(listOf(
             Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, null, true)
         ), 1.februar)
-        val opplysning = historikk.avklarSykepengegrunnlag(1.februar, 1.februar, arbeidsforholdhistorikk)
+        val opplysning = historikk.avklarSykepengegrunnlag(
+            1.februar,
+            1.februar,
+            null,
+            arbeidsforholdhistorikk
+        )
         assertNotNull(opplysning)
         assertEquals(IkkeRapportert::class, opplysning::class)
         assertEquals(INGEN, opplysning.inspektør.beløp)
@@ -84,7 +93,12 @@ internal class InntektshistorikkTest {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, 1.januar, MaskinellJurist())
         assertEquals(1, inspektør.inntektTeller.size)
         assertEquals(1, inspektør.inntektTeller.first())
-        assertEquals(INNTEKT, historikk.avklarSykepengegrunnlag(1.januar, 1.januar, Arbeidsforholdhistorikk())?.inspektør?.beløp)
+        assertEquals(INNTEKT, historikk.avklarSykepengegrunnlag(
+            1.januar,
+            1.januar,
+            null,
+            Arbeidsforholdhistorikk()
+        )?.inspektør?.beløp)
     }
 
     @Test
@@ -92,8 +106,18 @@ internal class InntektshistorikkTest {
         inntektsmelding(førsteFraværsdag = 1.januar, beregnetInntekt = 30000.månedlig).addInntekt(historikk, 1.januar, MaskinellJurist())
         inntektsmelding(førsteFraværsdag = 1.januar, beregnetInntekt = 29000.månedlig).addInntekt(historikk, 1.januar, MaskinellJurist())
         inntektsmelding(førsteFraværsdag = 1.februar, beregnetInntekt = 31000.månedlig).addInntekt(historikk, 1.februar, MaskinellJurist())
-        assertEquals(30000.månedlig, historikk.avklarSykepengegrunnlag(1.januar, 1.januar, Arbeidsforholdhistorikk())?.inspektør?.beløp)
-        assertEquals(31000.månedlig, historikk.avklarSykepengegrunnlag(1.februar, 1.februar, Arbeidsforholdhistorikk())?.inspektør?.beløp)
+        assertEquals(30000.månedlig, historikk.avklarSykepengegrunnlag(
+            1.januar,
+            1.januar,
+            null,
+            Arbeidsforholdhistorikk()
+        )?.inspektør?.beløp)
+        assertEquals(31000.månedlig, historikk.avklarSykepengegrunnlag(
+            1.februar,
+            1.februar,
+            null,
+            Arbeidsforholdhistorikk()
+        )?.inspektør?.beløp)
     }
 
     @Test
@@ -101,12 +125,17 @@ internal class InntektshistorikkTest {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, 1.januar, MaskinellJurist())
         assertEquals(1, inspektør.inntektTeller.size)
         assertEquals(1, inspektør.inntektTeller.first())
-        assertNull(historikk.avklarSykepengegrunnlag(2.januar, 2.januar, Arbeidsforholdhistorikk()))
+        assertNull(historikk.avklarSykepengegrunnlag(
+            2.januar,
+            2.januar,
+            null,
+            Arbeidsforholdhistorikk()
+        ))
     }
 
     @Test
     fun `intrikat test for sykepengegrunnlag der første fraværsdag er 31 desember`() {
-        inntektperioderForSykepengegrunnlag {
+        val skattSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
             1.desember(2016) til 1.desember(2016) inntekter {
                 ORGNUMMER inntekt 10000
             }
@@ -120,15 +149,16 @@ internal class InntektshistorikkTest {
                 ORGNUMMER inntekt 12000
                 ORGNUMMER inntekt 22000
             }
-        }.lagreInntekter(historikk, 31.desember(2017), UUID.randomUUID())
-        assertEquals(1, inspektør.inntektTeller.size)
-        assertEquals(3, inspektør.inntektTeller.single())
-        assertEquals(256000.årlig, historikk.avklarSykepengegrunnlag(31.desember(2017), 31.desember(2017), Arbeidsforholdhistorikk())?.inspektør?.beløp)
+        }
+            .map { it.tilSykepengegrunnlag(31.desember(2017), UUID.randomUUID()) }
+            .single()
+
+        assertEquals(256000.årlig, historikk.avklarSykepengegrunnlag(31.desember(2017), 31.desember(2017), skattSykepengegrunnlag, Arbeidsforholdhistorikk())?.inspektør?.beløp)
     }
 
     @Test
     fun `intrikat test for sykepengegrunnlag der første fraværsdag er 1 januar`() {
-        inntektperioderForSykepengegrunnlag {
+        val skattSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
             1.desember(2016) til 1.desember(2016) inntekter {
                 ORGNUMMER inntekt 10000
             }
@@ -142,35 +172,37 @@ internal class InntektshistorikkTest {
                 ORGNUMMER inntekt 12000
                 ORGNUMMER inntekt 22000
             }
-        }.lagreInntekter(historikk, 1.januar, UUID.randomUUID())
-        assertEquals(1, inspektør.inntektTeller.size)
-        assertEquals(5, inspektør.inntektTeller.single())
-        assertEquals(392000.årlig, historikk.avklarSykepengegrunnlag(1.januar, 1.januar, Arbeidsforholdhistorikk())?.inspektør?.beløp)
+        }
+            .map { it.tilSykepengegrunnlag(1.januar, UUID.randomUUID()) }
+            .single()
+        assertEquals(392000.årlig, historikk.avklarSykepengegrunnlag(1.januar, 1.januar, skattSykepengegrunnlag, Arbeidsforholdhistorikk())?.inspektør?.beløp)
     }
 
     @Test
     fun `Inntekt fra skatt siste tre måneder brukes til å beregne sykepengegrunnlaget`() {
-        inntektperioderForSykepengegrunnlag {
+        val skattSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
             1.desember(2016) til 1.desember(2017) inntekter {
                 ORGNUMMER inntekt INNTEKT
             }
             1.desember(2016) til 1.august(2017) inntekter {
                 ORGNUMMER inntekt INNTEKT
             }
-        }.lagreInntekter(historikk, 1.januar, UUID.randomUUID())
-        assertEquals(1, inspektør.inntektTeller.size)
-        assertEquals(3, inspektør.inntektTeller.first())
-        assertEquals(INNTEKT, historikk.avklarSykepengegrunnlag(1.januar, 1.januar, Arbeidsforholdhistorikk())?.inspektør?.beløp)
+        }
+            .map { it.tilSykepengegrunnlag(1.januar, UUID.randomUUID()) }
+            .single()
+        assertEquals(INNTEKT, historikk.avklarSykepengegrunnlag(1.januar, 1.januar, skattSykepengegrunnlag, Arbeidsforholdhistorikk())?.inspektør?.beløp)
     }
 
     @Test
     fun `Inntekt fra skatt siste tre måneder som tilsammen er et negativt beløp`() {
-        inntektperioderForSykepengegrunnlag {
+        val skattSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
             1.oktober(2017) til 1.desember(2017) inntekter {
                 ORGNUMMER inntekt INNTEKT * -1
             }
-        }.lagreInntekter(historikk, 1.januar, UUID.randomUUID())
-        val inntektsopplysning = historikk.avklarSykepengegrunnlag(1.januar, 1.januar, Arbeidsforholdhistorikk())
+        }
+            .map { it.tilSykepengegrunnlag(1.januar, UUID.randomUUID()) }
+            .single()
+        val inntektsopplysning = historikk.avklarSykepengegrunnlag(1.januar, 1.januar, skattSykepengegrunnlag, Arbeidsforholdhistorikk())
         assertTrue(inntektsopplysning is SkattSykepengegrunnlag)
         assertEquals(INGEN, inntektsopplysning?.inspektør?.beløp)
     }
@@ -190,66 +222,6 @@ internal class InntektshistorikkTest {
             )
         )
         assertEquals(INGEN, skattComposite.inspektør.beløp)
-    }
-
-    @Test
-    fun `Inntekter med forskjellig dato konflikterer ikke`() {
-        inntektperioderForSykepengegrunnlag {
-            1.desember(2016) til 1.desember(2017) inntekter {
-                ORGNUMMER inntekt INNTEKT
-            }
-        }.lagreInntekter(historikk, 1.januar, UUID.randomUUID())
-        inntektperioderForSykepengegrunnlag {
-            1.desember(2016) til 1.august(2017) inntekter {
-                ORGNUMMER inntekt INNTEKT
-            }
-        }.lagreInntekter(historikk, 15.januar, UUID.randomUUID())
-        assertEquals(2, inspektør.inntektTeller.size)
-        assertEquals(3, inspektør.inntektTeller.first())
-        assertEquals(3, inspektør.inntektTeller.last())
-        assertEquals(INNTEKT, historikk.avklarSykepengegrunnlag(1.januar, 1.januar, Arbeidsforholdhistorikk())?.inspektør?.beløp)
-        assertNull(historikk.avklarSykepengegrunnlag(15.januar, 15.januar, Arbeidsforholdhistorikk()))
-    }
-
-    @Test
-    fun `Senere inntekter for samme dato overskriver eksisterende inntekter`() {
-        inntektperioderForSykepengegrunnlag {
-            1.desember(2016) til 1.desember(2017) inntekter {
-                ORGNUMMER inntekt INNTEKT
-            }
-        }.lagreInntekter(historikk, 1.januar, UUID.randomUUID())
-        inntektperioderForSykepengegrunnlag {
-            1.desember(2016) til 1.november(2017) inntekter {
-                ORGNUMMER inntekt INNTEKT/2
-            }
-        }.lagreInntekter(historikk, 1.januar, UUID.randomUUID())
-        assertEquals(2, inspektør.inntektTeller.size)
-        assertEquals(2, inspektør.inntektTeller.first())
-        assertEquals(3, inspektør.inntektTeller.last())
-        val inntektsopplysning = historikk.avklarSykepengegrunnlag(1.januar, 1.januar, Arbeidsforholdhistorikk())
-        assertNotNull(inntektsopplysning)
-        assertEquals(INNTEKT/3, inntektsopplysning.inspektør.beløp)
-    }
-
-    @Test
-    fun `Inntekt fra skatt skal bare brukes en gang`() {
-        repeat(3) { _ ->
-            val meldingsreferanseId = UUID.randomUUID()
-            inntektperioderForSykepengegrunnlag {
-                1.desember(2016) til 1.desember(2017) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-                1.desember(2016) til 1.august(2017) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }.lagreInntekter(historikk, 1.januar, meldingsreferanseId)
-        }
-
-        assertEquals(1, inspektør.inntektTeller.size)
-        inspektør.inntektTeller.forEach {
-            assertEquals(3, it)
-        }
-        assertEquals(INNTEKT, historikk.avklarSykepengegrunnlag(1.januar, 1.januar, Arbeidsforholdhistorikk())?.inspektør?.beløp)
     }
 
     @Test
