@@ -233,10 +233,7 @@ class Person private constructor(
         }
 
         utbetalingshistorikk.sikreAtArbeidsgivereEksisterer {
-            arbeidsgivere.finnEllerOpprett(it) {
-                utbetalingshistorikk.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", it)
-                Arbeidsgiver(this, it, jurist)
-            }
+            arbeidsgivere.finnEllerOpprett(it, utbetalingshistorikk)
         }
         arbeidsgivere.beregnFeriepengerForAlleArbeidsgivere(
             aktørId,
@@ -527,21 +524,17 @@ class Person private constructor(
         finnEllerOpprettArbeidsgiver(hendelse.organisasjonsnummer(), hendelse)
 
     private fun finnEllerOpprettArbeidsgiver(orgnummer: String, aktivitetslogg: IAktivitetslogg) =
-        arbeidsgivere.finnEllerOpprett(orgnummer) {
-            aktivitetslogg.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", orgnummer)
-            Arbeidsgiver(this, orgnummer, jurist)
-        }
+        arbeidsgivere.finnEllerOpprett(orgnummer, aktivitetslogg)
 
     private fun finnArbeidsgiver(hendelse: ArbeidstakerHendelse) =
         hendelse.organisasjonsnummer().let { orgnr ->
             arbeidsgivere.finn(orgnr) ?: hendelse.logiskFeil("Finner ikke arbeidsgiver")
         }
 
-    private fun MutableList<Arbeidsgiver>.finnEllerOpprett(orgnr: String, creator: () -> Arbeidsgiver) =
-        finn(orgnr) ?: run {
-            val newValue = creator()
-            add(newValue)
-            newValue
+    private fun MutableList<Arbeidsgiver>.finnEllerOpprett(orgnr: String, aktivitetslogg: IAktivitetslogg) =
+        finn(orgnr) ?: Arbeidsgiver(this@Person, orgnr, jurist).also { arbeidsgiver ->
+            aktivitetslogg.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", orgnr)
+            add(arbeidsgiver)
         }
 
     internal fun nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
