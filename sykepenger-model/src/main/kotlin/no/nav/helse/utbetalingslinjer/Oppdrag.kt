@@ -5,7 +5,6 @@ import java.time.LocalDate.MIN
 import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -20,7 +19,7 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.FEIL
 
-internal class Oppdrag private constructor(
+class Oppdrag private constructor(
     private val mottaker: String,
     private val fagområde: Fagområde,
     private val linjer: MutableList<Utbetalingslinje>,
@@ -210,7 +209,7 @@ internal class Oppdrag private constructor(
     internal fun erRelevant(fagsystemId: String, fagområde: Fagområde) =
         this.fagsystemId == fagsystemId && this.fagområde == fagområde
 
-    internal fun valider(simulering: Simulering) =
+    internal fun valider(simulering: SimuleringPort) =
         simulering.valider(this)
 
     private fun kopierKunLinjerMedEndring() = kopierMed(filter(Utbetalingslinje::erForskjell))
@@ -399,7 +398,7 @@ internal class Oppdrag private constructor(
         this.status = hendelse.status
     }
 
-    internal fun håndter(simulering: Simulering) {
+    internal fun håndter(simulering: SimuleringPort) {
         if (!simulering.erRelevantFor(fagområde, fagsystemId)) return
         this.erSimulert = true
         this.simuleringsResultat = simulering.simuleringResultat
@@ -443,3 +442,9 @@ interface OverføringsinformasjonPort {
     fun erRelevant(fagsystemId: String): Boolean
 }
 
+interface SimuleringPort {
+    val simuleringResultat: SimuleringResultat?
+    fun valider(oppdrag: Oppdrag): SimuleringPort
+    fun erRelevantFor(fagområde: Fagområde, fagsystemId: String): Boolean
+
+}

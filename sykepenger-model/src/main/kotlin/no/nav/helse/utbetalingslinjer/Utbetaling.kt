@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.hendelser.ArbeidstakerHendelse
+import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
@@ -196,8 +197,8 @@ internal class Utbetaling private constructor(
 
     internal fun håndter(simulering: Simulering) {
         if (!simulering.erRelevantForUtbetaling(id)) return
-        personOppdrag.håndter(simulering)
-        arbeidsgiverOppdrag.håndter(simulering)
+        personOppdrag.håndter(SimuleringAdapter(simulering))
+        arbeidsgiverOppdrag.håndter(SimuleringAdapter(simulering))
     }
 
     internal fun simuler(hendelse: IAktivitetslogg) {
@@ -243,8 +244,8 @@ internal class Utbetaling private constructor(
         hendelse.erRelevant(id)
 
     internal fun valider(simulering: Simulering): IAktivitetslogg {
-        arbeidsgiverOppdrag.valider(simulering)
-        personOppdrag.valider(simulering)
+        arbeidsgiverOppdrag.valider(SimuleringAdapter(simulering))
+        personOppdrag.valider(SimuleringAdapter(simulering))
         return simulering
     }
 
@@ -1034,4 +1035,11 @@ class OverføringsinformasjonOverførtAdapter(private val hendelse: UtbetalingOv
     override val overføringstidspunkt: LocalDateTime = hendelse.overføringstidspunkt
     override val status: Oppdragstatus = Oppdragstatus.OVERFØRT
     override fun erRelevant(fagsystemId: String): Boolean = hendelse.erRelevant(fagsystemId)
+}
+
+class SimuleringAdapter(private val simulering: Simulering): SimuleringPort {
+    override val simuleringResultat: SimuleringResultat? = simulering.simuleringResultat
+    override fun valider(oppdrag: Oppdrag): SimuleringPort = this.apply { simulering.valider(oppdrag) }
+    override fun erRelevantFor(fagområde: Fagområde, fagsystemId: String): Boolean = simulering.erRelevantFor(fagområde, fagsystemId)
+
 }
