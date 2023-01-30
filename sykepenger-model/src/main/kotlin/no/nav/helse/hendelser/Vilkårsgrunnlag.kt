@@ -7,10 +7,10 @@ import no.nav.helse.hendelser.Periode.Companion.sammenhengende
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.beregnOpptjening
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsforholdhistorikk.Companion.opptjening
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
@@ -33,9 +33,9 @@ class Vilkårsgrunnlag(
 
     internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
 
-    internal fun beregnSykepengegrunnlag(person: Person, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
+    internal fun avklarSykepengegrunnlag(person: Person, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
         val opptjening = arbeidsforhold.beregnOpptjening(skjæringstidspunkt, NullObserver)
-        return inntektsvurderingForSykepengegrunnlag.beregnSykepengegrunnlag(this, person, opptjening, skjæringstidspunkt, meldingsreferanseId(), subsumsjonObserver)
+        return inntektsvurderingForSykepengegrunnlag.avklarSykepengegrunnlag(this, person, opptjening, skjæringstidspunkt, meldingsreferanseId(), subsumsjonObserver)
     }
 
     internal fun valider(

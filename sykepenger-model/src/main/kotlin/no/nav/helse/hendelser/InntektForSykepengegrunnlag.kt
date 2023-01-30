@@ -4,11 +4,11 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
-import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.beregnSykepengegrunnlag
+import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.avklarSykepengegrunnlag
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektFor
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_3
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import org.slf4j.LoggerFactory
@@ -25,10 +25,10 @@ class InntektForSykepengegrunnlag(
         require(inntekter.antallMåneder() <= 3L) { "Forventer maks 3 inntektsmåneder" }
     }
 
-    internal fun beregnSykepengegrunnlag(hendelse: IAktivitetslogg, person: Person, opptjening: Opptjening, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, subsumsjonObserver: SubsumsjonObserver) = this
+    internal fun avklarSykepengegrunnlag(hendelse: IAktivitetslogg, person: Person, opptjening: Opptjening, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, subsumsjonObserver: SubsumsjonObserver) = this
         .inntekter
         .filter { it.ansattVedSkjæringstidspunkt(opptjening) }
-        .beregnSykepengegrunnlag(hendelse, person, skjæringstidspunkt, meldingsreferanseId, subsumsjonObserver)
+        .avklarSykepengegrunnlag(hendelse, person, skjæringstidspunkt, meldingsreferanseId, subsumsjonObserver)
 
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,

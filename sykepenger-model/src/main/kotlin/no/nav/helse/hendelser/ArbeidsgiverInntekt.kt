@@ -8,13 +8,13 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.har
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.nylig
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.utenOffentligeYtelser
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.YTELSE_FRA_OFFENTLIGE
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.økonomi.Inntekt
 
 class ArbeidsgiverInntekt(
@@ -40,7 +40,7 @@ class ArbeidsgiverInntekt(
     private fun harInntekter() = inntekter.isNotEmpty()
 
     internal companion object {
-        internal fun List<ArbeidsgiverInntekt>.beregnSykepengegrunnlag(hendelse: IAktivitetslogg, person: Person, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, subsumsjonObserver: SubsumsjonObserver) =
+        internal fun List<ArbeidsgiverInntekt>.avklarSykepengegrunnlag(hendelse: IAktivitetslogg, person: Person, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, subsumsjonObserver: SubsumsjonObserver) =
             person.avklarSykepengegrunnlag(hendelse, skjæringstidspunkt, this.associateBy({ it.arbeidsgiver }) { it.tilSykepengegrunnlag(skjæringstidspunkt, meldingsreferanseId) }, subsumsjonObserver)
 
         internal fun List<ArbeidsgiverInntekt>.kilder(antallMåneder: Int) = this
