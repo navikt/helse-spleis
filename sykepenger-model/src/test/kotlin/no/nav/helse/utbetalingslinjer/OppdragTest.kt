@@ -51,7 +51,7 @@ internal class OppdragTest {
             )
         ), sisteArbeidsgiverdag = 31.desember(2017))
         val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger)
-        oppdrag1.lagreOverføringsinformasjon(UtbetalingOverført(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), 1234L, LocalDateTime.now()))
+        oppdrag1.lagreOverføringsinformasjon(OverføringsinformasjonOverførtAdapter(UtbetalingOverført(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), 1234L, LocalDateTime.now())))
         assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag1))
         assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag2))
     }
@@ -78,7 +78,7 @@ internal class OppdragTest {
                 grad = 100
             )
         ), sisteArbeidsgiverdag = 31.desember(2017))
-        oppdrag1.lagreOverføringsinformasjon(UtbetalingOverført(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), 1234L, LocalDateTime.now()))
+        oppdrag1.lagreOverføringsinformasjon(OverføringsinformasjonOverførtAdapter(UtbetalingOverført(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), 1234L, LocalDateTime.now())))
         assertFalse(Oppdrag.synkronisert(oppdrag1, oppdrag2))
     }
 
@@ -104,9 +104,9 @@ internal class OppdragTest {
                 grad = 100
             )
         ), sisteArbeidsgiverdag = 31.desember(2017))
-        oppdrag1.lagreOverføringsinformasjon(UtbetalingOverført(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), 1234L, LocalDateTime.now()))
-        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
-        oppdrag2.lagreOverføringsinformasjon(UtbetalingOverført(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag2.fagsystemId(), UUID.randomUUID().toString(), 1234L, LocalDateTime.now()))
+        oppdrag1.lagreOverføringsinformasjon(OverføringsinformasjonOverførtAdapter(UtbetalingOverført(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), 1234L, LocalDateTime.now())))
+        oppdrag1.lagreOverføringsinformasjon(OverføringsinformasjonAdapter(UtbetalingHendelse(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now())))
+        oppdrag2.lagreOverføringsinformasjon(OverføringsinformasjonOverførtAdapter(UtbetalingOverført(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag2.fagsystemId(), UUID.randomUUID().toString(), 1234L, LocalDateTime.now())))
         assertFalse(Oppdrag.synkronisert(oppdrag1, oppdrag2))
     }
 
@@ -132,8 +132,8 @@ internal class OppdragTest {
                 grad = 100
             )
         ), sisteArbeidsgiverdag = 31.desember(2017))
-        oppdrag1.lagreOverføringsinformasjon(UtbetalingOverført(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), 1234L, LocalDateTime.now()))
-        oppdrag2.lagreOverføringsinformasjon(UtbetalingOverført(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag2.fagsystemId(), UUID.randomUUID().toString(), 1234L, LocalDateTime.now()))
+        oppdrag1.lagreOverføringsinformasjon(OverføringsinformasjonOverførtAdapter(UtbetalingOverført(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), 1234L, LocalDateTime.now())))
+        oppdrag2.lagreOverføringsinformasjon(OverføringsinformasjonOverførtAdapter(UtbetalingOverført(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag2.fagsystemId(), UUID.randomUUID().toString(), 1234L, LocalDateTime.now())))
         assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag2))
     }
 
@@ -276,7 +276,7 @@ internal class OppdragTest {
         val avstemmingsnøkkel: Long = 1235
         val overføringstidspunkt = LocalDateTime.now()
 
-        oppdrag.lagreOverføringsinformasjon(UtbetalingOverført(
+        oppdrag.lagreOverføringsinformasjon(OverføringsinformasjonOverførtAdapter(UtbetalingOverført(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = "1234",
             fødselsnummer = "1234",
@@ -285,7 +285,7 @@ internal class OppdragTest {
             utbetalingId = "7894",
             avstemmingsnøkkel = avstemmingsnøkkel,
             overføringstidspunkt = overføringstidspunkt
-        ))
+        )))
 
         assertEquals(avstemmingsnøkkel, oppdrag.inspektør.avstemmingsnøkkel)
         assertEquals(overføringstidspunkt, oppdrag.inspektør.overføringstidspunkt)
@@ -310,7 +310,7 @@ internal class OppdragTest {
         val avstemmingsnøkkel: Long = 1235
         val overføringstidspunkt = LocalDateTime.now()
 
-        oppdrag.lagreOverføringsinformasjon(UtbetalingHendelse(
+        oppdrag.lagreOverføringsinformasjon(OverføringsinformasjonAdapter(UtbetalingHendelse(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = "1234",
             fødselsnummer = "1234",
@@ -321,7 +321,7 @@ internal class OppdragTest {
             overføringstidspunkt = overføringstidspunkt,
             melding = "foo",
             status = Oppdragstatus.AKSEPTERT
-        ))
+        )))
 
         assertEquals(avstemmingsnøkkel, oppdrag.inspektør.avstemmingsnøkkel)
         assertEquals(overføringstidspunkt, oppdrag.inspektør.overføringstidspunkt)
@@ -346,7 +346,7 @@ internal class OppdragTest {
         val avstemmingsnøkkel: Long = 1235
         val overføringstidspunkt = LocalDateTime.now()
 
-        oppdrag.lagreOverføringsinformasjon(UtbetalingOverført(
+        oppdrag.lagreOverføringsinformasjon(OverføringsinformasjonOverførtAdapter(UtbetalingOverført(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = "1234",
             fødselsnummer = "1234",
@@ -355,10 +355,10 @@ internal class OppdragTest {
             utbetalingId = "7894",
             avstemmingsnøkkel = avstemmingsnøkkel,
             overføringstidspunkt = overføringstidspunkt
-        ))
+        )))
 
         val aksepteringstidspunkt = overføringstidspunkt.plusSeconds(3)
-        oppdrag.lagreOverføringsinformasjon(UtbetalingHendelse(
+        oppdrag.lagreOverføringsinformasjon(OverføringsinformasjonAdapter(UtbetalingHendelse(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = "1234",
             fødselsnummer = "1234",
@@ -369,7 +369,7 @@ internal class OppdragTest {
             overføringstidspunkt = aksepteringstidspunkt,
             melding = "foo",
             status = Oppdragstatus.AKSEPTERT
-        ))
+        )))
 
         assertEquals(avstemmingsnøkkel, oppdrag.inspektør.avstemmingsnøkkel)
         assertEquals(overføringstidspunkt, oppdrag.inspektør.overføringstidspunkt)
@@ -392,7 +392,7 @@ internal class OppdragTest {
             ), sisteArbeidsgiverdag = 16.januar
         )
 
-        oppdrag.lagreOverføringsinformasjon(UtbetalingOverført(
+        oppdrag.lagreOverføringsinformasjon(OverføringsinformasjonOverførtAdapter(UtbetalingOverført(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = "1234",
             fødselsnummer = "1234",
@@ -401,9 +401,9 @@ internal class OppdragTest {
             utbetalingId = "7894",
             avstemmingsnøkkel = 6666,
             overføringstidspunkt = LocalDateTime.now()
-        ))
+        )))
 
-        oppdrag.lagreOverføringsinformasjon(UtbetalingHendelse(
+        oppdrag.lagreOverføringsinformasjon(OverføringsinformasjonAdapter(UtbetalingHendelse(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = "1234",
             fødselsnummer = "1234",
@@ -414,7 +414,7 @@ internal class OppdragTest {
             overføringstidspunkt = LocalDateTime.now(),
             melding = "foo",
             status = Oppdragstatus.AKSEPTERT
-        ))
+        )))
 
         assertNull(oppdrag.inspektør.avstemmingsnøkkel)
         assertNull(oppdrag.inspektør.overføringstidspunkt)

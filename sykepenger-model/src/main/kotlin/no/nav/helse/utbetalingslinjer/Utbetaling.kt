@@ -824,15 +824,15 @@ internal class Utbetaling private constructor(
 
         override fun overført(utbetaling: Utbetaling, hendelse: UtbetalingOverført) {
             utbetaling.lagreOverføringsinformasjon(hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
-            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
-            utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
+            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(OverføringsinformasjonOverførtAdapter(hendelse))
+            utbetaling.personOppdrag.lagreOverføringsinformasjon(OverføringsinformasjonOverførtAdapter(hendelse))
             utbetaling.tilstand(Overført, hendelse)
         }
 
         override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
             utbetaling.lagreOverføringsinformasjon(hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
-            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
-            utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
+            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(OverføringsinformasjonAdapter(hendelse))
+            utbetaling.personOppdrag.lagreOverføringsinformasjon(OverføringsinformasjonAdapter(hendelse))
             utbetaling.håndterKvittering(hendelse)
         }
     }
@@ -845,14 +845,14 @@ internal class Utbetaling private constructor(
         override fun overført(utbetaling: Utbetaling, hendelse: UtbetalingOverført) {
             hendelse.info("Mottok overførtkvittering, men står allerede i Overført. Venter på kvittering.")
             utbetaling.lagreOverføringsinformasjon(hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
-            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
-            utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
+            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(OverføringsinformasjonOverførtAdapter(hendelse))
+            utbetaling.personOppdrag.lagreOverføringsinformasjon(OverføringsinformasjonOverførtAdapter(hendelse))
         }
 
         override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
             utbetaling.lagreOverføringsinformasjon(hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
-            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
-            utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
+            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(OverføringsinformasjonAdapter(hendelse))
+            utbetaling.personOppdrag.lagreOverføringsinformasjon(OverføringsinformasjonAdapter(hendelse))
             utbetaling.håndterKvittering(hendelse)
         }
     }
@@ -917,13 +917,13 @@ internal class Utbetaling private constructor(
         }
 
         override fun overført(utbetaling: Utbetaling, hendelse: UtbetalingOverført) {
-            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
-            utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
+            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(OverføringsinformasjonOverførtAdapter(hendelse))
+            utbetaling.personOppdrag.lagreOverføringsinformasjon(OverføringsinformasjonOverførtAdapter(hendelse))
         }
 
         override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
-            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
-            utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
+            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(OverføringsinformasjonAdapter(hendelse))
+            utbetaling.personOppdrag.lagreOverføringsinformasjon(OverføringsinformasjonAdapter(hendelse))
         }
     }
 
@@ -1021,4 +1021,17 @@ internal class Utbetaling private constructor(
     }
 
     enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }
+}
+
+class OverføringsinformasjonAdapter(private val hendelse: UtbetalingHendelse): OverføringsinformasjonPort {
+    override val avstemmingsnøkkel: Long = hendelse.avstemmingsnøkkel
+    override val overføringstidspunkt: LocalDateTime = hendelse.overføringstidspunkt
+    override val status: Oppdragstatus = hendelse.status
+    override fun erRelevant(fagsystemId: String): Boolean = hendelse.erRelevant(fagsystemId)
+}
+class OverføringsinformasjonOverførtAdapter(private val hendelse: UtbetalingOverført): OverføringsinformasjonPort {
+    override val avstemmingsnøkkel: Long = hendelse.avstemmingsnøkkel
+    override val overføringstidspunkt: LocalDateTime = hendelse.overføringstidspunkt
+    override val status: Oppdragstatus = Oppdragstatus.OVERFØRT
+    override fun erRelevant(fagsystemId: String): Boolean = hendelse.erRelevant(fagsystemId)
 }

@@ -9,8 +9,6 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
-import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.nesteDag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_1
@@ -394,14 +392,7 @@ internal class Oppdrag private constructor(
         "simuleringsResultat" to simuleringsResultat?.toMap()
     )
 
-    internal fun lagreOverføringsinformasjon(hendelse: UtbetalingOverført) {
-        if (!hendelse.erRelevant(fagsystemId)) return
-        if (this.avstemmingsnøkkel == null) this.avstemmingsnøkkel = hendelse.avstemmingsnøkkel
-        if (this.overføringstidspunkt == null) this.overføringstidspunkt = hendelse.overføringstidspunkt
-        this.status = Oppdragstatus.OVERFØRT
-    }
-
-    internal fun lagreOverføringsinformasjon(hendelse: UtbetalingHendelse) {
+    internal fun lagreOverføringsinformasjon(hendelse: OverføringsinformasjonPort) {
         if (!hendelse.erRelevant(fagsystemId)) return
         if (this.avstemmingsnøkkel == null) this.avstemmingsnøkkel = hendelse.avstemmingsnøkkel
         if (this.overføringstidspunkt == null) this.overføringstidspunkt = hendelse.overføringstidspunkt
@@ -443,5 +434,12 @@ internal class Oppdrag private constructor(
             linkTo = nåværende
         }
     }
+}
+
+interface OverføringsinformasjonPort {
+    val avstemmingsnøkkel: Long
+    val overføringstidspunkt: LocalDateTime
+    val status: Oppdragstatus
+    fun erRelevant(fagsystemId: String): Boolean
 }
 
