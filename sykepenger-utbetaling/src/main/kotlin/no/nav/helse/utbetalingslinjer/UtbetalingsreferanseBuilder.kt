@@ -7,11 +7,11 @@ import java.util.*
 private const val pad = '='
 private const val padByte = pad.code.toByte()
 
-internal fun genererUtbetalingsreferanse(uuid: UUID): String {
+fun genererUtbetalingsreferanse(uuid: UUID): String {
     return uuid.base32Encode()
 }
 
-internal fun decodeUtbetalingsreferanse(utbetalingsreferanse: String): UUID {
+fun decodeUtbetalingsreferanse(utbetalingsreferanse: String): UUID {
     return Base32(padByte).decode(utbetalingsreferanse).let {
         ByteBuffer.wrap(it).asLongBuffer()
     }.let {

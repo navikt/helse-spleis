@@ -52,15 +52,9 @@ import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.ForlengelseFraInfotrygd
-import no.nav.helse.person.Inntektskilde
-import no.nav.helse.person.InntektsmeldingInfo
-import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement

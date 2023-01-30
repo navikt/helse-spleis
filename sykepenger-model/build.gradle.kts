@@ -1,9 +1,7 @@
-val commonsCodecVersion = "1.15"
 val jsonassertVersion = "1.5.0"
 val jacksonVersion = "2.14.0"
 
 dependencies {
-    api("commons-codec:commons-codec:$commonsCodecVersion")
     implementation(project(":sykepenger-tid"))
     implementation(project(":sykepenger-utbetaling"))
     implementation(project(":sykepenger-aktivitetslogg"))
