@@ -239,7 +239,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
     }
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("💡 Denne vil fungere om forsyvningsstrategier kun tillater å forskyve til perioder med samme skjæringstidspunkt")
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅Løses med oppdelt håndtering av inntektsmelding")
     fun `periode med ferie kant-i-kant med en periode med utbetalingsdag`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(5.februar, 23.februar, 100.prosent))

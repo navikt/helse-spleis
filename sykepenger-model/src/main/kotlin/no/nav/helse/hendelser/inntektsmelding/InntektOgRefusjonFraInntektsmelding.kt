@@ -64,11 +64,13 @@ internal class InntektOgRefusjonFraInntektsmelding(
     internal inner class FørsteFraværsdagForskyvningsstragi : InntektOgRefusjonMatchingstrategi {
         // Bruker matching på først fraværsdag, men forskyver første fraværsdag om vedtaksperioden(e) som treffes ikke forventer inntekt
         private var forskjøvetFørsteFraværsdag = førsteFraværsdag
+        private var skjæringstidspunktForPeriodeMedFørsteFraværsdag: LocalDate? = null
         override fun matcher(skjæringstidspunkt: LocalDate, periode: Periode, forventerInntekt: () -> Boolean): Boolean {
             if (ingenArbeidsgiverperiode || førsteFraværsdagEtterArbeidsgiverperioden) {
                 val førsteFraværsdagIPeriode = forskjøvetFørsteFraværsdag!!.erIPeriode(periode)
                 if (!førsteFraværsdagIPeriode) return false
-                if (forventerInntekt()) return true
+                if (førsteFraværsdag == forskjøvetFørsteFraværsdag) skjæringstidspunktForPeriodeMedFørsteFraværsdag = skjæringstidspunkt
+                if (skjæringstidspunkt == skjæringstidspunktForPeriodeMedFørsteFraværsdag && forventerInntekt()) return true
                 forskjøvetFørsteFraværsdag = periode.endInclusive.nesteDag
                 return false
             }
@@ -88,14 +90,16 @@ internal class InntektOgRefusjonFraInntektsmelding(
 
     internal inner class FørsteDagEtterArbeidsgiverperiodenForskyvningsstragi : InntektOgRefusjonMatchingstrategi {
         // Bruker matching på første dag etter arbeidsgiverprioden, men forskyver dagen om vedtaksperioden(e) som treffes ikke forventer inntekt
-        private var forskjøvetFørsteDagEtterArbeidsgiverperioden = sisteDagIArbeidsgiverperioden?.nesteDag
+        private val førsteDagEtterArbeidsgiverperioden = sisteDagIArbeidsgiverperioden?.nesteDag
+        private var forskjøvetFørsteDagEtterArbeidsgiverperioden = førsteDagEtterArbeidsgiverperioden
+        private var skjæringstidspunktForPeriodeMedFørsteDagEtterArbeidsgiverperioden: LocalDate? = null
         override fun matcher(skjæringstidspunkt: LocalDate, periode: Periode, forventerInntekt: () -> Boolean): Boolean {
             if (sisteDagIArbeidsgiverperioden == null) return false
             if (førsteFraværsdag?.isAfter(sisteDagIArbeidsgiverperioden) == true) return false
-
             val dagIPeriode = forskjøvetFørsteDagEtterArbeidsgiverperioden!!.erIPeriode(periode)
             if (!dagIPeriode) return false
-            if (forventerInntekt()) return true
+            if (førsteDagEtterArbeidsgiverperioden == forskjøvetFørsteDagEtterArbeidsgiverperioden) skjæringstidspunktForPeriodeMedFørsteDagEtterArbeidsgiverperioden = skjæringstidspunkt
+            if (skjæringstidspunkt == skjæringstidspunktForPeriodeMedFørsteDagEtterArbeidsgiverperioden && forventerInntekt()) return true
             forskjøvetFørsteDagEtterArbeidsgiverperioden = periode.endInclusive.nesteDag
             return false
         }

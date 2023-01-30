@@ -290,7 +290,7 @@ internal class InntektsmeldingMatchingTest {
     }
 
     @Test
-    fun `Kun arbeidsgiverperiode og ferie skal ikke håndtere inntekt`() {
+    fun `Kun arbeidsgiverperiode og ferie skal ikke håndtere inntekt, heller ikke perioden etter som har nytt skjæringstidspunkt`() {
         val vedtaksperiode1 = 4.januar til 22.januar // Ferie 20-22.januar
         val vedtaksperiode2 = 23.januar til 31.januar
 
@@ -301,7 +301,67 @@ internal class InntektsmeldingMatchingTest {
             vedtaksperiode1 medSkjæringstidspunkt 4.januar som ikkeForventerInntekt,
             vedtaksperiode2 medSkjæringstidspunkt 23.januar som forventerInntekt
         ) {
+            bleIkkeHåndtert
+        }
+    }
+
+    @Test
+    fun `Forsyvning av første fraværsdag, vedtaksperiode etter har samme skjæringstidspunkt`() {
+        val vedtaksperiode1 = 1.januar til 16.januar
+        val vedtaksperiode2 = 17.januar til 17.januar
+        val (_, inntekt) =
+            inntektsmelding(listOf(vedtaksperiode1, vedtaksperiode2), 16.januar, 1.januar til 15.januar)
+
+        inntekt.evaluerer(
+            vedtaksperiode1 medSkjæringstidspunkt 1.januar som ikkeForventerInntekt,
+            vedtaksperiode2 medSkjæringstidspunkt 1.januar som forventerInntekt
+        ) {
+            this bleHåndtertMed FørsteFraværsdagForskyvningsstragi::class av vedtaksperiode2
+        }
+    }
+
+    @Test
+    fun `Forsyvning av første fraværsdag, vedtaksperiode etter har ulikt skjæringstidspunkt`() {
+        val vedtaksperiode1 = 1.januar til 16.januar
+        val vedtaksperiode2 = 17.januar til 17.januar
+        val (_, inntekt) =
+            inntektsmelding(listOf(vedtaksperiode1, vedtaksperiode2), 16.januar, 1.januar til 15.januar)
+
+        inntekt.evaluerer(
+            vedtaksperiode1 medSkjæringstidspunkt 1.januar som ikkeForventerInntekt,
+            vedtaksperiode2 medSkjæringstidspunkt 17.januar som forventerInntekt
+        ) {
+            bleIkkeHåndtert
+        }
+    }
+
+    @Test
+    fun `Forsyvning av første første dag etter arbeidsgiverperioden, vedtaksperiode etter har samme skjæringstidspunkt`() {
+        val vedtaksperiode1 = 1.januar til 16.januar
+        val vedtaksperiode2 = 17.januar til 17.januar
+        val (_, inntekt) =
+            inntektsmelding(listOf(vedtaksperiode1, vedtaksperiode2), 15.januar, 1.januar til 15.januar)
+
+        inntekt.evaluerer(
+            vedtaksperiode1 medSkjæringstidspunkt 1.januar som ikkeForventerInntekt,
+            vedtaksperiode2 medSkjæringstidspunkt 1.januar som forventerInntekt
+        ) {
             this bleHåndtertMed FørsteDagEtterArbeidsgiverperiodenForskyvningsstragi::class av vedtaksperiode2
+        }
+    }
+
+    @Test
+    fun `Forsyvning av første første dag etter arbeidsgiverperioden, vedtaksperiode etter har ulikt skjæringstidspunkt`() {
+        val vedtaksperiode1 = 1.januar til 16.januar
+        val vedtaksperiode2 = 17.januar til 17.januar
+        val (_, inntekt) =
+            inntektsmelding(listOf(vedtaksperiode1, vedtaksperiode2), 15.januar, 1.januar til 15.januar)
+
+        inntekt.evaluerer(
+            vedtaksperiode1 medSkjæringstidspunkt 1.januar som ikkeForventerInntekt,
+            vedtaksperiode2 medSkjæringstidspunkt 17.januar som forventerInntekt
+        ) {
+            bleIkkeHåndtert
         }
     }
 
