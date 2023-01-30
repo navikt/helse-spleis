@@ -7,7 +7,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.contains
 import no.nav.helse.person.UtbetalingsdagVisitor
-import no.nav.helse.utbetalingslinjer.BeløpkildeAdaptor
+import no.nav.helse.utbetalingslinjer.BeløpkildeAdapter
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
@@ -175,7 +175,7 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
         Comparable<Utbetalingsdag> {
 
         internal abstract val prioritet: Int
-        internal fun beløpkilde() = BeløpkildeAdaptor(økonomi)
+        internal fun beløpkilde() = BeløpkildeAdapter(økonomi)
         override fun compareTo(other: Utbetalingsdag): Int {
             return this.prioritet.compareTo(other.prioritet)
         }

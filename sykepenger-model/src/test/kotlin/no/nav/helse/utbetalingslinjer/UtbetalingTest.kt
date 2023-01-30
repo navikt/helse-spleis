@@ -717,13 +717,13 @@ internal class UtbetalingTest {
         val utbetalingUtenMatch = opprettGodkjentUtbetaling()
         val utbetalinger = listOf(utbetalingUtenMatch, utbetalingMedPersonOppdragMatch)
 
-        val funnetArbeidsgiverUtbetaling = Utbetaling.finnUtbetalingForJustering(utbetalinger, arbeidsgiverFagsystemId.gRegulering())
+        val funnetArbeidsgiverUtbetaling = Utbetaling.finnUtbetalingForJustering(utbetalinger, arbeidsgiverFagsystemId.gRegulering().utbetalingsport())
         assertEquals(utbetalingMedPersonOppdragMatch, funnetArbeidsgiverUtbetaling, "Fant ikke arbeidsgiverutbetaling")
 
-        val funnetUtbetaling = Utbetaling.finnUtbetalingForJustering(utbetalinger, personFagsystemId.gRegulering())
+        val funnetUtbetaling = Utbetaling.finnUtbetalingForJustering(utbetalinger, personFagsystemId.gRegulering().utbetalingsport())
         assertEquals(utbetalingMedPersonOppdragMatch, funnetUtbetaling, "Fant ikke personutbetaling")
 
-        assertNull(Utbetaling.finnUtbetalingForJustering(utbetalinger, "somethingrandom".gRegulering()))
+        assertNull(Utbetaling.finnUtbetalingForJustering(utbetalinger, "somethingrandom".gRegulering().utbetalingsport()))
     }
 
     @Test

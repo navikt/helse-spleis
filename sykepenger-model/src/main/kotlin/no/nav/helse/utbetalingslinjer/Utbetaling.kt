@@ -7,7 +7,6 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.til
-import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
@@ -173,7 +172,7 @@ class Utbetaling private constructor(
         godkjenn(hendelse, hendelse.vurdering())
     }
 
-    internal fun håndter(hendelse: Grunnbeløpsregulering) {
+    internal fun håndter(hendelse: GrunnbeløpsreguleringPort) {
         godkjenn(hendelse, Vurdering.automatiskGodkjent)
     }
 
@@ -263,7 +262,7 @@ class Utbetaling private constructor(
         return tilstand.annuller(this, hendelse)
     }
 
-    internal fun etterutbetale(hendelse: Grunnbeløpsregulering, utbetalingstidslinje: Utbetalingstidslinje): Utbetaling? {
+    internal fun etterutbetale(hendelse: GrunnbeløpsreguleringPort, utbetalingstidslinje: Utbetalingstidslinje): Utbetaling? {
         return tilstand.etterutbetale(this, hendelse, utbetalingstidslinje)
     }
 
@@ -406,7 +405,7 @@ class Utbetaling private constructor(
 
         internal fun finnUtbetalingForJustering(
             utbetalinger: List<Utbetaling>,
-            hendelse: Grunnbeløpsregulering
+            hendelse: GrunnbeløpsreguleringPort
         ): Utbetaling? {
             val sisteUtbetalte = utbetalinger.aktive().lastOrNull {
                 hendelse.erRelevant(it.arbeidsgiverOppdrag.fagsystemId()) ||
@@ -668,7 +667,7 @@ class Utbetaling private constructor(
             hendelse.funksjonellFeil(RV_UT_7)
         }
 
-        fun etterutbetale(utbetaling: Utbetaling, hendelse: Grunnbeløpsregulering, utbetalingstidslinje: Utbetalingstidslinje): Utbetaling? {
+        fun etterutbetale(utbetaling: Utbetaling, hendelse: GrunnbeløpsreguleringPort, utbetalingstidslinje: Utbetalingstidslinje): Utbetaling? {
             hendelse.info("Forventet ikke å etterutbetale på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
             hendelse.funksjonellFeil(RV_UT_8)
             return null
@@ -872,7 +871,7 @@ class Utbetaling private constructor(
                 null
             ).also { hendelse.info("Oppretter annullering med id ${it.id}") }
 
-        override fun etterutbetale(utbetaling: Utbetaling, hendelse: Grunnbeløpsregulering, utbetalingstidslinje: Utbetalingstidslinje) =
+        override fun etterutbetale(utbetaling: Utbetaling, hendelse: GrunnbeløpsreguleringPort, utbetalingstidslinje: Utbetalingstidslinje) =
             Utbetaling(
                 sisteAktive = null,
                 fødselsnummer = hendelse.fødselsnummer(),
@@ -1015,4 +1014,10 @@ class Utbetaling private constructor(
 interface AnnullerUtbetalingPort: IAktivitetslogg {
     fun vurdering(): Utbetaling.Vurdering
     fun erRelevant(fagsystemId: String): Boolean
+}
+
+interface GrunnbeløpsreguleringPort: IAktivitetslogg {
+    fun erRelevant(fagsystemId: String): Boolean
+    fun fødselsnummer(): String
+    fun organisasjonsnummer(): String
 }
