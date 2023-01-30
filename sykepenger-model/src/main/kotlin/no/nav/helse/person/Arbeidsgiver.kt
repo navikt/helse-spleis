@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
@@ -517,7 +518,8 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun håndterInntektsmeldingOppdelt(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID?) {
-        val dager = inntektsmelding.dager.also {
+        val sammenhengendePerioder = sammenhengendePerioder()
+        val dager = inntektsmelding.dager(sammenhengendePerioder).also {
             /* Den eventuelle "halen" som ikke håndteres av noen vedtaksperioder må legges til _først_
             for at vedtaksperioder skal forstå at de før var innenfor AGP, men nå skal utbetales
             selv om de selv ikke overlapper med inntektsmeldingen på noen måte;
@@ -912,6 +914,10 @@ internal class Arbeidsgiver private constructor(
                 sammenhengendePerioder.add(it)
         }
         return sammenhengendePerioder
+    }
+
+    private fun sammenhengendePerioder(): List<Periode> {
+        return vedtaksperioder.map { it.periode() }.grupperSammenhengendePerioderMedHensynTilHelg()
     }
 
     internal fun finnSammenhengendePeriode(skjæringstidspunkt: LocalDate) = vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt)

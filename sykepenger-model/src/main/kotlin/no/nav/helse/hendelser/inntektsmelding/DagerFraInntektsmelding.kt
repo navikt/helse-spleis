@@ -17,7 +17,8 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 
 internal class DagerFraInntektsmelding(
-    private val inntektsmelding: Inntektsmelding
+    private val inntektsmelding: Inntektsmelding,
+    private val sammenhengendePerioder: List<Periode> = emptyList()
 ): IAktivitetslogg by inntektsmelding {
     private val opprinneligPeriode = inntektsmelding.sykdomstidslinje().periode()
     private val gjenståendeDager = opprinneligPeriode?.toMutableSet() ?: mutableSetOf()
@@ -50,11 +51,10 @@ internal class DagerFraInntektsmelding(
     }
 
     private fun overlappendeDager(periode: Periode) = periode.intersect(gjenståendeDager)
-    internal fun skalHåndteresAv(periode: Periode) = overlappendeDager(periode).isNotEmpty() || arbeidsgiverperiodenStarterRettEtter(periode)
-
-    private fun arbeidsgiverperiodenStarterRettEtter(periode: Periode): Boolean {
-        if (opprinneligPeriode == null) return false
-        return periode.erRettFør(opprinneligPeriode)
+    internal fun skalHåndteresAv(periode: Periode): Boolean {
+        // Finner den sammenhengende perioden denne vedtaksperioden er en del av, og sjekker overlapp med den
+        val sammenhengendePeriode = sammenhengendePerioder.single { periode.start in it }
+        return overlappendeDager(sammenhengendePeriode).isNotEmpty()
     }
 
     internal fun harBlittHåndtertAv(periode: Periode) = håndterteDager.any { it in periode }

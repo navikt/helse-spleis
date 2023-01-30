@@ -1956,23 +1956,22 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("❌")
     fun `padding med arbeidsdager før arbeidsgiverperioden`() {
-        håndterSykmelding(Sykmeldingsperiode(28.januar(2022), 16.februar(2022), 100.prosent))
-        håndterSøknad(Sykdom(28.januar(2022), 16.februar(2022), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(28.januar, 16.februar, 100.prosent))
+        håndterSøknad(Sykdom(28.januar, 16.februar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
 
-        håndterSykmelding(Sykmeldingsperiode(17.februar(2022), 8.mars(2022), 100.prosent))
-        håndterSøknad(Sykdom(17.februar(2022), 8.mars(2022), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(17.februar, 8.mars, 100.prosent))
+        håndterSøknad(Sykdom(17.februar, 8.mars, 100.prosent))
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
 
-        håndterSykmelding(Sykmeldingsperiode(9.mars(2022), 31.mars(2022), 100.prosent))
-        håndterSøknad(Sykdom(9.mars(2022), 31.mars(2022), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(9.mars, 31.mars, 100.prosent))
+        håndterSøknad(Sykdom(9.mars, 31.mars, 100.prosent))
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
 
-        val førsteDagIArbeidsgiverperioden = 28.februar(2022)
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(førsteDagIArbeidsgiverperioden til 15.mars(2022)), førsteFraværsdag = 28.februar(2022))
+        val førsteDagIArbeidsgiverperioden = 28.februar
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(førsteDagIArbeidsgiverperioden til 15.mars), førsteFraværsdag = 28.februar)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
@@ -1984,16 +1983,16 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
 
-        assertEquals(28.januar(2022), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.skjæringstidspunkt)
-        assertEquals(28.februar(2022), inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.skjæringstidspunkt)
-        assertEquals(28.februar(2022), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.skjæringstidspunkt)
+        assertEquals(28.januar, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.skjæringstidspunkt)
+        assertEquals(28.februar, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.skjæringstidspunkt)
+        assertEquals(28.februar, inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.skjæringstidspunkt)
 
         val beregnetSykdomstidslinje = inspektør.sykdomshistorikk.sykdomstidslinje()
         val beregnetSykdomstidslinjeDager = beregnetSykdomstidslinje.inspektør.dager
-        assertTrue(beregnetSykdomstidslinjeDager.filterKeys { it in 28.januar(2022) til førsteDagIArbeidsgiverperioden.minusDays(1) }.values.all {
+        assertTrue(beregnetSykdomstidslinjeDager.filterKeys { it in 28.januar til førsteDagIArbeidsgiverperioden.minusDays(1) }.values.all {
             (it is Dag.Arbeidsdag || it is Dag.FriskHelgedag) && it.kommerFra(Inntektsmelding::class)
         }) { beregnetSykdomstidslinje.toShortString() }
-        assertTrue(beregnetSykdomstidslinjeDager.filterKeys { it in førsteDagIArbeidsgiverperioden til 31.mars(2022) }.values.all {
+        assertTrue(beregnetSykdomstidslinjeDager.filterKeys { it in førsteDagIArbeidsgiverperioden til 31.mars }.values.all {
             (it is Dag.Sykedag || it is Dag.SykHelgedag) && it.kommerFra(Søknad::class)
         }) { beregnetSykdomstidslinje.toShortString() }
     }

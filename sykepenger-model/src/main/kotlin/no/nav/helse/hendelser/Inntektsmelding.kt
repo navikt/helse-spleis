@@ -12,12 +12,12 @@ import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding
 import no.nav.helse.nesteDag
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Personopplysninger
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
@@ -318,10 +318,9 @@ class Inntektsmelding(
         }
     }
 
-    internal val dager: DagerFraInntektsmelding
-        get() {
-            return DagerFraInntektsmelding(this)
-        }
+    internal fun dager(sammenhengendePerioder: List<Periode>): DagerFraInntektsmelding {
+        return DagerFraInntektsmelding(this, sammenhengendePerioder)
+    }
     internal fun inntektOgRefusjon(dagerFraInntektsmelding: DagerFraInntektsmelding): InntektOgRefusjonFraInntektsmelding {
         return InntektOgRefusjonFraInntektsmelding(
             this,
