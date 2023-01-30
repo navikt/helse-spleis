@@ -415,7 +415,7 @@ internal class LagUtbetalingForRevurderingTest {
 private fun List<Pair<Utbetaling, Vedtaksperiode>>.sistePeriodeForUtbetalinger(): List<Vedtaksperiode> {
     return fold(mutableMapOf<UUID, MutableList<Vedtaksperiode>>()) { acc, pair ->
         val (utbetaling, vedtaksperiode) = pair
-        acc.getOrPut(utbetaling.korrelasjonsId) { mutableListOf() }.add(vedtaksperiode)
+        acc.getOrPut(utbetaling.inspektør.korrelasjonsId) { mutableListOf() }.add(vedtaksperiode)
         acc
     }.map { it.value.maxOf { periode -> periode } }
 }

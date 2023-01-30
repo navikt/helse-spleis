@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory
 // Understands related payment activities for an Arbeidsgiver
 internal class Utbetaling private constructor(
     private val id: UUID,
-    internal val korrelasjonsId: UUID,
+    private val korrelasjonsId: UUID,
     private val beregningId: UUID,
     private val utbetalingstidslinje: Utbetalingstidslinje,
     private val arbeidsgiverOppdrag: Oppdrag,
