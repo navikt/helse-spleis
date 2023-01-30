@@ -15,7 +15,6 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
-import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Inntektskilde
@@ -121,9 +120,9 @@ internal class Utbetaling private constructor(
     private val periode get() = oppdragsperiode?.oppdaterTom(utbetalingstidslinje.periode()) ?: utbetalingstidslinje.periode()
     private val stønadsdager get() = Oppdrag.stønadsdager(arbeidsgiverOppdrag, personOppdrag)
     private val observers = mutableSetOf<UtbetalingObserver>()
-    private var forrigeHendelse: ArbeidstakerHendelse? = null
+    private var forrigeHendelse: IAktivitetslogg? = null
 
-    private fun harHåndtert(hendelse: ArbeidstakerHendelse) =
+    private fun harHåndtert(hendelse: IAktivitetslogg) =
         (hendelse == forrigeHendelse).also { forrigeHendelse = hendelse }
 
     internal fun registrer(observer: UtbetalingObserver) {
@@ -283,7 +282,7 @@ internal class Utbetaling private constructor(
     override fun toSpesifikkKontekst() =
         SpesifikkKontekst("Utbetaling", mapOf("utbetalingId" to "$id"))
 
-    private fun godkjenn(hendelse: ArbeidstakerHendelse, vurdering: Vurdering) {
+    private fun godkjenn(hendelse: IAktivitetslogg, vurdering: Vurdering) {
         hendelse.kontekst(this)
         tilstand.godkjenn(this, hendelse, vurdering)
     }
@@ -654,7 +653,7 @@ internal class Utbetaling private constructor(
     internal fun erEldreEnn(other: LocalDateTime): Boolean {
         return other > tidsstempel
     }
-    private fun lagreOverføringsinformasjon(hendelse: ArbeidstakerHendelse, avstemmingsnøkkel: Long, tidspunkt: LocalDateTime) {
+    private fun lagreOverføringsinformasjon(hendelse: IAktivitetslogg, avstemmingsnøkkel: Long, tidspunkt: LocalDateTime) {
         hendelse.info("Utbetalingen ble overført til Oppdrag/UR $tidspunkt, og har fått avstemmingsnøkkel $avstemmingsnøkkel.\n")
         if (this.avstemmingsnøkkel != null && this.avstemmingsnøkkel != avstemmingsnøkkel)
             hendelse.info("Avstemmingsnøkkel har endret seg.\nTidligere verdi: ${this.avstemmingsnøkkel}")
