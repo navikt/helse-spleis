@@ -32,7 +32,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_9
-import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
@@ -45,7 +44,7 @@ import org.slf4j.LoggerFactory
 // Understands related payment activities for an Arbeidsgiver
 internal class Utbetaling private constructor(
     private val id: UUID,
-    private val korrelasjonsId: UUID,
+    internal val korrelasjonsId: UUID,
     private val beregningId: UUID,
     private val utbetalingstidslinje: Utbetalingstidslinje,
     private val arbeidsgiverOppdrag: Oppdrag,
@@ -542,14 +541,6 @@ internal class Utbetaling private constructor(
             tidspunkt: LocalDateTime,
             automatiskBehandling: Boolean
         ): Vurdering = Vurdering(godkjent, ident, epost, tidspunkt, automatiskBehandling)
-
-        internal fun List<Pair<Utbetaling, Vedtaksperiode>>.sistePeriodeForUtbetalinger(): List<Vedtaksperiode> {
-            return fold(mutableMapOf<UUID, MutableList<Vedtaksperiode>>()) { acc, pair ->
-                val (utbetaling, vedtaksperiode) = pair
-                acc.getOrPut(utbetaling.korrelasjonsId) { mutableListOf() }.add(vedtaksperiode)
-                acc
-            }.map { it.value.maxOf { periode -> periode } }
-        }
 
         // kan forkaste dersom ingen utbetalinger er utbetalt/in flight, eller de er annullert
         fun kanForkastes(vedtaksperiodeUtbetalinger: List<Utbetaling>, arbeidsgiverUtbetalinger: List<Utbetaling>): Boolean {

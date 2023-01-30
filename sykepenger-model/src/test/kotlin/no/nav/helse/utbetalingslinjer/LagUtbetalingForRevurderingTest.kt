@@ -29,7 +29,6 @@ import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.sistePeriodeForUtbetalinger
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -411,4 +410,12 @@ internal class LagUtbetalingForRevurderingTest {
     private fun Utbetaling.assertDiff(diff: Int) {
         assertEquals(diff, inspektør.nettobeløp)
     }
+}
+
+private fun List<Pair<Utbetaling, Vedtaksperiode>>.sistePeriodeForUtbetalinger(): List<Vedtaksperiode> {
+    return fold(mutableMapOf<UUID, MutableList<Vedtaksperiode>>()) { acc, pair ->
+        val (utbetaling, vedtaksperiode) = pair
+        acc.getOrPut(utbetaling.korrelasjonsId) { mutableListOf() }.add(vedtaksperiode)
+        acc
+    }.map { it.value.maxOf { periode -> periode } }
 }
