@@ -925,7 +925,6 @@ internal class Vedtaksperiode private constructor(
             periodetype = periodetype,
             førstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING,
             inntektskilde = requireNotNull(person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntektskilde()),
-            arbeidsforholdId = inntektsmeldingInfo?.arbeidsforholdId,
             orgnummereMedRelevanteArbeidsforhold = person.relevanteArbeidsgivere(skjæringstidspunkt)
         )
     }

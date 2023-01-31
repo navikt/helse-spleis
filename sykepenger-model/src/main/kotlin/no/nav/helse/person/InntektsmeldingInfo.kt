@@ -5,7 +5,7 @@ import java.util.UUID
 
 internal class InntektsmeldingInfo(
     private val id: UUID,
-    internal val arbeidsforholdId: String?
+    private val arbeidsforholdId: String?
 ) {
 
     internal fun leggTil(hendelser: MutableSet<Dokumentsporing>) {

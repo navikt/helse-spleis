@@ -1152,37 +1152,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sender med arbeidsforholdId på godkjenningsbehov`() {
-        val arbeidsforholdId = UUID.randomUUID().toString()
-
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            arbeidsforholdId = arbeidsforholdId
-        )
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-
-        val godkjenningsbehov = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning)
-        assertEquals(arbeidsforholdId, godkjenningsbehov.detaljer()["arbeidsforholdId"])
-    }
-
-    @Test
-    fun `sender ikke med arbeidsforholdId på godkjenningsbehov når det mangler`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-
-        val godkjenningsbehov = person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning)
-        assertNull(godkjenningsbehov.detaljer()["arbeidsforholdId"])
-    }
-
-    @Test
     fun `Ber ikke om ny IM hvis det bare er helg mellom to perioder`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 26.januar, 100.prosent))

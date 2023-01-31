@@ -210,8 +210,7 @@ class Utbetaling private constructor(
         periodetype: Periodetype,
         førstegangsbehandling: Boolean,
         inntektskilde: Inntektskilde,
-        orgnummereMedRelevanteArbeidsforhold: List<String>,
-        arbeidsforholdId: String?
+        orgnummereMedRelevanteArbeidsforhold: List<String>
     ) {
         hendelse.kontekst(this)
         tilstand.godkjenning(
@@ -222,7 +221,6 @@ class Utbetaling private constructor(
             førstegangsbehandling,
             inntektskilde,
             orgnummereMedRelevanteArbeidsforhold,
-            arbeidsforholdId,
             hendelse
         )
     }
@@ -708,7 +706,6 @@ class Utbetaling private constructor(
             førstegangsbehandling: Boolean,
             inntektskilde: Inntektskilde,
             orgnummereMedRelevanteArbeidsforhold: List<String>,
-            arbeidsforholdId: String?,
             hendelse: IAktivitetslogg
         ) {
             hendelse.info("Forventet ikke å lage godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
@@ -748,7 +745,6 @@ class Utbetaling private constructor(
             førstegangsbehandling: Boolean,
             inntektskilde: Inntektskilde,
             orgnummereMedRelevanteArbeidsforhold: List<String>,
-            arbeidsforholdId: String?,
             hendelse: IAktivitetslogg
         ) {
             godkjenning(
@@ -760,8 +756,7 @@ class Utbetaling private constructor(
                 førstegangsbehandling = førstegangsbehandling,
                 utbetalingtype = utbetaling.type.name,
                 inntektskilde = inntektskilde.name,
-                orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
-                arbeidsforholdId = arbeidsforholdId
+                orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
             )
         }
     }

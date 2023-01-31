@@ -246,7 +246,6 @@ sealed class Aktivitet(
                 utbetalingtype: String,
                 inntektskilde: String,
                 orgnummereMedRelevanteArbeidsforhold: List<String>,
-                arbeidsforholdId: String?,
             ) {
                 aktivitetslogg.behov(
                     Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler", mapOf(
@@ -257,8 +256,7 @@ sealed class Aktivitet(
                         "førstegangsbehandling" to førstegangsbehandling,
                         "utbetalingtype" to utbetalingtype,
                         "inntektskilde" to inntektskilde,
-                        "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
-                        "arbeidsforholdId" to arbeidsforholdId
+                        "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold
                     )
                 )
             }
