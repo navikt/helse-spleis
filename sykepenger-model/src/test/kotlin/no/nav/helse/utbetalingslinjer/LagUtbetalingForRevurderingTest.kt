@@ -347,7 +347,7 @@ internal class LagUtbetalingForRevurderingTest {
                 utbetalingId = "$utbetalingId",
                 avstemmingsnøkkel = 123456L,
                 overføringstidspunkt = LocalDateTime.now()
-            )
+            ).utbetalingport()
         )
     }
 

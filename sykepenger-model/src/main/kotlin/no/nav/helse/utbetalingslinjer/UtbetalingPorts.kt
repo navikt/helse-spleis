@@ -1,0 +1,14 @@
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.utbetalingslinjer.Utbetaling
+
+interface AnnullerUtbetalingPort: IAktivitetslogg {
+    fun vurdering(): Utbetaling.Vurdering
+    fun erRelevant(fagsystemId: String): Boolean
+}
+
+interface GrunnbeløpsreguleringPort: IAktivitetslogg {
+    fun erRelevant(fagsystemId: String): Boolean
+    fun fødselsnummer(): String
+    fun organisasjonsnummer(): String
+}
+

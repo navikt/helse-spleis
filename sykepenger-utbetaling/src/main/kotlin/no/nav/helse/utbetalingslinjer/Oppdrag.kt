@@ -1,5 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
+import OverføringsinformasjonPort
+import SimuleringPort
 import java.time.LocalDate
 import java.time.LocalDate.MIN
 import java.time.LocalDateTime
@@ -435,16 +437,3 @@ class Oppdrag private constructor(
     }
 }
 
-interface OverføringsinformasjonPort {
-    val avstemmingsnøkkel: Long
-    val overføringstidspunkt: LocalDateTime
-    val status: Oppdragstatus
-    fun erRelevant(fagsystemId: String): Boolean
-}
-
-interface SimuleringPort {
-    val simuleringResultat: SimuleringResultat?
-    fun valider(oppdrag: Oppdrag): SimuleringPort
-    fun erRelevantFor(fagområde: Fagområde, fagsystemId: String): Boolean
-
-}

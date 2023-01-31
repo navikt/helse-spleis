@@ -892,7 +892,7 @@ internal class UtbetalingTest {
                 utbetalingId = "$utbetalingId",
                 avstemmingsnøkkel = 123456L,
                 overføringstidspunkt = LocalDateTime.now()
-            )
+            ).utbetalingport()
         )
     }
 

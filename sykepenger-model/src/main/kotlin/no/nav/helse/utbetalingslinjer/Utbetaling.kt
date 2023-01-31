@@ -1,5 +1,8 @@
 package no.nav.helse.utbetalingslinjer
 
+import AnnullerUtbetalingPort
+import GrunnbeløpsreguleringPort
+import OverføringsinformasjonPort
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -8,7 +11,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Inntektskilde
@@ -183,7 +185,7 @@ class Utbetaling private constructor(
         tilstand.kvittér(this, utbetaling)
     }
 
-    internal fun håndter(utbetalingOverført: UtbetalingOverført) {
+    internal fun håndter(utbetalingOverført: OverføringsinformasjonPort) {
         if (!utbetalingOverført.erRelevant(arbeidsgiverOppdrag.fagsystemId(), personOppdrag.fagsystemId(), id)) return
         if (harHåndtert(utbetalingOverført)) return
         utbetalingOverført.kontekst(this)
@@ -679,7 +681,7 @@ class Utbetaling private constructor(
             return null
         }
 
-        fun overført(utbetaling: Utbetaling, hendelse: UtbetalingOverført) {
+        fun overført(utbetaling: Utbetaling, hendelse: OverføringsinformasjonPort) {
             hendelse.info("Forventet ikke overførtkvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
             hendelse.funksjonellFeil(RV_UT_10)
         }
@@ -810,10 +812,10 @@ class Utbetaling private constructor(
             utbetaling.overfør(påminnelse)
         }
 
-        override fun overført(utbetaling: Utbetaling, hendelse: UtbetalingOverført) {
+        override fun overført(utbetaling: Utbetaling, hendelse: OverføringsinformasjonPort) {
             utbetaling.lagreOverføringsinformasjon(hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
-            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(OverføringsinformasjonOverførtAdapter(hendelse))
-            utbetaling.personOppdrag.lagreOverføringsinformasjon(OverføringsinformasjonOverførtAdapter(hendelse))
+            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
+            utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
             utbetaling.tilstand(Overført, hendelse)
         }
 
@@ -830,11 +832,11 @@ class Utbetaling private constructor(
             utbetaling.overfør(påminnelse)
         }
 
-        override fun overført(utbetaling: Utbetaling, hendelse: UtbetalingOverført) {
+        override fun overført(utbetaling: Utbetaling, hendelse: OverføringsinformasjonPort) {
             hendelse.info("Mottok overførtkvittering, men står allerede i Overført. Venter på kvittering.")
             utbetaling.lagreOverføringsinformasjon(hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
-            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(OverføringsinformasjonOverførtAdapter(hendelse))
-            utbetaling.personOppdrag.lagreOverføringsinformasjon(OverføringsinformasjonOverførtAdapter(hendelse))
+            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
+            utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
         }
 
         override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
@@ -904,9 +906,9 @@ class Utbetaling private constructor(
             utbetaling.overfør(Overført, påminnelse)
         }
 
-        override fun overført(utbetaling: Utbetaling, hendelse: UtbetalingOverført) {
-            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(OverføringsinformasjonOverførtAdapter(hendelse))
-            utbetaling.personOppdrag.lagreOverføringsinformasjon(OverføringsinformasjonOverførtAdapter(hendelse))
+        override fun overført(utbetaling: Utbetaling, hendelse: OverføringsinformasjonPort) {
+            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
+            utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
         }
 
         override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
@@ -1009,15 +1011,4 @@ class Utbetaling private constructor(
     }
 
     enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }
-}
-
-interface AnnullerUtbetalingPort: IAktivitetslogg {
-    fun vurdering(): Utbetaling.Vurdering
-    fun erRelevant(fagsystemId: String): Boolean
-}
-
-interface GrunnbeløpsreguleringPort: IAktivitetslogg {
-    fun erRelevant(fagsystemId: String): Boolean
-    fun fødselsnummer(): String
-    fun organisasjonsnummer(): String
 }

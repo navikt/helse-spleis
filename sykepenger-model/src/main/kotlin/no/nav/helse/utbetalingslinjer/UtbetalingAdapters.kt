@@ -1,6 +1,11 @@
 package no.nav.helse.utbetalingslinjer
 
+import AnnullerUtbetalingPort
+import GrunnbeløpsreguleringPort
+import OverføringsinformasjonPort
+import SimuleringPort
 import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
@@ -15,18 +20,21 @@ class AnnullerUtbetalingAdapter(private val original: AnnullerUtbetaling): Annul
     override fun vurdering(): Utbetaling.Vurdering = original.vurdering()
     override fun erRelevant(fagsystemId: String): Boolean = original.erRelevant(fagsystemId)
 }
-class OverføringsinformasjonAdapter(private val hendelse: UtbetalingHendelse): OverføringsinformasjonPort {
+class OverføringsinformasjonAdapter(private val hendelse: UtbetalingHendelse): OverføringsinformasjonPort, IAktivitetslogg by hendelse {
     override val avstemmingsnøkkel: Long = hendelse.avstemmingsnøkkel
     override val overføringstidspunkt: LocalDateTime = hendelse.overføringstidspunkt
     override val status: Oppdragstatus = hendelse.status
     override fun erRelevant(fagsystemId: String): Boolean = hendelse.erRelevant(fagsystemId)
+    override fun erRelevant(arbeidsgiverFagsystemId: String, personFagsystemId: String, utbetaling: UUID): Boolean = hendelse.erRelevant(arbeidsgiverFagsystemId, personFagsystemId, utbetaling)
 }
 
-class OverføringsinformasjonOverførtAdapter(private val hendelse: UtbetalingOverført): OverføringsinformasjonPort {
+fun UtbetalingOverført.utbetalingport() = OverføringsinformasjonOverførtAdapter(this)
+class OverføringsinformasjonOverførtAdapter(private val hendelse: UtbetalingOverført): OverføringsinformasjonPort, IAktivitetslogg by hendelse {
     override val avstemmingsnøkkel: Long = hendelse.avstemmingsnøkkel
     override val overføringstidspunkt: LocalDateTime = hendelse.overføringstidspunkt
     override val status: Oppdragstatus = Oppdragstatus.OVERFØRT
     override fun erRelevant(fagsystemId: String): Boolean = hendelse.erRelevant(fagsystemId)
+    override fun erRelevant(arbeidsgiverFagsystemId: String, personFagsystemId: String, utbetaling: UUID): Boolean = hendelse.erRelevant(arbeidsgiverFagsystemId, personFagsystemId, utbetaling)
 }
 
 /**

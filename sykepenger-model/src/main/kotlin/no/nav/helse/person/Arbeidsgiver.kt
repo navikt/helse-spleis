@@ -622,7 +622,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(utbetaling: UtbetalingOverført) {
         utbetaling.kontekst(this)
-        utbetalinger.forEach { it.håndter(utbetaling) }
+        utbetalinger.forEach { it.håndter(utbetaling.utbetalingport()) }
     }
 
     internal fun håndter(utbetalingHendelse: UtbetalingHendelse) {
