@@ -80,7 +80,9 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.lønnsinntekt
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -91,7 +93,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
@@ -1927,5 +1928,50 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 assertIngenInfo("Inntektsmelding ikke håndtert")
             }
         )
+    }
+
+    @Test
+    fun `Hensyntar korrigert inntekt før vilkårsprøving`() {
+        nyPeriode(1.januar til 31.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 25000.månedlig)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 30000.månedlig)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+
+        val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode)
+        assertNotNull(vilkårsgrunnlag)
+        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør
+        assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+
+        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+            assertEquals(30000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+            assertEquals(no.nav.helse.person.inntekt.Inntektsmelding::class, it.inntektsopplysning::class)
+        }
+
+    }
+
+    @Test
+    fun `Hensyntar korrigert inntekt i avventer blokkerende`() {
+        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        nyPeriode(1.mars til 31.mars)
+        håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = 25000.månedlig)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+
+        håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = 30000.månedlig)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+
+        val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(2.vedtaksperiode)
+        assertNotNull(vilkårsgrunnlag)
+        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør
+        assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+
+        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+            assertEquals(30000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+            assertEquals(no.nav.helse.person.inntekt.Inntektsmelding::class, it.inntektsopplysning::class)
+        }
+
     }
 }

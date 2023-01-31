@@ -1,6 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.InntektsopplysningVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -10,8 +11,10 @@ import no.nav.helse.økonomi.Inntekt
 internal class SkattSykepengegrunnlag(
     private val id: UUID,
     dato: LocalDate,
-    inntektsopplysninger: List<Skatteopplysning>
-) : Inntektsopplysning(dato, 40) {
+    inntektsopplysninger: List<Skatteopplysning>,
+    tidsstempel: LocalDateTime,
+    private val hendelseId: UUID
+) : Inntektsopplysning(dato, 40, tidsstempel) {
     private val inntektsopplysninger = Skatteopplysning.sisteTreMåneder(dato, inntektsopplysninger)
     private val beløp = Skatteopplysning.omregnetÅrsinntekt(this.inntektsopplysninger)
 

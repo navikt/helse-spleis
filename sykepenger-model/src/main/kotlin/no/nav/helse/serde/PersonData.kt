@@ -94,6 +94,7 @@ import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Infotryg
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.SpleisArbeidsgiver
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosent.Companion.ratio
@@ -364,20 +365,28 @@ internal data class PersonData(
                     }
             }
 
+            data class SkatteopplysningData(
+                private val hendelseId: UUID,
+                private val beløp: Inntekt,
+                private val måned: YearMonth,
+                private val type: String,
+                private val fordel: String,
+                private val beskrivelse: String,
+                private val tidsstempel: LocalDateTime
+            ) {
+                internal fun tilModellobjekt() = Skatteopplysning(hendelseId, beløp, måned, enumValueOf(type), fordel, beskrivelse, tidsstempel)
+            }
+
             data class InntektsopplysningData(
-                private val id: UUID?,
-                private val dato: LocalDate?,
-                private val hendelseId: UUID?,
+                private val id: UUID,
+                private val dato: LocalDate,
+                private val hendelseId: UUID,
                 private val beløp: Double?,
-                private val kilde: String?,
+                private val kilde: String,
                 private val forklaring: String?,
                 private val subsumsjon: SubsumsjonData?,
-                private val måned: YearMonth?,
-                private val type: String?,
-                private val fordel: String?,
-                private val beskrivelse: String?,
-                private val tidsstempel: LocalDateTime?,
-                private val skatteopplysninger: List<InntektsopplysningData>?
+                private val tidsstempel: LocalDateTime,
+                private val skatteopplysninger: List<SkatteopplysningData>?
             ) {
                 data class SubsumsjonData(
                     private val paragraf: String,
@@ -387,57 +396,47 @@ internal data class PersonData(
                     internal fun tilModellobjekt() = Subsumsjon(paragraf, ledd, bokstav)
                 }
                 internal fun tilModellobjekt() =
-                    when (kilde?.let(Inntektsopplysningskilde::valueOf)) {
+                    when (kilde.let(Inntektsopplysningskilde::valueOf)) {
                         Inntektsopplysningskilde.INFOTRYGD ->
                             Infotrygd(
-                                id = requireNotNull(id),
-                                dato = requireNotNull(dato),
-                                hendelseId = requireNotNull(hendelseId),
+                                id = id,
+                                dato = dato,
+                                hendelseId = hendelseId,
                                 beløp = requireNotNull(beløp).månedlig,
-                                tidsstempel = requireNotNull(tidsstempel)
+                                tidsstempel = tidsstempel
                             )
                         Inntektsopplysningskilde.INNTEKTSMELDING ->
                             Inntektsmelding(
-                                id = requireNotNull(id),
-                                dato = requireNotNull(dato),
-                                hendelseId = requireNotNull(hendelseId),
+                                id = id,
+                                dato = dato,
+                                hendelseId = hendelseId,
                                 beløp = requireNotNull(beløp).månedlig,
-                                tidsstempel = requireNotNull(tidsstempel)
+                                tidsstempel = tidsstempel
                             )
                         Inntektsopplysningskilde.IKKE_RAPPORTERT ->
                             IkkeRapportert(
-                                id = requireNotNull(id),
-                                dato = requireNotNull(dato),
-                                tidsstempel = requireNotNull(tidsstempel)
+                                id = id,
+                                dato = dato,
+                                tidsstempel = tidsstempel
                             )
                         Inntektsopplysningskilde.SAKSBEHANDLER ->
                             Saksbehandler(
-                                id = requireNotNull(id),
-                                dato = requireNotNull(dato),
-                                hendelseId = requireNotNull(hendelseId),
+                                id = id,
+                                dato = dato,
+                                hendelseId = hendelseId,
                                 beløp = requireNotNull(beløp).månedlig,
                                 forklaring = forklaring,
                                 subsumsjon = subsumsjon?.tilModellobjekt(),
-                                tidsstempel = requireNotNull(tidsstempel)
+                                tidsstempel = tidsstempel
                             )
                         null -> SkattSykepengegrunnlag(
-                            id = requireNotNull(id),
-                            dato = requireNotNull(dato),
+                            id = id,
+                            dato = dato,
                             inntektsopplysninger = requireNotNull(skatteopplysninger).map { skatteData ->
-                                when (skatteData.kilde?.let(Inntektsopplysningskilde::valueOf)) {
-                                    Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG ->
-                                        Skatteopplysning(
-                                            hendelseId = requireNotNull(skatteData.hendelseId),
-                                            beløp = requireNotNull(skatteData.beløp).månedlig,
-                                            måned = requireNotNull(skatteData.måned),
-                                            type = enumValueOf(requireNotNull(skatteData.type)),
-                                            fordel = requireNotNull(skatteData.fordel),
-                                            beskrivelse = requireNotNull(skatteData.beskrivelse),
-                                            tidsstempel = requireNotNull(skatteData.tidsstempel)
-                                        )
-                                    else -> error("Kan kun være skatteopplysninger i SkattSykepengegrunnlag")
-                                }
-                            }
+                                skatteData.tilModellobjekt()
+                            },
+                            tidsstempel = tidsstempel,
+                            hendelseId = hendelseId
                         )
                         else -> error("Fant ${kilde}. Det er ugyldig for sykepengegrunnlag")
                     }

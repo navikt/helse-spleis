@@ -65,7 +65,7 @@ internal class Skatteopplysning(
         // TODO: sette inn en IkkeRapportert inntekt når vi lagrer skatteopplysninger fra Vilkårsgrunnlag,
         // basert på hvilke arbeidsgivere det finnes arbeidsforhold fra uten skatteopplysninger
         internal fun nyoppstartetArbeidsforhold(skjæringstidspunkt: LocalDate, arbeidsforholdhistorikk: Arbeidsforholdhistorikk) =
-            IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt).takeIf {
+            IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt, LocalDateTime.now()).takeIf {
                 arbeidsforholdhistorikk.harArbeidsforholdNyereEnn(skjæringstidspunkt, MAKS_INNTEKT_GAP)
             }
 

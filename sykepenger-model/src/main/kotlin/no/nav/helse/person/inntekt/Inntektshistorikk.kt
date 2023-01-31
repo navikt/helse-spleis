@@ -28,8 +28,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
         historikk.add(0, inntekt)
     }
 
-    internal fun nyesteInnslag() = historikk.firstOrNull()
-
     internal fun isNotEmpty() = historikk.isNotEmpty()
 
     internal fun avklarSykepengegrunnlag(

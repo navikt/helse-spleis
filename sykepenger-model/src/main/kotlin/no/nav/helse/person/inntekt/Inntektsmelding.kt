@@ -15,8 +15,8 @@ internal class Inntektsmelding(
     dato: LocalDate,
     private val hendelseId: UUID,
     private val beløp: Inntekt,
-    private val tidsstempel: LocalDateTime = LocalDateTime.now()
-) : Inntektsopplysning(dato, 60) {
+    tidsstempel: LocalDateTime
+) : Inntektsopplysning(dato, 60, tidsstempel) {
 
     override fun accept(visitor: InntektsopplysningVisitor) {
         accept(visitor as InntektsmeldingVisitor)
@@ -46,12 +46,12 @@ internal class Inntektsmelding(
         if (dato == skjæringstidspunkt) return this
         if (førsteFraværsdag == null || dato != førsteFraværsdag) return null
         if (YearMonth.from(skjæringstidspunkt) == YearMonth.from(førsteFraværsdag)) return this
-        return IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt)
+        return IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt, this.tidsstempel)
     }
 
     override fun omregnetÅrsinntekt(): Inntekt = beløp
 
-    internal fun kanLagres(other: Inntektsmelding) = this.dato != other.dato
+    internal fun kanLagres(other: Inntektsmelding) = this.hendelseId != other.hendelseId
 
     override fun erSamme(other: Inntektsopplysning): Boolean {
         return other is Inntektsmelding && this.dato == other.dato && other.beløp == this.beløp

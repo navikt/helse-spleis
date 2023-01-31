@@ -1,6 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.InntektsopplysningVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -10,7 +11,8 @@ import no.nav.helse.økonomi.Inntekt
 
 abstract class Inntektsopplysning protected constructor(
     protected val dato: LocalDate,
-    private val prioritet: Int
+    private val prioritet: Int,
+    protected val tidsstempel: LocalDateTime
 ) {
     internal abstract fun accept(visitor: InntektsopplysningVisitor)
     protected open fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? = null
@@ -43,6 +45,7 @@ abstract class Inntektsopplysning protected constructor(
     private fun beste(other: Inntektsopplysning): Inntektsopplysning {
         if (this.dato > other.dato) return this
         if (this.prioritet >= other.prioritet) return this
+        if (this.tidsstempel >= other.tidsstempel) return this
         return other
     }
 
