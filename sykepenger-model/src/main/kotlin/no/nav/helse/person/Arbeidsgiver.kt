@@ -78,7 +78,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingslinjer.utbetalingport
-import no.nav.helse.utbetalingslinjer.utbetalingsport
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -654,7 +653,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(påminnelse: Utbetalingpåminnelse) {
         påminnelse.kontekst(this)
-        utbetalinger.forEach { it.håndter(påminnelse) }
+        utbetalinger.forEach { it.håndter(påminnelse.utbetalingport()) }
     }
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {
@@ -668,19 +667,19 @@ internal class Arbeidsgiver private constructor(
 
         val sisteUtbetalte = Utbetaling.finnUtbetalingForJustering(
             utbetalinger = utbetalinger,
-            hendelse = hendelse.utbetalingsport()
+            hendelse = hendelse.utbetalingport()
         ) ?: return hendelse.info("Fant ingen utbetalinger å etterutbetale")
 
         val periode = LocalDate.of(2020, 5, 1).minusMonths(18) til LocalDate.now()
 
         val reberegnetTidslinje = reberegnUtbetalte(hendelse, arbeidsgivere, periode, vilkårsgrunnlagHistorikk)
 
-        val etterutbetaling = sisteUtbetalte.etterutbetale(hendelse.utbetalingsport(), reberegnetTidslinje)
+        val etterutbetaling = sisteUtbetalte.etterutbetale(hendelse.utbetalingport(), reberegnetTidslinje)
             ?: return hendelse.info("Utbetalingen for $organisasjonsnummer for perioden $sisteUtbetalte er ikke blitt endret. Grunnbeløpsregulering gjennomføres ikke.")
 
         hendelse.info("Etterutbetaler for $organisasjonsnummer for perioden $sisteUtbetalte")
         nyUtbetaling(hendelse, etterutbetaling)
-        etterutbetaling.håndter(hendelse.utbetalingsport())
+        etterutbetaling.håndter(hendelse.utbetalingport())
     }
 
     private fun reberegnUtbetalte(

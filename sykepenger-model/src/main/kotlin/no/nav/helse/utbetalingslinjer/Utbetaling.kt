@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
@@ -225,7 +224,7 @@ class Utbetaling private constructor(
         )
     }
 
-    internal fun håndter(påminnelse: Utbetalingpåminnelse) {
+    internal fun håndter(påminnelse: UtbetalingpåminnelsePort) {
         if (!påminnelse.erRelevant(id)) return
         påminnelse.kontekst(this)
         if (!påminnelse.gjelderStatus(Utbetalingstatus.fraTilstand(tilstand))) return
@@ -689,7 +688,7 @@ class Utbetaling private constructor(
             hendelse.funksjonellFeil(RV_UT_11)
         }
 
-        fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
+        fun håndter(utbetaling: Utbetaling, påminnelse: UtbetalingpåminnelsePort) {
             påminnelse.info("Utbetaling ble påminnet, men gjør ingenting")
         }
 
@@ -790,7 +789,7 @@ class Utbetaling private constructor(
             utbetaling.overfør(Sendt, hendelse)
         }
 
-        override fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
+        override fun håndter(utbetaling: Utbetaling, påminnelse: UtbetalingpåminnelsePort) {
             utbetaling.overfør(Sendt, påminnelse)
         }
     }
@@ -798,7 +797,7 @@ class Utbetaling private constructor(
     internal object Sendt : Tilstand {
         private val makstid = Duration.ofDays(7)
 
-        override fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
+        override fun håndter(utbetaling: Utbetaling, påminnelse: UtbetalingpåminnelsePort) {
             if (påminnelse.harOversteget(makstid)) {
                 påminnelse.info("Gir opp å prøve utbetaling på nytt etter ${makstid.toHours()} timer")
                 påminnelse.funksjonellFeil(RV_UT_14)
@@ -823,7 +822,7 @@ class Utbetaling private constructor(
     }
 
     internal object Overført : Tilstand {
-        override fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
+        override fun håndter(utbetaling: Utbetaling, påminnelse: UtbetalingpåminnelsePort) {
             utbetaling.overfør(påminnelse)
         }
 
@@ -896,7 +895,7 @@ class Utbetaling private constructor(
             utbetaling.tilstand(Forkastet, hendelse)
         }
 
-        override fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
+        override fun håndter(utbetaling: Utbetaling, påminnelse: UtbetalingpåminnelsePort) {
             påminnelse.info("Forsøker å sende utbetalingen på nytt")
             utbetaling.overfør(Overført, påminnelse)
         }
