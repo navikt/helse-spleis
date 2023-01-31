@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.UtbetalingVisitor
@@ -167,7 +166,7 @@ class Utbetaling private constructor(
         tilstand.opprett(this, hendelse)
     }
 
-    internal fun håndter(hendelse: Utbetalingsgodkjenning) {
+    internal fun håndter(hendelse: UtbetalingsgodkjenningAdapter) {
         if (!hendelse.erRelevant(id)) return
         hendelse.valider()
         godkjenn(hendelse, hendelse.vurdering())
@@ -234,7 +233,7 @@ class Utbetaling private constructor(
     internal fun gjelderFor(hendelse: UtbetalingHendelse) =
         hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId(), personOppdrag.fagsystemId(), id)
 
-    internal fun gjelderFor(hendelse: Utbetalingsgodkjenning) =
+    internal fun gjelderFor(hendelse: UtbetalingsgodkjenningAdapter) =
         hendelse.erRelevant(id)
 
     internal fun valider(simulering: Simulering): IAktivitetslogg {

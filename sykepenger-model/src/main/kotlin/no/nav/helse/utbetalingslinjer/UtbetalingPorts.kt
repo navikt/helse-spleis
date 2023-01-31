@@ -1,3 +1,4 @@
+import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.utbetalingslinjer.Utbetaling
 
@@ -12,3 +13,9 @@ interface GrunnbeløpsreguleringPort: IAktivitetslogg {
     fun organisasjonsnummer(): String
 }
 
+interface UtbetalingsgodkjenningPort: IAktivitetslogg {
+    fun erRelevant(id: UUID): Boolean
+    fun valider()
+    fun vurdering(): Utbetaling.Vurdering
+
+}

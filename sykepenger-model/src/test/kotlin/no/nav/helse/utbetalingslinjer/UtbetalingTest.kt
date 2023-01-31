@@ -931,7 +931,7 @@ internal class UtbetalingTest {
             godkjenttidspunkt = LocalDateTime.now(),
             automatiskBehandling = false,
         ).also {
-            utbetaling.håndter(it)
+            utbetaling.håndter(it.utbetalingport())
         }
 
     private fun annuller(utbetaling: Utbetaling, fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId()) =
