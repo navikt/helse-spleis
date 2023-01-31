@@ -307,7 +307,7 @@ internal class PeriodeTest {
         assertEquals(1.januar til 3.januar, dager.periodeRettFør(4.januar))
         assertNull(dager.periodeRettFør(5.januar))
         assertEquals(10.januar til 11.januar, dager.periodeRettFør(12.januar))
-        assertNull(dager.periodeRettFør(15.januar)) // Skal håndtere helg som gap
+        assertEquals(10.januar til 12.januar, dager.periodeRettFør(15.januar))
         assertEquals(1.januar til 31.januar, (1.januar til 31.januar).periodeRettFør(1.februar))
     }
 
