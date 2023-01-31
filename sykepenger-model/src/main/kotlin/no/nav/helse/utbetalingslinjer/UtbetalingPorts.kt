@@ -17,5 +17,9 @@ interface UtbetalingsgodkjenningPort: IAktivitetslogg {
     fun erRelevant(id: UUID): Boolean
     fun valider()
     fun vurdering(): Utbetaling.Vurdering
+}
 
+interface UtbetalingHendelsePort: OverføringsinformasjonPort {
+    fun valider()
+    fun skalForsøkesIgjen(): Boolean
 }

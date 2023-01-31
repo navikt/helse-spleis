@@ -4,6 +4,7 @@ import AnnullerUtbetalingPort
 import GrunnbeløpsreguleringPort
 import OverføringsinformasjonPort
 import SimuleringPort
+import UtbetalingHendelsePort
 import UtbetalingsgodkjenningPort
 import java.time.Duration
 import java.time.LocalDateTime
@@ -76,4 +77,17 @@ class UtbetalingsgodkjenningAdapter(private val utbetalingsgodkjenning: Utbetali
     override fun erRelevant(id: UUID): Boolean = utbetalingsgodkjenning.erRelevant(id)
     override fun valider() { utbetalingsgodkjenning.valider() }
     override fun vurdering(): Utbetaling.Vurdering = utbetalingsgodkjenning.vurdering()
+}
+
+internal fun UtbetalingHendelse.utbetalingport() = UtbetalingHendelseAdapter(this)
+class UtbetalingHendelseAdapter(private val hendelse: UtbetalingHendelse): UtbetalingHendelsePort, IAktivitetslogg by hendelse {
+    override val avstemmingsnøkkel: Long = hendelse.avstemmingsnøkkel
+    override val overføringstidspunkt: LocalDateTime = hendelse.overføringstidspunkt
+    override val status: Oppdragstatus = hendelse.status
+    override fun erRelevant(fagsystemId: String): Boolean = hendelse.erRelevant(fagsystemId)
+    override fun erRelevant(arbeidsgiverFagsystemId: String, personFagsystemId: String, utbetaling: UUID): Boolean = hendelse.erRelevant(arbeidsgiverFagsystemId, personFagsystemId, utbetaling)
+    override fun skalForsøkesIgjen(): Boolean = hendelse.skalForsøkesIgjen()
+    override fun valider() {
+        hendelse.valider()
+    }
 }

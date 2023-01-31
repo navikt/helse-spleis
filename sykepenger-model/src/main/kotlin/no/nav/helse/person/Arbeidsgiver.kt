@@ -641,7 +641,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun håndterUtbetaling(utbetaling: UtbetalingHendelse) {
-        utbetalinger.forEach { it.håndter(utbetaling) }
+        utbetalinger.forEach { it.håndter(utbetaling.utbetalingport()) }
         håndter(utbetaling, Vedtaksperiode::håndter)
     }
 

@@ -913,7 +913,7 @@ internal class UtbetalingTest {
                 melding = "hei",
                 avstemmingsnøkkel = 123456L,
                 overføringstidspunkt = LocalDateTime.now()
-            )
+            ).utbetalingport()
         )
     }
 
