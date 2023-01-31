@@ -328,7 +328,7 @@ internal class SykepengegrunnlagTest {
             alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
             skjæringstidspunkt = 1.januar,
             arbeidsgiverInntektsopplysninger = listOf(
-                ArbeidsgiverInntektsopplysning("orgnr", Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), inntekt), Refusjonsopplysninger())
+                ArbeidsgiverInntektsopplysning("orgnr", Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), inntekt, LocalDateTime.now()), Refusjonsopplysninger())
             ),
             deaktiverteArbeidsforhold = emptyList(),
             vurdertInfotrygd = false,
@@ -342,10 +342,10 @@ internal class SykepengegrunnlagTest {
     @Test
     fun `overstyre inntekt og refusjon - endre til samme`() {
         val opprinnelig = listOf(
-            ArbeidsgiverInntektsopplysning("a1", Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig), RefusjonsopplysningerBuilder().apply {
+            ArbeidsgiverInntektsopplysning("a1", Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
                 leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
             }.build()),
-            ArbeidsgiverInntektsopplysning("a2", Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig), RefusjonsopplysningerBuilder().apply {
+            ArbeidsgiverInntektsopplysning("a2", Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
                 leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, INGEN), LocalDateTime.now())
             }.build()),
         )
@@ -359,8 +359,8 @@ internal class SykepengegrunnlagTest {
     }
     @Test
     fun `overstyre inntekt og refusjon - endrer kun refusjon`() {
-        val a1Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
-        val a2Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig)
+        val a1Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
+        val a2Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig, LocalDateTime.now())
         val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, INGEN), LocalDateTime.now())
         }.build()
@@ -383,8 +383,8 @@ internal class SykepengegrunnlagTest {
     }
     @Test
     fun `overstyre inntekt og refusjon - endrer kun inntekt`() {
-        val a1Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
-        val a2Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig)
+        val a1Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
+        val a2Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig, LocalDateTime.now())
         val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, INGEN), LocalDateTime.now())
         }.build()
@@ -410,8 +410,8 @@ internal class SykepengegrunnlagTest {
     }
     @Test
     fun `overstyre inntekt og refusjon - forsøker å endre Infotrygd-inntekt`() {
-        val a1Inntektsopplysning = Infotrygd(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig)
-        val a2Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig)
+        val a1Inntektsopplysning = Infotrygd(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig, LocalDateTime.now())
+        val a2Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig, LocalDateTime.now())
         val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, INGEN), LocalDateTime.now())
         }.build()
@@ -436,8 +436,8 @@ internal class SykepengegrunnlagTest {
     }
     @Test
     fun `overstyre inntekt og refusjon - forsøker å legge til ny arbeidsgiver`() {
-        val a1Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
-        val a2Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig)
+        val a1Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
+        val a2Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig, LocalDateTime.now())
         val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, INGEN), LocalDateTime.now())
         }.build()

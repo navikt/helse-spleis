@@ -350,7 +350,7 @@ internal class InfotrygdhistorikkTest {
         val builder = UtbetalingstidslinjeBuilder(Inntekter(
             organisasjonsnummer = "a1",
             vilkårsgrunnlagHistorikk = mapOf(
-                1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
+                1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
             ).somVilkårsgrunnlagHistorikk("a1"),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonObserver = SubsumsjonObserver.NullObserver
@@ -370,7 +370,7 @@ internal class InfotrygdhistorikkTest {
         val builder = UtbetalingstidslinjeBuilder(Inntekter(
             organisasjonsnummer = "a1",
             vilkårsgrunnlagHistorikk = mapOf(
-                1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
+                1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
             ).somVilkårsgrunnlagHistorikk("a1"),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonObserver = SubsumsjonObserver.NullObserver

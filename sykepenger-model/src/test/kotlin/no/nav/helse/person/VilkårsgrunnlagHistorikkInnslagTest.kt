@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -133,12 +134,12 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                     ArbeidsgiverInntektsopplysning(
                         "orgnr",
                         Saksbehandler(
-                            UUID.randomUUID(),
                             skjæringstidspunkt,
                             UUID.randomUUID(),
                             inntekt,
                             "",
-                            null
+                            null,
+                            LocalDateTime.now()
                         ),
                         Refusjonsopplysninger()
                     )

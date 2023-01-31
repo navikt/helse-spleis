@@ -429,7 +429,7 @@ internal data class PersonData(
                                 subsumsjon = subsumsjon?.tilModellobjekt(),
                                 tidsstempel = tidsstempel
                             )
-                        null -> SkattSykepengegrunnlag(
+                        Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG -> SkattSykepengegrunnlag(
                             id = id,
                             dato = dato,
                             inntektsopplysninger = requireNotNull(skatteopplysninger).map { skatteData ->

@@ -1137,6 +1137,7 @@ internal class JsonBuilder : AbstractBuilder() {
         override fun preVisitSkattSykepengegrunnlag(
             skattSykepengegrunnlag: SkattSykepengegrunnlag,
             id: UUID,
+            hendelseId: UUID,
             dato: LocalDate,
             beløp: Inntekt
         ) {
@@ -1183,12 +1184,15 @@ internal class JsonBuilder : AbstractBuilder() {
         override fun postVisitSkattSykepengegrunnlag(
             skattSykepengegrunnlag: SkattSykepengegrunnlag,
             id: UUID,
+            hendelseId: UUID,
             dato: LocalDate,
             beløp: Inntekt
         ) {
             this.inntektsopplysninger.add(mapOf(
                 "id" to id,
+                "hendelseId" to hendelseId,
                 "dato" to dato,
+                "kilde" to "SKATT_SYKEPENGEGRUNNLAG",
                 "skatteopplysninger" to skatteopplysninger
             ))
             popState()

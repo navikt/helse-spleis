@@ -5,7 +5,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.InntekthistorikkVisitor
-import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.avklarSykepengegrunnlag
+import no.nav.helse.person.inntekt.AvklarbarSykepengegrunnlag.Companion.avklarSykepengegrunnlag
 
 internal class Inntektshistorikk private constructor(private val historikk: MutableList<Inntektsmelding>) {
 

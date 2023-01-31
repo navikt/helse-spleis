@@ -28,6 +28,7 @@ class ArbeidsgiverInntekt(
     internal fun tilSykepengegrunnlag(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) =
         SkattSykepengegrunnlag(
             id = UUID.randomUUID(),
+            hendelseId = meldingsreferanseId,
             dato = skjæringstidspunkt,
             inntektsopplysninger = inntekter.map { it.somInntekt(meldingsreferanseId) },
             tidsstempel = LocalDateTime.now()

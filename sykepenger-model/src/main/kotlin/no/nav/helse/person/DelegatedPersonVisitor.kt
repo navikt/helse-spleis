@@ -917,19 +917,21 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
     override fun preVisitSkattSykepengegrunnlag(
         skattSykepengegrunnlag: SkattSykepengegrunnlag,
         id: UUID,
+        hendelseId: UUID,
         dato: LocalDate,
         beløp: Inntekt
     ) {
-        delegatee.preVisitSkattSykepengegrunnlag(skattSykepengegrunnlag, id, dato, beløp)
+        delegatee.preVisitSkattSykepengegrunnlag(skattSykepengegrunnlag, id, hendelseId, dato, beløp)
     }
 
     override fun postVisitSkattSykepengegrunnlag(
         skattSykepengegrunnlag: SkattSykepengegrunnlag,
         id: UUID,
+        hendelseId: UUID,
         dato: LocalDate,
         beløp: Inntekt
     ) {
-        delegatee.postVisitSkattSykepengegrunnlag(skattSykepengegrunnlag, id, dato, beløp)
+        delegatee.postVisitSkattSykepengegrunnlag(skattSykepengegrunnlag, id, hendelseId, dato, beløp)
     }
 
     override fun visitSkatteopplysning(

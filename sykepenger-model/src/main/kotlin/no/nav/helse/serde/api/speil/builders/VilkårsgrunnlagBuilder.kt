@@ -445,6 +445,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             override fun preVisitSkattSykepengegrunnlag(
                 skattSykepengegrunnlag: SkattSykepengegrunnlag,
                 id: UUID,
+                hendelseId: UUID,
                 dato: LocalDate,
                 beløp: Inntekt
             ) {
