@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
@@ -27,8 +28,8 @@ import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -44,7 +45,6 @@ import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
-import no.nav.helse.Alder
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
@@ -261,10 +261,15 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         tidsstempel: LocalDateTime,
         organisasjonsnummer: String,
         sykdomshistorikkElementId: UUID,
-        inntektshistorikkInnslagId: UUID,
         vilkårsgrunnlagHistorikkInnslagId: UUID
     ) {
-        delegatee.preVisitUtbetalingstidslinjeberegning(id, tidsstempel, organisasjonsnummer, sykdomshistorikkElementId, inntektshistorikkInnslagId, vilkårsgrunnlagHistorikkInnslagId)
+        delegatee.preVisitUtbetalingstidslinjeberegning(
+            id,
+            tidsstempel,
+            organisasjonsnummer,
+            sykdomshistorikkElementId,
+            vilkårsgrunnlagHistorikkInnslagId
+        )
     }
 
     override fun postVisitUtbetalingstidslinjeberegning(
@@ -272,10 +277,15 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         tidsstempel: LocalDateTime,
         organisasjonsnummer: String,
         sykdomshistorikkElementId: UUID,
-        inntektshistorikkInnslagId: UUID,
         vilkårsgrunnlagHistorikkInnslagId: UUID
     ) {
-        delegatee.postVisitUtbetalingstidslinjeberegning(id, tidsstempel, organisasjonsnummer, sykdomshistorikkElementId, inntektshistorikkInnslagId, vilkårsgrunnlagHistorikkInnslagId)
+        delegatee.postVisitUtbetalingstidslinjeberegning(
+            id,
+            tidsstempel,
+            organisasjonsnummer,
+            sykdomshistorikkElementId,
+            vilkårsgrunnlagHistorikkInnslagId
+        )
     }
 
     override fun visitBehov(
@@ -866,14 +876,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
 
     override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
         delegatee.preVisitInntekthistorikk(inntektshistorikk)
-    }
-
-    override fun preVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) {
-        delegatee.preVisitInnslag(innslag, id)
-    }
-
-    override fun postVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) {
-        delegatee.postVisitInnslag(innslag, id)
     }
 
     override fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {

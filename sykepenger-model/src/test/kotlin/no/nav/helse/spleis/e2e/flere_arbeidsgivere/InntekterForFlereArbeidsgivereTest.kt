@@ -15,7 +15,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
-import no.nav.helse.inspectors.Kilde
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -55,7 +54,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
@@ -193,48 +191,10 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         ).håndter(Person::håndter)
 
-        assertEquals(1, a1Inspektør.inntektInspektør.antallInnslag)
-        assertEquals(0, a2Inspektør.inntektInspektør.antallInnslag)
-
         val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.januar) ?: fail { "forventet vilkårsgrunnlag" }
 
-        val a1Opplysninger = a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger ?: fail { "forventet innslag" }
-
-        assertTrue(a1Opplysninger.none { it.kilde == Kilde.INFOTRYGD })
-
-        assertEquals(1, a1Opplysninger.size)
-        assertEquals(25000.månedlig, a1Opplysninger.single().sykepengegrunnlag)
-        assertEquals(Kilde.INNTEKTSMELDING, a1Opplysninger.single().kilde)
         assertEquals(25000.månedlig, vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.inntektsopplysning.inspektør.beløp)
         assertEquals(4900.månedlig, vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.inntektsopplysning.inspektør.beløp)
-    }
-
-    @Test
-    fun `Skatteinntekter for sykepengegrunnlag legges ikke i inntektshistorikken`() {
-        val inntekterForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
-            1.oktober(2017) til 1.desember(2017) inntekter {
-                a1 inntekt 15000
-            }
-        }
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null))
-        nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
-        vilkårsgrunnlag(
-            1.vedtaksperiode,
-            orgnummer = a1,
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt 24000
-                }
-            },
-            inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
-            arbeidsforhold = arbeidsforhold
-        ).håndter(Person::håndter)
-
-        val inntektInspektør = a1Inspektør.inntektInspektør
-        val opplysninger = inntektInspektør.sisteInnslag?.opplysninger ?: fail { "forventet opplysninger" }
-        assertEquals(1, opplysninger.size)
-        assertEquals(1, inntektInspektør.antallInnslag)
-        assertEquals(25000.månedlig, opplysninger.single().sykepengegrunnlag)
     }
 
     @Test

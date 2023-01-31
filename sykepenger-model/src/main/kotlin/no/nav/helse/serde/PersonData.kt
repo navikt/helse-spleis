@@ -6,14 +6,14 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Alder
+import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
@@ -24,13 +24,15 @@ import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.InntektsmeldingInfoHistorikk
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
-import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeUtbetalinger
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
@@ -51,8 +53,8 @@ import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.gjennopprett
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.ArbeidsforholdhistorikkInnslagData.Companion.tilArbeidsforholdhistorikk
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingInfoHistorikkElementData.Companion.finn
@@ -84,8 +86,6 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
-import no.nav.helse.Alder
-import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
@@ -568,7 +568,7 @@ internal data class PersonData(
     data class ArbeidsgiverData(
         private val organisasjonsnummer: String,
         private val id: UUID,
-        private val inntektshistorikk: List<InntektshistorikkInnslagData> = listOf(),
+        private val inntektshistorikk: List<InntektsmeldingData> = listOf(),
         private val sykdomshistorikk: List<SykdomshistorikkData>,
         private val sykmeldingsperioder: List<SykmeldingsperiodeData>,
         private val vedtaksperioder: List<VedtaksperiodeData>,
@@ -599,7 +599,7 @@ internal data class PersonData(
                 person,
                 organisasjonsnummer,
                 id,
-                Inntektshistorikk.gjenopprett(InntektshistorikkInnslagData.parseInntekter(inntektshistorikk)),
+                Inntektshistorikk.gjenopprett(inntektshistorikk.map { it.tilModellobjekt() }),
                 modelSykdomshistorikk,
                 Sykmeldingsperioder(sykmeldingsperioder.map { it.tilPeriode() }),
                 vedtaksperiodeliste,
@@ -646,6 +646,23 @@ internal data class PersonData(
             return arbeidsgiver
         }
 
+        data class InntektsmeldingData(
+            private val id: UUID,
+            private val dato: LocalDate,
+            private val hendelseId: UUID,
+            private val beløp: Double,
+            private val tidsstempel: LocalDateTime
+        ) {
+
+            internal fun tilModellobjekt() = Inntektsmelding(
+                id = id,
+                dato = dato,
+                hendelseId = hendelseId,
+                beløp = beløp.månedlig,
+                tidsstempel = tidsstempel
+            )
+        }
+
         data class InntektsmeldingInfoHistorikkElementData(
             private val dato: LocalDate,
             private val inntektsmeldinger: List<InntektsmeldingInfoData>
@@ -683,7 +700,6 @@ internal data class PersonData(
             private val id: UUID,
             private val tidsstempel: LocalDateTime,
             private val sykdomshistorikkElementId: UUID,
-            private val inntektshistorikkInnslagId: UUID,
             private val vilkårsgrunnlagHistorikkInnslagId: UUID,
             private val organisasjonsnummer: String,
             private val utbetalingstidslinje: UtbetalingstidslinjeData
@@ -693,38 +709,10 @@ internal data class PersonData(
                     id = id,
                     tidsstempel = tidsstempel,
                     sykdomshistorikkElementId = sykdomshistorikkElementId,
-                    inntektshistorikkInnslagId = inntektshistorikkInnslagId,
                     vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikkInnslagId,
                     organisasjonsnummer = organisasjonsnummer,
                     utbetalingstidslinje = utbetalingstidslinje.konverterTilUtbetalingstidslinje()
                 )
-        }
-
-        data class InntektshistorikkInnslagData(
-            val id: UUID,
-            val inntektsopplysninger: List<InntektsmeldingData>
-        ) {
-            internal fun tilModellobjekt() = Inntektshistorikk.Innslag.gjenopprett(id, inntektsopplysninger.map { it.tilModellobjekt() })
-            internal companion object {
-                internal fun parseInntekter(inntekter: List<InntektshistorikkInnslagData>) =
-                    inntekter.map { innslag -> innslag.tilModellobjekt() }
-            }
-
-            data class InntektsmeldingData(
-                private val id: UUID,
-                private val dato: LocalDate,
-                private val hendelseId: UUID,
-                private val beløp: Double,
-                private val tidsstempel: LocalDateTime
-            ) {
-                internal fun tilModellobjekt() = Inntektsmelding(
-                    id = id,
-                    dato = dato,
-                    hendelseId = hendelseId,
-                    beløp = beløp.månedlig,
-                    tidsstempel = tidsstempel
-                )
-            }
         }
 
         data class RefusjonsopplysningData(

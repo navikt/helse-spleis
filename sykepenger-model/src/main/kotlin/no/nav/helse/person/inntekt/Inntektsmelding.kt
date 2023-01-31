@@ -4,9 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.InntektsmeldingVisitor
 import no.nav.helse.person.InntektsopplysningVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -53,10 +51,7 @@ internal class Inntektsmelding(
 
     override fun omregnetÅrsinntekt(): Inntekt = beløp
 
-    override fun kanLagres(other: Inntektsopplysning) = !skalErstattesAv(other)
-
-    override fun skalErstattesAv(other: Inntektsopplysning) =
-        other is Inntektsmelding && this.dato == other.dato
+    internal fun kanLagres(other: Inntektsmelding) = this.dato != other.dato
 
     override fun erSamme(other: Inntektsopplysning): Boolean {
         return other is Inntektsmelding && this.dato == other.dato && other.beløp == this.beløp

@@ -4,9 +4,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Subsumsjon
-import no.nav.helse.person.etterlevelse.Bokstav
-import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.InntektsopplysningVisitor
+import no.nav.helse.person.etterlevelse.Bokstav
 import no.nav.helse.person.etterlevelse.Ledd
 import no.nav.helse.person.etterlevelse.Paragraf
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -36,9 +35,6 @@ class Saksbehandler internal constructor(
     }
 
     override fun omregnetÅrsinntekt(): Inntekt = beløp
-
-    override fun skalErstattesAv(other: Inntektsopplysning) =
-        other is Saksbehandler && this.dato == other.dato
 
     override fun erSamme(other: Inntektsopplysning) =
         other is Saksbehandler && this.dato == other.dato && this.beløp == other.beløp

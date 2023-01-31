@@ -6,13 +6,13 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Subsumsjon
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
@@ -28,6 +28,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
@@ -40,8 +41,8 @@ import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSDAG
@@ -73,7 +74,6 @@ import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
-import no.nav.helse.Alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -319,14 +319,12 @@ internal class JsonBuilder : AbstractBuilder() {
             tidsstempel: LocalDateTime,
             organisasjonsnummer: String,
             sykdomshistorikkElementId: UUID,
-            inntektshistorikkInnslagId: UUID,
             vilkårsgrunnlagHistorikkInnslagId: UUID
         ) {
             beregninger.add(mapOf(
                 "id" to id,
                 "sykdomshistorikkElementId" to sykdomshistorikkElementId,
                 "vilkårsgrunnlagHistorikkInnslagId" to vilkårsgrunnlagHistorikkInnslagId,
-                "inntektshistorikkInnslagId" to inntektshistorikkInnslagId,
                 "tidsstempel" to tidsstempel,
                 "organisasjonsnummer" to organisasjonsnummer,
                 "utbetalingstidslinje" to utbetalingstidslinjeMap
@@ -1402,27 +1400,6 @@ internal class JsonBuilder : AbstractBuilder() {
 
     private class InntektshistorikkState(private val inntekter: MutableList<Map<String, Any?>>) :
         BuilderState() {
-        override fun preVisitInnslag(
-            innslag: Inntektshistorikk.Innslag,
-            id: UUID
-        ) {
-            val inntektsopplysninger = mutableListOf<Map<String, Any?>>()
-            this.inntekter.add(
-                mutableMapOf(
-                    "id" to id,
-                    "inntektsopplysninger" to inntektsopplysninger
-                )
-            )
-            pushState(InntektsendringState(inntektsopplysninger))
-        }
-
-        override fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
-            popState()
-        }
-    }
-
-    private class InntektsendringState(private val inntektsopplysninger: MutableList<Map<String, Any?>>) :
-        BuilderState() {
 
         override fun visitInntektsmelding(
             inntektsmelding: Inntektsmelding,
@@ -1432,7 +1409,7 @@ internal class JsonBuilder : AbstractBuilder() {
             beløp: Inntekt,
             tidsstempel: LocalDateTime
         ) {
-            inntektsopplysninger.add(mapOf(
+            inntekter.add(mapOf(
                 "id" to id,
                 "dato" to dato,
                 "hendelseId" to hendelseId,
@@ -1441,7 +1418,9 @@ internal class JsonBuilder : AbstractBuilder() {
             ))
         }
 
-        override fun postVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) = popState()
+        override fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
+            popState()
+        }
     }
 
     private class VedtaksperiodeState(private val vedtaksperiodeMap: MutableMap<String, Any?>) : BuilderState() {

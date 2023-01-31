@@ -17,7 +17,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.utbetalingslinjer.OppdragVisitor
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -69,6 +68,7 @@ import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.OppdragVisitor
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -88,8 +88,6 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `revurder inntekt happy case`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
-
-        val tidligereInntektInnslagId = inspektør.inntektInspektør.sisteInnslag?.innslagId
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 32000.månedlig, refusjon = Refusjon(32000.månedlig, null, emptyList()))
         håndterYtelser(1.vedtaksperiode)
@@ -124,11 +122,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertEquals(2, vilkårgrunnlagsinspektør.antallGrunnlagsdata())
         assertEquals(3, grunnlagsdataInspektør.avviksprosent?.roundToInt())
 
-        val tidligereBeregning = inspektør.utbetalingstidslinjeberegningData.first()
-        assertEquals(tidligereBeregning.inntektshistorikkInnslagId, tidligereInntektInnslagId)
-
         val beregning = inspektør.utbetalingstidslinjeberegningData.last()
-        assertEquals(beregning.inntektshistorikkInnslagId, inspektør.inntektInspektør.sisteInnslag?.innslagId)
 
         assertEquals(beregning.vilkårsgrunnlagHistorikkInnslagId, person.nyesteIdForVilkårsgrunnlagHistorikk())
 

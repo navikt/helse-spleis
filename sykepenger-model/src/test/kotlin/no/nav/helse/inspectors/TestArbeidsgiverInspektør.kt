@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.ider
@@ -20,6 +19,7 @@ import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
@@ -64,7 +64,7 @@ internal class TestArbeidsgiverInspektør(
     private val vedtaksperiodeForkastet = mutableMapOf<Int, Boolean>()
     val utbetalingstidslinjeberegningData = mutableListOf<UtbetalingstidslinjeberegningData>()
     internal lateinit var arbeidsgiver: Arbeidsgiver
-    internal val inntektInspektør get() = InntektshistorikkInspektør(arbeidsgiver)
+    internal val inntektInspektør get() = InntektshistorikkInspektør(arbeidsgiver.inspektør.inntektshistorikk)
     internal lateinit var sykdomshistorikk: Sykdomshistorikk
     internal lateinit var sykdomstidslinje: Sykdomstidslinje
     internal val vedtaksperiodeSykdomstidslinje = mutableMapOf<UUID, Sykdomstidslinje>()
@@ -147,7 +147,6 @@ internal class TestArbeidsgiverInspektør(
         tidsstempel: LocalDateTime,
         organisasjonsnummer: String,
         sykdomshistorikkElementId: UUID,
-        inntektshistorikkInnslagId: UUID,
         vilkårsgrunnlagHistorikkInnslagId: UUID
     ) {
         utbetalingstidslinjeberegningData.add(
@@ -155,7 +154,6 @@ internal class TestArbeidsgiverInspektør(
             id = id,
             tidsstempel = tidsstempel,
             sykdomshistorikkElementId = sykdomshistorikkElementId,
-            inntektshistorikkInnslagId = inntektshistorikkInnslagId,
             vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikkInnslagId
         )
         )
@@ -515,12 +513,7 @@ internal class TestArbeidsgiverInspektør(
         val id: UUID,
         val tidsstempel: LocalDateTime,
         val sykdomshistorikkElementId: UUID,
-        val inntektshistorikkInnslagId: UUID,
         val vilkårsgrunnlagHistorikkInnslagId: UUID
     )
 
-    internal data class InnslagId(
-        val id: UUID,
-        val timestamp: LocalDateTime
-    )
 }

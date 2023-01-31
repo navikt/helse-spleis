@@ -5,18 +5,16 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.InntekthistorikkVisitor
-import no.nav.helse.person.inntekt.Inntektshistorikk.Innslag.Companion.avklarSykepengegrunnlag
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.avklarSykepengegrunnlag
-import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.lagre
 
-internal class Inntektshistorikk private constructor(private val historikk: MutableList<Innslag>) {
+internal class Inntektshistorikk private constructor(private val historikk: MutableList<Inntektsmelding>) {
 
     internal constructor() : this(mutableListOf())
 
     internal companion object {
         internal val NULLUUID: UUID = UUID.fromString("00000000-0000-0000-0000-000000000000")
 
-        internal fun gjenopprett(list: List<Innslag>) = Inntektshistorikk(list.toMutableList())
+        internal fun gjenopprett(list: List<Inntektsmelding>) = Inntektshistorikk(list.toMutableList())
     }
 
     internal fun accept(visitor: InntekthistorikkVisitor) {
@@ -26,18 +24,11 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
     }
 
     internal fun leggTil(inntekt: Inntektsmelding) {
-        leggTil(Innslag(listOf(inntekt)))
-    }
-
-    private fun leggTil(nyttInnslag: Innslag) {
-        val gjeldende = nyesteInnslag() ?: return historikk.add(0, nyttInnslag)
-        val oppdatertInnslag = (gjeldende + nyttInnslag) ?: return
-        historikk.add(0, oppdatertInnslag)
+        if (historikk.any { !it.kanLagres(inntekt) }) return
+        historikk.add(0, inntekt)
     }
 
     internal fun nyesteInnslag() = historikk.firstOrNull()
-
-    internal fun nyesteId() = Innslag.nyesteId(this)
 
     internal fun isNotEmpty() = historikk.isNotEmpty()
 
@@ -47,16 +38,14 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
         skattSykepengegrunnlag: SkattSykepengegrunnlag?,
         arbeidsforholdhistorikk: Arbeidsforholdhistorikk
     ): Inntektsopplysning? =
-        nyesteInnslag().avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skattSykepengegrunnlag, arbeidsforholdhistorikk)
+        historikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skattSykepengegrunnlag, arbeidsforholdhistorikk)
+
+    internal fun isEmpty(): Boolean {
+        return historikk.isEmpty()
+    }
 
     internal class Innslag private constructor(private val id: UUID, private val inntekter: List<Inntektsmelding>) {
         constructor(inntekter: List<Inntektsmelding> = emptyList()) : this(UUID.randomUUID(), inntekter)
-
-        internal fun accept(visitor: InntekthistorikkVisitor) {
-            visitor.preVisitInnslag(this, id)
-            inntekter.forEach { it.accept(visitor) }
-            visitor.postVisitInnslag(this, id)
-        }
 
         override fun equals(other: Any?): Boolean {
             return other is Innslag && this.inntekter == other.inntekter
@@ -66,16 +55,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
             var result = id.hashCode()
             result = 31 * result + inntekter.hashCode()
             return result
-        }
-
-        operator fun plus(other: Innslag): Innslag? {
-            var inntekter = this.inntekter
-            other.inntekter.forEach { inntektsopplysning ->
-                inntekter = inntektsopplysning.lagre(inntekter)
-            }
-            val nytt = Innslag(inntekter)
-            if (this == nytt) return null
-            return nytt
         }
 
         internal companion object {
@@ -89,7 +68,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
             internal fun gjenopprett(id: UUID, inntektsopplysninger: List<Inntektsmelding>) =
                 Innslag(id, inntektsopplysninger)
 
-            internal fun nyesteId(inntektshistorikk: Inntektshistorikk) = inntektshistorikk.nyesteInnslag()!!.id
         }
     }
 }

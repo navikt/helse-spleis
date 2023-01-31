@@ -16,7 +16,6 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.Kilde
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
@@ -166,8 +165,6 @@ internal abstract class AbstractDslTest {
         testArbeidsgiverAsserter.assertHarHendelseIder(vedtaksperiodeId, *hendelseIder)
     protected fun TestPerson.TestArbeidsgiver.assertHarIkkeHendelseIder(vedtaksperiodeId: UUID, vararg hendelseIder: UUID) =
         testArbeidsgiverAsserter.assertHarIkkeHendelseIder(vedtaksperiodeId, *hendelseIder)
-    protected fun TestPerson.TestArbeidsgiver.assertAntallInntektsopplysninger(antall: Int, inntektskilde: Kilde) =
-        testArbeidsgiverAsserter.assertAntallInntektsopplysninger(antall, inntektskilde)
     protected fun TestPerson.TestArbeidsgiver.assertIngenFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) =
         testArbeidsgiverAsserter.assertIngenFunksjonelleFeil(*filtre)
     protected fun TestPerson.TestArbeidsgiver.assertFunksjonellFeil(funksjonellFeil: String, vararg filtre: AktivitetsloggFilter) =

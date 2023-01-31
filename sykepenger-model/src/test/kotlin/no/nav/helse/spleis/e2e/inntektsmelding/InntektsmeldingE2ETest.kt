@@ -95,7 +95,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
@@ -376,34 +375,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(9.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(9.januar, 20.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        assertEquals(1, inspektør.inntektInspektør.antallInnslag)
-    }
-
-    @Disabled("WIP Test for inntektsmelding med refusjonsopphold")
-    @Test
-    fun `inntektsmelding med refusjonsopphold`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar)
-        håndterSøknad(Sykdom(1.januar, 30.januar, 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt()
-
-        // -> TODO refusjon IM kommer her
-
-        håndterSykmelding(Sykmeldingsperiode(31.januar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(31.januar, 28.februar, 100.prosent))
-        håndterInntektsmelding(
-            listOf(Periode(1.januar, 16.januar)),
-            førsteFraværsdag = 1.januar,
-            refusjon = Refusjon(INNTEKT, 6.februar, emptyList())
-        )
-
-        inspektør.also {
-            assertEquals(Periode(1.januar, 30.januar), it.vedtaksperioder(1.vedtaksperiode).periode())
-        }
+        assertEquals(1, inspektør.inntektInspektør.size)
     }
 
     @Test
@@ -581,58 +553,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             RV_IM_4,
             AktivitetsloggFilter.person()
         )
-    }
-
-    @Disabled
-    @Test
-    fun `Opphør i refusjon i første periode som kommer mens forlengelse er i play kaster forlengelsen`() {
-        håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020), 100.prosent))
-        håndterInntektsmelding(
-            listOf(Periode(1.november(2020), 16.november(2020))),
-            førsteFraværsdag = 1.november(2020)
-        )
-        håndterSøknad(Sykdom(1.november(2020), 20.november(2020), 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.november(2019) til 1.oktober(2020) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }
-        ))
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt()
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-
-        håndterSykmelding(Sykmeldingsperiode(21.november(2020), 10.desember(2020), 100.prosent))
-        håndterInntektsmelding(
-            listOf(Periode(1.november(2020), 16.november(2020))),
-            førsteFraværsdag = 1.november(2020), refusjon = Refusjon(INNTEKT, 1.november(2020), emptyList())
-        )
-        håndterSøknad(Sykdom(21.november(2020), 10.desember(2020), 100.prosent))
-        håndterYtelser(2.vedtaksperiode)
-        assertForkastetPeriodeTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
-        )
-
     }
 
     @Test
@@ -866,26 +786,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING
         )
-    }
-
-    @Disabled // TODO: burde vi sjekke IT-historikk om det er en forlengelse før vi sender den til AVSLUTTET_UTEN_UTBETALING
-    @Test
-    fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere utbetalt periode i IT - IT-historikk kommer først`() {
-        håndterSykmelding(Sykmeldingsperiode(3.februar, 18.februar, 100.prosent))
-        val utbetalinger = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 21.januar, 100.prosent, 1000.daglig)
-        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger, inntektshistorikk = inntektshistorikk)
-        håndterSøknad(Sykdom(3.februar, 18.februar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        inspektør.also {
-            assertEquals(3.februar, it.vedtaksperioder(1.vedtaksperiode).periode().start)
-        }
     }
 
     @Test
@@ -2017,7 +1917,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )  // 6.februar er en mandag, kun helg mellom agp og første sykmeldingsdag
 
         assertEquals("GG UUUUUGG UUUUUGG ?SSSSHH SSSSSHH SS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-        assertEquals(1, inspektør.inntektInspektør.antallInnslag)
+        assertEquals(1, inspektør.inntektInspektør.size)
         assertForventetFeil(
             forklaring = "Det blir feil å kalle inntektsmeldingIkkeHåndtert når både dager og inntekt er håndtert",
             nå = {

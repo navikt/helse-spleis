@@ -3,6 +3,7 @@ package no.nav.helse.serde.api.speil.builders
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Alder
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverVisitor
@@ -27,7 +28,6 @@ import no.nav.helse.serde.api.speil.VedtaksperiodeAkkumulator
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
-import no.nav.helse.Alder
 
 internal data class GenerasjonIder(
     val beregningId: BeregningId,
@@ -142,7 +142,6 @@ internal class GenerasjonerBuilder(
         tidsstempel: LocalDateTime,
         organisasjonsnummer: String,
         sykdomshistorikkElementId: UUID,
-        inntektshistorikkInnslagId: UUID,
         vilkårsgrunnlagHistorikkInnslagId: UUID
     ) {
         generasjonIderAkkumulator.leggTil(id, GenerasjonIder(id, sykdomshistorikkElementId, vilkårsgrunnlagHistorikkInnslagId))

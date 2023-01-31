@@ -9,7 +9,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.Inntektsinspektør
+import no.nav.helse.inspectors.InntektshistorikkInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.november
@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test
 internal class InntektshistorikkTest {
 
     private lateinit var historikk: Inntektshistorikk
-    private val inspektør get() = Inntektsinspektør(historikk)
+    private val inspektør get() = InntektshistorikkInspektør(historikk)
 
     private companion object {
         const val UNG_PERSON_FNR_2018 = "12029240045"
@@ -91,8 +91,7 @@ internal class InntektshistorikkTest {
     @Test
     fun `Inntekt fra inntektsmelding brukes til å beregne sykepengegrunnlaget`() {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, 1.januar, MaskinellJurist())
-        assertEquals(1, inspektør.inntektTeller.size)
-        assertEquals(1, inspektør.inntektTeller.first())
+        assertEquals(1, inspektør.size)
         assertEquals(INNTEKT, historikk.avklarSykepengegrunnlag(
             1.januar,
             1.januar,
@@ -123,8 +122,7 @@ internal class InntektshistorikkTest {
     @Test
     fun `Inntekt fra inntektsmelding brukes ikke til å beregne sykepengegrunnlaget på annen dato`() {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, 1.januar, MaskinellJurist())
-        assertEquals(1, inspektør.inntektTeller.size)
-        assertEquals(1, inspektør.inntektTeller.first())
+        assertEquals(1, inspektør.size)
         assertNull(historikk.avklarSykepengegrunnlag(
             2.januar,
             2.januar,
@@ -231,9 +229,7 @@ internal class InntektshistorikkTest {
             førsteFraværsdag = 2.januar,
             arbeidsgiverperioder = listOf(2.januar til 17.januar)
         ).addInntekt(historikk, 1.januar, MaskinellJurist())
-        assertEquals(2, inspektør.inntektTeller.size)
-        assertEquals(2, inspektør.inntektTeller.first())
-        assertEquals(1, inspektør.inntektTeller.last())
+        assertEquals(2, inspektør.size)
     }
 
     private fun inntektsmelding(

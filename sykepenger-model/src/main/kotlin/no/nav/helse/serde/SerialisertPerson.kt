@@ -139,6 +139,7 @@ import no.nav.helse.serde.migration.V211SammenligningsgrunnlagBareSkatt
 import no.nav.helse.serde.migration.V212FjerneRapporterteInntekterFraInntektshistorikk
 import no.nav.helse.serde.migration.V213FlytteDatoTilSkattSykepengegrunnlag
 import no.nav.helse.serde.migration.V214FjernerInfotrygdOgSkattSykepengegrunnlagFraInntektshistorikken
+import no.nav.helse.serde.migration.V215TarBortInnslagFraInntektshistorikken
 import no.nav.helse.serde.migration.V21FjernGruppeId
 import no.nav.helse.serde.migration.V22FjernFelterFraSykdomstidslinje
 import no.nav.helse.serde.migration.V23None
@@ -451,7 +452,8 @@ class SerialisertPerson(val json: String) {
             V211SammenligningsgrunnlagBareSkatt(),
             V212FjerneRapporterteInntekterFraInntektshistorikk(),
             V213FlytteDatoTilSkattSykepengegrunnlag(),
-            V214FjernerInfotrygdOgSkattSykepengegrunnlagFraInntektshistorikken()
+            V214FjernerInfotrygdOgSkattSykepengegrunnlagFraInntektshistorikken(),
+            V215TarBortInnslagFraInntektshistorikken()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)

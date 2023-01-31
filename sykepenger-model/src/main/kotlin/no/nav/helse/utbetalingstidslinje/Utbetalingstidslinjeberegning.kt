@@ -4,15 +4,14 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.UtbetalingstidslinjeberegningVisitor
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.utbetalingslinjer.Utbetaling
 
 internal class Utbetalingstidslinjeberegning private constructor(
     private val id: UUID,
     private val tidsstempel: LocalDateTime,
     private val sykdomshistorikkElementId: UUID,
-    private val inntektshistorikkInnslagId: UUID,
     private val vilkårsgrunnlagHistorikkInnslagId: UUID,
     private val organisasjonsnummer: String,
     private val utbetalingstidslinje: Utbetalingstidslinje
@@ -20,7 +19,6 @@ internal class Utbetalingstidslinjeberegning private constructor(
 
     internal constructor(
         sykdomshistorikkElementId: UUID,
-        inntektshistorikkInnslagId: UUID,
         vilkårsgrunnlagHistorikkInnslagId: UUID,
         organisasjonsnummer: String,
         utbetalingstidslinje: Utbetalingstidslinje
@@ -28,7 +26,6 @@ internal class Utbetalingstidslinjeberegning private constructor(
         id = UUID.randomUUID(),
         tidsstempel = LocalDateTime.now(),
         sykdomshistorikkElementId = sykdomshistorikkElementId,
-        inntektshistorikkInnslagId = inntektshistorikkInnslagId,
         vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikkInnslagId,
         organisasjonsnummer = organisasjonsnummer,
         utbetalingstidslinje = utbetalingstidslinje
@@ -37,9 +34,21 @@ internal class Utbetalingstidslinjeberegning private constructor(
     internal fun utbetalingstidslinje() = utbetalingstidslinje
 
     internal fun accept(visitor: UtbetalingstidslinjeberegningVisitor) {
-        visitor.preVisitUtbetalingstidslinjeberegning(id, tidsstempel, organisasjonsnummer, sykdomshistorikkElementId, inntektshistorikkInnslagId, vilkårsgrunnlagHistorikkInnslagId)
+        visitor.preVisitUtbetalingstidslinjeberegning(
+            id,
+            tidsstempel,
+            organisasjonsnummer,
+            sykdomshistorikkElementId,
+            vilkårsgrunnlagHistorikkInnslagId
+        )
         utbetalingstidslinje.accept(visitor)
-        visitor.postVisitUtbetalingstidslinjeberegning(id, tidsstempel, organisasjonsnummer, sykdomshistorikkElementId, inntektshistorikkInnslagId, vilkårsgrunnlagHistorikkInnslagId)
+        visitor.postVisitUtbetalingstidslinjeberegning(
+            id,
+            tidsstempel,
+            organisasjonsnummer,
+            sykdomshistorikkElementId,
+            vilkårsgrunnlagHistorikkInnslagId
+        )
     }
 
     internal companion object {
@@ -103,7 +112,6 @@ internal class Utbetalingstidslinjeberegning private constructor(
             id: UUID,
             tidsstempel: LocalDateTime,
             sykdomshistorikkElementId: UUID,
-            inntektshistorikkInnslagId: UUID,
             vilkårsgrunnlagHistorikkInnslagId: UUID,
             organisasjonsnummer: String,
             utbetalingstidslinje: Utbetalingstidslinje
@@ -111,7 +119,6 @@ internal class Utbetalingstidslinjeberegning private constructor(
             id = id,
             tidsstempel = tidsstempel,
             sykdomshistorikkElementId = sykdomshistorikkElementId,
-            inntektshistorikkInnslagId = inntektshistorikkInnslagId,
             vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikkInnslagId,
             organisasjonsnummer = organisasjonsnummer,
             utbetalingstidslinje = utbetalingstidslinje

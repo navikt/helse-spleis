@@ -2,8 +2,8 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import no.nav.helse.person.Arbeidsforholdhistorikk
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.InntektsopplysningVisitor
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
@@ -15,8 +15,6 @@ abstract class Inntektsopplysning protected constructor(
     internal abstract fun accept(visitor: InntektsopplysningVisitor)
     protected open fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? = null
     internal abstract fun omregnetÅrsinntekt(): Inntekt
-    internal open fun kanLagres(other: Inntektsopplysning) = this != other
-    internal open fun skalErstattesAv(other: Inntektsopplysning) = this == other
 
     internal open fun overstyres(ny: Inntektsopplysning): Inntektsopplysning {
         if (ny.omregnetÅrsinntekt() == this.omregnetÅrsinntekt()) return this
@@ -49,7 +47,7 @@ abstract class Inntektsopplysning protected constructor(
     }
 
     internal companion object {
-        internal fun List<Inntektsopplysning>?.avklarSykepengegrunnlag(
+        internal fun List<Inntektsmelding>?.avklarSykepengegrunnlag(
             skjæringstidspunkt: LocalDate,
             førsteFraværsdag: LocalDate?,
             skattSykepengegrunnlag: SkattSykepengegrunnlag?,
@@ -60,11 +58,6 @@ abstract class Inntektsopplysning protected constructor(
             val kandidater = tilgjengelige.mapNotNull { it.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag) }
             if (kandidater.isEmpty()) return reserve
             return kandidater.reduce { champion, challenger -> champion.beste(challenger) }
-        }
-
-        internal fun <Opplysning: Inntektsopplysning> Opplysning.lagre(liste: List<Opplysning>): List<Opplysning> {
-            if (liste.any { !it.kanLagres(this) }) return liste
-            return liste.filterNot { it.skalErstattesAv(this) } + this
         }
 
         internal fun List<Inntektsopplysning>.valider(aktivitetslogg: IAktivitetslogg) {

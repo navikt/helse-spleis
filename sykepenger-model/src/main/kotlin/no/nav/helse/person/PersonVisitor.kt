@@ -26,8 +26,8 @@ import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
@@ -360,7 +360,6 @@ internal interface UtbetalingstidslinjeberegningVisitor : UtbetalingsdagVisitor 
         tidsstempel: LocalDateTime,
         organisasjonsnummer: String,
         sykdomshistorikkElementId: UUID,
-        inntektshistorikkInnslagId: UUID,
         vilkårsgrunnlagHistorikkInnslagId: UUID
     ) {
     }
@@ -370,7 +369,6 @@ internal interface UtbetalingstidslinjeberegningVisitor : UtbetalingsdagVisitor 
         tidsstempel: LocalDateTime,
         organisasjonsnummer: String,
         sykdomshistorikkElementId: UUID,
-        inntektshistorikkInnslagId: UUID,
         vilkårsgrunnlagHistorikkInnslagId: UUID
     ) {
     }
@@ -679,9 +677,6 @@ internal interface InntektsopplysningVisitor : InntektsmeldingVisitor, Skatteopp
 }
 internal interface InntekthistorikkVisitor : InntektsmeldingVisitor {
     fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
-    fun preVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) {}
-
-    fun postVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) {}
     fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
 }
 

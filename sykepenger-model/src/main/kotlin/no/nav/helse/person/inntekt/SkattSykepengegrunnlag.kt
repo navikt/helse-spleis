@@ -53,12 +53,6 @@ internal class SkattSykepengegrunnlag(
         )
     }
 
-    override fun kanLagres(other: Inntektsopplysning) = true
-    override fun skalErstattesAv(other: Inntektsopplysning): Boolean {
-        if (other !is SkattSykepengegrunnlag) return false
-        return this.dato == other.dato
-    }
-
     override fun erSamme(other: Inntektsopplysning): Boolean {
         return other is SkattSykepengegrunnlag && this.dato == other.dato && this.inntektsopplysninger == other.inntektsopplysninger
     }
