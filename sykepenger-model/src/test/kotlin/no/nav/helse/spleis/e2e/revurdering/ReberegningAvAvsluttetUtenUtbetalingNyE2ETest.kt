@@ -1121,7 +1121,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    fun `endrer arbeidsgiverperiode etter igangsatt revurdering`() {
+    fun `endrer arbeidsgiverperiode etter igangsatt revurdering`() = Toggle.HåndterInntektsmeldingOppdelt.enable {
         val forMyeInntekt = INNTEKT * 1.2
         val riktigInntekt = INNTEKT
 
@@ -1140,6 +1140,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterInntektsmelding(listOf(
             22.januar til 6.februar
         ), beregnetInntekt = riktigInntekt)
+        assertEquals(24.januar til 11.februar, inspektør.periode(1.vedtaksperiode))
+        assertEquals("UUUGG UUUUUGG SSSSSHH SSSSSHH SS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(2.vedtaksperiode)

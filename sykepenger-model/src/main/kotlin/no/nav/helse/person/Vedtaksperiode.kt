@@ -1453,7 +1453,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndterDagerFør(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
             dager.leggTilArbeidsdagerFør(vedtaksperiode.periode.start)
             vedtaksperiode.periode = dager.oppdatertFom(vedtaksperiode.periode)
-            dager.håndterGjenståendeFør(vedtaksperiode.periode, vedtaksperiode.arbeidsgiver)
+            dager.håndterDagerRettFør(vedtaksperiode.periode, vedtaksperiode.arbeidsgiver)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
@@ -2058,7 +2058,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndterDagerFør(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
             dager.leggTilArbeidsdagerFør(vedtaksperiode.periode.start)
             vedtaksperiode.periode = dager.oppdatertFom(vedtaksperiode.periode)
-            dager.håndterGjenståendeFør(vedtaksperiode.periode, vedtaksperiode.arbeidsgiver)
+            dager.håndterDagerRettFør(vedtaksperiode.periode, vedtaksperiode.arbeidsgiver)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {

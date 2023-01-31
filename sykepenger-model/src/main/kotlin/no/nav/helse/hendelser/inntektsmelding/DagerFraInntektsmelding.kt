@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
+import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
 import no.nav.helse.hendelser.tilOrNull
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Arbeidsgiver
@@ -38,23 +39,26 @@ internal class DagerFraInntektsmelding(
         val nyeDager = oppdatertPeriode - opprinneligPeriode
         gjenståendeDager.addAll(nyeDager)
     }
-    private fun dagerFør(periode: Periode) = gjenståendeDager.filter { it < periode.start }.toSet()
 
-    internal fun håndterGjenståendeFør(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit) {
-        val dagerFør = dagerFør(periode).takeUnless { it.isEmpty() } ?: return
-        oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, dagerFør.omsluttendePeriode!!))
-        gjenståendeDager.removeAll(dagerFør)
+    internal fun håndterDagerRettFør(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit) {
+        val dagerRettFør = dagerRettFør(periode).takeUnless { it.isEmpty() } ?: return
+        oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, dagerRettFør.omsluttendePeriode!!))
+        gjenståendeDager.removeAll(dagerRettFør)
     }
 
-    internal fun håndterGjenståendeFør(periode: Periode, arbeidsgiver: Arbeidsgiver) = håndterGjenståendeFør(periode) {
+    internal fun håndterDagerRettFør(periode: Periode, arbeidsgiver: Arbeidsgiver) = håndterDagerRettFør(periode) {
         arbeidsgiver.oppdaterSykdom(it)
     }
 
-    private fun overlappendeDager(periode: Periode) = periode.intersect(gjenståendeDager)
+    private fun overlappendeDager(periode: Periode) =  periode.intersect(gjenståendeDager)
+
+    private fun dagerRettFør(periode: Periode) = gjenståendeDager.periodeRettFør(periode.start)?.toSet() ?: emptySet()
+
     internal fun skalHåndteresAv(periode: Periode): Boolean {
-        // Finner den sammenhengende perioden denne vedtaksperioden er en del av, og sjekker overlapp med den
         val sammenhengendePeriode = sammenhengendePerioder.single { periode.start in it }
-        return overlappendeDager(sammenhengendePeriode).isNotEmpty()
+        val overlapperMedSammenhengende = overlappendeDager(sammenhengendePeriode).isNotEmpty()
+        val dagerRettFørPeriode = dagerRettFør(periode).isNotEmpty()
+        return overlapperMedSammenhengende || dagerRettFørPeriode
     }
 
     internal fun harBlittHåndtertAv(periode: Periode) = håndterteDager.any { it in periode }
@@ -98,7 +102,8 @@ internal class DagerFraInntektsmelding(
         val fom = periode.endInclusive.nesteDag
         val tom = gjenståendeDager.maxOrNull() ?: return
         val hale = (fom tilOrNull tom) ?: return
-        håndter(hale, arbeidsgiver)
+        arbeidsgiver.oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, hale.omsluttendePeriode!!))
+        gjenståendeDager.removeAll(hale)
     }
 
 

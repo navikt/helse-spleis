@@ -33,9 +33,9 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.september
@@ -408,7 +408,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("✅Vi hensyntar ikke dager rett før - hva med rett før med bare helg mellom?")
     fun `vedtaksperioder som avventer inntektsmelding strekkes tilbake til å dekke arbeidsgiverperiode`() {
         nyPeriode(1.januar til 31.januar, a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
@@ -418,6 +417,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             arbeidsgiverperioder = listOf(16.desember(2017) til 31.desember(2017)),
             beregnetInntekt = INNTEKT
         )
+        assertEquals("GG UUUUUGG UUUUUGG SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertEquals(16.desember(2017) til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode())
     }

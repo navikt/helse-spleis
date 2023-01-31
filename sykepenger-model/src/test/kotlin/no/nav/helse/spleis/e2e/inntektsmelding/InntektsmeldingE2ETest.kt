@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -234,7 +233,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("❌")
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅AventerIm->AUU utenom AvventerBlokkerende")
     fun `ulik arbeidsgiverperiode - flere arbeidsgivere`() {
         håndterSykmelding(Sykmeldingsperiode(22.januar, 15.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(22.januar, 15.februar, 100.prosent), orgnummer = a1)
@@ -1867,7 +1866,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("✅Vi hensyntar ikke dager rett før - hva med rett før med bare helg mellom?")
     fun `Inntektsmelding strekker periode tilbake når agp er kant-i-kant`() {
         nyPeriode(1.februar til 16.februar)
         assertEquals(1.februar til 16.februar, inspektør.periode(1.vedtaksperiode))
