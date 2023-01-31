@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -40,7 +41,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
@@ -50,7 +50,6 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.september
-import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertActivities
@@ -58,6 +57,7 @@ import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
+import no.nav.helse.spleis.e2e.assertIngenInfo
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertInntektForDato
@@ -2004,5 +2004,28 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertIngenVarsler(1.vedtaksperiode.filter())
         assertIngenVarsler(2.vedtaksperiode.filter())
+    }
+
+
+    @Test
+    fun `arbeidsgiverperiode - helg - vedtaksperiode`() = Toggle.HåndterInntektsmeldingOppdelt.enable {
+        håndterSykmelding(Sykmeldingsperiode(6.februar, 20.februar, 100.prosent))
+        håndterSøknad(Sykdom(6.februar, 20.februar, 100.prosent))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(20.januar til 4.februar),
+            førsteFraværsdag = 6.februar
+        )  // 6.februar er en mandag, kun helg mellom agp og første sykmeldingsdag
+
+        assertEquals("GG UUUUUGG UUUUUGG ?SSSSHH SSSSSHH SS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertEquals(1, inspektør.inntektInspektør.antallInnslag)
+        assertForventetFeil(
+            forklaring = "Det blir feil å kalle inntektsmeldingIkkeHåndtert når både dager og inntekt er håndtert",
+            nå = {
+                assertInfo("Inntektsmelding ikke håndtert")
+            },
+            ønsket = {
+                assertIngenInfo("Inntektsmelding ikke håndtert")
+            }
+        )
     }
 }

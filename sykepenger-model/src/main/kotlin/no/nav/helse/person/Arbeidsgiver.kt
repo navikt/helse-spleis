@@ -565,6 +565,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID?) {
+        inntektsmelding.info("Inntektsmelding ikke håndtert")
         if (vedtaksperiodeId != null) {
             if (!forkastede.håndterInntektsmeldingReplay(person, inntektsmelding, vedtaksperiodeId)) {
                 inntektsmelding.info("Vedtaksperiode overlapper ikke med replayet Inntektsmelding")
