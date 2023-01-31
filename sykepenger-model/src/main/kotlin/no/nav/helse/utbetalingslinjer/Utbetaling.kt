@@ -4,6 +4,7 @@ import AnnullerUtbetalingPort
 import GrunnbeløpsreguleringPort
 import OverføringsinformasjonPort
 import UtbetalingHendelsePort
+import UtbetalingpåminnelsePort
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime

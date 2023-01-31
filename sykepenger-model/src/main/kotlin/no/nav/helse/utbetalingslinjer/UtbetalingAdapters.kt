@@ -5,6 +5,7 @@ import GrunnbeløpsreguleringPort
 import OverføringsinformasjonPort
 import SimuleringPort
 import UtbetalingHendelsePort
+import UtbetalingpåminnelsePort
 import UtbetalingsgodkjenningPort
 import java.time.Duration
 import java.time.LocalDateTime
