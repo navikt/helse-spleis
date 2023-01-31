@@ -1906,24 +1906,15 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
 
     @Test
-    fun `arbeidsgiverperiode - helg - vedtaksperiode`() = Toggle.HåndterInntektsmeldingOppdelt.enable {
+    fun `arbeidsgiveperiode i forkant av vedtaksperiode med en dags gap`() {
         håndterSykmelding(Sykmeldingsperiode(6.februar, 20.februar, 100.prosent))
         håndterSøknad(Sykdom(6.februar, 20.februar, 100.prosent))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(20.januar til 4.februar),
             førsteFraværsdag = 6.februar
-        )  // 6.februar er en mandag, kun helg mellom agp og første sykmeldingsdag
-
+        )
         assertEquals("GG UUUUUGG UUUUUGG ?SSSSHH SSSSSHH SS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertEquals(1, inspektør.inntektInspektør.size)
-        assertForventetFeil(
-            forklaring = "Det blir feil å kalle inntektsmeldingIkkeHåndtert når både dager og inntekt er håndtert",
-            nå = {
-                assertInfo("Inntektsmelding ikke håndtert")
-            },
-            ønsket = {
-                assertIngenInfo("Inntektsmelding ikke håndtert")
-            }
-        )
+        assertIngenInfo("Inntektsmelding ikke håndtert")
     }
 }

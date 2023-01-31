@@ -106,6 +106,8 @@ internal class DagerFraInntektsmelding(
         gjenståendeDager.removeAll(hale)
     }
 
+    internal fun ferdigstilt() = gjenståendeDager.isEmpty()
+
 
     private class PeriodeFraInntektsmelding(
         private val inntektsmelding: Inntektsmelding,
