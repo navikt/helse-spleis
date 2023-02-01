@@ -600,6 +600,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅ Vedtaksperiode 1 håndterer IM når den kommer og slår ut på allerede håndtert ved replay. Gjør ikke et ekstra AvventerBlokkerende-hopp")
     fun `Venter på å bli kilt etter inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 7.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(8.januar, 23.februar, 100.prosent))

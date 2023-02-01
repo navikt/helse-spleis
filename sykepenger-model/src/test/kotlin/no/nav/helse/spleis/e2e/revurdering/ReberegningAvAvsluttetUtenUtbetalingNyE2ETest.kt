@@ -1384,6 +1384,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         nyPeriode(14.desember(2022) til 8.januar(2023))
         håndterInntektsmelding(listOf(4.november(2022) til 19.november(2022)), førsteFraværsdag = 14.desember(2022))
 
+        assertEquals("UGG UUUUUGG UUUUUG? ??????? ??????H SSSSSHH ??SSSHH SSSSSHH SSSSSHH SSSSSHH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+
         assertForventetFeil(
             forklaring = "1.vedtaksperiode burde omgjøres her pga de implisitte egenemeldingsdagene 4.november til 19.november, som er 15 dager før den korte perioden",
             nå = {
