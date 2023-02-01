@@ -12,7 +12,6 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
@@ -208,7 +207,7 @@ class Utbetaling private constructor(
         skjæringstidspunkt: LocalDate,
         periodetype: Periodetype,
         førstegangsbehandling: Boolean,
-        inntektskilde: Inntektskilde,
+        inntektskilde: UtbetalingInntektskilde,
         orgnummereMedRelevanteArbeidsforhold: List<String>
     ) {
         hendelse.kontekst(this)
@@ -703,7 +702,7 @@ class Utbetaling private constructor(
             skjæringstidspunkt: LocalDate,
             periodetype: Periodetype,
             førstegangsbehandling: Boolean,
-            inntektskilde: Inntektskilde,
+            inntektskilde: UtbetalingInntektskilde,
             orgnummereMedRelevanteArbeidsforhold: List<String>,
             hendelse: IAktivitetslogg
         ) {
@@ -742,7 +741,7 @@ class Utbetaling private constructor(
             skjæringstidspunkt: LocalDate,
             periodetype: Periodetype,
             førstegangsbehandling: Boolean,
-            inntektskilde: Inntektskilde,
+            inntektskilde: UtbetalingInntektskilde,
             orgnummereMedRelevanteArbeidsforhold: List<String>,
             hendelse: IAktivitetslogg
         ) {

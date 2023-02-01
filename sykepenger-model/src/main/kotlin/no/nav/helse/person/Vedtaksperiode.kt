@@ -116,6 +116,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.sammenlign
@@ -2622,7 +2623,13 @@ enum class Periodetype {
 
 enum class Inntektskilde {
     EN_ARBEIDSGIVER,
-    FLERE_ARBEIDSGIVERE
+    FLERE_ARBEIDSGIVERE;
+    fun tilUtbetalingInntektskilde(): UtbetalingInntektskilde {
+        return when(this) {
+            EN_ARBEIDSGIVER -> UtbetalingInntektskilde.EN_ARBEIDSGIVER
+            FLERE_ARBEIDSGIVERE -> UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
+        }
+    }
 }
 
 internal typealias VedtaksperiodeFilter = (Vedtaksperiode) -> Boolean

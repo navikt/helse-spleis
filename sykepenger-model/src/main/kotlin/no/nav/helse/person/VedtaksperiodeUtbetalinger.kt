@@ -158,7 +158,7 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
             skjæringstidspunkt = skjæringstidspunkt,
             periodetype = periodetype,
             førstegangsbehandling = førstegangsbehandling,
-            inntektskilde = inntektskilde,
+            inntektskilde = inntektskilde.tilUtbetalingInntektskilde(),
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
         )
     }
