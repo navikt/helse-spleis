@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
+import no.nav.helse.utbetalingslinjer.UtbetalingVedtakFattetBuilder
 import no.nav.helse.økonomi.Inntekt
 
 internal class VedtakFattetBuilder(
@@ -16,7 +17,7 @@ internal class VedtakFattetBuilder(
     private val periode: Periode,
     private val hendelseIder: Set<UUID>,
     private val skjæringstidspunkt: LocalDate
-) {
+): UtbetalingVedtakFattetBuilder {
     private var sykepengegrunnlag =  Inntekt.INGEN
     private var beregningsgrunnlag = Inntekt.INGEN
     private var begrensning: Sykepengegrunnlag.Begrensning? = null
@@ -24,8 +25,8 @@ internal class VedtakFattetBuilder(
     private var vedtakFattetTidspunkt = LocalDateTime.now()
     private var utbetalingId: UUID? = null
 
-    internal fun utbetalingId(id: UUID) = apply { this.utbetalingId = id }
-    internal fun utbetalingVurdert(tidspunkt: LocalDateTime) = apply { this.vedtakFattetTidspunkt = tidspunkt }
+    override fun utbetalingId(id: UUID) = apply { this.utbetalingId = id }
+    override fun utbetalingVurdert(tidspunkt: LocalDateTime) = apply { this.vedtakFattetTidspunkt = tidspunkt }
     internal fun sykepengegrunnlag(sykepengegrunnlag: Inntekt) = apply { this.sykepengegrunnlag = sykepengegrunnlag }
     internal fun beregningsgrunnlag(beregningsgrunnlag: Inntekt) = apply { this.beregningsgrunnlag = beregningsgrunnlag }
     internal fun begrensning(begrensning: Sykepengegrunnlag.Begrensning) = apply { this.begrensning = begrensning }

@@ -28,7 +28,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_9
-import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.trekkerTilbakePenger
@@ -240,7 +239,7 @@ class Utbetaling private constructor(
         return simulering
     }
 
-    internal fun build(builder: VedtakFattetBuilder) {
+    internal fun build(builder: UtbetalingVedtakFattetBuilder) {
         builder.utbetalingId(id)
         vurdering?.build(builder)
     }
@@ -996,10 +995,15 @@ class Utbetaling private constructor(
                 else -> GodkjentUtenUtbetaling
             }
 
-        internal fun build(builder: VedtakFattetBuilder) {
+        internal fun build(builder: UtbetalingVedtakFattetBuilder) {
             builder.utbetalingVurdert(tidspunkt)
         }
     }
 
     enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }
+}
+
+interface UtbetalingVedtakFattetBuilder {
+    fun utbetalingVurdert(tidspunkt: LocalDateTime): UtbetalingVedtakFattetBuilder
+    fun utbetalingId(id: UUID): UtbetalingVedtakFattetBuilder
 }
