@@ -27,6 +27,10 @@ internal class DagerFraInntektsmelding(
     private val alleDager get() = (opprinneligPeriode?: emptySet()) + arbeidsdager
     private val håndterteDager get() = alleDager - gjenståendeDager
 
+    internal fun accept(visitor: DagerFraInntektsmeldingVisitor) {
+        visitor.visitGjenståendeDager(gjenståendeDager)
+    }
+
     internal fun meldingsreferanseId() = inntektsmelding.meldingsreferanseId()
     internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = inntektsmelding.leggTil(hendelseIder)
 
@@ -81,12 +85,8 @@ internal class DagerFraInntektsmelding(
     }
 
     internal fun håndterGjenstående(oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit) {
-        if (gjenståendeDager.isEmpty()) return
-        // Om vi har håndtert noen dager skal vi kun ta med "halen" etter den siste perioden.
-        // Om ingen dager er håndtert skal vi håndtere alle dager
-        val håndterGjenståendeFraOgMed = håndterteDager.maxOrNull()?.nesteDag ?: gjenståendeDager.min()
-        val gjenståendePeriode = (håndterGjenståendeFraOgMed tilOrNull gjenståendeDager.max()) ?: return
-        oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, gjenståendePeriode.omsluttendePeriode!!))
+        val gjenståendePeriode = gjenståendeDager.omsluttendePeriode ?: return
+        oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, gjenståendePeriode))
         gjenståendeDager.removeAll(gjenståendePeriode)
     }
 
@@ -105,10 +105,16 @@ internal class DagerFraInntektsmelding(
     }
 
     internal fun håndterHaleEtter(periode: Periode, arbeidsgiver: Arbeidsgiver) {
+        håndterHaleEtter(periode) {
+            arbeidsgiver.oppdaterSykdom(it)
+        }
+    }
+
+    internal fun håndterHaleEtter(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit) {
         val fom = periode.endInclusive.nesteDag
         val tom = gjenståendeDager.maxOrNull() ?: return
         val hale = (fom tilOrNull tom) ?: return
-        arbeidsgiver.oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, hale.omsluttendePeriode!!))
+        oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, hale.omsluttendePeriode!!))
         gjenståendeDager.removeAll(hale)
     }
 
@@ -124,4 +130,8 @@ internal class DagerFraInntektsmelding(
         override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = throw IllegalStateException("Ikke i bruk")
         override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = throw IllegalStateException("Ikke i bruk")
     }
+}
+
+internal interface DagerFraInntektsmeldingVisitor {
+    fun visitGjenståendeDager(dager: Set<LocalDate>)
 }

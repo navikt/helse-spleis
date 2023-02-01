@@ -541,9 +541,9 @@ internal class Arbeidsgiver private constructor(
         val inntektOgRefusjonHåndteres = vedtaksperiodeSomSkalHåndtereInntektOgRefusjon != null
 
         if (!noenHarHåndtertDager && inntektOgRefusjonHåndteres) {
-            // TODO: Håndter gjenstående trenger nå bare å håndtere om ingen dager er håndtert
-            // Noen av dagene er håndtert, men ikke nødvendigvis alle. For å beholde dagens oppførsel
-            // må vi håndtere de gjenstående dagene også.
+            // Om vi ikke har håndterte noen dager, men allikevel skal håndtere inntekt og refusjon
+            // legger vi til alle dagene på arbeidsgiver som "hjemløse dager" (dekkes ikke av noen vedtaksperioder)
+            // Dette kun for å beholde dagens oppførsel.
             dager.håndterGjenstående(this@Arbeidsgiver)
         }
 
