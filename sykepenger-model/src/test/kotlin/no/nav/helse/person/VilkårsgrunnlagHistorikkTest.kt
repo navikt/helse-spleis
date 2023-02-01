@@ -236,7 +236,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
 
         val aktivitetslogg = Aktivitetslogg()
-        historikk.vilkårsgrunnlagFor(1.januar)?.valider(aktivitetslogg, listOf(ORGNR), false)
+        historikk.vilkårsgrunnlagFor(1.januar)?.valider(aktivitetslogg, ORGNR, listOf(ORGNR), false)
         assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 

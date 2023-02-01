@@ -105,8 +105,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_7
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -470,17 +468,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun låsOpp() = arbeidsgiver.låsOpp(periode)
     private fun lås() = arbeidsgiver.lås(periode)
-
-    private fun skalHaWarningForFlereArbeidsforholdUtenSykdomEllerUlikStartdato(
-        vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
-    ) =
-        arbeidsgiver.erFørstegangsbehandling(periode)
-                && (flereArbeidsforholdUtenSykdom(vilkårsgrunnlag) || flereArbeidsforholdUlikStartdato())
-
-    private fun flereArbeidsforholdUtenSykdom(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) =
-        vilkårsgrunnlag is VilkårsgrunnlagHistorikk.Grunnlagsdata && vilkårsgrunnlag.harInntektFraAOrdningen()
-
-    private fun flereArbeidsforholdUlikStartdato() = person.harFlereArbeidsforholdMedUlikStartdato(skjæringstidspunkt)
 
     internal fun forkast(hendelse: IAktivitetslogg, utbetalinger: List<Utbetaling>): Boolean {
         if (!this.utbetalinger.kanForkastes(utbetalinger) || this.tilstand == AvsluttetUtenUtbetaling) return false
@@ -896,7 +883,7 @@ internal class Vedtaksperiode private constructor(
         return Arbeidsgiverperiode.forventerInntekt(finnArbeidsgiverperiode(), periode, sykdomstidslinje, jurist())
     }
 
-    private fun sendOppgaveEvent(hendelse: IAktivitetslogg) {
+    private fun sendOppgaveEvent() {
         if (!skalOppretteOppgave()) return
         val inntektsmeldingIds =
             arbeidsgiver.finnSammenhengendePeriode(skjæringstidspunkt)
@@ -1375,7 +1362,7 @@ internal class Vedtaksperiode private constructor(
 
             FunksjonelleFeilTilVarsler.wrap(ytelser) {
                 vedtaksperiode.validerYtelserForSkjæringstidspunkt(ytelser)
-                person.valider(ytelser, vilkårsgrunnlag, vedtaksperiode.skjæringstidspunkt, true)
+                person.valider(ytelser, vilkårsgrunnlag, vedtaksperiode.organisasjonsnummer, vedtaksperiode.skjæringstidspunkt, true)
                 person.fyllUtPeriodeMedForventedeDager(ytelser, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt)
                 val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
                 vedtaksperiode.forsøkRevurdering(arbeidsgiverUtbetalinger, ytelser)
@@ -1709,7 +1696,7 @@ internal class Vedtaksperiode private constructor(
                     ytelser.kontekst(vilkårsgrunnlag)
                 }
                 valider {
-                    person.valider(this, vilkårsgrunnlag, vedtaksperiode.skjæringstidspunkt, arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode) != null)
+                    arbeidsgiver.valider(this, vedtaksperiode, vilkårsgrunnlag, vedtaksperiode.skjæringstidspunkt)
                 }
                 onSuccess {
                     if (vedtaksperiode.inntektsmeldingInfo == null) {
@@ -1728,15 +1715,6 @@ internal class Vedtaksperiode private constructor(
                     arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger, beregningsperiode, mapOf(vedtaksperiode.periode to (this to vedtaksperiode.jurist())))
                 }
                 onSuccess {
-                    if (vedtaksperiode.person.harKunEttAnnetRelevantArbeidsforholdEnn(
-                            vedtaksperiode.skjæringstidspunkt,
-                            vedtaksperiode.organisasjonsnummer
-                        )
-                    ) {
-                        ytelser.varsel(RV_VV_8)
-                    } else if (vedtaksperiode.skalHaWarningForFlereArbeidsforholdUtenSykdomEllerUlikStartdato(vilkårsgrunnlag)) {
-                        ytelser.varsel(RV_VV_2)
-                    }
                     vedtaksperiode.forsøkUtbetaling(arbeidsgiverUtbetalinger.maksimumSykepenger, ytelser)
                 }
             }
@@ -2236,7 +2214,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.arbeidsgiver.ferdigstillRevurdering(hendelse, vedtaksperiode)
             vedtaksperiode.kontekst(hendelse) // 'ferdigstillRevurdering'  påvirker hendelsekontekst
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
-            vedtaksperiode.sendOppgaveEvent(hendelse)
+            vedtaksperiode.sendOppgaveEvent()
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -2267,7 +2245,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             hendelse.info("Sykdom for denne personen kan ikke behandles automatisk.")
-            vedtaksperiode.sendOppgaveEvent(hendelse)
+            vedtaksperiode.sendOppgaveEvent()
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {

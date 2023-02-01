@@ -41,6 +41,8 @@ import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD
 import no.nav.helse.Alder
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerOpptjening
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerStartdato
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -138,6 +140,15 @@ internal class Sykepengegrunnlag(
             aktivitetslogg.info("Mangler inntekt for $it på skjæringstidspunkt $skjæringstidspunkt")
         }
         valideringstrategi()(aktivitetslogg, RV_SV_2)
+    }
+
+    internal fun validerOpptjening(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening?, orgnummer: String) {
+        if (opptjening == null) return
+        arbeidsgiverInntektsopplysninger.validerOpptjening(aktivitetslogg, opptjening, orgnummer)
+    }
+
+    internal fun validerStartdato(aktivitetslogg: IAktivitetslogg) {
+        arbeidsgiverInntektsopplysninger.validerStartdato(aktivitetslogg)
     }
 
     internal fun validerAvvik(aktivitetslogg: IAktivitetslogg, sammenligningsgrunnlag: Sammenligningsgrunnlag) {
@@ -241,14 +252,13 @@ internal class Sykepengegrunnlag(
             oppfyllerMinsteinntektskrav
         )
     }
-
     internal fun avviksprosent(sammenligningsgrunnlag: Sammenligningsgrunnlag, subsumsjonObserver: SubsumsjonObserver) =
         sammenligningsgrunnlag.avviksprosent(beregningsgrunnlag, subsumsjonObserver)
-
     internal fun inntektskilde() = when {
         arbeidsgiverInntektsopplysninger.size > 1 -> Inntektskilde.FLERE_ARBEIDSGIVERE
         else -> Inntektskilde.EN_ARBEIDSGIVER
     }
+
     internal fun harInntektFraAOrdningen() =
         arbeidsgiverInntektsopplysninger.any { it.harInntektFraAOrdningen() }
     internal fun erRelevant(organisasjonsnummer: String) = arbeidsgiverInntektsopplysninger.any {
@@ -265,10 +275,10 @@ internal class Sykepengegrunnlag(
             refusjonsbeløp = INGEN
         )
     }
+
     internal fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
         return arbeidsgiverInntektsopplysninger.medInntekt(organisasjonsnummer, `6G`, skjæringstidspunkt, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver) ?: utenInntekt(økonomi, arbeidsgiverperiode)
     }
-
     internal fun medUtbetalingsopplysninger(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver, manglerRefusjonsopplysning: ManglerRefusjonsopplysning): Økonomi {
         return arbeidsgiverInntektsopplysninger.medUtbetalingsopplysninger(organisasjonsnummer, `6G`, skjæringstidspunkt, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver, manglerRefusjonsopplysning)
     }
@@ -288,7 +298,6 @@ internal class Sykepengegrunnlag(
                  && begrensning == other.begrensning
                  && deaktiverteArbeidsforhold == other.deaktiverteArbeidsforhold
     }
-
     override fun hashCode(): Int {
         var result = sykepengegrunnlag.hashCode()
         result = 31 * result + arbeidsgiverInntektsopplysninger.hashCode()
@@ -297,7 +306,9 @@ internal class Sykepengegrunnlag(
         result = 31 * result + deaktiverteArbeidsforhold.hashCode()
         return result
     }
+
     override fun compareTo(other: Inntekt) = this.sykepengegrunnlag.compareTo(other)
+
     internal fun er6GBegrenset() = begrensning == ER_6G_BEGRENSET
 
     internal fun ghostPeriode(sisteId: UUID, vilkårsgrunnlagId: UUID, organisasjonsnummer: String, periode: Periode): GhostPeriode? {

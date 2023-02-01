@@ -14,19 +14,26 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.AbstractPersonTest
+import no.nav.helse.nesteDag
+import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FØDSELSDATO
+import no.nav.helse.person.Arbeidsforholdhistorikk
+import no.nav.helse.person.Opptjening
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
+import no.nav.helse.spleis.e2e.assertIngenVarsel
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.NAVDAGER
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -325,7 +332,7 @@ internal class SykepengegrunnlagTest {
         val inntekt = 10000.månedlig
         val overstyrt = 15000.månedlig
         val sykepengegrunnlag = Sykepengegrunnlag(
-            alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
+            alder = UNG_PERSON_FØDSELSDATO.alder,
             skjæringstidspunkt = 1.januar,
             arbeidsgiverInntektsopplysninger = listOf(
                 ArbeidsgiverInntektsopplysning("orgnr", Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), inntekt, LocalDateTime.now()), Refusjonsopplysninger())
@@ -474,12 +481,234 @@ internal class SykepengegrunnlagTest {
     }
 
     @Test
+    fun `lager varsel dersom arbeidsforhold har opphørt`() {
+        val a1 = "a1"
+        val a2 = "a2"
+        val skjæringstidspunkt = 1.mars
+        val sluttdatoA1 = skjæringstidspunkt.minusMonths(1).withDayOfMonth(1)
+        val startdatoA2 = skjæringstidspunkt
+
+        val sykepengegrunnlag = Sykepengegrunnlag(
+            alder = UNG_PERSON_FØDSELSDATO.alder,
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidsgiverInntektsopplysninger = listOf(
+                ArbeidsgiverInntektsopplysning(
+                    orgnummer = a1,
+                    inntektsopplysning = Inntektsmelding(
+                        id = UUID.randomUUID(),
+                        dato = skjæringstidspunkt,
+                        hendelseId = UUID.randomUUID(),
+                        beløp = 25000.månedlig,
+                        tidsstempel = LocalDateTime.now()
+                    ),
+                    refusjonsopplysninger = Refusjonsopplysninger()
+                ),
+                ArbeidsgiverInntektsopplysning(
+                    orgnummer = a2,
+                    inntektsopplysning = SkattSykepengegrunnlag(
+                        id = UUID.randomUUID(),
+                        hendelseId = UUID.randomUUID(),
+                        dato = skjæringstidspunkt,
+                        inntektsopplysninger = listOf(
+                            Skatteopplysning(
+                                hendelseId = UUID.randomUUID(),
+                                beløp = 25000.månedlig,
+                                måned = 1.januar.yearMonth,
+                                type = Skatteopplysning.Inntekttype.LØNNSINNTEKT,
+                                fordel = "",
+                                beskrivelse = "",
+                                tidsstempel = LocalDateTime.now()
+                            )
+                        ),
+                        tidsstempel = LocalDateTime.now()
+                    ),
+                    refusjonsopplysninger = Refusjonsopplysninger()
+                )
+            ),
+            deaktiverteArbeidsforhold = emptyList(),
+            vurdertInfotrygd = false
+        )
+
+        val opptjening = Opptjening(listOf(
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a1, listOf(
+                Arbeidsforholdhistorikk.Arbeidsforhold(
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = sluttdatoA1,
+                    deaktivert = false
+                )
+            )),
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a2, listOf(
+                Arbeidsforholdhistorikk.Arbeidsforhold(
+                    ansattFom = startdatoA2,
+                    ansattTom = null,
+                    deaktivert = false
+                )
+            ))
+        ), skjæringstidspunkt, NullObserver)
+
+        Aktivitetslogg().also { aktivitetslogg ->
+            sykepengegrunnlag.validerOpptjening(aktivitetslogg, opptjening, a1)
+            aktivitetslogg.assertVarsel(RV_VV_8)
+        }
+
+        Aktivitetslogg().also { aktivitetslogg ->
+            sykepengegrunnlag.validerOpptjening(aktivitetslogg, opptjening, a2)
+            aktivitetslogg.assertIngenVarsel(RV_VV_8)
+        }
+    }
+
+    @Test
+    fun `lager varsel ved flere arbeidsgivere med ghost`() {
+        val a1 = "a1"
+        val a2 = "a2"
+        val skjæringstidspunkt = 1.mars
+        val førsteFraværsdagAG1 = skjæringstidspunkt
+        val førsteFraværsdagAG2 = skjæringstidspunkt.nesteDag
+        val sykepengegrunnlag = Sykepengegrunnlag(
+            alder = UNG_PERSON_FØDSELSDATO.alder,
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidsgiverInntektsopplysninger = listOf(
+                ArbeidsgiverInntektsopplysning(
+                    orgnummer = a1,
+                    inntektsopplysning = Inntektsmelding(
+                        id = UUID.randomUUID(),
+                        dato = førsteFraværsdagAG1,
+                        hendelseId = UUID.randomUUID(),
+                        beløp = 25000.månedlig,
+                        tidsstempel = LocalDateTime.now()
+                    ),
+                    refusjonsopplysninger = Refusjonsopplysninger()
+                ),
+                ArbeidsgiverInntektsopplysning(
+                    orgnummer = a2,
+                    inntektsopplysning = SkattSykepengegrunnlag(
+                        id = UUID.randomUUID(),
+                        hendelseId = UUID.randomUUID(),
+                        dato = skjæringstidspunkt,
+                        inntektsopplysninger = listOf(
+                            Skatteopplysning(
+                                hendelseId = UUID.randomUUID(),
+                                beløp = 25000.månedlig,
+                                måned = 1.januar.yearMonth,
+                                type = Skatteopplysning.Inntekttype.LØNNSINNTEKT,
+                                fordel = "",
+                                beskrivelse = "",
+                                tidsstempel = LocalDateTime.now()
+                            )
+                        ),
+                        tidsstempel = LocalDateTime.now()
+                    ),
+                    refusjonsopplysninger = Refusjonsopplysninger()
+                )
+            ),
+            deaktiverteArbeidsforhold = emptyList(),
+            vurdertInfotrygd = false
+        )
+
+
+        Aktivitetslogg().also { aktivitetslogg ->
+            sykepengegrunnlag.validerStartdato(aktivitetslogg)
+            aktivitetslogg.assertVarsel(RV_VV_2)
+        }
+    }
+
+    @Test
+    fun `lager varsel ved flere arbeidsgivere med ulik startdato`() {
+        val a1 = "a1"
+        val a2 = "a2"
+        val skjæringstidspunkt = 1.mars
+        val førsteFraværsdagAG1 = skjæringstidspunkt
+        val førsteFraværsdagAG2 = skjæringstidspunkt.nesteDag
+        val sykepengegrunnlag = Sykepengegrunnlag(
+            alder = UNG_PERSON_FØDSELSDATO.alder,
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidsgiverInntektsopplysninger = listOf(
+                ArbeidsgiverInntektsopplysning(
+                    orgnummer = a1,
+                    inntektsopplysning = Inntektsmelding(
+                        id = UUID.randomUUID(),
+                        dato = førsteFraværsdagAG1,
+                        hendelseId = UUID.randomUUID(),
+                        beløp = 25000.månedlig,
+                        tidsstempel = LocalDateTime.now()
+                    ),
+                    refusjonsopplysninger = Refusjonsopplysninger()
+                ),
+                ArbeidsgiverInntektsopplysning(
+                    orgnummer = a2,
+                    inntektsopplysning = Inntektsmelding(
+                        id = UUID.randomUUID(),
+                        dato = førsteFraværsdagAG2,
+                        hendelseId = UUID.randomUUID(),
+                        beløp = 25000.månedlig,
+                        tidsstempel = LocalDateTime.now()
+                    ),
+                    refusjonsopplysninger = Refusjonsopplysninger()
+                )
+            ),
+            deaktiverteArbeidsforhold = emptyList(),
+            vurdertInfotrygd = false
+        )
+
+
+        Aktivitetslogg().also { aktivitetslogg ->
+            sykepengegrunnlag.validerStartdato(aktivitetslogg)
+            aktivitetslogg.assertVarsel(RV_VV_2)
+        }
+    }
+
+    @Test
+    fun `ikke varsel ved flere arbeidsgivere med samme startdato`() {
+        val a1 = "a1"
+        val a2 = "a2"
+        val skjæringstidspunkt = 1.mars
+        val førsteFraværsdagAG1 = skjæringstidspunkt
+        val førsteFraværsdagAG2 = skjæringstidspunkt
+        val sykepengegrunnlag = Sykepengegrunnlag(
+            alder = UNG_PERSON_FØDSELSDATO.alder,
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidsgiverInntektsopplysninger = listOf(
+                ArbeidsgiverInntektsopplysning(
+                    orgnummer = a1,
+                    inntektsopplysning = Inntektsmelding(
+                        id = UUID.randomUUID(),
+                        dato = førsteFraværsdagAG1,
+                        hendelseId = UUID.randomUUID(),
+                        beløp = 25000.månedlig,
+                        tidsstempel = LocalDateTime.now()
+                    ),
+                    refusjonsopplysninger = Refusjonsopplysninger()
+                ),
+                ArbeidsgiverInntektsopplysning(
+                    orgnummer = a2,
+                    inntektsopplysning = Inntektsmelding(
+                        id = UUID.randomUUID(),
+                        dato = førsteFraværsdagAG2,
+                        hendelseId = UUID.randomUUID(),
+                        beløp = 25000.månedlig,
+                        tidsstempel = LocalDateTime.now()
+                    ),
+                    refusjonsopplysninger = Refusjonsopplysninger()
+                )
+            ),
+            deaktiverteArbeidsforhold = emptyList(),
+            vurdertInfotrygd = false
+        )
+
+
+        Aktivitetslogg().also { aktivitetslogg ->
+            sykepengegrunnlag.validerStartdato(aktivitetslogg)
+            aktivitetslogg.assertIngenVarsel(RV_VV_2)
+        }
+    }
+
+    @Test
     fun equals() {
         val inntektID = UUID.randomUUID()
         val hendelseId = UUID.randomUUID()
         val tidsstempel = LocalDateTime.now()
         val sykepengegrunnlag1 = Sykepengegrunnlag(
-            alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
+            alder = UNG_PERSON_FØDSELSDATO.alder,
             skjæringstidspunkt = 1.januar,
             arbeidsgiverInntektsopplysninger = listOf(
                 ArbeidsgiverInntektsopplysning(
@@ -501,7 +730,7 @@ internal class SykepengegrunnlagTest {
         assertEquals(
             sykepengegrunnlag1,
             Sykepengegrunnlag(
-                alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
+                alder = UNG_PERSON_FØDSELSDATO.alder,
                 skjæringstidspunkt = 1.januar,
                 arbeidsgiverInntektsopplysninger = listOf(
                     ArbeidsgiverInntektsopplysning(
@@ -525,7 +754,7 @@ internal class SykepengegrunnlagTest {
         assertNotEquals(
             sykepengegrunnlag1,
             Sykepengegrunnlag(
-                alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
+                alder = UNG_PERSON_FØDSELSDATO.alder,
                 skjæringstidspunkt = 1.januar,
                 arbeidsgiverInntektsopplysninger = emptyList(),
                 deaktiverteArbeidsforhold = emptyList(),
@@ -536,7 +765,7 @@ internal class SykepengegrunnlagTest {
         assertNotEquals(
             sykepengegrunnlag1,
             Sykepengegrunnlag(
-                alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
+                alder = UNG_PERSON_FØDSELSDATO.alder,
                 skjæringstidspunkt = 1.januar,
                 arbeidsgiverInntektsopplysninger = listOf(
                     ArbeidsgiverInntektsopplysning(
@@ -559,7 +788,7 @@ internal class SykepengegrunnlagTest {
         assertNotEquals(
             sykepengegrunnlag1,
             Sykepengegrunnlag(
-                alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
+                alder = UNG_PERSON_FØDSELSDATO.alder,
                 skjæringstidspunkt = 1.januar,
                 arbeidsgiverInntektsopplysninger = listOf(
                     ArbeidsgiverInntektsopplysning(
@@ -582,7 +811,7 @@ internal class SykepengegrunnlagTest {
         assertNotEquals(
             sykepengegrunnlag1,
             Sykepengegrunnlag(
-                alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
+                alder = UNG_PERSON_FØDSELSDATO.alder,
                 skjæringstidspunkt = 1.januar,
                 arbeidsgiverInntektsopplysninger = listOf(
                     ArbeidsgiverInntektsopplysning(

@@ -681,14 +681,6 @@ class Person private constructor(
     internal fun relevanteArbeidsgivere(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.relevanteArbeidsgivere(vilkårsgrunnlagFor(skjæringstidspunkt))
 
-    internal fun harFlereArbeidsforholdMedUlikStartdato(skjæringstidspunkt: LocalDate) =
-        arbeidsgivere.mapNotNull { it.finnFørsteFraværsdag(skjæringstidspunkt) }.sorted().distinct().count() > 1
-
-    internal fun harKunEttAnnetRelevantArbeidsforholdEnn(skjæringstidspunkt: LocalDate, orgnummer: String): Boolean {
-        val aktiveArbeidsforhold = arbeidsgivereMedRelevanteArbeidsforhold(skjæringstidspunkt)
-        return aktiveArbeidsforhold.size == 1 && aktiveArbeidsforhold.single().organisasjonsnummer() != orgnummer
-    }
-
     internal fun nyeArbeidsgiverInntektsopplysninger(
         skjæringstidspunkt: LocalDate,
         inntektsmelding: Inntektsmelding,
@@ -753,10 +745,11 @@ class Person private constructor(
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,
         vilkårsgrunnlag: VilkårsgrunnlagElement,
+        organisasjonsnummer: String,
         skjæringstidspunkt: LocalDate,
         erForlengelse: Boolean
     ): Boolean {
-        arbeidsgivere.validerVilkårsgrunnlag(aktivitetslogg, vilkårsgrunnlag, skjæringstidspunkt, erForlengelse)
+        arbeidsgivere.validerVilkårsgrunnlag(aktivitetslogg, vilkårsgrunnlag, organisasjonsnummer, skjæringstidspunkt, erForlengelse)
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 

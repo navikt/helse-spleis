@@ -119,5 +119,10 @@ abstract class Inntektsopplysning protected constructor(
                 aktivitetslogg.funksjonellFeil(Varselkode.RV_VV_5)
             }
         }
+
+        internal fun List<Inntektsopplysning>.validerStartdato(aktivitetslogg: IAktivitetslogg) {
+            if (distinctBy { it.dato }.size <= 1 && none { it is SkattSykepengegrunnlag || it is IkkeRapportert }) return
+            aktivitetslogg.varsel(Varselkode.RV_VV_2)
+        }
     }
 }

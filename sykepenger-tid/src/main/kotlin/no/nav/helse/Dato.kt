@@ -23,6 +23,7 @@ fun Int.desember(year: Int): LocalDate = LocalDate.of(year, 12, this)
 fun YearMonth.isWithinRangeOf(dato: LocalDate, måneder: Long) =
     this in YearMonth.from(dato).let { it.minusMonths(måneder)..it.minusMonths(1) }
 
+val LocalDate.yearMonth: YearMonth get() = YearMonth.from(this)
 
 val Int.ukedager get() = Ukedager(this)
 operator fun LocalDate.plus(other: Ukedager) = other + this

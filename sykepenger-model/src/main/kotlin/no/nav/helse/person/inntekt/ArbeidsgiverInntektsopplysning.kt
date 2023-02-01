@@ -4,9 +4,12 @@ import java.time.LocalDate
 import no.nav.helse.person.ArbeidsgiverInntektsopplysningVisitor
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerStartdato
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.valider
+import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.validerStartdato
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -96,6 +99,16 @@ class ArbeidsgiverInntektsopplysning(
             .map { inntekt -> inntekt.overstyr(other) }
             .also { it.subsummer(subsumsjonObserver, opptjening) }
         internal fun List<ArbeidsgiverInntektsopplysning>.erOverstyrt() = any { it.inntektsopplysning is Saksbehandler }
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.validerOpptjening(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening, orgnummer: String) {
+            val arbeidsforholdAktivePåSkjæringstidspunktet = filter { opptjening.ansattVedSkjæringstidspunkt(it.orgnummer) }.singleOrNull() ?: return
+            if (arbeidsforholdAktivePåSkjæringstidspunktet.orgnummer == orgnummer) return
+            aktivitetslogg.varsel(Varselkode.RV_VV_8)
+        }
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.validerStartdato(aktivitetslogg: IAktivitetslogg) {
+            return map { it.inntektsopplysning }.validerStartdato(aktivitetslogg)
+        }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.refusjonsopplysninger(organisasjonsnummer: String) =
             singleOrNull{it.gjelder(organisasjonsnummer)}?.refusjonsopplysninger ?: Refusjonsopplysninger()
