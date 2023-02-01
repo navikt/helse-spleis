@@ -14,8 +14,9 @@ interface OverføringsinformasjonPort: IAktivitetslogg {
     fun erRelevant(arbeidsgiverFagsystemId: String, personFagsystemId: String, utbetaling: UUID): Boolean
 }
 
-interface SimuleringPort {
+interface SimuleringPort: IAktivitetslogg {
     val simuleringResultat: SimuleringResultat?
     fun valider(oppdrag: Oppdrag): SimuleringPort
     fun erRelevantFor(fagområde: Fagområde, fagsystemId: String): Boolean
+    fun erRelevantForUtbetaling(id: UUID): Boolean
 }

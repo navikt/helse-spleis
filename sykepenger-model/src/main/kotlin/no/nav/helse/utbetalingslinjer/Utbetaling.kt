@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingslinjer
 import AnnullerUtbetalingPort
 import GrunnbeløpsreguleringPort
 import OverføringsinformasjonPort
+import SimuleringPort
 import UtbetalingHendelsePort
 import UtbetalingpåminnelsePort
 import java.time.Duration
@@ -10,7 +11,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
@@ -187,10 +187,10 @@ class Utbetaling private constructor(
         tilstand.overført(this, utbetalingOverført)
     }
 
-    internal fun håndter(simulering: Simulering) {
+    internal fun håndter(simulering: SimuleringPort) {
         if (!simulering.erRelevantForUtbetaling(id)) return
-        personOppdrag.håndter(SimuleringAdapter(simulering))
-        arbeidsgiverOppdrag.håndter(SimuleringAdapter(simulering))
+        personOppdrag.håndter(simulering)
+        arbeidsgiverOppdrag.håndter(simulering)
     }
 
     internal fun simuler(hendelse: IAktivitetslogg) {
@@ -233,9 +233,9 @@ class Utbetaling private constructor(
     internal fun gjelderFor(hendelse: UtbetalingsgodkjenningAdapter) =
         hendelse.erRelevant(id)
 
-    internal fun valider(simulering: Simulering): IAktivitetslogg {
-        arbeidsgiverOppdrag.valider(SimuleringAdapter(simulering))
-        personOppdrag.valider(SimuleringAdapter(simulering))
+    internal fun valider(simulering: SimuleringPort): IAktivitetslogg {
+        arbeidsgiverOppdrag.valider(simulering)
+        personOppdrag.valider(simulering)
         return simulering
     }
 

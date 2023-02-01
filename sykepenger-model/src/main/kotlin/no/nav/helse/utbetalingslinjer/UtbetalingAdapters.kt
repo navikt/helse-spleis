@@ -51,10 +51,12 @@ internal class BeløpkildeAdapter(private val økonomi: Økonomi): Beløpkilde {
     override fun personbeløp(): Int = økonomi.medAvrundetData { _, _, _, _, _, _, _, personbeløp, _ -> personbeløp!! }
 }
 
-class SimuleringAdapter(private val simulering: Simulering): SimuleringPort {
+internal fun Simulering.utbetalingport() = SimuleringAdapter(this)
+class SimuleringAdapter(private val simulering: Simulering): SimuleringPort, IAktivitetslogg by simulering {
     override val simuleringResultat: SimuleringResultat? = simulering.simuleringResultat
     override fun valider(oppdrag: Oppdrag): SimuleringPort = this.apply { simulering.valider(oppdrag) }
     override fun erRelevantFor(fagområde: Fagområde, fagsystemId: String): Boolean = simulering.erRelevantFor(fagområde, fagsystemId)
+    override fun erRelevantForUtbetaling(id: UUID): Boolean = simulering.erRelevantForUtbetaling(id)
 }
 
 internal fun Grunnbeløpsregulering.utbetalingport() = GrunnbeløpsreguleringAdapter(this)
