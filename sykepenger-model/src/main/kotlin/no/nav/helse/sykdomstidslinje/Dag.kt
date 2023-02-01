@@ -93,7 +93,7 @@ internal sealed class Dag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
-        override fun accept(visitor: SykdomstidslinjeVisitor) = økonomi.accept(visitor, this, dato, kilde)
+        override fun accept(visitor: SykdomstidslinjeVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
     }
 
     internal class Feriedag(
@@ -120,7 +120,7 @@ internal sealed class Dag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
-        override fun accept(visitor: SykdomstidslinjeVisitor) = økonomi.accept(visitor, this, dato, kilde)
+        override fun accept(visitor: SykdomstidslinjeVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
     }
 
     internal class Sykedag(
@@ -129,7 +129,7 @@ internal sealed class Dag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
-        override fun accept(visitor: SykdomstidslinjeVisitor) = økonomi.accept(visitor, this, dato, kilde)
+        override fun accept(visitor: SykdomstidslinjeVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
     }
 
     internal class ForeldetSykedag(
@@ -138,7 +138,7 @@ internal sealed class Dag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
-        override fun accept(visitor: SykdomstidslinjeVisitor) = økonomi.accept(visitor, this, dato, kilde)
+        override fun accept(visitor: SykdomstidslinjeVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
     }
 
     internal class SykHelgedag(
@@ -147,7 +147,7 @@ internal sealed class Dag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
-        override fun accept(visitor: SykdomstidslinjeVisitor) = økonomi.accept(visitor, this, dato, kilde)
+        override fun accept(visitor: SykdomstidslinjeVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
     }
 
     internal class Permisjonsdag(

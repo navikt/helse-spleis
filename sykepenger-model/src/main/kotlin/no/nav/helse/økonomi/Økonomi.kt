@@ -2,9 +2,6 @@ package no.nav.helse.økonomi
 
 import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -263,46 +260,6 @@ internal class Økonomi private constructor(
         arbeidsgiverbeløp = gradertArbeidsgiverRefusjonsbeløp.coerceAtMost(total)
         personbeløp = (total - arbeidsgiverbeløp!!).coerceAtLeast(INGEN)
     }
-
-    internal fun accept(
-        visitor: SykdomstidslinjeVisitor,
-        dag: Dag.Arbeidsgiverdag,
-        dato: LocalDate,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) =
-        visitor.visitDag(dag, dato, this, kilde)
-
-    internal fun accept(
-        visitor: SykdomstidslinjeVisitor,
-        dag: Dag.ArbeidsgiverHelgedag,
-        dato: LocalDate,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) =
-        visitor.visitDag(dag, dato, this, kilde)
-
-    internal fun accept(
-        visitor: SykdomstidslinjeVisitor,
-        dag: Dag.Sykedag,
-        dato: LocalDate,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) =
-        visitor.visitDag(dag, dato, this, kilde)
-
-    internal fun accept(
-        visitor: SykdomstidslinjeVisitor,
-        dag: Dag.SykHelgedag,
-        dato: LocalDate,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) =
-        visitor.visitDag(dag, dato, this, kilde)
-
-    internal fun accept(
-        visitor: SykdomstidslinjeVisitor,
-        dag: Dag.ForeldetSykedag,
-        dato: LocalDate,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) =
-        visitor.visitDag(dag, dato, this, kilde)
 
     internal sealed class Tilstand {
 
