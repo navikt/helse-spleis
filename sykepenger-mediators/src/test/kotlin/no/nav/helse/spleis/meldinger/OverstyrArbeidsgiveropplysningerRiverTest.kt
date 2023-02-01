@@ -211,11 +211,11 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
         @Language("json")
         val forventetResultat = """
             {
-              "@event_name": "overstyr_arbeidsgiveropplysninger",
+              "@event_name": "overstyr_inntekt_og_refusjon",
               "aktørId": "42",
               "fødselsnummer": "12029240045",
               "skjæringstidspunkt": "2018-01-01",
-              "arbeidsgiveropplysninger": [
+              "arbeidsgivere": [
                 {
                   "organisasjonsnummer": "987654321",
                   "månedligInntekt": 31000.0,
@@ -255,7 +255,7 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
             }"""
 
         val faktiskResultat =
-            overstyrArbeidsgiveropplysninger.json("@event_name", "aktørId", "fødselsnummer", "skjæringstidspunkt", "arbeidsgiveropplysninger")
+            overstyrArbeidsgiveropplysninger.json("@event_name", "aktørId", "fødselsnummer", "skjæringstidspunkt", "arbeidsgivere")
 
         JSONAssert.assertEquals(forventetResultat, faktiskResultat, STRICT)
         assertNoErrors(overstyrArbeidsgiveropplysninger)

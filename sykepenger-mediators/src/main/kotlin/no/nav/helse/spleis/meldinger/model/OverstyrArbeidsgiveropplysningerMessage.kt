@@ -20,7 +20,7 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage) : He
     override val fødselsnummer: String = packet["fødselsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
     private val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
-    private val arbeidsgiveropplysninger = packet["arbeidsgiveropplysninger"].asArbeidsgiveropplysninger()
+    private val arbeidsgiveropplysninger = packet["arbeidsgivere"].asArbeidsgiveropplysninger()
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) =
         mediator.behandle(

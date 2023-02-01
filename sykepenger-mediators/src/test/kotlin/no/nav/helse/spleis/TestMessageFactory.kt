@@ -983,11 +983,11 @@ internal class TestMessageFactory(
         skjæringstidspunkt: LocalDate,
         arbeidsgiveropplysninger: List<Arbeidsgiveropplysning>
     ) = nyHendelse(
-        "overstyr_arbeidsgiveropplysninger", mutableMapOf(
+        "overstyr_inntekt_og_refusjon", mutableMapOf(
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "skjæringstidspunkt" to skjæringstidspunkt,
-            "arbeidsgiveropplysninger" to arbeidsgiveropplysninger.map { arbeidgiver ->
+            "arbeidsgivere" to arbeidsgiveropplysninger.map { arbeidgiver ->
                 mutableMapOf(
                     "organisasjonsnummer" to arbeidgiver.organisasjonsnummer,
                     "månedligInntekt" to arbeidgiver.månedligInntekt,

@@ -12,17 +12,17 @@ internal class OverstyrArbeidsgiveropplysningerRiver(
     messageMediator: IMessageMediator
 ): HendelseRiver(rapidsConnection, messageMediator) {
 
-    override val eventName = "overstyr_arbeidsgiveropplysninger"
+    override val eventName = "overstyr_inntekt_og_refusjon"
 
-    override val riverName = "Overstyr arbeidsgiveropplysninger"
+    override val riverName = "Overstyr inntekt og refusjon"
 
     override fun createMessage(packet: JsonMessage) = OverstyrArbeidsgiveropplysningerMessage(packet)
 
     override fun validate(message: JsonMessage) {
         message.requireKey("aktørId", "fødselsnummer")
         message.require("skjæringstidspunkt", JsonNode::asLocalDate)
-        message.require("arbeidsgiveropplysninger") { require(it.size() > 0) { "Må settes minst en arbeidsgiveropplysning" } }
-        message.requireArray("arbeidsgiveropplysninger") {
+        message.require("arbeidsgivere") { require(it.size() > 0) { "Må settes minst en arbeidsgiver" } }
+        message.requireArray("arbeidsgivere") {
             require("organisasjonsnummer") { require(it.gyldigTekst) }
             require("månedligInntekt") { require(it.gyldigDouble) }
             require("forklaring") { require(it.gyldigTekst) }
@@ -36,7 +36,7 @@ internal class OverstyrArbeidsgiveropplysningerRiver(
                 require("beløp") { require(it.gyldigDouble)}
             }
         }
-        message.require("arbeidsgiveropplysninger") { arbeidsgiveropplysning ->
+        message.require("arbeidsgivere") { arbeidsgiveropplysning ->
             val organisasjonsnummer = arbeidsgiveropplysning.map { it.path("organisasjonsnummer").asText() }
             require(organisasjonsnummer.size == organisasjonsnummer.toSet().size) { "Duplikate organisasjonsnummer $organisasjonsnummer" }
         }
