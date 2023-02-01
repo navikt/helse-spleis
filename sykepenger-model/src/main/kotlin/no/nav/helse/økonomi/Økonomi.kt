@@ -3,7 +3,7 @@ package no.nav.helse.økonomi
 import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.person.UtbetalingsdagVisitor
+import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode

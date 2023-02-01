@@ -49,7 +49,7 @@ import no.nav.helse.utbetalingslinjer.OppdragVisitor
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
+import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt
@@ -382,7 +382,8 @@ internal interface VedtaksperiodeUtbetalingVisitor : UtbetalingVisitor, Vilkårs
     fun postVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Pair<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, Utbetaling>>) {}
 }
 
-internal interface VedtaksperiodeVisitor : VedtaksperiodeUtbetalingVisitor, SykdomstidslinjeVisitor, UtbetalingsdagVisitor, InntektsmeldingInfoVisitor {
+internal interface VedtaksperiodeVisitor : VedtaksperiodeUtbetalingVisitor, SykdomstidslinjeVisitor,
+    UtbetalingsdagVisitor, InntektsmeldingInfoVisitor {
     fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
@@ -417,67 +418,6 @@ internal interface VedtaksperiodeVisitor : VedtaksperiodeUtbetalingVisitor, Sykd
         inntektskilde: () -> Inntektskilde
     ) {
     }
-}
-
-internal interface UtbetalingsdagVisitor {
-    fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
-    fun visit(
-        dag: Utbetalingsdag.ArbeidsgiverperiodeDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-    }
-
-    fun visit(
-        dag: Utbetalingsdag.NavDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-    }
-
-    fun visit(
-        dag: Utbetalingsdag.NavHelgDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-    }
-
-    fun visit(
-        dag: Utbetalingsdag.Arbeidsdag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-    }
-
-    fun visit(
-        dag: Utbetalingsdag.Fridag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-    }
-
-    fun visit(
-        dag: Utbetalingsdag.AvvistDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-    }
-
-    fun visit(
-        dag: Utbetalingsdag.ForeldetDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-    }
-
-    fun visit(
-        dag: Utbetalingsdag.UkjentDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-    }
-
-    fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
 }
 
 internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {

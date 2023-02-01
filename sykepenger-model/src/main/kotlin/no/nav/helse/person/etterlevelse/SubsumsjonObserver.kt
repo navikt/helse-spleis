@@ -10,7 +10,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.person.SkatteopplysningVisitor
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.person.UtbetalingsdagVisitor
+import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag.Tidslinjeperiode.Companion.dager
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag

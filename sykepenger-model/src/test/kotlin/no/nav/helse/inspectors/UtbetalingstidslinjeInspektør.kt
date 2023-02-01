@@ -1,6 +1,6 @@
 package no.nav.helse.inspectors
 
-import no.nav.helse.person.UtbetalingsdagVisitor
+import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.*
@@ -12,7 +12,8 @@ import kotlin.reflect.KClass
 internal val Utbetalingstidslinje.inspektør get() = UtbetalingstidslinjeInspektør(this)
 
 // Collects assertable statistics for a Utbetalingstidslinje
-internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalingstidslinje): UtbetalingsdagVisitor {
+internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalingstidslinje):
+    UtbetalingsdagVisitor {
     var førstedato = LocalDate.MIN
     var sistedato = LocalDate.MAX
     lateinit var førstedag: Utbetalingsdag

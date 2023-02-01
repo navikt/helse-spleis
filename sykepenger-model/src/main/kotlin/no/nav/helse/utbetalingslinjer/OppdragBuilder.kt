@@ -1,7 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.UtbetalingsdagVisitor
+import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.*

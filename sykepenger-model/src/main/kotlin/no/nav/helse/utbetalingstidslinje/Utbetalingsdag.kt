@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
-import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingslinjer.BeløpkildeAdapter
 import no.nav.helse.økonomi.Økonomi
 
