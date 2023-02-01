@@ -115,17 +115,6 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
     }
 
     @Test
-    fun `arbeidsforhold kun for andre orgnr gir samme antall opptjente dager`() {
-        val vilkårsgrunnlag = vilkårsgrunnlag(
-            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold("eitAnnaOrgNummer", 4.desember(2017)))
-        )
-        person.håndter(vilkårsgrunnlag)
-        assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 28, true)
-        assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand())
-        assertVarsel(RV_VV_1, AktivitetsloggFilter.person())
-    }
-
-    @Test
     fun `ingen arbeidsforhold gir 0 opptjente dager`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
             arbeidsforhold = emptyList()

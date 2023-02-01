@@ -658,6 +658,79 @@ internal class SykepengegrunnlagTest {
     }
 
     @Test
+    fun `lager varsel dersom en arbeidsgiver i sykepengegrunnlaget ikke har registrert opptjening`() {
+        val a1 = "a1"
+        val a2 = "a2"
+        val skjæringstidspunkt = 1.mars
+        val sykepengegrunnlag = Sykepengegrunnlag(
+            alder = UNG_PERSON_FØDSELSDATO.alder,
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidsgiverInntektsopplysninger = listOf(
+                ArbeidsgiverInntektsopplysning(
+                    orgnummer = a1,
+                    inntektsopplysning = Inntektsmelding(
+                        id = UUID.randomUUID(),
+                        dato = skjæringstidspunkt,
+                        hendelseId = UUID.randomUUID(),
+                        beløp = 25000.månedlig,
+                        tidsstempel = LocalDateTime.now()
+                    ),
+                    refusjonsopplysninger = Refusjonsopplysninger()
+                ),
+                ArbeidsgiverInntektsopplysning(
+                    orgnummer = a2,
+                    inntektsopplysning = Inntektsmelding(
+                        id = UUID.randomUUID(),
+                        dato = skjæringstidspunkt,
+                        hendelseId = UUID.randomUUID(),
+                        beløp = 25000.månedlig,
+                        tidsstempel = LocalDateTime.now()
+                    ),
+                    refusjonsopplysninger = Refusjonsopplysninger()
+                )
+            ),
+            deaktiverteArbeidsforhold = emptyList(),
+            vurdertInfotrygd = false
+        )
+
+        val opptjeningUtenA2 = Opptjening(listOf(
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a1, listOf(
+                Arbeidsforholdhistorikk.Arbeidsforhold(
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    deaktivert = false
+                )
+            ))
+        ), skjæringstidspunkt, NullObserver)
+        val opptjeningMedA2 = Opptjening(listOf(
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a1, listOf(
+                Arbeidsforholdhistorikk.Arbeidsforhold(
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    deaktivert = false
+                )
+            )),
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a2, listOf(
+                Arbeidsforholdhistorikk.Arbeidsforhold(
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    deaktivert = false
+                )
+            ))
+        ), skjæringstidspunkt, NullObserver)
+
+        Aktivitetslogg().also { aktivitetslogg ->
+            sykepengegrunnlag.validerOpptjening(aktivitetslogg, opptjeningUtenA2)
+            aktivitetslogg.assertVarsel(RV_VV_1)
+        }
+
+        Aktivitetslogg().also { aktivitetslogg ->
+            sykepengegrunnlag.validerOpptjening(aktivitetslogg, opptjeningMedA2)
+            aktivitetslogg.assertIngenVarsel(RV_VV_1)
+        }
+    }
+
+    @Test
     fun `ikke varsel ved flere arbeidsgivere med samme startdato`() {
         val a1 = "a1"
         val a2 = "a2"

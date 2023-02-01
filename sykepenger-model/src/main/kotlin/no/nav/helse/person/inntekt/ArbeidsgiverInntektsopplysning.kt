@@ -106,6 +106,11 @@ class ArbeidsgiverInntektsopplysning(
             aktivitetslogg.varsel(Varselkode.RV_VV_8)
         }
 
+        internal fun List<ArbeidsgiverInntektsopplysning>.validerOpptjening(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening) {
+            if (none { opptjening.startdatoFor(it.orgnummer) == null }) return
+            aktivitetslogg.varsel(Varselkode.RV_VV_1)
+        }
+
         internal fun List<ArbeidsgiverInntektsopplysning>.validerStartdato(aktivitetslogg: IAktivitetslogg) {
             return map { it.inntektsopplysning }.validerStartdato(aktivitetslogg)
         }

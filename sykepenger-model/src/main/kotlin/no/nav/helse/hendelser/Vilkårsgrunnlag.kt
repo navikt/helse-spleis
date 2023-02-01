@@ -77,9 +77,6 @@ class Vilkårsgrunnlag(
     internal fun lagre(person: Person, skjæringstidspunkt: LocalDate) {
         val opptjening = arbeidsforhold.beregnOpptjening(skjæringstidspunkt, NullObserver)
         opptjening.lagreArbeidsforhold(person, this)
-        if (person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(skjæringstidspunkt)) {
-            varsel(RV_VV_1)
-        }
     }
 
     private fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Sammenligningsgrunnlag {

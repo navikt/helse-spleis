@@ -559,31 +559,6 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `arbeidsforhold fom skjæringstidspunkt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
-            orgnummer = a1,
-        )
-
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar))
-        val inntekter = listOf(grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)))
-
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter,
-                arbeidsforhold = emptyList()
-            ),
-            arbeidsforhold = arbeidsforhold
-        )
-        Assertions.assertFalse(person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(1.januar))
-    }
-
-    @Test
     fun `Forlengelser skal ikke få warning på at arbeidsgiver ikke finnes i Aa-reg`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)

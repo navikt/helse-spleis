@@ -258,8 +258,15 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             orgnummer = a1,
-            arbeidsforhold = emptyList()
+            arbeidsforhold = listOf(
+                Arbeidsforhold(
+                    orgnummer = a2,
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null
+                )
+            )
         )
+        håndterYtelser(1.vedtaksperiode)
         assertVarsel(RV_VV_1, 1.vedtaksperiode.filter())
     }
 

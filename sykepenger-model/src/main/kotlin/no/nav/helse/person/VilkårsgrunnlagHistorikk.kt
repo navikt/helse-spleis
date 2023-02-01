@@ -211,7 +211,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, organisasjonsnummerRelevanteArbeidsgivere: List<String>, erForlengelse: Boolean): Boolean {
             sykepengegrunnlag.validerInntekt(aktivitetslogg, organisasjonsnummerRelevanteArbeidsgivere)
             sykepengegrunnlag.validerOpptjening(aktivitetslogg, opptjening, organisasjonsnummer)
-            if (!erForlengelse) sykepengegrunnlag.validerStartdato(aktivitetslogg)
+            if (!erForlengelse) {
+                sykepengegrunnlag.validerOpptjening(aktivitetslogg, opptjening)
+                sykepengegrunnlag.validerStartdato(aktivitetslogg)
+            }
             valider(aktivitetslogg, erForlengelse)
             return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
         }

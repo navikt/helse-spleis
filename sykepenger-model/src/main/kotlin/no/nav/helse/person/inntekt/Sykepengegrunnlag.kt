@@ -147,6 +147,11 @@ internal class Sykepengegrunnlag(
         arbeidsgiverInntektsopplysninger.validerOpptjening(aktivitetslogg, opptjening, orgnummer)
     }
 
+    internal fun validerOpptjening(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening?) {
+        if (opptjening == null) return
+        arbeidsgiverInntektsopplysninger.validerOpptjening(aktivitetslogg, opptjening)
+    }
+
     internal fun validerStartdato(aktivitetslogg: IAktivitetslogg) {
         arbeidsgiverInntektsopplysninger.validerStartdato(aktivitetslogg)
     }

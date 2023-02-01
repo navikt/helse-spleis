@@ -675,9 +675,6 @@ class Person private constructor(
     internal fun antallArbeidsgivereMedRelevantArbeidsforhold(skjæringstidspunkt: LocalDate) =
         arbeidsgivereMedRelevanteArbeidsforhold(skjæringstidspunkt).size
 
-    internal fun harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(skjæringstidspunkt: LocalDate) =
-        arbeidsgivere.any { it.harVedtaksperiodeMedUkjentArbeidsforhold(skjæringstidspunkt) }
-
     internal fun relevanteArbeidsgivere(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.relevanteArbeidsgivere(vilkårsgrunnlagFor(skjæringstidspunkt))
 
