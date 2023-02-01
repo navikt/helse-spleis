@@ -2110,9 +2110,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             hendelse: IAktivitetslogg
         ): Boolean {
-            val filter =
-                if (Toggle.InntektsmeldingKanTriggeRevurdering.enabled) NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING else NYERE_ELLER_SAMME_SKJÆRINGSTIDSPUNKT_ER_UTBETALT
-            val revurderingIkkeStøttet = vedtaksperiode.person.vedtaksperioder(filter(vedtaksperiode)).isNotEmpty()
+            val revurderingIkkeStøttet = vedtaksperiode.person.vedtaksperioder(NYERE_ELLER_SAMME_SKJÆRINGSTIDSPUNKT_ER_UTBETALT(vedtaksperiode)).isNotEmpty()
 
             // støttes ikke før vi støtter revurdering av eldre skjæringstidspunkt
             if (revurderingIkkeStøttet) {
