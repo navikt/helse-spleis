@@ -539,7 +539,7 @@ internal class Arbeidsgiver private constructor(
             vedtaksperioder.skalHåndtere(inntektsmelding.inntektOgRefusjon(dager))
         val inntektOgRefusjonHåndteres = vedtaksperiodeSomSkalHåndtereInntektOgRefusjon != null
 
-        if (noenHarHåndtertDager || inntektOgRefusjonHåndteres) {
+        if (!noenHarHåndtertDager && inntektOgRefusjonHåndteres) {
             // TODO: Håndter gjenstående trenger nå bare å håndtere om ingen dager er håndtert
             // Noen av dagene er håndtert, men ikke nødvendigvis alle. For å beholde dagens oppførsel
             // må vi håndtere de gjenstående dagene også.
