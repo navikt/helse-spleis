@@ -22,8 +22,10 @@ internal class DagerFraInntektsmelding(
     private val sammenhengendePerioder: List<Periode> = emptyList()
 ): IAktivitetslogg by inntektsmelding {
     private val opprinneligPeriode = inntektsmelding.sykdomstidslinje().periode()
+    private val arbeidsdager = mutableSetOf<LocalDate>()
     private val gjenståendeDager = opprinneligPeriode?.toMutableSet() ?: mutableSetOf()
-    private val håndterteDager get() = (opprinneligPeriode?: emptySet()).minus(gjenståendeDager)
+    private val alleDager get() = (opprinneligPeriode?: emptySet()) + arbeidsdager
+    private val håndterteDager get() = alleDager - gjenståendeDager
 
     internal fun meldingsreferanseId() = inntektsmelding.meldingsreferanseId()
     internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = inntektsmelding.leggTil(hendelseIder)
@@ -36,8 +38,9 @@ internal class DagerFraInntektsmelding(
         inntektsmelding.padLeft(dato)
         val oppdatertPeriode = inntektsmelding.sykdomstidslinje().periode() ?: return
         if (opprinneligPeriode == oppdatertPeriode) return
-        val nyeDager = oppdatertPeriode - opprinneligPeriode
-        gjenståendeDager.addAll(nyeDager)
+        val arbeidsdagerFør = oppdatertPeriode - opprinneligPeriode
+        arbeidsdager.addAll(arbeidsdagerFør)
+        gjenståendeDager.addAll(arbeidsdagerFør)
     }
 
     internal fun håndterPeriodeRettFør(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit) {

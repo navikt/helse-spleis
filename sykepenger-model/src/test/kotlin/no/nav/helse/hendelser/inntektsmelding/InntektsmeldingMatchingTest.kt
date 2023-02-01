@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.desember
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
@@ -495,6 +496,17 @@ internal class InntektsmeldingMatchingTest {
         // Dette for å beholde dagens oppførsel hvor en vedtaksperiode håndterer inntekt, men ingen håndterer noen dager
         val (dager, _) = inntektsmelding(emptyList(),null, 1.januar til 16.januar)
         assertEquals(1.januar til 16.januar, dager.håndterGjenstående())
+    }
+
+    @Test
+    fun `Må hensynta arbeidsdager før i tillegg til de opprinnelig dagene for å avgjøre om en periode er håndtert`() {
+        val vedtaksperiode = 1.januar til 31.januar
+        val (dager, _) = inntektsmelding(listOf(vedtaksperiode), 1.januar, 15.januar til 30.januar)
+        dager.leggTilArbeidsdagerFør(vedtaksperiode.start)
+        assertEquals(1.januar til 30.januar, dager.håndter(vedtaksperiode))
+        assertFalse(dager.harBlittHåndtertAv(31.desember(2017).somPeriode()))
+        assertTrue(dager.harBlittHåndtertAv(1.januar til 14.januar))
+        assertFalse(dager.harBlittHåndtertAv(31.januar.somPeriode()))
     }
 
     private fun DagerFraInntektsmelding.håndter(periode: Periode): Periode? {
