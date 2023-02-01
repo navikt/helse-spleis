@@ -1,6 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import no.nav.helse.person.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagVisitor
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 
@@ -33,6 +34,10 @@ internal class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
     }
 
     internal companion object {
+        internal fun List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>.validerInntekter(aktivitetslogg: IAktivitetslogg, sykepengegrunnlag: Sykepengegrunnlag) {
+            sykepengegrunnlag.validerInntekter(aktivitetslogg, associateBy({ it.orgnummer}) { it.inntektsopplysninger })
+        }
+
         internal fun List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>.sammenligningsgrunnlag(): Inntekt {
             return map { it.rapportertInntekt }.summer()
         }

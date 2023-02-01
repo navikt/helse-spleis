@@ -669,12 +669,6 @@ class Person private constructor(
         }
     }
 
-    private fun arbeidsgivereMedRelevanteArbeidsforhold(skjæringstidspunkt: LocalDate): List<Arbeidsgiver> =
-        arbeidsgivere.filter { it.harRelevantArbeidsforhold(skjæringstidspunkt) }
-
-    internal fun antallArbeidsgivereMedRelevantArbeidsforhold(skjæringstidspunkt: LocalDate) =
-        arbeidsgivereMedRelevanteArbeidsforhold(skjæringstidspunkt).size
-
     internal fun relevanteArbeidsgivere(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.relevanteArbeidsgivere(vilkårsgrunnlagFor(skjæringstidspunkt))
 

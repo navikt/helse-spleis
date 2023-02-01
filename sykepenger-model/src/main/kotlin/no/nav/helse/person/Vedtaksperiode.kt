@@ -615,7 +615,6 @@ internal class Vedtaksperiode private constructor(
         vilkårsgrunnlag.valider(
             grunnlagForSykepengegrunnlag,
             skjæringstidspunkt,
-            person.antallArbeidsgivereMedRelevantArbeidsforhold(skjæringstidspunkt),
             jurist()
         )
         person.lagreVilkårsgrunnlag(vilkårsgrunnlag.grunnlagsdata())

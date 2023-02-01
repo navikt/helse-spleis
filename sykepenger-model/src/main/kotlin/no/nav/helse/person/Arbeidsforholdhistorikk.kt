@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.hendelser.Periode.Companion.sammenhengende
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.ansattVedSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.harArbeidsforholdNyereEnn
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 
@@ -26,10 +25,6 @@ internal class Arbeidsforholdhistorikk private constructor(
         historikk.forEach { it.accept(visitor) }
         visitor.postVisitArbeidsforholdhistorikk(this)
     }
-
-    internal fun harRelevantArbeidsforhold(skjæringstidspunkt: LocalDate) = sisteInnslag(skjæringstidspunkt)?.arbeidsforhold
-        ?.ansattVedSkjæringstidspunkt(skjæringstidspunkt)
-        ?: false
 
     internal fun harArbeidsforholdNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Long) =
         sisteInnslag(skjæringstidspunkt)?.harArbeidsforholdNyereEnn(skjæringstidspunkt, antallMåneder) ?: false

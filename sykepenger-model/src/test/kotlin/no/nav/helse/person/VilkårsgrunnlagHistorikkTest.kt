@@ -299,7 +299,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag.valider(
             10000.månedlig.sykepengegrunnlag,
             1.januar,
-            1,
             MaskinellJurist()
         )
         historikk.lagre(vilkårsgrunnlag.grunnlagsdata())
@@ -327,7 +326,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag.valider(
             10000.månedlig.sykepengegrunnlag,
             1.januar,
-            1,
             jurist
         )
         SubsumsjonInspektør(jurist).assertVurdert(paragraf = PARAGRAF_8_2, ledd = 1.ledd, versjon = 12.juni(2020))
@@ -361,13 +359,11 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag1.valider(
             10000.månedlig.sykepengegrunnlag,
             1.januar,
-            1,
             MaskinellJurist()
         )
         vilkårsgrunnlag2.valider(
             10000.månedlig.sykepengegrunnlag,
             1.januar,
-            1,
             MaskinellJurist()
         )
 
@@ -401,14 +397,12 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag.valider(
             10000.månedlig.sykepengegrunnlag,
             1.januar,
-            1,
             MaskinellJurist()
         )
         historikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         vilkårsgrunnlag.valider(
             10000.månedlig.sykepengegrunnlag,
             4.januar,
-            1,
             MaskinellJurist()
         )
         historikk.lagre(vilkårsgrunnlag.grunnlagsdata())
@@ -433,7 +427,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag.valider(
             10000.månedlig.sykepengegrunnlag,
             1.januar,
-            1,
             MaskinellJurist()
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
@@ -459,7 +452,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag.valider(
             10000.månedlig.sykepengegrunnlag,
             1.januar,
-            1,
             MaskinellJurist()
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
@@ -486,7 +478,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag1.valider(
             10000.månedlig.sykepengegrunnlag,
             1.januar,
-            1,
             MaskinellJurist()
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
@@ -503,7 +494,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag2.valider(
             10000.månedlig.sykepengegrunnlag,
             1.januar,
-            1,
             MaskinellJurist()
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
@@ -530,7 +520,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag.valider(
             10.månedlig.sykepengegrunnlag,
             1.januar,
-            1,
             MaskinellJurist()
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
@@ -567,7 +556,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlag.valider(
             10.månedlig.sykepengegrunnlag(fødselsdato.alder),
             1.januar,
-            1,
             MaskinellJurist()
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())

@@ -7,6 +7,9 @@ import java.util.UUID
 import no.nav.helse.isWithinRangeOf
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.SkatteopplysningVisitor
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.YTELSE_FRA_OFFENTLIGE
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 
@@ -61,6 +64,11 @@ internal class Skatteopplysning(
 
         internal fun sisteTreMåneder(dato: LocalDate, inntektsopplysninger: List<Skatteopplysning>) =
             inntektsopplysninger.filter { it.måned.isWithinRangeOf(dato, 3) }
+
+        internal fun List<Skatteopplysning>.validerInntekterSisteTreMåneder(aktivitetslogg: IAktivitetslogg, dato: LocalDate) {
+            if (sisteTreMåneder(dato, this).filterNot { it.type == YTELSE_FRA_OFFENTLIGE }.isEmpty()) return
+            aktivitetslogg.varsel(Varselkode.RV_IV_1)
+        }
 
         // TODO: sette inn en IkkeRapportert inntekt når vi lagrer skatteopplysninger fra Vilkårsgrunnlag,
         // basert på hvilke arbeidsgivere det finnes arbeidsforhold fra uten skatteopplysninger

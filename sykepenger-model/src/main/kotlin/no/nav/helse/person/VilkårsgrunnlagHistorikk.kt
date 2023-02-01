@@ -400,6 +400,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag, opptjening) {
         override fun valider(aktivitetslogg: IAktivitetslogg, erForlengelse: Boolean) {
             sykepengegrunnlag.validerAvvik(aktivitetslogg, sammenligningsgrunnlag)
+            if (!erForlengelse) {
+                sammenligningsgrunnlag.validerInntekter(aktivitetslogg, sykepengegrunnlag)
+            }
         }
 
         override fun ghostPeriode(sisteId: UUID, organisasjonsnummer: String, periode: Periode): GhostPeriode? {

@@ -81,11 +81,9 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
         )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        Assertions.assertFalse(
-            person.personLogg.toString()
-                .contains(RV_VV_2.name)
-        )
+        Assertions.assertFalse(person.personLogg.toString().contains(RV_VV_2.name))
         assertVarsel(RV_IV_1, 1.vedtaksperiode.filter())
     }
 

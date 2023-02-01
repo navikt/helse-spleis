@@ -41,6 +41,7 @@ import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD
 import no.nav.helse.Alder
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerOpptjening
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerStartdato
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
@@ -156,6 +157,10 @@ internal class Sykepengegrunnlag(
         arbeidsgiverInntektsopplysninger.validerStartdato(aktivitetslogg)
     }
 
+    internal fun validerInntekter(aktivitetslogg: IAktivitetslogg, sammenligningsgrunnlag: Map<String, List<Skatteopplysning>>) {
+        return arbeidsgiverInntektsopplysninger.validerInntekter(aktivitetslogg, skjæringstidspunkt, sammenligningsgrunnlag)
+    }
+
     internal fun validerAvvik(aktivitetslogg: IAktivitetslogg, sammenligningsgrunnlag: Sammenligningsgrunnlag) {
         val avvik = avviksprosent(sammenligningsgrunnlag, SubsumsjonObserver.NullObserver)
         if (harAkseptabeltAvvik(avvik)) aktivitetslogg.info("Har %.0f %% eller mindre avvik i inntekt (%.2f %%)", Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent(), avvik.prosent())
@@ -223,7 +228,6 @@ internal class Sykepengegrunnlag(
         )
 
     internal fun justerGrunnbeløp() = kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold)
-
     internal fun accept(visitor: SykepengegrunnlagVisitor) {
         visitor.preVisitSykepengegrunnlag(
             this,
@@ -259,13 +263,14 @@ internal class Sykepengegrunnlag(
     }
     internal fun avviksprosent(sammenligningsgrunnlag: Sammenligningsgrunnlag, subsumsjonObserver: SubsumsjonObserver) =
         sammenligningsgrunnlag.avviksprosent(beregningsgrunnlag, subsumsjonObserver)
+
     internal fun inntektskilde() = when {
         arbeidsgiverInntektsopplysninger.size > 1 -> Inntektskilde.FLERE_ARBEIDSGIVERE
         else -> Inntektskilde.EN_ARBEIDSGIVER
     }
-
     internal fun harInntektFraAOrdningen() =
         arbeidsgiverInntektsopplysninger.any { it.harInntektFraAOrdningen() }
+
     internal fun erRelevant(organisasjonsnummer: String) = arbeidsgiverInntektsopplysninger.any {
         it.gjelder(organisasjonsnummer)
     }
@@ -280,14 +285,13 @@ internal class Sykepengegrunnlag(
             refusjonsbeløp = INGEN
         )
     }
-
     internal fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
         return arbeidsgiverInntektsopplysninger.medInntekt(organisasjonsnummer, `6G`, skjæringstidspunkt, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver) ?: utenInntekt(økonomi, arbeidsgiverperiode)
     }
+
     internal fun medUtbetalingsopplysninger(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver, manglerRefusjonsopplysning: ManglerRefusjonsopplysning): Økonomi {
         return arbeidsgiverInntektsopplysninger.medUtbetalingsopplysninger(organisasjonsnummer, `6G`, skjæringstidspunkt, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver, manglerRefusjonsopplysning)
     }
-
     internal fun build(builder: VedtakFattetBuilder) {
         builder
             .sykepengegrunnlag(this.sykepengegrunnlag)
@@ -303,6 +307,7 @@ internal class Sykepengegrunnlag(
                  && begrensning == other.begrensning
                  && deaktiverteArbeidsforhold == other.deaktiverteArbeidsforhold
     }
+
     override fun hashCode(): Int {
         var result = sykepengegrunnlag.hashCode()
         result = 31 * result + arbeidsgiverInntektsopplysninger.hashCode()

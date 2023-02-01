@@ -81,24 +81,6 @@ internal class ArbeidsforholdhistorikkTest {
     }
 
     @Test
-    fun `harRelevantArbeidsforhold fungerer for eldre innslag i arbeidsforholdhistorikken`() {
-        val arbeidsforhold1 = listOf(Arbeidsforhold(ansattFom = 31.januar(2010), ansattTom = null, deaktivert = false))
-        val arbeidsforhold2 = listOf(Arbeidsforhold(ansattFom = 31.januar(2010), ansattTom = 30.april(2022), deaktivert = false))
-
-        val historikk = Arbeidsforholdhistorikk()
-        historikk.lagre(arbeidsforhold1, 1.januar(2018))
-        historikk.lagre(arbeidsforhold2, 1.januar(2022))
-
-        assertTrue(historikk.harRelevantArbeidsforhold(1.januar(2018)))
-    }
-
-    @Test
-    fun `tom historikk har ikke relevant arbeidsforhold for et skjæringstidspunkt`() {
-        val historikk = Arbeidsforholdhistorikk()
-        assertFalse(historikk.harRelevantArbeidsforhold(1.januar(2018)))
-    }
-
-    @Test
     fun `duplikatsjekk er ikke avhengig av rekkefølgen på innslagene som legges inn`() {
         val arbeidsforhold1 = listOf(Arbeidsforhold(ansattFom = 1.januar(2017), ansattTom = 31.desember(2017), deaktivert = false))
         val arbeidsforhold2 = listOf(Arbeidsforhold(ansattFom = 1.januar(2022), ansattTom = 31.desember(2022), deaktivert = false))

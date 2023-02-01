@@ -1,8 +1,5 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.desember
@@ -13,25 +10,11 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.oktober
 import no.nav.helse.person.AbstractPersonTest
-import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.Inntektskilde
-import no.nav.helse.person.InntektsmeldingInfo
-import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
-import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Skatteopplysning
-import no.nav.helse.spleis.e2e.AktivitetsloggFilter
-import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -134,7 +117,6 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         vilkårsgrunnlag.valider(
             grunnlagForSykepengegrunnlag = INNTEKT.sykepengegrunnlag,
             skjæringstidspunkt = 31.januar,
-            antallArbeidsgivereFraAareg = 1,
             subsumsjonObserver = MaskinellJurist()
         )
 

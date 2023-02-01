@@ -1,8 +1,10 @@
 package no.nav.helse.person.inntekt
 
 import no.nav.helse.person.SammenligningsgrunnlagVisitor
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag.Companion.sammenligningsgrunnlag
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag.Companion.validerInntekter
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 
@@ -20,6 +22,10 @@ internal class Sammenligningsgrunnlag(
         arbeidsgiverInntektsopplysninger.sammenligningsgrunnlag(),
         arbeidsgiverInntektsopplysninger
     )
+
+    internal fun validerInntekter(aktivitetslogg: IAktivitetslogg, sykepengegrunnlag: Sykepengegrunnlag) {
+        arbeidsgiverInntektsopplysninger.validerInntekter(aktivitetslogg, sykepengegrunnlag)
+    }
 
     internal fun erRelevant(organisasjonsnummer: String) =
         arbeidsgiverInntektsopplysninger.any { it.gjelder(organisasjonsnummer) }

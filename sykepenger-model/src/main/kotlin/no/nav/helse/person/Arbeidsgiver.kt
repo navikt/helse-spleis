@@ -1103,8 +1103,6 @@ internal class Arbeidsgiver private constructor(
         sykdomshistorikk.fyllUtPeriodeMedForventedeDager(hendelse, periode.oppdaterFom(skjæringstidspunkt))
     }
 
-    internal fun harRelevantArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harRelevantArbeidsforhold(skjæringstidspunkt)
-
     internal fun harFerdigstiltPeriode() = vedtaksperioder.any(ER_ELLER_HAR_VÆRT_AVSLUTTET) || forkastede.harAvsluttedePerioder()
 
     internal fun harSykmeldingsperiodeFør(dato: LocalDate) = sykmeldingsperioder.harSykmeldingsperiodeFør(dato)

@@ -11,6 +11,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.vali
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.valider
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.validerStartdato
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.inntekt.Skatteopplysning.Companion.validerInntekterSisteTreMåneder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt
@@ -113,6 +114,15 @@ class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.validerStartdato(aktivitetslogg: IAktivitetslogg) {
             return map { it.inntektsopplysning }.validerStartdato(aktivitetslogg)
+        }
+
+        // sjekker at det ikke er arbeidsgivere i sammenligningsgrunnlaget siste tre måneder, som ikke inngår i sykepengegrunnlaget
+        internal fun List<ArbeidsgiverInntektsopplysning>.validerInntekter(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, sammenligningsgrunnlag: Map<String, List<Skatteopplysning>>) {
+            val arbeidsgivereSisteTreMåneder = map { it.orgnummer }
+            sammenligningsgrunnlag
+                .filterNot { (orgnummer, _) -> orgnummer in arbeidsgivereSisteTreMåneder }
+                .flatMap { it.value }
+                .validerInntekterSisteTreMåneder(aktivitetslogg, skjæringstidspunkt)
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.refusjonsopplysninger(organisasjonsnummer: String) =

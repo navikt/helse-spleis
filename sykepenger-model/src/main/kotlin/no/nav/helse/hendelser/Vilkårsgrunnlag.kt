@@ -11,7 +11,6 @@ import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
@@ -41,7 +40,6 @@ class Vilkårsgrunnlag(
     internal fun valider(
         grunnlagForSykepengegrunnlag: Sykepengegrunnlag,
         skjæringstidspunkt: LocalDate,
-        antallArbeidsgivereFraAareg: Int,
         subsumsjonObserver: SubsumsjonObserver
     ): IAktivitetslogg {
         val sammenligningsgrunnlag = sammenligningsgrunnlag(skjæringstidspunkt, subsumsjonObserver)
@@ -51,7 +49,6 @@ class Vilkårsgrunnlag(
         inntektsvurderingForSykepengegrunnlag.loggInteressantFrilanserInformasjon(skjæringstidspunkt)
 
         val opptjening = arbeidsforhold.beregnOpptjening(skjæringstidspunkt, subsumsjonObserver)
-        val inntektsvurderingOk = inntektsvurdering.valider(this, antallArbeidsgivereFraAareg)
         val opptjeningvurderingOk = opptjening.valider(this)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this)
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
@@ -64,7 +61,7 @@ class Vilkårsgrunnlag(
             ),
             opptjening = opptjening,
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus,
-            vurdertOk = sykepengegrunnlagOk && inntektsvurderingOk && opptjeningvurderingOk && medlemskapsvurderingOk,
+            vurdertOk = sykepengegrunnlagOk && opptjeningvurderingOk && medlemskapsvurderingOk,
             meldingsreferanseId = meldingsreferanseId(),
             vilkårsgrunnlagId = UUID.randomUUID()
         )

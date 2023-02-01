@@ -24,6 +24,8 @@ import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
+import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
+import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.YTELSE_FRA_OFFENTLIGE
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -772,6 +774,106 @@ internal class SykepengegrunnlagTest {
         Aktivitetslogg().also { aktivitetslogg ->
             sykepengegrunnlag.validerStartdato(aktivitetslogg)
             aktivitetslogg.assertIngenVarsel(RV_VV_2)
+        }
+    }
+
+    @Test
+    fun `ikke varsel ved ingen ukjente arbeidsgivere i sammenligningsgrunnlaget siste 3 mnd`() {
+        val a1 = "a1"
+        val a2 = "a2"
+        val skjæringstidspunkt = 1.mars
+        val sykepengegrunnlag = Sykepengegrunnlag(
+            alder = UNG_PERSON_FØDSELSDATO.alder,
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidsgiverInntektsopplysninger = listOf(
+                ArbeidsgiverInntektsopplysning(
+                    orgnummer = a1,
+                    inntektsopplysning = Inntektsmelding(
+                        id = UUID.randomUUID(),
+                        dato = skjæringstidspunkt,
+                        hendelseId = UUID.randomUUID(),
+                        beløp = 25000.månedlig,
+                        tidsstempel = LocalDateTime.now()
+                    ),
+                    refusjonsopplysninger = Refusjonsopplysninger()
+                )
+            ),
+            deaktiverteArbeidsforhold = emptyList(),
+            vurdertInfotrygd = false
+        )
+
+        Aktivitetslogg().also { aktivitetslogg ->
+            sykepengegrunnlag.validerInntekter(aktivitetslogg, mapOf(
+                a2 to listOf(
+                    Skatteopplysning(
+                        hendelseId = UUID.randomUUID(),
+                        beløp = 500.månedlig,
+                        måned = skjæringstidspunkt.minusMonths(1).yearMonth,
+                        type = YTELSE_FRA_OFFENTLIGE,
+                        fordel = "",
+                        beskrivelse = ""
+                    )
+                )
+            ))
+            aktivitetslogg.assertIngenVarsel(RV_IV_1)
+        }
+
+        Aktivitetslogg().also { aktivitetslogg ->
+            sykepengegrunnlag.validerInntekter(aktivitetslogg, mapOf(
+                a2 to listOf(
+                    Skatteopplysning(
+                        hendelseId = UUID.randomUUID(),
+                        beløp = 500.månedlig,
+                        måned = skjæringstidspunkt.minusMonths(4).yearMonth,
+                        type = LØNNSINNTEKT,
+                        fordel = "",
+                        beskrivelse = ""
+                    )
+                )
+            ))
+            aktivitetslogg.assertIngenVarsel(RV_IV_1)
+        }
+    }
+
+    @Test
+    fun `varsel ved ukjente arbeidsgivere i sammenligningsgrunnlaget siste 3 mnd`() {
+        val a1 = "a1"
+        val a2 = "a2"
+        val skjæringstidspunkt = 1.mars
+        val sykepengegrunnlag = Sykepengegrunnlag(
+            alder = UNG_PERSON_FØDSELSDATO.alder,
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidsgiverInntektsopplysninger = listOf(
+                ArbeidsgiverInntektsopplysning(
+                    orgnummer = a1,
+                    inntektsopplysning = Inntektsmelding(
+                        id = UUID.randomUUID(),
+                        dato = skjæringstidspunkt,
+                        hendelseId = UUID.randomUUID(),
+                        beløp = 25000.månedlig,
+                        tidsstempel = LocalDateTime.now()
+                    ),
+                    refusjonsopplysninger = Refusjonsopplysninger()
+                )
+            ),
+            deaktiverteArbeidsforhold = emptyList(),
+            vurdertInfotrygd = false
+        )
+
+        Aktivitetslogg().also { aktivitetslogg ->
+            sykepengegrunnlag.validerInntekter(aktivitetslogg, mapOf(
+                a2 to listOf(
+                    Skatteopplysning(
+                        hendelseId = UUID.randomUUID(),
+                        beløp = 500.månedlig,
+                        måned = skjæringstidspunkt.minusMonths(1).yearMonth,
+                        type = LØNNSINNTEKT,
+                        fordel = "",
+                        beskrivelse = ""
+                    )
+                )
+            ))
+            aktivitetslogg.assertVarsel(RV_IV_1)
         }
     }
 

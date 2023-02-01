@@ -153,7 +153,11 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
             arbeidsforhold = arbeidsforhold
         )
-        vilkårsgrunnlag.valider(Sykepengegrunnlag(1.januar.alder, emptyList(), 1.januar, NullObserver, false), 1.januar, 1, NullObserver)
+        vilkårsgrunnlag.valider(
+            Sykepengegrunnlag(1.januar.alder, emptyList(), 1.januar, NullObserver, false),
+            1.januar,
+            NullObserver
+        )
         assertEquals(300000.årlig, vilkårsgrunnlag.grunnlagsdata().inspektør.sammenligningsgrunnlag.inspektør.sammenligningsgrunnlag)
     }
 
