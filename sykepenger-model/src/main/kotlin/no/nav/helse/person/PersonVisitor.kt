@@ -49,6 +49,7 @@ import no.nav.helse.utbetalingslinjer.OppdragVisitor
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt
@@ -421,56 +422,56 @@ internal interface VedtaksperiodeVisitor : VedtaksperiodeUtbetalingVisitor, Sykd
 internal interface UtbetalingsdagVisitor {
     fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
     fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
+        dag: Utbetalingsdag.ArbeidsgiverperiodeDag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
     }
 
     fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
+        dag: Utbetalingsdag.NavDag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
     }
 
     fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
+        dag: Utbetalingsdag.NavHelgDag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
     }
 
     fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
+        dag: Utbetalingsdag.Arbeidsdag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
     }
 
     fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.Fridag,
+        dag: Utbetalingsdag.Fridag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
     }
 
     fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
+        dag: Utbetalingsdag.AvvistDag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
     }
 
     fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag,
+        dag: Utbetalingsdag.ForeldetDag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
     }
 
     fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag,
+        dag: Utbetalingsdag.UkjentDag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {

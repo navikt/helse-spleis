@@ -50,7 +50,7 @@ import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig

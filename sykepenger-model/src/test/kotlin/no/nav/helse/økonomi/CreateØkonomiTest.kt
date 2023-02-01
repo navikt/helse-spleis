@@ -14,7 +14,7 @@ import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -179,7 +179,7 @@ internal class CreateØkonomiTest {
         lateinit var fangetØkonomi: Økonomi
         dagData.parseDag(1.januar).accept(object : UtbetalingsdagVisitor {
             override fun visit(
-                dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
+                dag: Utbetalingsdag.NavDag,
                 dato: LocalDate,
                 økonomi: Økonomi
             ) {

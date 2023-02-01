@@ -28,7 +28,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Økonomi
 
 // Besøker hele sykdomshistorikk-treet
@@ -172,7 +172,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
     internal fun build() = utbetalingstidslinje.toList()
 
     override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
+        dag: Utbetalingsdag.Arbeidsdag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
@@ -188,7 +188,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
     }
 
     override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
+        dag: Utbetalingsdag.ArbeidsgiverperiodeDag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
@@ -204,7 +204,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
     }
 
     override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
+        dag: Utbetalingsdag.NavDag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
@@ -228,7 +228,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
     }
 
     override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
+        dag: Utbetalingsdag.NavHelgDag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
@@ -245,7 +245,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
     }
 
     override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.Fridag,
+        dag: Utbetalingsdag.Fridag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
@@ -259,7 +259,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
     }
 
     override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag,
+        dag: Utbetalingsdag.UkjentDag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
@@ -273,7 +273,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
     }
 
     override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
+        dag: Utbetalingsdag.AvvistDag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
@@ -292,7 +292,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
     }
 
     override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag,
+        dag: Utbetalingsdag.ForeldetDag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {

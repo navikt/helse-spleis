@@ -23,6 +23,7 @@ import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -158,7 +159,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
         )
     }
 
-    private fun avvisteDager(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje.Utbetalingsdag.AvvistDag> {
+    private fun avvisteDager(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingsdag.AvvistDag> {
         return tidslinjer.flatMap { it.inspektør.avvistedager }
     }
 

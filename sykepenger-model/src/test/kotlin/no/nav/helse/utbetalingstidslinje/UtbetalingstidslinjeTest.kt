@@ -6,7 +6,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

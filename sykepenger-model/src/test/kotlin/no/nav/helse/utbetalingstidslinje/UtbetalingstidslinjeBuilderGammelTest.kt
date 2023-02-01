@@ -25,11 +25,10 @@ import no.nav.helse.testhelpers.UK
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fridag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Fridag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig

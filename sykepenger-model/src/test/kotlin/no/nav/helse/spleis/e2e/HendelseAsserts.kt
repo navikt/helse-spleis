@@ -18,7 +18,7 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -60,7 +60,7 @@ internal fun <T : ArbeidstakerHendelse> AbstractEndToEndTest.assertIkkeEtterspur
     }
 }
 
-internal inline fun <reified R : Utbetalingstidslinje.Utbetalingsdag> assertUtbetalingsdag(dag: Utbetalingstidslinje.Utbetalingsdag, expectedDagtype: KClass<R>, expectedTotalgrad: Double = 100.0) {
+internal inline fun <reified R : Utbetalingsdag> assertUtbetalingsdag(dag: Utbetalingsdag, expectedDagtype: KClass<R>, expectedTotalgrad: Double = 100.0) {
     dag.let {
         it.økonomi.medData { _, _, _, _, totalGrad, _, _, _, _ ->
             assertEquals(expectedTotalgrad, totalGrad)

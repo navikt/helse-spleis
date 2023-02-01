@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
-import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -22,9 +21,7 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Com
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.AP
@@ -36,8 +33,7 @@ import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosent.Companion.prosent
@@ -514,7 +510,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag2.grunnlagsdata())
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
         vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager))
-        assertEquals(8, utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.NavDag>().size)
+        assertEquals(8, utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingsdag.NavDag>().size)
     }
 
     @Test
@@ -543,7 +539,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         assertFalse(grunnlagsdataInspektør.vurdertOk)
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
         vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager))
-        utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.AvvistDag>().let { avvisteDager ->
+        utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingsdag.AvvistDag>().let { avvisteDager ->
             assertEquals(8, avvisteDager.size)
             avvisteDager.forEach {
                 assertEquals(1, it.begrunnelser.size)
@@ -581,7 +577,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
         vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager))
 
-        utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.AvvistDag>().let { avvisteDager ->
+        utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingsdag.AvvistDag>().let { avvisteDager ->
             assertEquals(8, avvisteDager.size)
             avvisteDager.forEach {
                 assertEquals(1, it.begrunnelser.size)

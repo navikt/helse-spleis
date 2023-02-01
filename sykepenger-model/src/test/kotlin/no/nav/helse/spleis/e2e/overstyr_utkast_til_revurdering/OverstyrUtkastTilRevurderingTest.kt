@@ -42,9 +42,9 @@ import no.nav.helse.spleis.e2e.manuellSykedag
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fridag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Fridag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent

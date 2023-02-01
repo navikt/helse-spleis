@@ -80,7 +80,7 @@ internal class TidslinjefusjonTest {
     @Test
     fun `feriedag vs arbeidsdag`() {
         val result = tidslinjeOf(1.FRI) + tidslinjeOf(1.ARB)
-        assertEquals(Utbetalingstidslinje.Utbetalingsdag.Fridag::class, result.single()::class)
+        assertEquals(Utbetalingsdag.Fridag::class, result.single()::class)
     }
 
     @Test

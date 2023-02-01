@@ -35,6 +35,7 @@ import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -160,7 +161,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         assertFunksjonellFeil("Forlenger en Infotrygdperiode på tvers av arbeidsgivere")
     }
 
-    private fun assertAlleDager(utbetalingstidslinje: Utbetalingstidslinje, periode: Periode, vararg dager: KClass<out Utbetalingstidslinje.Utbetalingsdag>) {
+    private fun assertAlleDager(utbetalingstidslinje: Utbetalingstidslinje, periode: Periode, vararg dager: KClass<out Utbetalingsdag>) {
         utbetalingstidslinje.subset(periode).also { tidslinje ->
             assertTrue(tidslinje.all { it::class in dager }) {
                 val ulikeDager = tidslinje.filter { it::class !in dager }

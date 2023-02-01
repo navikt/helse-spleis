@@ -30,7 +30,7 @@ import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -411,7 +411,7 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
 
     private fun TestPerson.TestArbeidsgiver.assertDag(dato: LocalDate, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt) {
         inspektør(orgnummer).sisteUtbetalingUtbetalingstidslinje()[dato].let {
-            if (it is Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) return
+            if (it is Utbetalingsdag.NavHelgDag) return
             assertEquals(arbeidsgiverbeløp, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(personbeløp, it.økonomi.inspektør.personbeløp)
         }

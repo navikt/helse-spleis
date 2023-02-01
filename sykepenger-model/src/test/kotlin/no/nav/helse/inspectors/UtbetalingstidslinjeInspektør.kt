@@ -3,9 +3,10 @@ package no.nav.helse.inspectors
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import kotlin.reflect.KClass
 
 internal val Utbetalingstidslinje.inspektør get() = UtbetalingstidslinjeInspektør(this)
@@ -14,8 +15,8 @@ internal val Utbetalingstidslinje.inspektør get() = UtbetalingstidslinjeInspekt
 internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalingstidslinje): UtbetalingsdagVisitor {
     var førstedato = LocalDate.MIN
     var sistedato = LocalDate.MAX
-    lateinit var førstedag: Utbetalingstidslinje.Utbetalingsdag
-    lateinit var sistedag: Utbetalingstidslinje.Utbetalingsdag
+    lateinit var førstedag: Utbetalingsdag
+    lateinit var sistedag: Utbetalingsdag
 
     internal var arbeidsdagTeller = 0
     internal var arbeidsgiverperiodeDagTeller = 0
@@ -38,7 +39,7 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
     private val begrunnelser = mutableMapOf<LocalDate, List<Begrunnelse>>()
 
     private val økonomi = mutableMapOf<LocalDate, Økonomi>()
-    val unikedager = mutableSetOf<KClass<out Utbetalingstidslinje.Utbetalingsdag>>()
+    val unikedager = mutableSetOf<KClass<out Utbetalingsdag>>()
 
     internal val size get() =
         arbeidsdagTeller +
@@ -73,7 +74,7 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
 
     internal fun erNavdag(dato: LocalDate) = utbetalingstidslinje[dato] is NavDag
 
-    private fun collect(dag: Utbetalingstidslinje.Utbetalingsdag, dato: LocalDate, økonomi: Økonomi) {
+    private fun collect(dag: Utbetalingsdag, dato: LocalDate, økonomi: Økonomi) {
         this.økonomi[dato] = økonomi
         unikedager.add(dag::class)
         første(dag, dato)
@@ -81,7 +82,7 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
         sistedato = dato
     }
 
-    private fun første(dag: Utbetalingstidslinje.Utbetalingsdag, dato: LocalDate) {
+    private fun første(dag: Utbetalingsdag, dato: LocalDate) {
         if (this::førstedag.isInitialized) return
         førstedag = dag
         førstedato = dato

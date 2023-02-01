@@ -92,6 +92,7 @@ import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.InfotrygdArbeidsgiver
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.InfotrygdPerson
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.SpleisArbeidsgiver
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -1406,32 +1407,32 @@ internal data class PersonData(
             internal fun parseDag(dato: LocalDate) =
                 when (type) {
                     TypeData.ArbeidsgiverperiodeDag -> {
-                        Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag(dato = dato, økonomi = økonomi)
+                        Utbetalingsdag.ArbeidsgiverperiodeDag(dato = dato, økonomi = økonomi)
                     }
                     TypeData.NavDag -> {
-                        Utbetalingstidslinje.Utbetalingsdag.NavDag(dato, økonomi)
+                        Utbetalingsdag.NavDag(dato, økonomi)
                     }
                     TypeData.NavHelgDag -> {
-                        Utbetalingstidslinje.Utbetalingsdag.NavHelgDag(dato = dato, økonomi = økonomi)
+                        Utbetalingsdag.NavHelgDag(dato = dato, økonomi = økonomi)
                     }
                     TypeData.Arbeidsdag -> {
-                        Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag(dato = dato, økonomi = økonomi)
+                        Utbetalingsdag.Arbeidsdag(dato = dato, økonomi = økonomi)
                     }
                     TypeData.Fridag -> {
-                        Utbetalingstidslinje.Utbetalingsdag.Fridag(dato = dato, økonomi = økonomi)
+                        Utbetalingsdag.Fridag(dato = dato, økonomi = økonomi)
                     }
                     TypeData.AvvistDag -> {
-                        Utbetalingstidslinje.Utbetalingsdag.AvvistDag(
+                        Utbetalingsdag.AvvistDag(
                             dato = dato,
                             økonomi = økonomi,
                             begrunnelser = begrunnelser?.map { it.tilBegrunnelse() } ?: error("Prøver å deserialisere avvist dag uten begrunnelse")
                         )
                     }
                     TypeData.UkjentDag -> {
-                        Utbetalingstidslinje.Utbetalingsdag.UkjentDag(dato = dato, økonomi = økonomi)
+                        Utbetalingsdag.UkjentDag(dato = dato, økonomi = økonomi)
                     }
                     TypeData.ForeldetDag -> {
-                        Utbetalingstidslinje.Utbetalingsdag.ForeldetDag(dato = dato, økonomi = økonomi)
+                        Utbetalingsdag.ForeldetDag(dato = dato, økonomi = økonomi)
                     }
                 }
         }

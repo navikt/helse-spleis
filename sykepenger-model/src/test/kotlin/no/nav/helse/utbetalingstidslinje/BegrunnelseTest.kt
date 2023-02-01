@@ -1,8 +1,8 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.januar
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

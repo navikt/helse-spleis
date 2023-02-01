@@ -122,7 +122,7 @@ internal abstract class HistorieTest {
         assertEquals(datoer.toList(), infotrygdhistorikk.skjæringstidspunkter(arbeidsgiverSykdomstidslinje.values.toList()))
     }
 
-    protected fun assertAlleDager(utbetalingstidslinje: Utbetalingstidslinje, periode: Periode, vararg dager: KClass<out Utbetalingstidslinje.Utbetalingsdag>) {
+    protected fun assertAlleDager(utbetalingstidslinje: Utbetalingstidslinje, periode: Periode, vararg dager: KClass<out Utbetalingsdag>) {
         utbetalingstidslinje.subset(periode).also { tidslinje ->
             assertTrue(tidslinje.all { it::class in dager }) {
                 val ulikeDager = tidslinje.filter { it::class !in dager }

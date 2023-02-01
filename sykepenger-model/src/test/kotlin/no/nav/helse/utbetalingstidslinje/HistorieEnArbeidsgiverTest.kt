@@ -13,12 +13,12 @@ import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fridag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Fridag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

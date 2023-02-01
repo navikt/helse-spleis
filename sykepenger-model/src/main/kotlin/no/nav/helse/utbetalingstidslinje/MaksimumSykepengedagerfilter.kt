@@ -10,8 +10,8 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_9
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.økonomi.Økonomi
 
 internal class MaksimumSykepengedagerfilter(
@@ -145,7 +145,7 @@ internal class MaksimumSykepengedagerfilter(
     }
 
     override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
+        dag: Utbetalingsdag.NavHelgDag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
@@ -154,7 +154,7 @@ internal class MaksimumSykepengedagerfilter(
     }
 
     override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
+        dag: Utbetalingsdag.Arbeidsdag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
@@ -162,7 +162,7 @@ internal class MaksimumSykepengedagerfilter(
     }
 
     override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
+        dag: Utbetalingsdag.ArbeidsgiverperiodeDag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
@@ -170,7 +170,7 @@ internal class MaksimumSykepengedagerfilter(
     }
 
     override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.Fridag,
+        dag: Utbetalingsdag.Fridag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
@@ -178,7 +178,7 @@ internal class MaksimumSykepengedagerfilter(
     }
 
     override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
+        dag: Utbetalingsdag.AvvistDag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {

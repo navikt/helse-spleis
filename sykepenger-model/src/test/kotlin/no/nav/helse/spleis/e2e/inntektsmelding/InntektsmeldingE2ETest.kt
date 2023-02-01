@@ -85,7 +85,7 @@ import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -386,7 +386,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         val utbetaling = inspektør.utbetaling(0).inspektør
-        assertTrue((1.januar til 16.januar).all { utbetaling.utbetalingstidslinje[it] is Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag })
+        assertTrue((1.januar til 16.januar).all { utbetaling.utbetalingstidslinje[it] is Utbetalingsdag.ArbeidsgiverperiodeDag })
     }
 
     @Test

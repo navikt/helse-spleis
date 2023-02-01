@@ -17,7 +17,7 @@ import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions

@@ -17,7 +17,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbe
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilder
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Inntekter
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals

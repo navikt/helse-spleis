@@ -4,7 +4,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.*
 import org.junit.jupiter.api.Test
 
 internal class HistorieFlereArbeidsgivereTest : HistorieTest() {

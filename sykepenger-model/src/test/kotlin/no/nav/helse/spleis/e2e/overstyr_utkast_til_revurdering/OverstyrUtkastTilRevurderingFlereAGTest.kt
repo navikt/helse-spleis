@@ -22,8 +22,8 @@ import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.manuellFeriedag
 import no.nav.helse.spleis.e2e.nyeVedtak
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fridag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Fridag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import org.junit.jupiter.api.Test
 
 internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() {

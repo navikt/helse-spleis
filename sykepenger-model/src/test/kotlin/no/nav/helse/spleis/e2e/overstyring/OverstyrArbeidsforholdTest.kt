@@ -38,8 +38,7 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -607,6 +606,6 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             assertEquals(31000.månedlig, it.rapportertInntekt)
         }
         assertVarsel(RV_OV_1, 1.vedtaksperiode.filter(a1))
-        assertInstanceOf(Utbetalingstidslinje.Utbetalingsdag.AvvistDag::class.java, inspektør.sisteUtbetalingUtbetalingstidslinje()[31.januar])
+        assertInstanceOf(Utbetalingsdag.AvvistDag::class.java, inspektør.sisteUtbetalingUtbetalingstidslinje()[31.januar])
     }
 }

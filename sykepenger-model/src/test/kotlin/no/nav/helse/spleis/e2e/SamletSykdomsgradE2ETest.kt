@@ -19,7 +19,7 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_4
 import no.nav.helse.utbetalingslinjer.Utbetaling.GodkjentUtenUtbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Sendt
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -37,9 +37,9 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         assertEquals(GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(0))
         val utbetalingstidslinje = inspektør.utbetalingUtbetalingstidslinje(0)
-        assertTrue(utbetalingstidslinje[17.januar] is Utbetalingstidslinje.Utbetalingsdag.AvvistDag)
-        assertTrue(utbetalingstidslinje[18.januar] is Utbetalingstidslinje.Utbetalingsdag.AvvistDag)
-        assertTrue(utbetalingstidslinje[19.januar] is Utbetalingstidslinje.Utbetalingsdag.AvvistDag)
+        assertTrue(utbetalingstidslinje[17.januar] is Utbetalingsdag.AvvistDag)
+        assertTrue(utbetalingstidslinje[18.januar] is Utbetalingsdag.AvvistDag)
+        assertTrue(utbetalingstidslinje[19.januar] is Utbetalingsdag.AvvistDag)
         assertEquals(3, utbetalingstidslinje.inspektør.avvistDagTeller)
         assertTilstander(
             1.vedtaksperiode,
@@ -67,9 +67,9 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         val utbetalingstidslinje = inspektør.utbetalingUtbetalingstidslinje(1)
-        assertTrue(utbetalingstidslinje[17.januar] is Utbetalingstidslinje.Utbetalingsdag.AvvistDag)
-        assertTrue(utbetalingstidslinje[18.januar] is Utbetalingstidslinje.Utbetalingsdag.AvvistDag)
-        assertTrue(utbetalingstidslinje[19.januar] is Utbetalingstidslinje.Utbetalingsdag.AvvistDag)
+        assertTrue(utbetalingstidslinje[17.januar] is Utbetalingsdag.AvvistDag)
+        assertTrue(utbetalingstidslinje[18.januar] is Utbetalingsdag.AvvistDag)
+        assertTrue(utbetalingstidslinje[19.januar] is Utbetalingsdag.AvvistDag)
         assertEquals(3, utbetalingstidslinje.inspektør.avvistDagTeller)
         assertEquals(Sendt, inspektør.utbetalingtilstand(1))
         assertTilstander(
