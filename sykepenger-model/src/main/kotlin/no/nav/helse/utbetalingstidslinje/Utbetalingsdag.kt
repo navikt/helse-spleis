@@ -31,7 +31,7 @@ internal sealed class Utbetalingsdag(
 
     internal class ArbeidsgiverperiodeDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
         override val prioritet = 30
-        override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
+        override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
     }
 
     internal class NavDag(
@@ -39,13 +39,13 @@ internal sealed class Utbetalingsdag(
         økonomi: Økonomi
     ) : Utbetalingsdag(dato, økonomi) {
         override val prioritet = 50
-        override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
+        override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
     }
 
     internal class NavHelgDag(dato: LocalDate, økonomi: Økonomi) :
         Utbetalingsdag(dato, økonomi) {
         override val prioritet = 40
-        override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
+        override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
     }
 
     internal class Fridag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
@@ -55,7 +55,7 @@ internal sealed class Utbetalingsdag(
 
     internal class Arbeidsdag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
         override val prioritet = 10
-        override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
+        override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
     }
 
     internal class AvvistDag(
@@ -71,7 +71,7 @@ internal sealed class Utbetalingsdag(
         override fun avvisDag(begrunnelser: List<Begrunnelse>) =
             AvvistDag(dato, økonomi, this.begrunnelser + begrunnelser)
 
-        override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
+        override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
         internal fun navDag(): Utbetalingsdag =
             if (Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode in begrunnelser) this else NavDag(dato, økonomi.låsOpp())
 
