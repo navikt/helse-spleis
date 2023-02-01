@@ -501,7 +501,8 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun sykmeldingsperioder() = sykmeldingsperioder.toList()
 
-    internal fun arbeidsgiverperioder(vedtaksperiodeIdInnhenter: IdInnhenter) = periode(vedtaksperiodeIdInnhenter).let { arbeidsgiver.arbeidsgiverperiode(it, NullObserver)?.perioder ?: emptyList() }
+    internal fun arbeidsgiverperioden(vedtaksperiodeIdInnhenter: IdInnhenter) = periode(vedtaksperiodeIdInnhenter).let { arbeidsgiver.arbeidsgiverperiode(it, NullObserver) }
+    internal fun arbeidsgiverperioder(vedtaksperiodeIdInnhenter: IdInnhenter) = arbeidsgiverperioden(vedtaksperiodeIdInnhenter)?.perioder ?: emptyList()
     internal fun arbeidsgiverperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = arbeidsgiverperioder(vedtaksperiodeIdInnhenter).singleOrNull()
 
     internal fun refusjonsopplysningerFraVilkårsgrunnlag(skjæringstidspunkt: LocalDate = skjæringstidspunkter.maxBy { it.key }.value()) =
