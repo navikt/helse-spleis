@@ -546,6 +546,8 @@ internal class Arbeidsgiver private constructor(
             dager.håndterGjenstående(this@Arbeidsgiver)
         }
 
+        dager.valider(this@Arbeidsgiver)
+
         vedtaksperiodeSomSkalHåndtereInntektOgRefusjon?.håndter(inntektsmelding.inntektOgRefusjon(dager))?.also {
             // En av vedtaksperiodene har håndtert inntekt og refusjon
             // vi må informere de andre vedtaksperiodene på arbeidsgiveren som berøres av dette
