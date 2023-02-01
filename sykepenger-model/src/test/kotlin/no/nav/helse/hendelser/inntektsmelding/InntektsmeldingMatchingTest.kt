@@ -70,7 +70,7 @@ internal class InntektsmeldingMatchingTest {
             inntektsmelding(listOf(vedtaksperiode1, vedtaksperiode2), 22.januar, 1.januar til 16.januar)
 
         assertEquals(2.januar til 16.januar, dager.håndter(vedtaksperiode1))
-        assertEquals(1.januar.somPeriode(), dager.håndterDagerRettFør(vedtaksperiode1))
+        assertEquals(1.januar.somPeriode(), dager.håndterPeriodeRettFør(vedtaksperiode1))
         assertNull(dager.håndter(vedtaksperiode2))
         assertNull(dager.håndterGjenstående())
 
@@ -90,7 +90,7 @@ internal class InntektsmeldingMatchingTest {
             inntektsmelding(listOf(vedtaksperiode1, vedtaksperiode2), 5.januar, 5.januar til 20.januar)
 
         assertEquals(5.januar til 20.januar, dager.håndter(vedtaksperiode1))
-        assertNull(dager.håndterDagerRettFør(vedtaksperiode1))
+        assertNull(dager.håndterPeriodeRettFør(vedtaksperiode1))
         assertNull(dager.håndter(vedtaksperiode2))
         assertNull(dager.håndterGjenstående())
 
@@ -110,7 +110,7 @@ internal class InntektsmeldingMatchingTest {
             inntektsmelding(listOf(vedtaksperiode1, vedtaksperiode2), 22.januar, 5.januar til 20.januar)
 
         assertEquals(5.januar til 20.januar, dager.håndter(vedtaksperiode1))
-        assertNull(dager.håndterDagerRettFør(vedtaksperiode1))
+        assertNull(dager.håndterPeriodeRettFør(vedtaksperiode1))
         assertNull(dager.håndter(vedtaksperiode2))
         // TODO: Hva første fraværsdag er satt til har innvirkning på hvor lang sykdomstisdlinjen til IM er
         assertEquals(21.januar.somPeriode(), dager.håndterGjenstående())
@@ -130,7 +130,7 @@ internal class InntektsmeldingMatchingTest {
             inntektsmelding(listOf(vedtaksperiode1), 1.mars, 1.mars til 16.mars)
 
         assertNull(dager.håndter(vedtaksperiode1))
-        assertNull(dager.håndterDagerRettFør(vedtaksperiode1))
+        assertNull(dager.håndterPeriodeRettFør(vedtaksperiode1))
         assertEquals(1.mars til 16.mars, dager.håndterGjenstående()) // Om den kalles tas alt gjenstående med uavhengig
 
         inntekt.evaluerer(vedtaksperiode1 som forventerInntekt) {
@@ -152,7 +152,7 @@ internal class InntektsmeldingMatchingTest {
             )
 
         assertEquals(1.januar til 20.januar, dager.håndter(vedtaksperiode1))
-        assertNull(dager.håndterDagerRettFør(vedtaksperiode1))
+        assertNull(dager.håndterPeriodeRettFør(vedtaksperiode1))
         assertEquals(21.januar til 22.januar, dager.håndterGjenstående())
 
         inntekt.evaluerer(vedtaksperiode1 som ikkeForventerInntekt) {
@@ -176,11 +176,11 @@ internal class InntektsmeldingMatchingTest {
             )
 
         assertEquals(3.januar til 4.januar, dager.håndter(vedtaksperiode1))
-        assertNull(dager.håndterDagerRettFør(vedtaksperiode1))
+        assertNull(dager.håndterPeriodeRettFør(vedtaksperiode1))
         assertEquals(8.januar til 10.januar, dager.håndter(vedtaksperiode2))
-        assertEquals(5.januar til 7.januar, dager.håndterDagerRettFør(vedtaksperiode2))
+        assertEquals(5.januar til 7.januar, dager.håndterPeriodeRettFør(vedtaksperiode2))
         assertEquals(11.januar til 21.januar, dager.håndter(vedtaksperiode3))
-        assertNull(dager.håndterDagerRettFør(vedtaksperiode2))
+        assertNull(dager.håndterPeriodeRettFør(vedtaksperiode2))
         assertNull(dager.håndterGjenstående())
 
         inntekt.evaluerer(
@@ -220,7 +220,7 @@ internal class InntektsmeldingMatchingTest {
             inntektsmelding(listOf(vedtaksperiode1, vedtaksperiode2), 20.januar, 1.januar til 16.januar)
 
         assertEquals(1.januar til 16.januar, dager.håndter(vedtaksperiode1))
-        assertNull(dager.håndterDagerRettFør(vedtaksperiode1))
+        assertNull(dager.håndterPeriodeRettFør(vedtaksperiode1))
         assertNull(dager.håndter(vedtaksperiode2))
         assertNull(dager.håndterGjenstående())
 
@@ -256,7 +256,7 @@ internal class InntektsmeldingMatchingTest {
 
         assertTrue(dager.skalHåndteresAv(vedtaksperiode1))
         assertFalse(dager.harBlittHåndtertAv(vedtaksperiode1))
-        assertEquals(1.januar.somPeriode(), dager.håndterDagerRettFør(vedtaksperiode1))
+        assertEquals(1.januar.somPeriode(), dager.håndterPeriodeRettFør(vedtaksperiode1))
         assertEquals(2.januar til 15.januar, dager.håndter(vedtaksperiode1))
         assertFalse(dager.skalHåndteresAv(vedtaksperiode1))
         assertTrue(dager.harBlittHåndtertAv(vedtaksperiode1))
@@ -422,7 +422,7 @@ internal class InntektsmeldingMatchingTest {
         val vedtaksperiode1 = 17.januar til 31.januar
         val (dager, _) = inntektsmelding(listOf(vedtaksperiode1), 1.januar, 1.januar til 16.januar)
         assertNull(dager.håndter(vedtaksperiode1))
-        assertEquals(1.januar til 16.januar, dager.håndterDagerRettFør(vedtaksperiode1))
+        assertEquals(1.januar til 16.januar, dager.håndterPeriodeRettFør(vedtaksperiode1))
     }
 
     @Test
@@ -430,7 +430,7 @@ internal class InntektsmeldingMatchingTest {
         val vedtaksperiode1 = 22.januar til 31.januar
         val (dager, _) = inntektsmelding(listOf(vedtaksperiode1), 4.januar, 4.januar til 19.januar)
         assertNull(dager.håndter(vedtaksperiode1))
-        assertEquals(4.januar til 19.januar, dager.håndterDagerRettFør(vedtaksperiode1))
+        assertEquals(4.januar til 19.januar, dager.håndterPeriodeRettFør(vedtaksperiode1))
     }
 
     @Test
@@ -506,9 +506,9 @@ internal class InntektsmeldingMatchingTest {
         return håndtertPeriode
     }
 
-    private fun DagerFraInntektsmelding.håndterDagerRettFør(periode: Periode): Periode? {
+    private fun DagerFraInntektsmelding.håndterPeriodeRettFør(periode: Periode): Periode? {
         var håndtertPeriode: Periode? = null
-        håndterDagerRettFør(periode) {
+        håndterPeriodeRettFør(periode) {
             håndtertPeriode = it.sykdomstidslinje().periode()
         }
         return håndtertPeriode
