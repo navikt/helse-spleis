@@ -3,7 +3,6 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.InntektsopplysningVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
@@ -11,8 +10,8 @@ import no.nav.helse.økonomi.Inntekt
 internal class IkkeRapportert(
     private val id: UUID,
     dato: LocalDate,
-    private val tidsstempel: LocalDateTime = LocalDateTime.now()
-) : Inntektsopplysning(dato, 10) {
+    tidsstempel: LocalDateTime
+) : AvklarbarSykepengegrunnlag(dato, 10, tidsstempel) {
 
     override fun accept(visitor: InntektsopplysningVisitor) {
         visitor.visitIkkeRapportert(id, dato, tidsstempel)

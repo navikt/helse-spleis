@@ -1,5 +1,6 @@
 package no.nav.helse.person.inntekt
 
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -17,13 +18,13 @@ internal class InntektsopplysningTest {
 
     @Test
     fun overstyres() {
-        val im1 = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), INNTEKT)
-        val im2 = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), INNTEKT)
-        val saksbehandler1 = Saksbehandler(UUID.randomUUID(), 20.januar, UUID.randomUUID(), 20000.månedlig, "", null)
-        val saksbehandler2 = Saksbehandler(UUID.randomUUID(), 20.januar, UUID.randomUUID(), 20000.månedlig, "", null)
-        val saksbehandler3 = Saksbehandler(UUID.randomUUID(), 20.januar, UUID.randomUUID(), 30000.månedlig, "", null)
-        val saksbehandler4 = Saksbehandler(UUID.randomUUID(), 20.januar, UUID.randomUUID(), INGEN, "", null)
-        val ikkeRapportert = IkkeRapportert(UUID.randomUUID(), 1.januar)
+        val im1 = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
+        val im2 = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
+        val saksbehandler1 = Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
+        val saksbehandler2 = Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
+        val saksbehandler3 = Saksbehandler(20.januar, UUID.randomUUID(), 30000.månedlig, "", null, LocalDateTime.now())
+        val saksbehandler4 = Saksbehandler(20.januar, UUID.randomUUID(), INGEN, "", null, LocalDateTime.now())
+        val ikkeRapportert = IkkeRapportert(UUID.randomUUID(), 1.januar, LocalDateTime.now())
 
         assertEquals(saksbehandler1, im1.overstyres(saksbehandler1))
         assertEquals(saksbehandler1, saksbehandler1.overstyres(saksbehandler2))
@@ -36,8 +37,8 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `inntektsmelding-likhet`() {
-        val im1 = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), INNTEKT)
-        val im2 = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), INNTEKT)
+        val im1 = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
+        val im2 = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
 
         assertEquals(im1, im2)
         assertFalse(im1.kanLagres(im2))
@@ -47,8 +48,8 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `inntektsmelding-ulikhet`() {
-        val im1 = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), INNTEKT)
-        val im2 = Inntektsmelding(UUID.randomUUID(), 2.januar, UUID.randomUUID(), INNTEKT)
+        val im1 = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
+        val im2 = Inntektsmelding(UUID.randomUUID(), 2.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
 
         assertNotEquals(im1, im2)
         assertTrue(im1.kanLagres(im2))
@@ -57,8 +58,8 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `saksbehandler-likhet`() {
-        val saksbehandler1 = Saksbehandler(UUID.randomUUID(), 20.januar, UUID.randomUUID(), 20000.månedlig, "", null)
-        val saksbehandler2 = Saksbehandler(UUID.randomUUID(), 20.januar, UUID.randomUUID(), 25000.månedlig, "", null)
+        val saksbehandler1 = Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
+        val saksbehandler2 = Saksbehandler(20.januar, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now())
 
         assertNotEquals(saksbehandler1, saksbehandler2)
     }

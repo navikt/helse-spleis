@@ -11,11 +11,11 @@ import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.Arbeidsforholdhistorikk
+import no.nav.helse.person.Opptjening
 import no.nav.helse.person.etterlevelse.Bokstav
 import no.nav.helse.person.etterlevelse.Ledd
-import no.nav.helse.person.Opptjening
-import no.nav.helse.person.etterlevelse.Paragraf
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.etterlevelse.Paragraf
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
@@ -41,10 +41,10 @@ internal class ArbeidsgiverInntektsopplysningTest {
     fun `overstyr inntekter`() {
         val skjæringstidspunkt = 1.januar
         val opptjening = Opptjening(emptyList(), skjæringstidspunkt, NullObserver)
-        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig), Refusjonsopplysninger())
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 2000.månedlig), Refusjonsopplysninger())
-        val a1Overstyrt = ArbeidsgiverInntektsopplysning("a1", Saksbehandler(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 3000.månedlig, "", null), Refusjonsopplysninger())
-        val a3Overstyrt = ArbeidsgiverInntektsopplysning("a3", Saksbehandler(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 4000.månedlig, "", null), Refusjonsopplysninger())
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 2000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
+        val a1Overstyrt = ArbeidsgiverInntektsopplysning("a1", Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 3000.månedlig, "", null, LocalDateTime.now()), Refusjonsopplysninger())
+        val a3Overstyrt = ArbeidsgiverInntektsopplysning("a3", Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 4000.månedlig, "", null, LocalDateTime.now()), Refusjonsopplysninger())
 
         val original = listOf(a1Opplysning, a2Opplysning)
         val new = listOf(a1Overstyrt)
@@ -75,8 +75,8 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val overstyrtBeløp = 3000.månedlig
 
         val subsumsjon = Subsumsjon(paragraf.ref, ledd.nummer, bokstav.ref.toString())
-        val a1Opplysning = ArbeidsgiverInntektsopplysning(orgnummer, Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig), Refusjonsopplysninger())
-        val a1Overstyrt = ArbeidsgiverInntektsopplysning(orgnummer, Saksbehandler(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), overstyrtBeløp, "Jeg bare måtte gjøre det", subsumsjon), Refusjonsopplysninger())
+        val a1Opplysning = ArbeidsgiverInntektsopplysning(orgnummer, Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
+        val a1Overstyrt = ArbeidsgiverInntektsopplysning(orgnummer, Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), overstyrtBeløp, "Jeg bare måtte gjøre det", subsumsjon, LocalDateTime.now()), Refusjonsopplysninger())
 
         val jurist = MaskinellJurist()
         listOf(a1Opplysning).overstyrInntekter(opptjening, listOf(a1Overstyrt), jurist)
@@ -103,8 +103,8 @@ internal class ArbeidsgiverInntektsopplysningTest {
     @Test
     fun `deaktiverer en inntekt`() {
         val skjæringstidspunkt = 1.januar
-        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig), Refusjonsopplysninger())
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt), Refusjonsopplysninger())
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt, LocalDateTime.now()), Refusjonsopplysninger())
 
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
         val (aktive, deaktiverte) = opprinnelig.deaktiver(emptyList(), "a2", "Denne må bort", NullObserver)
@@ -122,8 +122,8 @@ internal class ArbeidsgiverInntektsopplysningTest {
     @Test
     fun `subsummerer deaktivering`() {
         val skjæringstidspunkt = 1.januar
-        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig), Refusjonsopplysninger())
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt), Refusjonsopplysninger())
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt, LocalDateTime.now()), Refusjonsopplysninger())
 
         val jurist = MaskinellJurist()
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
@@ -149,8 +149,8 @@ internal class ArbeidsgiverInntektsopplysningTest {
     @Test
     fun `subsummerer aktivering`() {
         val skjæringstidspunkt = 1.januar
-        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig), Refusjonsopplysninger())
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt), Refusjonsopplysninger())
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt, LocalDateTime.now()), Refusjonsopplysninger())
 
         val jurist = MaskinellJurist()
         val opprinneligAktive = listOf(a1Opplysning)
@@ -240,7 +240,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val arbeidsgiverInntektsopplysning = ArbeidsgiverInntektsopplysning(
             "orgnummer",
             SkattSykepengegrunnlag(
-                UUID.randomUUID(), 1.januar, inntektsopplysninger = listOf(
+                UUID.randomUUID(), UUID.randomUUID(), 1.januar, inntektsopplysninger = listOf(
                     Skatteopplysning(
                         hendelseId = UUID.randomUUID(),
                         beløp = (-2500).daglig,
@@ -249,7 +249,8 @@ internal class ArbeidsgiverInntektsopplysningTest {
                         fordel = "fordel",
                         beskrivelse = "beskrivelse"
                     )
-                )
+                ),
+                LocalDateTime.now()
             ),
             Refusjonsopplysninger()
         )

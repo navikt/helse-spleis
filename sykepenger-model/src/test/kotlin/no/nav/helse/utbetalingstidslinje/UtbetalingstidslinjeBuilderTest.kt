@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmelding
@@ -10,8 +11,8 @@ import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
@@ -564,9 +565,9 @@ internal class UtbetalingstidslinjeBuilderTest {
     private val perioder: MutableList<Arbeidsgiverperiode> = mutableListOf()
 
     private val inntektsopplysningPerSkjæringstidspunkt = mapOf(
-        1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 31000.månedlig),
-        1.februar to Inntektsmelding(UUID.randomUUID(), 1.februar, UUID.randomUUID(), 25000.månedlig),
-        1.mars to Inntektsmelding(UUID.randomUUID(), 1.mars, UUID.randomUUID(), 50000.månedlig),
+        1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 31000.månedlig, LocalDateTime.now()),
+        1.februar to Inntektsmelding(UUID.randomUUID(), 1.februar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now()),
+        1.mars to Inntektsmelding(UUID.randomUUID(), 1.mars, UUID.randomUUID(), 50000.månedlig, LocalDateTime.now()),
     )
 
     private fun undersøke(tidslinje: Sykdomstidslinje, delegator: ((Arbeidsgiverperiodeteller, SykdomstidslinjeVisitor) -> SykdomstidslinjeVisitor)? = null) {

@@ -12,8 +12,8 @@ internal class Infotrygd(
     dato: LocalDate,
     private val hendelseId: UUID,
     private val beløp: Inntekt,
-    private val tidsstempel: LocalDateTime = LocalDateTime.now()
-) : Inntektsopplysning(dato, 80) {
+    tidsstempel: LocalDateTime
+) : Inntektsopplysning(dato, tidsstempel) {
 
     override fun accept(visitor: InntektsopplysningVisitor) {
         visitor.visitInfotrygd(this, id, dato, hendelseId, beløp, tidsstempel)

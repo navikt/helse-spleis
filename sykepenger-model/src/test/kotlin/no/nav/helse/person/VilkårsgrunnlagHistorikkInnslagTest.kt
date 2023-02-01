@@ -1,7 +1,9 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -20,7 +22,6 @@ import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -133,12 +134,12 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                     ArbeidsgiverInntektsopplysning(
                         "orgnr",
                         Saksbehandler(
-                            UUID.randomUUID(),
                             skjæringstidspunkt,
                             UUID.randomUUID(),
                             inntekt,
                             "",
-                            null
+                            null,
+                            LocalDateTime.now()
                         ),
                         Refusjonsopplysninger()
                     )

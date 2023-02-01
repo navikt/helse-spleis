@@ -15,8 +15,8 @@ internal class Inntektsmelding(
     dato: LocalDate,
     private val hendelseId: UUID,
     private val beløp: Inntekt,
-    private val tidsstempel: LocalDateTime = LocalDateTime.now()
-) : Inntektsopplysning(dato, 60) {
+    tidsstempel: LocalDateTime
+) : AvklarbarSykepengegrunnlag(dato, 60, tidsstempel) {
 
     override fun accept(visitor: InntektsopplysningVisitor) {
         accept(visitor as InntektsmeldingVisitor)
@@ -42,11 +42,11 @@ internal class Inntektsmelding(
         throw IllegalStateException("Kan ikke overstyre arbeidsforhold for en arbeidsgiver som har sykdom")
     }
 
-    override fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? {
+    override fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): AvklarbarSykepengegrunnlag? {
         if (dato == skjæringstidspunkt) return this
         if (førsteFraværsdag == null || dato != førsteFraværsdag) return null
         if (YearMonth.from(skjæringstidspunkt) == YearMonth.from(førsteFraværsdag)) return this
-        return IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt)
+        return IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt, this.tidsstempel)
     }
 
     override fun omregnetÅrsinntekt(): Inntekt = beløp

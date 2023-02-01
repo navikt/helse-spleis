@@ -1,6 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.InntektsopplysningVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -9,16 +10,18 @@ import no.nav.helse.økonomi.Inntekt
 
 internal class SkattSykepengegrunnlag(
     private val id: UUID,
+    private val hendelseId: UUID,
     dato: LocalDate,
-    inntektsopplysninger: List<Skatteopplysning>
-) : Inntektsopplysning(dato, 40) {
+    inntektsopplysninger: List<Skatteopplysning>,
+    tidsstempel: LocalDateTime
+) : AvklarbarSykepengegrunnlag(dato, 40, tidsstempel) {
     private val inntektsopplysninger = Skatteopplysning.sisteTreMåneder(dato, inntektsopplysninger)
     private val beløp = Skatteopplysning.omregnetÅrsinntekt(this.inntektsopplysninger)
 
     override fun accept(visitor: InntektsopplysningVisitor) {
-        visitor.preVisitSkattSykepengegrunnlag(this, id, dato, beløp)
+        visitor.preVisitSkattSykepengegrunnlag(this, id, hendelseId, dato, beløp, tidsstempel)
         inntektsopplysninger.forEach { it.accept(visitor) }
-        visitor.postVisitSkattSykepengegrunnlag(this, id, dato, beløp)
+        visitor.postVisitSkattSykepengegrunnlag(this, id, hendelseId, dato, beløp, tidsstempel)
     }
 
     override fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =

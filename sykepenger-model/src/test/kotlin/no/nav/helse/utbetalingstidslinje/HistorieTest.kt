@@ -108,7 +108,7 @@ internal abstract class HistorieTest {
         val sykdomstidslinje = arbeidsgiverSykdomstidslinje.getValue(orgnr)
         val inntekter = Inntekter(
             organisasjonsnummer = orgnr,
-            vilkårsgrunnlagHistorikk = inntektsdatoer.associateWith { Inntektsmelding(UUID.randomUUID(), it, UUID.randomUUID(), 25000.månedlig) }.somVilkårsgrunnlagHistorikk(orgnr),
+            vilkårsgrunnlagHistorikk = inntektsdatoer.associateWith { Inntektsmelding(UUID.randomUUID(), it, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now()) }.somVilkårsgrunnlagHistorikk(orgnr),
             regler = regler,
             subsumsjonObserver = SubsumsjonObserver.NullObserver
         )

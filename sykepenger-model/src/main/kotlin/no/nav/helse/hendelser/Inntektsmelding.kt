@@ -222,7 +222,7 @@ class Inntektsmelding(
         builder.leggTilInntekt(
             ArbeidsgiverInntektsopplysning(
                 organisasjonsnummer,
-                Inntektsmelding(UUID.randomUUID(), inntektsdato, meldingsreferanseId(), beregnetInntekt),
+                Inntektsmelding(UUID.randomUUID(), inntektsdato, meldingsreferanseId(), beregnetInntekt, LocalDateTime.now()),
                 refusjon.refusjonsopplysninger(meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
             )
         )

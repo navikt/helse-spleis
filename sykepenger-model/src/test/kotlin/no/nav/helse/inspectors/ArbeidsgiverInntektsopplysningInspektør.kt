@@ -79,8 +79,10 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
     override fun preVisitSkattSykepengegrunnlag(
         skattSykepengegrunnlag: SkattSykepengegrunnlag,
         id: UUID,
+        hendelseId: UUID,
         dato: LocalDate,
-        beløp: Inntekt
+        beløp: Inntekt,
+        tidsstempel: LocalDateTime
     ) {
         this.inntektsopplysning = skattSykepengegrunnlag
     }

@@ -20,8 +20,8 @@ import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.serde.api.dto.Refusjonselement
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
@@ -445,8 +445,10 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             override fun preVisitSkattSykepengegrunnlag(
                 skattSykepengegrunnlag: SkattSykepengegrunnlag,
                 id: UUID,
+                hendelseId: UUID,
                 dato: LocalDate,
-                beløp: Inntekt
+                beløp: Inntekt,
+                tidsstempel: LocalDateTime
             ) {
                 val (inntekt, inntekterFraAOrdningen) = SkattBuilder(skattSykepengegrunnlag).build()
                 this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.AOrdningen, inntekt, inntekterFraAOrdningen)

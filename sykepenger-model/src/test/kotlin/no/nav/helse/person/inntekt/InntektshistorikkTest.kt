@@ -1,6 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -208,7 +209,7 @@ internal class InntektshistorikkTest {
     @Test
     fun `Inntekt fra skatt er minst 0 kroner`() {
         val skattComposite = SkattSykepengegrunnlag(
-            UUID.randomUUID(), 1.januar, inntektsopplysninger = listOf(
+            UUID.randomUUID(), UUID.randomUUID(), 1.januar, inntektsopplysninger = listOf(
                 Skatteopplysning(
                     hendelseId = UUID.randomUUID(),
                     beløp = (-2500).daglig,
@@ -217,7 +218,7 @@ internal class InntektshistorikkTest {
                     fordel = "fordel",
                     beskrivelse = "beskrivelse"
                 )
-            )
+            ), LocalDateTime.now()
         )
         assertEquals(INGEN, skattComposite.inspektør.beløp)
     }

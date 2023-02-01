@@ -664,15 +664,19 @@ internal interface InntektsopplysningVisitor : InntektsmeldingVisitor, Skatteopp
     fun preVisitSkattSykepengegrunnlag(
         skattSykepengegrunnlag: SkattSykepengegrunnlag,
         id: UUID,
+        hendelseId: UUID,
         dato: LocalDate,
-        beløp: Inntekt
+        beløp: Inntekt,
+        tidsstempel: LocalDateTime
     ) {}
 
     fun postVisitSkattSykepengegrunnlag(
         skattSykepengegrunnlag: SkattSykepengegrunnlag,
         id: UUID,
+        hendelseId: UUID,
         dato: LocalDate,
-        beløp: Inntekt
+        beløp: Inntekt,
+        tidsstempel: LocalDateTime
     ) {}
 }
 internal interface InntekthistorikkVisitor : InntektsmeldingVisitor {

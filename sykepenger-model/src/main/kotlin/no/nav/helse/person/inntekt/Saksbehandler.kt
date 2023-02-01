@@ -19,8 +19,8 @@ class Saksbehandler internal constructor(
     private val beløp: Inntekt,
     private val forklaring: String?,
     private val subsumsjon: Subsumsjon?,
-    private val tidsstempel: LocalDateTime = LocalDateTime.now()
-) : Inntektsopplysning(dato, 100) {
+    tidsstempel: LocalDateTime
+) : Inntektsopplysning(dato, tidsstempel) {
 
     constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, forklaring: String, subsumsjon: Subsumsjon?, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
 

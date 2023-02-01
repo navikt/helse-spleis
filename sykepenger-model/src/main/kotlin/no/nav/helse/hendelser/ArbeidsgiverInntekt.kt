@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -27,8 +28,10 @@ class ArbeidsgiverInntekt(
     internal fun tilSykepengegrunnlag(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) =
         SkattSykepengegrunnlag(
             id = UUID.randomUUID(),
+            hendelseId = meldingsreferanseId,
             dato = skjæringstidspunkt,
-            inntektsopplysninger = inntekter.map { it.somInntekt(meldingsreferanseId) }
+            inntektsopplysninger = inntekter.map { it.somInntekt(meldingsreferanseId) },
+            tidsstempel = LocalDateTime.now()
         )
 
     internal fun tilSammenligningsgrunnlag(meldingsreferanseId: UUID) =
