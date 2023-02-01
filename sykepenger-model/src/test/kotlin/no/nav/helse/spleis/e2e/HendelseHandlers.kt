@@ -62,7 +62,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.person.inntekt.Saksbehandler
-import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.tilOverstyrt

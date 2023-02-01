@@ -1,6 +1,4 @@
-package no.nav.helse.serde.reflection
-
-import no.nav.helse.utbetalingslinjer.Utbetaling
+package no.nav.helse.utbetalingslinjer
 
 enum class Utbetalingstatus(private val tilstand: Utbetaling.Tilstand) {
     NY(Utbetaling.Ny),

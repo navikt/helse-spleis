@@ -64,7 +64,7 @@ import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
-import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse

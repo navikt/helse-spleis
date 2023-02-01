@@ -1,7 +1,7 @@
 import java.time.Duration
 import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
 
 interface AnnullerUtbetalingPort: IAktivitetslogg {

@@ -29,7 +29,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_9
 import no.nav.helse.person.builders.VedtakFattetBuilder
-import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.trekkerTilbakePenger

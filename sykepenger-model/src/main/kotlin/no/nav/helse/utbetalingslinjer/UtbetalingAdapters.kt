@@ -19,7 +19,6 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.økonomi.Økonomi
 
 internal fun AnnullerUtbetaling.utbetalingport() = AnnullerUtbetalingAdapter(this)

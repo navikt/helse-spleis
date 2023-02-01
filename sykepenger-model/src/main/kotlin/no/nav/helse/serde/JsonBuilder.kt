@@ -58,7 +58,7 @@ import no.nav.helse.serde.api.BuilderState
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.reflection.AktivitetsloggMap
 import no.nav.helse.serde.reflection.Inntektsopplysningskilde
-import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk

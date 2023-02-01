@@ -23,7 +23,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.spleis.TestMessageFactory.UtbetalingshistorikkTestdata.Companion.toJson
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.utbetalingslinjer.Oppdragstatus

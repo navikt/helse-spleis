@@ -12,7 +12,7 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
-import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.serde.reflection.castAsList
 import no.nav.helse.serde.reflection.castAsMap
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent

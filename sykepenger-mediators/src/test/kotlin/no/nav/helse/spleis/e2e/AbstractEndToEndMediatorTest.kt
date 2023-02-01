@@ -31,7 +31,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehis
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.toUUID
-import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.spleis.HendelseMediator
 import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.TestMessageFactory

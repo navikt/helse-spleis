@@ -15,7 +15,6 @@ import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.infotrygdhistorikk.Nødnummer
-import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import org.slf4j.LoggerFactory

@@ -5,7 +5,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.spleis.IHendelseMediator
 
 // Understands a JSON message representing a UtbetalingpPåminnelse

@@ -24,7 +24,7 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
-import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive

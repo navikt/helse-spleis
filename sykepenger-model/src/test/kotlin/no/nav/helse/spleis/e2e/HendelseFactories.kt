@@ -51,7 +51,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.sisteBehov
 import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.utbetalingslinjer.Oppdragstatus

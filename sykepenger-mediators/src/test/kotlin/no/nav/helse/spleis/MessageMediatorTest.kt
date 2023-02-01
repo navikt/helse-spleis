@@ -9,7 +9,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
-import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.spleis.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
