@@ -117,6 +117,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
+import no.nav.helse.utbetalingslinjer.UtbetalingPeriodetype
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.sammenlign
@@ -2619,16 +2620,21 @@ enum class Periodetype {
 
     /** Perioden er en direkte eller indirekte forlengelse av en OVERGANG_FRA_IT-periode */
     INFOTRYGDFORLENGELSE;
+
+    fun tilUtbetalingPeriodetype(): UtbetalingPeriodetype = when (this) {
+        FØRSTEGANGSBEHANDLING -> UtbetalingPeriodetype.FØRSTEGANGSBEHANDLING
+        FORLENGELSE -> UtbetalingPeriodetype.FORLENGELSE
+        OVERGANG_FRA_IT -> UtbetalingPeriodetype.OVERGANG_FRA_IT
+        INFOTRYGDFORLENGELSE -> UtbetalingPeriodetype.INFOTRYGDFORLENGELSE
+    }
 }
 
 enum class Inntektskilde {
     EN_ARBEIDSGIVER,
     FLERE_ARBEIDSGIVERE;
-    fun tilUtbetalingInntektskilde(): UtbetalingInntektskilde {
-        return when(this) {
-            EN_ARBEIDSGIVER -> UtbetalingInntektskilde.EN_ARBEIDSGIVER
-            FLERE_ARBEIDSGIVERE -> UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
-        }
+    fun tilUtbetalingInntektskilde(): UtbetalingInntektskilde = when(this) {
+        EN_ARBEIDSGIVER -> UtbetalingInntektskilde.EN_ARBEIDSGIVER
+        FLERE_ARBEIDSGIVERE -> UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
     }
 }
 

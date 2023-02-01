@@ -156,7 +156,7 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
             hendelse = hendelse,
             periode = periode,
             skjæringstidspunkt = skjæringstidspunkt,
-            periodetype = periodetype,
+            periodetype = periodetype.tilUtbetalingPeriodetype(),
             førstegangsbehandling = førstegangsbehandling,
             inntektskilde = inntektskilde.tilUtbetalingInntektskilde(),
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
