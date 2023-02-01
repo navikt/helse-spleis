@@ -2,7 +2,6 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.InntektsmeldingVisitor
@@ -16,7 +15,7 @@ internal class Inntektsmelding(
     private val hendelseId: UUID,
     private val beløp: Inntekt,
     tidsstempel: LocalDateTime
-) : AvklarbarSykepengegrunnlag(dato, 60, tidsstempel) {
+) : AvklarbarSykepengegrunnlag(dato, tidsstempel) {
 
     override fun accept(visitor: InntektsopplysningVisitor) {
         accept(visitor as InntektsmeldingVisitor)
@@ -45,13 +44,12 @@ internal class Inntektsmelding(
     override fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): AvklarbarSykepengegrunnlag? {
         if (dato == skjæringstidspunkt) return this
         if (førsteFraværsdag == null || dato != førsteFraværsdag) return null
-        if (YearMonth.from(skjæringstidspunkt) == YearMonth.from(førsteFraværsdag)) return this
-        return IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt, this.tidsstempel)
+        return this
     }
 
     override fun omregnetÅrsinntekt(): Inntekt = beløp
 
-    internal fun kanLagres(other: Inntektsmelding) = this.dato != other.dato
+    internal fun kanLagres(other: Inntektsmelding) = this.hendelseId != other.hendelseId
 
     override fun erSamme(other: Inntektsopplysning): Boolean {
         return other is Inntektsmelding && this.dato == other.dato && other.beløp == this.beløp

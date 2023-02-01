@@ -2,6 +2,7 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class InntektsopplysningTest {
     private companion object {
@@ -37,8 +39,9 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `inntektsmelding-likhet`() {
-        val im1 = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
-        val im2 = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
+        val hendelsesId = UUID.randomUUID()
+        val im1 = Inntektsmelding(UUID.randomUUID(), 1.januar, hendelsesId, INNTEKT, LocalDateTime.now())
+        val im2 = Inntektsmelding(UUID.randomUUID(), 1.januar, hendelsesId, INNTEKT, LocalDateTime.now())
 
         assertEquals(im1, im2)
         assertFalse(im1.kanLagres(im2))
@@ -62,5 +65,67 @@ internal class InntektsopplysningTest {
         val saksbehandler2 = Saksbehandler(20.januar, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now())
 
         assertNotEquals(saksbehandler1, saksbehandler2)
+    }
+
+    @Test
+    fun `turnering - inntektsmelding vs inntektsmelding`() {
+        val im1 = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
+        val im2 = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now().plusSeconds(1))
+
+        assertEquals(im2, im1.beste(im2))
+        assertEquals(im2, im2.beste(im1))
+    }
+
+    @Test
+    fun `turnering - skatt vs inntektsmelding`() {
+        val im = Inntektsmelding(UUID.randomUUID(), 10.februar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
+        val skatt1 = SkattSykepengegrunnlag(UUID.randomUUID(), UUID.randomUUID(), 1.februar, emptyList(), LocalDateTime.now() )
+        val skatt2 = SkattSykepengegrunnlag(UUID.randomUUID(), UUID.randomUUID(), 31.januar, emptyList(), LocalDateTime.now() )
+
+        assertEquals(im, im.beste(skatt1))
+        assertEquals(im, skatt1.beste(im))
+
+        assertEquals(skatt2, im.beste(skatt2))
+        assertEquals(skatt2, skatt2.beste(im))
+    }
+
+    @Test
+    fun `turnering - ikkeRapportert vs inntektsmelding`() {
+        val im = Inntektsmelding(UUID.randomUUID(), 10.februar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
+        val ikkeRapportert1 = IkkeRapportert(UUID.randomUUID(), 1.februar, LocalDateTime.now())
+        val ikkeRapportert2 = IkkeRapportert(UUID.randomUUID(), 31.januar, LocalDateTime.now())
+
+        assertEquals(im, im.beste(ikkeRapportert1))
+        assertEquals(im, ikkeRapportert1.beste(im))
+
+        assertEquals(ikkeRapportert2, ikkeRapportert2.beste(im))
+        assertEquals(ikkeRapportert2, im.beste(ikkeRapportert2))
+    }
+
+    @Test
+    fun `turnering - ikkeRapportert vs skatt`() {
+        val skatt = SkattSykepengegrunnlag(UUID.randomUUID(), UUID.randomUUID(), 1.februar, emptyList(), LocalDateTime.now() )
+        val ikkeRapportert = IkkeRapportert(UUID.randomUUID(), 31.januar, LocalDateTime.now())
+
+         assertEquals(skatt, skatt.beste(ikkeRapportert))
+         assertEquals(skatt, ikkeRapportert.beste(skatt))
+    }
+
+    @Test
+    fun `turnering - skatt vs skatt`() {
+        val skatt1 = SkattSykepengegrunnlag(UUID.randomUUID(), UUID.randomUUID(), 1.februar, emptyList(), LocalDateTime.now() )
+        val skatt2 = SkattSykepengegrunnlag(UUID.randomUUID(), UUID.randomUUID(), 1.februar, emptyList(), LocalDateTime.now() )
+
+        assertThrows<IllegalStateException> { skatt1.beste(skatt2) }
+        assertThrows<IllegalStateException> { skatt2.beste(skatt1) }
+    }
+
+    @Test
+    fun `turnering - ikkeRapportert vs ikkeRapportert`() {
+        val ikkeRapportert1 = IkkeRapportert(UUID.randomUUID(), 31.januar, LocalDateTime.now())
+        val ikkeRapportert2 = IkkeRapportert(UUID.randomUUID(), 31.januar, LocalDateTime.now())
+
+        assertThrows<IllegalStateException> { ikkeRapportert1.beste(ikkeRapportert2) }
+        assertThrows<IllegalStateException> { ikkeRapportert2.beste(ikkeRapportert1) }
     }
 }

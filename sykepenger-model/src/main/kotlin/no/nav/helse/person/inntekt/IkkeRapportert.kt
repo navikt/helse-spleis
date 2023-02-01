@@ -11,7 +11,9 @@ internal class IkkeRapportert(
     private val id: UUID,
     dato: LocalDate,
     tidsstempel: LocalDateTime
-) : AvklarbarSykepengegrunnlag(dato, 10, tidsstempel) {
+) : AvklarbarSykepengegrunnlag(dato, tidsstempel) {
+    override fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
+        takeIf { this.dato == skjæringstidspunkt }
 
     override fun accept(visitor: InntektsopplysningVisitor) {
         visitor.visitIkkeRapportert(id, dato, tidsstempel)

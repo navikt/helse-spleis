@@ -102,11 +102,11 @@ internal class InntektshistorikkTest {
     }
 
     @Test
-    fun `Inntekt fra andre inntektsmelding overskriver ikke inntekt fra første, gitt samme første fraværsdag`() {
+    fun `Inntekt fra andre inntektsmelding overskriver inntekt fra første, gitt samme første fraværsdag`() {
         inntektsmelding(førsteFraværsdag = 1.januar, beregnetInntekt = 30000.månedlig).addInntekt(historikk, 1.januar, MaskinellJurist())
         inntektsmelding(førsteFraværsdag = 1.januar, beregnetInntekt = 29000.månedlig).addInntekt(historikk, 1.januar, MaskinellJurist())
         inntektsmelding(førsteFraværsdag = 1.februar, beregnetInntekt = 31000.månedlig).addInntekt(historikk, 1.februar, MaskinellJurist())
-        assertEquals(30000.månedlig, historikk.avklarSykepengegrunnlag(
+        assertEquals(29000.månedlig, historikk.avklarSykepengegrunnlag(
             1.januar,
             1.januar,
             null,

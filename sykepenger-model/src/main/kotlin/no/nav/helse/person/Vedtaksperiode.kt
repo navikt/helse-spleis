@@ -308,6 +308,13 @@ internal class Vedtaksperiode private constructor(
         tilstand(inntektOgRefusjon, nesteTilstand())
     }
 
+    private fun håndterInntektOgRefusjon(inntektsmelding: Inntektsmelding) {
+        inntektsmeldingInfo = arbeidsgiver.addInntektsmelding(skjæringstidspunkt, inntektsmelding, jurist)
+        inntektsmelding.valider(periode, skjæringstidspunkt, finnArbeidsgiverperiode(), jurist)
+        inntektsmelding.info("Fullført behandling av inntektsmelding")
+        if (inntektsmelding.harFunksjonelleFeilEllerVerre()) return forkast(inntektsmelding)
+    }
+
     private fun håndterDager(dager: DagerFraInntektsmelding) {
         tilstand.håndterDagerFør(this, dager)
         dager.håndter(periode, arbeidsgiver)?.let { oppdatertSykdomstidslinje ->
@@ -1579,6 +1586,14 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             inntektsmelding.varsel(RV_IM_4)
+            vedtaksperiode.håndterInntektOgRefusjon(inntektsmelding)
+            vedtaksperiode.person.gjenopptaBehandling(inntektsmelding)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
+            inntektOgRefusjon.varsel(RV_IM_4)
+            vedtaksperiode.håndterInntektOgRefusjon(inntektOgRefusjon) { AvventerBlokkerendePeriode }
+            vedtaksperiode.person.gjenopptaBehandling(inntektOgRefusjon)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -1621,6 +1636,13 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             inntektsmelding.varsel(RV_IM_4)
+            vedtaksperiode.håndterInntektOgRefusjon(inntektsmelding)
+            vedtaksperiode.tilstand(inntektsmelding, AvventerBlokkerendePeriode)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
+            inntektOgRefusjon.varsel(RV_IM_4)
+            vedtaksperiode.håndterInntektOgRefusjon(inntektOgRefusjon) { AvventerBlokkerendePeriode }
         }
     }
 

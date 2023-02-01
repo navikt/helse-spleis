@@ -14,7 +14,7 @@ internal class SkattSykepengegrunnlag(
     dato: LocalDate,
     inntektsopplysninger: List<Skatteopplysning>,
     tidsstempel: LocalDateTime
-) : AvklarbarSykepengegrunnlag(dato, 40, tidsstempel) {
+) : AvklarbarSykepengegrunnlag(dato, tidsstempel) {
     private val inntektsopplysninger = Skatteopplysning.sisteTreMåneder(dato, inntektsopplysninger)
     private val beløp = Skatteopplysning.omregnetÅrsinntekt(this.inntektsopplysninger)
 

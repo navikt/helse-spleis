@@ -24,11 +24,14 @@ internal val Refusjonsopplysning.inspektør get() = RefusjonsopplysningInspektø
 internal class RefusjonsopplysningInspektør(refusjonsopplysning: Refusjonsopplysning) : RefusjonsopplysningerVisitor {
     lateinit var meldingsreferanseId: UUID
         private set
+    lateinit var beløp: Inntekt
+        private set
     init {
         refusjonsopplysning.accept(this)
     }
 
     override fun visitRefusjonsopplysning(meldingsreferanseId: UUID, fom: LocalDate, tom: LocalDate?, beløp: Inntekt) {
         this.meldingsreferanseId = meldingsreferanseId
+        this.beløp = beløp
     }
 }
