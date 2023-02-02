@@ -14,6 +14,145 @@ import java.util.*
 internal class OppdragTest {
 
     @Test
+    fun `prepend oppdrag`() {
+        val oppdrag1 = Oppdrag("", Fagområde.SykepengerRefusjon, listOf(
+            Utbetalingslinje(
+                fom = 19.januar,
+                tom = 25.januar,
+                endringskode = Endringskode.UEND,
+                aktuellDagsinntekt = 1000,
+                beløp = 1000,
+                grad = 100,
+                delytelseId = 1,
+                refDelytelseId = null,
+                refFagsystemId = null
+            ),
+            Utbetalingslinje(
+                fom = 26.januar,
+                tom = 28.januar,
+                endringskode = Endringskode.ENDR,
+                aktuellDagsinntekt = 1000,
+                beløp = 500,
+                grad = 50,
+                delytelseId = 2,
+                refDelytelseId = null,
+                refFagsystemId = null
+            ),
+            Utbetalingslinje(
+                fom = 29.januar,
+                tom = 31.januar,
+                endringskode = Endringskode.NY,
+                aktuellDagsinntekt = 1000,
+                beløp = 1000,
+                grad = 100,
+                delytelseId = 3,
+                refDelytelseId = null,
+                refFagsystemId = null
+            )
+        ), sisteArbeidsgiverdag = 18.januar)
+        val oppdrag2 = Oppdrag("", Fagområde.SykepengerRefusjon, listOf(
+            Utbetalingslinje(
+                fom = 17.januar,
+                tom = 18.januar,
+                endringskode = Endringskode.NY,
+                aktuellDagsinntekt = 1000,
+                beløp = 1000,
+                grad = 100
+            )
+        ), sisteArbeidsgiverdag = 16.januar)
+
+        val oppdrag3 = Oppdrag("", Fagområde.SykepengerRefusjon, listOf(
+            Utbetalingslinje(
+                fom = 17.januar,
+                tom = 25.januar,
+                endringskode = Endringskode.NY,
+                aktuellDagsinntekt = 1000,
+                beløp = 1000,
+                grad = 100,
+                delytelseId = 1,
+                refDelytelseId = null,
+                refFagsystemId = null
+            ),
+            Utbetalingslinje(
+                fom = 26.januar,
+                tom = 28.januar,
+                endringskode = Endringskode.ENDR,
+                aktuellDagsinntekt = 1000,
+                beløp = 500,
+                grad = 50,
+                delytelseId = 2,
+                refDelytelseId = null,
+                refFagsystemId = null
+            ),
+            Utbetalingslinje(
+                fom = 29.januar,
+                tom = 31.januar,
+                endringskode = Endringskode.NY,
+                aktuellDagsinntekt = 1000,
+                beløp = 1000,
+                grad = 100,
+                delytelseId = 3,
+                refDelytelseId = null,
+                refFagsystemId = null
+            )
+        ), sisteArbeidsgiverdag = 16.januar)
+        assertEquals(oppdrag3, oppdrag1 + oppdrag2)
+        assertEquals(oppdrag3, oppdrag2 + oppdrag1)
+
+        val oppdragSomKanUtbetales = oppdrag3.minus(oppdrag1, Aktivitetslogg())
+        val expectedOppdragSomKanUtbetales = Oppdrag("", Fagområde.SykepengerRefusjon, listOf(
+            Utbetalingslinje(
+                fom = 17.januar,
+                tom = 25.januar,
+                endringskode = Endringskode.NY,
+                aktuellDagsinntekt = 1000,
+                beløp = 1000,
+                grad = 100,
+                delytelseId = 4,
+                refDelytelseId = 3,
+                refFagsystemId = oppdrag1.inspektør.fagsystemId()
+            ),
+            Utbetalingslinje(
+                fom = 26.januar,
+                tom = 28.januar,
+                endringskode = Endringskode.NY,
+                aktuellDagsinntekt = 1000,
+                beløp = 500,
+                grad = 50,
+                delytelseId = 5,
+                refDelytelseId = 4,
+                refFagsystemId = oppdrag1.inspektør.fagsystemId()
+            ),
+            Utbetalingslinje(
+                fom = 29.januar,
+                tom = 31.januar,
+                endringskode = Endringskode.NY,
+                aktuellDagsinntekt = 1000,
+                beløp = 1000,
+                grad = 100,
+                delytelseId = 6,
+                refDelytelseId = 5,
+                refFagsystemId = oppdrag1.inspektør.fagsystemId()
+            )
+        ), sisteArbeidsgiverdag = 16.januar)
+        assertEquals(expectedOppdragSomKanUtbetales, oppdragSomKanUtbetales)
+    }
+
+    private fun assertEquals(expected: Oppdrag, actual: Oppdrag) {
+        assertEquals(expected.size, actual.size) { "antall linjer stemmer ikke" }
+        assertEquals(expected.inspektør.mottaker, actual.inspektør.mottaker) { "mottaker stemmer ikke" }
+        assertEquals(expected.inspektør.fagområde, actual.inspektør.fagområde) { "mottaker stemmer ikke" }
+        expected.forEachIndexed { index, expectedLinje ->
+            val actualLinje = actual[index]
+
+            assertEquals(expectedLinje.inspektør.fom, actualLinje.inspektør.fom)
+            assertEquals(expectedLinje.inspektør.tom, actualLinje.inspektør.tom)
+            assertEquals(expectedLinje.inspektør.beløp, actualLinje.inspektør.beløp)
+            assertEquals(expectedLinje.inspektør.grad, actualLinje.inspektør.grad)
+        }
+    }
+
+    @Test
     fun `tomme oppdrag er synkroniserte med hverandre`() {
         val oppdrag1 = Oppdrag("mottaker", Fagområde.SykepengerRefusjon)
         val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger)

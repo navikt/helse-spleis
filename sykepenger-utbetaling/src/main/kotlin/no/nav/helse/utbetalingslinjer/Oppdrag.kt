@@ -232,6 +232,23 @@ class Oppdrag private constructor(
             sisteArbeidsgiverdag = sisteArbeidsgiverdag
         )
 
+    operator fun plus(other: Oppdrag): Oppdrag {
+        check(none { linje -> other.any { it.periode.overlapperMed(linje.periode) } }) {
+            "ikke støttet: kan ikke overlappe med annet oppdrag"
+        }
+        if (this.fomHarFlyttetSegFremover(other)) return other + this
+        return kopierMed((slåSammenOppdrag(other)))
+    }
+
+    private fun slåSammenOppdrag(other: Oppdrag): List<Utbetalingslinje> {
+        if (this.isEmpty()) return other.linjer
+        if (other.isEmpty()) return this.linjer
+        val sisteLinje = this.first()
+        val første = other.first()
+        val mellomlinje = sisteLinje.slåSammenLinje(første) ?: return this.linjer + other.linjer
+        return this.linjer.dropLast(1) + listOf(mellomlinje) + other.linjer.drop(1)
+    }
+
     fun minus(eldre: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
         // Vi ønsker ikke å forlenge et oppdrag vi ikke overlapper med, eller et tomt oppdrag
         if (harIngenKoblingTilTidligereOppdrag(eldre)) return this

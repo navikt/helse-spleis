@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
 import no.nav.helse.erHelg
+import no.nav.helse.erRettFør
 import no.nav.helse.hendelser.til
 import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
@@ -92,6 +93,8 @@ class Utbetalingslinje(
     }
 
     fun kobleTil(other: Utbetalingslinje) {
+        this.endringskode = NY
+        this.datoStatusFom = null
         this.delytelseId = other.delytelseId + 1
         this.refDelytelseId = other.delytelseId
     }
@@ -141,6 +144,24 @@ class Utbetalingslinje(
             this.refDelytelseId = null
             this.refFagsystemId = null
         }
+
+    fun slåSammenLinje(førsteLinjeIForrige: Utbetalingslinje) = this.let { sisteLinjeINytt: Utbetalingslinje ->
+        if (sisteLinjeINytt.beløp != førsteLinjeIForrige.beløp || sisteLinjeINytt.grad != førsteLinjeIForrige.grad || !sisteLinjeINytt.tom.erRettFør(førsteLinjeIForrige.fom)) null
+        else Utbetalingslinje(
+            fom = sisteLinjeINytt.fom,
+            tom = førsteLinjeIForrige.tom,
+            satstype = sisteLinjeINytt.satstype,
+            beløp = sisteLinjeINytt.beløp,
+            aktuellDagsinntekt = sisteLinjeINytt.aktuellDagsinntekt,
+            grad = sisteLinjeINytt.grad,
+            refFagsystemId = sisteLinjeINytt.refFagsystemId,
+            delytelseId = sisteLinjeINytt.delytelseId,
+            refDelytelseId = sisteLinjeINytt.refDelytelseId,
+            endringskode = sisteLinjeINytt.endringskode,
+            klassekode = sisteLinjeINytt.klassekode,
+            datoStatusFom = sisteLinjeINytt.datoStatusFom
+        )
+    }
 
     private fun copyWith(linjetype: Endringskode, tidligere: Utbetalingslinje) {
         this.refFagsystemId = tidligere.refFagsystemId

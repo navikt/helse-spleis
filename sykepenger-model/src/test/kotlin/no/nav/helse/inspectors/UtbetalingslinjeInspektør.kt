@@ -22,6 +22,9 @@ internal class UtbetalingslinjeInspektør(utbetalingslinje: Utbetalingslinje) : 
     internal var beløp: Int? = null
         private set
 
+    internal var grad: Int? = null
+        private set
+
     internal var delytelseId by Delegates.notNull<Int>()
         private set
 
@@ -67,6 +70,7 @@ internal class UtbetalingslinjeInspektør(utbetalingslinje: Utbetalingslinje) : 
         this.datoStatusFom = datoStatusFom
         this.refFagsystemId = refFagsystemId
         this.beløp = beløp
+        this.grad = grad
         this.statuskode = statuskode
     }
 }
