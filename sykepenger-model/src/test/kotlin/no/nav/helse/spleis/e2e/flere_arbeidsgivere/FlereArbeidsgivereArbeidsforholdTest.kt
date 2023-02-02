@@ -535,8 +535,6 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
 
         val arbeidsforhold = listOf(
             Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH),
-            Vilkårsgrunnlag.Arbeidsforhold("", LocalDate.EPOCH, 31.januar),
-            Vilkårsgrunnlag.Arbeidsforhold("", LocalDate.EPOCH),
             Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH)
         )
         val inntekter = listOf(

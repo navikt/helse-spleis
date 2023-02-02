@@ -25,10 +25,9 @@ class Vilkårsgrunnlag(
     private val inntektsvurdering: Inntektsvurdering,
     private val medlemskapsvurdering: Medlemskapsvurdering,
     private val inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
-    arbeidsforhold: List<Arbeidsforhold>
+    private val arbeidsforhold: List<Arbeidsforhold>
 ) : ArbeidstakerHendelse(meldingsreferanseId, personidentifikator.toString(), aktørId, orgnummer) {
     private var grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
-    private val arbeidsforhold = arbeidsforhold.filter { it.orgnummer.isNotBlank() }
 
     internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
 
@@ -81,10 +80,14 @@ class Vilkårsgrunnlag(
     }
 
     class Arbeidsforhold(
-        internal val orgnummer: String,
+        private val orgnummer: String,
         private val ansattFom: LocalDate,
         private val ansattTom: LocalDate? = null
     ) {
+        init {
+            check(orgnummer.isNotBlank())
+        }
+
         internal fun tilDomeneobjekt() = Arbeidsforholdhistorikk.Arbeidsforhold(
             ansattFom = ansattFom,
             ansattTom = ansattTom,
