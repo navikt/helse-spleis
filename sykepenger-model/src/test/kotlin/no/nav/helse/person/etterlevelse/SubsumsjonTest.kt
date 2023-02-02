@@ -13,9 +13,11 @@ import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_16
 import no.nav.helse.etterlevelse.Punktum
 import no.nav.helse.etterlevelse.Punktum.PUNKTUM_1
 import no.nav.helse.etterlevelse.Punktum.PUNKTUM_2
-import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
-import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
-import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
+import no.nav.helse.etterlevelse.Subsumsjon
+import no.nav.helse.etterlevelse.Subsumsjon.Utfall
+import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
+import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
+import no.nav.helse.etterlevelse.SubsumsjonVisitor
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test

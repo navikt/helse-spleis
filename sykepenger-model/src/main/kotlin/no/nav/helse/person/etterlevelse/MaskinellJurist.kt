@@ -6,6 +6,7 @@ import java.time.Year
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.etterlevelse.BetingetSubsumsjon
 import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -14,7 +15,9 @@ import no.nav.helse.juni
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_A
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_B
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_C
+import no.nav.helse.etterlevelse.EnkelSubsumsjon
 import no.nav.helse.etterlevelse.FOLKETRYGDLOVENS_OPPRINNELSESDATO
+import no.nav.helse.etterlevelse.GrupperbarSubsumsjon
 import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.person.Dokumentsporing
@@ -42,10 +45,12 @@ import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_51
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_9
 import no.nav.helse.etterlevelse.Punktum
 import no.nav.helse.etterlevelse.Punktum.Companion.punktum
-import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
-import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_BEREGNET
-import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
-import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
+import no.nav.helse.etterlevelse.Subsumsjon
+import no.nav.helse.etterlevelse.Subsumsjon.Utfall
+import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_BEREGNET
+import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
+import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
+import no.nav.helse.etterlevelse.SubsumsjonVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag.Companion.dager
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent

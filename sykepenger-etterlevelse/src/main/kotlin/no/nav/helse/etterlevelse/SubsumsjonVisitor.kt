@@ -1,14 +1,9 @@
-package no.nav.helse.person.etterlevelse
+package no.nav.helse.etterlevelse
 
 import no.nav.helse.hendelser.Periode
 import java.time.LocalDate
-import no.nav.helse.etterlevelse.Bokstav
-import no.nav.helse.etterlevelse.KontekstType
-import no.nav.helse.etterlevelse.Ledd
-import no.nav.helse.etterlevelse.Paragraf
-import no.nav.helse.etterlevelse.Punktum
 
-internal interface SubsumsjonVisitor {
+interface SubsumsjonVisitor {
     fun preVisitSubsumsjon(
         utfall: Subsumsjon.Utfall,
         versjon: LocalDate,

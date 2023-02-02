@@ -1,16 +1,11 @@
-package no.nav.helse.person.etterlevelse
+package no.nav.helse.etterlevelse
 
 import java.time.LocalDate
-import no.nav.helse.etterlevelse.Bokstav
-import no.nav.helse.etterlevelse.KontekstType
-import no.nav.helse.etterlevelse.Ledd
-import no.nav.helse.etterlevelse.Paragraf
-import no.nav.helse.etterlevelse.Punktum
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.til
 
-internal abstract class Subsumsjon {
+abstract class Subsumsjon {
 
     enum class Utfall {
         VILKAR_OPPFYLT, VILKAR_IKKE_OPPFYLT, VILKAR_UAVKLART, VILKAR_BEREGNET
@@ -27,7 +22,7 @@ internal abstract class Subsumsjon {
     abstract val output: Map<String, Any>
     protected abstract val kontekster: Map<String, KontekstType>
 
-    internal fun accept(visitor: SubsumsjonVisitor) {
+    fun accept(visitor: SubsumsjonVisitor) {
         visitor.preVisitSubsumsjon(utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
         acceptSpesifikk(visitor)
         visitor.postVisitSubsumsjon(utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
@@ -35,7 +30,7 @@ internal abstract class Subsumsjon {
 
     protected abstract fun acceptSpesifikk(visitor: SubsumsjonVisitor)
 
-    internal fun sammenstill(subsumsjoner: List<Subsumsjon>): List<Subsumsjon> {
+    fun sammenstill(subsumsjoner: List<Subsumsjon>): List<Subsumsjon> {
         if (!skalSammenstille()) return subsumsjoner
         val (medSammeDatagrunnlag, utenSammeDatagrunnlag) = subsumsjoner.partition { subsumsjon -> subsumsjon == this }
         if (medSammeDatagrunnlag.isEmpty()) return subsumsjoner + this
@@ -80,7 +75,7 @@ internal abstract class Subsumsjon {
     }
 }
 
-internal class EnkelSubsumsjon(
+class EnkelSubsumsjon(
     override val utfall: Utfall,
     override val versjon: LocalDate,
     override val paragraf: Paragraf,
@@ -94,7 +89,7 @@ internal class EnkelSubsumsjon(
     override fun acceptSpesifikk(visitor: SubsumsjonVisitor) {}
 }
 
-internal class GrupperbarSubsumsjon private constructor(
+class GrupperbarSubsumsjon private constructor(
     private val perioder: List<Periode>,
     override val utfall: Utfall,
     override val versjon: LocalDate,
@@ -106,7 +101,7 @@ internal class GrupperbarSubsumsjon private constructor(
     override val input: Map<String, Any>,
     override val kontekster: Map<String, KontekstType>
 ) : Subsumsjon() {
-    internal constructor(
+    constructor(
         dato: LocalDate,
         input: Map<String, Any>,
         output: Map<String, Any>,
@@ -146,7 +141,7 @@ internal class GrupperbarSubsumsjon private constructor(
     }
 }
 
-internal class BetingetSubsumsjon(
+class BetingetSubsumsjon(
     private val funnetRelevant: Boolean,
     override val utfall: Utfall,
     override val versjon: LocalDate,
