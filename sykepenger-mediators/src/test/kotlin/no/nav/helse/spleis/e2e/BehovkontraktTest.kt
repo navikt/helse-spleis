@@ -167,22 +167,25 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     private fun assertInntekterForSammenligningsgrunnlagdetaljer(behov: JsonNode) {
+        assertDato(behov.path(InntekterForSammenligningsgrunnlag.name).path("skjæringstidspunkt").asText())
         assertÅrMåned(behov.path(InntekterForSammenligningsgrunnlag.name).path("beregningStart").asText())
         assertÅrMåned(behov.path(InntekterForSammenligningsgrunnlag.name).path("beregningSlutt").asText())
     }
 
     private fun assertInntekterForSykepengegrunnlagdetaljer(behov: JsonNode) {
+        assertDato(behov.path(InntekterForSykepengegrunnlag.name).path("skjæringstidspunkt").asText())
         assertÅrMåned(behov.path(InntekterForSykepengegrunnlag.name).path("beregningStart").asText())
         assertÅrMåned(behov.path(InntekterForSykepengegrunnlag.name).path("beregningSlutt").asText())
     }
 
     private fun assertMedlemskapdetaljer(behov: JsonNode) {
+        assertDato(behov.path(Medlemskap.name).path("skjæringstidspunkt").asText())
         assertDato(behov.path(Medlemskap.name).path("medlemskapPeriodeFom").asText())
         assertDato(behov.path(Medlemskap.name).path("medlemskapPeriodeTom").asText())
     }
 
     private fun assertArbeidsforholdV2detaljer(behov: JsonNode) {
-        assertTrue(behov.path(ArbeidsforholdV2.name).isEmpty)
+        assertDato(behov.path(ArbeidsforholdV2.name).path("skjæringstidspunkt").asText())
     }
 
     private fun assertDødsinfodetaljer(behov: JsonNode) {

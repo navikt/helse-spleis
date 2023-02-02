@@ -177,6 +177,7 @@ sealed class Aktivitet(
 
             fun inntekterForSammenligningsgrunnlag(
                 aktivitetslogg: IAktivitetslogg,
+                skjæringstidspunkt: LocalDate,
                 beregningStart: YearMonth,
                 beregningSlutt: YearMonth
             ) {
@@ -184,6 +185,7 @@ sealed class Aktivitet(
                     Behovtype.InntekterForSammenligningsgrunnlag,
                     "Trenger inntekter for sammenligningsgrunnlag",
                     mapOf(
+                        "skjæringstidspunkt" to skjæringstidspunkt.toString(),
                         "beregningStart" to beregningStart.toString(),
                         "beregningSlutt" to beregningSlutt.toString()
                     )
@@ -192,6 +194,7 @@ sealed class Aktivitet(
 
             fun inntekterForSykepengegrunnlag(
                 aktivitetslogg: IAktivitetslogg,
+                skjæringstidspunkt: LocalDate,
                 beregningStart: YearMonth,
                 beregningSlutt: YearMonth
             ) {
@@ -199,14 +202,17 @@ sealed class Aktivitet(
                     Behovtype.InntekterForSykepengegrunnlag,
                     "Trenger inntekter for sykepengegrunnlag",
                     mapOf(
+                        "skjæringstidspunkt" to skjæringstidspunkt.toString(),
                         "beregningStart" to beregningStart.toString(),
                         "beregningSlutt" to beregningSlutt.toString()
                     )
                 )
             }
 
-            fun arbeidsforhold(aktivitetslogg: IAktivitetslogg) {
-                aktivitetslogg.behov(Behovtype.ArbeidsforholdV2, "Trenger informasjon om arbeidsforhold")
+            fun arbeidsforhold(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate) {
+                aktivitetslogg.behov(Behovtype.ArbeidsforholdV2, "Trenger informasjon om arbeidsforhold", mapOf(
+                    "skjæringstidspunkt" to skjæringstidspunkt.toString()
+                ))
             }
 
             fun dagpenger(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
@@ -227,9 +233,10 @@ sealed class Aktivitet(
                 )
             }
 
-            fun medlemskap(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
+            fun medlemskap(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, fom: LocalDate, tom: LocalDate) {
                 aktivitetslogg.behov(
                     Behovtype.Medlemskap, "Trenger informasjon om medlemskap", mapOf(
+                        "skjæringstidspunkt" to skjæringstidspunkt.toString(),
                         "medlemskapPeriodeFom" to fom.toString(),
                         "medlemskapPeriodeTom" to tom.toString()
                     )

@@ -659,10 +659,10 @@ internal class Vedtaksperiode private constructor(
 
     private fun trengerVilkårsgrunnlag(hendelse: IAktivitetslogg) {
         val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
-        inntekterForSykepengegrunnlag(hendelse, beregningSlutt.minusMonths(2), beregningSlutt)
-        arbeidsforhold(hendelse)
-        inntekterForSammenligningsgrunnlag(hendelse, beregningSlutt.minusMonths(11), beregningSlutt)
-        medlemskap(hendelse, periode.start, periode.endInclusive)
+        inntekterForSykepengegrunnlag(hendelse, skjæringstidspunkt, beregningSlutt.minusMonths(2), beregningSlutt)
+        arbeidsforhold(hendelse, skjæringstidspunkt)
+        inntekterForSammenligningsgrunnlag(hendelse, skjæringstidspunkt, beregningSlutt.minusMonths(11), beregningSlutt)
+        medlemskap(hendelse, skjæringstidspunkt, periode.start, periode.endInclusive)
     }
 
     private fun trengerArbeidsgiveropplysninger() {
