@@ -1,5 +1,6 @@
 package no.nav.helse.dsl
 
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov
@@ -91,7 +92,7 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
         }
     }
 
-    override fun inntektsmeldingReplay(personidentifikator: Personidentifikator, vedtaksperiodeId: UUID) {
+    override fun inntektsmeldingReplay(personidentifikator: Personidentifikator, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, førsteDagIArbeidsgiverperioden: LocalDate?) {
         replays.add(vedtaksperiodeId)
     }
 

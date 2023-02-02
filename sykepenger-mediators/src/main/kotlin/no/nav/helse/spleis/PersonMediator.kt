@@ -6,17 +6,23 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.PersonHendelse
+import no.nav.helse.hendelser.somPeriode
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
+import no.nav.helse.spleis.meldinger.model.asPeriode
 import org.slf4j.LoggerFactory
 
 internal class PersonMediator(
@@ -57,13 +63,25 @@ internal class PersonMediator(
         meldinger.add(Pakke(fødselsnummer, eventName, message))
     }
 
-    override fun inntektsmeldingReplay(personidentifikator: Personidentifikator, vedtaksperiodeId: UUID) {
-        hendelseRepository.finnInntektsmeldinger(personidentifikator).forEach { inntektsmelding ->
-            createReplayMessage(inntektsmelding, mapOf(
-                "@event_name" to "inntektsmelding_replay",
-                "vedtaksperiodeId" to vedtaksperiodeId
-            ))
-        }
+    override fun inntektsmeldingReplay(personidentifikator: Personidentifikator, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, førsteDagIArbeidsgiverperioden: LocalDate?) {
+        // en generøs periode for å finne trolig relevant eventuell inntektsmelding
+        val førstedag = listOfNotNull(skjæringstidspunkt, førsteDagIArbeidsgiverperioden).min().minusDays(30)
+        val søkeområde = førstedag til førstedag.plusYears(1)
+
+        hendelseRepository.finnInntektsmeldinger(personidentifikator)
+            .filter { inntektsmelding ->
+                val førsteFraværsdag = inntektsmelding.path("foersteFravaersdag").asOptionalLocalDate()
+                val arbeidsgiverperioder = inntektsmelding.path("arbeidsgiverperioder").map(::asPeriode)
+
+                val periode = (arbeidsgiverperioder + listOfNotNull(førsteFraværsdag?.somPeriode())).periode()
+                periode != null && periode.overlapperMed(søkeområde)
+            }
+            .forEach { inntektsmelding ->
+                createReplayMessage(inntektsmelding, mapOf(
+                    "@event_name" to "inntektsmelding_replay",
+                    "vedtaksperiodeId" to vedtaksperiodeId
+                ))
+            }
     }
 
     private fun createReplayMessage(message: JsonNode, extraFields: Map<String, Any>) {

@@ -417,9 +417,9 @@ class Person private constructor(
         observers.forEach { it.vedtaksperiodeEndret(event) }
     }
 
-    internal fun inntektsmeldingReplay(vedtaksperiodeId: UUID) {
+    internal fun inntektsmeldingReplay(vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, førsteDagIArbeidsgiverperioden: LocalDate?) {
         observers.forEach {
-            it.inntektsmeldingReplay(personidentifikator, vedtaksperiodeId)
+            it.inntektsmeldingReplay(personidentifikator, vedtaksperiodeId, skjæringstidspunkt, førsteDagIArbeidsgiverperioden)
         }
     }
 

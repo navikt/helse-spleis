@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.inspectors.inspektør
@@ -116,7 +117,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         trengerArbeidsgiveropplysningerVedtaksperioder.add(event)
     }
 
-    override fun inntektsmeldingReplay(personidentifikator: Personidentifikator, vedtaksperiodeId: UUID) {
+    override fun inntektsmeldingReplay(personidentifikator: Personidentifikator, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, førsteDagIArbeidsgiverperioden: LocalDate?) {
         inntektsmeldingReplayEventer.add(vedtaksperiodeId)
     }
 

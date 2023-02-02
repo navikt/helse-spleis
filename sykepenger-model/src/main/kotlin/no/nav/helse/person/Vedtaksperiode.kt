@@ -727,7 +727,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun trengerInntektsmeldingReplay() {
-        person.inntektsmeldingReplay(id)
+        person.inntektsmeldingReplay(id, skjæringstidspunkt, finnArbeidsgiverperiode()?.firstOrNull())
     }
 
     private fun emitVedtaksperiodeEndret(
