@@ -456,10 +456,6 @@ internal class Arbeidsgiver private constructor(
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {
         val sykdomshistorikkId = sykdomshistorikk.nyesteId()
-        if (inntektshistorikk.isEmpty()) {
-            require(!utbetalingstidslinje.harUtbetalinger()) { "Arbeidsgiver har utbetaling, men vi finner ikke inntektshistorikk" }
-            Inntektshistorikk.NULLUUID
-        }
         val vilkårsgrunnlagHistorikkId = vilkårsgrunnlagHistorikk.sisteId()
         beregnetUtbetalingstidslinjer.add(
             Utbetalingstidslinjeberegning(
