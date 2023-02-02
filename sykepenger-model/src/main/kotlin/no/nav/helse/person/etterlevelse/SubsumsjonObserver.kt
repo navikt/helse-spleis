@@ -11,7 +11,6 @@ import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.person.SkatteopplysningVisitor
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag.Tidslinjeperiode.Companion.dager
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
@@ -483,58 +482,6 @@ interface SubsumsjonObserver {
         maksdato: LocalDate,
         startdatoSykepengerettighet: LocalDate
     ) {}
-
-    class Tidslinjedag(
-        private val dato: LocalDate,
-        private val dagtype: String,
-        private val grad: Int?
-    ) {
-        private fun hørerTil(tidslinjeperiode: Tidslinjeperiode) = tidslinjeperiode.hørerTil(dato, dagtype, grad)
-
-        internal fun erRettFør(dato: LocalDate) = this.dato.plusDays(1) == dato
-
-        internal fun erAvvistDag() = dagtype == "AVVISTDAG"
-
-        companion object {
-            fun List<Tidslinjedag>.dager(periode: Periode? = null): List<Map<String, Any?>> {
-                return this
-                    .filter { it.dato >= (periode?.start ?: LocalDate.MIN) && it.dato <= (periode?.endInclusive ?: LocalDate.MAX) }
-                    .sortedBy { it.dato }
-                    .fold(mutableListOf<Tidslinjeperiode>()) { acc, nesteDag ->
-                        if (acc.isNotEmpty() && nesteDag.hørerTil(acc.last())) {
-                            acc.last().utvid(nesteDag.dato)
-                        } else {
-                            acc.add(Tidslinjeperiode(nesteDag.dato, nesteDag.dato, nesteDag.dagtype, nesteDag.grad))
-                        }
-                        acc
-                    }.dager()
-            }
-        }
-
-        private class Tidslinjeperiode(
-            private val fom: LocalDate,
-            private var tom: LocalDate,
-            private val dagtype: String,
-            private val grad: Int?
-        ) {
-            fun utvid(dato: LocalDate) {
-                this.tom = dato
-            }
-
-            fun hørerTil(dato: LocalDate, dagtype: String, grad: Int?) = tom.plusDays(1) == dato && this.dagtype == dagtype && this.grad == grad
-
-            companion object {
-                fun List<Tidslinjeperiode>.dager() = map {
-                    mapOf(
-                        "fom" to it.fom,
-                        "tom" to it.tom,
-                        "dagtype" to it.dagtype,
-                        "grad" to it.grad
-                    )
-                }
-            }
-        }
-    }
 
     private class SykdomstidslinjeBuilder(sykdomstidslinje: Sykdomstidslinje) : SykdomstidslinjeVisitor {
         private val navdager = mutableListOf<Tidslinjedag>()

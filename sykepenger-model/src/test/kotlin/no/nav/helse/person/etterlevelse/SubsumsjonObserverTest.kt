@@ -9,8 +9,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenlignin
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag.Companion.dager
+import no.nav.helse.person.etterlevelse.Tidslinjedag.Companion.dager
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.FRI

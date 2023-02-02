@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.etterlevelse.Tidslinjedag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.A
@@ -204,14 +205,14 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         override fun `§ 8-17 ledd 1 bokstav a`(
             oppfylt: Boolean,
             dagen: LocalDate,
-            sykdomstidslinje: List<SubsumsjonObserver.Tidslinjedag>
+            sykdomstidslinje: List<Tidslinjedag>
         ) {
             subsumsjoner += 1
             if (oppfylt) `§ 8-17 første ledd bokstav a - oppfylt` += 1
             else `§ 8-17 første ledd bokstav a - ikke oppfylt` += 1
         }
 
-        override fun `§ 8-17 ledd 2`(dato: LocalDate, sykdomstidslinje: List<SubsumsjonObserver.Tidslinjedag>) {
+        override fun `§ 8-17 ledd 2`(dato: LocalDate, sykdomstidslinje: List<Tidslinjedag>) {
             subsumsjoner += 1
             `§ 8-17 ledd 2` += 1
         }
@@ -221,22 +222,22 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
             `§ 8-11 første ledd` += 1
         }
 
-        override fun `§ 8-19 første ledd`(dato: LocalDate, beregnetTidslinje: List<SubsumsjonObserver.Tidslinjedag>) {
+        override fun `§ 8-19 første ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {
             subsumsjoner += 1
             `§ 8-19 første ledd - beregning` += 1
         }
 
-        override fun `§ 8-19 andre ledd`(dato: LocalDate, beregnetTidslinje: List<SubsumsjonObserver.Tidslinjedag>) {
+        override fun `§ 8-19 andre ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {
             subsumsjoner += 1
             `§ 8-19 andre ledd - beregning` += 1
         }
 
-        override fun `§ 8-19 tredje ledd`(dato: LocalDate, beregnetTidslinje: List<SubsumsjonObserver.Tidslinjedag>) {
+        override fun `§ 8-19 tredje ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {
             subsumsjoner += 1
             `§ 8-19 tredje ledd - beregning` += 1
         }
 
-        override fun `§ 8-19 fjerde ledd`(dato: LocalDate, beregnetTidslinje: List<SubsumsjonObserver.Tidslinjedag>) {
+        override fun `§ 8-19 fjerde ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {
             subsumsjoner += 1
             `§ 8-19 fjerde ledd - beregning` += 1
         }

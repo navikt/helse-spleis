@@ -51,7 +51,7 @@ import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_BEREGNET
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.etterlevelse.SubsumsjonVisitor
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag.Companion.dager
+import no.nav.helse.person.etterlevelse.Tidslinjedag.Companion.dager
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 
@@ -240,8 +240,8 @@ class MaskinellJurist private constructor(
 
     override fun `§ 8-12 ledd 1 punktum 1`(
         periode: Periode,
-        tidslinjegrunnlag: List<List<SubsumsjonObserver.Tidslinjedag>>,
-        beregnetTidslinje: List<SubsumsjonObserver.Tidslinjedag>,
+        tidslinjegrunnlag: List<List<Tidslinjedag>>,
+        beregnetTidslinje: List<Tidslinjedag>,
         gjenståendeSykedager: Int,
         forbrukteSykedager: Int,
         maksdato: LocalDate,
@@ -288,8 +288,8 @@ class MaskinellJurist private constructor(
         gjenståendeSykepengedager: Int,
         beregnetAntallOppholdsdager: Int,
         tilstrekkeligOppholdISykedager: Int,
-        tidslinjegrunnlag: List<List<SubsumsjonObserver.Tidslinjedag>>,
-        beregnetTidslinje: List<SubsumsjonObserver.Tidslinjedag>
+        tidslinjegrunnlag: List<List<Tidslinjedag>>,
+        beregnetTidslinje: List<Tidslinjedag>
     ) {
         leggTil(
             BetingetSubsumsjon(
@@ -312,7 +312,7 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-13 ledd 1`(periode: Periode, avvisteDager: List<LocalDate>, tidslinjer: List<List<SubsumsjonObserver.Tidslinjedag>>) {
+    override fun `§ 8-13 ledd 1`(periode: Periode, avvisteDager: List<LocalDate>, tidslinjer: List<List<Tidslinjedag>>) {
         fun periode() = periode.toList() - avvisteDager
 
         fun logg(utfall: Utfall, dager: List<LocalDate>) {
@@ -342,7 +342,7 @@ class MaskinellJurist private constructor(
 
     override fun `§ 8-13 ledd 2`(
         periode: Periode,
-        tidslinjer: List<List<SubsumsjonObserver.Tidslinjedag>>,
+        tidslinjer: List<List<Tidslinjedag>>,
         grense: Double,
         dagerUnderGrensen: List<LocalDate>
     ) {
@@ -421,7 +421,7 @@ class MaskinellJurist private constructor(
     override fun `§ 8-17 ledd 1 bokstav a`(
         oppfylt: Boolean,
         dagen: LocalDate,
-        sykdomstidslinje: List<SubsumsjonObserver.Tidslinjedag>
+        sykdomstidslinje: List<Tidslinjedag>
     ) {
         leggTil(
             GrupperbarSubsumsjon(
@@ -440,14 +440,14 @@ class MaskinellJurist private constructor(
 
     override fun `§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(
         periode: Iterable<LocalDate>,
-        sykdomstidslinje: List<SubsumsjonObserver.Tidslinjedag>
+        sykdomstidslinje: List<Tidslinjedag>
     ) {
         periode.forEach {
             `§ 8-17 ledd 1 bokstav a`(false, it, sykdomstidslinje)
         }
     }
 
-    override fun `§ 8-17 ledd 2`(dato: LocalDate, sykdomstidslinje: List<SubsumsjonObserver.Tidslinjedag>) {
+    override fun `§ 8-17 ledd 2`(dato: LocalDate, sykdomstidslinje: List<Tidslinjedag>) {
         leggTil(
             GrupperbarSubsumsjon(
                 dato = dato,
@@ -464,7 +464,7 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-19 første ledd`(dato: LocalDate, beregnetTidslinje: List<SubsumsjonObserver.Tidslinjedag>) {
+    override fun `§ 8-19 første ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {
         leggTil(
             EnkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
@@ -482,7 +482,7 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-19 andre ledd`(dato: LocalDate, beregnetTidslinje: List<SubsumsjonObserver.Tidslinjedag>) {
+    override fun `§ 8-19 andre ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {
         leggTil(
             GrupperbarSubsumsjon(
                 dato = dato,
@@ -499,7 +499,7 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-19 tredje ledd`(dato: LocalDate, beregnetTidslinje: List<SubsumsjonObserver.Tidslinjedag>) {
+    override fun `§ 8-19 tredje ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {
         leggTil(
             GrupperbarSubsumsjon(
                 dato = dato,
@@ -516,7 +516,7 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-19 fjerde ledd`(dato: LocalDate, beregnetTidslinje: List<SubsumsjonObserver.Tidslinjedag>) {
+    override fun `§ 8-19 fjerde ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {
         leggTil(
             GrupperbarSubsumsjon(
                 dato = dato,
@@ -771,8 +771,8 @@ class MaskinellJurist private constructor(
 
     override fun `§ 8-51 ledd 3`(
         periode: Periode,
-        tidslinjegrunnlag: List<List<SubsumsjonObserver.Tidslinjedag>>,
-        beregnetTidslinje: List<SubsumsjonObserver.Tidslinjedag>,
+        tidslinjegrunnlag: List<List<Tidslinjedag>>,
+        beregnetTidslinje: List<Tidslinjedag>,
         gjenståendeSykedager: Int,
         forbrukteSykedager: Int,
         maksdato: LocalDate,
