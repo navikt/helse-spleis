@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Inntekttype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -27,42 +28,8 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
 
-    private val inntekterForSammenligningsgrunnlag = packet["@løsning.${InntekterForSammenligningsgrunnlag.name}"]
-        .flatMap { måned ->
-            måned["inntektsliste"]
-                .groupBy({ inntekt -> inntekt.arbeidsgiver() }) { inntekt ->
-                    ArbeidsgiverInntekt.MånedligInntekt(
-                        yearMonth = måned["årMåned"].asYearMonth(),
-                        inntekt = inntekt["beløp"].asDouble().månedlig,
-                        type = inntekt["inntektstype"].asInntekttype(),
-                        fordel = if (inntekt.path("fordel").isTextual) inntekt["fordel"].asText() else "",
-                        beskrivelse = if (inntekt.path("beskrivelse").isTextual) inntekt["beskrivelse"].asText() else ""
-                    )
-                }.toList()
-        }
-        .groupBy({ (arbeidsgiver, _) -> arbeidsgiver }) { (_, inntekter) -> inntekter }
-        .map { (arbeidsgiver, inntekter) ->
-            ArbeidsgiverInntekt(arbeidsgiver, inntekter.flatten())
-        }
-
-    private val inntekterForSykepengegrunnlag = packet["@løsning.${InntekterForSykepengegrunnlag.name}"]
-        .flatMap { måned ->
-            måned["inntektsliste"]
-                .groupBy({ inntekt -> inntekt.arbeidsgiver() }) { inntekt ->
-                    ArbeidsgiverInntekt.MånedligInntekt(
-                        yearMonth = måned["årMåned"].asYearMonth(),
-                        inntekt = inntekt["beløp"].asDouble().månedlig,
-                        type = inntekt["inntektstype"].asInntekttype(),
-                        fordel = if (inntekt.path("fordel").isTextual) inntekt["fordel"].asText() else "",
-                        beskrivelse = if (inntekt.path("beskrivelse").isTextual) inntekt["beskrivelse"].asText() else ""
-                    )
-                }.toList()
-        }
-        .groupBy({ (arbeidsgiver, _) -> arbeidsgiver }) { (_, inntekter) -> inntekter }
-        .map { (arbeidsgiver, inntekter) ->
-            ArbeidsgiverInntekt(arbeidsgiver, inntekter.flatten())
-        }
-
+    private val inntekterForSammenligningsgrunnlag = mapSkatteopplysninger(packet["@løsning.${InntekterForSammenligningsgrunnlag.name}"])
+    private val inntekterForSykepengegrunnlag = mapSkatteopplysninger(packet["@løsning.${InntekterForSykepengegrunnlag.name}"])
     private val arbeidsforholdForSykepengegrunnlag = packet["@løsning.${InntekterForSykepengegrunnlag.name}"]
         .flatMap { måned ->
             måned["arbeidsforholdliste"]
@@ -117,9 +84,9 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
         mediator.behandle(this, vilkårsgrunnlag, context)
     }
 
-    companion object {
+    private companion object {
 
-        internal fun JsonNode.asInntekttype() = when (this.asText()) {
+        private fun JsonNode.asInntekttype() = when (this.asText()) {
             "LOENNSINNTEKT" -> Inntekttype.LØNNSINNTEKT
             "NAERINGSINNTEKT" -> Inntekttype.NÆRINGSINNTEKT
             "PENSJON_ELLER_TRYGD" -> Inntekttype.PENSJON_ELLER_TRYGD
@@ -127,11 +94,30 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
             else -> error("Kunne ikke mappe Inntekttype")
         }
 
-        internal fun JsonNode.arbeidsgiver() = when {
+        private fun JsonNode.arbeidsgiver() = when {
             path("orgnummer").isTextual -> path("orgnummer").asText()
             path("fødselsnummer").isTextual -> path("fødselsnummer").asText()
             path("aktørId").isTextual -> path("aktørId").asText()
             else -> error("Mangler arbeidsgiver for inntekt i hendelse")
         }
+
+        private fun mapSkatteopplysninger(opplysninger: JsonNode) =
+            opplysninger.flatMap { måned ->
+                måned["inntektsliste"].map { opplysning ->
+                    (opplysning as ObjectNode).put("årMåned", måned.path("årMåned").asText())
+                }
+            }
+            .groupBy({ inntekt -> inntekt.arbeidsgiver() }) { inntekt ->
+                ArbeidsgiverInntekt.MånedligInntekt(
+                    yearMonth = inntekt["årMåned"].asYearMonth(),
+                    inntekt = inntekt["beløp"].asDouble().månedlig,
+                    type = inntekt["inntektstype"].asInntekttype(),
+                    fordel = if (inntekt.path("fordel").isTextual) inntekt["fordel"].asText() else "",
+                    beskrivelse = if (inntekt.path("beskrivelse").isTextual) inntekt["beskrivelse"].asText() else ""
+                )
+            }
+            .map { (arbeidsgiver, inntekter) ->
+                ArbeidsgiverInntekt(arbeidsgiver, inntekter)
+            }
     }
 }
