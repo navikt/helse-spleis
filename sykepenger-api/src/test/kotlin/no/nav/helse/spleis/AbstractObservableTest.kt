@@ -170,6 +170,7 @@ abstract class AbstractObservableTest {
     ): Vilkårsgrunnlag = Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
+            skjæringstidspunkt = FOM,
             aktørId = AKTØRID,
             personidentifikator = fnr.somPersonidentifikator(),
             orgnummer = orgnummer,

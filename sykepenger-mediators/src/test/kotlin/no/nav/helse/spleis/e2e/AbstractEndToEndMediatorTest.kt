@@ -30,6 +30,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.TilstandType
+import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.toUUID
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.spleis.HendelseMediator
@@ -352,6 +353,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSykepengegrunnlag))
         val (_, message) = meldingsfabrikk.lagVilkårsgrunnlag(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+            skjæringstidspunkt = testRapid.inspektør.etterspurteBehov(Medlemskap).path("Medlemskap").path("skjæringstidspunkt").asLocalDate(),
             tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(
                 vedtaksperiodeIndeks,
                 InntekterForSammenligningsgrunnlag

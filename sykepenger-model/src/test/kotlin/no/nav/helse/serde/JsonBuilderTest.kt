@@ -402,8 +402,7 @@ class JsonBuilderTest {
                     perioder = listOf(Periode(fom, 4.januar), Periode(8.januar, 16.januar))
                 )
             )
-            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
-            håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+            håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId, skjæringstidspunkt = 8.januar))
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
             håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
             håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
@@ -672,6 +671,7 @@ class JsonBuilderTest {
 
     private fun vilkårsgrunnlag(
         vedtaksperiodeId: String,
+        skjæringstidspunkt: LocalDate = 1.januar,
         inntektsvurdering: List<ArbeidsgiverInntekt> = inntektperioderForSammenligningsgrunnlag {
             1.januar(2017) til 1.desember(2017) inntekter {
                 orgnummer inntekt 31000.månedlig
@@ -686,6 +686,7 @@ class JsonBuilderTest {
     ) = Vilkårsgrunnlag(
         meldingsreferanseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeId,
+        skjæringstidspunkt = skjæringstidspunkt,
         aktørId = aktørId,
         personidentifikator = fnr,
         orgnummer = orgnummer,

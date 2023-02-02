@@ -554,6 +554,7 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
     assertEtterspurt(Behovtype.Medlemskap)
     vilkårsgrunnlag(
         vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
+        skjæringstidspunkt = finnSkjæringstidspunkt(orgnummer, vedtaksperiodeIdInnhenter),
         medlemskapstatus = medlemskapstatus,
         orgnummer = orgnummer,
         arbeidsforhold = arbeidsforhold,

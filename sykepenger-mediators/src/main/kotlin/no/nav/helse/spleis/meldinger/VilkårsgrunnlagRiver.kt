@@ -19,6 +19,10 @@ internal class VilkårsgrunnlagRiver(
 
     override fun validate(message: JsonMessage) {
         message.requireKey("vedtaksperiodeId", "tilstand")
+        message.require("${InntekterForSammenligningsgrunnlag.name}.skjæringstidspunkt", JsonNode::asLocalDate)
+        message.require("${InntekterForSykepengegrunnlag.name}.skjæringstidspunkt", JsonNode::asLocalDate)
+        message.require("${ArbeidsforholdV2.name}.skjæringstidspunkt", JsonNode::asLocalDate)
+        message.require("${Medlemskap.name}.skjæringstidspunkt", JsonNode::asLocalDate)
         message.requireArray("@løsning.${InntekterForSammenligningsgrunnlag.name}") {
             require("årMåned", JsonNode::asYearMonth)
             requireArray("inntektsliste") {

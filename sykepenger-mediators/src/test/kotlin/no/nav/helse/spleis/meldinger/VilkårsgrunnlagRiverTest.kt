@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
+import no.nav.helse.januar
 import no.nav.helse.spleis.e2e.AbstractEndToEndMediatorTest.Companion.UNG_PERSON_FØDSELSDATO
 
 internal class VilkårsgrunnlagRiverTest : RiverTest() {
@@ -33,6 +34,7 @@ internal class VilkårsgrunnlagRiverTest : RiverTest() {
         assertNoErrors(
             testMessageFactory.lagVilkårsgrunnlag(
                 vedtaksperiodeId = UUID.randomUUID(),
+                skjæringstidspunkt = 1.januar,
                 tilstand = TilstandType.START,
                 inntekter = emptyList(),
                 inntekterForSykepengegrunnlag = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning(
@@ -51,6 +53,7 @@ internal class VilkårsgrunnlagRiverTest : RiverTest() {
         assertNoErrors(
             testMessageFactory.lagVilkårsgrunnlag(
                 vedtaksperiodeId = UUID.randomUUID(),
+                skjæringstidspunkt = 1.januar,
                 tilstand = TilstandType.START,
                 inntekter = emptyList(),
                 inntekterForSykepengegrunnlag = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning(

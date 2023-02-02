@@ -354,7 +354,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
-        if (!vilkårsgrunnlag.erRelevant(id)) return
+        if (!vilkårsgrunnlag.erRelevant(id, skjæringstidspunkt)) return
         kontekst(vilkårsgrunnlag)
         tilstand.håndter(this, vilkårsgrunnlag)
     }
@@ -608,13 +608,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
-        val grunnlagForSykepengegrunnlag = vilkårsgrunnlag.avklarSykepengegrunnlag(person, skjæringstidspunkt, jurist())
-
-        vilkårsgrunnlag.valider(
-            grunnlagForSykepengegrunnlag,
-            skjæringstidspunkt,
-            jurist()
-        )
+        val grunnlagForSykepengegrunnlag = vilkårsgrunnlag.avklarSykepengegrunnlag(person, jurist())
+        vilkårsgrunnlag.valider(grunnlagForSykepengegrunnlag, jurist())
         person.lagreVilkårsgrunnlag(vilkårsgrunnlag.grunnlagsdata())
         if (vilkårsgrunnlag.harFunksjonelleFeilEllerVerre()) {
             return forkast(vilkårsgrunnlag)

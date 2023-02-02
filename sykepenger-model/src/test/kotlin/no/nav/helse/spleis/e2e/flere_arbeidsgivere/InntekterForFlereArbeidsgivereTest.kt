@@ -75,6 +75,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         vilkårsgrunnlag(
             1.vedtaksperiode,
+            skjæringstidspunkt = 1.januar,
             orgnummer = a1,
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -135,6 +136,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         val vilkårsgrunnlag = vilkårsgrunnlag(
             1.vedtaksperiode,
+            skjæringstidspunkt = 1.januar,
             orgnummer = a1,
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -155,7 +157,6 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
         vilkårsgrunnlag.valider(
             Sykepengegrunnlag(1.januar.alder, emptyList(), 1.januar, NullObserver, false),
-            1.januar,
             NullObserver
         )
         assertEquals(300000.årlig, vilkårsgrunnlag.grunnlagsdata().inspektør.sammenligningsgrunnlag.inspektør.sammenligningsgrunnlag)
@@ -178,6 +179,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         vilkårsgrunnlag(
             1.vedtaksperiode,
+            skjæringstidspunkt = 1.januar,
             orgnummer = a1,
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -216,6 +218,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
         vilkårsgrunnlag(
             1.vedtaksperiode,
+            skjæringstidspunkt = 1.januar,
             orgnummer = a1,
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -312,6 +315,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     private fun vilkårsgrunnlag(
         vedtaksperiodeIdInnhenter: IdInnhenter,
+        skjæringstidspunkt: LocalDate,
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
@@ -322,6 +326,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         return Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
+            skjæringstidspunkt = skjæringstidspunkt,
             aktørId = AKTØRID,
             personidentifikator = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,

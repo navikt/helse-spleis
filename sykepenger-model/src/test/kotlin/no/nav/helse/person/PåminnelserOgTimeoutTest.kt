@@ -219,6 +219,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
+            skjæringstidspunkt = 1.januar,
             aktørId = "aktørId",
             personidentifikator = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,

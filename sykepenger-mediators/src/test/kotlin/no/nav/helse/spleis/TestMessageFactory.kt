@@ -562,6 +562,7 @@ internal class TestMessageFactory(
 
     fun lagVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
+        skjæringstidspunkt: LocalDate,
         tilstand: TilstandType,
         inntekter: List<InntekterForSammenligningsgrunnlagFraLøsning>,
         inntekterForSykepengegrunnlag: List<InntekterForSykepengegrunnlagFraLøsning>,
@@ -633,6 +634,20 @@ internal class TestMessageFactory(
                         "ansattTil" to it.ansattTil
                     )
                 }
+            ),
+            ekstraFelter = mapOf(
+                InntekterForSykepengegrunnlag.name to mapOf(
+                    "skjæringstidspunkt" to skjæringstidspunkt
+                ),
+                InntekterForSammenligningsgrunnlag.name to mapOf(
+                    "skjæringstidspunkt" to skjæringstidspunkt
+                ),
+                ArbeidsforholdV2.name to mapOf(
+                    "skjæringstidspunkt" to skjæringstidspunkt
+                ),
+                Medlemskap.name to mapOf(
+                    "skjæringstidspunkt" to skjæringstidspunkt
+                ),
             )
         )
     }

@@ -220,6 +220,7 @@ internal class TestPerson(
             behovsamler.bekreftBehov(vedtaksperiodeId, InntekterForSammenligningsgrunnlag, InntekterForSykepengegrunnlag, ArbeidsforholdV2, Medlemskap)
             arbeidsgiverHendelsefabrikk.lagVilkårsgrunnlag(
                 vedtaksperiodeId,
+                inspektør.skjæringstidspunkt(vedtaksperiodeId),
                 medlemskapstatus,
                 arbeidsforhold ?: arbeidsgivere.map { (orgnr, _) -> Vilkårsgrunnlag.Arbeidsforhold(orgnr, LocalDate.EPOCH, null) },
                 inntektsvurdering ?: lagStandardSammenligningsgrunnlag(

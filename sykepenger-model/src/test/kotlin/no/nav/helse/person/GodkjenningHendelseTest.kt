@@ -197,6 +197,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
         Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
+            skjæringstidspunkt = førsteSykedag,
             aktørId = "aktørId",
             personidentifikator = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,

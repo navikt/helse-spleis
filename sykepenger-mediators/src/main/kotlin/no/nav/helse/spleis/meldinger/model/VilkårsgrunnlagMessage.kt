@@ -61,10 +61,18 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
         else -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
     }
 
+    private val skjæringstidspunkter = listOf(
+        packet["${InntekterForSykepengegrunnlag.name}.skjæringstidspunkt"].asLocalDate(),
+        packet["${InntekterForSammenligningsgrunnlag.name}.skjæringstidspunkt"].asLocalDate(),
+        packet["${ArbeidsforholdV2.name}.skjæringstidspunkt"].asLocalDate(),
+        packet["${Medlemskap.name}.skjæringstidspunkt"].asLocalDate(),
+    )
+
     private val vilkårsgrunnlag
         get() = Vilkårsgrunnlag(
             meldingsreferanseId = this.id,
             vedtaksperiodeId = vedtaksperiodeId,
+            skjæringstidspunkt = skjæringstidspunkter.distinct().single(),
             aktørId = aktørId,
             personidentifikator = fødselsnummer.somPersonidentifikator(),
             orgnummer = organisasjonsnummer,

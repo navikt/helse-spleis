@@ -193,6 +193,7 @@ internal fun AbstractEndToEndTest.inntektsmelding(
 
 internal fun AbstractEndToEndTest.vilkårsgrunnlag(
     vedtaksperiodeIdInnhenter: IdInnhenter,
+    skjæringstidspunkt: LocalDate,
     medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))),
@@ -203,6 +204,7 @@ internal fun AbstractEndToEndTest.vilkårsgrunnlag(
     return Vilkårsgrunnlag(
         meldingsreferanseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
+        skjæringstidspunkt = skjæringstidspunkt,
         aktørId = AKTØRID,
         personidentifikator = fnr,
         orgnummer = orgnummer,

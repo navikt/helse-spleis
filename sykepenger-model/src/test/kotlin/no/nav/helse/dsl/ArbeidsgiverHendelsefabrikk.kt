@@ -186,6 +186,7 @@ internal class ArbeidsgiverHendelsefabrikk(
 
     internal fun lagVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
+        skjæringstidspunkt: LocalDate,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
         inntektsvurdering: Inntektsvurdering,
@@ -194,6 +195,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         return Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId.toString(),
+            skjæringstidspunkt = skjæringstidspunkt,
             aktørId = aktørId,
             personidentifikator = personidentifikator,
             orgnummer = organisasjonsnummer,

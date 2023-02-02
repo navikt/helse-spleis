@@ -97,6 +97,7 @@ internal class MessageMediatorTest {
     fun vilkårsgrunnlag() {
         testRapid.sendTestMessage(meldingsfabrikk.lagVilkårsgrunnlag(
             vedtaksperiodeId = UUID.randomUUID(),
+            skjæringstidspunkt = 1.januar,
             tilstand = TilstandType.START,
             inntekter = emptyList(),
             inntekterForSykepengegrunnlag = emptyList(),
