@@ -1,4 +1,4 @@
-package no.nav.helse.person.etterlevelse
+package no.nav.helse.etterlevelse
 
 import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
@@ -10,9 +10,9 @@ class Tidslinjedag(
 ) {
     private fun hørerTil(tidslinjeperiode: Tidslinjeperiode) = tidslinjeperiode.hørerTil(dato, dagtype, grad)
 
-    internal fun erRettFør(dato: LocalDate) = this.dato.plusDays(1) == dato
+    fun erRettFør(dato: LocalDate) = this.dato.plusDays(1) == dato
 
-    internal fun erAvvistDag() = dagtype == "AVVISTDAG"
+    fun erAvvistDag() = dagtype == "AVVISTDAG"
 
     companion object {
         fun List<Tidslinjedag>.dager(periode: Periode? = null): List<Map<String, Any?>> {

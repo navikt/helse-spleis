@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.person.SkatteopplysningVisitor
