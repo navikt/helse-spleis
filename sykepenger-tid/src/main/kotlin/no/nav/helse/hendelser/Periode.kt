@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import no.nav.helse.erRettFør
-import no.nav.helse.nesteArbeidsdag
 import no.nav.helse.nesteDag
 
 // Understands beginning and end of a time interval
@@ -37,7 +36,14 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
         fun List<Periode>.grupperSammenhengendePerioder() = merge(mergeKantIKant)
         fun List<Periode>.grupperSammenhengendePerioderMedHensynTilHelg() = merge(mergeOverHelg)
 
+        fun List<Periode>.sammenhengende(dato: LocalDate) = this
+            .grupperSammenhengendePerioderMedHensynTilHelg()
+            .firstOrNull { dato in it || it.erRettFør(dato) }
+            ?.let { it.start til dato }
+            ?: dato.somPeriode()
+
         val Iterable<LocalDate>.omsluttendePeriode get() = this.takeIf { it.iterator().hasNext() }?.let { min() til max() }
+
         fun Iterable<LocalDate>.periodeRettFør(dato: LocalDate): Periode? {
             val rettFør = sorted().lastOrNull { it.erRettFør(dato) } ?: return null
             return grupperSammenhengendePerioderMedHensynTilHelg().single { rettFør in it }.let { periode ->
@@ -56,12 +62,6 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
             }
             return resultat
         }
-
-        fun Collection<Periode>.sammenhengende(skjæringstidspunkt: LocalDate) = sortedByDescending { it.start }
-            .fold(skjæringstidspunkt til skjæringstidspunkt) { acc, periode ->
-                if (periode.rettFørEllerOverlapper(acc.start)) periode.start til acc.endInclusive
-                else acc
-            }
 
         fun Iterable<Periode>.overlapper(): Boolean {
             sortedBy { it.start }.zipWithNext { nåværende, neste ->
@@ -95,8 +95,6 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
 
     fun erRettFør(other: Periode) = erRettFør(other.start)
     fun erRettFør(other: LocalDate) = this.endInclusive.erRettFør(other)
-
-    private fun rettFørEllerOverlapper(dato: LocalDate) = start < dato && endInclusive.nesteArbeidsdag() >= dato
 
     fun periodeMellom(other: LocalDate): Periode? {
         val enDagFør = other.minusDays(1)

@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMed
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
+import no.nav.helse.hendelser.Periode.Companion.sammenhengende
 import no.nav.helse.hendelser.Periode.Companion.slutterEtter
 import no.nav.helse.januar
 import no.nav.helse.juli
@@ -45,6 +46,24 @@ internal class PeriodeTest {
 
         assertEquals(forventet, perioder.grupperSammenhengendePerioder())
     }
+
+    @Test
+    fun `strekker perioder sammen`() {
+        val perioder = listOf(
+            2.januar til 5.januar,
+            6.januar til 11.januar,
+            15.januar til 19.januar
+        )
+        assertEquals(2.januar til 2.januar, perioder.sammenhengende(2.januar))
+        assertEquals(2.januar til 8.januar, perioder.sammenhengende(8.januar))
+        assertEquals(2.januar til 12.januar, perioder.sammenhengende(12.januar))
+        assertEquals(13.januar.somPeriode(), perioder.sammenhengende(13.januar))
+        assertEquals(1.januar.somPeriode(), perioder.sammenhengende(1.januar))
+        assertEquals(14.januar.somPeriode(), perioder.sammenhengende(14.januar))
+        assertEquals(15.januar til 22.januar, perioder.sammenhengende(22.januar))
+        assertEquals(23.januar.somPeriode(), perioder.sammenhengende(23.januar))
+    }
+
     @Test
     fun `siste periode linker alle sammen`() {
         val perioder = listOf(
