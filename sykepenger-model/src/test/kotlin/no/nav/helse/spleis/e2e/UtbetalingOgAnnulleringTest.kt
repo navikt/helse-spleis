@@ -1,6 +1,9 @@
 package no.nav.helse.spleis.e2e
 
+import java.lang.NullPointerException
+import java.lang.RuntimeException
 import java.time.LocalDateTime
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -24,6 +27,7 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -31,10 +35,35 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 
 internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `annullere førstegangsbehandling uten utbetaling`() {
+        nyPeriode(1.januar til 20.januar, grad = 19.prosent)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+        var err: RuntimeException? = null
+        try {
+            håndterAnnullerUtbetaling(ORGNUMMER)
+        } catch (ex: RuntimeException) {
+            err = ex
+        }
+
+        assertForventetFeil(
+            forklaring = "nullpointer ved godkjenning",
+            nå = { assertNotNull(err) },
+            ønsket = { assertNull(err) }
+        )
+    }
 
     @Test
     fun `annullerer første periode før andre periode starter i en ikke-sammenhengende utbetaling med mer enn 16 dager gap`() {
