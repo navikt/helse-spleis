@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDateTime
 import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
+import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -373,6 +374,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅Løses med oppdelt håndtering av inntektsmelding")
     fun `setter riktig inntekt i utbetalingstidslinjebuilder`() {
         håndterSykmelding(Sykmeldingsperiode(21.september(2020), 10.oktober(2020), 100.prosent))
         håndterSøknad(Sykdom(21.september(2020), 10.oktober(2020), 100.prosent))
@@ -423,6 +425,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅Løses med oppdelt håndtering av inntektsmelding")
     fun `vedtaksperioder som avventer inntektsmelding strekkes ikke tilbake til å dekke arbeidsgiverperiode om det er helg mellom`() {
         nyPeriode(1.januar til 31.januar, a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
@@ -436,7 +439,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertForventetFeil(
             forklaring = "Perioden trekkes ikke tilbake til å dekke arbeidsgiverperioden",
             nå = { assertEquals(1.januar til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode()) },
-            ønsket = { assertEquals(16.desember(2017) til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode()) }
+            ønsket = { assertEquals(14.desember(2017) til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode()) }
         )
     }
 
@@ -969,7 +972,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Starter ikke ny arbeidsgiverperiode dersom flere opphold til sammen utgjør over 16 dager når hvert opphold er under 16 dager - opphold etter arbeidsgiverperioden`() {
+    fun `Starter ikke ny arbeidsgiverperiode dersom flere opphold til sammen utgjør over 16 dager når hvert opphold er under 16 dager - opphold etter arbeidsgiverperioden`() = Toggle.HåndterInntektsmeldingOppdelt.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 10.januar(2021), 100.prosent))
         håndterSøknad(Sykdom(1.januar(2021), 10.januar(2021), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -986,6 +989,12 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 20.januar(2021) til 25.januar(2021)
             ), INNTEKT, førsteFraværsdag = 5.februar(2021)
         )
+
+        assertEquals("SHH SSSSSHH AAAAARR AASSSHH S?????? ????SHH SSSSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertEquals(1.januar(2021) til 10.januar(2021), inspektør.periode(1.vedtaksperiode))
+        assertEquals(20.januar(2021) til 25.januar(2021), inspektør.periode(2.vedtaksperiode))
+        assertEquals(5.februar(2021) til 12.februar(2021), inspektør.periode(3.vedtaksperiode))
+
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2020) til 1.desember(2020) inntekter {

@@ -19,7 +19,7 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 
 internal class DagerFraInntektsmelding(
     private val inntektsmelding: Inntektsmelding,
-    private val sammenhengendePerioder: List<Periode> = emptyList()
+    private val sammenhengendePerioder: List<Periode>
 ): IAktivitetslogg by inntektsmelding {
     private val opprinneligPeriode = inntektsmelding.sykdomstidslinje().periode()
     private val arbeidsdager = mutableSetOf<LocalDate>()
@@ -35,22 +35,28 @@ internal class DagerFraInntektsmelding(
     internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = inntektsmelding.leggTil(hendelseIder)
 
     private fun valider(arbeidsgiverperiode: Arbeidsgiverperiode?) = inntektsmelding.validerArbeidsgiverperiode(arbeidsgiverperiode)
-    internal fun vurdertTilOgMed(dato: LocalDate) = inntektsmelding.trimLeft(dato)
-    internal fun oppdatertFom(periode: Periode) = inntektsmelding.oppdaterFom(periode)
-    internal fun leggTilArbeidsdagerFør(dato: LocalDate) {
+
+    private var vurdertTilOgMed: LocalDate = LocalDate.MIN
+    internal fun vurdertTilOgMed(dato: LocalDate) {
+        vurdertTilOgMed = dato
+        gjenståendeDager.removeAll { it <= dato }
+    }
+
+    private fun leggTilArbeidsdagerFør(dato: LocalDate) {
         checkNotNull(opprinneligPeriode) { "Forventer ikke å utvide en tom sykdomstidslinje" }
         inntektsmelding.padLeft(dato)
         val oppdatertPeriode = inntektsmelding.sykdomstidslinje().periode() ?: return
-        if (opprinneligPeriode == oppdatertPeriode) return
-        val arbeidsdagerFør = oppdatertPeriode - opprinneligPeriode
+        val arbeidsdagerFør = (oppdatertPeriode - opprinneligPeriode).filter { it > vurdertTilOgMed }.takeUnless { it.isEmpty() } ?: return
         arbeidsdager.addAll(arbeidsdagerFør)
         gjenståendeDager.addAll(arbeidsdagerFør)
     }
 
-    internal fun håndterPeriodeRettFør(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit) {
-        val periodeRettFør = periodeRettFør(periode) ?: return
+    internal fun håndterPeriodeRettFør(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit): Periode? {
+        leggTilArbeidsdagerFør(periode.start)
+        val periodeRettFør = periodeRettFør(periode) ?: return null
         oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, periodeRettFør))
         gjenståendeDager.removeAll(periodeRettFør)
+        return periodeRettFør
     }
 
     internal fun håndterPeriodeRettFør(periode: Periode, arbeidsgiver: Arbeidsgiver) = håndterPeriodeRettFør(periode) {

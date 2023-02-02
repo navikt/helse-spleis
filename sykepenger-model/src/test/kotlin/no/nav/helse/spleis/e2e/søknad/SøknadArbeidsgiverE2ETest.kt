@@ -579,6 +579,8 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅Trekker nå vedtaksperiode 2 tilbake til 6.januar")
+
     fun `avslutter korte perioder med gap med søknad etter IM`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(9.januar, 12.januar, 100.prosent))

@@ -1377,6 +1377,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅Løses med oppdelt håndtering av inntektsmelding")
     fun `Inntektsmelding oppgir tidligere egenmeldingsdager før kort periode - omgjøring?`() {
         nyPeriode(4.desember(2022) til 11.desember(2022))
         håndterUtbetalingshistorikk(1.vedtaksperiode)

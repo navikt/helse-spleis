@@ -103,6 +103,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅Løses med oppdelt håndtering av inntektsmelding")
     fun `Inntektsmelding sletter vilkårsgrunnlag og trekker tilbake penger`() {
         createOvergangFraInfotrygdPerson()
         assertEquals(1.januar til 31.januar, person.inspektør.utbetaltIInfotrygd.single())

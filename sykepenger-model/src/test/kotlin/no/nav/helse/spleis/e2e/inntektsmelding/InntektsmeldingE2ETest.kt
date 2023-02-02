@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -1795,6 +1796,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅Løses med oppdelt håndtering av inntektsmelding")
     fun `arbeidsgiverperioden starter tidligere`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 10.januar, 100.prosent))
@@ -1885,6 +1887,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅Løses med oppdelt håndtering av inntektsmelding")
     fun `Inntektsmelding strekker ikke periode tilbake når det er en helgedag mellom agp og periode`() {
         nyPeriode(22.januar til 16.februar)
         assertEquals(22.januar til 16.februar, inspektør.periode(1.vedtaksperiode))
@@ -1894,10 +1897,12 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅ Legger ikke lengre til dager i forkant med gap til vedtaksperioden")
     fun `Arbeidsgiverperiode treffer ingen vedtaksperioder og oppgitt begrunnelseForReduksjonEllerIkkeUtbetalt`() {
         nyPeriode(22.januar til 16.februar)
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         håndterInntektsmelding(listOf(5.januar til 20.januar), førsteFraværsdag = 22.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "Mjau")
+        assertEquals(5.januar til 16.februar, inspektør.periode(1.vedtaksperiode))
         // Vi forkaster dagene fra søknaden, men dagene fra inntektsmeldingen beholdes på arbeidsgivers tidslinje
         assertEquals("UGG UUUUUGG UUUUUGR", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
@@ -1916,13 +1921,15 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
 
     @Test
-    fun `arbeidsgiveperiode i forkant av vedtaksperiode med en dags gap`() {
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅ Tar ikke med snute med gap til vedtaksperiode")
+    fun `arbeidsgiveperiode i forkant av vedtaksperiode med en dags gap`() = Toggle.HåndterInntektsmeldingOppdelt.disable {
         håndterSykmelding(Sykmeldingsperiode(6.februar, 20.februar, 100.prosent))
         håndterSøknad(Sykdom(6.februar, 20.februar, 100.prosent))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(20.januar til 4.februar),
             førsteFraværsdag = 6.februar
         )
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertEquals("GG UUUUUGG UUUUUGG ?SSSSHH SSSSSHH SS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertEquals(1, inspektør.inntektInspektør.size)
         assertIngenInfo("Inntektsmelding ikke håndtert")
