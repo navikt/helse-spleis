@@ -15,6 +15,7 @@ import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_A
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_B
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_C
 import no.nav.helse.etterlevelse.FOLKETRYGDLOVENS_OPPRINNELSESDATO
+import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.toMap
@@ -886,18 +887,5 @@ class MaskinellJurist private constructor(
         Dokumentsporing.Type.OverstyrArbeidsforhold -> KontekstType.OverstyrArbeidsforhold
     }
 
-    enum class KontekstType {
-        Fødselsnummer,
-        Organisasjonsnummer,
-        Vedtaksperiode,
-        Sykmelding,
-        Søknad,
-        Inntektsmelding,
-        OverstyrTidslinje,
-        OverstyrInntekt,
-        OverstyrRefusjon,
-        OverstyrArbeidsgiveropplysninger,
-        OverstyrArbeidsforhold,
-    }
 }
 

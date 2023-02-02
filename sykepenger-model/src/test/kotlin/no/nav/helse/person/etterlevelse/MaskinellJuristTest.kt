@@ -2,13 +2,13 @@ package no.nav.helse.person.etterlevelse
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.januar
-import no.nav.helse.person.etterlevelse.MaskinellJurist.*
 import no.nav.helse.somPersonidentifikator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 import no.nav.helse.etterlevelse.Bokstav
+import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Punktum
