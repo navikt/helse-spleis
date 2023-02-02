@@ -61,7 +61,11 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         assertForventetFeil(
             forklaring = "nullpointer ved godkjenning",
             nå = { assertNotNull(err) },
-            ønsket = { assertNull(err) }
+            ønsket = {
+                assertNull(err)
+                assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+                assertEquals(Utbetaling.Annullert, inspektør.utbetaling(1).inspektør.tilstand)
+            }
         )
     }
 
