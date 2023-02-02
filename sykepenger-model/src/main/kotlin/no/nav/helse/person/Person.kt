@@ -648,15 +648,6 @@ class Person private constructor(
         }
     }
 
-    internal fun lagreArbeidsforhold(
-        orgnummer: String,
-        arbeidsforhold: List<Arbeidsforholdhistorikk.Arbeidsforhold>,
-        aktivitetslogg: IAktivitetslogg,
-        skjæringstidspunkt: LocalDate
-    ) {
-        finnEllerOpprettArbeidsgiver(orgnummer, aktivitetslogg).lagreArbeidsforhold(arbeidsforhold, skjæringstidspunkt)
-    }
-
     internal fun fyllUtPeriodeMedForventedeDager(
         hendelse: PersonHendelse,
         periode: Periode,

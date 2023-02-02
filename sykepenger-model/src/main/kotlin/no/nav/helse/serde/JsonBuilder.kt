@@ -13,7 +13,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Subsumsjon
-import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.toMap
@@ -281,12 +280,6 @@ internal class JsonBuilder : AbstractBuilder() {
             pushState(RefusjonshistorikkState(historikk))
         }
 
-        override fun preVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {
-            val historikk = mutableListOf<Map<String, Any?>>()
-            arbeidsgiverMap["arbeidsforholdhistorikk"] = historikk
-            pushState(ArbeidsforholdhistorikkState(historikk))
-        }
-
         override fun preVisitInntektsmeldinginfoHistorikk(inntektsmeldingInfoHistorikk: InntektsmeldingInfoHistorikk) {
             val historikk = mutableListOf<Map<String, Any>>()
             arbeidsgiverMap["inntektsmeldingInfo"] = historikk
@@ -439,29 +432,6 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun postVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {
-            popState()
-        }
-    }
-
-    private class ArbeidsforholdhistorikkState(private val historikk: MutableList<Map<String, Any?>>) : BuilderState() {
-        private var arbeidsforholMap: MutableList<Map<String, Any?>> = mutableListOf()
-
-        override fun visitArbeidsforhold(ansattFom: LocalDate, ansattTom: LocalDate?, deaktivert: Boolean) {
-            arbeidsforholMap.add(
-                mapOf(
-                    "ansattFom" to ansattFom,
-                    "ansattTom" to ansattTom,
-                    "deaktivert" to deaktivert
-                )
-            )
-        }
-
-        override fun postVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {
-            historikk.add(mapOf("id" to id, "skjæringstidspunkt" to skjæringstidspunkt, "arbeidsforhold" to arbeidsforholMap))
-            arbeidsforholMap = mutableListOf()
-        }
-
-        override fun postVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {
             popState()
         }
     }
@@ -841,7 +811,7 @@ internal class JsonBuilder : AbstractBuilder() {
             arbeidsforholdMap.add(mapOf("ansattFom" to ansattFom, "ansattTom" to ansattTom, "deaktivert" to deaktivert))
         }
 
-        override fun postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
+        override fun postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold>) {
             arbeidsforholdOpptjeningsgrunnlagMap.add(mapOf("orgnummer" to orgnummer, "ansattPerioder" to arbeidsforholdMap))
             popState()
         }
@@ -850,7 +820,7 @@ internal class JsonBuilder : AbstractBuilder() {
     class OpptjeningState(private val opptjeningsMap: MutableMap<String, Any>): BuilderState() {
         private val arbeidsforholdOpptjeningsgrunnlagMap = mutableListOf<Map<String, Any>>()
 
-        override fun preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
+        override fun preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold>) {
             pushState(ArbeidsgiverOpptjeningsgrunnlagState(arbeidsforholdOpptjeningsgrunnlagMap))
         }
 

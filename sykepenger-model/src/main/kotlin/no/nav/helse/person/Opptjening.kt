@@ -3,9 +3,11 @@ package no.nav.helse.person
 import java.time.LocalDate
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.ansattVedSkjæringstidspunkt
-import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.opptjeningsperiode
-import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.toEtterlevelseMap
+import no.nav.helse.hendelser.Periode.Companion.sammenhengende
+import no.nav.helse.hendelser.til
+import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.ansattVedSkjæringstidspunkt
+import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.opptjeningsperiode
+import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.toEtterlevelseMap
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.aktiver
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.arbeidsforholdForJurist
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.deaktiver
@@ -63,11 +65,13 @@ internal class Opptjening private constructor(
         return Opptjening(arbeidsforhold.aktiver(orgnummer), skjæringstidspunkt, subsumsjonObserver)
     }
 
-    internal fun lagreArbeidsforhold(person: Person, hendelse: IAktivitetslogg) {
-        arbeidsforhold.forEach { it.lagreArbeidsforhold(person, skjæringstidspunkt, hendelse) }
-    }
+    internal class ArbeidsgiverOpptjeningsgrunnlag(private val orgnummer: String, private val ansattPerioder: List<Arbeidsforhold>) {
+        internal fun accept(visitor: OpptjeningVisitor) {
+            visitor.preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder)
+            ansattPerioder.forEach { it.accept(visitor) }
+            visitor.postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder)
+        }
 
-    internal class ArbeidsgiverOpptjeningsgrunnlag(private val orgnummer: String, private val ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
         internal fun ansattVedSkjæringstidspunkt(orgnummer: String, skjæringstidspunkt: LocalDate) =
             this.orgnummer == orgnummer && ansattPerioder.ansattVedSkjæringstidspunkt(skjæringstidspunkt)
 
@@ -81,9 +85,73 @@ internal class Opptjening private constructor(
             return ArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder.map { it.deaktiver() })
         }
 
+        internal class Arbeidsforhold(
+            private val ansattFom: LocalDate,
+            private val ansattTom: LocalDate?,
+            private val deaktivert: Boolean
+        ) {
+            internal fun gjelder(skjæringstidspunkt: LocalDate) = ansattFom <= skjæringstidspunkt && (ansattTom == null || ansattTom >= skjæringstidspunkt)
+
+            override fun equals(other: Any?) = other is Arbeidsforhold
+                    && ansattFom == other.ansattFom
+                    && ansattTom == other.ansattTom
+                    && deaktivert == other.deaktivert
+
+            internal fun harArbeidetMindreEnn(skjæringstidspunkt: LocalDate, antallMåneder: Int) =
+                ansattFom >= skjæringstidspunkt.withDayOfMonth(1).minusMonths(antallMåneder.toLong())
+
+            override fun hashCode(): Int {
+                var result = ansattFom.hashCode()
+                result = 31 * result + (ansattTom?.hashCode() ?: 0)
+                result = 31 * result + deaktivert.hashCode()
+                return result
+            }
+
+            internal fun accept(visitor: OpptjeningVisitor) {
+                visitor.visitArbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, deaktivert = deaktivert)
+            }
+
+            internal fun deaktiver() = Arbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, deaktivert = true)
+
+            internal fun aktiver() = Arbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, deaktivert = false)
+
+            companion object {
+                private fun List<Arbeidsforhold>.harArbeidetMindreEnn(skjæringstidspunkt: LocalDate, antallMåneder: Int) = this
+                    .filter { it.harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder) }
+                    .filter { it.gjelder(skjæringstidspunkt) }
+
+                internal fun List<Arbeidsforhold>.harArbeidsforholdNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Int) =
+                    harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder).isNotEmpty()
+
+                internal fun Collection<Arbeidsforhold>.opptjeningsperiode(skjæringstidspunkt: LocalDate) = this
+                    .filter { !it.deaktivert }
+                    .map { it.ansattFom til (it.ansattTom ?: skjæringstidspunkt) }
+                    .sammenhengende(skjæringstidspunkt)
+
+                internal fun Collection<Arbeidsforhold>.ansattVedSkjæringstidspunkt(skjæringstidspunkt: LocalDate) = any { it.gjelder(skjæringstidspunkt) }
+
+                internal fun Iterable<Arbeidsforhold>.toEtterlevelseMap(orgnummer: String) = map {
+                    mapOf(
+                        "orgnummer" to orgnummer,
+                        "fom" to it.ansattFom,
+                        "tom" to it.ansattTom
+                    )
+                }
+            }
+
+        }
+
         companion object {
+            internal fun Map<String, List<Arbeidsforhold>>.opptjening(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Opptjening {
+                val arbeidsforhold = this
+                    .filterValues { it.isNotEmpty() }
+                    .map { (orgnr, arbeidsforhold) -> Opptjening.ArbeidsgiverOpptjeningsgrunnlag(orgnr, arbeidsforhold) }
+                return Opptjening(arbeidsforhold, skjæringstidspunkt, subsumsjonObserver)
+            }
+
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.aktiver(orgnummer: String) = map { it.aktiver(orgnummer) }
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.deaktiver(orgnummer: String) = map { it.deaktiver(orgnummer) }
+
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.startdatoFor(orgnummer: String, skjæringstidspunkt: LocalDate) = this
                 .singleOrNull { it.orgnummer == orgnummer }
                 ?.ansattPerioder
@@ -92,19 +160,8 @@ internal class Opptjening private constructor(
 
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.opptjeningsperiode(skjæringstidspunkt: LocalDate) =
                 flatMap { it.ansattPerioder }.opptjeningsperiode(skjæringstidspunkt)
-
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.arbeidsforholdForJurist() =
                 flatMap { it.ansattPerioder.toEtterlevelseMap(it.orgnummer) }
-        }
-
-        internal fun accept(visitor: OpptjeningVisitor) {
-            visitor.preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder)
-            ansattPerioder.forEach { it.accept(visitor) }
-            visitor.postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder)
-        }
-
-        internal fun lagreArbeidsforhold(person: Person, skjæringstidspunkt: LocalDate, hendelse: IAktivitetslogg) {
-            person.lagreArbeidsforhold(this.orgnummer, this.ansattPerioder, hendelse, skjæringstidspunkt)
         }
     }
 

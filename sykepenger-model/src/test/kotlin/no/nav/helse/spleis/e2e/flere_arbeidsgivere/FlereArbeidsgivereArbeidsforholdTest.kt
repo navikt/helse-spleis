@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -17,9 +16,7 @@ import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntektskilde
-import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
@@ -115,6 +112,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
         )
+
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.mars)
         assertNotNull(vilkårsgrunnlag)
 

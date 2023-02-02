@@ -157,6 +157,7 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         this.sykepengegrunnlag = sykepengegrunnlag
         this.sammenligningsgrunnlag = sammenligningsgrunnlag
         this.avviksprosent = avviksprosent
+        this.opptjening = opptjening
         this.meldingsreferanseId = meldingsreferanseId
         this.harMinimumInntekt = harMinimumInntekt
         this.vurdertOk = vurdertOk

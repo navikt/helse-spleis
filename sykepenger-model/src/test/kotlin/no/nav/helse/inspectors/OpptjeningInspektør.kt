@@ -1,7 +1,6 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDate
-import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.OpptjeningVisitor
 
@@ -16,7 +15,7 @@ internal class OpptjeningInspektør(opptjening: Opptjening) : OpptjeningVisitor 
         opptjening.accept(this)
     }
 
-    override fun preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
+    override fun preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold>) {
         this.nåværendeOrgnr = orgnummer
     }
 

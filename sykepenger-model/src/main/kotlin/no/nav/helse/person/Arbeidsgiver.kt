@@ -103,7 +103,6 @@ internal class Arbeidsgiver private constructor(
     private val beregnetUtbetalingstidslinjer: MutableList<Utbetalingstidslinjeberegning>,
     private val feriepengeutbetalinger: MutableList<Feriepengeutbetaling>,
     private val refusjonshistorikk: Refusjonshistorikk,
-    private val arbeidsforholdhistorikk: Arbeidsforholdhistorikk,
     private val inntektsmeldingInfo: InntektsmeldingInfoHistorikk,
     private val jurist: MaskinellJurist
 ) : Aktivitetskontekst, UtbetalingObserver {
@@ -120,7 +119,6 @@ internal class Arbeidsgiver private constructor(
         beregnetUtbetalingstidslinjer = mutableListOf(),
         feriepengeutbetalinger = mutableListOf(),
         refusjonshistorikk = Refusjonshistorikk(),
-        arbeidsforholdhistorikk = Arbeidsforholdhistorikk(),
         inntektsmeldingInfo = InntektsmeldingInfoHistorikk(),
         jurist.medOrganisasjonsnummer(organisasjonsnummer)
     )
@@ -182,10 +180,7 @@ internal class Arbeidsgiver private constructor(
             flatMap { it.vedtaksperioder }.lagRevurdering(vedtaksperiode, arbeidsgiverUtbetalinger, hendelse)
         }
 
-        internal fun List<Arbeidsgiver>.avklarSykepengegrunnlag(
-            skjæringstidspunkt: LocalDate,
-            skatteopplysninger: Map<String, SkattSykepengegrunnlag>
-        ) =
+        internal fun List<Arbeidsgiver>.avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, skatteopplysninger: Map<String, SkattSykepengegrunnlag>) =
             mapNotNull { arbeidsgiver -> arbeidsgiver.avklarSykepengegrunnlag(skjæringstidspunkt, skatteopplysninger[arbeidsgiver.organisasjonsnummer]) }
 
         internal fun skjæringstidspunkt(arbeidsgivere: List<Arbeidsgiver>, periode: Periode, infotrygdhistorikk: Infotrygdhistorikk) =
@@ -357,7 +352,6 @@ internal class Arbeidsgiver private constructor(
         feriepengeutbetalinger.forEach { it.accept(visitor) }
         visitor.postVisitFeriepengeutbetalinger(feriepengeutbetalinger)
         refusjonshistorikk.accept(visitor)
-        arbeidsforholdhistorikk.accept(visitor)
         inntektsmeldingInfo.accept(visitor)
         visitor.postVisitArbeidsgiver(this, id, organisasjonsnummer)
     }
@@ -1051,10 +1045,6 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun lagreArbeidsforhold(arbeidsforhold: List<Arbeidsforholdhistorikk.Arbeidsforhold>, skjæringstidspunkt: LocalDate) {
-        arbeidsforholdhistorikk.lagre(arbeidsforhold, skjæringstidspunkt)
-    }
-
     internal fun beregn(aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger, periode: Periode, perioder: Map<Periode, Pair<IAktivitetslogg, SubsumsjonObserver>>): Boolean {
         try {
             arbeidsgiverUtbetalinger.beregn(organisasjonsnummer, periode, perioder)
@@ -1137,7 +1127,6 @@ internal class Arbeidsgiver private constructor(
                 beregnetUtbetalingstidslinjer: List<Utbetalingstidslinjeberegning>,
                 feriepengeutbetalinger: List<Feriepengeutbetaling>,
                 refusjonshistorikk: Refusjonshistorikk,
-                arbeidsforholdhistorikk: Arbeidsforholdhistorikk,
                 inntektsmeldingInfo: InntektsmeldingInfoHistorikk,
                 jurist: MaskinellJurist
             ) = Arbeidsgiver(
@@ -1153,7 +1142,6 @@ internal class Arbeidsgiver private constructor(
                 beregnetUtbetalingstidslinjer.toMutableList(),
                 feriepengeutbetalinger.toMutableList(),
                 refusjonshistorikk,
-                arbeidsforholdhistorikk,
                 inntektsmeldingInfo,
                 jurist
             )

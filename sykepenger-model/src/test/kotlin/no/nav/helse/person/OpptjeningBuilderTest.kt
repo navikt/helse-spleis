@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
 import no.nav.helse.serde.AbstractBuilder
 import no.nav.helse.serde.JsonBuilder
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -18,7 +19,7 @@ internal class OpptjeningBuilderTest {
         val arbeidsgiverOpptjeningsgrunnlag = listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 orgnummer = "orgnummer",
-                ansattPerioder = listOf(Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = null, deaktivert = false))
+                ansattPerioder = listOf(Arbeidsforhold(ansattFom = 1.januar, ansattTom = null, deaktivert = false))
             )
         )
 
@@ -55,14 +56,14 @@ internal class OpptjeningBuilderTest {
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 orgnummer = "orgnummer",
                 ansattPerioder = listOf(
-                    Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.mars, ansattTom = 31.mars, deaktivert = false),
-                    Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.april, ansattTom = null, deaktivert = false)
+                    Arbeidsforhold(ansattFom = 1.mars, ansattTom = 31.mars, deaktivert = false),
+                    Arbeidsforhold(ansattFom = 1.april, ansattTom = null, deaktivert = false)
                 )
             ), Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 orgnummer = "orgnummer2",
                 ansattPerioder = listOf(
-                    Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = 31.januar, deaktivert = false),
-                    Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.februar, ansattTom = null, deaktivert = true)
+                    Arbeidsforhold(ansattFom = 1.januar, ansattTom = 31.januar, deaktivert = false),
+                    Arbeidsforhold(ansattFom = 1.februar, ansattTom = null, deaktivert = true)
                 )
             )
         )

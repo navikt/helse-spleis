@@ -31,6 +31,7 @@ import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.Alder.Companion.alder
+import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
@@ -55,7 +56,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         private const val ORGNR = "123456789"
         private val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNR, 1.desember(2017)))
         private val arbeidsforholdFraHistorikk = listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(ORGNR, listOf(Arbeidsforholdhistorikk.Arbeidsforhold(1.desember(2017), null, false)))
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(ORGNR, listOf(Arbeidsforhold(1.desember(2017), null, false)))
         )
     }
 

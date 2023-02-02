@@ -12,6 +12,7 @@ import no.nav.helse.oktober
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Paragraf
+import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -23,7 +24,7 @@ internal class OpptjeningTest {
     @Test
     fun `startdato for manglende arbeidsforhold`() {
         val arbeidsforhold = listOf(Opptjening.ArbeidsgiverOpptjeningsgrunnlag("a1", listOf(
-            Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, null, false)
+            Arbeidsforhold(1.januar, null, false)
         )))
         val opptjening = Opptjening(arbeidsforhold, 1.mars, MaskinellJurist())
         assertNull(opptjening.startdatoFor("a2"))
@@ -32,7 +33,7 @@ internal class OpptjeningTest {
     @Test
     fun `startdato for deaktivert arbeidsforhold`() {
         val arbeidsforhold = listOf(Opptjening.ArbeidsgiverOpptjeningsgrunnlag("a1", listOf(
-            Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, null, true)
+            Arbeidsforhold(1.januar, null, true)
         )))
         val opptjening = Opptjening(arbeidsforhold, 1.mars, MaskinellJurist())
         assertEquals(1.mars, opptjening.startdatoFor("a1"))
@@ -41,8 +42,8 @@ internal class OpptjeningTest {
     @Test
     fun `startdato for aktivt arbeidsforhold`() {
         val arbeidsforhold = listOf(Opptjening.ArbeidsgiverOpptjeningsgrunnlag("a1", listOf(
-            Arbeidsforholdhistorikk.Arbeidsforhold(1.februar, null, false),
-            Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, 31.januar, false),
+            Arbeidsforhold(1.februar, null, false),
+            Arbeidsforhold(1.januar, 31.januar, false),
         )))
         val opptjening = Opptjening(arbeidsforhold, 1.mars, MaskinellJurist())
         assertEquals(1.januar, opptjening.startdatoFor("a1"))
@@ -62,7 +63,7 @@ internal class OpptjeningTest {
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "orgnummer",
                 listOf(
-                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                    Arbeidsforhold(
                         ansattFom = 1.januar,
                         ansattTom = null,
                         deaktivert = false
@@ -81,7 +82,7 @@ internal class OpptjeningTest {
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "orgnummer",
                 listOf(
-                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                    Arbeidsforhold(
                         ansattFom = 1.januar,
                         ansattTom = null,
                         deaktivert = false
@@ -100,7 +101,7 @@ internal class OpptjeningTest {
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "orgnummer",
                 listOf(
-                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                    Arbeidsforhold(
                         ansattFom = 1.januar,
                         ansattTom = null,
                         deaktivert = false
@@ -119,7 +120,7 @@ internal class OpptjeningTest {
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "orgnummer",
                 listOf(
-                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                    Arbeidsforhold(
                         ansattFom = 1.januar,
                         ansattTom = null,
                         deaktivert = true
@@ -138,17 +139,17 @@ internal class OpptjeningTest {
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "orgnummer",
                 listOf(
-                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                    Arbeidsforhold(
                         ansattFom = 1.januar,
                         ansattTom = 10.januar,
                         deaktivert = false
                     ),
-                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                    Arbeidsforhold(
                         ansattFom = 11.januar,
                         ansattTom = 14.januar,
                         deaktivert = true
                     ),
-                    Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 15.januar, ansattTom = null, deaktivert = false)
+                    Arbeidsforhold(ansattFom = 15.januar, ansattTom = null, deaktivert = false)
                 )
             )
         )
@@ -164,12 +165,12 @@ internal class OpptjeningTest {
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "orgnummer",
                 listOf(
-                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                    Arbeidsforhold(
                         ansattFom = 1.januar,
                         ansattTom = 10.januar,
                         deaktivert = false
                     ),
-                    Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 11.januar, ansattTom = null, deaktivert = false)
+                    Arbeidsforhold(ansattFom = 11.januar, ansattTom = null, deaktivert = false)
                 )
             )
         )
@@ -185,13 +186,13 @@ internal class OpptjeningTest {
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "orgnummer",
                 listOf(
-                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                    Arbeidsforhold(
                         ansattFom = 1.januar,
                         ansattTom = 10.januar,
                         deaktivert = false
                     ),
-                    Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 15.januar, ansattTom = null, deaktivert = false),
-                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                    Arbeidsforhold(ansattFom = 15.januar, ansattTom = null, deaktivert = false),
+                    Arbeidsforhold(
                         ansattFom = 11.januar,
                         ansattTom = 14.januar,
                         deaktivert = false
@@ -211,7 +212,7 @@ internal class OpptjeningTest {
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "a1",
                 listOf(
-                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                    Arbeidsforhold(
                         ansattFom = 1.oktober(2017),
                         ansattTom = 30.april(2022),
                         deaktivert = false
@@ -222,7 +223,7 @@ internal class OpptjeningTest {
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "a2",
                 listOf(
-                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                    Arbeidsforhold(
                         ansattFom = 2.mai(2022),
                         ansattTom = null,
                         deaktivert = false
@@ -243,7 +244,7 @@ internal class OpptjeningTest {
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "a1",
                 listOf(
-                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                    Arbeidsforhold(
                         ansattFom = 1.oktober(2017),
                         ansattTom = 29.april(2022),
                         deaktivert = false
@@ -254,7 +255,7 @@ internal class OpptjeningTest {
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "a2",
                 listOf(
-                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                    Arbeidsforhold(
                         ansattFom = 2.mai(2022),
                         ansattTom = null,
                         deaktivert = false
@@ -275,7 +276,7 @@ internal class OpptjeningTest {
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "a1",
                 listOf(
-                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                    Arbeidsforhold(
                         ansattFom = 1.oktober(2017),
                         ansattTom = 28.april(2022),
                         deaktivert = false
@@ -286,7 +287,7 @@ internal class OpptjeningTest {
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "a2",
                 listOf(
-                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                    Arbeidsforhold(
                         ansattFom = 2.mai(2022),
                         ansattTom = null,
                         deaktivert = false
@@ -307,7 +308,7 @@ internal class OpptjeningTest {
         val arbeidsforhold = listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 AbstractPersonTest.ORGNUMMER,
-                listOf(Arbeidsforholdhistorikk.Arbeidsforhold(4.desember(2017), 31.januar, deaktivert = false))
+                listOf(Arbeidsforhold(4.desember(2017), 31.januar, deaktivert = false))
             )
         )
         Opptjening(arbeidsforhold, 1.januar, jurist)
@@ -337,7 +338,7 @@ internal class OpptjeningTest {
         val arbeidsforhold = listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 AbstractPersonTest.ORGNUMMER,
-                listOf(Arbeidsforholdhistorikk.Arbeidsforhold(5.desember(2017), 31.januar, deaktivert = false))
+                listOf(Arbeidsforhold(5.desember(2017), 31.januar, deaktivert = false))
             )
         )
         Opptjening(arbeidsforhold, 1.januar, jurist)

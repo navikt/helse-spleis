@@ -7,6 +7,7 @@ import no.nav.helse.person.InntektsopplysningVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
 
+// TODO: legge til hendelseId fra SkattSykepengegrunnlag
 internal class IkkeRapportert(
     private val id: UUID,
     dato: LocalDate,

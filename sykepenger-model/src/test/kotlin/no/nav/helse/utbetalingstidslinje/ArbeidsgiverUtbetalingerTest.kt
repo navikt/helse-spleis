@@ -18,7 +18,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
@@ -39,6 +38,7 @@ import no.nav.helse.testhelpers.UTELATE
 import no.nav.helse.testhelpers.Utbetalingsdager
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.Alder.Companion.alder
+import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -330,7 +330,7 @@ internal class ArbeidsgiverUtbetalingerTest {
                     listOf(
                         Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                             ORGNUMMER, listOf(
-                                Arbeidsforholdhistorikk.Arbeidsforhold(1.januar.minusYears(1), null, false)
+                                Arbeidsforhold(1.januar.minusYears(1), null, false)
                             )
                         )
                     ), 1.januar, SubsumsjonObserver.NullObserver

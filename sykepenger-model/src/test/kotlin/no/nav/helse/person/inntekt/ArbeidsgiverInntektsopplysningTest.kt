@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Opptjening
 import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Ledd
@@ -65,7 +64,13 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val orgnummer = "a1"
 
         val opptjening = Opptjening(listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(orgnummer, listOf(Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom, null, false)))
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(orgnummer, listOf(
+                Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold(
+                    ansattFom,
+                    null,
+                    false
+                )
+            ))
         ), skjæringstidspunkt, NullObserver)
 
 

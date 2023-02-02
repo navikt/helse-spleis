@@ -6,9 +6,8 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode.Companion.sammenhengende
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.beregnOpptjening
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.opptjening
-import no.nav.helse.person.Arbeidsforholdhistorikk
-import no.nav.helse.person.Arbeidsforholdhistorikk.Companion.opptjening
 import no.nav.helse.person.Opptjening
+import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -83,7 +82,7 @@ class Vilkårsgrunnlag(
             check(orgnummer.isNotBlank())
         }
 
-        internal fun tilDomeneobjekt() = Arbeidsforholdhistorikk.Arbeidsforhold(
+        internal fun tilDomeneobjekt() = Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold(
             ansattFom = ansattFom,
             ansattTom = ansattTom,
             deaktivert = false

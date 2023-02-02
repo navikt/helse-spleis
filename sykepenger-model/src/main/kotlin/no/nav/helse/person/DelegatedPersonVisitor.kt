@@ -213,11 +213,15 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitOpptjening(opptjening, arbeidsforhold, opptjeningsperiode)
     }
 
-    override fun preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
+    override fun preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold>) {
         delegatee.preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder)
     }
 
-    override fun postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
+    override fun visitArbeidsforhold(ansattFom: LocalDate, ansattTom: LocalDate?, deaktivert: Boolean) {
+        delegatee.visitArbeidsforhold(ansattFom, ansattTom, deaktivert)
+    }
+
+    override fun postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold>) {
         delegatee.postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder)
     }
 
@@ -1235,25 +1239,5 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
 
     override fun postVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {
         delegatee.postVisitRefusjonshistorikk(refusjonshistorikk)
-    }
-
-    override fun preVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {
-        delegatee.preVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk)
-    }
-
-    override fun postVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {
-        delegatee.postVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk)
-    }
-
-    override fun preVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {
-        delegatee.preVisitArbeidsforholdinnslag(arbeidsforholdinnslag, id, skjæringstidspunkt)
-    }
-
-    override fun visitArbeidsforhold(ansattFom: LocalDate, ansattTom: LocalDate?, deaktivert: Boolean) {
-        delegatee.visitArbeidsforhold(ansattFom, ansattTom, deaktivert)
-    }
-
-    override fun postVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {
-        delegatee.postVisitArbeidsforholdinnslag(arbeidsforholdinnslag, id, skjæringstidspunkt)
     }
 }

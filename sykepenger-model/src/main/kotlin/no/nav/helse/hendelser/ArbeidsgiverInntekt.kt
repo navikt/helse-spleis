@@ -6,7 +6,7 @@ import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.harInntektFor
-import no.nav.helse.person.Arbeidsforholdhistorikk
+import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -20,7 +20,7 @@ class ArbeidsgiverInntekt(
     private val arbeidsgiver: String,
     private val inntekter: List<MånedligInntekt>
 ) {
-    internal fun tilSykepengegrunnlag(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold> = emptyList()) =
+    internal fun tilSykepengegrunnlag(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, ansattPerioder: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold> = emptyList()) =
         SkattSykepengegrunnlag(
             id = UUID.randomUUID(),
             hendelseId = meldingsreferanseId,
@@ -37,7 +37,8 @@ class ArbeidsgiverInntekt(
         )
 
     internal companion object {
-        internal fun List<ArbeidsgiverInntekt>.avklarSykepengegrunnlag(hendelse: IAktivitetslogg, person: Person, opptjening: Map<String, List<Arbeidsforholdhistorikk.Arbeidsforhold>>, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {            val rapporteArbeidsforhold = opptjening.mapValues { (_, ansattPerioder) ->
+        internal fun List<ArbeidsgiverInntekt>.avklarSykepengegrunnlag(hendelse: IAktivitetslogg, person: Person, opptjening: Map<String, List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold>>, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
+            val rapporteArbeidsforhold = opptjening.mapValues { (_, ansattPerioder) ->
                 SkattSykepengegrunnlag(
                     id = UUID.randomUUID(),
                     hendelseId = meldingsreferanseId,

@@ -124,7 +124,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     private fun grunnlagsdata(skjæringstidspunkt: LocalDate, harOpptjening: Boolean = true, harMinimumInntekt: Boolean = true, erMedlem: Boolean = true): VilkårsgrunnlagHistorikk.Grunnlagsdata {
         val opptjening = if (!harOpptjening) emptyList() else listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag("orgnr", listOf(
-                Arbeidsforholdhistorikk.Arbeidsforhold(skjæringstidspunkt.minusYears(1), null, false)
+                Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold(skjæringstidspunkt.minusYears(1), null, false)
             ))
         )
         val inntekt = if (!harMinimumInntekt) 2000.månedlig else 25000.månedlig

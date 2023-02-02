@@ -205,14 +205,15 @@ internal interface SammenligningsgrunnlagVisitor : ArbeidsgiverInntektsopplysnin
     ) {}
 }
 
-internal interface OpptjeningVisitor : ArbeidsforholdVisitor {
+internal interface OpptjeningVisitor {
     fun preVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {}
-    fun preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {}
-    fun postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {}
+    fun preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold>) {}
+    fun visitArbeidsforhold(ansattFom: LocalDate, ansattTom: LocalDate?, deaktivert: Boolean) {}
+    fun postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold>) {}
     fun postVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {}
 }
 
-internal interface VilkårsgrunnlagHistorikkVisitor : SykepengegrunnlagVisitor, SammenligningsgrunnlagVisitor, OpptjeningVisitor {
+internal interface VilkårsgrunnlagHistorikkVisitor : OpptjeningVisitor, SykepengegrunnlagVisitor, SammenligningsgrunnlagVisitor {
     fun preVisitVilkårsgrunnlagHistorikk() {}
     fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {}
     fun postVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {}
@@ -269,7 +270,7 @@ internal interface InntektsmeldingInfoHistorikkVisitor : InntektsmeldingInfoVisi
 
 internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, SykdomshistorikkVisitor, VedtaksperiodeVisitor,
     UtbetalingVisitor, UtbetalingstidslinjeberegningVisitor, FeriepengeutbetalingVisitor, RefusjonshistorikkVisitor,
-    ArbeidsforholdhistorikkVisitor, InntektsmeldingInfoHistorikkVisitor, SykmeldingsperioderVisitor {
+    InntektsmeldingInfoHistorikkVisitor, SykmeldingsperioderVisitor {
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -536,18 +537,6 @@ internal interface RefusjonshistorikkVisitor {
     }
 
     fun postVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {}
-}
-
-internal interface ArbeidsforholdVisitor {
-    fun visitArbeidsforhold(ansattFom: LocalDate, ansattTom: LocalDate?, deaktivert: Boolean) {}
-}
-
-internal interface ArbeidsforholdhistorikkVisitor: ArbeidsforholdVisitor {
-    fun preVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {}
-    fun postVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {}
-
-    fun preVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {}
-    fun postVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {}
 }
 
 internal interface SkatteopplysningVisitor {

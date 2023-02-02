@@ -16,8 +16,8 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.nesteDag
 import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FØDSELSDATO
-import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Opptjening
+import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -533,14 +533,14 @@ internal class SykepengegrunnlagTest {
 
         val opptjening = Opptjening(listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a1, listOf(
-                Arbeidsforholdhistorikk.Arbeidsforhold(
+                Arbeidsforhold(
                     ansattFom = LocalDate.EPOCH,
                     ansattTom = sluttdatoA1,
                     deaktivert = false
                 )
             )),
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a2, listOf(
-                Arbeidsforholdhistorikk.Arbeidsforhold(
+                Arbeidsforhold(
                     ansattFom = startdatoA2,
                     ansattTom = null,
                     deaktivert = false
@@ -697,7 +697,7 @@ internal class SykepengegrunnlagTest {
 
         val opptjeningUtenA2 = Opptjening(listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a1, listOf(
-                Arbeidsforholdhistorikk.Arbeidsforhold(
+                Arbeidsforhold(
                     ansattFom = LocalDate.EPOCH,
                     ansattTom = null,
                     deaktivert = false
@@ -706,14 +706,14 @@ internal class SykepengegrunnlagTest {
         ), skjæringstidspunkt, NullObserver)
         val opptjeningMedA2 = Opptjening(listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a1, listOf(
-                Arbeidsforholdhistorikk.Arbeidsforhold(
+                Arbeidsforhold(
                     ansattFom = LocalDate.EPOCH,
                     ansattTom = null,
                     deaktivert = false
                 )
             )),
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a2, listOf(
-                Arbeidsforholdhistorikk.Arbeidsforhold(
+                Arbeidsforhold(
                     ansattFom = LocalDate.EPOCH,
                     ansattTom = null,
                     deaktivert = false

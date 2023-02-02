@@ -14,7 +14,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.tilSporing
@@ -56,7 +55,6 @@ import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.ArbeidsforholdhistorikkInnslagData.Companion.tilArbeidsforholdhistorikk
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingInfoHistorikkElementData.Companion.finn
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingInfoHistorikkElementData.Companion.tilInntektsmeldingInfoHistorikk
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.Companion.parseRefusjon
@@ -435,6 +433,7 @@ internal data class PersonData(
                             inntektsopplysninger = requireNotNull(skatteopplysninger).map { skatteData ->
                                 skatteData.tilModellobjekt()
                             },
+                            ansattPerioder = emptyList(),
                             tidsstempel = tidsstempel,
                             hendelseId = hendelseId!!
                         )
@@ -501,8 +500,17 @@ internal data class PersonData(
 
             data class ArbeidsgiverOpptjeningsgrunnlagData(
                 private val orgnummer: String,
-                private val ansattPerioder: List<ArbeidsgiverData.ArbeidsforholdhistorikkInnslagData.ArbeidsforholdData>
+                private val ansattPerioder: List<ArbeidsforholdData>
             ) {
+                data class ArbeidsforholdData(
+                    val ansattFom: LocalDate,
+                    val ansattTom: LocalDate?,
+                    val deaktivert: Boolean
+                ) {
+                    internal fun tilArbeidsforhold() =
+                        Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold(ansattFom, ansattTom, deaktivert)
+                }
+
                 companion object {
                     fun List<ArbeidsgiverOpptjeningsgrunnlagData>.tilArbeidsgiverOpptjeningsgrunnlag() =
                         map { arbeidsgiverOpptjeningsgrunnlag ->
@@ -576,7 +584,6 @@ internal data class PersonData(
         private val beregnetUtbetalingstidslinjer: List<BeregnetUtbetalingstidslinjeData>,
         private val feriepengeutbetalinger: List<FeriepengeutbetalingData> = emptyList(),
         private val refusjonshistorikk: List<RefusjonData>,
-        private val arbeidsforholdhistorikk: List<ArbeidsforholdhistorikkInnslagData> = listOf(),
         private val inntektsmeldingInfo: List<InntektsmeldingInfoHistorikkElementData>
     ) {
         private val modelSykdomshistorikk = SykdomshistorikkData.parseSykdomshistorikk(sykdomshistorikk)
@@ -607,7 +614,6 @@ internal data class PersonData(
                 beregnetUtbetalingstidslinjer.map { it.tilBeregnetUtbetalingstidslinje() },
                 feriepengeutbetalinger.map { it.createFeriepengeutbetaling(alder) },
                 refusjonshistorikk.parseRefusjon(),
-                arbeidsforholdhistorikk.tilArbeidsforholdhistorikk(),
                 inntektsmeldingInfo.tilInntektsmeldingInfoHistorikk(),
                 arbeidsgiverJurist
             )
@@ -1125,28 +1131,6 @@ internal data class PersonData(
                         )
                     }
                 }
-            }
-        }
-
-        data class ArbeidsforholdhistorikkInnslagData(
-            val id: UUID,
-            val arbeidsforhold: List<ArbeidsforholdData>,
-            val skjæringstidspunkt: LocalDate
-        ) {
-
-            internal companion object {
-                internal fun List<ArbeidsforholdhistorikkInnslagData>.tilArbeidsforholdhistorikk() =
-                    Arbeidsforholdhistorikk.ferdigArbeidsforholdhistorikk(map { it.tilInnslag() })
-            }
-
-            internal fun tilInnslag() = Arbeidsforholdhistorikk.Innslag(id, arbeidsforhold.map { it.tilArbeidsforhold() }, skjæringstidspunkt)
-
-            data class ArbeidsforholdData(
-                val ansattFom: LocalDate,
-                val ansattTom: LocalDate?,
-                val deaktivert: Boolean
-            ) {
-                internal fun tilArbeidsforhold() = Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom, ansattTom, deaktivert)
             }
         }
     }
