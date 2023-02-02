@@ -5,9 +5,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.InntektsopplysningVisitor
-import no.nav.helse.person.etterlevelse.Bokstav
-import no.nav.helse.person.etterlevelse.Ledd
-import no.nav.helse.person.etterlevelse.Paragraf
+import no.nav.helse.etterlevelse.Bokstav
+import no.nav.helse.etterlevelse.Ledd
+import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory

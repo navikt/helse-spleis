@@ -8,6 +8,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
+import no.nav.helse.etterlevelse.Bokstav
+import no.nav.helse.etterlevelse.Ledd
+import no.nav.helse.etterlevelse.Paragraf
+import no.nav.helse.etterlevelse.Punktum
 
 internal class MaskinellJuristTest {
 

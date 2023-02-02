@@ -3,11 +3,11 @@ package no.nav.helse.inspectors
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.person.AbstractPersonTest.Companion.ORGNUMMER
-import no.nav.helse.person.etterlevelse.Bokstav
+import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.etterlevelse.Ledd
-import no.nav.helse.person.etterlevelse.Paragraf
-import no.nav.helse.person.etterlevelse.Punktum
+import no.nav.helse.etterlevelse.Ledd
+import no.nav.helse.etterlevelse.Paragraf
+import no.nav.helse.etterlevelse.Punktum
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.MaskinellJurist.KontekstType
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall

@@ -1,13 +1,17 @@
 package no.nav.helse.person.etterlevelse
 
 import java.time.LocalDate
-import no.nav.helse.person.etterlevelse.Bokstav.BOKSTAV_A
-import no.nav.helse.person.etterlevelse.Bokstav.BOKSTAV_B
-import no.nav.helse.person.etterlevelse.Ledd.Companion.ledd
-import no.nav.helse.person.etterlevelse.Paragraf.PARAGRAF_2
-import no.nav.helse.person.etterlevelse.Paragraf.PARAGRAF_8_16
-import no.nav.helse.person.etterlevelse.Punktum.PUNKTUM_1
-import no.nav.helse.person.etterlevelse.Punktum.PUNKTUM_2
+import no.nav.helse.etterlevelse.Bokstav
+import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_A
+import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_B
+import no.nav.helse.etterlevelse.Ledd
+import no.nav.helse.etterlevelse.Ledd.Companion.ledd
+import no.nav.helse.etterlevelse.Paragraf
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_2
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_16
+import no.nav.helse.etterlevelse.Punktum
+import no.nav.helse.etterlevelse.Punktum.PUNKTUM_1
+import no.nav.helse.etterlevelse.Punktum.PUNKTUM_2
 import no.nav.helse.person.etterlevelse.MaskinellJurist.KontekstType
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT

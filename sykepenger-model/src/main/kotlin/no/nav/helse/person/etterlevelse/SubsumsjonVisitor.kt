@@ -3,6 +3,10 @@ package no.nav.helse.person.etterlevelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.etterlevelse.MaskinellJurist.*
 import java.time.LocalDate
+import no.nav.helse.etterlevelse.Bokstav
+import no.nav.helse.etterlevelse.Ledd
+import no.nav.helse.etterlevelse.Paragraf
+import no.nav.helse.etterlevelse.Punktum
 
 internal interface SubsumsjonVisitor {
     fun preVisitSubsumsjon(

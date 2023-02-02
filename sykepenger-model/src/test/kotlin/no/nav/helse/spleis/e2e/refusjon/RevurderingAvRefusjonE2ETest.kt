@@ -6,8 +6,8 @@ import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
-import no.nav.helse.person.etterlevelse.Ledd
-import no.nav.helse.person.etterlevelse.Paragraf
+import no.nav.helse.etterlevelse.Ledd
+import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

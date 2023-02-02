@@ -1,12 +1,16 @@
 package no.nav.helse.person.etterlevelse
 
-import no.nav.helse.person.etterlevelse.Ledd.Companion.ledd
+import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.person.etterlevelse.MaskinellJurist.*
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import no.nav.helse.etterlevelse.Bokstav
+import no.nav.helse.etterlevelse.Ledd
+import no.nav.helse.etterlevelse.Paragraf
+import no.nav.helse.etterlevelse.Punktum
 
 internal class BetingetSubsumsjonTest {
 

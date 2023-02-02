@@ -1,6 +1,10 @@
 package no.nav.helse.person.etterlevelse
 
 import java.time.LocalDate
+import no.nav.helse.etterlevelse.Bokstav
+import no.nav.helse.etterlevelse.Ledd
+import no.nav.helse.etterlevelse.Paragraf
+import no.nav.helse.etterlevelse.Punktum
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.til

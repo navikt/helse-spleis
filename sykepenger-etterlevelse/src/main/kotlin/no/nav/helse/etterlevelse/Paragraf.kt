@@ -1,8 +1,8 @@
-package no.nav.helse.person.etterlevelse
+package no.nav.helse.etterlevelse
 
 import java.time.LocalDate
 
-enum class Paragraf(internal val ref: String) {
+enum class Paragraf(val ref: String) {
     PARAGRAF_2("2"),
     PARAGRAF_8_2("8-2"),
     PARAGRAF_8_3("8-3"),
@@ -25,7 +25,7 @@ enum class Paragraf(internal val ref: String) {
     }
 }
 
-enum class Ledd(internal val nummer: Int) {
+enum class Ledd(val nummer: Int) {
     LEDD_1(1),
     LEDD_2(2),
     LEDD_3(3),
@@ -37,7 +37,7 @@ enum class Ledd(internal val nummer: Int) {
         return "$nummer. ledd"
     }
 
-    internal companion object {
+    companion object {
         val Int.ledd get() = enumValues<Ledd>().first { it.nummer == this }
     }
 }
@@ -61,13 +61,13 @@ enum class Punktum(private val nummer: Int) {
 
     fun toJson(): Int = nummer
 
-    internal companion object {
+    companion object {
         val Int.punktum get() = enumValues<Punktum>().first { it.nummer == this }
         val IntRange.punktum get() = enumValues<Punktum>().filter { it.nummer in this }
     }
 }
 
-enum class Bokstav(internal val ref: Char) {
+enum class Bokstav(val ref: Char) {
     BOKSTAV_A('a'),
     BOKSTAV_B('b'),
     BOKSTAV_C('c');
@@ -77,7 +77,7 @@ enum class Bokstav(internal val ref: Char) {
         require(regex.matches(ref.toString())) { "En bokstav må være en bokstav i det norske alfabetet" }
     }
 
-    internal fun toJson() = ref
+    fun toJson() = ref
 }
 
 val FOLKETRYGDLOVENS_OPPRINNELSESDATO: LocalDate = LocalDate.of(1997, 2, 28)
