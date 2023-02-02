@@ -3,7 +3,6 @@ package no.nav.helse.inspectors
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmelding
@@ -26,7 +25,7 @@ internal class InntektshistorikkInspektør(inntektshistorikk: Inntektshistorikk)
     }
 
     internal fun omregnetÅrsinntekt(dato: LocalDate, førsteFraværsdag: LocalDate) =
-        inntektshistorikk.avklarSykepengegrunnlag(dato, førsteFraværsdag, null, Arbeidsforholdhistorikk())
+        inntektshistorikk.avklarSykepengegrunnlag(dato, førsteFraværsdag, null)
 
     override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
         this.inntektshistorikk = inntektshistorikk

@@ -205,7 +205,14 @@ internal interface SammenligningsgrunnlagVisitor : ArbeidsgiverInntektsopplysnin
     ) {}
 }
 
-internal interface VilkårsgrunnlagHistorikkVisitor : SykepengegrunnlagVisitor, SammenligningsgrunnlagVisitor, ArbeidsforholdVisitor {
+internal interface OpptjeningVisitor : ArbeidsforholdVisitor {
+    fun preVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {}
+    fun preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {}
+    fun postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {}
+    fun postVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {}
+}
+
+internal interface VilkårsgrunnlagHistorikkVisitor : SykepengegrunnlagVisitor, SammenligningsgrunnlagVisitor, OpptjeningVisitor {
     fun preVisitVilkårsgrunnlagHistorikk() {}
     fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {}
     fun postVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {}
@@ -247,10 +254,6 @@ internal interface VilkårsgrunnlagHistorikkVisitor : SykepengegrunnlagVisitor, 
         sykepengegrunnlag: Sykepengegrunnlag,
         vilkårsgrunnlagId: UUID
     ) {}
-    fun preVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {}
-    fun postVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {}
-    fun preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {}
-    fun postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {}
 }
 
 internal interface InntektsmeldingInfoVisitor {

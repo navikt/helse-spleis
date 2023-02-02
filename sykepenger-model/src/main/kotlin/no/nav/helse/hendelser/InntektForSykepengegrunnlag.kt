@@ -6,7 +6,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.avklarSykepengegrunnlag
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektFor
-import no.nav.helse.person.Opptjening
+import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_3
@@ -25,10 +25,8 @@ class InntektForSykepengegrunnlag(
         require(inntekter.antallMåneder() <= 3L) { "Forventer maks 3 inntektsmåneder" }
     }
 
-    internal fun avklarSykepengegrunnlag(hendelse: IAktivitetslogg, person: Person, opptjening: Opptjening, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, subsumsjonObserver: SubsumsjonObserver) = this
-        .inntekter
-        .filter { it.ansattVedSkjæringstidspunkt(opptjening) }
-        .avklarSykepengegrunnlag(hendelse, person, skjæringstidspunkt, meldingsreferanseId, subsumsjonObserver)
+    internal fun avklarSykepengegrunnlag(hendelse: IAktivitetslogg, person: Person, opptjening: Map<String, List<Arbeidsforholdhistorikk.Arbeidsforhold>>, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, subsumsjonObserver: SubsumsjonObserver) =
+        inntekter.avklarSykepengegrunnlag(hendelse, person, opptjening, skjæringstidspunkt, meldingsreferanseId, subsumsjonObserver)
 
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,

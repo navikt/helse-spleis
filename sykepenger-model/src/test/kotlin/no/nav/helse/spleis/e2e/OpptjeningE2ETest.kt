@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -12,21 +11,17 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.Arbeidsforholdhistorikk
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Inntektskilde.EN_ARBEIDSGIVER
-import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.inntekt.Inntektsmelding
-import no.nav.helse.spleis.e2e.OpptjeningE2ETest.ArbeidsforholdVisitor.Companion.assertHarArbeidsforhold
-import no.nav.helse.spleis.e2e.OpptjeningE2ETest.ArbeidsforholdVisitor.Companion.assertHarIkkeArbeidsforhold
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
@@ -135,44 +130,25 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
         }
     }
 
-    fun personMedArbeidsforhold(vararg arbeidsforhold: Vilkårsgrunnlag.Arbeidsforhold, fom: LocalDate = 1.januar, tom: LocalDate = 31.januar, vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode) {
+    private fun personMedArbeidsforhold(vararg arbeidsforhold: Vilkårsgrunnlag.Arbeidsforhold, fom: LocalDate = 1.januar, tom: LocalDate = 31.januar, vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(fom, tom, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(fom til fom.plusDays(15)), orgnummer = a1)
         håndterVilkårsgrunnlag(vedtaksperiodeIdInnhenter, arbeidsforhold = arbeidsforhold.toList(), orgnummer = a1)
     }
-
-    internal class ArbeidsforholdVisitor(val forventetArbeidsforhold: String, val forventetSkjæringstidspunkt: LocalDate) : PersonVisitor {
-        private var erIRiktigArbeidsgiver = false
-        private var erIRiktigSkjæringstidspunkt = false
-        private var harBesøktArbeidsforhold = false
-
-        override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
-            erIRiktigArbeidsgiver = organisasjonsnummer == forventetArbeidsforhold
+    companion object {
+        fun AbstractEndToEndTest.assertHarArbeidsforhold(skjæringstidspunkt: LocalDate, arbeidsforhold: String) {
+            val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(skjæringstidspunkt)
+            assertNotNull(vilkårsgrunnlag)
+            val opptjening = vilkårsgrunnlag.inspektør.opptjening.inspektør.arbeidsforhold[arbeidsforhold]
+            assertNotNull(opptjening)
+            assertTrue(opptjening.isNotEmpty())
         }
 
-        override fun preVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {
-            erIRiktigSkjæringstidspunkt = forventetSkjæringstidspunkt == skjæringstidspunkt
-        }
-
-        override fun visitArbeidsforhold(ansattFom: LocalDate, ansattTom: LocalDate?, deaktivert: Boolean) {
-            if (erIRiktigSkjæringstidspunkt && erIRiktigArbeidsgiver) {
-                harBesøktArbeidsforhold = true
-            }
-        }
-
-        companion object {
-            fun AbstractEndToEndTest.assertHarArbeidsforhold(skjæringstidspunkt: LocalDate, arbeidsforhold: String) {
-                val visitor = ArbeidsforholdVisitor(arbeidsforhold, skjæringstidspunkt)
-                person.accept(visitor)
-                assertTrue(visitor.harBesøktArbeidsforhold, "Fant ikke arbeidsforhold for $arbeidsforhold på skjæringstidspunkt $skjæringstidspunkt")
-            }
-
-            fun AbstractEndToEndTest.assertHarIkkeArbeidsforhold(skjæringstidspunkt: LocalDate, arbeidsforhold: String) {
-                val visitor = ArbeidsforholdVisitor(arbeidsforhold, skjæringstidspunkt)
-                person.accept(visitor)
-                assertFalse(visitor.harBesøktArbeidsforhold, "Fant uforventet arbeidsforhold for $arbeidsforhold på skjæringstidspunkt $skjæringstidspunkt")
-            }
+        fun AbstractEndToEndTest.assertHarIkkeArbeidsforhold(skjæringstidspunkt: LocalDate, arbeidsforhold: String) {
+            val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(skjæringstidspunkt)
+            assertNotNull(vilkårsgrunnlag)
+            assertNull(vilkårsgrunnlag.inspektør.opptjening.inspektør.arbeidsforhold[arbeidsforhold])
         }
     }
 }

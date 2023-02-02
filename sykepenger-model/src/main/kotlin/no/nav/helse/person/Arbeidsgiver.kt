@@ -318,7 +318,7 @@ internal class Arbeidsgiver private constructor(
 
     private fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, skattSykepengegrunnlag: SkattSykepengegrunnlag? = null) : ArbeidsgiverInntektsopplysning? {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
-        val inntektsopplysning = inntektshistorikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skattSykepengegrunnlag, arbeidsforholdhistorikk)
+        val inntektsopplysning = inntektshistorikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skattSykepengegrunnlag)
         return when {
             inntektsopplysning != null -> ArbeidsgiverInntektsopplysning(organisasjonsnummer, inntektsopplysning, refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt))
             else -> null

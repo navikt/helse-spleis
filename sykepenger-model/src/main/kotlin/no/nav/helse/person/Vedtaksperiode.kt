@@ -608,8 +608,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
-        vilkårsgrunnlag.lagre(person, skjæringstidspunkt)
-
         val grunnlagForSykepengegrunnlag = vilkårsgrunnlag.avklarSykepengegrunnlag(person, skjæringstidspunkt, jurist())
 
         vilkårsgrunnlag.valider(

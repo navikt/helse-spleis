@@ -9,7 +9,6 @@ import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -589,8 +588,8 @@ internal class InntektsmeldingTest {
         inntektsmelding(listOf(Periode(1.januar, 16.januar)), refusjonBeløp = 2000.månedlig, beregnetInntekt = 2000.månedlig, førsteFraværsdag = 3.februar)
         val inntektshistorikk = Inntektshistorikk()
         inntektsmelding.addInntekt(inntektshistorikk, 1.februar, MaskinellJurist())
-        assertEquals(2000.månedlig, inntektshistorikk.avklarSykepengegrunnlag(1.februar, 1.februar, null, Arbeidsforholdhistorikk())?.inspektør?.beløp)
-        assertNull(inntektshistorikk.avklarSykepengegrunnlag(3.februar, 3.februar, null, Arbeidsforholdhistorikk()))
+        assertEquals(2000.månedlig, inntektshistorikk.avklarSykepengegrunnlag(1.februar, 1.februar, null)?.inspektør?.beløp)
+        assertNull(inntektshistorikk.avklarSykepengegrunnlag(3.februar, 3.februar, null))
     }
 
     private fun inntektsmelding(

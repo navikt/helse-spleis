@@ -40,6 +40,7 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -114,8 +115,11 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
         )
-        assertEquals(1, inspektør(a1).arbeidsgiver.inspektør.arbeidsforholdhistorikk.inspektør.antallInnslag())
-        assertEquals(1, inspektør(a2).arbeidsgiver.inspektør.arbeidsforholdhistorikk.inspektør.antallInnslag())
+        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.mars)
+        assertNotNull(vilkårsgrunnlag)
+
+        assertEquals(1, vilkårsgrunnlag.inspektør.opptjening.inspektør.arbeidsforhold.getValue(a1).size)
+        assertEquals(1, vilkårsgrunnlag.inspektør.opptjening.inspektør.arbeidsforhold.getValue(a2).size)
     }
 
     @Test
@@ -358,7 +362,9 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             ),
             arbeidsforhold = arbeidsforhold1
         )
-        assertEquals(5, inspektør(a1).arbeidsgiver.inspektør.arbeidsforholdhistorikk.inspektør.arbeidsforholdSisteInnslag())
+        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.mars)
+        assertNotNull(vilkårsgrunnlag)
+        assertEquals(5, vilkårsgrunnlag.inspektør.opptjening.inspektør.arbeidsforhold.getValue(a1).size)
     }
 
     @Test

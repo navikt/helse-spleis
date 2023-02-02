@@ -16,6 +16,7 @@ import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mai
+import no.nav.helse.mars
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -52,7 +53,8 @@ internal class PeriodeTest {
         val perioder = listOf(
             2.januar til 5.januar,
             6.januar til 11.januar,
-            15.januar til 19.januar
+            15.januar til 19.januar,
+            1.februar til LocalDate.MAX
         )
         assertEquals(2.januar til 2.januar, perioder.sammenhengende(2.januar))
         assertEquals(2.januar til 8.januar, perioder.sammenhengende(8.januar))
@@ -62,6 +64,7 @@ internal class PeriodeTest {
         assertEquals(14.januar.somPeriode(), perioder.sammenhengende(14.januar))
         assertEquals(15.januar til 22.januar, perioder.sammenhengende(22.januar))
         assertEquals(23.januar.somPeriode(), perioder.sammenhengende(23.januar))
+        assertEquals(1.februar til 1.mars, perioder.sammenhengende(1.mars))
     }
 
     @Test

@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.isWithinRangeOf
-import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.SkatteopplysningVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -28,9 +27,6 @@ internal class Skatteopplysning(
         PENSJON_ELLER_TRYGD,
         YTELSE_FRA_OFFENTLIGE
     }
-
-    internal fun erRelevantForSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
-        måned.isWithinRangeOf(skjæringstidspunkt, MAKS_INNTEKT_GAP)
 
     internal fun accept(visitor: SkatteopplysningVisitor) {
         visitor.visitSkatteopplysning(this, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel)
@@ -60,22 +56,16 @@ internal class Skatteopplysning(
 
 
     internal companion object {
-        private const val MAKS_INNTEKT_GAP = 2L
+        internal fun sisteMåneder(dato: LocalDate, antallMåneder: Int, inntektsopplysninger: List<Skatteopplysning>) =
+            inntektsopplysninger.filter { it.måned.isWithinRangeOf(dato, antallMåneder.toLong()) }
 
         internal fun sisteTreMåneder(dato: LocalDate, inntektsopplysninger: List<Skatteopplysning>) =
-            inntektsopplysninger.filter { it.måned.isWithinRangeOf(dato, 3) }
+            sisteMåneder(dato, 3, inntektsopplysninger)
 
         internal fun List<Skatteopplysning>.validerInntekterSisteTreMåneder(aktivitetslogg: IAktivitetslogg, dato: LocalDate) {
             if (sisteTreMåneder(dato, this).filterNot { it.type == YTELSE_FRA_OFFENTLIGE }.isEmpty()) return
             aktivitetslogg.varsel(Varselkode.RV_IV_1)
         }
-
-        // TODO: sette inn en IkkeRapportert inntekt når vi lagrer skatteopplysninger fra Vilkårsgrunnlag,
-        // basert på hvilke arbeidsgivere det finnes arbeidsforhold fra uten skatteopplysninger
-        internal fun nyoppstartetArbeidsforhold(skjæringstidspunkt: LocalDate, arbeidsforholdhistorikk: Arbeidsforholdhistorikk) =
-            IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt, LocalDateTime.now()).takeIf {
-                arbeidsforholdhistorikk.harArbeidsforholdNyereEnn(skjæringstidspunkt, MAKS_INNTEKT_GAP)
-            }
 
         fun omregnetÅrsinntekt(liste: List<Skatteopplysning>) = liste
             .map { it.beløp }

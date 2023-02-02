@@ -43,7 +43,7 @@ internal class Opptjening private constructor(
         return erOppfylt
     }
 
-    internal fun accept(visitor: VilkårsgrunnlagHistorikkVisitor) {
+    internal fun accept(visitor: OpptjeningVisitor) {
         visitor.preVisitOpptjening(this, arbeidsforhold, opptjeningsperiode)
         arbeidsforhold.forEach { it.accept(visitor) }
         visitor.postVisitOpptjening(this, arbeidsforhold, opptjeningsperiode)
@@ -97,7 +97,7 @@ internal class Opptjening private constructor(
                 flatMap { it.ansattPerioder.toEtterlevelseMap(it.orgnummer) }
         }
 
-        internal fun accept(visitor: VilkårsgrunnlagHistorikkVisitor) {
+        internal fun accept(visitor: OpptjeningVisitor) {
             visitor.preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder)
             ansattPerioder.forEach { it.accept(visitor) }
             visitor.postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder)

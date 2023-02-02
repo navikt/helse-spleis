@@ -19,6 +19,7 @@ import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeUtbetalinger
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
+import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.serde.reflection.AktivitetsloggMap
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -51,6 +52,9 @@ private class InfotrygdhistorikkElementMixin
 
 @JsonSerialize(using = AktivitetsloggSerializer::class)
 private class AktivitetsloggMixin
+
+@JsonIgnoreProperties("ansattPerioder")
+private class SkattSykepengegrunnlagMixin
 
 internal class AktivitetsloggSerializer : JsonSerializer<Aktivitetslogg>() {
     override fun serialize(value: Aktivitetslogg?, gen: JsonGenerator, serializers: SerializerProvider?) {
@@ -86,7 +90,8 @@ private val objectMapper = jacksonObjectMapper()
             InfotrygdhistorikkElement::class.java to InfotrygdhistorikkElementMixin::class.java,
             Prosentdel::class.java to ProsentdelMixin::class.java,
             Aktivitetslogg::class.java to AktivitetsloggMixin::class.java,
-            Personopplysninger::class.java to PersonopplysningerMixin::class.java
+            Personopplysninger::class.java to PersonopplysningerMixin::class.java,
+            SkattSykepengegrunnlag::class.java to SkattSykepengegrunnlagMixin::class.java
         )
     )
     .setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE)

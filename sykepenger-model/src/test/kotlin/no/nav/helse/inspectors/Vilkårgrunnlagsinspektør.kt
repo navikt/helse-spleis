@@ -123,6 +123,8 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         private set
     internal var harOpptjening by Delegates.notNull<Boolean>()
         private set
+    internal lateinit var opptjening: Opptjening
+        private set
     internal var meldingsreferanseId: UUID? = null
         private set
     internal var harMinimumInntekt: Boolean? = null
@@ -158,6 +160,7 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         this.meldingsreferanseId = meldingsreferanseId
         this.harMinimumInntekt = harMinimumInntekt
         this.vurdertOk = vurdertOk
+        this.opptjening = opptjening
         this.inntektskilde = sykepengegrunnlag.inntektskilde()
         this.vilkårsgrunnlagId = vilkårsgrunnlagId
         this.type = "Spleis"

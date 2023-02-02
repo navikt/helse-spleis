@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode.Companion.sammenhengende
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.beregnOpptjening
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.opptjening
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsforholdhistorikk.Companion.opptjening
 import no.nav.helse.person.Opptjening
@@ -12,7 +13,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 
@@ -32,7 +32,7 @@ class Vilkårsgrunnlag(
     internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
 
     internal fun avklarSykepengegrunnlag(person: Person, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
-        val opptjening = arbeidsforhold.beregnOpptjening(skjæringstidspunkt, NullObserver)
+        val opptjening = arbeidsforhold.opptjening(skjæringstidspunkt)
         return inntektsvurderingForSykepengegrunnlag.avklarSykepengegrunnlag(this, person, opptjening, skjæringstidspunkt, meldingsreferanseId(), subsumsjonObserver)
     }
 
@@ -70,11 +70,6 @@ class Vilkårsgrunnlag(
 
     internal fun grunnlagsdata() = requireNotNull(grunnlagsdata) { "Må kalle valider() først" }
 
-    internal fun lagre(person: Person, skjæringstidspunkt: LocalDate) {
-        val opptjening = arbeidsforhold.beregnOpptjening(skjæringstidspunkt, NullObserver)
-        opptjening.lagreArbeidsforhold(person, this)
-    }
-
     private fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Sammenligningsgrunnlag {
         return inntektsvurdering.sammenligningsgrunnlag(skjæringstidspunkt, meldingsreferanseId(), subsumsjonObserver)
     }
@@ -108,9 +103,15 @@ class Vilkårsgrunnlag(
         }
 
         internal companion object {
-            internal fun Iterable<Arbeidsforhold>.opptjeningsperiode(skjæringstidspunkt: LocalDate) = this
+            private fun Iterable<Arbeidsforhold>.opptjeningsperiode(skjæringstidspunkt: LocalDate) = this
                 .mapNotNull { it.periode(skjæringstidspunkt) }
                 .sammenhengende(skjæringstidspunkt)
+
+            internal fun Iterable<Arbeidsforhold>.opptjening(skjæringstidspunkt: LocalDate) = opptjeningsperiode(skjæringstidspunkt).let { opptjeningsperiode ->
+                this
+                    .filter { it.erDelAvOpptjeningsperiode(opptjeningsperiode) }
+                    .groupBy({ it.orgnummer }) { it.tilDomeneobjekt() }
+            }
 
             internal fun List<Arbeidsforhold>.beregnOpptjening(
                 skjæringstidspunkt: LocalDate,

@@ -16,6 +16,7 @@ import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.Arbeidsforholdhistorikk
+import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.testhelpers.assertNotNull
@@ -59,13 +60,21 @@ internal class InntektshistorikkTest {
     fun `sykepengegrunnlag for arbeidsgiver med nytt arbeidsforhold`() {
         val arbeidsforholdhistorikk = Arbeidsforholdhistorikk()
         arbeidsforholdhistorikk.lagre(listOf(
-            Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, null, false)
+            Arbeidsforhold(1.januar, null, false)
         ), 1.februar)
         val opplysning = historikk.avklarSykepengegrunnlag(
             1.februar,
             1.februar,
-            null,
-            arbeidsforholdhistorikk
+            SkattSykepengegrunnlag(
+                id = UUID.randomUUID(),
+                hendelseId = UUID.randomUUID(),
+                dato = 1.februar,
+                inntektsopplysninger = emptyList(),
+                ansattPerioder = listOf(
+                    Arbeidsforhold(1.januar, null, false)
+                ),
+                tidsstempel = LocalDateTime.now()
+            )
         )
         assertNotNull(opplysning)
         assertEquals(IkkeRapportert::class, opplysning::class)
@@ -76,13 +85,21 @@ internal class InntektshistorikkTest {
     fun `sykepengegrunnlag for arbeidsgiver med nytt deaktivert arbeidsforhold`() {
         val arbeidsforholdhistorikk = Arbeidsforholdhistorikk()
         arbeidsforholdhistorikk.lagre(listOf(
-            Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, null, true)
+            Arbeidsforhold(1.januar, null, true)
         ), 1.februar)
         val opplysning = historikk.avklarSykepengegrunnlag(
             1.februar,
             1.februar,
-            null,
-            arbeidsforholdhistorikk
+            SkattSykepengegrunnlag(
+                id = UUID.randomUUID(),
+                hendelseId = UUID.randomUUID(),
+                dato = 1.februar,
+                inntektsopplysninger = emptyList(),
+                ansattPerioder = listOf(
+                    Arbeidsforhold(1.januar, null, true)
+                ),
+                tidsstempel = LocalDateTime.now()
+            )
         )
         assertNotNull(opplysning)
         assertEquals(IkkeRapportert::class, opplysning::class)
@@ -96,8 +113,7 @@ internal class InntektshistorikkTest {
         assertEquals(INNTEKT, historikk.avklarSykepengegrunnlag(
             1.januar,
             1.januar,
-            null,
-            Arbeidsforholdhistorikk()
+            null
         )?.inspektør?.beløp)
     }
 
@@ -109,14 +125,12 @@ internal class InntektshistorikkTest {
         assertEquals(29000.månedlig, historikk.avklarSykepengegrunnlag(
             1.januar,
             1.januar,
-            null,
-            Arbeidsforholdhistorikk()
+            null
         )?.inspektør?.beløp)
         assertEquals(31000.månedlig, historikk.avklarSykepengegrunnlag(
             1.februar,
             1.februar,
-            null,
-            Arbeidsforholdhistorikk()
+            null
         )?.inspektør?.beløp)
     }
 
@@ -127,8 +141,7 @@ internal class InntektshistorikkTest {
         assertNull(historikk.avklarSykepengegrunnlag(
             2.januar,
             2.januar,
-            null,
-            Arbeidsforholdhistorikk()
+            null
         ))
     }
 
@@ -149,10 +162,10 @@ internal class InntektshistorikkTest {
                 ORGNUMMER inntekt 22000
             }
         }
-            .map { it.tilSykepengegrunnlag(31.desember(2017), UUID.randomUUID()) }
+            .map { it.tilSykepengegrunnlag(31.desember(2017), UUID.randomUUID(), listOf(Arbeidsforhold(1.november(2017), null, false))) }
             .single()
 
-        assertEquals(256000.årlig, historikk.avklarSykepengegrunnlag(31.desember(2017), 31.desember(2017), skattSykepengegrunnlag, Arbeidsforholdhistorikk())?.inspektør?.beløp)
+        assertEquals(256000.årlig, historikk.avklarSykepengegrunnlag(31.desember(2017), 31.desember(2017), skattSykepengegrunnlag)?.inspektør?.beløp)
     }
 
     @Test
@@ -172,9 +185,9 @@ internal class InntektshistorikkTest {
                 ORGNUMMER inntekt 22000
             }
         }
-            .map { it.tilSykepengegrunnlag(1.januar, UUID.randomUUID()) }
+            .map { it.tilSykepengegrunnlag(1.januar, UUID.randomUUID(), listOf(Arbeidsforhold(1.desember(2016), null, false))) }
             .single()
-        assertEquals(392000.årlig, historikk.avklarSykepengegrunnlag(1.januar, 1.januar, skattSykepengegrunnlag, Arbeidsforholdhistorikk())?.inspektør?.beløp)
+        assertEquals(392000.årlig, historikk.avklarSykepengegrunnlag(1.januar, 1.januar, skattSykepengegrunnlag)?.inspektør?.beløp)
     }
 
     @Test
@@ -187,9 +200,9 @@ internal class InntektshistorikkTest {
                 ORGNUMMER inntekt INNTEKT
             }
         }
-            .map { it.tilSykepengegrunnlag(1.januar, UUID.randomUUID()) }
+            .map { it.tilSykepengegrunnlag(1.januar, UUID.randomUUID(), listOf(Arbeidsforhold(1.desember(2016), null, false))) }
             .single()
-        assertEquals(INNTEKT, historikk.avklarSykepengegrunnlag(1.januar, 1.januar, skattSykepengegrunnlag, Arbeidsforholdhistorikk())?.inspektør?.beløp)
+        assertEquals(INNTEKT, historikk.avklarSykepengegrunnlag(1.januar, 1.januar, skattSykepengegrunnlag)?.inspektør?.beløp)
     }
 
     @Test
@@ -199,9 +212,9 @@ internal class InntektshistorikkTest {
                 ORGNUMMER inntekt INNTEKT * -1
             }
         }
-            .map { it.tilSykepengegrunnlag(1.januar, UUID.randomUUID()) }
+            .map { it.tilSykepengegrunnlag(1.januar, UUID.randomUUID(), listOf(Arbeidsforhold(1.oktober(2017), null, false))) }
             .single()
-        val inntektsopplysning = historikk.avklarSykepengegrunnlag(1.januar, 1.januar, skattSykepengegrunnlag, Arbeidsforholdhistorikk())
+        val inntektsopplysning = historikk.avklarSykepengegrunnlag(1.januar, 1.januar, skattSykepengegrunnlag)
         assertTrue(inntektsopplysning is SkattSykepengegrunnlag)
         assertEquals(INGEN, inntektsopplysning?.inspektør?.beløp)
     }

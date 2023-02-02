@@ -3,7 +3,6 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.InntektsopplysningVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -53,32 +52,21 @@ abstract class AvklarbarSykepengegrunnlag(
                 Inntektsmelding::class to SisteAnkomne,
                 SkattSykepengegrunnlag::class to TidligsteMåned,
                 IkkeRapportert::class to TidligsteMåned
-            ),
-            IkkeRapportert::class to mapOf(
-                SkattSykepengegrunnlag::class to KunHøyre,
             )
         )
 
-        private fun Map<KClass<out AvklarbarSykepengegrunnlag>, Map<out KClass<out AvklarbarSykepengegrunnlag>, Inntektturnering>>.avgjør(venstre: AvklarbarSykepengegrunnlag, høyre: AvklarbarSykepengegrunnlag): AvklarbarSykepengegrunnlag {
+        private fun Map<KClass<Inntektsmelding>, Map<out KClass<out AvklarbarSykepengegrunnlag>, Inntektturnering>>.avgjør(venstre: AvklarbarSykepengegrunnlag, høyre: AvklarbarSykepengegrunnlag): AvklarbarSykepengegrunnlag {
             return this[venstre::class]?.get(høyre::class)?.beste(venstre, høyre)
                 ?: this[høyre::class]?.get(venstre::class)?.beste(høyre, venstre) // kommutativ variant; a+b = b+a
                 ?: error("mangelfull inntektturnering for [${venstre::class.simpleName}, ${høyre::class.simpleName}]")
         }
-        internal fun List<Inntektsmelding>?.avklarSykepengegrunnlag(
-            skjæringstidspunkt: LocalDate,
-            førsteFraværsdag: LocalDate?,
-            skattSykepengegrunnlag: SkattSykepengegrunnlag?,
-            arbeidsforholdhistorikk: Arbeidsforholdhistorikk
-        ): Inntektsopplysning? {
-            val reserve = Skatteopplysning.nyoppstartetArbeidsforhold(skjæringstidspunkt, arbeidsforholdhistorikk)
-            val tilgjengelige = listOfNotNull(skattSykepengegrunnlag, reserve) + (this ?: emptyList())
+        internal fun List<Inntektsmelding>?.avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?, skattSykepengegrunnlag: SkattSykepengegrunnlag?): Inntektsopplysning? {
+            val tilgjengelige = listOfNotNull(skattSykepengegrunnlag) + (this ?: emptyList())
             val kandidater = tilgjengelige.mapNotNull { it.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag) }
             if (kandidater.isEmpty()) return null
             return kandidater.reduce { champion, challenger -> champion.beste(challenger) }
         }
     }
-
-
 }
 
 abstract class Inntektsopplysning protected constructor(

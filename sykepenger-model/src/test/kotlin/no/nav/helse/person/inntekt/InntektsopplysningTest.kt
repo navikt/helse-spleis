@@ -107,8 +107,8 @@ internal class InntektsopplysningTest {
         val skatt = SkattSykepengegrunnlag(UUID.randomUUID(), UUID.randomUUID(), 1.februar, emptyList(), LocalDateTime.now() )
         val ikkeRapportert = IkkeRapportert(UUID.randomUUID(), 31.januar, LocalDateTime.now())
 
-         assertEquals(skatt, skatt.beste(ikkeRapportert))
-         assertEquals(skatt, ikkeRapportert.beste(skatt))
+        assertThrows<IllegalStateException> { assertEquals(skatt, skatt.beste(ikkeRapportert)) }
+        assertThrows<IllegalStateException> { assertEquals(skatt, ikkeRapportert.beste(skatt)) }
     }
 
     @Test
