@@ -9,7 +9,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig

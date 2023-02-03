@@ -25,7 +25,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.hendelser.PersonHendelse
-import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.serde.serialize

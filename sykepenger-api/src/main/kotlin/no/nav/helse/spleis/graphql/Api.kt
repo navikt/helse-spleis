@@ -14,7 +14,7 @@ import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.Toggle
 import no.nav.helse.person.Person
-import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.serde.api.dto.PersonDTO
 import no.nav.helse.spleis.dao.HendelseDao

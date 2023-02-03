@@ -18,7 +18,7 @@ import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.person.Person
 import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.somPersonidentifikator
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow

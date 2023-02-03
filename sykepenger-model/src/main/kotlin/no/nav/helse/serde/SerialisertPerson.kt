@@ -8,7 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.helse.person.Person
-import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.migration.JsonMigration
 import no.nav.helse.serde.migration.JsonMigrationException
 import no.nav.helse.serde.migration.MeldingerSupplier

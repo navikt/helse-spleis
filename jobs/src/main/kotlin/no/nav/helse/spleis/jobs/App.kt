@@ -12,7 +12,7 @@ import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.serde.serialize
 import no.nav.rapids_and_rivers.cli.AivenConfig

@@ -4,7 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.MaskinellJurist
 import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class TestPersonAssertions(private val personInspektør: PersonInspektør, private val jurist: MaskinellJurist) {

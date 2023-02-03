@@ -11,7 +11,7 @@ import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.MaskinellJurist
 
 internal class AvvisDagerEtterDødsdatofilterTest {
     private lateinit var inspektør: UtbetalingstidslinjeInspektør

@@ -20,7 +20,7 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.api.serializePersonForSporing
 import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.dao.HendelseDao

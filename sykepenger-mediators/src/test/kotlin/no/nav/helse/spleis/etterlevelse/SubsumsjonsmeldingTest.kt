@@ -5,7 +5,7 @@ import com.networknt.schema.JsonSchemaFactory
 import com.networknt.schema.SpecVersion
 import com.networknt.schema.ValidationMessage
 import no.nav.helse.januar
-import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.somPersonidentifikator

@@ -5,7 +5,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
-import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.spleis.AbstractObservableTest
 import no.nav.helse.spleis.objectMapper
 import no.nav.helse.spleis.testhelpers.ApiTestServer

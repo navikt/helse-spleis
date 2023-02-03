@@ -9,6 +9,7 @@ val mainClass = "no.nav.helse.spleis.AppKt"
 dependencies {
     implementation(project(":sykepenger-model"))
     implementation(project(":sykepenger-primitiver"))
+    implementation(project(":sykepenger-etterlevelse"))
     implementation(project(":sykepenger-utbetaling"))
     implementation(project(":sykepenger-aktivitetslogg"))
 

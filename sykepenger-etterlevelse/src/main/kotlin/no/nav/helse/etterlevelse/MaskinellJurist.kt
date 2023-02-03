@@ -1,4 +1,4 @@
-package no.nav.helse.person.etterlevelse
+package no.nav.helse.etterlevelse
 
 import java.io.Serializable
 import java.time.LocalDate
@@ -6,8 +6,6 @@ import java.time.Year
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.etterlevelse.BetingetSubsumsjon
-import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.januar
@@ -15,17 +13,11 @@ import no.nav.helse.juni
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_A
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_B
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_C
-import no.nav.helse.etterlevelse.EnkelSubsumsjon
-import no.nav.helse.etterlevelse.FOLKETRYGDLOVENS_OPPRINNELSESDATO
-import no.nav.helse.etterlevelse.GrupperbarSubsumsjon
-import no.nav.helse.etterlevelse.KontekstType
-import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.etterlevelse.Ledd.LEDD_1
 import no.nav.helse.etterlevelse.Ledd.LEDD_2
 import no.nav.helse.etterlevelse.Ledd.LEDD_3
 import no.nav.helse.etterlevelse.Ledd.LEDD_5
-import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_10
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_11
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_12
@@ -41,16 +33,11 @@ import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_3
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_30
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_51
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_9
-import no.nav.helse.etterlevelse.Punktum
 import no.nav.helse.etterlevelse.Punktum.Companion.punktum
-import no.nav.helse.etterlevelse.Subsumsjon
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_BEREGNET
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
-import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.etterlevelse.SubsumsjonVisitor
-import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.etterlevelse.Tidslinjedag.Companion.dager
 import no.nav.helse.person.DokumentType
 import no.nav.helse.økonomi.Inntekt
@@ -813,7 +800,7 @@ class MaskinellJurist private constructor(
         if (dagerIkkeOppfylt.isNotEmpty()) logg(VILKAR_IKKE_OPPFYLT, dagerIkkeOppfylt.first(), dagerIkkeOppfylt.last())
     }
 
-    internal fun subsumsjoner() = subsumsjoner.toList()
+    fun subsumsjoner() = subsumsjoner.toList()
 
     fun events() = subsumsjoner.map(SubsumsjonEvent.Companion::fraSubsumsjon)
 
