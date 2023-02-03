@@ -10,7 +10,7 @@ import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 
 class Vilkårsgrunnlag(

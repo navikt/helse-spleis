@@ -56,8 +56,8 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektshistorikk

@@ -10,7 +10,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElementTest.Companion.eksisterendeInfotrygdHistorikkelement
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.serde.PersonData

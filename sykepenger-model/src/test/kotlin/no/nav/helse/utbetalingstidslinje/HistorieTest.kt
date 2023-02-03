@@ -6,7 +6,7 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk

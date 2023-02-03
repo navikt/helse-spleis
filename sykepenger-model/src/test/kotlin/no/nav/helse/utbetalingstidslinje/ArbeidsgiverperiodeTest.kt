@@ -5,7 +5,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
 import org.junit.jupiter.api.Assertions.assertEquals

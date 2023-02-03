@@ -9,7 +9,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.utbetalingsh
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Periodetype
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode

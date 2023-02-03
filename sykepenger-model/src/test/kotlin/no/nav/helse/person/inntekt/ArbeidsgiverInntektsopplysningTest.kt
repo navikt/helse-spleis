@@ -15,7 +15,7 @@ import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Paragraf
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medInntekt

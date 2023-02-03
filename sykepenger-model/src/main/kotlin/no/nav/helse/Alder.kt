@@ -7,7 +7,7 @@ import java.time.Year
 import java.time.temporal.ChronoUnit.YEARS
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 
 // TODO: alder bør ha dødsdato for å regne alder riktig i tilfelle død

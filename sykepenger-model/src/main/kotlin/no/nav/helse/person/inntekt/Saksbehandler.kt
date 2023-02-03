@@ -8,7 +8,7 @@ import no.nav.helse.person.InntektsopplysningVisitor
 import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Paragraf
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 

@@ -1,9 +1,8 @@
-package no.nav.helse.person.etterlevelse
+package no.nav.helse.etterlevelse
 
 import java.io.Serializable
 import java.time.LocalDate
 import java.time.Year
-import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.InntektSubsumsjonobserver
@@ -470,6 +469,6 @@ interface SubsumsjonObserver: InntektSubsumsjonobserver, ProsentdelSubsumsjonObs
     )
 
     companion object {
-        internal val NullObserver = object : SubsumsjonObserver {}
+        val NullObserver = object : SubsumsjonObserver {}
     }
 }

@@ -24,7 +24,7 @@ import no.nav.helse.oktober
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest

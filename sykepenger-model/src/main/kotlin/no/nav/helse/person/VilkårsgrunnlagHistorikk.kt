@@ -17,7 +17,7 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_16
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_11
 import no.nav.helse.person.builders.VedtakFattetBuilder
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.ManglerRefusjonsopplysning
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag

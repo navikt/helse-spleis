@@ -11,7 +11,7 @@ import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Personopplysninger
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import kotlin.reflect.KClass
 
 internal typealias Melding = KClass<out SykdomstidslinjeHendelse>

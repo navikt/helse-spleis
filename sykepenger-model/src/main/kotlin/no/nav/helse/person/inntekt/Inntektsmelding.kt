@@ -6,7 +6,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.InntektsmeldingVisitor
 import no.nav.helse.person.InntektsopplysningVisitor
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
 
 internal class Inntektsmelding(

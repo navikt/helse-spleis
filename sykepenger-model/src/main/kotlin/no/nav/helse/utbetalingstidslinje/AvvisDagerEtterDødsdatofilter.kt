@@ -6,7 +6,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvis
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvisteDager
 import java.time.LocalDate
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 
 internal class AvvisDagerEtterDødsdatofilter(
     private val dødsdato: LocalDate?,

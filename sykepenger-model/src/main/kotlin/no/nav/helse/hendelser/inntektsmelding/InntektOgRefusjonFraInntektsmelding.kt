@@ -10,7 +10,7 @@ import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Person
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 
 internal class InntektOgRefusjonFraInntektsmelding(
     private val inntektsmelding: Inntektsmelding,

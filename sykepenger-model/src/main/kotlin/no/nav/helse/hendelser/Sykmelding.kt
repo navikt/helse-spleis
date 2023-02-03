@@ -7,7 +7,7 @@ import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Personopplysninger
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.noOverlap
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje

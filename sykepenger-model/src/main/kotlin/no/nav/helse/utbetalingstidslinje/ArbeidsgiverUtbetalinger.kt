@@ -8,7 +8,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.RevurderingUtbetalinger
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 
 internal class ArbeidsgiverUtbetalinger(
     regler: ArbeidsgiverRegler,

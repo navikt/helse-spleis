@@ -2,7 +2,7 @@ package no.nav.helse.person.inntekt
 
 import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag.Companion.sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag.Companion.validerInntekter
 import no.nav.helse.økonomi.Inntekt

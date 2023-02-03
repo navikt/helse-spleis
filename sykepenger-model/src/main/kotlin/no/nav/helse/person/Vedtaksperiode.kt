@@ -108,7 +108,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_7
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.serde.reflection.AktivitetsloggMap
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace

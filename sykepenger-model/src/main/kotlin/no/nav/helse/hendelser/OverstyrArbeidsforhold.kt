@@ -5,7 +5,7 @@ import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Opptjening
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 
 class OverstyrArbeidsforhold(

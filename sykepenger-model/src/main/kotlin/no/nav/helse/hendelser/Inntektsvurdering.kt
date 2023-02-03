@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.etterlevelse.SammenligningsgrunnlagBuilder.Companion.subsumsjonsformat
 class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {

@@ -10,7 +10,7 @@ import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_3
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import org.slf4j.LoggerFactory
 
 class InntektForSykepengegrunnlag(

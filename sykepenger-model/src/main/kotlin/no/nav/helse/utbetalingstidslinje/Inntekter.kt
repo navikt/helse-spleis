@@ -7,7 +7,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.manglerRefusjonsopplysninger
 import no.nav.helse.person.Vedtaksperiode.Companion.manglerVilkårsgrunnlag
 import no.nav.helse.person.Vedtaksperiode.Companion.ugyldigUtbetalingstidslinje
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.ManglerRefusjonsopplysning
 import no.nav.helse.økonomi.Økonomi
 
