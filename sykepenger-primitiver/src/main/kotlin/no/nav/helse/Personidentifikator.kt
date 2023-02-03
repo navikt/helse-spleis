@@ -8,7 +8,6 @@ class Personidentifikator private constructor(private val value: String) {
         value.toLong()
     companion object {
         fun somPersonidentifikator(ident: String) = Personidentifikator(value = ident)
-        private fun alleTegnErSiffer(string: String) = string.matches(Regex("\\d*"))
     }
 }
 
