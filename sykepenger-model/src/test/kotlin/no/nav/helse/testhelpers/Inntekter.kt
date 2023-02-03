@@ -1,11 +1,8 @@
 package no.nav.helse.testhelpers
 
-import java.time.LocalDate
 import java.time.YearMonth
-import java.util.UUID
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 

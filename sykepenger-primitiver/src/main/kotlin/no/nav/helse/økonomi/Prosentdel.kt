@@ -4,7 +4,9 @@ import java.math.BigDecimal
 import java.math.BigDecimal.ONE
 import java.math.BigDecimal.ZERO
 import java.math.MathContext
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import java.time.LocalDate
+import no.nav.helse.etterlevelse.Tidslinjedag
+import no.nav.helse.hendelser.Periode
 import kotlin.math.roundToInt
 
 class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparable<Prosentdel> {
@@ -18,10 +20,10 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
         private val HUNDRE_PROSENT = 100.0.toBigDecimal(mc)
         private val GRENSE = 20.prosent
 
-        internal fun fraRatio(ratio: Double) = Prosentdel(ratio.toBigDecimal(mc))
-        internal fun fraRatio(ratio: String) = Prosentdel(ratio.toBigDecimal(mc))
+        fun fraRatio(ratio: Double) = Prosentdel(ratio.toBigDecimal(mc))
+        fun fraRatio(ratio: String) = Prosentdel(ratio.toBigDecimal(mc))
 
-        internal fun subsumsjon(subsumsjonObserver: SubsumsjonObserver, block: SubsumsjonObserver.(Double) -> Unit) {
+        fun subsumsjon(subsumsjonObserver: ProsentdelSubsumsjonObserver, block: ProsentdelSubsumsjonObserver.(Double) -> Unit) {
             subsumsjonObserver.block(GRENSE.toDouble())
         }
 
@@ -40,7 +42,7 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
 
     override fun hashCode() = brøkdel.hashCode()
 
-    internal operator fun not() = Prosentdel(SIKKER_BRØK - this.brøkdel)
+    operator fun not() = Prosentdel(SIKKER_BRØK - this.brøkdel)
 
     internal operator fun div(other: Prosentdel) = Prosentdel(this.brøkdel.divide(other.brøkdel, mc))
 
@@ -50,15 +52,24 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
         return "${(toDouble())} %"
     }
 
-    internal fun reciproc(other: Inntekt) = other.times(inverse())
+    fun reciproc(other: Inntekt) = other.times(inverse())
 
     private fun inverse(): BigDecimal = SIKKER_BRØK.divide(this.brøkdel, mc)
 
     internal fun times(other: Inntekt) = other.times(brøkdel)
 
-    internal fun toDouble() = brøkdel.multiply(HUNDRE_PROSENT, mc).toDouble()
+    fun toDouble() = brøkdel.multiply(HUNDRE_PROSENT, mc).toDouble()
 
-    internal fun roundToInt() = toDouble().roundToInt()
+    fun roundToInt() = toDouble().roundToInt()
 
-    internal fun erUnderGrensen() = this < GRENSE
+    fun erUnderGrensen() = this < GRENSE
+}
+
+interface ProsentdelSubsumsjonObserver {
+    fun `§ 8-13 ledd 2`(
+        periode: Periode,
+        tidslinjerForSubsumsjon: List<List<Tidslinjedag>>,
+        grense: Double,
+        dagerUnderGrensen: List<LocalDate>
+    )
 }

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.lang.NullPointerException
 import java.lang.RuntimeException
 import java.time.LocalDateTime
 import no.nav.helse.assertForventetFeil
@@ -38,8 +37,6 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 
 internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 

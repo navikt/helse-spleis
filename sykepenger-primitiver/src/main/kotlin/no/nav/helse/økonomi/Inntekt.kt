@@ -4,7 +4,6 @@ import java.math.BigDecimal
 import java.math.MathContext
 import java.time.LocalDate
 import no.nav.helse.memoize
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Prosentdel.Companion.average
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
@@ -26,21 +25,21 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
         //8-10 ledd 3
         private const val ARBEIDSDAGER_PER_ÅR = 260
 
-        internal fun vektlagtGjennomsnitt(parene: List<Pair<Prosentdel, Inntekt>>): Prosentdel {
+        fun vektlagtGjennomsnitt(parene: List<Pair<Prosentdel, Inntekt>>): Prosentdel {
             return parene.map { it.first to it.second.årlig.toBigDecimal(mc) }.average()
         }
 
         val Number.månedlig get() = Inntekt(this.toDouble() * 12)
 
-        internal val Number.årlig get() = Inntekt(this.toDouble())
+        val Number.årlig get() = Inntekt(this.toDouble())
 
         val Number.daglig get() = Inntekt(this.toDouble() * ARBEIDSDAGER_PER_ÅR)
 
         fun Number.daglig(grad: Prosentdel) = this.daglig / grad
 
-        internal fun Collection<Inntekt>.summer() = this.fold(INGEN) { acc, inntekt -> acc + inntekt }
+        fun Collection<Inntekt>.summer() = this.fold(INGEN) { acc, inntekt -> acc + inntekt }
 
-        internal val INGEN = 0.daglig
+        val INGEN = 0.daglig
 
         private val tilDagligDoubleMemoized = { tall: Double -> tall / ARBEIDSDAGER_PER_ÅR }.memoize()
         private val tilMånedligDoubleMemoized = { tall: Double -> tall / 12 }.memoize()
@@ -49,7 +48,7 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
         private val rundNedTilDagligMemoized = { tall: Double -> tilDagligDoubleMemoized(tall).toInt().daglig }.memoize()
     }
 
-    internal fun <R> reflection(block: (årlig: Double, månedlig: Double, daglig: Double, dagligInt: Int) -> R) = block(
+    fun <R> reflection(block: (årlig: Double, månedlig: Double, daglig: Double, dagligInt: Int) -> R) = block(
         årlig,
         tilMånedligDouble(),
         tilDagligDouble(),
@@ -59,28 +58,28 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
     private fun tilDagligInt() = tilDagligIntMemoized(årlig)
     private fun tilDagligDouble() = tilDagligDoubleMemoized(årlig)
     private fun tilMånedligDouble() = tilMånedligDoubleMemoized(årlig)
-    internal fun rundTilDaglig() = rundTilDagligMemoized(årlig)
-    internal fun rundNedTilDaglig() = rundNedTilDagligMemoized(årlig)
+    fun rundTilDaglig() = rundTilDagligMemoized(årlig)
+    fun rundNedTilDaglig() = rundNedTilDagligMemoized(årlig)
 
-    internal fun dekningsgrunnlag(dagen: LocalDate, regler: ArbeidsgiverRegler, subsumsjonObserver: InntektSubsumsjonobserver): Inntekt {
+    fun dekningsgrunnlag(dagen: LocalDate, regler: DekningsgradKilde, subsumsjonObserver: InntektSubsumsjonobserver): Inntekt {
         val dekningsgrunnlag = Inntekt(this.årlig * regler.dekningsgrad())
         subsumsjonObserver.`§ 8-16 ledd 1`(dagen, regler.dekningsgrad(), this.årlig, dekningsgrunnlag.årlig)
         return dekningsgrunnlag
     }
 
-    internal operator fun times(scalar: Number) = Inntekt(this.årlig * scalar.toDouble())
+    operator fun times(scalar: Number) = Inntekt(this.årlig * scalar.toDouble())
     internal operator fun times(scalar: BigDecimal) = Inntekt(scalar.multiply(this.årlig.toBigDecimal(mc), mc).toDouble())
 
-    internal operator fun times(prosentdel: Prosentdel) = prosentdel.times(this)
+    operator fun times(prosentdel: Prosentdel) = prosentdel.times(this)
 
-    internal operator fun div(scalar: Number) = Inntekt(this.årlig / scalar.toDouble())
+    operator fun div(scalar: Number) = Inntekt(this.årlig / scalar.toDouble())
     internal operator fun div(other: Prosentdel) = other.reciproc(this)
 
-    internal infix fun ratio(other: Inntekt) = this.årlig / other.årlig
+    infix fun ratio(other: Inntekt) = this.årlig / other.årlig
 
-    internal operator fun plus(other: Inntekt) = Inntekt(this.årlig + other.årlig)
+    operator fun plus(other: Inntekt) = Inntekt(this.årlig + other.årlig)
 
-    internal operator fun minus(other: Inntekt) = Inntekt(this.årlig - other.årlig)
+    operator fun minus(other: Inntekt) = Inntekt(this.årlig - other.årlig)
 
     override fun hashCode() = årlig.hashCode()
 
@@ -94,10 +93,14 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
         return "[Årlig: $årlig, Månedlig: ${tilMånedligDouble()}, Daglig: ${tilDagligDouble()}]"
     }
 
-    internal fun avviksprosent(other: Inntekt) =
+    fun avviksprosent(other: Inntekt) =
         Prosent.ratio((this.årlig - other.årlig).absoluteValue / other.årlig)
 }
 
 interface InntektSubsumsjonobserver {
     fun `§ 8-16 ledd 1`(dato: LocalDate, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double)
+}
+
+interface DekningsgradKilde {
+    fun dekningsgrad(): Double
 }

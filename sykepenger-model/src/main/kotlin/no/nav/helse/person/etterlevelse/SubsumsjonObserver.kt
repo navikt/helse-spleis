@@ -27,11 +27,12 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.InntektSubsumsjonobserver
 import no.nav.helse.økonomi.Prosent
+import no.nav.helse.økonomi.ProsentdelSubsumsjonObserver
 import no.nav.helse.økonomi.Økonomi
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
-interface SubsumsjonObserver: InntektSubsumsjonobserver {
+interface SubsumsjonObserver: InntektSubsumsjonobserver, ProsentdelSubsumsjonObserver {
 
     /**
      * Vurdering av opptjeningstid
@@ -200,7 +201,7 @@ interface SubsumsjonObserver: InntektSubsumsjonobserver {
      * @param grense grense brukt til å vurdere [dagerUnderGrensen]
      * @param dagerUnderGrensen dager som befinner seg under tilstrekkelig uføregrad, gitt av [grense]
      */
-    fun `§ 8-13 ledd 2`(periode: Periode, tidslinjer: List<List<Tidslinjedag>>, grense: Double, dagerUnderGrensen: List<LocalDate>) {}
+    override fun `§ 8-13 ledd 2`(periode: Periode, tidslinjer: List<List<Tidslinjedag>>, grense: Double, dagerUnderGrensen: List<LocalDate>) {}
 
     /**
      * Retten til sykepenger etter dette kapitlet faller bort når arbeidsforholdet midlertidig avbrytes i mer enn 14 dager

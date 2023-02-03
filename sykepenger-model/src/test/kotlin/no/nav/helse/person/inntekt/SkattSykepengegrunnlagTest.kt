@@ -8,7 +8,6 @@ import no.nav.helse.februar
 import no.nav.helse.forrigeDag
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
 import no.nav.helse.person.inntekt.AvklarbarSykepengegrunnlag.Companion.avklarSykepengegrunnlag
 import no.nav.helse.testhelpers.assertNotNull

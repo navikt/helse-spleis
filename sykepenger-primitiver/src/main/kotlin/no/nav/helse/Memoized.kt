@@ -2,7 +2,7 @@ package no.nav.helse
 
 import java.util.concurrent.ConcurrentHashMap
 
-internal class Memoized<T>(private val supplier: () -> T) {
+class Memoized<T>(private val supplier: () -> T) {
     private val value by lazy(supplier)
     operator fun invoke() = value
 }

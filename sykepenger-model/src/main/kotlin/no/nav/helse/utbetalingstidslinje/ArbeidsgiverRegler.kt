@@ -1,9 +1,11 @@
 package no.nav.helse.utbetalingstidslinje
 
-internal interface ArbeidsgiverRegler {
+import no.nav.helse.økonomi.DekningsgradKilde
+
+internal interface ArbeidsgiverRegler: DekningsgradKilde {
     fun burdeStarteNyArbeidsgiverperiode(oppholdsdagerBrukt: Int): Boolean
     fun arbeidsgiverperiodenGjennomført(arbeidsgiverperiodedagerBrukt: Int): Boolean
-    fun dekningsgrad(): Double
+    override fun dekningsgrad(): Double
     fun maksSykepengedager(): Int
     fun maksSykepengedagerOver67(): Int
 
