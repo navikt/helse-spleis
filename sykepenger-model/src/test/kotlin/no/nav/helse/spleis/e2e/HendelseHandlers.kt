@@ -695,14 +695,16 @@ internal fun AbstractEndToEndTest.håndterPåminnelse(
     påminnetTilstand: TilstandType,
     tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now(),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    antallGangerPåminnet: Int = 1
+    antallGangerPåminnet: Int = 1,
+    skalReberegnes: Boolean = false
 ) {
     påminnelse(
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer),
         påminnetTilstand = påminnetTilstand,
         tilstandsendringstidspunkt = tilstandsendringstidspunkt,
         orgnummer = orgnummer,
-        antallGangerPåminnet = antallGangerPåminnet
+        antallGangerPåminnet = antallGangerPåminnet,
+        skalReberegnes = skalReberegnes
     ).håndter(Person::håndter)
 }
 

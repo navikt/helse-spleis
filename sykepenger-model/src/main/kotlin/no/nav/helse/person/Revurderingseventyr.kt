@@ -3,12 +3,8 @@ package no.nav.helse.person
 import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
-import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Arbeidsforhold
-import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiveropplysninger
-import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiverperiode
-import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.KorrigertSøknad
-import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.NyPeriode
-import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Sykdomstidslinje
+import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeData
+import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.*
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 
@@ -23,13 +19,14 @@ class Revurderingseventyr private constructor(
 
         fun arbeidsforhold(skjæringstidspunkt: LocalDate) = Revurderingseventyr(Arbeidsforhold, skjæringstidspunkt, skjæringstidspunkt.somPeriode())
         fun korrigertSøknad(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(KorrigertSøknad, skjæringstidspunkt, periodeForEndring)
+        fun reberegning(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Reberegning, skjæringstidspunkt, periodeForEndring)
         fun sykdomstidslinje(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Sykdomstidslinje, skjæringstidspunkt, periodeForEndring)
         fun arbeidsgiveropplysninger(skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(Arbeidsgiveropplysninger, skjæringstidspunkt, endringsdato.somPeriode())
         fun arbeidsgiverperiode(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Arbeidsgiverperiode, skjæringstidspunkt, periodeForEndring)
-        fun korrigertInntektsmelding(skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(RevurderingÅrsak.KorrigertInntektsmelding, skjæringstidspunkt, endringsdato.somPeriode())
+        fun korrigertInntektsmelding(skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(KorrigertInntektsmelding, skjæringstidspunkt, endringsdato.somPeriode())
     }
 
-    private val vedtaksperioder = mutableListOf<PersonObserver.OverstyringIgangsatt.VedtaksperiodeData>()
+    private val vedtaksperioder = mutableListOf<VedtaksperiodeData>()
 
     internal fun inngåSomRevurdering(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, periode: Periode): Boolean {
         if (periodeForEndring.starterEtter(periode)) return false
@@ -56,14 +53,7 @@ class Revurderingseventyr private constructor(
 
     internal fun sendOverstyringIgangsattEvent(person: Person) {
         if (vedtaksperioder.isEmpty()) return
-        person.emitOverstyringIgangsattEvent(
-            PersonObserver.OverstyringIgangsatt(
-                årsak = hvorfor.navn(),
-                berørtePerioder = vedtaksperioder.toList(),
-                skjæringstidspunkt = skjæringstidspunkt,
-                periodeForEndring = periodeForEndring
-            )
-        )
+        hvorfor.emitOverstyringIgangsattEvent(person, vedtaksperioder.toList(), skjæringstidspunkt, periodeForEndring)
     }
 
     internal fun loggDersomKorrigerendeSøknad(hendelse: IAktivitetslogg, loggMelding: String) {
@@ -83,6 +73,17 @@ class Revurderingseventyr private constructor(
         fun kanInngå(hendelse: IAktivitetslogg): Boolean = true
         fun dersomInngått(hendelse: IAktivitetslogg) {}
 
+        fun emitOverstyringIgangsattEvent(person: Person, vedtaksperioder: List<VedtaksperiodeData>, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) {
+            person.emitOverstyringIgangsattEvent(
+                PersonObserver.OverstyringIgangsatt(
+                    årsak = navn(),
+                    berørtePerioder = vedtaksperioder,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    periodeForEndring = periodeForEndring
+                )
+            )
+        }
+
         fun navn(): String
 
         object Arbeidsgiverperiode : RevurderingÅrsak {
@@ -99,6 +100,17 @@ class Revurderingseventyr private constructor(
 
         object Arbeidsforhold : RevurderingÅrsak {
             override fun navn() = "ARBEIDSFORHOLD"
+        }
+
+        object Reberegning : RevurderingÅrsak {
+            override fun emitOverstyringIgangsattEvent(
+                person: Person,
+                vedtaksperioder: List<VedtaksperiodeData>,
+                skjæringstidspunkt: LocalDate,
+                periodeForEndring: Periode
+            ) { /* trenger ikke fortelle om en reberegning */ }
+
+            override fun navn() = "REBEREGNING"
         }
 
         object KorrigertSøknad : RevurderingÅrsak {

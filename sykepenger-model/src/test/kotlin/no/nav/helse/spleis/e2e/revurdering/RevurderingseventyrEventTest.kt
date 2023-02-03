@@ -12,10 +12,18 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeData
+import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
+import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
@@ -74,6 +82,23 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
             this bleForårsaketAv "SYKDOMSTIDSLINJE"
             this medSkjæringstidspunkt 1.januar
             this medførteRevurderingAv (januar og februar)
+        }
+    }
+
+    @Test
+    fun `reberegning av revurdering`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(1.mars, 31.mars)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(27.februar, 28.februar, 50.prosent))
+        nullstillTilstandsendringer()
+        håndterPåminnelse(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, skalReberegnes = true)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertTilstander(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertEquals(1, observatør.overstyringIgangsatt.size)
+        revurderingIgangsattEvent(0) {
+            this bleForårsaketAv "KORRIGERT_SØKNAD"
         }
     }
 

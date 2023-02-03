@@ -1335,6 +1335,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (påminnelse.skalReberegnes())
+                return vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.reberegning(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
             val periode = vedtaksperiode.sykefraværstilfelle()
             vedtaksperiode.trengerYtelser(påminnelse, periode)
         }
