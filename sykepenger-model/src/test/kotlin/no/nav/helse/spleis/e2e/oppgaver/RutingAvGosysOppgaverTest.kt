@@ -65,7 +65,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), 16.februar)
         forkastAlle(hendelselogg)
 
-        assertTrue(observatør.opprettOppgaveEvent().isEmpty())
+        assertTrue(observatør.opprettOppgaveEventer().isEmpty())
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadHendelseId in it.hendelser })
     }
 
@@ -96,7 +96,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         forkastAlle(hendelselogg)
 
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
-        assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveEventer().any { søknadHendelseId in it.hendelser })
     }
 
     @Test
@@ -115,7 +115,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         ))
         håndterInntektsmelding(listOf(1.januar til 16.januar), 17.februar)
 
-        assertTrue(observatør.opprettOppgaveEvent().any { søknadId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveEventer().any { søknadId in it.hendelser })
         assertFalse(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadId in it.hendelser })
     }
 
@@ -127,7 +127,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         forkastAlle(hendelselogg)
 
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
-        assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveEventer().any { søknadHendelseId in it.hendelser })
     }
 
     @Test
@@ -138,7 +138,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         val søknadHendelseId = håndterSøknad(Sykdom(1.februar(2016), 28.februar(2016), 80.prosent))
         forkastAlle(hendelselogg)
 
-        assertTrue(observatør.opprettOppgaveEvent().isEmpty())
+        assertTrue(observatør.opprettOppgaveEventer().isEmpty())
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadHendelseId in it.hendelser })
     }
 
@@ -152,7 +152,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         forkastAlle(hendelselogg)
 
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
-        assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveEventer().any { søknadHendelseId in it.hendelser })
     }
 
     @Test
@@ -164,7 +164,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         val søknadHendelseId = håndterSøknad(Sykdom(20.februar, 11.mars, 80.prosent))
         forkastAlle(hendelselogg)
 
-        assertTrue(observatør.opprettOppgaveEvent().isEmpty())
+        assertTrue(observatør.opprettOppgaveEventer().isEmpty())
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadHendelseId in it.hendelser })
     }
 
@@ -179,7 +179,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         val søknadHendelseId = håndterSøknadSomIkkeErStøttet()
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
-        assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveEventer().any { søknadHendelseId in it.hendelser })
     }
 
     @Test
@@ -191,7 +191,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         val søknadHendelseId = håndterSøknadSomIkkeErStøttet()
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
-        assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveEventer().any { søknadHendelseId in it.hendelser })
     }
 
     @Test
@@ -208,7 +208,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, false)
 
-        assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveEventer().any { inntektsmeldingId in it.hendelser })
     }
 
     @Test
@@ -218,7 +218,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
         forkastAlle(hendelselogg)
 
-        assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveEventer().any { inntektsmeldingId in it.hendelser })
     }
 
     @Test
@@ -229,7 +229,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
         forkastAlle(hendelselogg)
 
-        assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveEventer().any { inntektsmeldingId in it.hendelser })
     }
 
     @Test
@@ -245,7 +245,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
 
         assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
-        assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveEventer().any { inntektsmeldingId in it.hendelser })
     }
 
     @Test
@@ -263,7 +263,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
-        assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveEventer().any { inntektsmeldingId in it.hendelser })
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
     }
 
@@ -280,7 +280,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, false)
 
-        assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveEventer().any { inntektsmeldingId in it.hendelser })
     }
 
     @Test
@@ -300,7 +300,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, false)
 
-        assertFalse(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
+        assertFalse(observatør.opprettOppgaveEventer().any { inntektsmeldingId in it.hendelser })
     }
 
     @Test
@@ -311,7 +311,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars)
         håndterSykmelding(Sykmeldingsperiode(5.april, 26.mai, 100.prosent))
 
-        assertTrue(observatør.opprettOppgaveEvent().isEmpty())
+        assertTrue(observatør.opprettOppgaveEventer().isEmpty())
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().none { inntektsmeldingId in it.hendelser })
     }
 
@@ -332,7 +332,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         assertIngenVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertIngenVarsel(RV_IM_4, 2.vedtaksperiode.filter())
         assertVarsel(RV_IM_4, 3.vedtaksperiode.filter())
-        assertTrue(observatør.opprettOppgaveEvent().isEmpty())
+        assertTrue(observatør.opprettOppgaveEventer().isEmpty())
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { inntektsmeldingId in it.hendelser })
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
@@ -354,7 +354,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(22.januar, 22.januar, 100.prosent))
         val søknadId = håndterSøknad(Sykdom(22.januar, 22.januar, 100.prosent))
 
-        assertTrue(observatør.opprettOppgaveEvent().any { søknadId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveEventer().any { søknadId in it.hendelser })
         assertFalse(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadId in it.hendelser })
     }
 
@@ -368,7 +368,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         ))
         val søknadId = håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         person.søppelbøtte(hendelselogg, 1.mars til 31.mars)
-        assertTrue(observatør.opprettOppgaveEvent().any { søknadId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveEventer().any { søknadId in it.hendelser })
         assertFalse(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadId in it.hendelser })
     }
 
@@ -382,7 +382,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         ))
         val søknadId = håndterSøknad(Sykdom(10.mars, 31.mars, 100.prosent))
         person.søppelbøtte(hendelselogg, 10.mars til 31.mars)
-        assertTrue(observatør.opprettOppgaveEvent().any { søknadId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveEventer().any { søknadId in it.hendelser })
         assertFalse(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadId in it.hendelser })
     }
 
@@ -396,7 +396,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         ))
         val søknadId = håndterSøknad(Sykdom(12.februar, 28.februar, 100.prosent))
         person.søppelbøtte(hendelselogg, 12.februar til 28.februar)
-        assertFalse(observatør.opprettOppgaveEvent().any { søknadId in it.hendelser })
+        assertFalse(observatør.opprettOppgaveEventer().any { søknadId in it.hendelser })
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadId in it.hendelser }) {
             "Selv om det er en Infotrygd-utbetaling mellom så er det ikke kritisk at vi likevel ruter oppgavene til Speil-benken," +
                 "mht. at vi også har en utbetaling innenfor 16 dager fra perioden som kastes ut. En fremtidig utvikler har " +
@@ -412,7 +412,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
             Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
         ))
         person.søppelbøtte(hendelselogg, 1.februar til 28.februar)
-        assertTrue(observatør.opprettOppgaveEvent().any { søknadId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveEventer().any { søknadId in it.hendelser })
         assertFalse(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadId in it.hendelser })
     }
 
@@ -430,7 +430,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(1.vedtaksperiode, REVURDERING_FEILET)
         assertFunksjonellFeil("Forkaster avvist revurdering ettersom vedtaksperioden ikke har tidligere utbetalte utbetalinger.", 1.vedtaksperiode.filter())
-        assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveEventer().any { inntektsmeldingId in it.hendelser })
     }
 
     @Test

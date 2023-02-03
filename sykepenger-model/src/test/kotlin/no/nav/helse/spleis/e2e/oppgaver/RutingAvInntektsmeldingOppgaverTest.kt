@@ -56,7 +56,7 @@ internal class RutingAvInntektsmeldingOppgaverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
         val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = true)
-        assertEquals(listOf(søknadId, inntektsmeldingId), observatør.opprettOppgaveEvent().flatMap { it.hendelser })
+        assertEquals(listOf(søknadId, inntektsmeldingId), observatør.opprettOppgaveEventer().flatMap { it.hendelser })
     }
 
     @Test
@@ -69,7 +69,7 @@ internal class RutingAvInntektsmeldingOppgaverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         val inntektsmeldingId2 = håndterInntektsmelding(listOf(1.januar til 16.januar))
         val søknadId2 = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = true)
-        assertEquals(listOf(søknadId1, inntektsmeldingId1, søknadId2, inntektsmeldingId2), observatør.opprettOppgaveEvent().flatMap { it.hendelser })
+        assertEquals(listOf(søknadId1, inntektsmeldingId1, søknadId2, inntektsmeldingId2), observatør.opprettOppgaveEventer().flatMap { it.hendelser })
     }
 
     @Test

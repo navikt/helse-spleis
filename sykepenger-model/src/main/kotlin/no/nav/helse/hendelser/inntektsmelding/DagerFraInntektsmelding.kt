@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.tilOrNull
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
@@ -119,7 +120,9 @@ internal class DagerFraInntektsmelding(
     }
 
     internal fun ferdigstilt() = gjenståendeDager.isEmpty()
-
+    internal fun utsettOppgave(person: Person) {
+        person.emitUtsettOppgaveEvent(inntektsmelding)
+    }
 
     private class PeriodeFraInntektsmelding(
         private val inntektsmelding: Inntektsmelding,

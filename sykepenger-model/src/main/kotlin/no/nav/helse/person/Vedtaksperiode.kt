@@ -285,6 +285,13 @@ internal class Vedtaksperiode private constructor(
     internal fun postHåndter(dager: DagerFraInntektsmelding) {
         if (dager.harBlittHåndtertAv(periode) || dager.skalHåndteresAv(periode)) {
             dager.leggTil(hendelseIder)
+            if (tilstand == AvsluttetUtenUtbetaling) {
+                // Kun for å beholde dagens funksjonelle oppførsel
+                // Hvis en periode i AUU overlapper med noen arbeidgsiveperiodedager, men har ikke håndtert inntekt
+                // Så mistenker vi at det mulig vil komme en forlengelse som skal håndtere den inntekten
+                // Derfor utsetter vi oppretelse av gosys-oppgave på inntektsmeldingen
+                dager.utsettOppgave(person)
+            }
         }
     }
 

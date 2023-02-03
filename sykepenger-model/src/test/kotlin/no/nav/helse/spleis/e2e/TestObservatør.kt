@@ -65,7 +65,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     fun forkastedePerioder() = forkastedeEventer.size
     fun forkastet(vedtaksperiodeId: UUID) = forkastedeEventer.getValue(vedtaksperiodeId)
     fun opprettOppgaveForSpeilsaksbehandlereEvent() = opprettOppgaverTilSpeilsaksbehandlerEventer.toList()
-    fun opprettOppgaveEvent() = opprettOppgaverEventer.toList()
+    fun opprettOppgaveEventer() = opprettOppgaverEventer.toList()
     fun utsettOppgaveEventer() = utsettOppgaveEventer.toList()
 
     override fun avstemt(result: Map<String, Any>) {

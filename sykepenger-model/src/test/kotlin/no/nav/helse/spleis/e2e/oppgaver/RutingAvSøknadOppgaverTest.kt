@@ -59,7 +59,7 @@ internal class RutingAvSøknadOppgaverTest : AbstractEndToEndTest() {
         */
         assertEquals(
             listOf(søknadId1, søknadId2, søknadId2),
-            observatør.opprettOppgaveEvent().flatMap { it.hendelser }
+            observatør.opprettOppgaveEventer().flatMap { it.hendelser }
         )
     }
 
@@ -77,7 +77,7 @@ internal class RutingAvSøknadOppgaverTest : AbstractEndToEndTest() {
         */
         assertEquals(
             listOf(søknadId2),
-            observatør.opprettOppgaveEvent().flatMap { it.hendelser }
+            observatør.opprettOppgaveEventer().flatMap { it.hendelser }
         )
     }
 

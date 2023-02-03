@@ -118,15 +118,16 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("❓hendelseId ble lagt til etter vedtaksperiode_endret blir laget")
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅ Det funksjonelle er løst på en annen måte med et utsett_oppgave-signal istedenfor vedtaksperiode-endret")
+    // bytt ut assert med assertEquals(hendelseId, observatør.utsettOppgaveEventer().single().hendelse) og flytt til RutingAvGosysOppgaverTest
     fun `Sender vedtaksperiode_endret når inntektsmelidng kommer i AVSLUTTET_UTEN_UTBETALING`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 1.januar(2021), 100.prosent))
-        håndterSøknad(Sykdom(1.januar(2021), 1.januar(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 1.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 1.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
 
         assertEquals(1, observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)).size)
 
-        val hendelseId = håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021))
+        val hendelseId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
 
         assertEquals(2, observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)).size)
         assertTrue(hendelseId in observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)))
