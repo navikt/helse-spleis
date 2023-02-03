@@ -20,8 +20,6 @@ import no.nav.helse.etterlevelse.FOLKETRYGDLOVENS_OPPRINNELSESDATO
 import no.nav.helse.etterlevelse.GrupperbarSubsumsjon
 import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Ledd
-import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.Dokumentsporing.Companion.toMap
 import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.etterlevelse.Ledd.LEDD_1
 import no.nav.helse.etterlevelse.Ledd.LEDD_2
@@ -87,10 +85,7 @@ class MaskinellJurist private constructor(
     fun medOrganisasjonsnummer(organisasjonsnummer: String) =
         kopierMedKontekst(mapOf(organisasjonsnummer to KontekstType.Organisasjonsnummer) + kontekster.filterNot { it.value == KontekstType.Organisasjonsnummer })
 
-    fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: Set<Dokumentsporing>, periode: Periode) =
-        medVedtaksperiode(vedtaksperiodeId, hendelseIder.toMap(), periode)
-
-    private fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: Map<UUID, DokumentType>, periode: Periode) =
+    fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: Map<UUID, DokumentType>, periode: Periode) =
         kopierMedKontekst(
             mapOf(vedtaksperiodeId.toString() to KontekstType.Vedtaksperiode) + hendelseIder
                 .map { it.key.toString() to it.value.tilKontekst() } + kontekster,
