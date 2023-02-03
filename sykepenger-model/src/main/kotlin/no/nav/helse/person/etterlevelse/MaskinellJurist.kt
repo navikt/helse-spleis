@@ -53,6 +53,7 @@ import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.etterlevelse.SubsumsjonVisitor
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.etterlevelse.Tidslinjedag.Companion.dager
+import no.nav.helse.person.DokumentType
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 
@@ -89,7 +90,7 @@ class MaskinellJurist private constructor(
     fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: Set<Dokumentsporing>, periode: Periode) =
         medVedtaksperiode(vedtaksperiodeId, hendelseIder.toMap(), periode)
 
-    private fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: Map<UUID, Dokumentsporing.DokumentType>, periode: Periode) =
+    private fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: Map<UUID, DokumentType>, periode: Periode) =
         kopierMedKontekst(
             mapOf(vedtaksperiodeId.toString() to KontekstType.Vedtaksperiode) + hendelseIder
                 .map { it.key.toString() to it.value.tilKontekst() } + kontekster,
@@ -885,15 +886,15 @@ class MaskinellJurist private constructor(
         }
     }
 
-    private fun Dokumentsporing.DokumentType.tilKontekst() = when (this) {
-        Dokumentsporing.DokumentType.Sykmelding -> KontekstType.Sykmelding
-        Dokumentsporing.DokumentType.Søknad -> KontekstType.Søknad
-        Dokumentsporing.DokumentType.Inntektsmelding -> KontekstType.Inntektsmelding
-        Dokumentsporing.DokumentType.OverstyrTidslinje -> KontekstType.OverstyrTidslinje
-        Dokumentsporing.DokumentType.OverstyrInntekt -> KontekstType.OverstyrInntekt
-        Dokumentsporing.DokumentType.OverstyrRefusjon -> KontekstType.OverstyrRefusjon
-        Dokumentsporing.DokumentType.OverstyrArbeidsgiveropplysninger -> KontekstType.OverstyrArbeidsgiveropplysninger
-        Dokumentsporing.DokumentType.OverstyrArbeidsforhold -> KontekstType.OverstyrArbeidsforhold
+    private fun DokumentType.tilKontekst() = when (this) {
+        DokumentType.Sykmelding -> KontekstType.Sykmelding
+        DokumentType.Søknad -> KontekstType.Søknad
+        DokumentType.Inntektsmelding -> KontekstType.Inntektsmelding
+        DokumentType.OverstyrTidslinje -> KontekstType.OverstyrTidslinje
+        DokumentType.OverstyrInntekt -> KontekstType.OverstyrInntekt
+        DokumentType.OverstyrRefusjon -> KontekstType.OverstyrRefusjon
+        DokumentType.OverstyrArbeidsgiveropplysninger -> KontekstType.OverstyrArbeidsgiveropplysninger
+        DokumentType.OverstyrArbeidsforhold -> KontekstType.OverstyrArbeidsforhold
     }
 
 }

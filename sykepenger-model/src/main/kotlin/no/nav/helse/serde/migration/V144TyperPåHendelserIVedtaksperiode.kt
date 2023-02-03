@@ -3,7 +3,7 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.util.UUID
-import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.DokumentType
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
 
@@ -47,15 +47,15 @@ internal class V144TyperPåHendelserIVedtaksperiode : JsonMigration(version = 14
             }
     }
 
-    private fun hendelseTypeTilSporing(hendelseType: String, vedtaksperiodeId: UUID): Dokumentsporing.DokumentType {
+    private fun hendelseTypeTilSporing(hendelseType: String, vedtaksperiodeId: UUID): DokumentType {
         return when (hendelseType) {
-            "NY_SØKNAD" -> Dokumentsporing.DokumentType.Sykmelding
-            "SENDT_SØKNAD_ARBEIDSGIVER" -> Dokumentsporing.DokumentType.Søknad
-            "SENDT_SØKNAD_NAV" -> Dokumentsporing.DokumentType.Søknad
-            "INNTEKTSMELDING" -> Dokumentsporing.DokumentType.Inntektsmelding
-            "OVERSTYRTIDSLINJE" -> Dokumentsporing.DokumentType.OverstyrTidslinje
-            "OVERSTYRINNTEKT" -> Dokumentsporing.DokumentType.OverstyrInntekt
-            "OVERSTYRARBEIDSFORHOLD" -> Dokumentsporing.DokumentType.OverstyrArbeidsforhold
+            "NY_SØKNAD" -> DokumentType.Sykmelding
+            "SENDT_SØKNAD_ARBEIDSGIVER" -> DokumentType.Søknad
+            "SENDT_SØKNAD_NAV" -> DokumentType.Søknad
+            "INNTEKTSMELDING" -> DokumentType.Inntektsmelding
+            "OVERSTYRTIDSLINJE" -> DokumentType.OverstyrTidslinje
+            "OVERSTYRINNTEKT" -> DokumentType.OverstyrInntekt
+            "OVERSTYRARBEIDSFORHOLD" -> DokumentType.OverstyrArbeidsforhold
             else -> throw IllegalArgumentException("Hendelse med type=$hendelseType var ikke forventet i migrering. VedtaksperiodeId=$vedtaksperiodeId")
         }
     }

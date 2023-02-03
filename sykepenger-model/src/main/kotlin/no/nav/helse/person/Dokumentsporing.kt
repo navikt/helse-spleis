@@ -20,17 +20,6 @@ data class Dokumentsporing private constructor(private val id: UUID, private val
         internal fun Map<UUID, DokumentType>.tilSporing() = map { Dokumentsporing(it.key, it.value) }.toSet()
     }
 
-    internal enum class DokumentType {
-        Sykmelding,
-        Søknad,
-        Inntektsmelding,
-        OverstyrTidslinje,
-        OverstyrInntekt,
-        OverstyrRefusjon,
-        OverstyrArbeidsgiveropplysninger,
-        OverstyrArbeidsforhold,
-    }
-
     internal fun toMap() = mapOf(id.toString() to dokumentType.name)
 }
 

@@ -15,7 +15,7 @@ import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.DokumentType
 import no.nav.helse.person.Dokumentsporing.Companion.tilSporing
 import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.ForlengelseFraInfotrygd
@@ -908,7 +908,7 @@ internal data class PersonData(
             private val skjæringstidspunktFraInfotrygd: LocalDate?,
             private val skjæringstidspunkt: LocalDate?,
             private val sykdomstidslinje: SykdomstidslinjeData,
-            private val hendelseIder: Map<UUID, Dokumentsporing.DokumentType>,
+            private val hendelseIder: Map<UUID, DokumentType>,
             private val inntektsmeldingInfo: InntektsmeldingInfoHistorikkElementData.InntektsmeldingInfoData?,
             private val fom: LocalDate,
             private val tom: LocalDate,
