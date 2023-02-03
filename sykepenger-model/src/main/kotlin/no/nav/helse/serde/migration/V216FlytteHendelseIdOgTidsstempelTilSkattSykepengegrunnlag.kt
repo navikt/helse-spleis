@@ -14,27 +14,27 @@ internal class V216FlytteHendelseIdOgTidsstempelTilSkattSykepengegrunnlag: JsonM
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("vilkårsgrunnlagHistorikk").forEach { innslag ->
+            val innslagOpprettet = innslag.path("opprettet").asText()
             innslag.path("vilkårsgrunnlag").forEach { vilkårsgrunnlag ->
+                val meldingsreferanseId = vilkårsgrunnlag.path("meldingsreferanseId").asText()
                 vilkårsgrunnlag.path("sykepengegrunnlag")
                     .path("arbeidsgiverInntektsopplysninger")
                     .filter { opplysning -> erSkattSykepengegrunnlag(opplysning.path("inntektsopplysning")) }
-                    .forEach { opplysning -> migrerSkattSykepengegrunnlag(opplysning.path("inntektsopplysning")) }
+                    .forEach { opplysning -> migrerSkattSykepengegrunnlag(opplysning.path("inntektsopplysning"), innslagOpprettet, meldingsreferanseId) }
                 vilkårsgrunnlag.path("sykepengegrunnlag")
                     .path("deaktiverteArbeidsforhold")
                     .filter { opplysning -> erSkattSykepengegrunnlag(opplysning.path("inntektsopplysning")) }
-                    .forEach { opplysning -> migrerSkattSykepengegrunnlag(opplysning.path("inntektsopplysning")) }
+                    .forEach { opplysning -> migrerSkattSykepengegrunnlag(opplysning.path("inntektsopplysning"), innslagOpprettet, meldingsreferanseId) }
             }
         }
     }
 
     private fun erSkattSykepengegrunnlag(opplysning: JsonNode) =
-        opplysning.path("skatteopplysninger").any { skatteopplysning ->
-            skatteopplysning.path("kilde").asText() == "SKATT_SYKEPENGEGRUNNLAG"
-        }
+        opplysning.hasNonNull("skatteopplysninger")
 
-    private fun migrerSkattSykepengegrunnlag(skattSykepengegrunnlag: JsonNode) {
-        val tidsstempel = skattSykepengegrunnlag.path("skatteopplysninger").first().path("tidsstempel").asText()
-        val hendelseId = skattSykepengegrunnlag.path("skatteopplysninger").first().path("hendelseId").asText()
+    private fun migrerSkattSykepengegrunnlag(skattSykepengegrunnlag: JsonNode, innslagOpprettet: String, hendelseId: String) {
+        val tidsstempel = skattSykepengegrunnlag.path("skatteopplysninger").firstOrNull()?.path("tidsstempel")?.asText() ?: innslagOpprettet
+        val hendelseId = skattSykepengegrunnlag.path("skatteopplysninger").firstOrNull()?.path("hendelseId")?.asText() ?: hendelseId
         (skattSykepengegrunnlag as ObjectNode).put("tidsstempel", tidsstempel)
         skattSykepengegrunnlag.put("hendelseId", hendelseId)
         skattSykepengegrunnlag.put("kilde", "SKATT_SYKEPENGEGRUNNLAG")
