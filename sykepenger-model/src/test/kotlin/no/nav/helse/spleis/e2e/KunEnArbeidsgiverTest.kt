@@ -1069,4 +1069,26 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
         assertTrue(inspektør.utbetalinger.last().inspektør.utbetalingstidslinje.inspektør.erNavdag(18.oktober(2021)))
     }
+
+    @Test
+    fun `test`() {
+        // ikke lage oppdrag som betaler for mye
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+
+            håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar, 100.prosent))
+            håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent))
+
+            håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+        }
+
+        val utbetaling = inspektør.utbetaling(0)
+        assertEquals(16.januar til 31.januar, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.periode)
+    }
 }

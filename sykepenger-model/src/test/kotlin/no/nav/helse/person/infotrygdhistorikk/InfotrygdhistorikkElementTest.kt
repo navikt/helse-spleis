@@ -225,7 +225,7 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
-    fun `historikk for utvider ikke`() {
+    fun `historikk for utvider`() {
         val sykdomstidslinje = 10.S
         val element = nyttHistorikkelement(
             listOf(
@@ -234,7 +234,7 @@ internal class InfotrygdhistorikkElementTest {
             )
         )
         val tidslinje = element.historikkFor("ag1", sykdomstidslinje)
-        assertEquals(sykdomstidslinje.periode(), tidslinje.periode())
+        assertEquals(1.januar til 28.februar, tidslinje.periode())
     }
 
     @Test

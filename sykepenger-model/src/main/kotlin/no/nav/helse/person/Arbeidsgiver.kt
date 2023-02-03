@@ -64,7 +64,6 @@ import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -77,6 +76,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAv
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.utbetalingport
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
@@ -1035,8 +1035,8 @@ internal class Arbeidsgiver private constructor(
             vedtaksperioder = vedtaksperioder
         )
         return { periode ->
-            val sykdomstidslinje = sykdomstidslinje().fremTilOgMed(periode.endInclusive).takeUnless { it.count() == 0 }
-            if (sykdomstidslinje == null) Utbetalingstidslinje()
+            val sykdomstidslinje = sykdomstidslinje()
+            if (sykdomstidslinje.count() == 0) Utbetalingstidslinje()
             else {
                 val builder = UtbetalingstidslinjeBuilder(inntekter, periode, hendelse)
                 infotrygdhistorikk.buildUtbetalingstidslinje(organisasjonsnummer, sykdomstidslinje, builder, subsumsjonObserver)

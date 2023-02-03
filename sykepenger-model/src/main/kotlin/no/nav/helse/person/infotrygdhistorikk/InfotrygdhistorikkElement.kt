@@ -5,10 +5,10 @@ import java.time.LocalDateTime
 import java.util.Objects
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_15
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -121,7 +121,7 @@ class InfotrygdhistorikkElement private constructor(
     internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
         if (sykdomstidslinje.periode() == null) return sykdomstidslinje
         val ulåst = Sykdomstidslinje().merge(sykdomstidslinje, replace)
-        return cached(orgnummer, ulåst).fremTilOgMed(sykdomstidslinje.sisteDag())
+        return cached(orgnummer, ulåst)
     }
 
     private fun cached(orgnummer: String, sykdomstidslinje: Sykdomstidslinje) =
