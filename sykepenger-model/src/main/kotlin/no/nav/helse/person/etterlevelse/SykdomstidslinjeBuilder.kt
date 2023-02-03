@@ -38,4 +38,8 @@ internal class SykdomstidslinjeBuilder(sykdomstidslinje: Sykdomstidslinje) : Syk
         val grad = økonomi?.medData { grad, _, _ -> grad }
         navdager.add(Tidslinjedag(dato, dagtype, grad?.roundToInt()))
     }
+    companion object {
+        internal fun Sykdomstidslinje.subsumsjonsformat(): List<Tidslinjedag> = SykdomstidslinjeBuilder(this).dager()
+
+    }
 }

@@ -42,4 +42,10 @@ internal class UtbetalingstidslinjeBuilder(utbetalingstidslinje: Utbetalingstids
         val grad = økonomi?.medData { grad, _, _ -> grad }
         navdager.add(Tidslinjedag(dato, dagtype, grad?.roundToInt()))
     }
+
+    companion object {
+        internal fun Utbetalingstidslinje.subsumsjonsformat(): List<Tidslinjedag> = UtbetalingstidslinjeBuilder(this).dager()
+        internal fun List<Utbetalingstidslinje>.subsumsjonsformat(): List<List<Tidslinjedag>> = map { it.subsumsjonsformat() }
+            .filter { it.isNotEmpty() }
+    }
 }

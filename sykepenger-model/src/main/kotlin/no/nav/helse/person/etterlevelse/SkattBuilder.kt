@@ -41,4 +41,8 @@ internal class SkattBuilder(skatt: Skatteopplysning) : SkatteopplysningVisitor {
         Skatteopplysning.Inntekttype.PENSJON_ELLER_TRYGD -> "PENSJON_ELLER_TRYGD"
         Skatteopplysning.Inntekttype.YTELSE_FRA_OFFENTLIGE -> "YTELSE_FRA_OFFENTLIGE"
     }
+
+    companion object {
+        internal fun Iterable<Skatteopplysning>.subsumsjonsformat(): List<Map<String, Any>> = map { SkattBuilder(it).inntekt() }
+    }
 }

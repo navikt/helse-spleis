@@ -61,4 +61,7 @@ internal class SammenligningsgrunnlagBuilder(sammenligningsgrunnlag: Sammenligni
         Skatteopplysning.Inntekttype.PENSJON_ELLER_TRYGD -> "PENSJON_ELLER_TRYGD"
         Skatteopplysning.Inntekttype.YTELSE_FRA_OFFENTLIGE -> "YTELSE_FRA_OFFENTLIGE"
     }
+    companion object {
+        internal fun Sammenligningsgrunnlag.subsumsjonsformat(): SubsumsjonObserver.SammenligningsgrunnlagDTO = SammenligningsgrunnlagBuilder(this).build()
+    }
 }

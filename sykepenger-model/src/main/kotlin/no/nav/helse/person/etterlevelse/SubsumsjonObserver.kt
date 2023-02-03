@@ -5,10 +5,6 @@ import java.time.LocalDate
 import java.time.Year
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Skatteopplysning
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.InntektSubsumsjonobserver
 import no.nav.helse.økonomi.Prosent
@@ -475,11 +471,5 @@ interface SubsumsjonObserver: InntektSubsumsjonobserver, ProsentdelSubsumsjonObs
 
     companion object {
         internal val NullObserver = object : SubsumsjonObserver {}
-        internal fun List<Utbetalingstidslinje>.subsumsjonsformat(): List<List<Tidslinjedag>> = map { it.subsumsjonsformat() }
-            .filter { it.isNotEmpty() }
-        internal fun Utbetalingstidslinje.subsumsjonsformat(): List<Tidslinjedag> = UtbetalingstidslinjeBuilder(this).dager()
-        internal fun Sykdomstidslinje.subsumsjonsformat(): List<Tidslinjedag> = SykdomstidslinjeBuilder(this).dager()
-        internal fun Iterable<Skatteopplysning>.subsumsjonsformat(): List<Map<String, Any>> = map { SkattBuilder(it).inntekt() }
-        internal fun Sammenligningsgrunnlag.subsumsjonsformat(): SammenligningsgrunnlagDTO = SammenligningsgrunnlagBuilder(this).build()
     }
 }
