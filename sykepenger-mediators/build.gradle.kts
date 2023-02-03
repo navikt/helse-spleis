@@ -13,7 +13,7 @@ dependencies {
     implementation(libs.rapids.and.rivers)
     implementation(libs.bundles.database)
     implementation(libs.flyway)
-    implementation(project(":sykepenger-tid"))
+    implementation(project(":sykepenger-primitiver"))
     implementation(project(":sykepenger-aktivitetslogg"))
 
     testImplementation(libs.testcontainers) {

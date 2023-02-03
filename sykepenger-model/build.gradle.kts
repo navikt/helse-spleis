@@ -2,7 +2,7 @@ val jsonassertVersion = "1.5.0"
 val jacksonVersion = "2.14.0"
 
 dependencies {
-    implementation(project(":sykepenger-tid"))
+    implementation(project(":sykepenger-primitiver"))
     implementation(project(":sykepenger-utbetaling"))
     implementation(project(":sykepenger-aktivitetslogg"))
     implementation(project(":sykepenger-etterlevelse"))
