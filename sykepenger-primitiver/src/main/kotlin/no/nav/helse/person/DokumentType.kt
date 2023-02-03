@@ -1,6 +1,6 @@
 package no.nav.helse.person
 
-internal enum class DokumentType {
+enum class DokumentType {
     Sykmelding,
     Søknad,
     Inntektsmelding,
