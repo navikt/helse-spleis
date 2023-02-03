@@ -8,10 +8,10 @@ class Prosent private constructor(private val desimal: Double) : Comparable<Pros
 
     companion object {
         private const val EPSILON = 0.000001
-        internal val MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT = 25.prosent
+        val MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT = 25.prosent
 
-        internal fun ratio(ratio: Double) = Prosent(ratio)
-        internal fun prosent(prosent: Double) = Prosent(prosent / 100)
+        fun ratio(ratio: Double) = Prosent(ratio)
+        fun prosent(prosent: Double) = Prosent(prosent / 100)
 
         val Double.ratio get() = ratio(this)
         val Number.prosent get() = prosent(this.toDouble())
@@ -30,9 +30,9 @@ class Prosent private constructor(private val desimal: Double) : Comparable<Pros
 
     override fun toString() = "${roundToInt()}%"
 
-    internal fun ratio() = desimal
+    fun ratio() = desimal
 
-    internal fun prosent() = desimal * 100.0
+    fun prosent() = desimal * 100.0
 
-    internal fun roundToInt() = prosent().roundToInt()
+    fun roundToInt() = prosent().roundToInt()
 }
