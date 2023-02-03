@@ -47,15 +47,15 @@ internal class V144TyperPåHendelserIVedtaksperiode : JsonMigration(version = 14
             }
     }
 
-    private fun hendelseTypeTilSporing(hendelseType: String, vedtaksperiodeId: UUID): Dokumentsporing.Type {
+    private fun hendelseTypeTilSporing(hendelseType: String, vedtaksperiodeId: UUID): Dokumentsporing.DokumentType {
         return when (hendelseType) {
-            "NY_SØKNAD" -> Dokumentsporing.Type.Sykmelding
-            "SENDT_SØKNAD_ARBEIDSGIVER" -> Dokumentsporing.Type.Søknad
-            "SENDT_SØKNAD_NAV" -> Dokumentsporing.Type.Søknad
-            "INNTEKTSMELDING" -> Dokumentsporing.Type.Inntektsmelding
-            "OVERSTYRTIDSLINJE" -> Dokumentsporing.Type.OverstyrTidslinje
-            "OVERSTYRINNTEKT" -> Dokumentsporing.Type.OverstyrInntekt
-            "OVERSTYRARBEIDSFORHOLD" -> Dokumentsporing.Type.OverstyrArbeidsforhold
+            "NY_SØKNAD" -> Dokumentsporing.DokumentType.Sykmelding
+            "SENDT_SØKNAD_ARBEIDSGIVER" -> Dokumentsporing.DokumentType.Søknad
+            "SENDT_SØKNAD_NAV" -> Dokumentsporing.DokumentType.Søknad
+            "INNTEKTSMELDING" -> Dokumentsporing.DokumentType.Inntektsmelding
+            "OVERSTYRTIDSLINJE" -> Dokumentsporing.DokumentType.OverstyrTidslinje
+            "OVERSTYRINNTEKT" -> Dokumentsporing.DokumentType.OverstyrInntekt
+            "OVERSTYRARBEIDSFORHOLD" -> Dokumentsporing.DokumentType.OverstyrArbeidsforhold
             else -> throw IllegalArgumentException("Hendelse med type=$hendelseType var ikke forventet i migrering. VedtaksperiodeId=$vedtaksperiodeId")
         }
     }

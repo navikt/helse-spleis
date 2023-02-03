@@ -87,8 +87,11 @@ class MaskinellJurist private constructor(
         kopierMedKontekst(mapOf(organisasjonsnummer to KontekstType.Organisasjonsnummer) + kontekster.filterNot { it.value == KontekstType.Organisasjonsnummer })
 
     fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: Set<Dokumentsporing>, periode: Periode) =
+        medVedtaksperiode(vedtaksperiodeId, hendelseIder.toMap(), periode)
+
+    private fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: Map<UUID, Dokumentsporing.DokumentType>, periode: Periode) =
         kopierMedKontekst(
-            mapOf(vedtaksperiodeId.toString() to KontekstType.Vedtaksperiode) + hendelseIder.toMap()
+            mapOf(vedtaksperiodeId.toString() to KontekstType.Vedtaksperiode) + hendelseIder
                 .map { it.key.toString() to it.value.tilKontekst() } + kontekster,
             periode
         )
@@ -882,15 +885,15 @@ class MaskinellJurist private constructor(
         }
     }
 
-    private fun Dokumentsporing.Type.tilKontekst() = when (this) {
-        Dokumentsporing.Type.Sykmelding -> KontekstType.Sykmelding
-        Dokumentsporing.Type.Søknad -> KontekstType.Søknad
-        Dokumentsporing.Type.Inntektsmelding -> KontekstType.Inntektsmelding
-        Dokumentsporing.Type.OverstyrTidslinje -> KontekstType.OverstyrTidslinje
-        Dokumentsporing.Type.OverstyrInntekt -> KontekstType.OverstyrInntekt
-        Dokumentsporing.Type.OverstyrRefusjon -> KontekstType.OverstyrRefusjon
-        Dokumentsporing.Type.OverstyrArbeidsgiveropplysninger -> KontekstType.OverstyrArbeidsgiveropplysninger
-        Dokumentsporing.Type.OverstyrArbeidsforhold -> KontekstType.OverstyrArbeidsforhold
+    private fun Dokumentsporing.DokumentType.tilKontekst() = when (this) {
+        Dokumentsporing.DokumentType.Sykmelding -> KontekstType.Sykmelding
+        Dokumentsporing.DokumentType.Søknad -> KontekstType.Søknad
+        Dokumentsporing.DokumentType.Inntektsmelding -> KontekstType.Inntektsmelding
+        Dokumentsporing.DokumentType.OverstyrTidslinje -> KontekstType.OverstyrTidslinje
+        Dokumentsporing.DokumentType.OverstyrInntekt -> KontekstType.OverstyrInntekt
+        Dokumentsporing.DokumentType.OverstyrRefusjon -> KontekstType.OverstyrRefusjon
+        Dokumentsporing.DokumentType.OverstyrArbeidsgiveropplysninger -> KontekstType.OverstyrArbeidsgiveropplysninger
+        Dokumentsporing.DokumentType.OverstyrArbeidsforhold -> KontekstType.OverstyrArbeidsforhold
     }
 
 }

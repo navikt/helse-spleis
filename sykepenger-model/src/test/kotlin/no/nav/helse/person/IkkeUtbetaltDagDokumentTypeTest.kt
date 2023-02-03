@@ -4,7 +4,7 @@ import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class IkkeUtbetaltDagTypeTest {
+internal class IkkeUtbetaltDagDokumentTypeTest {
 
     @Test
     fun `spre-gosys og Flex skal kjenne til alle begrunnelser for avvist dag`() {

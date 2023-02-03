@@ -908,7 +908,7 @@ internal data class PersonData(
             private val skjæringstidspunktFraInfotrygd: LocalDate?,
             private val skjæringstidspunkt: LocalDate?,
             private val sykdomstidslinje: SykdomstidslinjeData,
-            private val hendelseIder: Map<UUID, Dokumentsporing.Type>,
+            private val hendelseIder: Map<UUID, Dokumentsporing.DokumentType>,
             private val inntektsmeldingInfo: InntektsmeldingInfoHistorikkElementData.InntektsmeldingInfoData?,
             private val fom: LocalDate,
             private val tom: LocalDate,
