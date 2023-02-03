@@ -2,35 +2,17 @@ package no.nav.helse.person.etterlevelse
 
 import java.io.Serializable
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.Year
-import java.time.YearMonth
-import java.util.UUID
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.SammenligningsgrunnlagVisitor
-import no.nav.helse.person.SkatteopplysningVisitor
-import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
-import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
-import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.NÆRINGSINNTEKT
-import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.PENSJON_ELLER_TRYGD
-import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.YTELSE_FRA_OFFENTLIGE
-import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.InntektSubsumsjonobserver
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.ProsentdelSubsumsjonObserver
-import no.nav.helse.økonomi.Økonomi
-import kotlin.math.roundToInt
-import kotlin.properties.Delegates
 
 interface SubsumsjonObserver: InntektSubsumsjonobserver, ProsentdelSubsumsjonObserver {
 
@@ -485,161 +467,6 @@ interface SubsumsjonObserver: InntektSubsumsjonobserver, ProsentdelSubsumsjonObs
         maksdato: LocalDate,
         startdatoSykepengerettighet: LocalDate
     ) {}
-
-    private class SykdomstidslinjeBuilder(sykdomstidslinje: Sykdomstidslinje) : SykdomstidslinjeVisitor {
-        private val navdager = mutableListOf<Tidslinjedag>()
-
-        init {
-            sykdomstidslinje.accept(this)
-        }
-
-        fun dager() = navdager.toList()
-
-        override fun visitDag(dag: Dag.Sykedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
-            visit(dato, "SYKEDAG", økonomi)
-        }
-
-        override fun visitDag(dag: Dag.SykHelgedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
-            visit(dato, "SYKEDAG", økonomi)
-        }
-
-        override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
-            visit(dato, "FERIEDAG", null)
-        }
-
-        override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
-            visit(dato, "PERMISJONSDAG", null)
-        }
-
-        private fun visit(dato: LocalDate, dagtype: String, økonomi: Økonomi?) {
-            val grad = økonomi?.medData { grad, _, _ -> grad }
-            navdager.add(Tidslinjedag(dato, dagtype, grad?.roundToInt()))
-        }
-    }
-
-    private class UtbetalingstidslinjeBuilder(utbetalingstidslinje: Utbetalingstidslinje) : UtbetalingsdagVisitor {
-        private val navdager = mutableListOf<Tidslinjedag>()
-
-        init {
-            utbetalingstidslinje.accept(this)
-        }
-
-        fun dager() = navdager.toList()
-
-        override fun visit(dag: Utbetalingsdag.NavDag, dato: LocalDate, økonomi: Økonomi) {
-            visit(dato, "NAVDAG", økonomi)
-        }
-
-        override fun visit(dag: Utbetalingsdag.ArbeidsgiverperiodeDag, dato: LocalDate, økonomi: Økonomi) {
-            visit(dato, "AGPDAG", økonomi)
-        }
-
-        override fun visit(dag: Utbetalingsdag.NavHelgDag, dato: LocalDate, økonomi: Økonomi) {
-            if (navdager.isNotEmpty() && navdager.last().erAvvistDag()) visit(dato, "AVVISTDAG", økonomi) else visit(dato, "NAVDAG", økonomi)
-        }
-
-        override fun visit(dag: Utbetalingsdag.Fridag, dato: LocalDate, økonomi: Økonomi) {
-            // Dersom vi er inne i en oppholdsperiode ønsker vi ikke å ta med vanlige helger
-            if (navdager.isNotEmpty() && navdager.last().erRettFør(dato)) visit(dato, "FRIDAG", økonomi)
-        }
-
-        override fun visit(dag: Utbetalingsdag.AvvistDag, dato: LocalDate, økonomi: Økonomi) {
-            visit(dato, "AVVISTDAG", økonomi)
-        }
-
-        private fun visit(dato: LocalDate, dagtype: String, økonomi: Økonomi?) {
-            val grad = økonomi?.medData { grad, _, _ -> grad }
-            navdager.add(Tidslinjedag(dato, dagtype, grad?.roundToInt()))
-        }
-    }
-
-    private class SkattBuilder(skatt: Skatteopplysning) : SkatteopplysningVisitor {
-        private lateinit var inntekt: Map<String, Any>
-
-        init {
-            skatt.accept(this)
-        }
-
-        fun inntekt() = inntekt
-
-        override fun visitSkatteopplysning(
-            skatteopplysning: Skatteopplysning,
-            hendelseId: UUID,
-            beløp: Inntekt,
-            måned: YearMonth,
-            type: Skatteopplysning.Inntekttype,
-            fordel: String,
-            beskrivelse: String,
-            tidsstempel: LocalDateTime
-        ) {
-            inntekt = mapOf(
-                "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
-                "årMåned" to måned,
-                "type" to type.fromInntekttype(),
-                "fordel" to fordel,
-                "beskrivelse" to beskrivelse
-            )
-        }
-
-        private fun Skatteopplysning.Inntekttype.fromInntekttype() = when (this) {
-            LØNNSINNTEKT -> "LØNNSINNTEKT"
-            NÆRINGSINNTEKT -> "NÆRINGSINNTEKT"
-            PENSJON_ELLER_TRYGD -> "PENSJON_ELLER_TRYGD"
-            YTELSE_FRA_OFFENTLIGE -> "YTELSE_FRA_OFFENTLIGE"
-        }
-    }
-
-    private class SammenligningsgrunnlagBuilder(sammenligningsgrunnlag: Sammenligningsgrunnlag) : SammenligningsgrunnlagVisitor {
-        private var sammenligningsgrunnlag by Delegates.notNull<Double>()
-        private val inntekter = mutableMapOf<String, List<Map<String, Any>>>()
-        private lateinit var inntektliste: MutableList<Map<String, Any>>
-
-        init {
-            sammenligningsgrunnlag.accept(this)
-        }
-
-        fun build() = SammenligningsgrunnlagDTO(sammenligningsgrunnlag, inntekter)
-
-        override fun preVisitSammenligningsgrunnlag(sammenligningsgrunnlag1: Sammenligningsgrunnlag, sammenligningsgrunnlag: Inntekt) {
-            this.sammenligningsgrunnlag = sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
-        }
-        override fun preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
-            arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag,
-            orgnummer: String,
-            rapportertInntekt: Inntekt
-        ) {
-            inntektliste = mutableListOf()
-            inntekter[orgnummer] = inntektliste
-        }
-
-        override fun visitSkatteopplysning(
-            skatteopplysning: Skatteopplysning,
-            hendelseId: UUID,
-            beløp: Inntekt,
-            måned: YearMonth,
-            type: Skatteopplysning.Inntekttype,
-            fordel: String,
-            beskrivelse: String,
-            tidsstempel: LocalDateTime
-        ) {
-            inntektliste.add(
-                mapOf(
-                    "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
-                    "årMåned" to måned,
-                    "type" to type.fromInntekttype(),
-                    "fordel" to fordel,
-                    "beskrivelse" to beskrivelse
-                )
-            )
-        }
-
-        private fun Skatteopplysning.Inntekttype.fromInntekttype() = when (this) {
-            LØNNSINNTEKT -> "LØNNSINNTEKT"
-            NÆRINGSINNTEKT -> "NÆRINGSINNTEKT"
-            PENSJON_ELLER_TRYGD -> "PENSJON_ELLER_TRYGD"
-            YTELSE_FRA_OFFENTLIGE -> "YTELSE_FRA_OFFENTLIGE"
-        }
-    }
 
     class SammenligningsgrunnlagDTO(
         val sammenligningsgrunnlag: Double,
