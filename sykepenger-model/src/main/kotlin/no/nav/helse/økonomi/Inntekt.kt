@@ -4,7 +4,6 @@ import java.math.BigDecimal
 import java.math.MathContext
 import java.time.LocalDate
 import no.nav.helse.memoize
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Prosentdel.Companion.average
 import kotlin.math.absoluteValue
@@ -63,7 +62,7 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
     internal fun rundTilDaglig() = rundTilDagligMemoized(årlig)
     internal fun rundNedTilDaglig() = rundNedTilDagligMemoized(årlig)
 
-    internal fun dekningsgrunnlag(dagen: LocalDate, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Inntekt {
+    internal fun dekningsgrunnlag(dagen: LocalDate, regler: ArbeidsgiverRegler, subsumsjonObserver: InntektSubsumsjonobserver): Inntekt {
         val dekningsgrunnlag = Inntekt(this.årlig * regler.dekningsgrad())
         subsumsjonObserver.`§ 8-16 ledd 1`(dagen, regler.dekningsgrad(), this.årlig, dekningsgrunnlag.årlig)
         return dekningsgrunnlag
@@ -97,4 +96,8 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
 
     internal fun avviksprosent(other: Inntekt) =
         Prosent.ratio((this.årlig - other.årlig).absoluteValue / other.årlig)
+}
+
+interface InntektSubsumsjonobserver {
+    fun `§ 8-16 ledd 1`(dato: LocalDate, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double)
 }

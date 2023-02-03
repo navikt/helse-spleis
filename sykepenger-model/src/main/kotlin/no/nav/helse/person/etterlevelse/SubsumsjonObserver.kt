@@ -25,12 +25,13 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.InntektSubsumsjonobserver
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Økonomi
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
-interface SubsumsjonObserver {
+interface SubsumsjonObserver: InntektSubsumsjonobserver {
 
     /**
      * Vurdering av opptjeningstid
@@ -224,7 +225,7 @@ interface SubsumsjonObserver {
      * @param inntekt inntekt for aktuell arbeidsgiver
      * @param dekningsgrunnlag maks dagsats før reduksjon til 6G og reduksjon for sykmeldingsgrad
      */
-    fun `§ 8-16 ledd 1`(dato: LocalDate, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) {}
+    override fun `§ 8-16 ledd 1`(dato: LocalDate, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) {}
 
     /**
      * Vurdering av når utbetaling av sykepenger tidligst skal starte
