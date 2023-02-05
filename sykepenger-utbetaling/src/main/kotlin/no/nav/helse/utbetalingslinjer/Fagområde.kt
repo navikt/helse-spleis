@@ -25,11 +25,8 @@ enum class Fagområde(
     fun linje(fagsystemId: String, dato: LocalDate, grad: Int) =
         Utbetalingslinje(dato, dato, Satstype.Daglig, null, 0, grad, fagsystemId, klassekode = klassekode)
 
-    fun oppdaterLinje(linje: Utbetalingslinje, dato: LocalDate, økonomi: Beløpkilde, beløp: Int) {
-        linje.beløp = beløpStrategy(økonomi)
-        linje.aktuellDagsinntekt = beløp
-        linje.fom = dato
-    }
+    fun oppdaterLinje(linje: Utbetalingslinje, dato: LocalDate, økonomi: Beløpkilde, beløp: Int) =
+        linje.kopier(fom = dato, beløp = beløpStrategy(økonomi), aktuellDagsinntekt = beløp)
 
     fun kanLinjeUtvides(linje: Utbetalingslinje, økonomi: Beløpkilde, grad: Int) =
         grad == linje.grad && (linje.beløp == null || linje.beløp == beløpStrategy(økonomi))

@@ -7,6 +7,7 @@ import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
@@ -22,6 +23,8 @@ import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.kjedeSammenLinjer
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.kobleTil
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -652,7 +655,9 @@ internal class UtbetalingslinjeForskjellTest {
         val original = linjer(1.januar to 5.januar)
         val recalculated = linjer(1.januar to 5.januar, 15.januar to 19.januar)
         val actual = recalculated - original
-        assertUtbetalinger(recalculated, actual)
+        val linje1 = 1.januar to 5.januar endringskode UEND
+        val linje2 = 15.januar to 19.januar pekerPå linje1
+        assertUtbetalinger(linjer(linje1, linje2), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
         assertEquals(UEND, actual[0].endringskode)
@@ -667,7 +672,9 @@ internal class UtbetalingslinjeForskjellTest {
         val original = linjer(1.januar to 5.januar)
         val recalculated = linjer(1.januar to 5.januar grad 80, 15.januar to 19.januar)
         val actual = recalculated - original
-        assertUtbetalinger(recalculated, actual)
+        val linje1 = 1.januar to 5.januar grad 80 endringskode NY pekerPå original.last()
+        val linje2 = 15.januar to 19.januar endringskode NY pekerPå linje1
+        assertUtbetalinger(linjer(linje1, linje2), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
         assertEquals(NY, actual[0].endringskode)
@@ -682,7 +689,9 @@ internal class UtbetalingslinjeForskjellTest {
         val original = linjer(1.januar to 5.januar dagsats 500)
         val recalculated = linjer(1.januar to 5.januar dagsats 1000, 15.januar to 19.januar)
         val actual = recalculated - original
-        assertUtbetalinger(recalculated, actual)
+        val linje1 = 1.januar to 5.januar dagsats 1000 pekerPå original.last()
+        val linje2 = 15.januar to 19.januar pekerPå linje1
+        assertUtbetalinger(linjer(linje1, linje2), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
         assertEquals(NY, actual[0].endringskode)
@@ -733,7 +742,12 @@ internal class UtbetalingslinjeForskjellTest {
             1.februar to 9.februar
         )
         val actual = recalculated - original
-        assertUtbetalinger(recalculated, actual)
+
+        val linje1 = 1.januar to 5.januar endringskode UEND
+        val linje2 = 6.januar to 17.januar grad 50 endringskode NY pekerPå original.last()
+        val linje3 = 18.januar to 19.januar grad 80 endringskode NY pekerPå linje2
+        val linje4 = 1.februar to 9.februar grad 100 endringskode NY pekerPå linje3
+        assertUtbetalinger(linjer(linje1, linje2, linje3, linje4), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
 
@@ -986,7 +1000,8 @@ internal class UtbetalingslinjeForskjellTest {
 
         assertEquals(first[0].hashCode(), second[0].hashCode())
         val intermediate = second - first
-        assertNotEquals(first[0].hashCode(), second[0].hashCode())
+        assertEquals(first[0].hashCode(), second[0].hashCode())
+        assertNotEquals(intermediate[0].hashCode(), second[0].hashCode())
 
         val third = linjer(1.januar to 5.januar)
 
@@ -1057,21 +1072,28 @@ internal class UtbetalingslinjeForskjellTest {
             assertEquals(a.grad, b.grad, "grad stemmer ikke overens")
             assertEquals(a.datoStatusFom, b.datoStatusFom)
             assertEquals(a.endringskode, b.endringskode) { "endringskode ${b.endringskode} matcher ikke forventet ${a.endringskode}" }
-            assertEquals(a.id, b.id) { "delytelseid ${b.id} matcher ikke forventet ${a.id}"}
+            assertEquals(a.id, b.id) { "delytelseid ${b.id} matcher ikke forventet ${a.id} for ${a.fom}-${a.tom}"}
             assertEquals(a.refId, b.refId) { "refdelytelseid ${b.refId} matcher ikke forventet ${a.refId}"}
         }
     }
 
-    private fun linjer(vararg linjer: TestUtbetalingslinje, other: Oppdrag? = null, sisteArbeidsgiverdag: LocalDate? = 31.desember(2017)) =
-        Oppdrag(ORGNUMMER, SykepengerRefusjon, linjer.map { it.asUtbetalingslinje() }, fagsystemId = other?.fagsystemId() ?: genererUtbetalingsreferanse(UUID.randomUUID()), sisteArbeidsgiverdag = sisteArbeidsgiverdag).also { oppdrag ->
-            oppdrag.forEach { if(it.refId != null) it.refFagsystemId = oppdrag.fagsystemId() }
+    private fun linjer(vararg linjer: TestUtbetalingslinje, other: Oppdrag? = null, sisteArbeidsgiverdag: LocalDate? = 31.desember(2017)): Oppdrag {
+        val fagsystemId = other?.inspektør?.fagsystemId() ?: genererUtbetalingsreferanse(UUID.randomUUID())
+        val kjedeLinjer = linjer.map { it.asUtbetalingslinje() }.let { utbetalingslinjer ->
+            val førsteLinje = utbetalingslinjer.take(1)
+            førsteLinje + utbetalingslinjer.drop(1).kobleTil(fagsystemId)
         }
+        return Oppdrag(ORGNUMMER, SykepengerRefusjon, kjedeLinjer, fagsystemId = fagsystemId, sisteArbeidsgiverdag = sisteArbeidsgiverdag)
+    }
 
-    private fun linjer(vararg linjer: Utbetalingslinje, sisteArbeidsgiverdag: LocalDate = 31.desember(2017)) =
-        Oppdrag(ORGNUMMER, SykepengerRefusjon, linjer.toList(), sisteArbeidsgiverdag = sisteArbeidsgiverdag).also { oppdrag ->
-            oppdrag.zipWithNext { a, b -> b.kobleTil(a) }
-            oppdrag.forEach { if(it.refId != null) it.refFagsystemId = oppdrag.fagsystemId() }
+    private fun linjer(vararg linjer: Utbetalingslinje, sisteArbeidsgiverdag: LocalDate = 31.desember(2017)): Oppdrag {
+        val fagsystemId = genererUtbetalingsreferanse(UUID.randomUUID())
+        val kjedeLinjer = kjedeSammenLinjer(linjer.toList()).let { linjer ->
+            val førsteLinje = linjer.take(1)
+            førsteLinje + linjer.drop(1).kobleTil(fagsystemId)
         }
+        return Oppdrag(ORGNUMMER, SykepengerRefusjon, kjedeLinjer, fagsystemId = fagsystemId, sisteArbeidsgiverdag = sisteArbeidsgiverdag)
+    }
 
     private inner class TestUtbetalingslinje(
         private val fom: LocalDate,
@@ -1116,13 +1138,32 @@ internal class UtbetalingslinjeForskjellTest {
             return this
         }
 
+        infix fun pekerPå(other: TestUtbetalingslinje): TestUtbetalingslinje {
+            delytelseId = other.delytelseId + 1
+            refDelytelseId = other.delytelseId
+            return this
+        }
+
         infix fun endrer(other: Utbetalingslinje): TestUtbetalingslinje {
             endringskode(ENDR)
             delytelseId = other.id
             return this
         }
 
-        fun asUtbetalingslinje() = Utbetalingslinje(fom, tom, satstype, dagsats, dagsats, grad, endringskode = endringskode, datoStatusFom = datoStatusFom, refDelytelseId = refDelytelseId, delytelseId = delytelseId)
+        fun asUtbetalingslinje(fagsystemId: String? = null) =
+            Utbetalingslinje(
+                fom = fom,
+                tom = tom,
+                satstype = satstype,
+                beløp = dagsats,
+                aktuellDagsinntekt = dagsats,
+                grad = grad,
+                endringskode = endringskode,
+                datoStatusFom = datoStatusFom,
+                refDelytelseId = refDelytelseId,
+                refFagsystemId = fagsystemId?.takeIf { refDelytelseId != null },
+                delytelseId = delytelseId
+            )
 
     }
 

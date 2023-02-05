@@ -13,15 +13,15 @@ class Utbetalingslinje(
     var fom: LocalDate,
     var tom: LocalDate,
     internal var satstype: Satstype = Satstype.Daglig,
-    var beløp: Int?,
-    var aktuellDagsinntekt: Int?,
+    val beløp: Int?,
+    val aktuellDagsinntekt: Int?,
     val grad: Int?,
-    var refFagsystemId: String? = null,
-    private var delytelseId: Int = 1,
-    private var refDelytelseId: Int? = null,
-    private var endringskode: Endringskode = NY,
-    private var klassekode: Klassekode = RefusjonIkkeOpplysningspliktig,
-    private var datoStatusFom: LocalDate? = null
+    val refFagsystemId: String? = null,
+    private val delytelseId: Int = 1,
+    private val refDelytelseId: Int? = null,
+    private val endringskode: Endringskode = NY,
+    private val klassekode: Klassekode = RefusjonIkkeOpplysningspliktig,
+    private val datoStatusFom: LocalDate? = null
 ) : Iterable<LocalDate> {
 
     companion object {
@@ -61,6 +61,21 @@ class Utbetalingslinje(
             klassekode = klassekode,
             datoStatusFom = datoStatusFom
         )
+
+        fun List<Utbetalingslinje>.kobleTil(fagsystemId: String) = map { linje ->
+            linje.kopier(refFagsystemId = fagsystemId)
+        }
+
+        fun kjedeSammenLinjer(linjer: List<Utbetalingslinje>): List<Utbetalingslinje> {
+            if (linjer.isEmpty()) return emptyList()
+            var forrige = linjer.first()
+            val result = mutableListOf(forrige)
+            linjer.drop(1).forEach { linje ->
+                forrige = linje.kobleTil(forrige)
+                result.add(forrige)
+            }
+            return result
+        }
     }
 
     private val statuskode get() = datoStatusFom?.let { "OPPH" }
@@ -92,12 +107,49 @@ class Utbetalingslinje(
         )
     }
 
-    fun kobleTil(other: Utbetalingslinje) {
-        this.endringskode = NY
-        this.datoStatusFom = null
-        this.delytelseId = other.delytelseId + 1
-        this.refDelytelseId = other.delytelseId
-    }
+    fun kobleTil(other: Utbetalingslinje) = kopier(
+        endringskode = NY,
+        datoStatusFom = null,
+        delytelseId = other.delytelseId + 1,
+        refDelytelseId = other.delytelseId,
+        refFagsystemId = other.refFagsystemId ?: this.refFagsystemId
+    )
+
+    fun førsteLinje() = kopier(refFagsystemId = null)
+
+    fun opphørslinje(datoStatusFom: LocalDate) = kopier(
+        endringskode = ENDR,
+        refFagsystemId = null,
+        refDelytelseId = null,
+        datoStatusFom = datoStatusFom
+    )
+
+    fun kopier(
+        fom: LocalDate = this.fom,
+        endringskode: Endringskode = this.endringskode,
+        delytelseId: Int = this.delytelseId,
+        refDelytelseId: Int? = this.refDelytelseId,
+        refFagsystemId: String? = this.refFagsystemId,
+        klassekode: Klassekode = this.klassekode,
+        datoStatusFom: LocalDate? = this.datoStatusFom,
+        beløp: Int? = this.beløp,
+        aktuellDagsinntekt: Int? = this.aktuellDagsinntekt
+    ) =
+        Utbetalingslinje(
+            fom = fom,
+            tom = tom,
+            satstype = satstype,
+            beløp = beløp,
+            aktuellDagsinntekt = aktuellDagsinntekt,
+            grad = grad,
+            refFagsystemId = refFagsystemId,
+            delytelseId = delytelseId,
+            refDelytelseId = refDelytelseId,
+            endringskode = endringskode,
+            klassekode = klassekode,
+            datoStatusFom = datoStatusFom
+        )
+
 
     fun datoStatusFom() = datoStatusFom
     fun totalbeløp() = satstype.totalbeløp(beløp ?: 0, stønadsdager())
@@ -112,41 +164,54 @@ class Utbetalingslinje(
 
     private fun equals(other: Utbetalingslinje) =
         this.fom == other.fom &&
-            this.tom == other.tom &&
-            this.beløp == other.beløp &&
-            this.grad == other.grad &&
-            this.datoStatusFom == other.datoStatusFom
+                this.tom == other.tom &&
+                this.beløp == other.beløp &&
+                this.grad == other.grad &&
+                this.datoStatusFom == other.datoStatusFom
 
     fun kanEndreEksisterendeLinje(other: Utbetalingslinje, sisteLinjeITidligereOppdrag: Utbetalingslinje) =
         other == sisteLinjeITidligereOppdrag &&
-        this.fom == other.fom &&
-            this.beløp == other.beløp &&
-            this.grad == other.grad &&
-            this.datoStatusFom == other.datoStatusFom
+                this.fom == other.fom &&
+                this.beløp == other.beløp &&
+                this.grad == other.grad &&
+                this.datoStatusFom == other.datoStatusFom
 
     fun skalOpphøreOgErstatte(other: Utbetalingslinje, sisteLinjeITidligereOppdrag: Utbetalingslinje) =
         other == sisteLinjeITidligereOppdrag &&
-        (this.fom > other.fom)
+                (this.fom > other.fom)
 
     override fun hashCode(): Int {
         return fom.hashCode() * 37 +
-            tom.hashCode() * 17 +
-            beløp.hashCode() * 41 +
-            grad.hashCode() * 61 +
-            endringskode.name.hashCode() * 59 +
-            datoStatusFom.hashCode() * 23
+                tom.hashCode() * 17 +
+                beløp.hashCode() * 41 +
+                grad.hashCode() * 61 +
+                endringskode.name.hashCode() * 59 +
+                datoStatusFom.hashCode() * 23
     }
 
-    fun markerUendret(tidligere: Utbetalingslinje) = copyWith(UEND, tidligere)
+    fun markerUendret(tidligere: Utbetalingslinje) = kopier(
+        endringskode = UEND,
+        delytelseId = tidligere.delytelseId,
+        refDelytelseId = tidligere.refDelytelseId,
+        refFagsystemId = tidligere.refFagsystemId,
+        klassekode = tidligere.klassekode,
+        datoStatusFom = tidligere.datoStatusFom
+    )
 
-    fun endreEksisterendeLinje(tidligere: Utbetalingslinje) = copyWith(ENDR, tidligere)
-        .also {
-            this.refDelytelseId = null
-            this.refFagsystemId = null
-        }
+    fun endreEksisterendeLinje(tidligere: Utbetalingslinje) = kopier(
+        endringskode = ENDR,
+        delytelseId = tidligere.delytelseId,
+        refDelytelseId = null,
+        refFagsystemId = null,
+        klassekode = tidligere.klassekode,
+        datoStatusFom = tidligere.datoStatusFom
+    )
 
     fun slåSammenLinje(førsteLinjeIForrige: Utbetalingslinje) = this.let { sisteLinjeINytt: Utbetalingslinje ->
-        if (sisteLinjeINytt.beløp != førsteLinjeIForrige.beløp || sisteLinjeINytt.grad != førsteLinjeIForrige.grad || !sisteLinjeINytt.tom.erRettFør(førsteLinjeIForrige.fom)) null
+        if (sisteLinjeINytt.beløp != førsteLinjeIForrige.beløp || sisteLinjeINytt.grad != førsteLinjeIForrige.grad || !sisteLinjeINytt.tom.erRettFør(
+                førsteLinjeIForrige.fom
+            )
+        ) null
         else Utbetalingslinje(
             fom = sisteLinjeINytt.fom,
             tom = førsteLinjeIForrige.tom,
@@ -163,32 +228,7 @@ class Utbetalingslinje(
         )
     }
 
-    private fun copyWith(linjetype: Endringskode, tidligere: Utbetalingslinje) {
-        this.refFagsystemId = tidligere.refFagsystemId
-        this.delytelseId = tidligere.delytelseId
-        this.refDelytelseId = tidligere.refDelytelseId
-        this.klassekode = tidligere.klassekode
-        this.endringskode = linjetype
-        this.datoStatusFom = tidligere.datoStatusFom
-    }
-
     fun erForskjell() = endringskode != UEND
-
-    fun opphørslinje(datoStatusFom: LocalDate) =
-        Utbetalingslinje(
-            fom = fom,
-            tom = tom,
-            beløp = beløp,
-            aktuellDagsinntekt = aktuellDagsinntekt,
-            grad = grad,
-            refFagsystemId = null,
-            delytelseId = delytelseId,
-            refDelytelseId = null,
-            endringskode = ENDR,
-            datoStatusFom = datoStatusFom,
-            satstype = satstype,
-            klassekode = klassekode
-        )
 
     fun erOpphør() = datoStatusFom != null
 
