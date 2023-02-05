@@ -232,7 +232,8 @@ internal class OppdragBuilder(
             grad: Int,
             aktuellDagsinntekt: Int
         ) {
-            linje.fom = dag.dato
+            val førsteLinje = utbetalingslinjer.removeFirst()
+            utbetalingslinjer.add(0, førsteLinje.kopier(fom = dag.dato))
         }
 
         override fun nyLinje(
@@ -249,7 +250,8 @@ internal class OppdragBuilder(
             dato: LocalDate,
             grad: Int
         ) {
-            linje.fom = dag.dato
+            val førsteLinje = utbetalingslinjer.removeFirst()
+            utbetalingslinjer.add(0, førsteLinje.kopier(fom = dag.dato))
         }
 
         override fun nyLinje(
@@ -297,7 +299,8 @@ internal class OppdragBuilder(
             dato: LocalDate,
             grad: Int
         ) {
-            linje.fom = dag.dato
+            val førsteLinje = utbetalingslinjer.removeFirst()
+            utbetalingslinjer.add(0, førsteLinje.kopier(fom = dag.dato))
         }
 
         override fun nyLinje(

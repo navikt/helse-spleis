@@ -430,8 +430,6 @@ class Oppdrag private constructor(
             val eldreLinjer = nytt.linjer.take(tidligere.size)
             val nyeLinjer = nytt.linjer.drop(tidligere.size)
 
-            check(nyeLinjer.first() === nytt[tidligere.size])
-
             val koblingslinje = nyeLinjer.first().kobleTil(linkTo)
             val kjedeLinjer = kjedeSammenLinjer(listOf(koblingslinje) + nyeLinjer.drop(1))
             return nytt.kopierMed(eldreLinjer + kjedeLinjer)

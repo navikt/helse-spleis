@@ -10,9 +10,9 @@ import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.utbetalingslinjer.Klassekode.RefusjonIkkeOpplysningspliktig
 
 class Utbetalingslinje(
-    var fom: LocalDate,
-    var tom: LocalDate,
-    internal var satstype: Satstype = Satstype.Daglig,
+    val fom: LocalDate,
+    val tom: LocalDate,
+    internal val satstype: Satstype = Satstype.Daglig,
     val beløp: Int?,
     val aktuellDagsinntekt: Int?,
     val grad: Int?,
