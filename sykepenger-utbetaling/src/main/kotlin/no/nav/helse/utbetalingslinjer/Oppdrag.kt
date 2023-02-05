@@ -238,7 +238,7 @@ class Oppdrag private constructor(
         check(none { linje -> other.any { it.periode.overlapperMed(linje.periode) } }) {
             "ikke støttet: kan ikke overlappe med annet oppdrag"
         }
-        if (this.fomHarFlyttetSegFremover(other)) return other + this
+        if (this.isNotEmpty() && other.isNotEmpty() && this.fomHarFlyttetSegFremover(other)) return other + this
         return kopierMed((slåSammenOppdrag(other)))
     }
 

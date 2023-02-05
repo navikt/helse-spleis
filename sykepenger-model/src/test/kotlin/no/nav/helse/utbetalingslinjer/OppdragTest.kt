@@ -14,6 +14,13 @@ import java.util.*
 internal class OppdragTest {
 
     @Test
+    fun `prepende tomme oppdrag`() {
+        val oppdrag1 = Oppdrag("", Fagområde.SykepengerRefusjon)
+        val oppdrag2 = Oppdrag("", Fagområde.SykepengerRefusjon)
+        val result = oppdrag1 + oppdrag2
+        assertTrue(result.isEmpty())
+    }
+    @Test
     fun `prepend oppdrag`() {
         val oppdrag1 = Oppdrag("", Fagområde.SykepengerRefusjon, listOf(
             Utbetalingslinje(
