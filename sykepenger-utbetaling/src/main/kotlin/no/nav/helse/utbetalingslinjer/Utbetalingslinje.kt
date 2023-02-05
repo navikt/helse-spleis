@@ -126,6 +126,7 @@ class Utbetalingslinje(
 
     fun kopier(
         fom: LocalDate = this.fom,
+        tom: LocalDate = this.tom,
         endringskode: Endringskode = this.endringskode,
         delytelseId: Int = this.delytelseId,
         refDelytelseId: Int? = this.refDelytelseId,
@@ -207,25 +208,9 @@ class Utbetalingslinje(
         datoStatusFom = tidligere.datoStatusFom
     )
 
-    fun slåSammenLinje(førsteLinjeIForrige: Utbetalingslinje) = this.let { sisteLinjeINytt: Utbetalingslinje ->
-        if (sisteLinjeINytt.beløp != førsteLinjeIForrige.beløp || sisteLinjeINytt.grad != førsteLinjeIForrige.grad || !sisteLinjeINytt.tom.erRettFør(
-                førsteLinjeIForrige.fom
-            )
-        ) null
-        else Utbetalingslinje(
-            fom = sisteLinjeINytt.fom,
-            tom = førsteLinjeIForrige.tom,
-            satstype = sisteLinjeINytt.satstype,
-            beløp = sisteLinjeINytt.beløp,
-            aktuellDagsinntekt = sisteLinjeINytt.aktuellDagsinntekt,
-            grad = sisteLinjeINytt.grad,
-            refFagsystemId = sisteLinjeINytt.refFagsystemId,
-            delytelseId = sisteLinjeINytt.delytelseId,
-            refDelytelseId = sisteLinjeINytt.refDelytelseId,
-            endringskode = sisteLinjeINytt.endringskode,
-            klassekode = sisteLinjeINytt.klassekode,
-            datoStatusFom = sisteLinjeINytt.datoStatusFom
-        )
+    fun slåSammenLinje(førsteLinjeIForrige: Utbetalingslinje): Utbetalingslinje? {
+        if (this.beløp != førsteLinjeIForrige.beløp || this.grad != førsteLinjeIForrige.grad || !this.tom.erRettFør(førsteLinjeIForrige.fom)) return null
+        return kopier(tom = førsteLinjeIForrige.tom)
     }
 
     fun erForskjell() = endringskode != UEND
