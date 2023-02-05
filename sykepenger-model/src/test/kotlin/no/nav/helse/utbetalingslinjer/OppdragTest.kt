@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.februar
 
 internal class OppdragTest {
 
@@ -63,6 +64,62 @@ internal class OppdragTest {
             assertEquals(25.januar, result[0].inspektør.tom)
             assertEquals(26.januar, result[1].inspektør.fom)
             assertEquals(28.januar, result[1].inspektør.tom)
+        }
+    }
+
+    @Test
+    fun `begrense oppdrag fra første dato`() {
+        val oppdrag1 = Oppdrag("", Fagområde.SykepengerRefusjon, listOf(
+            Utbetalingslinje(
+                fom = 19.januar,
+                tom = 25.januar,
+                endringskode = Endringskode.UEND,
+                aktuellDagsinntekt = 1000,
+                beløp = 1000,
+                grad = 100,
+                delytelseId = 1,
+                refDelytelseId = null,
+                refFagsystemId = null
+            ),
+            Utbetalingslinje(
+                fom = 26.januar,
+                tom = 28.januar,
+                endringskode = Endringskode.ENDR,
+                aktuellDagsinntekt = 1000,
+                beløp = 500,
+                grad = 50,
+                delytelseId = 2,
+                refDelytelseId = null,
+                refFagsystemId = null
+            ),
+            Utbetalingslinje(
+                fom = 29.januar,
+                tom = 31.januar,
+                endringskode = Endringskode.NY,
+                aktuellDagsinntekt = 1000,
+                beløp = 1000,
+                grad = 100,
+                delytelseId = 3,
+                refDelytelseId = null,
+                refFagsystemId = null
+            )
+        ), sisteArbeidsgiverdag = 18.januar)
+
+        assertTrue(oppdrag1.begrensFra(1.februar).isEmpty())
+        oppdrag1.begrensFra(29.januar).also { result ->
+            assertEquals(1, result.size)
+            assertEquals(29.januar, result.single().inspektør.fom)
+            assertEquals(31.januar, result.single().inspektør.tom)
+            assertEquals(3, result.single().inspektør.delytelseId)
+        }
+        oppdrag1.begrensFra(24.januar).also { result ->
+            assertEquals(3, result.size)
+            assertEquals(24.januar, result[0].inspektør.fom)
+            assertEquals(25.januar, result[0].inspektør.tom)
+            assertEquals(26.januar, result[1].inspektør.fom)
+            assertEquals(28.januar, result[1].inspektør.tom)
+            assertEquals(29.januar, result[2].inspektør.fom)
+            assertEquals(31.januar, result[2].inspektør.tom)
         }
     }
 

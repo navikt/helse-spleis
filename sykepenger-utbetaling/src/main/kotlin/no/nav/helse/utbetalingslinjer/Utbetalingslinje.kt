@@ -208,6 +208,7 @@ class Utbetalingslinje(
         datoStatusFom = tidligere.datoStatusFom
     )
 
+    internal fun begrensFra(førsteDag: LocalDate) = kopier(fom = førsteDag)
     internal fun begrensTil(sisteDato: LocalDate) = kopier(tom = sisteDato)
 
     fun slåSammenLinje(førsteLinjeIForrige: Utbetalingslinje): Utbetalingslinje? {

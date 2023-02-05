@@ -234,6 +234,15 @@ class Oppdrag private constructor(
             sisteArbeidsgiverdag = sisteArbeidsgiverdag
         )
 
+    fun begrensFra(førsteDag: LocalDate): Oppdrag {
+        val (senereLinjer, tidligereLinjer) = this.linjer.partition { it.fom >= førsteDag }
+        val delvisOverlappendeFørsteLinje = tidligereLinjer
+            .lastOrNull()
+            ?.takeIf { it.tom >= førsteDag }
+            ?.begrensFra(førsteDag)
+        return kopierMed(listOfNotNull(delvisOverlappendeFørsteLinje) + senereLinjer)
+    }
+
     fun begrensTil(sisteDato: LocalDate, other: Oppdrag? = null): Oppdrag {
         val (tidligereLinjer, senereLinjer) = this.linjer.partition { it.tom <= sisteDato }
         val delvisOverlappendeSisteLinje = senereLinjer
