@@ -234,6 +234,16 @@ class Oppdrag private constructor(
             sisteArbeidsgiverdag = sisteArbeidsgiverdag
         )
 
+    fun begrensTil(sisteDato: LocalDate, other: Oppdrag? = null): Oppdrag {
+        val (tidligereLinjer, senereLinjer) = this.linjer.partition { it.tom <= sisteDato }
+        val delvisOverlappendeSisteLinje = senereLinjer
+            .firstOrNull()
+            ?.takeIf { it.fom <= sisteDato }
+            ?.begrensTil(sisteDato)
+        other?.also { kobleTil(it) }
+        return kopierMed(tidligereLinjer + listOfNotNull(delvisOverlappendeSisteLinje))
+    }
+
     operator fun plus(other: Oppdrag): Oppdrag {
         check(none { linje -> other.any { it.periode.overlapperMed(linje.periode) } }) {
             "ikke støttet: kan ikke overlappe med annet oppdrag"

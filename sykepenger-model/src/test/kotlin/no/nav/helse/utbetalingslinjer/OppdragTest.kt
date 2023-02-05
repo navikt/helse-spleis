@@ -14,6 +14,59 @@ import java.util.*
 internal class OppdragTest {
 
     @Test
+    fun `begrense oppdrag til siste dato`() {
+        val oppdrag1 = Oppdrag("", Fagområde.SykepengerRefusjon, listOf(
+            Utbetalingslinje(
+                fom = 19.januar,
+                tom = 25.januar,
+                endringskode = Endringskode.UEND,
+                aktuellDagsinntekt = 1000,
+                beløp = 1000,
+                grad = 100,
+                delytelseId = 1,
+                refDelytelseId = null,
+                refFagsystemId = null
+            ),
+            Utbetalingslinje(
+                fom = 26.januar,
+                tom = 28.januar,
+                endringskode = Endringskode.ENDR,
+                aktuellDagsinntekt = 1000,
+                beløp = 500,
+                grad = 50,
+                delytelseId = 2,
+                refDelytelseId = null,
+                refFagsystemId = null
+            ),
+            Utbetalingslinje(
+                fom = 29.januar,
+                tom = 31.januar,
+                endringskode = Endringskode.NY,
+                aktuellDagsinntekt = 1000,
+                beløp = 1000,
+                grad = 100,
+                delytelseId = 3,
+                refDelytelseId = null,
+                refFagsystemId = null
+            )
+        ), sisteArbeidsgiverdag = 18.januar)
+
+        assertTrue(oppdrag1.begrensTil(18.januar).isEmpty())
+        oppdrag1.begrensTil(20.januar).also { result ->
+            assertEquals(1, result.size)
+            assertEquals(19.januar, result.single().inspektør.fom)
+            assertEquals(20.januar, result.single().inspektør.tom)
+        }
+        oppdrag1.begrensTil(28.januar).also { result ->
+            assertEquals(2, result.size)
+            assertEquals(19.januar, result[0].inspektør.fom)
+            assertEquals(25.januar, result[0].inspektør.tom)
+            assertEquals(26.januar, result[1].inspektør.fom)
+            assertEquals(28.januar, result[1].inspektør.tom)
+        }
+    }
+
+    @Test
     fun `prepende tomme oppdrag`() {
         val oppdrag1 = Oppdrag("", Fagområde.SykepengerRefusjon)
         val oppdrag2 = Oppdrag("", Fagområde.SykepengerRefusjon)
