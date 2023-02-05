@@ -80,6 +80,7 @@ import no.nav.helse.spleis.e2e.tilGodkjent
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
+import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -296,10 +297,88 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyttVedtak(29.januar, 15.februar)
         nyPeriode(17.januar til 25.januar)
 
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-        assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
-        assertFunksjonellFeil(`Mottatt søknad out of order innenfor 18 dager`)
+        håndterInntektsmelding(listOf(1.januar til 15.januar, 17.januar til 17.januar))
+
+        assertForventetFeil(
+            forklaring = "støtter ikke out of order-perioder som kan påvirke agp ennå",
+            nå = {
+                assertFunksjonellFeil(`Mottatt søknad out of order innenfor 18 dager`)
+            },
+            ønsket = {
+                håndterVilkårsgrunnlag(3.vedtaksperiode)
+                håndterYtelser(3.vedtaksperiode)
+                håndterSimulering(3.vedtaksperiode)
+                håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+                håndterUtbetalt()
+
+                håndterYtelser(2.vedtaksperiode)
+                håndterSimulering(2.vedtaksperiode)
+
+                inspektør.utbetaling(0).also { førsteVedtak ->
+                    førsteVedtak.inspektør.arbeidsgiverOppdrag.also { oppdraget ->
+                        assertEquals(1, oppdraget.size)
+                        assertEquals(NY, oppdraget.inspektør.endringskode)
+                        oppdraget.single().inspektør.also { linje1 ->
+                            assertEquals(30.januar, linje1.fom)
+                            assertEquals(15.februar, linje1.tom)
+                            assertEquals(1431, linje1.beløp)
+                            assertEquals(NY, linje1.endringskode)
+                            assertEquals(1, linje1.delytelseId)
+                        }
+                    }
+                }
+                inspektør.utbetaling(1).also { outOfOrderUtbetalingen ->
+                    assertEquals(Utbetaling.Utbetalingtype.UTBETALING, outOfOrderUtbetalingen.inspektør.type)
+                    outOfOrderUtbetalingen.inspektør.arbeidsgiverOppdrag.also { oppdraget ->
+                        assertEquals(Endringskode.ENDR, oppdraget.inspektør.endringskode)
+                        assertEquals(2, oppdraget.size)
+                        oppdraget[0].inspektør.also { linje1 ->
+                            assertEquals(18.januar, linje1.fom)
+                            assertEquals(25.januar, linje1.tom)
+                            assertEquals(1431, linje1.beløp)
+                            assertEquals(2, linje1.delytelseId)
+                            assertEquals(1, linje1.refDelytelseId)
+                            assertEquals(NY, linje1.endringskode)
+                        }
+                        oppdraget[1].inspektør.also { linje2 ->
+                            assertEquals(30.januar, linje2.fom)
+                            assertEquals(15.februar, linje2.tom)
+                            assertEquals(1431, linje2.beløp)
+                            assertEquals(3, linje2.delytelseId)
+                            assertEquals(2, linje2.refDelytelseId)
+                            assertEquals(NY, linje2.endringskode)
+                        }
+                    }
+                }
+                inspektør.utbetaling(2).also { revurderingen ->
+                    assertEquals(Utbetaling.Utbetalingtype.REVURDERING, revurderingen.inspektør.type)
+                    revurderingen.inspektør.arbeidsgiverOppdrag.also { oppdraget ->
+                        assertEquals(Endringskode.ENDR, oppdraget.inspektør.endringskode)
+                        assertEquals(2, oppdraget.size)
+                        oppdraget[0].inspektør.also { linje1 ->
+                            assertEquals(18.januar, linje1.fom)
+                            assertEquals(25.januar, linje1.tom)
+                            assertEquals(1431, linje1.beløp)
+                            assertEquals(2, linje1.delytelseId)
+                            assertEquals(1, linje1.refDelytelseId)
+                            assertEquals(UEND, linje1.endringskode)
+                        }
+                        oppdraget[1].inspektør.also { linje2 ->
+                            assertEquals(29.januar, linje2.fom)
+                            assertEquals(15.februar, linje2.tom)
+                            assertEquals(1431, linje2.beløp)
+                            assertEquals(4, linje2.delytelseId)
+                            assertEquals(3, linje2.refDelytelseId)
+                            assertEquals(NY, linje2.endringskode)
+                        }
+                    }
+                }
+
+                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+                assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
+            }
+        )
     }
 
     @Test
