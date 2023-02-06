@@ -377,7 +377,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
         assertEquals(0, inspektør.feriepengeoppdrag.size)
         assertEquals(2, inspektør(ORGNUMMER2).feriepengeoppdrag.size)
-        assertEquals(0, inspektør(ORGNUMMER2).feriepengeoppdrag.first().feriepengeutbetalingslinjer.first().beløp)
+        assertTrue(inspektør(ORGNUMMER2).feriepengeoppdrag.first().feriepengeutbetalingslinjer.isEmpty())
     }
 
     @Test

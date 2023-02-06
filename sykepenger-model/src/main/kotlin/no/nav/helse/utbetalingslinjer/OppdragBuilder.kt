@@ -8,7 +8,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.util.*
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.kjedeSammenLinjer
 
 internal class OppdragBuilder(
     private val tidslinje: Utbetalingstidslinje,
@@ -41,16 +40,8 @@ internal class OppdragBuilder(
 
     private fun nyttOppdrag(): Oppdrag {
         val eldsteDag = utbetalingslinjer.firstOrNull()?.fom?.minusDays(1)
-        val linjerMedBeløp = fjernLinjerUtenUtbetalingsdager(utbetalingslinjer)
-        val kjededeLinjer = kjedeSammenLinjer(linjerMedBeløp)
-        val ferdigLinjer = førsteLinjeSkalIkkePekePåAndreLinjer(kjededeLinjer)
-        return Oppdrag(mottaker, fagområde, ferdigLinjer, fagsystemId, sisteArbeidsgiverdag ?: eldsteDag)
+        return Oppdrag(mottaker, fagområde, utbetalingslinjer, fagsystemId, sisteArbeidsgiverdag ?: eldsteDag)
     }
-
-    private fun fjernLinjerUtenUtbetalingsdager(linjer: List<Utbetalingslinje>) =
-        linjer.filterNot { it.beløp == null || it.beløp == 0 }
-    private fun førsteLinjeSkalIkkePekePåAndreLinjer(linjer: List<Utbetalingslinje>) =
-        listOfNotNull(linjer.firstOrNull()?.førsteLinje()) + linjer.drop(1)
 
     private val linje get() = utbetalingslinjer.first()
 

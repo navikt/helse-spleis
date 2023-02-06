@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -23,7 +24,6 @@ import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.kjedeSammenLinjer
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.kobleTil
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -1079,20 +1079,16 @@ internal class UtbetalingslinjeForskjellTest {
 
     private fun linjer(vararg linjer: TestUtbetalingslinje, other: Oppdrag? = null, sisteArbeidsgiverdag: LocalDate? = 31.desember(2017)): Oppdrag {
         val fagsystemId = other?.inspektør?.fagsystemId() ?: genererUtbetalingsreferanse(UUID.randomUUID())
-        val kjedeLinjer = linjer.map { it.asUtbetalingslinje() }.let { utbetalingslinjer ->
-            val førsteLinje = utbetalingslinjer.take(1)
-            førsteLinje + utbetalingslinjer.drop(1).kobleTil(fagsystemId)
-        }
-        return Oppdrag(ORGNUMMER, SykepengerRefusjon, kjedeLinjer, fagsystemId = fagsystemId, sisteArbeidsgiverdag = sisteArbeidsgiverdag)
+        return Oppdrag.ferdigOppdrag(ORGNUMMER, SykepengerRefusjon, linjer.toList().tilUtbetalingslinjer(fagsystemId), fagsystemId, NY, sisteArbeidsgiverdag, 0, null, null, null, LocalDateTime.now(), false, null)
     }
 
     private fun linjer(vararg linjer: Utbetalingslinje, sisteArbeidsgiverdag: LocalDate = 31.desember(2017)): Oppdrag {
         val fagsystemId = genererUtbetalingsreferanse(UUID.randomUUID())
-        val kjedeLinjer = kjedeSammenLinjer(linjer.toList()).let { linjer ->
-            val førsteLinje = linjer.take(1)
-            førsteLinje + linjer.drop(1).kobleTil(fagsystemId)
-        }
-        return Oppdrag(ORGNUMMER, SykepengerRefusjon, kjedeLinjer, fagsystemId = fagsystemId, sisteArbeidsgiverdag = sisteArbeidsgiverdag)
+        return Oppdrag(ORGNUMMER, SykepengerRefusjon, linjer.toList(), fagsystemId = fagsystemId, sisteArbeidsgiverdag = sisteArbeidsgiverdag)
+    }
+
+    private fun List<TestUtbetalingslinje>.tilUtbetalingslinjer(fagsystemId: String): List<Utbetalingslinje> {
+        return take(1).map { it.asUtbetalingslinje() } + drop(1).map { it.asUtbetalingslinje(fagsystemId) }
     }
 
     private inner class TestUtbetalingslinje(
@@ -1161,7 +1157,7 @@ internal class UtbetalingslinjeForskjellTest {
                 endringskode = endringskode,
                 datoStatusFom = datoStatusFom,
                 refDelytelseId = refDelytelseId,
-                refFagsystemId = fagsystemId?.takeIf { refDelytelseId != null },
+                refFagsystemId = if (endringskode == NY) fagsystemId else null,
                 delytelseId = delytelseId
             )
 

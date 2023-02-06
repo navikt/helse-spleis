@@ -66,7 +66,22 @@ class Utbetalingslinje(
             linje.kopier(refFagsystemId = fagsystemId)
         }
 
-        fun kjedeSammenLinjer(linjer: List<Utbetalingslinje>): List<Utbetalingslinje> {
+        internal fun normaliserLinjer(fagsystemId: String, linjer: List<Utbetalingslinje>): List<Utbetalingslinje> {
+            val linjerMedBeløp = fjernLinjerUtenUtbetalingsdager(linjer)
+            val nyeLinjerSkalPekePåFagsystemId = nyeLinjer(fagsystemId, linjerMedBeløp)
+            return kjedeSammenLinjer(nyeLinjerSkalPekePåFagsystemId)
+        }
+
+        // alle nye linjer skal peke på fagsystemId, foruten linje nr 1
+        private fun nyeLinjer(fagsystemId: String, linjer: List<Utbetalingslinje>) =
+            linjer.take(1).map { it.kopier(refFagsystemId = null) } + linjer.drop(1).map { it.kopier(refFagsystemId = fagsystemId) }
+
+        // linjer med beløp 0 kr er ugyldige/ikke ønsket å sende OS
+        private fun fjernLinjerUtenUtbetalingsdager(linjer: List<Utbetalingslinje>) =
+            linjer.filterNot { it.beløp == null || it.beløp == 0 }
+
+        // oppdraget utgjør på sett og vis en linket liste hvor hver linje har et nummer, og peker tilbake på forrige linje
+        internal fun kjedeSammenLinjer(linjer: List<Utbetalingslinje>): List<Utbetalingslinje> {
             if (linjer.isEmpty()) return emptyList()
             var forrige = linjer.first()
             val result = mutableListOf(forrige)
@@ -114,8 +129,6 @@ class Utbetalingslinje(
         refDelytelseId = other.delytelseId,
         refFagsystemId = other.refFagsystemId ?: this.refFagsystemId
     )
-
-    fun førsteLinje() = kopier(refFagsystemId = null)
 
     fun opphørslinje(datoStatusFom: LocalDate) = kopier(
         endringskode = ENDR,

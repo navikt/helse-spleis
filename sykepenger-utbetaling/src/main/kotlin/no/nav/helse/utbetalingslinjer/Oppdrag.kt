@@ -22,6 +22,7 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.FEIL
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.kjedeSammenLinjer
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.kobleTil
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.normaliserLinjer
 
 class Oppdrag private constructor(
     private val mottaker: String,
@@ -106,7 +107,7 @@ class Oppdrag private constructor(
     ) : this(
         mottaker,
         fagområde,
-        linjer.toMutableList(),
+        normaliserLinjer(fagsystemId, linjer).toMutableList(),
         fagsystemId,
         Endringskode.NY,
         sisteArbeidsgiverdag,
