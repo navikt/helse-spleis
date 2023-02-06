@@ -9,6 +9,7 @@ import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.nyesteId
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.uhåndtertBit
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.uhåndtertSykdomstidslinje
 import no.nav.helse.tournament.Dagturnering
 
 internal class Sykdomshistorikk private constructor(
@@ -48,8 +49,9 @@ internal class Sykdomshistorikk private constructor(
     }
 
     internal fun håndter(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
-        if (hendelse is BitAvInntektsmelding) return håndterBitAvInntektsmelding(hendelse)
-        return håndterSykdomstidslinjeHendelse(hendelse)
+        val uhåndtertSykdomstidslinje = elementer.uhåndtertSykdomstidslinje(hendelse) ?: return sykdomstidslinje()
+        elementer.add(0, Element.opprett(this, hendelse, hendelse.meldingsreferanseId(), uhåndtertSykdomstidslinje))
+        return sykdomstidslinje()
     }
 
     internal fun fyllUtPeriodeMedForventedeDager(hendelse: PersonHendelse, periode: Periode) {
@@ -118,6 +120,13 @@ internal class Sykdomshistorikk private constructor(
 
             internal fun List<Element>.nyesteId(): UUID = (this.firstOrNull() ?: empty).id
 
+            internal fun List<Element>.uhåndtertSykdomstidslinje(hendelse: SykdomstidslinjeHendelse) = fold(Sykdomstidslinje()) { tidligereHåndtert, element ->
+                if (element.harHåndtert(hendelse)) tidligereHåndtert + element.hendelseSykdomstidslinje
+                else tidligereHåndtert
+            }.let { alleredeHåndtertSykdomstidslinje ->
+                hendelse.sykdomstidslinje() - alleredeHåndtertSykdomstidslinje
+            }.takeUnless { it.periode() == null } // Tom sykdomstidslinje, ikke noe nytt
+
             internal fun List<Element>.uhåndtertBit(bitAvInntektsmelding: BitAvInntektsmelding) = fold(Sykdomstidslinje()) { sammenslåttTidslinje, element ->
                 if (element.harHåndtert(bitAvInntektsmelding)) sammenslåttTidslinje + element.hendelseSykdomstidslinje
                 else sammenslåttTidslinje
@@ -138,6 +147,22 @@ internal class Sykdomshistorikk private constructor(
                     beregnetSykdomstidslinje = historikk.sammenslåttTidslinje(
                         hendelse,
                         hendelseSykdomstidslinje
+                    )
+                )
+            }
+
+            internal fun opprett(
+                historikk: Sykdomshistorikk,
+                hendelse: IAktivitetslogg,
+                meldingsreferanseId: UUID,
+                uhåndtertSykdomstidslinje: Sykdomstidslinje
+            ): Element {
+                return Element(
+                    hendelseId = meldingsreferanseId,
+                    hendelseSykdomstidslinje = uhåndtertSykdomstidslinje,
+                    beregnetSykdomstidslinje = historikk.sammenslåttTidslinje(
+                        hendelse,
+                        uhåndtertSykdomstidslinje
                     )
                 )
             }
