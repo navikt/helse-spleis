@@ -1850,6 +1850,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         val førsteDagIArbeidsgiverperioden = 28.februar
         håndterInntektsmelding(arbeidsgiverperioder = listOf(førsteDagIArbeidsgiverperioden til 15.mars), førsteFraværsdag = 28.februar)
+        assertEquals("R AAAAARR AAAAARR AAAAARR AAAAARR AASSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertNull(inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(28.februar til 15.mars, inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+        assertEquals(28.februar til 15.mars, inspektør.arbeidsgiverperiode(2.vedtaksperiode))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)

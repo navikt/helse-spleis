@@ -1,7 +1,6 @@
 package no.nav.helse.hendelser.inntektsmelding
 
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
@@ -50,7 +49,7 @@ internal class DagerFraInntektsmelding(
 
     internal fun håndterPeriodeRettFør(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit) {
         val periodeRettFør = periodeRettFør(periode) ?: return
-        oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, periodeRettFør))
+        oppdaterSykdom(BitAvInntektsmelding(inntektsmelding, periodeRettFør))
         gjenståendeDager.removeAll(periodeRettFør)
     }
 
@@ -79,7 +78,7 @@ internal class DagerFraInntektsmelding(
 
     internal fun håndter(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Sykdomstidslinje): Sykdomstidslinje? {
         val overlappendeDager = overlappendeDager(periode).takeUnless { it.isEmpty() } ?: return null
-        val arbeidsgiverSykedomstidslinje = oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, overlappendeDager.omsluttendePeriode!!))
+        val arbeidsgiverSykedomstidslinje = oppdaterSykdom(BitAvInntektsmelding(inntektsmelding, overlappendeDager.omsluttendePeriode!!))
         gjenståendeDager.removeAll(overlappendeDager)
         forrigePeriodeSomHåndterte = periode
         return arbeidsgiverSykedomstidslinje.subset(periode)
@@ -87,7 +86,7 @@ internal class DagerFraInntektsmelding(
 
     internal fun håndterGjenstående(oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit) {
         val gjenståendePeriode = gjenståendeDager.omsluttendePeriode ?: return
-        oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, gjenståendePeriode))
+        oppdaterSykdom(BitAvInntektsmelding(inntektsmelding, gjenståendePeriode))
         gjenståendeDager.removeAll(gjenståendePeriode)
     }
 
@@ -115,7 +114,7 @@ internal class DagerFraInntektsmelding(
         val fom = periode.endInclusive.nesteDag
         val tom = gjenståendeDager.maxOrNull() ?: return
         val hale = (fom tilOrNull tom) ?: return
-        oppdaterSykdom(PeriodeFraInntektsmelding(inntektsmelding, hale.omsluttendePeriode!!))
+        oppdaterSykdom(BitAvInntektsmelding(inntektsmelding, hale.omsluttendePeriode!!))
         gjenståendeDager.removeAll(hale)
     }
 
@@ -124,10 +123,10 @@ internal class DagerFraInntektsmelding(
         person.emitUtsettOppgaveEvent(inntektsmelding)
     }
 
-    private class PeriodeFraInntektsmelding(
+    internal class BitAvInntektsmelding(
         private val inntektsmelding: Inntektsmelding,
         private val periode: Periode
-    ): SykdomstidslinjeHendelse(UUID.randomUUID(), inntektsmelding) {
+    ): SykdomstidslinjeHendelse(inntektsmelding.meldingsreferanseId(), inntektsmelding) {
         override fun sykdomstidslinje() = inntektsmelding.sykdomstidslinje().subset(periode)
         override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver) = throw IllegalStateException("Ikke i bruk")
         override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = throw IllegalStateException("Ikke i bruk")

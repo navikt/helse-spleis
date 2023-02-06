@@ -5,6 +5,7 @@ import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mandag
 import no.nav.helse.mars
@@ -225,6 +226,18 @@ internal class SykdomstidslinjeTest {
             nyTidslinje.merge(9.F)
         }
         assertEquals(nyTidslinje, forsøktOverskrevetTidslinje)
+    }
+
+    @Test
+    fun `trekke en sykdomstidslinje fra en annen`() {
+        assertEquals(Sykdomstidslinje(), Sykdomstidslinje() - Sykdomstidslinje())
+        val tidslinje1 = 31.S
+        resetSeed(2.januar)
+        val tidslinje2 = 29.S // mangler 1.januar og 31.januar
+        val resultat = tidslinje1 - tidslinje2
+        assertEquals(setOf(1.januar, 31.januar), resultat.inspektør.dager.filterValues { it !is Dag.UkjentDag }.keys)
+        assertEquals(tidslinje1,tidslinje2 + resultat)
+        assertEquals(Sykdomstidslinje(), tidslinje2 - tidslinje1)
     }
 
     private val konfliktsky = { venstre: Dag, høyre: Dag ->

@@ -118,7 +118,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("✅antall innslag i sykdomshistorikk")
     fun `ingen historie med to søknader til arbeidsgiver før inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 5.januar, 100.prosent))
@@ -166,7 +165,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("✅antall innslag i sykdomshistorikk")
     fun `ingen historie med to søknader (med gap mellom) til arbeidsgiver først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 4.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 4.januar, 100.prosent))
