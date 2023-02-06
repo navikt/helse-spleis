@@ -1,8 +1,10 @@
 package no.nav.helse.utbetalingslinjer
 
+import java.time.DayOfWeek
 import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
+import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.til
 import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
@@ -69,7 +71,14 @@ class Utbetalingslinje(
         internal fun normaliserLinjer(fagsystemId: String, linjer: List<Utbetalingslinje>): List<Utbetalingslinje> {
             val linjerMedBeløp = fjernLinjerUtenUtbetalingsdager(linjer)
             val nyeLinjerSkalPekePåFagsystemId = nyeLinjer(fagsystemId, linjerMedBeløp)
-            return kjedeSammenLinjer(nyeLinjerSkalPekePåFagsystemId)
+            val ferdigeLinjer = sisteLinjeSkalIkkeTrekkesIHelg(nyeLinjerSkalPekePåFagsystemId)
+            return kjedeSammenLinjer(ferdigeLinjer)
+        }
+
+        private fun sisteLinjeSkalIkkeTrekkesIHelg(linjer: List<Utbetalingslinje>): List<Utbetalingslinje> {
+            val utbetalingslinje = linjer.dropLast(1)
+            val siste = linjer.takeLast(1).map { it.kuttHelg() }
+            return utbetalingslinje + siste
         }
 
         // alle nye linjer skal peke på fagsystemId, foruten linje nr 1
@@ -232,6 +241,14 @@ class Utbetalingslinje(
     fun erForskjell() = endringskode != UEND
 
     fun erOpphør() = datoStatusFom != null
+
+    internal fun kuttHelg(): Utbetalingslinje {
+        return when (tom.dayOfWeek) {
+            DayOfWeek.SUNDAY -> kopier(tom = tom.minusDays(2))
+            DayOfWeek.SATURDAY -> kopier(tom = tom.forrigeDag)
+            else -> this
+        }
+    }
 
     fun toHendelseMap() = mapOf<String, Any?>(
         "fom" to fom.toString(),

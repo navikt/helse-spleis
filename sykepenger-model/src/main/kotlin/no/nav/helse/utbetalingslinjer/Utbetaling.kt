@@ -40,6 +40,7 @@ class Utbetaling private constructor(
     private val id: UUID,
     private val korrelasjonsId: UUID,
     private val beregningId: UUID,
+    private val opprinneligPeriode: Periode?, // TODO: rename når alle utbetalinger er migrert og har periode
     private val utbetalingstidslinje: Utbetalingstidslinje,
     private val arbeidsgiverOppdrag: Oppdrag,
     private val personOppdrag: Oppdrag,
@@ -55,9 +56,10 @@ class Utbetaling private constructor(
     private var avsluttet: LocalDateTime?,
     private var oppdatert: LocalDateTime = tidsstempel
 ) : Aktivitetskontekst {
-    private constructor(
+    internal constructor(
         beregningId: UUID,
         korrelerendeUtbetaling: Utbetaling?,
+        periode: Periode?,
         utbetalingstidslinje: Utbetalingstidslinje,
         arbeidsgiverOppdrag: Oppdrag,
         personOppdrag: Oppdrag,
@@ -69,6 +71,7 @@ class Utbetaling private constructor(
         UUID.randomUUID(),
         korrelerendeUtbetaling?.takeIf { arbeidsgiverOppdrag.tilhører(it.arbeidsgiverOppdrag) || personOppdrag.tilhører(it.personOppdrag) }?.korrelasjonsId ?: UUID.randomUUID(),
         beregningId,
+        periode,
         utbetalingstidslinje,
         arbeidsgiverOppdrag,
         personOppdrag,
@@ -100,6 +103,7 @@ class Utbetaling private constructor(
     ) : this(
         beregningId,
         forrige ?: sisteAktive,
+        null,
         utbetalingstidslinje.kutt(sisteDato),
         byggArbeidsgiveroppdrag(sisteAktive?.arbeidsgiverOppdrag, organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, forrige?.arbeidsgiverOppdrag),
         byggPersonoppdrag(sisteAktive?.personOppdrag, fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, forrige?.personOppdrag),
@@ -455,6 +459,11 @@ class Utbetaling private constructor(
         private fun List<Utbetaling>.aktiveMedUbetalte() = grupperUtbetalinger(Utbetaling::erAktivEllerUbetalt)
         private fun List<Utbetaling>.aktiveMedUtbetaling() = aktive().filterNot { it.oppdragsperiode == null }
         private fun List<Utbetaling>.utbetalte() = grupperUtbetalinger { it.erUtbetalt() || it.erInFlight() }
+        internal fun List<Utbetaling>.aktive(periode: Periode) = this
+            .aktive()
+            .filter { utbetaling ->
+                utbetaling.oppdragsperiode?.overlapperMed(periode) == true || (utbetaling.utbetalingstidslinje.isNotEmpty() && utbetaling.utbetalingstidslinje.periode().endInclusive in periode)
+            }
 
         private fun List<Utbetaling>.grupperUtbetalinger(filter: (Utbetaling) -> Boolean) =
             this.groupBy { it.korrelasjonsId }
@@ -492,6 +501,7 @@ class Utbetaling private constructor(
             id: UUID,
             korrelasjonsId: UUID,
             beregningId: UUID,
+            opprinneligPeriode: Periode?,
             utbetalingstidslinje: Utbetalingstidslinje,
             arbeidsgiverOppdrag: Oppdrag,
             personOppdrag: Oppdrag,
@@ -510,6 +520,7 @@ class Utbetaling private constructor(
             id = id,
             korrelasjonsId = korrelasjonsId,
             beregningId = beregningId,
+            opprinneligPeriode = opprinneligPeriode,
             utbetalingstidslinje = utbetalingstidslinje,
             arbeidsgiverOppdrag = arbeidsgiverOppdrag,
             personOppdrag = personOppdrag,
@@ -554,6 +565,7 @@ class Utbetaling private constructor(
             this,
             id,
             korrelasjonsId,
+            opprinneligPeriode,
             type,
             tilstand,
             periode,
@@ -582,6 +594,7 @@ class Utbetaling private constructor(
             this,
             id,
             korrelasjonsId,
+            opprinneligPeriode,
             type,
             tilstand,
             periode,
@@ -769,6 +782,7 @@ class Utbetaling private constructor(
             return Utbetaling(
                 utbetaling.beregningId,
                 utbetaling,
+                utbetaling.periode,
                 utbetaling.utbetalingstidslinje,
                 utbetaling.arbeidsgiverOppdrag.annuller(hendelse),
                 utbetaling.personOppdrag.annuller(hendelse),
@@ -854,6 +868,7 @@ class Utbetaling private constructor(
             Utbetaling(
                 utbetaling.beregningId,
                 utbetaling,
+                utbetaling.periode,
                 utbetaling.utbetalingstidslinje,
                 utbetaling.arbeidsgiverOppdrag.annuller(hendelse),
                 utbetaling.personOppdrag.annuller(hendelse),
