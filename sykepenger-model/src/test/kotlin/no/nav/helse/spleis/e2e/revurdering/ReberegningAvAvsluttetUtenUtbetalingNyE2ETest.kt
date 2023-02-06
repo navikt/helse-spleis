@@ -437,7 +437,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("💡ufullstendig validering: 'riktig' vedtaksperiode håndter inntekt. der er FF=skjæringstidspunkt. Er det OK at dette automatiseres?")
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅Riktig vedtaksperiode håndter inntekt. AUU får ingen varsler, utbetalingsperiode får RV_IM_4")
     fun `inntektsmelding gjør om kort periode til arbeidsdager`() {
         håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))

@@ -298,7 +298,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("❓Vi blir stående i AvventerIM fordi 19.januar skal utbetales")
+    @FeilerMedHåndterInntektsmeldingOppdelt("✅Vi blir stående i AvventerIM fordi 19.januar skal utbetales")
     fun `Periode uten inntekt går ikke videre ved mottatt inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 6.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 6.januar, 100.prosent))
