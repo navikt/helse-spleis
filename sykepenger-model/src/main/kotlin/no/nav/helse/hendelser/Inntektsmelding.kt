@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.cacheRefusjon
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.endrerRefusjon
@@ -24,7 +25,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmelding
@@ -39,8 +39,10 @@ import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.slf4j.LoggerFactory
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
+import kotlin.system.measureTimeMillis
 
 class Inntektsmelding(
     meldingsreferanseId: UUID,
@@ -65,6 +67,10 @@ class Inntektsmelding(
     organisasjonsnummer = orgnummer,
     opprettet = mottatt, aktivitetslogg = aktivitetslogg, personopplysninger = personopplysninger)
 {
+
+    companion object {
+        private val log = LoggerFactory.getLogger(Inntektsmelding::class.java)
+    }
 
     private val arbeidsgiverperioder = arbeidsgiverperioder.grupperSammenhengendePerioder()
     private val arbeidsgiverperiode = this.arbeidsgiverperioder.periode()
@@ -190,7 +196,12 @@ class Inntektsmelding(
         varsel(RV_IM_3)
     }
 
-    override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = arbeidsgiver.håndter(this)
+    override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
+        val time = measureTimeMillis {
+            arbeidsgiver.håndter(this)
+        }
+        log.info("brukte $time millis på å behandle inntektsmelding")
+    }
 
     private var inntektLagret = false
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, førsteFraværsdagFraSpleis: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
