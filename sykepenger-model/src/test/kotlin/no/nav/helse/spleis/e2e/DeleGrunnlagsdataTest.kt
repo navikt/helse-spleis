@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -149,7 +148,6 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("✅AventerIm->AUU utenom AvventerBlokkerende")
     fun `setter ikke inntektsmeldingId flere ganger`() {
         håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(20.februar, 28.februar, 100.prosent))
@@ -165,7 +163,6 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
             AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(

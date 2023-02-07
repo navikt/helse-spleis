@@ -57,5 +57,3 @@ spec:
     value: "true"
   - name: Splarbeidsbros
     value: "true"
-  - name: OppdeltIM
-    value: "true"

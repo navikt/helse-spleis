@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
-import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -909,7 +908,6 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("✅AventerIm->AUU utenom AvventerBlokkerende")
     fun `forlengelse av AVSLUTTET_UTEN_UTBETALING skal ikke gå til AVVENTER_HISTORIKK ved flere arbeidsgivere om IM kommer først`() {
         a1 { håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent)) }
         a2 { håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent)) }
@@ -934,9 +932,9 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertTilstander(1.vedtaksperiode,
                 START,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-                AVVENTER_BLOKKERENDE_PERIODE
+                AVSLUTTET_UTEN_UTBETALING
             )
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
         }
     }
 

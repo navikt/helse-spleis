@@ -125,6 +125,6 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object GraphQLPlayground : Toggle("GraphQLPlayground", false)
     object SendFeriepengeOppdrag : Toggle()
     object Splarbeidsbros : Toggle("Splarbeidsbros", false)
-    object HåndterInntektsmeldingOppdelt: Toggle("OppdeltIM", false)
+    object HåndterInntektsmeldingOppdelt: Toggle("OppdeltIM", true)
     object AUUSomFørstegangsbehandling: Toggle()
 }

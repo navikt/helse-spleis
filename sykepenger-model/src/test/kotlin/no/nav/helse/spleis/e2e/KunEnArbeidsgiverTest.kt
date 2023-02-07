@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDateTime
-import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -99,7 +98,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("✅vi lagrer ikke lengre inntekt i AUU")
     fun `ingen historie med søknad til arbeidsgiver først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 8.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 8.januar, 100.prosent))
@@ -109,8 +107,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertIngenFunksjonelleFeil()
         assertActivities()
         inspektør.also {
-            assertInntektshistorikkForDato(INNTEKT, 3.januar, inspektør = it)
-            assertEquals(2, it.sykdomshistorikk.size)
+            assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(2, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
         }
@@ -118,7 +115,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("✅Løses med oppdelt håndtering av inntektsmelding")
     fun `ingen historie med to søknader til arbeidsgiver før inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 5.januar, 100.prosent))
@@ -137,7 +133,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertActivities()
         inspektør.also {
             assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
-            assertEquals(4, it.sykdomshistorikk.size)
+            assertEquals(6, it.sykdomshistorikk.size)
             assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
             assertEquals(14, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
         }
@@ -166,7 +162,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("✅Løses med oppdelt håndtering av inntektsmelding")
     fun `ingen historie med to søknader (med gap mellom) til arbeidsgiver først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 4.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 4.januar, 100.prosent))
@@ -186,7 +181,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertActivities()
         inspektør.also {
             assertInntektForDato(INNTEKT, 8.januar, inspektør = it)
-            assertEquals(4, it.sykdomshistorikk.size)
+            assertEquals(7, it.sykdomshistorikk.size)
             assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
             assertEquals(13, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
         }
@@ -215,7 +210,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("✅vi lagrer ikke lengre inntekt i AUU")
     fun `ingen historie med inntektsmelding, så søknad til arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 8.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
@@ -224,8 +218,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
         assertActivities()
         inspektør.also {
-            assertInntektshistorikkForDato(INNTEKT, 3.januar, inspektør = it)
-            assertEquals(2, it.sykdomshistorikk.size)
+            assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(2, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
         }
@@ -233,7 +226,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
             AVSLUTTET_UTEN_UTBETALING
         )
     }
@@ -600,7 +592,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("✅ Vedtaksperiode 1 håndterer IM når den kommer og slår ut på allerede håndtert ved replay. Gjør ikke et ekstra AvventerBlokkerende-hopp")
     fun `Venter på å bli kilt etter inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 7.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(8.januar, 23.februar, 100.prosent))
@@ -622,8 +613,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             2.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,

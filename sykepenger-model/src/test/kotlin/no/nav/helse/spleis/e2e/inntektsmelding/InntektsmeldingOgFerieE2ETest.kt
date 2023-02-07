@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDate
-import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -239,7 +238,6 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
     }
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("✅Løses med oppdelt håndtering av inntektsmelding")
     fun `periode med ferie kant-i-kant med en periode med utbetalingsdag`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(5.februar, 23.februar, 100.prosent))
@@ -261,10 +259,6 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         assertEquals(24.februar til 12.mars, inspektør.periode(3.vedtaksperiode))
         assertEquals(24.februar til 11.mars, inspektør.arbeidsgiverperiode(3.vedtaksperiode))
 
-        assertForventetFeil(
-            forklaring = "Det er feil at 3.vedtaksperiode går til AUU, her skal tirsdag 12.mars utbetales så vi behøver inntektsmelding" ,
-            nå = { assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING) },
-            ønsket = { assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK) }
-        )
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
     }
 }

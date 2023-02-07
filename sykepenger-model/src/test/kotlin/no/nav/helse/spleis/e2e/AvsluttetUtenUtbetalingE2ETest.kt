@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
@@ -22,8 +21,6 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
@@ -119,24 +116,6 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("✅ Det funksjonelle er løst på en annen måte med et utsett_oppgave-signal istedenfor vedtaksperiode-endret")
-    // bytt ut assert med assertEquals(hendelseId, observatør.utsettOppgaveEventer().single().hendelse) og flytt til RutingAvGosysOppgaverTest
-    fun `Sender vedtaksperiode_endret når inntektsmelidng kommer i AVSLUTTET_UTEN_UTBETALING`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 1.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 1.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-
-        assertEquals(1, observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)).size)
-
-        val hendelseId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
-
-        assertEquals(2, observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)).size)
-        assertTrue(hendelseId in observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)))
-
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-    }
-
-    @Test
     fun `arbeidsgiverperiode med brudd i helg`() = Toggle.AUUSomFørstegangsbehandling.enable {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(4.januar, 5.januar, 100.prosent))
@@ -168,7 +147,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
                 13.januar til 18.januar // 6
             ), 8.januar
         )
-        assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         assertTilstander(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
     }
 }

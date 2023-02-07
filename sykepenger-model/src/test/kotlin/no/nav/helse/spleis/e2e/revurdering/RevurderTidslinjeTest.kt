@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.revurdering
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
 import no.nav.helse.antallEtterspurteBehov
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
@@ -1077,7 +1076,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @FeilerMedHåndterInntektsmeldingOppdelt("✅Løses med oppdelt håndtering av inntektsmelding")
     fun `forlengelse samtidig som en aktiv revurdering hvor forlengelsen sin IM flytter skjæringstidspunktet til aktive revurderingen`() {
         nyttVedtak(3.januar, 26.januar)
 
@@ -1093,36 +1091,27 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
 
-        assertForventetFeil(
-            forklaring = "Inntektsmeldingen for 2.vedtaksperiode endrer skjæringstidspunkt på 1.vedtaksperiode uten at den blir med i revurderingen",
-            nå = {
-                assertThrows<IllegalArgumentException> { håndterSimulering(1.vedtaksperiode) }
-                assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-            },
-            ønsket = {
-                håndterSimulering(1.vedtaksperiode)
-                håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-                håndterUtbetalt()
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
 
-                håndterVilkårsgrunnlag(2.vedtaksperiode)
-                håndterYtelser(2.vedtaksperiode)
-                håndterSimulering(2.vedtaksperiode)
-                håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-                håndterUtbetalt()
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
 
-                assertTilstander(
-                    2.vedtaksperiode,
-                    START,
-                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-                    AVVENTER_BLOKKERENDE_PERIODE,
-                    AVVENTER_VILKÅRSPRØVING,
-                    AVVENTER_HISTORIKK,
-                    AVVENTER_SIMULERING,
-                    AVVENTER_GODKJENNING,
-                    TIL_UTBETALING,
-                    AVSLUTTET
-                )
-            }
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
     }
 
