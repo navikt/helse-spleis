@@ -8,9 +8,9 @@ import no.nav.helse.desember
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
-import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding.FørsteDagEtterArbeidsgiverperiodenForskyvningsstragi
+import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding.FørsteDagEtterArbeidsgiverperiodenForskyvningsstrategi
 import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding.FørsteDagEtterArbeidsgiverperiodenStrategi
-import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding.FørsteFraværsdagForskyvningsstragi
+import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding.FørsteFraværsdagForskyvningsstrategi
 import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding.FørsteFraværsdagStrategi
 import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding.HarHåndtertDagerFraInntektsmeldingenStrategi
 import no.nav.helse.hendelser.somPeriode
@@ -305,7 +305,7 @@ internal class InntektsmeldingMatchingTest {
             vedtaksperiode1 medSkjæringstidspunkt 1.januar som ikkeForventerInntekt,
             vedtaksperiode2 medSkjæringstidspunkt 1.januar som forventerInntekt
         ) {
-            this bleHåndtertMed FørsteFraværsdagForskyvningsstragi::class av vedtaksperiode2
+            this bleHåndtertMed FørsteFraværsdagForskyvningsstrategi::class av vedtaksperiode2
         }
     }
 
@@ -335,7 +335,7 @@ internal class InntektsmeldingMatchingTest {
             vedtaksperiode1 medSkjæringstidspunkt 1.januar som ikkeForventerInntekt,
             vedtaksperiode2 medSkjæringstidspunkt 1.januar som forventerInntekt
         ) {
-            this bleHåndtertMed FørsteDagEtterArbeidsgiverperiodenForskyvningsstragi::class av vedtaksperiode2
+            this bleHåndtertMed FørsteDagEtterArbeidsgiverperiodenForskyvningsstrategi::class av vedtaksperiode2
         }
     }
 
@@ -368,7 +368,7 @@ internal class InntektsmeldingMatchingTest {
             auu3 medSkjæringstidspunkt 1.januar som ikkeForventerInntekt,
             skalUtbetales medSkjæringstidspunkt 1.januar som forventerInntekt
         ) {
-            this bleHåndtertMed FørsteFraværsdagForskyvningsstragi::class av skalUtbetales
+            this bleHåndtertMed FørsteFraværsdagForskyvningsstrategi::class av skalUtbetales
         }
     }
 

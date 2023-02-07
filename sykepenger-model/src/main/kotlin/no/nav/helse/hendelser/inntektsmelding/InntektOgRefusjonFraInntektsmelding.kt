@@ -61,7 +61,7 @@ internal class InntektOgRefusjonFraInntektsmelding(
         }
     }
 
-    internal inner class FørsteFraværsdagForskyvningsstragi : InntektOgRefusjonMatchingstrategi {
+    internal inner class FørsteFraværsdagForskyvningsstrategi : InntektOgRefusjonMatchingstrategi {
         // Bruker matching på først fraværsdag, men forskyver første fraværsdag om vedtaksperioden(e) som treffes ikke forventer inntekt
         private var forskjøvetFørsteFraværsdag = førsteFraværsdag
         private var skjæringstidspunktForPeriodeMedFørsteFraværsdag: LocalDate? = null
@@ -88,7 +88,7 @@ internal class InntektOgRefusjonFraInntektsmelding(
         }
     }
 
-    internal inner class FørsteDagEtterArbeidsgiverperiodenForskyvningsstragi : InntektOgRefusjonMatchingstrategi {
+    internal inner class FørsteDagEtterArbeidsgiverperiodenForskyvningsstrategi : InntektOgRefusjonMatchingstrategi {
         // Bruker matching på første dag etter arbeidsgiverprioden, men forskyver dagen om vedtaksperioden(e) som treffes ikke forventer inntekt
         private val førsteDagEtterArbeidsgiverperioden = sisteDagIArbeidsgiverperioden?.nesteDag
         private var forskjøvetFørsteDagEtterArbeidsgiverperioden = førsteDagEtterArbeidsgiverperioden
@@ -117,8 +117,8 @@ internal class InntektOgRefusjonFraInntektsmelding(
     internal val strategier = listOf(
         FørsteDagEtterArbeidsgiverperiodenStrategi(),
         FørsteFraværsdagStrategi(),
-        FørsteDagEtterArbeidsgiverperiodenForskyvningsstragi(),
-        FørsteFraværsdagForskyvningsstragi(),
+        FørsteDagEtterArbeidsgiverperiodenForskyvningsstrategi(),
+        FørsteFraværsdagForskyvningsstrategi(),
         HarHåndtertDagerFraInntektsmeldingenStrategi(dagerFraInntektsmelding)
     )
 }

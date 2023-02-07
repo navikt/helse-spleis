@@ -340,6 +340,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(9.januar, 19.januar, 100.prosent))
         håndterSøknad(Sykdom(9.januar, 19.januar, 100.prosent))
         håndterInntektsmelding(listOf(9.januar til 24.januar))
+        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
