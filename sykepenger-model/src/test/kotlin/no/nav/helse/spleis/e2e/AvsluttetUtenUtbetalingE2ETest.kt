@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.FeilerMedHåndterInntektsmeldingOppdelt
+import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -13,12 +14,12 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -136,7 +137,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `arbeidsgiverperiode med brudd i helg`() {
+    fun `arbeidsgiverperiode med brudd i helg`() = Toggle.AUUSomFørstegangsbehandling.enable {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(4.januar, 5.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -155,6 +156,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
 
+        nullstillTilstandsendringer()
         // 6. og 7. januar blir FriskHelg og medfører brudd i arbeidsgiverperioden
         // og dermed ble også skjæringstidspunktet forskjøvet til 8. januar
         håndterInntektsmelding(
@@ -166,7 +168,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
                 13.januar til 18.januar // 6
             ), 8.januar
         )
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        assertSisteTilstand(4.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        assertTilstander(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
     }
 }

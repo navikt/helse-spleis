@@ -469,6 +469,11 @@ internal class Vedtaksperiode private constructor(
 
     private fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() =
         person.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt)
+
+    private fun harNødvendigOpplysningerFraArbeidsgiver(hendelse: IAktivitetslogg) =
+        arbeidsgiver.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt) &&
+                arbeidsgiver.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, periode, hendelse)
+
     private fun harNødvendigInntektForVilkårsprøving() =
         person.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt)
 
@@ -1480,10 +1485,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
         }
 
-        private fun harNødvendigOpplysningerFraArbeidsgiver(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) =
-            vedtaksperiode.arbeidsgiver.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) &&
-                    vedtaksperiode.arbeidsgiver.harNødvendigRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, hendelse)
-
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {}
 
         override fun håndter(
@@ -1509,7 +1510,7 @@ internal class Vedtaksperiode private constructor(
                     } else if (vedtaksperiode.vilkårsgrunnlag is InfotrygdVilkårsgrunnlag) {
                         info("Oppdaget at perioden startet i infotrygd")
                         vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
-                    } else if (harNødvendigOpplysningerFraArbeidsgiver(vedtaksperiode, hendelse)) {
+                    } else if (vedtaksperiode.harNødvendigOpplysningerFraArbeidsgiver(hendelse)) {
                         info("Har nå nødvendige opplysninger fra arbeidsgiver")
                         vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
                     }
@@ -2049,7 +2050,14 @@ internal class Vedtaksperiode private constructor(
             if (!revurdering.inngåSomRevurdering(hendelse, vedtaksperiode, vedtaksperiode.periode)) return
             revurdering.loggDersomKorrigerendeSøknad(hendelse, "Startet revurdering grunnet korrigerende søknad")
             hendelse.info(RV_RV_1.varseltekst)
-            vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
+            if (Toggle.AUUSomFørstegangsbehandling.disabled){
+                return vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
+            }
+            if (!vedtaksperiode.harNødvendigOpplysningerFraArbeidsgiver(hendelse)) {
+                hendelse.info("mangler nødvendige opplysninger fra arbeidsgiver")
+                return vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
+            }
+            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
