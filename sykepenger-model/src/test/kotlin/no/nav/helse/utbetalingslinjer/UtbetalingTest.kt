@@ -801,23 +801,6 @@ internal class UtbetalingTest {
     }
 
     @Test
-    fun `g-regulering skal treffe personOppdrag`() {
-        val utbetalingMedPersonOppdragMatch = opprettGodkjentUtbetaling()
-        val personFagsystemId = utbetalingMedPersonOppdragMatch.inspektør.personOppdrag.fagsystemId()
-        val arbeidsgiverFagsystemId = utbetalingMedPersonOppdragMatch.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId()
-        val utbetalingUtenMatch = opprettGodkjentUtbetaling()
-        val utbetalinger = listOf(utbetalingUtenMatch, utbetalingMedPersonOppdragMatch)
-
-        val funnetArbeidsgiverUtbetaling = Utbetaling.finnUtbetalingForJustering(utbetalinger, arbeidsgiverFagsystemId.gRegulering().utbetalingport())
-        assertEquals(utbetalingMedPersonOppdragMatch, funnetArbeidsgiverUtbetaling, "Fant ikke arbeidsgiverutbetaling")
-
-        val funnetUtbetaling = Utbetaling.finnUtbetalingForJustering(utbetalinger, personFagsystemId.gRegulering().utbetalingport())
-        assertEquals(utbetalingMedPersonOppdragMatch, funnetUtbetaling, "Fant ikke personutbetaling")
-
-        assertNull(Utbetaling.finnUtbetalingForJustering(utbetalinger, "somethingrandom".gRegulering().utbetalingport()))
-    }
-
-    @Test
     fun `serialiserer avstemmingsnøkkel som null når den ikke er satt`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000))
         beregnUtbetalinger(tidslinje)

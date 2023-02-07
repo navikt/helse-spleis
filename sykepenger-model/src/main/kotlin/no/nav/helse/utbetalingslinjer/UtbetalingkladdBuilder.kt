@@ -13,12 +13,12 @@ internal class UtbetalingkladdBuilder(førsteDag: LocalDate, arbeidsgivermottake
     // TODO: krever at Overføringer/kvitteringer inneholder fagområde, ellers
     // kan ikke meldingene mappes til riktig oppdrag
     // private val fagsystemId = genererUtbetalingsreferanse(UUID.randomUUID())
-    private var arbeidsgiveroppdragBuilder = OppdragBuilderV2(
+    private var arbeidsgiveroppdragBuilder = OppdragBuilder(
         sisteArbeidsgiverdag = førsteDag,
         mottaker = arbeidsgivermottaker,
         fagområde = SykepengerRefusjon
     )
-    private var personoppdragBuilder = OppdragBuilderV2(
+    private var personoppdragBuilder = OppdragBuilder(
         sisteArbeidsgiverdag = førsteDag,
         mottaker = personmottaker,
         fagområde = Sykepenger

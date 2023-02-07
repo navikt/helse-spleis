@@ -26,7 +26,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_15
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_7
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_9
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
@@ -85,32 +84,6 @@ class Utbetaling private constructor(
         null,
         null,
         null
-    )
-
-    private constructor(
-        sisteAktive: Utbetaling?,
-        fødselsnummer: String,
-        beregningId: UUID,
-        organisasjonsnummer: String,
-        utbetalingstidslinje: Utbetalingstidslinje,
-        type: Utbetalingtype,
-        sisteDato: LocalDate,
-        aktivitetslogg: IAktivitetslogg,
-        maksdato: LocalDate,
-        forbrukteSykedager: Int,
-        gjenståendeSykedager: Int,
-        forrige: Utbetaling?
-    ) : this(
-        beregningId,
-        forrige ?: sisteAktive,
-        null,
-        utbetalingstidslinje.kutt(sisteDato),
-        byggArbeidsgiveroppdrag(sisteAktive?.arbeidsgiverOppdrag, organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, forrige?.arbeidsgiverOppdrag),
-        byggPersonoppdrag(sisteAktive?.personOppdrag, fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, forrige?.personOppdrag),
-        type,
-        maksdato,
-        forbrukteSykedager,
-        gjenståendeSykedager
     )
 
     private val oppdragsperiode = Oppdrag.periode(arbeidsgiverOppdrag, personOppdrag)
@@ -261,10 +234,6 @@ class Utbetaling private constructor(
         return tilstand.annuller(this, hendelse)
     }
 
-    internal fun etterutbetale(hendelse: GrunnbeløpsreguleringPort, utbetalingstidslinje: Utbetalingstidslinje): Utbetaling? {
-        return tilstand.etterutbetale(this, hendelse, utbetalingstidslinje)
-    }
-
     internal fun forkast(hendelse: IAktivitetslogg) {
         hendelse.kontekst(this)
         tilstand.forkast(this, hendelse)
@@ -361,63 +330,15 @@ class Utbetaling private constructor(
             return nyUtbetaling.lagUtbetaling(type, korrelerendeUtbetaling, beregningId, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager)
         }
 
-        internal fun finnUtbetalingForJustering(
-            utbetalinger: List<Utbetaling>,
-            hendelse: GrunnbeløpsreguleringPort
-        ): Utbetaling? {
-            val sisteUtbetalte = utbetalinger.aktive().lastOrNull {
-                hendelse.erRelevant(it.arbeidsgiverOppdrag.fagsystemId()) ||
-                hendelse.erRelevant(it.personOppdrag.fagsystemId())
-            } ?: return null.also {
-                hendelse.info("Fant ingen utbetalte utbetalinger. Dette betyr trolig at fagsystemiden er annullert.")
-            }
-            if (!sisteUtbetalte.utbetalingstidslinje.er6GBegrenset()) {
-                hendelse.info("Utbetalingen for perioden ${sisteUtbetalte.periode} er ikke begrenset av 6G")
-                return null
-            }
-            return sisteUtbetalte
-        }
-
         internal fun finnUtbetalingForAnnullering(utbetalinger: List<Utbetaling>, hendelse: AnnullerUtbetalingPort): Utbetaling? {
             return utbetalinger.aktiveMedUtbetaling().lastOrNull() ?: run {
                 hendelse.funksjonellFeil(RV_UT_4)
                 return null
             }
         }
-
-        private fun byggOppdrag(
-            sisteAktive: Oppdrag?,
-            mottaker: String,
-            tidslinje: Utbetalingstidslinje,
-            sisteDato: LocalDate,
-            aktivitetslogg: IAktivitetslogg,
-            forrige: Oppdrag?,
-            fagområde: Fagområde
-        ): Oppdrag = OppdragBuilder(tidslinje, mottaker, fagområde, sisteDato, forrige?.fagsystemId()).build(forrige?.takeUnless { Oppdrag.kanIkkeForsøkesPåNy(it) } ?: sisteAktive, aktivitetslogg)
-
-        private fun byggArbeidsgiveroppdrag(
-            sisteAktive: Oppdrag?,
-            organisasjonsnummer: String,
-            tidslinje: Utbetalingstidslinje,
-            sisteDato: LocalDate,
-            aktivitetslogg: IAktivitetslogg,
-            forrige: Oppdrag?
-        ) = byggOppdrag(sisteAktive, organisasjonsnummer, tidslinje, sisteDato, aktivitetslogg, forrige, SykepengerRefusjon)
-
-        private fun byggPersonoppdrag(
-            sisteAktive: Oppdrag?,
-            fødselsnummer: String,
-            tidslinje: Utbetalingstidslinje,
-            sisteDato: LocalDate,
-            aktivitetslogg: IAktivitetslogg,
-            forrige: Oppdrag?
-        ): Oppdrag {
-            return byggOppdrag(sisteAktive, fødselsnummer, tidslinje, sisteDato, aktivitetslogg, forrige, Sykepenger)
-        }
         internal fun List<Utbetaling>.aktive() = grupperUtbetalinger(Utbetaling::erAktiv)
         private fun List<Utbetaling>.aktiveMedUbetalte() = grupperUtbetalinger(Utbetaling::erAktivEllerUbetalt)
         private fun List<Utbetaling>.aktiveMedUtbetaling() = aktive().filterNot { it.oppdragsperiode == null }
-        private fun List<Utbetaling>.utbetalte() = grupperUtbetalinger { it.erUtbetalt() || it.erInFlight() }
         internal fun List<Utbetaling>.aktive(periode: Periode) = this
             .aktive()
             .filter { utbetaling ->
@@ -450,10 +371,6 @@ class Utbetaling private constructor(
         internal fun List<Utbetaling>.harNærliggendeUtbetaling(periode: Periode) =
             aktiveMedUbetalte().any { it.harNærliggendeUtbetaling(periode) }
 
-        internal fun List<Utbetaling>.utbetaltTidslinje() =
-            utbetalte()
-                .map { it.utbetalingstidslinje }
-                .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
         internal fun List<Utbetaling>.harId(id: UUID) = any { it.id == id }
         internal fun ferdigUtbetaling(
             id: UUID,
@@ -625,12 +542,6 @@ class Utbetaling private constructor(
         ) {
             hendelse.info("Forventet ikke godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
             hendelse.funksjonellFeil(RV_UT_7)
-        }
-
-        fun etterutbetale(utbetaling: Utbetaling, hendelse: GrunnbeløpsreguleringPort, utbetalingstidslinje: Utbetalingstidslinje): Utbetaling? {
-            hendelse.info("Forventet ikke å etterutbetale på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
-            hendelse.funksjonellFeil(RV_UT_8)
-            return null
         }
 
         fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetalingPort): Utbetaling? {
@@ -829,27 +740,6 @@ class Utbetaling private constructor(
                 null,
                 null
             ).also { hendelse.info("Oppretter annullering med id ${it.id}") }
-
-        override fun etterutbetale(utbetaling: Utbetaling, hendelse: GrunnbeløpsreguleringPort, utbetalingstidslinje: Utbetalingstidslinje) =
-            Utbetaling(
-                sisteAktive = null,
-                fødselsnummer = hendelse.fødselsnummer(),
-                beregningId = utbetaling.beregningId,
-                organisasjonsnummer = hendelse.organisasjonsnummer(),
-                utbetalingstidslinje = utbetalingstidslinje.kutt(utbetaling.periode.endInclusive),
-                type = Utbetalingtype.ETTERUTBETALING,
-                sisteDato = utbetaling.periode.endInclusive,
-                aktivitetslogg = hendelse,
-                maksdato = utbetaling.maksdato,
-                forbrukteSykedager = requireNotNull(utbetaling.forbrukteSykedager),
-                gjenståendeSykedager = requireNotNull(utbetaling.gjenståendeSykedager),
-                forrige = utbetaling
-            )
-                .takeIf { it.arbeidsgiverOppdrag.harUtbetalinger() }
-                ?.also {
-                    if (it.arbeidsgiverOppdrag.lastOrNull()?.tom != utbetaling.arbeidsgiverOppdrag.lastOrNull()?.tom)
-                        hendelse.logiskFeil("Etterutbetaling har utvidet eller kortet ned oppdraget")
-                }
     }
 
     internal object UtbetalingFeilet : Tilstand {

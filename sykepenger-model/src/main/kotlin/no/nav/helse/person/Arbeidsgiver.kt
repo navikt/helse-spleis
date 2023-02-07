@@ -22,9 +22,7 @@ import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
-import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
@@ -74,7 +72,6 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harNærliggendeUtbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingslinjer.utbetalingport
@@ -84,7 +81,6 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Inntekter
-import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException
@@ -660,47 +656,6 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(påminnelse: Påminnelse): Boolean {
         påminnelse.kontekst(this)
         return énHarHåndtert(påminnelse, Vedtaksperiode::håndter)
-    }
-
-    internal fun håndter(arbeidsgivere: List<Arbeidsgiver>, hendelse: Grunnbeløpsregulering, vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk) {
-        hendelse.kontekst(this)
-        hendelse.info("Håndterer etterutbetaling")
-
-        val sisteUtbetalte = Utbetaling.finnUtbetalingForJustering(
-            utbetalinger = utbetalinger,
-            hendelse = hendelse.utbetalingport()
-        ) ?: return hendelse.info("Fant ingen utbetalinger å etterutbetale")
-
-        val periode = LocalDate.of(2020, 5, 1).minusMonths(18) til LocalDate.now()
-
-        val reberegnetTidslinje = reberegnUtbetalte(hendelse, arbeidsgivere, periode, vilkårsgrunnlagHistorikk)
-
-        val etterutbetaling = sisteUtbetalte.etterutbetale(hendelse.utbetalingport(), reberegnetTidslinje)
-            ?: return hendelse.info("Utbetalingen for $organisasjonsnummer for perioden $sisteUtbetalte er ikke blitt endret. Grunnbeløpsregulering gjennomføres ikke.")
-
-        hendelse.info("Etterutbetaler for $organisasjonsnummer for perioden $sisteUtbetalte")
-        nyUtbetaling(hendelse, etterutbetaling)
-        etterutbetaling.håndter(hendelse.utbetalingport())
-    }
-
-    private fun reberegnUtbetalte(
-        aktivitetslogg: IAktivitetslogg,
-        arbeidsgivere: List<Arbeidsgiver>,
-        periode: Periode,
-        vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
-    ): Utbetalingstidslinje {
-        val arbeidsgivertidslinjer = arbeidsgivere
-            .map { it to it.utbetalinger.utbetaltTidslinje() }
-            .filter { it.second.isNotEmpty() }
-            .toMap()
-
-        MaksimumUtbetalingFilter().betal(arbeidsgivertidslinjer.values.toList(), periode, aktivitetslogg, jurist)
-
-        arbeidsgivertidslinjer.forEach { (arbeidsgiver, reberegnetUtbetalingstidslinje) ->
-            arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, reberegnetUtbetalingstidslinje, vilkårsgrunnlagHistorikk)
-        }
-
-        return nåværendeTidslinje()
     }
 
     override fun utbetalingUtbetalt(

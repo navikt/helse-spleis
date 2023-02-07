@@ -348,8 +348,6 @@ class Person private constructor(
 
     fun håndter(hendelse: Grunnbeløpsregulering) {
         hendelse.kontekst(this)
-        arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(arbeidsgivere, hendelse, vilkårsgrunnlagHistorikk)
-            ?: hendelse.funksjonellFeil(RV_AG_1)
         håndterGjenoppta(hendelse)
     }
 
