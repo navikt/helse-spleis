@@ -6,7 +6,7 @@ private val regex = "^$varselkodeformat$".toRegex()
 
 enum class Varselkode(
     val varseltekst: String,
-    private val funksjonellFeilTekst: String = varseltekst,
+    val funksjonellFeilTekst: String = varseltekst,
     private val avviklet: Boolean = false
 ) {
 
