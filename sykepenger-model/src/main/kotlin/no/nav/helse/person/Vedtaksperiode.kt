@@ -7,6 +7,8 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Alder
 import no.nav.helse.Toggle
+import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.hendelser.Inntektsmelding
@@ -107,8 +109,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_7
 import no.nav.helse.person.builders.VedtakFattetBuilder
-import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.serde.reflection.AktivitetsloggMap
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -2385,7 +2385,9 @@ internal class Vedtaksperiode private constructor(
             inntektOgRefusjon.strategier.forEach { strategy ->
                 forEach { vedtaksperiode ->
                     val match = inntektOgRefusjon.skalHåndteresAv(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, strategy) { vedtaksperiode.forventerInntektOgRefusjonFraInntektsmelding() }
-                    if (match) return vedtaksperiode
+                    if (match) return vedtaksperiode.also {
+                        inntektOgRefusjon.info("Vedtaksperiode ${vedtaksperiode.periode} ble plukket ut til å håndtere inntekt og refusjon av ${strategy::class.simpleName}")
+                    }
                 }
             }
             return null

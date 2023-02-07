@@ -1,16 +1,16 @@
 package no.nav.helse.hendelser.inntektsmelding
 
 import java.time.LocalDate
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.førsteArbeidsdag
+import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Person
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 internal class InntektOgRefusjonFraInntektsmelding(
     private val inntektsmelding: Inntektsmelding,
@@ -115,10 +115,10 @@ internal class InntektOgRefusjonFraInntektsmelding(
     }
 
     internal val strategier = listOf(
-        FørsteFraværsdagStrategi(),
         FørsteDagEtterArbeidsgiverperiodenStrategi(),
-        FørsteFraværsdagForskyvningsstragi(),
+        FørsteFraværsdagStrategi(),
         FørsteDagEtterArbeidsgiverperiodenForskyvningsstragi(),
+        FørsteFraværsdagForskyvningsstragi(),
         HarHåndtertDagerFraInntektsmeldingenStrategi(dagerFraInntektsmelding)
     )
 }
