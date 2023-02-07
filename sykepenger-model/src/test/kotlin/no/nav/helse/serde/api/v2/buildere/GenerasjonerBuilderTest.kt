@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Toggle
-import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.erHelg
@@ -22,6 +21,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -1755,7 +1755,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     @Test
     @Disabled("går igjennom denne med Maxi og Simen")
-    fun `inntektsmelding for to korte perioder`() = listOf(Toggle.HåndterInntektsmeldingOppdelt, Toggle.AUUSomFørstegangsbehandling).enable {
+    fun `inntektsmelding for to korte perioder`() = Toggle.AUUSomFørstegangsbehandling.enable {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -1766,6 +1766,13 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 24.januar)
+        assertEquals("UUUUGG UUUUSHH SSSSSH? ??SSSHH SS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertEquals(2.januar til 17.januar, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(2.januar til 17.januar, inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+        val arbeidsgiverperioden = inspektør.arbeidsgiverperioden(2.vedtaksperiode)!!
+        assertFalse(arbeidsgiverperioden.erFørsteUtbetalingsdagFørEllerLik(17.januar.somPeriode()))
+        assertTrue(arbeidsgiverperioden.erFørsteUtbetalingsdagFørEllerLik(18.januar.somPeriode()))
+
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
