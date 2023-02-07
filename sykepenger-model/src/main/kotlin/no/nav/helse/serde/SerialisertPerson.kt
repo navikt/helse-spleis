@@ -141,6 +141,7 @@ import no.nav.helse.serde.migration.V213FlytteDatoTilSkattSykepengegrunnlag
 import no.nav.helse.serde.migration.V214FjernerInfotrygdOgSkattSykepengegrunnlagFraInntektshistorikken
 import no.nav.helse.serde.migration.V215TarBortInnslagFraInntektshistorikken
 import no.nav.helse.serde.migration.V216FlytteHendelseIdOgTidsstempelTilSkattSykepengegrunnlag
+import no.nav.helse.serde.migration.V217SpissetMigreringForÅForkasteUtbetaling
 import no.nav.helse.serde.migration.V21FjernGruppeId
 import no.nav.helse.serde.migration.V22FjernFelterFraSykdomstidslinje
 import no.nav.helse.serde.migration.V23None
@@ -455,7 +456,8 @@ class SerialisertPerson(val json: String) {
             V213FlytteDatoTilSkattSykepengegrunnlag(),
             V214FjernerInfotrygdOgSkattSykepengegrunnlagFraInntektshistorikken(),
             V215TarBortInnslagFraInntektshistorikken(),
-            V216FlytteHendelseIdOgTidsstempelTilSkattSykepengegrunnlag()
+            V216FlytteHendelseIdOgTidsstempelTilSkattSykepengegrunnlag(),
+            V217SpissetMigreringForÅForkasteUtbetaling()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
