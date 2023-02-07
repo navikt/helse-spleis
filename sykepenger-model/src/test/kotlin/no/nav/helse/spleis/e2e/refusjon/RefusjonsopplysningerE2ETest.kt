@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.refusjon
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -16,12 +17,11 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.oktober
-import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_1
 import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.september
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -141,7 +141,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `Automatisk revurdering av AUU ved inntektsmelding som mangler refusjonsopplysninger`() {
+    fun `Automatisk revurdering av AUU ved inntektsmelding som mangler refusjonsopplysninger`() = Toggle.AUUSomFørstegangsbehandling.enable {
         a1 {
             (12.juli til 17.juli i 2022).avsluttUtenUtbetaling()
             (17.august til 17.august i 2022).avsluttUtenUtbetaling()
@@ -157,10 +157,9 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
                 (12.september til 20.september i 2022)
             )
             håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag = 22.september i 2022)
-            håndterYtelser(treffesAvInntektsmelding)
             håndterVilkårsgrunnlag(treffesAvInntektsmelding)
             håndterYtelser(treffesAvInntektsmelding)
-            assertSisteTilstand(treffesAvInntektsmelding, AVVENTER_SIMULERING_REVURDERING)
+            assertSisteTilstand(treffesAvInntektsmelding, AVVENTER_SIMULERING)
             assertVarsel(RV_RE_1)
         }
     }
