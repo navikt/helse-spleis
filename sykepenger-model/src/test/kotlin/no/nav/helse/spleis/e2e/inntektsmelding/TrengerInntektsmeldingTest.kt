@@ -1,22 +1,28 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
+import no.nav.helse.EnableToggle
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
+import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.nyPeriode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
+@EnableToggle(Toggle.AUUSomFørstegangsbehandling::class)
 internal class TrengerInntektsmeldingTest : AbstractEndToEndTest() {
 
     @Test
-    fun `Kort periode ber om inntektsmelding når den går inn i AvventerRevurdering, og sier fra om at inntektsmelding ikke trengs etter at den er mottatt`() {
+    fun `Kort periode ber om inntektsmelding når den går tilbake, og sier fra om at inntektsmelding ikke trengs etter at den er mottatt`() {
         nyPeriode(5.januar til 17.januar)
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         nyPeriode(20.januar til 22.januar)
@@ -27,9 +33,10 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndTest() {
         assertEquals(2, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar)

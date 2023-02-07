@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.e2e.søknad
 
+import no.nav.helse.EnableToggle
+import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -45,6 +47,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
+@EnableToggle(Toggle.AUUSomFørstegangsbehandling::class)
 internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
 
     @Test
@@ -73,7 +76,7 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
         nyPeriode(1.mars til 16.mars)
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         assertVarsel(Varselkode.RV_OO_2, 1.vedtaksperiode.filter())
         assertVarsel(Varselkode.RV_OO_1, 2.vedtaksperiode.filter())
@@ -85,7 +88,7 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
         håndterYtelser(1.vedtaksperiode)

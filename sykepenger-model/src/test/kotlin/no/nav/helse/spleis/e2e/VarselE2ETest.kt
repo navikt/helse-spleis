@@ -709,42 +709,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `varsel - Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 16.februar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-
-        håndterInntektsmelding(listOf(31.januar til 15.februar))
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    ArbeidsgiverInntekt(ORGNUMMER, (10..12).map {
-                        ArbeidsgiverInntekt.MånedligInntekt(
-                            yearMonth = YearMonth.of(2017, it),
-                            type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-                            inntekt = INNTEKT,
-                            fordel = "fordel",
-                            beskrivelse = "beskrivelse"
-                        )
-                    })
-                ),
-                arbeidsforhold = listOf(
-                    InntektForSykepengegrunnlag.Arbeidsforhold(
-                        ORGNUMMER, listOf(
-                            InntektForSykepengegrunnlag.MånedligArbeidsforhold(
-                                yearMonth = YearMonth.of(2017, 10),
-                                erFrilanser = true
-                            )
-                        )
-                    )
-                )
-            )
-        )
-        assertVarsel(RV_IV_3, 1.vedtaksperiode.filter())
-    }
-
-    @Test
     fun `varsel - Det er registrert bruk av på nødnummer`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
@@ -823,22 +787,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
 
         assertVarsel(RV_IT_15, 1.vedtaksperiode.filter())
         assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `varsel revurdering - Forkaster avvist revurdering ettersom vedtaksperioden ikke har tidligere utbetalte utbetalinger`() {
-        nyPeriode(2.januar til 17.januar)
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser()
-        håndterVilkårsgrunnlag()
-        håndterYtelser()
-        håndterSimulering()
-        håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
-
-        assertIngenVarsel(RV_RV_2, 1.vedtaksperiode.filter())
-        assertFunksjonellFeil("Forkaster avvist revurdering ettersom vedtaksperioden ikke har tidligere utbetalte utbetalinger.", 1.vedtaksperiode.filter())
     }
 
     @Test

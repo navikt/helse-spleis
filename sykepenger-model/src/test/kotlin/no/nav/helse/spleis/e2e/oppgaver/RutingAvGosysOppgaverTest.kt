@@ -1,6 +1,8 @@
 package no.nav.helse.spleis.e2e.oppgaver
 
 import java.util.UUID
+import no.nav.helse.EnableToggle
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -56,6 +58,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
+@EnableToggle(Toggle.AUUSomFørstegangsbehandling::class)
 internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
     @Test
@@ -424,14 +427,12 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode)
 
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser()
         håndterVilkårsgrunnlag()
         håndterYtelser()
         håndterSimulering()
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
 
-        assertSisteTilstand(1.vedtaksperiode, REVURDERING_FEILET)
-        assertFunksjonellFeil("Forkaster avvist revurdering ettersom vedtaksperioden ikke har tidligere utbetalte utbetalinger.", 1.vedtaksperiode.filter())
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertTrue(observatør.opprettOppgaveEventer().any { inntektsmeldingId in it.hendelser })
     }
 

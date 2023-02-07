@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
+import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
@@ -14,7 +15,7 @@ import org.slf4j.LoggerFactory
 internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    fun `revurdering ved inntektsmelding for korte perioder`() {
+    fun `revurdering ved inntektsmelding for korte perioder`() = Toggle.AUUSomFørstegangsbehandling.enable {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 5.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 5.januar, sykmeldingsgrad = 100))
@@ -29,29 +30,18 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
             perioder = listOf(SoknadsperiodeDTO(fom = 11.januar, tom = 17.januar, sykmeldingsgrad = 100))
         )
         sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
-        sendYtelserUtenSykepengehistorikk(2)
         sendVilkårsgrunnlag(2)
         sendYtelserUtenSykepengehistorikk(2)
         sendSimulering(2, SimuleringMessage.Simuleringstatus.OK)
 
         assertTilstander(0, "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING", "AVSLUTTET_UTEN_UTBETALING")
         assertTilstander(1, "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING", "AVSLUTTET_UTEN_UTBETALING")
-        assertTilstander(
-            2,
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
-            "AVSLUTTET_UTEN_UTBETALING",
-            "AVVENTER_REVURDERING",
-            "AVVENTER_GJENNOMFØRT_REVURDERING",
-            "AVVENTER_HISTORIKK_REVURDERING",
-            "AVVENTER_VILKÅRSPRØVING_REVURDERING",
-            "AVVENTER_HISTORIKK_REVURDERING",
-            "AVVENTER_SIMULERING_REVURDERING",
-            "AVVENTER_GODKJENNING_REVURDERING"
-        )
+        assertTilstander(2, "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING", "AVVENTER_HISTORIKK", "AVVENTER_SIMULERING", "AVVENTER_GODKJENNING")
     }
 
     @Test
-    fun `revurdering ved inntektsmelding for korte perioder - endring av skjæringstidspunkt`() {
+    fun `revurdering ved inntektsmelding for korte perioder - endring av skjæringstidspunkt`() = Toggle.AUUSomFørstegangsbehandling.enable {
         sendNySøknad(SoknadsperiodeDTO(fom = 8.januar, tom = 10.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 8.januar, tom = 10.januar, sykmeldingsgrad = 100))
@@ -71,25 +61,14 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
                 Periode(fom = 11.januar, tom = 21.januar),
             ), førsteFraværsdag = 11.januar
         )
-        sendYtelserUtenSykepengehistorikk(2)
-        sendVilkårsgrunnlag(2)
-        sendYtelserUtenSykepengehistorikk(2)
-        sendSimulering(2, SimuleringMessage.Simuleringstatus.OK)
+        sendVilkårsgrunnlag(1)
+        sendYtelserUtenSykepengehistorikk(1)
+        sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
 
         assertTilstander(0, "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING", "AVSLUTTET_UTEN_UTBETALING")
-        assertTilstander(1, "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING", "AVVENTER_REVURDERING", "AVVENTER_GJENNOMFØRT_REVURDERING")
-        assertTilstander(
-            2,
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
-            "AVSLUTTET_UTEN_UTBETALING",
-            "AVVENTER_REVURDERING",
-            "AVVENTER_GJENNOMFØRT_REVURDERING",
-            "AVVENTER_HISTORIKK_REVURDERING",
-            "AVVENTER_VILKÅRSPRØVING_REVURDERING",
-            "AVVENTER_HISTORIKK_REVURDERING",
-            "AVVENTER_SIMULERING_REVURDERING",
-            "AVVENTER_GODKJENNING_REVURDERING"
-        )
+        assertTilstander(1, "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING", "AVVENTER_HISTORIKK", "AVVENTER_SIMULERING", "AVVENTER_GODKJENNING")
+        assertTilstander(2, "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVVENTER_BLOKKERENDE_PERIODE")
     }
 
     private val logCollector = LogCollector()
