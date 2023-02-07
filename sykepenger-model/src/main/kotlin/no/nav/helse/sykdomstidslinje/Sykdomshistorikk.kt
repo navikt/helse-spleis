@@ -4,11 +4,10 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.PersonHendelse
-import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding.BitAvInntektsmelding
 import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.nyesteId
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.uhåndtertBit
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.uhåndtertSykdomstidslinje
 import no.nav.helse.tournament.Dagturnering
 
 internal class Sykdomshistorikk private constructor(
@@ -26,30 +25,11 @@ internal class Sykdomshistorikk private constructor(
 
     internal fun nyesteId()= elementer.nyesteId()
 
-    private fun håndterSykdomstidslinjeHendelse(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
-        if (elementer.none { it.harHåndtert(hendelse) }) {
-            elementer.add(0, Element.opprett(this, hendelse))
-        }
-        return sykdomstidslinje()
-    }
-
-
-    private fun håndterBitAvInntektsmelding(bitAvInntektsmelding: BitAvInntektsmelding): Sykdomstidslinje {
-        val nyesteElement = elementer.firstOrNull() ?: return håndterSykdomstidslinjeHendelse(bitAvInntektsmelding)
-        val uhåndtertBit = elementer.uhåndtertBit(bitAvInntektsmelding) ?: return sykdomstidslinje()
-        if (nyesteElement.harHåndtert(bitAvInntektsmelding)) {
-            val utvidetElement = Element.utvidNyesteElementMedBitAvInntektsmelding(this, bitAvInntektsmelding, uhåndtertBit, nyesteElement)
-            elementer[0] = utvidetElement
-            return sykdomstidslinje()
-        }
-        val nyttElement = Element.nyttElementMedBitAvInntektsmelding(this, bitAvInntektsmelding, uhåndtertBit)
-        elementer.add(0, nyttElement)
-        return sykdomstidslinje()
-    }
 
     internal fun håndter(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
-        if (hendelse is BitAvInntektsmelding) return håndterBitAvInntektsmelding(hendelse)
-        return håndterSykdomstidslinjeHendelse(hendelse)
+        val uhåndtertSykdomstidslinje = elementer.uhåndtertSykdomstidslinje(hendelse) ?: return sykdomstidslinje()
+        elementer.add(0, Element.opprett(this, hendelse, hendelse.meldingsreferanseId(), uhåndtertSykdomstidslinje))
+        return sykdomstidslinje()
     }
 
     internal fun fyllUtPeriodeMedForventedeDager(hendelse: PersonHendelse, periode: Periode) {
@@ -118,12 +98,17 @@ internal class Sykdomshistorikk private constructor(
 
             internal fun List<Element>.nyesteId(): UUID = (this.firstOrNull() ?: empty).id
 
-            internal fun List<Element>.uhåndtertBit(bitAvInntektsmelding: BitAvInntektsmelding) = fold(Sykdomstidslinje()) { sammenslåttTidslinje, element ->
-                if (element.harHåndtert(bitAvInntektsmelding)) sammenslåttTidslinje + element.hendelseSykdomstidslinje
-                else sammenslåttTidslinje
-            }.let { håndtertBit ->
-                bitAvInntektsmelding.sykdomstidslinje() - håndtertBit
-            }.takeUnless { it.periode() == null }
+            internal fun List<Element>.uhåndtertSykdomstidslinje(hendelse: SykdomstidslinjeHendelse) : Sykdomstidslinje? {
+                val tidligere = filter { it.harHåndtert(hendelse) }.takeUnless { it.isEmpty() } ?: return hendelse.sykdomstidslinje() // Første gang vi ser hendelsen
+                val alleredeHåndtertSykdomstidslinje = tidligere.fold(Sykdomstidslinje()) { tidligereHåndtert, element ->
+                    tidligereHåndtert + element.hendelseSykdomstidslinje
+                }
+                val uhåndtertSykdomstidslinje = hendelse.sykdomstidslinje() - alleredeHåndtertSykdomstidslinje
+                if (uhåndtertSykdomstidslinje.periode() == null) return null // Tom sykdomstidslinje, ikke noe nytt
+                return uhåndtertSykdomstidslinje.also {
+                    hendelse.info("Legger til bit nummer ${tidligere.size +1 } for ${it.periode()} i sykdomshistorikken")
+                }
+            }
 
             internal fun sykdomstidslinje(elementer: List<Element>) = elementer.first().beregnetSykdomstidslinje
 
@@ -142,33 +127,18 @@ internal class Sykdomshistorikk private constructor(
                 )
             }
 
-            internal fun utvidNyesteElementMedBitAvInntektsmelding(
+            internal fun opprett(
                 historikk: Sykdomshistorikk,
-                bitAvInntektsmelding: BitAvInntektsmelding,
-                uhåndtertBit: Sykdomstidslinje,
-                nyesteElement: Element
+                hendelse: IAktivitetslogg,
+                meldingsreferanseId: UUID,
+                uhåndtertSykdomstidslinje: Sykdomstidslinje
             ): Element {
                 return Element(
-                    id = UUID.randomUUID(), // TODO: Burde vi beholdt id fra nyesteElement? Men da fungerer ikke cachen til arbeidsgiverperiode 🤕
-                    hendelseId = nyesteElement.hendelseId,
-                    hendelseSykdomstidslinje = nyesteElement.hendelseSykdomstidslinje + uhåndtertBit,
+                    hendelseId = meldingsreferanseId,
+                    hendelseSykdomstidslinje = uhåndtertSykdomstidslinje,
                     beregnetSykdomstidslinje = historikk.sammenslåttTidslinje(
-                        bitAvInntektsmelding,
-                        uhåndtertBit
-                    )
-                )
-            }
-            internal fun nyttElementMedBitAvInntektsmelding(
-                historikk: Sykdomshistorikk,
-                bitAvInntektsmelding: BitAvInntektsmelding,
-                uhåndtertBit: Sykdomstidslinje
-            ): Element {
-                return Element(
-                    hendelseId = bitAvInntektsmelding.meldingsreferanseId(),
-                    hendelseSykdomstidslinje = uhåndtertBit,
-                    beregnetSykdomstidslinje = historikk.sammenslåttTidslinje(
-                        bitAvInntektsmelding,
-                        uhåndtertBit
+                        hendelse,
+                        uhåndtertSykdomstidslinje
                     )
                 )
             }

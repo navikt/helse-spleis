@@ -1,6 +1,8 @@
 package no.nav.helse.hendelser.inntektsmelding
 
 import java.time.LocalDate
+import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
@@ -11,8 +13,6 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -123,7 +123,7 @@ internal class DagerFraInntektsmelding(
         person.emitUtsettOppgaveEvent(inntektsmelding)
     }
 
-    internal class BitAvInntektsmelding(
+    private class BitAvInntektsmelding(
         private val inntektsmelding: Inntektsmelding,
         private val periode: Periode
     ): SykdomstidslinjeHendelse(inntektsmelding.meldingsreferanseId(), inntektsmelding) {
