@@ -1,5 +1,6 @@
 package no.nav.helse.dsl
 
+import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
@@ -29,9 +30,11 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
 
     private fun validerSykdomshistorikk() {
         arbeidsgivere.forEach { arbeidsgiver ->
-            val hendelseIder = arbeidsgiver.inspektør.sykdomshistorikk.inspektør.hendelseIder()
-            check(hendelseIder.size == hendelseIder.toSet().size) {
-                "Sykdomshistorikken inneholder duplikate hendelseIder"
+            val perioderPerHendelse = arbeidsgiver.inspektør.sykdomshistorikk.inspektør.perioderPerHendelse()
+            perioderPerHendelse.forEach { (hendelseId, perioder) ->
+                check(!perioder.overlapper()) {
+                    "Sykdomshistorikk inneholder overlappende perioder fra hendelse $hendelseId"
+                }
             }
         }
     }

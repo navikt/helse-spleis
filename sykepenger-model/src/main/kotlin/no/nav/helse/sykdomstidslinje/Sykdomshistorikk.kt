@@ -99,6 +99,7 @@ internal class Sykdomshistorikk private constructor(
             internal fun List<Element>.nyesteId(): UUID = (this.firstOrNull() ?: empty).id
 
             internal fun List<Element>.uhåndtertSykdomstidslinje(hendelse: SykdomstidslinjeHendelse) : Sykdomstidslinje? {
+                if (hendelse.sykdomstidslinje().periode() == null) return null // tom sykdomstidslinje
                 val tidligere = filter { it.harHåndtert(hendelse) }.takeUnless { it.isEmpty() } ?: return hendelse.sykdomstidslinje() // Første gang vi ser hendelsen
                 val alleredeHåndtertSykdomstidslinje = tidligere.fold(Sykdomstidslinje()) { tidligereHåndtert, element ->
                     tidligereHåndtert + element.hendelseSykdomstidslinje
