@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.desember
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
@@ -16,16 +17,16 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.UKJ
 import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.utbetalingslinjer.Endringskode.*
+import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
+import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.OVERFØRT
@@ -144,6 +145,41 @@ internal class UtbetalingTest {
             assertEquals(NY, linje.endringskode)
             assertEquals(4, linje.delytelseId)
             assertEquals(3, linje.refDelytelseId)
+        }
+    }
+    @Test
+    fun `ny utbetaling slutter på helg`() {
+        val tidslinje = tidslinjeOf(16.AP, 5.NAV, startDato = 1.januar)
+        beregnUtbetalinger(tidslinje)
+        val utbetaling1 = opprettUtbetaling(tidslinje)
+
+        val tidslinjeNy = tidslinjeOf(16.AP, 5.NAV, 4.NAV, 1.FRI, 2.NAV, 5.NAV, startDato = 1.januar)
+        beregnUtbetalinger(tidslinjeNy)
+        val utbetaling2 = opprettUtbetaling(tidslinjeNy, utbetaling1, sisteDato = 28.januar)
+
+        val utbetaling1Inspektør = utbetaling1.inspektør
+        val utbetaling2Inspektør = utbetaling2.inspektør
+
+        assertEquals("PPPPPPP PPPPPPP PPNNNHH", utbetaling1Inspektør.utbetalingstidslinje.toString())
+        assertEquals(1.januar til 21.januar, utbetaling1Inspektør.utbetalingstidslinje.periode())
+        assertEquals(1, utbetaling1Inspektør.arbeidsgiverOppdrag.size)
+        utbetaling1Inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(17.januar til 19.januar, linje.fom til linje.tom)
+            assertEquals(NY, linje.endringskode)
+            assertEquals(1, linje.delytelseId)
+            assertNull(linje.refDelytelseId)
+        }
+
+        assertEquals(utbetaling1Inspektør.korrelasjonsId, utbetaling2Inspektør.korrelasjonsId)
+        assertEquals(utbetaling1Inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), utbetaling2Inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNFHH", utbetaling2Inspektør.utbetalingstidslinje.toString())
+        assertEquals(1.januar til 28.januar, utbetaling2Inspektør.utbetalingstidslinje.periode())
+        assertEquals(1, utbetaling2Inspektør.arbeidsgiverOppdrag.size)
+        utbetaling2Inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(17.januar til 25.januar, linje.fom til linje.tom)
+            assertEquals(ENDR, linje.endringskode)
+            assertEquals(1, linje.delytelseId)
+            assertNull(linje.refDelytelseId)
         }
     }
 

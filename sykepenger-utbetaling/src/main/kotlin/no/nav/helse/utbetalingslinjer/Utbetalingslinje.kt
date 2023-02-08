@@ -77,7 +77,7 @@ class Utbetalingslinje(
 
         private fun sisteLinjeSkalIkkeTrekkesIHelg(linjer: List<Utbetalingslinje>): List<Utbetalingslinje> {
             val utbetalingslinje = linjer.dropLast(1)
-            val siste = linjer.takeLast(1).map { it.kuttHelg() }
+            val siste = linjer.takeLast(1).mapNotNull { it.kuttHelg() }
             return utbetalingslinje + siste
         }
 
@@ -242,10 +242,10 @@ class Utbetalingslinje(
 
     fun erOpphør() = datoStatusFom != null
 
-    internal fun kuttHelg(): Utbetalingslinje {
+    internal fun kuttHelg(): Utbetalingslinje? {
         return when (tom.dayOfWeek) {
-            DayOfWeek.SUNDAY -> kopier(tom = tom.minusDays(2))
-            DayOfWeek.SATURDAY -> kopier(tom = tom.forrigeDag)
+            DayOfWeek.SUNDAY -> tom.minusDays(2).takeUnless { it < fom}?.let { nyTom -> kopier(tom = nyTom) }
+            DayOfWeek.SATURDAY -> tom.forrigeDag.takeUnless { it < fom}?.let { nyTom -> kopier(tom = nyTom) }
             else -> this
         }
     }
