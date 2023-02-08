@@ -129,6 +129,7 @@ internal fun AbstractEndToEndTest.søknad(
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
     fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
     utenlandskSykmelding: Boolean = false,
+    sendTilGosys: Boolean = false,
     korrigerer: UUID? = null,
     opprinneligSendt: LocalDate? = null,
     merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
@@ -141,6 +142,7 @@ internal fun AbstractEndToEndTest.søknad(
     sykmeldingSkrevet = sykmeldingSkrevet ?: Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay(),
     korrigerer = korrigerer,
     utenlandskSykmelding = utenlandskSykmelding,
+    sendTilGosys = sendTilGosys,
     opprinneligSendt = opprinneligSendt,
     merknaderFraSykmelding = merknaderFraSykmelding,
     permittert = permittert

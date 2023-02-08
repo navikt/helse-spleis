@@ -424,6 +424,7 @@ internal fun AbstractEndToEndTest.håndterSøknad(
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
     korrigerer: UUID? = null,
     utenlandskSykmelding: Boolean = false,
+    sendTilGosys: Boolean = false,
     opprinneligSendt: LocalDate? = null,
     merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
     permittert: Boolean = false
@@ -439,6 +440,7 @@ internal fun AbstractEndToEndTest.håndterSøknad(
             fnr = fnr,
             korrigerer = korrigerer,
             utenlandskSykmelding = utenlandskSykmelding,
+            sendTilGosys = sendTilGosys,
             opprinneligSendt = opprinneligSendt,
             merknaderFraSykmelding = merknaderFraSykmelding,
             permittert = permittert

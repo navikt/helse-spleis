@@ -41,6 +41,7 @@ class Søknad(
     private val korrigerer: UUID?,
     private val opprinneligSendt: LocalDateTime?,
     private val utenlandskSykmelding: Boolean,
+    private val sendTilGosys: Boolean,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class, aktivitetslogg, personopplysninger) {
 
@@ -77,6 +78,7 @@ class Søknad(
         merknaderFraSykmelding.forEach { it.valider(this) }
         if (sykdomstidslinje.any { it is Dag.ForeldetSykedag }) varsel(RV_SØ_2)
         if (utenlandskSykmelding) funksjonellFeil(RV_SØ_29)
+        if (sendTilGosys) funksjonellFeil(RV_SØ_30)
         return this
     }
 
@@ -93,6 +95,11 @@ class Søknad(
 
     internal fun utenlandskSykmelding(): Boolean {
         if (utenlandskSykmelding) return true
+        return false
+    }
+
+    internal fun sendtTilGosys(): Boolean {
+        if (sendTilGosys) return true
         return false
     }
 

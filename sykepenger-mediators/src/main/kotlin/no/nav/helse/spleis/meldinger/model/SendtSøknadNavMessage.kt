@@ -48,6 +48,7 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, private val builder: 
             }
             builder.arbeidsgjennopptatt(packet["arbeidGjenopptatt"].asOptionalLocalDate())
             builder.utenlandskSykmelding(packet["utenlandskSykmelding"].asBoolean(false))
+            builder.sendTilGosys(packet["sendTilGosys"].asBoolean(false))
         }
     }
 }

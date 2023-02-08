@@ -99,6 +99,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_19
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_20
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_28
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_29
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_30
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_16
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
@@ -608,6 +609,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterOverlappendeSøknadRevurdering(søknad: Søknad) {
         if (periode.delvisOverlappMed(søknad.periode())) return søknad.funksjonellFeil(`Mottatt søknad som delvis overlapper`)
+        if (søknad.sendtTilGosys()) return søknad.funksjonellFeil(RV_SØ_30)
         if (søknad.utenlandskSykmelding()) return søknad.funksjonellFeil(RV_SØ_29)
         if (søknad.harArbeidsdager()) søknad.varsel(RV_SØ_15)
         else {

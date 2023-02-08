@@ -93,6 +93,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         permittert: Boolean = false,
         korrigerer: UUID? = null,
         utenlandskSykmelding: Boolean = false,
+        sendTilGosys: Boolean = false,
         opprinneligSendt: LocalDate? = null,
         aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
     ): Søknad {
@@ -112,7 +113,8 @@ internal class ArbeidsgiverHendelsefabrikk(
             korrigerer = korrigerer,
             opprinneligSendt = opprinneligSendt?.atStartOfDay(),
             aktivitetslogg = aktivitetslogg,
-            utenlandskSykmelding = utenlandskSykmelding
+            utenlandskSykmelding = utenlandskSykmelding,
+            sendTilGosys = sendTilGosys
         ).apply {
             søknader.add(this)
         }

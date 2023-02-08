@@ -113,7 +113,8 @@ abstract class AbstractObservableTest {
         sykmeldingSkrevet = sykmeldingSkrevet,
         korrigerer = null,
         opprinneligSendt = null,
-        utenlandskSykmelding = false
+        utenlandskSykmelding = false,
+        sendTilGosys = false,
     )
 
     protected fun inntektsmelding(
