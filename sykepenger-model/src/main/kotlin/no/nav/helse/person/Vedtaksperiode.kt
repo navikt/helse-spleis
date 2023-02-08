@@ -994,10 +994,8 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterAvsluttetUtenUtbetaling(hendelse: IAktivitetslogg) {
         if (utbetalinger.harTidligereUtbetaling()) return
-        if (!harNødvendigOpplysningerFraArbeidsgiver(hendelse)) return sikkerlogg.info("Vedtaksperiode {} i tilstand {} er regnet som AUU, og har ikke nødvendige opplysninger fra AG",
-            keyValue("vedtaksperiodeId", id), keyValue("tilstand", tilstand.type))
-        return sikkerlogg.info("Vedtaksperiode {} i tilstand {} er regnet som AUU, og har nødvendige opplysninger fra AG",
-            keyValue("vedtaksperiodeId", id), keyValue("tilstand", tilstand.type))
+        if (!harNødvendigOpplysningerFraArbeidsgiver(hendelse)) return this.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
+        return this.tilstand(hendelse, AvventerBlokkerendePeriode)
     }
 
     // Gang of four State pattern
