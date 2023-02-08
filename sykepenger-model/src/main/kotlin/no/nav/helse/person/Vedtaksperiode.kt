@@ -2151,6 +2151,8 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (!vedtaksperiode.forventerInntekt()) return
+            if (påminnelse.skalReberegnes())
+                return vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
             if (vedtaksperiode.vilkårsgrunnlag == null) return påminnelse.info("AUU-periode som potensielt burde omgjøres og mangler vilkårsgrunnlag")
             påminnelse.info("AUU-periode som potensielt burde omgjøres og har vilkårsgrunnlag")
         }
