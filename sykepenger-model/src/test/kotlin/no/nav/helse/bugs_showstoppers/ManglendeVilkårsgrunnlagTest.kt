@@ -36,11 +36,11 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
 
     @Test
     fun `inntektsmelding avslutter to korte perioder og flytter nav-perioden uten å utføre vilkårsprøving`() {
-        håndterSykmelding(Sykmeldingsperiode(9.januar, 15.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(9.januar, 15.januar))
         håndterSøknad(Sykdom(9.januar, 15.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(19.januar, 26.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(19.januar, 26.januar))
         håndterSøknad(Sykdom(19.januar, 26.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(29.januar, 2.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 2.februar))
         håndterSøknad(Sykdom(29.januar, 2.februar, 100.prosent))
         // inntektsmeldingen lukker de to korte periodene og gjør samtidig at
         // nav-perioden går fra AvventerInntektsmeldingUferdigForlengelse til AvventerUferdigForlengelse.
@@ -71,15 +71,15 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
 
     @Test
     fun `inntektsmelding drar periode tilbake og lager tilstøtende`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar))
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDate.EPOCH.atStartOfDay())
 
-        håndterSykmelding(Sykmeldingsperiode(26.januar, 2.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(26.januar, 2.februar))
         håndterSøknad(Sykdom(26.januar, 2.februar, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, besvart = LocalDate.EPOCH.atStartOfDay())
 
-        håndterSykmelding(Sykmeldingsperiode(5.februar, 21.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(5.februar, 21.februar))
         håndterSøknad(Sykdom(5.februar, 21.februar, 100.prosent))
         håndterUtbetalingshistorikk(3.vedtaksperiode, besvart = LocalDate.EPOCH.atStartOfDay())
 

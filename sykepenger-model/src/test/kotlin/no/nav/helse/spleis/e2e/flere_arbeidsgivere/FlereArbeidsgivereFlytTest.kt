@@ -69,14 +69,14 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `En periode i AvventerTidligerEllerOverlappendePerioder for hver arbeidsgiver - kun en periode skal gå videre`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
 
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a1)
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a1)
 
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a2)
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a2)
 
@@ -94,8 +94,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `To overlappende vedtaksperioder for forskjellige arbeidsgivere - skal ikke gå videre uten at begge har IM og søknad`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
@@ -113,12 +113,12 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     fun `Periode i AUU for a2 hensyntas på utbetalingen til a1`() {
         nyeVedtak(1.januar, 31.januar, a1, a2, inntekt = 40000.månedlig)
         forlengVedtak(1.februar, 28.februar, a1)
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 10.mars, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 10.mars), orgnummer = a2)
         håndterSøknad(Sykdom(1.mars, 10.mars, 100.prosent), orgnummer = a2)
         håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
 
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 10.mars, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 10.mars), orgnummer = a1)
         håndterSøknad(Sykdom(1.mars, 10.mars, 100.prosent), orgnummer = a1)
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
 
@@ -133,7 +133,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     fun `flere AG - kort periode har gap på arbeidsgivernivå men er sammenhengende på personnivå - kort periode`() {
         nyeVedtak(1.januar, 31.januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1)
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 10.mars, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 10.mars), orgnummer = a2)
         håndterSøknad(Sykdom(1.mars, 10.mars, 100.prosent), orgnummer = a2)
         håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
@@ -143,14 +143,14 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     fun `flere AG - periode har gap på arbeidsgivernivå men er sammenhengende på personnivå - sender feilaktig flere perioder til behandling`() {
         nyeVedtak(1.januar, 31.januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a2)
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a2)
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a2)
 
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 38.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a1)
         håndterSøknad(Sykdom(1.mars, 31.mars, 38.prosent), orgnummer = a1)
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
 
@@ -170,8 +170,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `To overlappende vedtaksperioder med en forlengelse - vedtaksperiode for ag2 dytter vedtaksperiode for ag1 videre`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
@@ -192,9 +192,9 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `drawio -- MANGLER SØKNAD`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a2)
 
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
         assertEquals(emptyList<Periode>(), inspektør(a1).sykmeldingsperioder())
@@ -212,15 +212,15 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `drawio -- ULIK LENGDE PÅ SYKEFRAVÆR`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(5.januar, 5.februar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(5.januar, 5.februar), orgnummer = a2)
         assertEquals(listOf(1.januar til 31.januar), inspektør(a1).sykmeldingsperioder())
         assertEquals(listOf(5.januar til 5.februar), inspektør(a2).sykmeldingsperioder())
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         assertEquals(emptyList<Periode>(), inspektør(a1).sykmeldingsperioder())
 
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), orgnummer = a1)
         assertEquals(listOf(1.februar til 28.februar), inspektør(a1).sykmeldingsperioder())
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
@@ -235,7 +235,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET, a1)
 
-        håndterSykmelding(Sykmeldingsperiode(6.februar, 26.februar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(6.februar, 26.februar), orgnummer = a2)
         håndterSøknad(Sykdom(6.februar, 26.februar, 100.prosent), orgnummer = a2)
 
         utbetalPeriodeEtterVilkårsprøving(1.vedtaksperiode, a2)
@@ -254,8 +254,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `drawio -- BURDE BLOKKERE PGA MANGLENDE IM`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
@@ -277,10 +277,10 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `drawio -- PERIODE HOS AG1 STREKKER SEG OVER TO PERIODER HOS AG2 - Må vente på alle IM`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
 
-        håndterSykmelding(Sykmeldingsperiode(2.januar, 18.januar, 100.prosent), orgnummer = a2)
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 30.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(2.januar, 18.januar), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 30.januar), orgnummer = a2)
 
         håndterSøknad(Sykdom(2.januar, 18.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(20.januar, 30.januar, 100.prosent), orgnummer = a2)
@@ -320,9 +320,9 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `Skal vente på inntektsmelding på gap-perioder selv om skjæringstidspunktet er det samme`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar, 100.prosent), orgnummer = a2)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), orgnummer = a2)
 
         håndterSøknad(Sykdom(1.januar, 18.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -338,9 +338,9 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `drawio -- Må vente på alle IM (forlengelse)`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(18.januar, 17.februar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(18.januar, 17.februar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(18.januar, 17.februar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(18.januar, 17.februar), orgnummer = a2)
 
         håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent), orgnummer = a1)
 
@@ -361,9 +361,9 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `drawio -- Må vente på alle IM (gap)`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 22.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(25.januar, 17.februar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(25.januar, 17.februar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 22.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(25.januar, 17.februar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(25.januar, 17.februar), orgnummer = a2)
 
         håndterSøknad(Sykdom(1.januar, 22.januar, 100.prosent), orgnummer = a1)
 
@@ -399,11 +399,11 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `Kort periode skal ikke blokkeres av mangelende søknad`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), orgnummer = a2)
 
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar), orgnummer = a2)
 
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a2)
@@ -419,7 +419,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     fun `En arbeidsgiver uten sykdom, blir syk i forlengelsen - skal vente på inntektsmelding`() {
         val periode1 = 1.januar(2021) til 31.januar(2021)
         val periode2 = 1.februar(2021) til 28.februar(2021)
-        håndterSykmelding(Sykmeldingsperiode(periode1.start, periode1.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(periode1.start, periode1.endInclusive), orgnummer = a1)
         håndterSøknad(Sykdom(periode1.start, periode1.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterInntektsmelding(
@@ -455,8 +455,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a1)
 
 
-        håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive), orgnummer = a2)
         håndterSøknad(Sykdom(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a2)
 
@@ -473,7 +473,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     fun `En arbeidsgiver uten sykdom, blir syk i forlengelsen - skal vente på inntektsmelding selv om saksbehandler har overstyrt ghostinntekten`() {
         val periode1 = 1.januar til 31.januar
         val periode2 = 1.februar til 28.februar
-        håndterSykmelding(Sykmeldingsperiode(periode1.start, periode1.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(periode1.start, periode1.endInclusive), orgnummer = a1)
         håndterSøknad(Sykdom(periode1.start, periode1.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterInntektsmelding(
@@ -512,8 +512,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a1)
 
 
-        håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive), orgnummer = a2)
         håndterSøknad(Sykdom(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a2)
 
@@ -531,11 +531,11 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         val periode1 = 31.januar til 20.februar
         val periode2 = 1.februar til 17.februar
         val periode3 = 18.februar til 25.februar
-        håndterSykmelding(Sykmeldingsperiode(periode1.start, periode1.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(periode1.start, periode1.endInclusive), orgnummer = a1)
         håndterSøknad(Sykdom(periode1.start, periode1.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
 
-        håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive), orgnummer = a2)
         håndterSøknad(Sykdom(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a2)
 
         håndterInntektsmelding(
@@ -548,7 +548,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             førsteFraværsdag = 1.februar,
             orgnummer = a2
         )
-        håndterSykmelding(Sykmeldingsperiode(periode3.start, periode3.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(periode3.start, periode3.endInclusive), orgnummer = a2)
         håndterSøknad(Sykdom(periode3.start, periode3.endInclusive, 100.prosent), orgnummer = a2)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
@@ -559,11 +559,11 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     @Disabled
     @Test
     fun `forlengelse av sykdom hos AG2 hvor sykdom startet hos AG1 en annen mnd enn skjæringstidspunkt, vedtaksperiode 2 for AG2 skal ikke vente på IM`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a2)
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a2)
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
 
@@ -580,8 +580,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `kort periode hos annen arbeidsgiver skal ikke blokkere videre behandling pga manglende IM`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
 
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
@@ -594,7 +594,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `kort periode hos annen arbeidsgiver vi tidligere har utbetalt til skal ikke blokkere videre behandling pga manglende IM`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a2)
@@ -603,8 +603,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         utbetalPeriode(1.vedtaksperiode, a2, 1.januar)
 
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 16.mars, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 16.mars), orgnummer = a2)
 
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
@@ -618,8 +618,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `inntektsmelding for arbeidsgiver 2 har ikke full refusjon - kan gå videre til utbetaling`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
@@ -642,8 +642,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `gjenopptaBehandling poker ikke neste arbeidsgiver til AvventerHistorikk før den blir kastet ut`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
@@ -674,8 +674,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `bruker har fyllt inn andre inntektskilder i søknad hvor vi har sykmeldingsperioder for begge arbeidsgivere`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
         håndterSøknad(
             Sykdom(1.januar, 31.januar, 100.prosent),
             andreInntektskilder = true,
@@ -694,7 +694,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `bruker har satt andre inntektskilder men vi kjenner ikke til sykdom for mer enn en arbeidsgiver`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(
             Sykdom(1.januar, 31.januar, 100.prosent),
             andreInntektskilder = true,
@@ -707,9 +707,9 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `Gammel sykemeldingsperiode skal ikke blokkere videre behandling av en senere søknad`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
 
-        håndterSykmelding(Sykmeldingsperiode(5.februar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(5.februar, 28.februar), orgnummer = a2)
         håndterSøknad(Sykdom(5.februar, 28.februar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(5.februar til 20.februar), orgnummer = a2)
 
@@ -756,13 +756,13 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     fun `sykmelding og søknad i forlengelsen til a1 kommer før sykmelding til a2 - skal ikke ha flere perioder i AvventerGodkjenning`() {
         nyeVedtak(1.januar, 31.januar, a2, a1)
 
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), orgnummer = a1)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         assertTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, a1)
 
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), orgnummer = a2)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
 
         // arbeidsgiveren spleis hører om først er den som blir valgt først til å gå videre i gjenopptaBehandling dersom periodenes tom er lik

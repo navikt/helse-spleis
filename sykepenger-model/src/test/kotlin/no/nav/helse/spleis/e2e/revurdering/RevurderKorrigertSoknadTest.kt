@@ -84,7 +84,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
     @Test
     fun `Avsluttet periode får en overlappende søknad som strekker seg etter vedtaksperiode - skal ikke sette i gang revurdering`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterSykmelding(Sykmeldingsperiode(15.januar, 15.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(15.januar, 15.februar))
         håndterSøknad(Sykdom(15.januar, 15.februar, 100.prosent))
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
@@ -95,7 +95,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
     @Test
     fun `Avsluttet periode får en overlappende søknad som strekker seg før vedtaksperiode - skal ikke sette i gang revurdering`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterSykmelding(Sykmeldingsperiode(15.desember(2017), 15.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(15.desember(2017), 15.januar))
         håndterSøknad(Sykdom(15.desember(2017), 15.januar, 100.prosent))
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
         assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
@@ -105,7 +105,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
     @Test
     fun `Avsluttet periode får en overlappende søknad som starter etter og slutter før vedtaksperiode - skal sette i gang revurdering`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterSykmelding(Sykmeldingsperiode(17.januar, 25.januar, 50.prosent))
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 25.januar))
         håndterSøknad(Sykdom(17.januar, 25.januar, 50.prosent))
 
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
@@ -187,7 +187,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
     fun `Avsluttet forlengelse får en overlappende søknad - skal sette i gang revurdering`() {
         nyttVedtak(1.januar, 31.januar, 50.prosent)
         forlengVedtak(1.februar, 28.februar, 50.prosent)
-        håndterSykmelding(Sykmeldingsperiode(5.februar, 20.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(5.februar, 20.februar))
         håndterSøknad(Sykdom(5.februar, 20.februar, 100.prosent))
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
@@ -208,7 +208,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
     fun `Overlappende søknad treffer førstegangsbehandling og forlengelse`() {
         nyttVedtak(1.januar, 31.januar, 50.prosent)
         forlengVedtak(1.februar, 28.februar, 50.prosent)
-        håndterSykmelding(Sykmeldingsperiode(15.januar, 15.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(15.januar, 15.februar))
         håndterSøknad(Sykdom(15.januar, 15.februar, 100.prosent))
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
@@ -223,7 +223,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar, 50.prosent)
         forlengVedtak(1.februar, 28.februar, 50.prosent)
 
-        håndterSykmelding(Sykmeldingsperiode(15.februar, 15.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(15.februar, 15.mars))
         håndterSøknad(Sykdom(15.februar, 15.mars, 100.prosent))
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
@@ -237,7 +237,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
     fun `Avsluttet periode med forlengelse får en overlappende søknad som starter før`() {
         nyttVedtak(1.januar, 31.januar, 50.prosent)
         forlengVedtak(1.februar, 28.februar, 50.prosent)
-        håndterSykmelding(Sykmeldingsperiode(15.desember(2017), 15.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(15.desember(2017), 15.januar))
         håndterSøknad(Sykdom(15.desember(2017), 15.januar, 100.prosent))
 
         assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
@@ -349,7 +349,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
     @Test
     fun `Korrigerende søknad i AvventerVilkårsprøving - setter i gang en overstyring av behandlingen`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar))
         håndterSøknad(Sykdom(1.februar, 16.februar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
 
@@ -373,7 +373,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
     @Test
     fun `Korrigerende søknad for førstegangsbehandling med forlengelse i avventerGodkjenning - setter i gang en revurdering`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

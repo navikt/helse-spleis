@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test
 internal class FriskmeldtE2ETest : AbstractEndToEndTest() {
     @Test
     fun `friskmeldt førstegangsbehandling`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(1.januar, 31.januar))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
@@ -38,7 +38,7 @@ internal class FriskmeldtE2ETest : AbstractEndToEndTest() {
     fun `friskmeldt forlengelse av kort periode`() {
         nyPeriode(1.januar til 16.januar)
         håndterUtbetalingshistorikk(1.vedtaksperiode)
-        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar))
         håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), Arbeid(17.januar, 31.januar))
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
     }
@@ -54,7 +54,7 @@ internal class FriskmeldtE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar))
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent), Arbeid(21.januar, 31.januar))
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
     }
@@ -62,7 +62,7 @@ internal class FriskmeldtE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Forlengelse med kun helg og friskmelding`() {
         nyttVedtak(1.januar, 19.januar)
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar))
         håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent), Arbeid(22.januar, 31.januar))
         assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
     }

@@ -49,7 +49,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     @Test
     fun `første fraværsdag oppgitt til dagen etter arbeidsgiverperioden over helg med en dags gap`(){
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(4.januar, 31.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(4.januar, 31.januar))
             håndterSøknad(Sykdom(4.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(4.januar til 19.januar), førsteFraværsdag = 23.januar)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -62,7 +62,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     @Test
     fun `første fraværsdag oppgitt med en dags gap til arbeidsgiverperioden`(){
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 18.januar)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -104,7 +104,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     fun `Duplikat inntektsmelding`() {
         a1 {
             val arbeidsgiverperiode = listOf(1.januar til 16.januar)
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             val inntektsmeldingId = håndterInntektsmelding(arbeidsgiverperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -115,7 +115,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(1.januar til 31.januar, INNTEKT)
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
-            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
             håndterInntektsmelding(
                 id = inntektsmeldingId,
@@ -129,7 +129,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     @Test
     fun `bruker først refusjonsopplysning også i gråsonen`(){
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -166,7 +166,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     @Test
     fun `Inntektsmelding uten refusjonsopplysninger tolkes som ingen refusjon`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             assertEquals(0, inspektør.arbeidsgiver.inspektør.refusjonshistorikk.inspektør.antall)
             assertEquals(emptyList<Refusjonsopplysning>(), inspektør.refusjonsopplysningerFraRefusjonshistorikk(1.januar).inspektør.refusjonsopplysninger)
@@ -177,7 +177,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     }
 
     private fun Periode.avsluttUtenUtbetaling() : UUID {
-        håndterSykmelding(Sykmeldingsperiode(start, endInclusive, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(start, endInclusive))
         håndterSøknad(Sykdom(start, endInclusive, 100.prosent))
         val vedtaksperiodeId = observatør.sisteVedtaksperiodeId(a1)
         observatør.tilstandsendringer.getValue(vedtaksperiodeId).last().takeUnless { it == AVSLUTTET_UTEN_UTBETALING } ?: return vedtaksperiodeId

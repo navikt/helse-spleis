@@ -36,13 +36,13 @@ internal class TestPersonTest : AbstractDslTest() {
 
     @Test
     fun `kan sende sykmelding til arbeidsgiver`() {
-        a1.håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        a1.håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         assertEquals(1, a1.inspektør.sykmeldingsperioder().size)
     }
 
     @Test
     fun `kan teste utenfor arbeidsgiver-kontekst`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), INNTEKT)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -67,7 +67,7 @@ internal class TestPersonTest : AbstractDslTest() {
     @Test
     fun `kan sende sykmelding via testblokk`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         }
         assertEquals(1, a1.inspektør.sykmeldingsperioder().size)
     }
@@ -75,7 +75,7 @@ internal class TestPersonTest : AbstractDslTest() {
     @Test
     fun `kan sende utbetale`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
             håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), INNTEKT)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -101,11 +101,11 @@ internal class TestPersonTest : AbstractDslTest() {
     @Test
     fun `flere arbeidsgivere`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
         }
         a2 {
-            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
         }
         a1 {
@@ -131,7 +131,7 @@ internal class TestPersonTest : AbstractDslTest() {
 
     @Test
     fun `ingen historie med inntektsmelding først`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), INNTEKT)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)

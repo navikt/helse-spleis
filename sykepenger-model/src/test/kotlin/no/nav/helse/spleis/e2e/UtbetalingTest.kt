@@ -24,7 +24,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Utbetaling endret får rett organisasjonsnummer ved overlappende sykemelding`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -37,8 +37,8 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         )
         håndterSimulering(1.vedtaksperiode)
 
-        håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
@@ -47,7 +47,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `grad rundes av`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent, 80.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -60,10 +60,10 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `første periode er kun arbeidsgiverperiode og ferie`() {
-        håndterSykmelding(Sykmeldingsperiode(4.januar, 22.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(4.januar, 22.januar))
         håndterSøknad(Sykdom(4.januar, 22.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(20.januar, 22.januar))
         håndterInntektsmelding(listOf(4.januar til 19.januar))
-        håndterSykmelding(Sykmeldingsperiode(23.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(23.januar, 31.januar))
         håndterSøknad(Sykdom(23.januar, 31.januar, 100.prosent))
 
         assertEquals(4.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))

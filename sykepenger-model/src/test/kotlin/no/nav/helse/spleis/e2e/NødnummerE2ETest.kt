@@ -22,7 +22,7 @@ internal class NødnummerE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `slår ikke ut på tidligere inntektsopplysning med nødnummer`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.februar, 28.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.februar til 16.februar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -34,7 +34,7 @@ internal class NødnummerE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `slår ikke ut på tidligere utbetaling på nødnummer`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.februar, 28.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.februar til 16.februar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -45,7 +45,7 @@ internal class NødnummerE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `slår ikke ut på inntektsopplysning med nødnummer`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.februar, 28.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar), førsteFraværsdag = 1.februar)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -58,7 +58,7 @@ internal class NødnummerE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `slår ikke ut på utbetaling med nødnummer innenfor samme agp`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.februar, 28.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar), førsteFraværsdag = 1.februar)
         håndterVilkårsgrunnlag(1.vedtaksperiode)

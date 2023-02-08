@@ -24,14 +24,14 @@ internal class RutingAvInntektsmeldingOppgaverTest : AbstractEndToEndTest() {
 
     @Test
     fun `dersom vi mottar inntektsmelding før søknad skal det sendes et utsett_oppgave-event`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertEquals(listOf(inntektsmeldingId), observatør.utsettOppgaveEventer().map { it.hendelse })
     }
 
     @Test
     fun `dersom inntektsmeldingen ikke treffer noen sykmeldinger skal det ikke sendes ut et utsett_oppgave-event`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterInntektsmelding(listOf(1.februar til 16.februar))
         assertEquals(emptyList<UUID>(), observatør.utsettOppgaveEventer().map { it.hendelse })
     }
@@ -39,7 +39,7 @@ internal class RutingAvInntektsmeldingOppgaverTest : AbstractEndToEndTest() {
     @Test
     fun `dersom inntektsmeldingen kommer etter søknad skal det ikke sendes ut et utsett_oppgave-event`() {
         // Utsettelse av oppgaveopprettelse blir da håndtert av vedtaksperiode_endret-event
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertEquals(emptyList<UUID>(), observatør.utsettOppgaveEventer().map { it.hendelse })
@@ -53,7 +53,7 @@ internal class RutingAvInntektsmeldingOppgaverTest : AbstractEndToEndTest() {
 
     @Test
     fun `dersom vi mottar inntektsmelding før søknad og søknaden feiler skal det opprettes oppgave for både søknad og inntektsmelding`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
         val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = true)
         assertEquals(listOf(søknadId, inntektsmeldingId), observatør.opprettOppgaveEventer().flatMap { it.hendelser })
@@ -61,12 +61,12 @@ internal class RutingAvInntektsmeldingOppgaverTest : AbstractEndToEndTest() {
 
     @Test
     fun `inntektsmelding replay av forkastede perioder skal kun be om replay for relevant vedtaksperiode`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2017), 31.januar(2017), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2017), 31.januar(2017)))
         val søknadId1 = håndterSøknad(Sykdom(1.januar(2017), 31.januar(2017), 100.prosent))
         val inntektsmeldingId1 = håndterInntektsmelding(listOf(1.januar(2017) til 16.januar(2017)))
         forkastAlle(hendelselogg)
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         val inntektsmeldingId2 = håndterInntektsmelding(listOf(1.januar til 16.januar))
         val søknadId2 = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = true)
         assertEquals(listOf(søknadId1, inntektsmeldingId1, søknadId2, inntektsmeldingId2), observatør.opprettOppgaveEventer().flatMap { it.hendelser })
@@ -74,7 +74,7 @@ internal class RutingAvInntektsmeldingOppgaverTest : AbstractEndToEndTest() {
 
     @Test
     fun `dersom vi har en nærliggende utbetaling og vi mottar inntektsmelding før søknad og søknaden feiler - skal det opprettes oppgave i speilkøen i gosys`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -83,7 +83,7 @@ internal class RutingAvInntektsmeldingOppgaverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterSykmelding(Sykmeldingsperiode(7.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(7.februar, 28.februar))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 7.februar)
         val søknadId = håndterSøknad(Sykdom(7.februar, 28.februar, 100.prosent), andreInntektskilder = true)
 

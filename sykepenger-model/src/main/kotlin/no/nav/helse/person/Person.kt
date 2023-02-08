@@ -3,8 +3,11 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
+import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Infotrygdendring
@@ -30,8 +33,8 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.avklarSykepengegrunnlag
+import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
@@ -58,14 +61,11 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AG_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.builders.VedtakFattetBuilder
-import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
@@ -144,7 +144,13 @@ class Person private constructor(
 
     private val observers = mutableListOf<PersonObserver>()
 
-    fun håndter(sykmelding: Sykmelding) = håndter(sykmelding, "sykmelding")
+    fun håndter(sykmelding: Sykmelding) {
+        registrer(sykmelding, "Behandler sykmelding")
+        tidligereBehandlinger(sykmelding, sykmelding.periode())
+        val arbeidsgiver = finnEllerOpprettArbeidsgiver(sykmelding)
+        arbeidsgiver.håndter(sykmelding)
+        håndterGjenoppta(sykmelding)
+    }
 
     fun håndter(søknad: Søknad) = håndter(søknad, "søknad") { søknad.forUng(alder) }
 
@@ -162,22 +168,26 @@ class Person private constructor(
         before: () -> Any = { }
     ) {
         registrer(hendelse, "Behandler $hendelsesmelding")
-        val cutoff = hendelse.periode().start.minusMonths(6)
-        val andreBehandledeVedtaksperioder = tidligereBehandlinger.flatMap { it.vedtaksperioderEtter(cutoff) }
-        if (andreBehandledeVedtaksperioder.isNotEmpty()) {
-             hendelse.funksjonellFeil(Varselkode.RV_AN_5)
-            val msg = andreBehandledeVedtaksperioder.map {
-                "vedtaksperiode(${it.periode()})"
-            }
-            sikkerLogg.info("""hendelse: ${hendelse::class.java.simpleName} (${hendelse.periode()}) kaster ut personen aktørid: $aktørId fnr: $personidentifikator 
-                | tidligere behandlede identer: ${tidligereBehandlinger.map { it.personidentifikator }}
-                | tidligere behandlede perioder: ${msg.joinToString { it }}
-                | cutoff: $cutoff""".trimMargin())
-        }
+        tidligereBehandlinger(hendelse, hendelse.periode())
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
         before()
         hendelse.fortsettÅBehandle(arbeidsgiver)
         håndterGjenoppta(hendelse)
+    }
+
+    private fun tidligereBehandlinger(hendelse: ArbeidstakerHendelse, periode: Periode) {
+        val cutoff = periode.start.minusMonths(6)
+        val andreBehandledeVedtaksperioder = tidligereBehandlinger.flatMap { it.vedtaksperioderEtter(cutoff) }
+        if (andreBehandledeVedtaksperioder.isNotEmpty()) {
+            hendelse.funksjonellFeil(Varselkode.RV_AN_5)
+            val msg = andreBehandledeVedtaksperioder.map {
+                "vedtaksperiode(${it.periode()})"
+            }
+            sikkerLogg.info("""hendelse: ${hendelse::class.java.simpleName} ($periode) kaster ut personen aktørid: $aktørId fnr: $personidentifikator 
+                | tidligere behandlede identer: ${tidligereBehandlinger.map { it.personidentifikator }}
+                | tidligere behandlede perioder: ${msg.joinToString { it }}
+                | cutoff: $cutoff""".trimMargin())
+        }
     }
 
     private fun vedtaksperioderEtter(dato: LocalDate) = arbeidsgivere.flatMap { it.vedtaksperioderEtter(dato) }

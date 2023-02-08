@@ -67,9 +67,8 @@ abstract class AbstractObservableTest {
 
     protected fun sykmelding(
         id: UUID = SYKMELDING_ID,
-        sykeperioder: List<Sykmeldingsperiode> = listOf(Sykmeldingsperiode(FOM, TOM, 100.prosent)),
+        sykeperioder: List<Sykmeldingsperiode> = listOf(Sykmeldingsperiode(FOM, TOM)),
         orgnummer: String = ORGNUMMER,
-        sykmeldingSkrevet: LocalDateTime = FOM.atStartOfDay(),
         fnr: String = UNG_PERSON_FNR,
         personopplysninger: Personopplysninger = Personopplysninger(
             Personidentifikator.somPersonidentifikator(fnr),
@@ -82,7 +81,6 @@ abstract class AbstractObservableTest {
         aktørId = AKTØRID,
         orgnummer = orgnummer,
         sykeperioder = sykeperioder,
-        sykmeldingSkrevet = sykmeldingSkrevet,
         personopplysninger = personopplysninger
     )
 

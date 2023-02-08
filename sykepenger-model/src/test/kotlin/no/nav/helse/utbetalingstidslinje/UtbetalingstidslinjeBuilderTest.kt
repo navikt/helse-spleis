@@ -3,8 +3,8 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
@@ -13,7 +13,6 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -528,27 +527,6 @@ internal class UtbetalingstidslinjeBuilderTest {
         }
         utbetalingstidslinje.subset(26.januar til 10.februar).forEach {
             assertNull(it.økonomi.arbeidsgiverperiode)
-        }
-    }
-
-    @Test
-    fun `utbetalingsdager med kilde Sykmelding etter arbeidsgiverperioden`() {
-        assertThrows<IllegalStateException> { undersøke(16.S + 1.S(Sykmelding::class)) }.also {
-            assertEquals("Kan ikke opprette utbetalingsdager med kilde Sykmelding: [17-01-2018 til 17-01-2018]", it.message)
-        }
-    }
-
-    @Test
-    fun `utbetalingsdager med kilde Sykmelding i arbeidsgiverperioden`() {
-        assertThrows<IllegalStateException> { undersøke(1.S(Sykmelding::class)) }.also {
-            assertEquals("Kan ikke opprette utbetalingsdager med kilde Sykmelding: [01-01-2018 til 01-01-2018]", it.message)
-        }
-    }
-
-    @Test
-    fun `utbetalingsdager med kilde Sykmelding i og etter arbeidsgiverperioden`() {
-        assertThrows<IllegalStateException> { undersøke(5.S + 5.S(Sykmelding::class) + 11.S + 5.S(Sykmelding::class) + 5.S) }.also {
-            assertEquals("Kan ikke opprette utbetalingsdager med kilde Sykmelding: [06-01-2018 til 10-01-2018, 22-01-2018 til 26-01-2018]", it.message)
         }
     }
 

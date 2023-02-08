@@ -68,11 +68,11 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
     @Test
     fun `revurdering for periode som start samme dag som en førstegangsvurdering`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = haandtverkerne)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar), orgnummer = haandtverkerne)
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = haandtverkerne)
         håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = haandtverkerne)
 
-        håndterSykmelding(Sykmeldingsperiode(17.januar, 25.januar, 100.prosent), orgnummer = haandtverkerne)
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 25.januar), orgnummer = haandtverkerne)
         håndterSøknad(Sykdom(17.januar, 25.januar, 100.prosent), orgnummer = haandtverkerne)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 20000.månedlig, orgnummer = haandtverkerne)
         håndterVilkårsgrunnlag(
@@ -98,10 +98,10 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterYtelser(2.vedtaksperiode, orgnummer = haandtverkerne)
         håndterSimulering(2.vedtaksperiode, orgnummer = haandtverkerne)
 
-        håndterSykmelding(Sykmeldingsperiode(10.januar, 16.januar, 100.prosent), orgnummer = aadvokatene)
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 16.januar), orgnummer = aadvokatene)
         håndterSøknad(Sykdom(10.januar, 16.januar, 100.prosent), orgnummer = aadvokatene)
 
-        håndterSykmelding(Sykmeldingsperiode(17.januar, 25.januar, 100.prosent), orgnummer = aadvokatene)
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 25.januar), orgnummer = aadvokatene)
         håndterSøknad(Sykdom(17.januar, 25.januar, 100.prosent), orgnummer = aadvokatene)
         håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = aadvokatene)
 
@@ -120,8 +120,8 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
     @Test
     fun `forlengelse av revurderte flere arbeidsgivere bør da virke`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = aadvokatene)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = haandtverkerne)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = aadvokatene)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = haandtverkerne)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = aadvokatene)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = haandtverkerne)
         håndterInntektsmelding(
@@ -164,8 +164,8 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = haandtverkerne)
 
         // og så forlenger vi.
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = aadvokatene)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = haandtverkerne)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), orgnummer = aadvokatene)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), orgnummer = haandtverkerne)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = aadvokatene)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = haandtverkerne)
 
@@ -262,7 +262,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         nyeVedtak(1.januar, 31.januar, haandtverkerne, aadvokatene)
         nullstillTilstandsendringer()
 
-        håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar, 100.prosent), orgnummer = haandtverkerne)
+        håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar), orgnummer = haandtverkerne)
         håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent), orgnummer = haandtverkerne)
 
         håndterOverstyrTidslinje((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = haandtverkerne)

@@ -32,10 +32,10 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
     fun `førstegangsbehadling frem til og med første periode med betaling`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(6.januar, 13.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(14.januar, 20.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 25.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar))
+        håndterSykmelding(Sykmeldingsperiode(6.januar, 13.januar))
+        håndterSykmelding(Sykmeldingsperiode(14.januar, 20.januar))
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 25.januar))
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(6.januar, 13.januar, 100.prosent))
         håndterSøknad(Sykdom(14.januar, 20.januar, 100.prosent))
@@ -49,8 +49,8 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
     fun `førstegangsbehadling etter gap`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar))
+        håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar))
 
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
@@ -63,7 +63,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
     fun `periodetype er overgang fra Infotrygd hvis foregående ble behandlet i Infotrygd`() {
         val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.januar, 26.januar, 100.prosent, 1000.daglig)
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 3.januar(2018), 1000.daglig, true))
-        håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
         assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(1.vedtaksperiode))
@@ -71,8 +71,8 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
     fun `periodetype settes til førstegangs hvis foregående ikke hadde utbetalingsdager pga lav sykdomsgrad`() {
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 10.februar, 15.prosent))
-        håndterSykmelding(Sykmeldingsperiode(11.februar, 21.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 10.februar))
+        håndterSykmelding(Sykmeldingsperiode(11.februar, 21.februar))
         håndterSøknad(Sykdom(20.januar, 10.februar, 15.prosent))
         håndterSøknad(Sykdom(11.februar, 21.februar, 100.prosent))
         håndterInntektsmelding(
@@ -87,10 +87,10 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
     fun `første periode er kun arbeidsgiverperiode og helg - før utbetaling`() {
-        håndterSykmelding(Sykmeldingsperiode(4.januar, 21.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(4.januar, 21.januar))
         håndterSøknad(Sykdom(4.januar, 21.januar, 100.prosent))
         håndterInntektsmelding(listOf(4.januar til 19.januar))
-        håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar))
         håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
         assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
         assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
@@ -98,10 +98,10 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
     fun `første periode er kun arbeidsgiverperiode og helg - etter utbetaling`() {
-        håndterSykmelding(Sykmeldingsperiode(4.januar, 21.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(4.januar, 21.januar))
         håndterSøknad(Sykdom(4.januar, 21.januar, 100.prosent))
         håndterInntektsmelding(listOf(4.januar til 19.januar))
-        håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar))
         håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
@@ -114,13 +114,13 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
     fun `periodetype for forlengelse dersom førstegangsbehandling består kun av ferie`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
         håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(11.januar, 21.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 21.januar))
         håndterSøknad(Sykdom(11.januar, 21.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(11.januar, 21.januar))
 
-        håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar))
         håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
         assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
         assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
@@ -136,7 +136,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
     fun `periodetype for forlengelse dersom førstegangsbehandling består kun av avviste dager`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
@@ -152,7 +152,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
         assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
@@ -161,7 +161,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
     fun `periodetype for forlengelse dersom førstegangsbehandling er avvist`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
@@ -177,7 +177,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
         assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
@@ -186,7 +186,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
     fun `periodetype for forlengelse dersom førstegangsbehandling er avvist og utbetalt i Infotrygd`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
@@ -202,7 +202,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
@@ -214,7 +214,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
     @Test
     fun `spleis - gap - infotrygd - spleis`() {
         nyttVedtak(1.januar, 25.januar)
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 28.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 28.mars))
         håndterSøknad(Sykdom(1.mars, 28.mars, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)
@@ -225,7 +225,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
     fun `infotrygd - gap - spleis`() {
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 20.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)
@@ -235,8 +235,8 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
     fun `infotrygd - spleis - infotrygd - spleis`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        håndterSykmelding(Sykmeldingsperiode(1.april, 30.april))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.april, 30.april, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode,
@@ -256,12 +256,12 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
     fun `overgang fra infotrygd hvor januar-periode er splittet inn i to utbetalingsperioder i IT - skal markeres som overgang`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
 
         forkastAlle(hendelselogg)
 
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
         håndterUtbetalingshistorikk(
@@ -280,15 +280,15 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
     fun `overgang fra infotrygd hvor det er to forkastede vedtaksperioder som fører til to utbetalinger i IT - skal markeres som overgang`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
         forkastAlle(hendelselogg)
 
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 50.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(Sykdom(1.mars, 31.mars, 50.prosent))
 
         håndterUtbetalingshistorikk(

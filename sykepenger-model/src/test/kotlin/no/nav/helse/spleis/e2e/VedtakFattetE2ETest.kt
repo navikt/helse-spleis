@@ -18,7 +18,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `sender vedtak fattet for perioder innenfor arbeidsgiverperioden`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 10.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -45,7 +45,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `sender vedtak fattet for perioder utenfor arbeidsgiverperioden med bare ferie`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 20.januar, 100.prosent), Ferie(17.januar, 20.januar))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -61,7 +61,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `sender vedtak fattet for forlengelseperioder utenfor arbeidsgiverperioden med bare ferie`() {
         nyttVedtak(1.januar, 20.januar, 100.prosent)
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(21.januar, 31.januar, 100.prosent), Ferie(21.januar, 31.januar))
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)

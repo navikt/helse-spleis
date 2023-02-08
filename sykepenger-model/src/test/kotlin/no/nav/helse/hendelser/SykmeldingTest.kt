@@ -1,17 +1,9 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDateTime
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.somPersonidentifikator
-import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
-import no.nav.helse.sykdomstidslinje.Dag.Sykedag
-import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -30,7 +22,7 @@ internal class SykmeldingTest {
 
     @Test
     fun `oppdaterer perioder`() {
-        sykmelding(Sykmeldingsperiode(10.januar, 15.januar, 100.prosent))
+        sykmelding(Sykmeldingsperiode(10.januar, 15.januar))
 
         sykmelding.oppdaterSykmeldingsperioder(emptyList()).also { result ->
             assertEquals(listOf(10.januar til 15.januar), result)
@@ -69,7 +61,7 @@ internal class SykmeldingTest {
     }
     @Test
     fun `oppdaterer perioder - trimmet dager - en dag igjen`() {
-        sykmelding(Sykmeldingsperiode(10.januar, 15.januar, 100.prosent))
+        sykmelding(Sykmeldingsperiode(10.januar, 15.januar))
         sykmelding.trimLeft(14.januar)
         sykmelding.oppdaterSykmeldingsperioder(emptyList()).also { result ->
             assertEquals(listOf(15.januar til 15.januar), result)
@@ -77,7 +69,7 @@ internal class SykmeldingTest {
     }
     @Test
     fun `oppdaterer perioder - trimmet forbi`() {
-        sykmelding(Sykmeldingsperiode(10.januar, 15.januar, 100.prosent))
+        sykmelding(Sykmeldingsperiode(10.januar, 15.januar))
         sykmelding.trimLeft(15.januar)
         val perioder = listOf(1.januar til 2.januar)
         sykmelding.oppdaterSykmeldingsperioder(perioder).also { result ->
@@ -86,37 +78,13 @@ internal class SykmeldingTest {
     }
 
     @Test
-    fun `sykdomsgrad som er 100 prosent støttes`() {
-        sykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent), Sykmeldingsperiode(12.januar, 16.januar, 100.prosent))
-        assertEquals(8 + 3, sykmelding.sykdomstidslinje().filterIsInstance<Sykedag>().size)
-        assertEquals(4, sykmelding.sykdomstidslinje().filterIsInstance<SykHelgedag>().size)
-        assertEquals(1, sykmelding.sykdomstidslinje().filterIsInstance<UkjentDag>().size)
-    }
-
-    @Test
-    fun `sykdomsgrad under 100 prosent støttes`() {
-        sykmelding(Sykmeldingsperiode(1.januar, 10.januar, 50.prosent), Sykmeldingsperiode(12.januar, 16.januar, 100.prosent))
-        assertFalse(sykmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist()).harFunksjonelleFeilEllerVerre())
-    }
-
-    @Test
     fun `sykeperioder mangler`() {
-        assertThrows<Aktivitetslogg.AktivitetException> { sykmelding() }
+        assertThrows<IllegalStateException> { sykmelding() }
     }
 
-    @Test
-    fun `overlappende sykeperioder`() {
-        assertThrows<Aktivitetslogg.AktivitetException> {
-            sykmelding(Sykmeldingsperiode(10.januar, 12.januar, 100.prosent), Sykmeldingsperiode(1.januar, 12.januar, 100.prosent))
-        }
-    }
-
-    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, mottatt: LocalDateTime? = null) {
-        val tidligsteFom = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay()
-        val sisteTom = Sykmeldingsperiode.periode(sykeperioder.toList())?.endInclusive?.atStartOfDay()
+    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode) {
         sykmelding = hendelsefabrikk.lagSykmelding(
-            sykeperioder = sykeperioder,
-            sykmeldingSkrevet = tidligsteFom ?: LocalDateTime.now()
+            sykeperioder = sykeperioder
         )
     }
 

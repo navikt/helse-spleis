@@ -22,7 +22,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Ber ikke om inntektsmelding på korte perioder`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar))
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))
         assertIngenFunksjonelleFeil()
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
@@ -31,7 +31,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Ber ikke om inntektsmelding på korte perioder med uferdige periode hos annen ag`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
@@ -39,7 +39,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 15.mars, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 15.mars), orgnummer = a2)
         val søknadId = håndterSøknad(Sykdom(1.mars, 15.mars, 100.prosent), orgnummer = a2)
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
@@ -52,7 +52,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Ber om inntektsmelding når vi ankommer AvventerInntektsmeldingEllerHistorikk`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
 
@@ -79,10 +79,10 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Ber ikke om inntektsmelding ved forlengelser`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         val søknadId1 = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
         assertIngenFunksjonelleFeil()
@@ -105,7 +105,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Sender ut event om at vi ikke trenger inntektsmelding når vi forlater AvventerInntektsmeldingEllerHistorikk`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
@@ -123,8 +123,8 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Send event om at vi ikke trenger inntektsmelding når vi forlater AvventerInntektsmeldingEllerHistorikk`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 2.februar)

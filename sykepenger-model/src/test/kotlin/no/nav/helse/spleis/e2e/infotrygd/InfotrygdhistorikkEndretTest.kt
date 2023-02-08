@@ -40,7 +40,7 @@ internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
     @Test
     fun `cachet infotrygdhistorikk på periode grunnet påminnelse på annen vedtaksperiode, skal fortsatt reberegne`() {
         periodeTilGodkjenning()
-        håndterSykmelding(Sykmeldingsperiode(1.mai, 31.mai, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mai, 31.mai))
         håndterSøknad(Sykdom(fom = 1.mai, tom = 31.mai, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, *utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk)
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING)
@@ -62,7 +62,7 @@ internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
     }
 
     private fun periodeTilGodkjenning(perioder: List<Infotrygdperiode> = emptyList(), inntektsopplysning: List<Inntektsopplysning> = emptyList()) {
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterInntektsmelding(listOf(1.mars til 16.mars))
         håndterVilkårsgrunnlag(1.vedtaksperiode)

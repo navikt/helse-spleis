@@ -507,7 +507,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
 
-        håndterSykmelding(Sykmeldingsperiode(1.april, 16.april, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.april, 16.april))
         håndterSøknad(Sykdom(1.april, 16.april, 100.prosent))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
@@ -597,7 +597,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
 
-        håndterSykmelding(Sykmeldingsperiode(1.juni, 10.juni, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.juni, 10.juni))
         håndterSøknad(Sykdom(1.juni, 10.juni, 100.prosent))
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
@@ -996,7 +996,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     fun `ping-pong - valider ytelser for de periodene som påvirkes av revurderingen`() {
         nyttVedtak(1.januar, 31.januar)
 
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,
@@ -1024,7 +1024,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     fun `ping-pong - riktig utbetalingsperiode`() {
         nyttVedtak(1.januar, 31.januar)
 
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,

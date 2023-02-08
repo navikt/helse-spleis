@@ -113,7 +113,6 @@ internal fun AbstractEndToEndTest.sykmelding(
     fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO
 ) = ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer).lagSykmelding(
     sykeperioder = sykeperioder,
-    sykmeldingSkrevet = sykmeldingSkrevet ?: Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
     id = id
 ).apply {
         hendelselogg = this

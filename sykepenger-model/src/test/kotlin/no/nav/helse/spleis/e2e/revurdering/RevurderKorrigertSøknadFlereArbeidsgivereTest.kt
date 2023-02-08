@@ -73,12 +73,12 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
     @Test
     fun `Overlappende søknad som strekker seg forbi vedtaksperioden`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         }
         a2 {
             håndterSøknad(Sykdom(15.januar, 15.februar, 100.prosent))
-            håndterSykmelding(Sykmeldingsperiode(15.januar, 15.februar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(15.januar, 15.februar))
             håndterInntektsmelding(listOf(15.januar til 30.januar), beregnetInntekt = 20000.månedlig)
         }
         a1 {
@@ -99,7 +99,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterUtbetalt()
         }
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(15.januar, 15.februar, 50.prosent))
+            håndterSykmelding(Sykmeldingsperiode(15.januar, 15.februar))
             håndterSøknad(Sykdom(15.januar, 15.februar, 50.prosent))
             assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
             val utbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode)
@@ -118,11 +118,11 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         val periodeAg1 = 1.januar til 31.januar
         val periodeAg2 = 1.februar til 28.februar
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(periodeAg1.start, periodeAg1.endInclusive, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(periodeAg1.start, periodeAg1.endInclusive))
             håndterSøknad(Sykdom(periodeAg1.start, periodeAg1.endInclusive, 100.prosent))
         }
         a2 {
-            håndterSykmelding(Sykmeldingsperiode(periodeAg2.start, periodeAg2.endInclusive, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(periodeAg2.start, periodeAg2.endInclusive))
             håndterSøknad(Sykdom(periodeAg2.start, periodeAg2.endInclusive, 100.prosent))
             håndterInntektsmelding(listOf(periodeAg2.start til periodeAg2.start.plusDays(15)), beregnetInntekt = 20000.månedlig)
         }
@@ -176,16 +176,16 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
     @Test
     fun `To arbeidsgivere med ett sykefraværstilfelle og gap over 16 dager på den ene arbeidsgiveren - korrigerende søknad på periode før gap setter i gang revurdering`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         }
         a2 {
-            håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar))
             håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent))
         }
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = TestPerson.INNTEKT)
-            håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars))
             håndterSøknad(Sykdom(24.februar, 24.mars, 100.prosent))
             håndterInntektsmelding(listOf(24.februar til 11.mars), beregnetInntekt = TestPerson.INNTEKT)
         }
@@ -476,16 +476,16 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
     @Test
     fun `To arbeidsgivere med ett sykefraværstilfelle og gap over 16 dager på den ene arbeidsgiveren - korrigerende søknad på arbeidsgiver uten gap setter i gang revurdering`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         }
         a2 {
-            håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar))
             håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent))
         }
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = TestPerson.INNTEKT)
-            håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars))
             håndterSøknad(Sykdom(24.februar, 24.mars, 100.prosent))
             håndterInntektsmelding(listOf(24.februar til 11.mars), beregnetInntekt = TestPerson.INNTEKT)
         }
@@ -615,16 +615,16 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
     @Test
     fun `To arbeidsgivere med ett sykefraværstilfelle og gap under 16 dager på den ene arbeidsgiveren - korrigerende søknader setter i gang revurdering`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         }
         a2 {
-            håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar))
             håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent))
         }
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = TestPerson.INNTEKT)
-            håndterSykmelding(Sykmeldingsperiode(10.februar, 10.mars, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(10.februar, 10.mars))
             håndterSøknad(Sykdom(10.februar, 10.mars, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = TestPerson.INNTEKT, 10.februar)
         }

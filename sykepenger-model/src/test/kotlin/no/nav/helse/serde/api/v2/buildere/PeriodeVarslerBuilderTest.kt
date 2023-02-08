@@ -10,9 +10,9 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_1
-import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.api.dto.AktivitetDTO
 import no.nav.helse.serde.api.speil.builders.PeriodeVarslerBuilder
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -36,13 +36,13 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
 
     @Test
     fun `varsel på samme skjæringstidspunkt kopieres`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar)) // Warning
         håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.VetIkke)
         håndterYtelser()
 
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
         assertVarsel(RV_MV_1, 1.vedtaksperiode.filter())
@@ -51,7 +51,7 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
 
     @Test
     fun `periode med varsel`(){
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.januar) // Warning
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -63,11 +63,11 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
 
     @Test
     fun `foregående uten utbetaling med warning og warning på periode to`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar))
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), merknaderFraSykmelding = listOf(Søknad.Merknad("UGYLDIG_TILBAKEDATERING")))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-        håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar))
         håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent), Utdanning(30.januar, 31.januar))
 
         assertEquals(1, aktiviteter(1.vedtaksperiode).size)
@@ -76,7 +76,7 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
 
     @Test
     fun `plukker riktig vilkårsgrunnlag`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.VetIkke) // Warning på vilkårsgrunnlag

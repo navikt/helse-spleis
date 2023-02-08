@@ -28,7 +28,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
     fun `skjæringstidspunktet endres som følge av historikk fra IT`() {
         nyttVedtak(1.januar, 31.januar)
         nyttVedtak(10.februar, 28.februar)
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterUtbetalingshistorikk(3.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.februar, 9.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 5.februar, INNTEKT, true)
@@ -40,10 +40,10 @@ internal class PingPongTest : AbstractEndToEndTest() {
 
     @Test
     fun `Kaster ut alt om vi oppdager at en senere periode er utbetalt i Infotrygd`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
         // Ingen søknad for første sykmelding - den sykmeldte sender den ikke inn eller vi er i et out of order-scenario
 
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar))
         håndterInntektsmelding(listOf(1.februar til 16.februar))
         håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent))
 

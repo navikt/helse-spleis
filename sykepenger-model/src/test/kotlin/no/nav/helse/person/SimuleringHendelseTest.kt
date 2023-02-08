@@ -159,8 +159,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     }
 
     private fun sykmelding() = a1Hendelsefabrikk.lagSykmelding(
-        sykeperioder = arrayOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100.prosent)),
-        sykmeldingSkrevet = førsteSykedag.atStartOfDay()
+        sykeperioder = arrayOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag))
     ).apply {
         hendelse = this
     }

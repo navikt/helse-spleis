@@ -3,10 +3,13 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
+import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -17,13 +20,12 @@ import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Opptjening
+import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.arbeidsgiver
-import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
@@ -37,8 +39,6 @@ import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.UTELATE
 import no.nav.helse.testhelpers.Utbetalingsdager
 import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.Alder.Companion.alder
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -306,8 +306,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         val sisteDag = arbeidsgiverTidslinje.periode().endInclusive
         person.håndter(
             hendelsefabrikk.lagSykmelding(
-                sykeperioder = arrayOf(Sykmeldingsperiode(førsteDag, sisteDag, 100.prosent)),
-                sykmeldingSkrevet = 1.januar.atStartOfDay()
+                sykeperioder = arrayOf(Sykmeldingsperiode(førsteDag, sisteDag))
             )
         )
         person.håndter(

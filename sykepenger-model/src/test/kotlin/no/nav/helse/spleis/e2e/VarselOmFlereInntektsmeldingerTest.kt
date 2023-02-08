@@ -22,14 +22,14 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
 
     @Test
     fun `Prodbug - Feilaktig varsel om flere inntektsmeldinger`() {
-        håndterSykmelding(Sykmeldingsperiode(22.mars(2021), 28.mars(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(22.mars(2021), 28.mars(2021)))
         håndterSøknad(Sykdom(22.mars(2021), 28.mars(2021), 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(29.mars(2021), 5.april(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(29.mars(2021), 5.april(2021)))
         håndterSøknad(Sykdom(29.mars(2021), 5.april(2021), 100.prosent))
         håndterSøknad(Sykdom(29.mars(2021), 5.april(2021), 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(6.april(2021), 16.april(2021), 50.prosent))
+        håndterSykmelding(Sykmeldingsperiode(6.april(2021), 16.april(2021)))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(22.mars(2021) til 6.april(2021)), førsteFraværsdag = 22.mars(2021))
         håndterSøknad(Sykdom(6.april(2021), 16.april(2021), 50.prosent))
 
@@ -44,7 +44,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
 
-        håndterSykmelding(Sykmeldingsperiode(17.april(2021), 30.april(2021), 20.prosent))
+        håndterSykmelding(Sykmeldingsperiode(17.april(2021), 30.april(2021)))
         assertTrue(person.personLogg.varsel().none { w ->
             w.toString().contains("Mottatt flere inntektsmeldinger")
         })
@@ -52,7 +52,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
 
     @Test
     fun `Varsel om flere inntektsmeldinger hvis vi forlenger en avsluttet periode med inntektsmelding`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar)
         håndterVilkårsgrunnlag(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, inntekt = INNTEKT, inntektsvurdering = Inntektsvurdering(
@@ -66,7 +66,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 20.mars, 50.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 20.mars))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars)
         håndterSøknad(Sykdom(1.mars, 20.mars, 50.prosent))
 

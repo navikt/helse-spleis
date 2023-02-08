@@ -42,7 +42,7 @@ import org.junit.jupiter.api.Test
 internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
     @Test
     fun `forledet søknad`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), mottatt = 1.januar(2019).atStartOfDay())
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), mottatt = 1.januar(2019).atStartOfDay())
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.januar(2019))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         assertVarsel(RV_SØ_2)
@@ -51,7 +51,7 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `forledet søknad med inntektsmelding`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), mottatt = 1.januar(2019).atStartOfDay())
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), mottatt = 1.januar(2019).atStartOfDay())
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.januar(2019))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertVarsel(RV_SØ_2)
@@ -72,7 +72,7 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `foreldet dag utenfor agp -- må gå til manuell`() {
-        håndterSykmelding(Sykmeldingsperiode(15.januar, 16.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(15.januar, 16.februar))
         håndterSøknad(
             Sykdom(15.januar, 16.februar, 100.prosent),
             Ferie(1.februar, 16.februar),
@@ -96,7 +96,7 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
     }
     @Test
     fun `foreldet dag innenfor agp -- kan lukkes uten manuell behandling`() {
-        håndterSykmelding(Sykmeldingsperiode(16.januar, 16.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(16.januar, 16.februar))
         håndterSøknad(
             Sykdom(16.januar, 16.februar, 100.prosent),
             Ferie(1.februar, 16.februar),
@@ -115,7 +115,7 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
     @Test
     fun `forledet søknad ved forlengelse`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), mottatt = 1.februar(2019).atStartOfDay())
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), mottatt = 1.februar(2019).atStartOfDay())
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.februar(2019))
         håndterUtbetalingshistorikk(2.vedtaksperiode)
         assertVarsel(RV_SØ_2)
@@ -124,8 +124,8 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `foreldet søknad forlenger annen foreldet søknad - deler korrelasjonsId`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 19.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 19.januar))
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar))
 
         // foreldet søknad :(
         håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
@@ -155,8 +155,8 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `foreldet søknad etter annen foreldet søknad - samme arbeidsgiverperiode - deler korrelasjonsId`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 19.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(24.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 19.januar))
+        håndterSykmelding(Sykmeldingsperiode(24.januar, 31.januar))
 
         // foreldet søknad :(
         håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
@@ -188,8 +188,8 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `foreldet søknad etter annen foreldet søknad - ulike arbeidsgiverperioder - deler ikke korrelasjonsId`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 19.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(19.februar, 12.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 19.januar))
+        håndterSykmelding(Sykmeldingsperiode(19.februar, 12.mars))
 
         // foreldet søknad :(
         håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.juni)

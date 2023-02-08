@@ -1,15 +1,12 @@
 package no.nav.helse.sykdomstidslinje
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.erRettFør
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.til
@@ -147,29 +144,7 @@ internal class SkjæringstidspunktTest {
     }
 
     @Test
-    fun `helg mellom to sykmeldinger`() {
-        val sykmelding1 = sykmelding(Sykmeldingsperiode(1.januar, 26.januar, 100.prosent)) // slutter fredag
-        val sykmelding2 = sykmelding(Sykmeldingsperiode(29.januar, 9.februar, 100.prosent)) // starter mandag
-        assertSkjæringstidspunkt(1.januar, sykmelding1, sykmelding2)
-    }
-
-    @Test
-    fun `fredag og helg mellom to sykmeldinger`() {
-        val sykmelding1 = sykmelding(Sykmeldingsperiode(1.januar, 25.januar, 100.prosent)) // slutter torsdag
-        val sykmelding2 = sykmelding(Sykmeldingsperiode(29.januar, 9.februar, 100.prosent)) // starter mandag
-        assertSkjæringstidspunkt(29.januar, sykmelding1, sykmelding2)
-    }
-
-    @Test
-    fun `helg og mandag mellom to sykmeldinger`() {
-        val sykmelding1 = sykmelding(Sykmeldingsperiode(1.januar, 26.januar, 100.prosent)) // slutter fredag
-        val sykmelding2 = sykmelding(Sykmeldingsperiode(30.januar, 9.februar, 100.prosent)) // starter tirsdag
-        assertSkjæringstidspunkt(30.januar, sykmelding1, sykmelding2)
-    }
-
-    @Test
     fun `sykeperiode starter på skjæringstidspunkt`() {
-        val sykmelding = sykmelding(Sykmeldingsperiode(4.februar(2020), 21.februar(2020), 100.prosent))
         val søknad = søknad(Søknadsperiode.Sykdom(4.februar(2020), 21.februar(2020), 100.prosent))
         val skjæringstidspunkt = 4.februar(2020)
         val inntektsmelding = inntektsmelding(
@@ -178,12 +153,11 @@ internal class SkjæringstidspunktTest {
                 Periode(4.februar(2020), 18.februar(2020))
             ), førsteFraværsdag = skjæringstidspunkt
         )
-        assertSkjæringstidspunkt(skjæringstidspunkt, sykmelding, søknad, inntektsmelding)
+        assertSkjæringstidspunkt(skjæringstidspunkt, søknad, inntektsmelding)
     }
 
     @Test
     fun `skjæringstidspunkt er riktig selv om første fraværsdag er satt for tidlig`() {
-        val sykmelding = sykmelding(Sykmeldingsperiode(4.februar(2020), 21.februar(2020), 100.prosent))
         val søknad = søknad(Søknadsperiode.Sykdom(4.februar(2020), 21.februar(2020), 100.prosent))
         val skjæringstidspunkt = 4.februar(2020)
         val inntektsmelding = inntektsmelding(
@@ -192,13 +166,12 @@ internal class SkjæringstidspunktTest {
                 Periode(4.februar(2020), 18.februar(2020))
             ), førsteFraværsdag = 20.januar(2020)
         )
-        assertSkjæringstidspunkt(skjæringstidspunkt, sykmelding, søknad, inntektsmelding)
+        assertSkjæringstidspunkt(skjæringstidspunkt, søknad, inntektsmelding)
     }
 
 
     @Test
     fun `skjæringstidspunkt er riktig selv om første fraværsdag er satt for sent`() {
-        val sykmelding = sykmelding(Sykmeldingsperiode(4.februar(2020), 21.februar(2020), 100.prosent))
         val søknad = søknad(Søknadsperiode.Sykdom(4.februar(2020), 21.februar(2020), 100.prosent))
         val skjæringstidspunkt = 4.februar(2020)
         val inntektsmelding = inntektsmelding(
@@ -207,12 +180,11 @@ internal class SkjæringstidspunktTest {
                 Periode(4.februar(2020), 18.februar(2020))
             ), førsteFraværsdag = 18.februar(2020)
         )
-        assertSkjæringstidspunkt(skjæringstidspunkt, sykmelding, søknad, inntektsmelding)
+        assertSkjæringstidspunkt(skjæringstidspunkt, søknad, inntektsmelding)
     }
 
     @Test
     fun `sykeperioden starter etter skjæringstidspunkt`() {
-        val sykmelding = sykmelding(Sykmeldingsperiode(29.januar(2020), 16.februar(2020), 100.prosent))
         val søknad = søknad(Søknadsperiode.Sykdom(29.januar(2020), 16.februar(2020), 100.prosent))
         val skjæringstidspunkt = 20.januar(2020)
         val inntektsmelding = inntektsmelding(
@@ -221,12 +193,11 @@ internal class SkjæringstidspunktTest {
                 Periode(20.januar(2020), 30.januar(2020))
             ), førsteFraværsdag = skjæringstidspunkt
         )
-        assertSkjæringstidspunkt(skjæringstidspunkt, sykmelding, søknad, inntektsmelding)
+        assertSkjæringstidspunkt(skjæringstidspunkt, søknad, inntektsmelding)
     }
 
     @Test
     fun `arbeidsgiverperiode med enkeltdager før skjæringstidspunkt`() {
-        val sykmelding = sykmelding(Sykmeldingsperiode(12.februar(2020), 19.februar(2020), 100.prosent))
         val søknad = søknad(Søknadsperiode.Sykdom(12.februar(2020), 19.februar(2020), 100.prosent))
         val skjæringstidspunkt = 3.februar(2020)
         val inntektsmelding = inntektsmelding(
@@ -236,7 +207,7 @@ internal class SkjæringstidspunktTest {
                 Periode(3.februar(2020), 16.februar(2020))
             ), førsteFraværsdag = skjæringstidspunkt
         )
-        assertSkjæringstidspunkt(skjæringstidspunkt, sykmelding, søknad, inntektsmelding)
+        assertSkjæringstidspunkt(skjæringstidspunkt, søknad, inntektsmelding)
     }
 
     @Test
@@ -385,14 +356,6 @@ internal class SkjæringstidspunktTest {
                 "Fikk $skjæringstidspunkt\n" +
                 "Tidslinje:\n$tidslinje"
         }
-    }
-
-
-    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode): Sykmelding {
-        return hendelsefabrikk.lagSykmelding(
-            sykeperioder = sykeperioder,
-            sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
-        )
     }
 
     private fun søknad(vararg perioder: Søknadsperiode): Søknad {

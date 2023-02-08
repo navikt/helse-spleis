@@ -39,7 +39,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
     fun `overstyre inn ferie med forgående periode med avsluttende ferie`() {
         /* Hvis forgående periode avsluttes med ferie og vi revurderer starten av etterfølgende periode med ferie blir det feil i utgående behov.
            Da får vi ikke med oss at feriedagene skal trekkes tilbake */
-        håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021)))
         håndterSøknadMedValidering(
             1.vedtaksperiode,
             Sykdom(1.april(2021), 23.april(2021), 100.prosent),
@@ -77,7 +77,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
 
     @Test
     fun `overstyre inn ferie med forgående periode uten avsluttende ferie`() {
-        håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021)))
         håndterSøknadMedValidering(
             1.vedtaksperiode,
             Sykdom(1.april(2021), 23.april(2021), 100.prosent)
@@ -111,7 +111,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
 
     @Test
     fun `overstyre inn ferie med forgående periode med annullering`() {
-        håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021)))
         håndterSøknadMedValidering(
             1.vedtaksperiode,
             Sykdom(1.april(2021), 23.april(2021), 100.prosent),
@@ -151,8 +151,8 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
     @Test
     fun `revurdering fjerner en hel linje i oppdraget`() {
         håndterSykmelding(
-            Sykmeldingsperiode(1.april(2021), 23.april(2021), 60.prosent),
-            Sykmeldingsperiode(24.april(2021), 30.april(2021), 40.prosent)
+            Sykmeldingsperiode(1.april(2021), 23.april(2021)),
+            Sykmeldingsperiode(24.april(2021), 30.april(2021))
         )
         håndterSøknadMedValidering(
             1.vedtaksperiode,
@@ -190,7 +190,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
 
     @Test
     fun `opphører hele perioden`() {
-        håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021)))
         håndterSøknadMedValidering(
             1.vedtaksperiode,
             Sykdom(1.april(2021), 23.april(2021), 60.prosent)
@@ -226,7 +226,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
 
     @Test
     fun `forlenger en opphørt periode`() {
-        håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021)))
         håndterSøknadMedValidering(
             1.vedtaksperiode,
             Sykdom(1.april(2021), 23.april(2021), 60.prosent)
@@ -263,7 +263,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
 
     @Test
     fun `pågående forlengelse fanget i en revurdering med opphør`() {
-        håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021)))
         håndterSøknadMedValidering(
             1.vedtaksperiode,
             Sykdom(1.april(2021), 23.april(2021), 60.prosent)
@@ -281,7 +281,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt()
 
-        håndterSykmelding(Sykmeldingsperiode(24.april(2021), 15.mai(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(24.april(2021), 15.mai(2021)))
         håndterSøknadMedValidering(
             2.vedtaksperiode,
             Sykdom(24.april(2021), 15.mai(2021), 100.prosent)
@@ -305,7 +305,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
 
     @Test
     fun `påfølgende periode har laget en utbetaling og forgående periode revurderes bort`() {
-        håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021)))
         håndterSøknadMedValidering(
             1.vedtaksperiode,
             Sykdom(1.april(2021), 23.april(2021), 60.prosent)
@@ -323,7 +323,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt()
 
-        håndterSykmelding(Sykmeldingsperiode(24.april(2021), 15.mai(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(24.april(2021), 15.mai(2021)))
         håndterSøknadMedValidering(
             2.vedtaksperiode,
             Sykdom(24.april(2021), 15.mai(2021), 100.prosent)
@@ -348,7 +348,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
 
     @Test
     fun `overstyrer inn ferie i starten av perioden`() {
-        håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.april(2021), 23.april(2021)))
         håndterSøknadMedValidering(
             1.vedtaksperiode,
             Sykdom(1.april(2021), 23.april(2021), 60.prosent)

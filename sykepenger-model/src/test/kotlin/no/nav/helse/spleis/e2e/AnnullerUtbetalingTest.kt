@@ -10,13 +10,13 @@ import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.sisteBehov
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -58,7 +58,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar) // forlengelse
         nyttVedtak(10.mars, 31.mars) // førstegangsbehandling, men med samme agp
-        håndterSykmelding(Sykmeldingsperiode(1.mai, 20.mai, 100.prosent)) // førstegangsbehandling, ny agp
+        håndterSykmelding(Sykmeldingsperiode(1.mai, 20.mai)) // førstegangsbehandling, ny agp
         håndterSøknad(Sykdom(1.mai, 20.mai, 100.prosent))
         håndterAnnullerUtbetaling()
         assertEquals(4, observatør.forkastedePerioder())
@@ -383,7 +383,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     @Test
     fun `annuller over ikke utbetalt forlengelse`() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
-        håndterSykmelding(Sykmeldingsperiode(27.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(27.januar, 31.januar))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(27.januar, 31.januar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -413,8 +413,8 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         // lag en periode
         nyttVedtak(1.januar, 31.januar)
         // prøv å forkast, ikke klar det
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 19.februar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 19.februar))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar))
         håndterSøknad(Sykdom(1.februar, 19.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent))
 
@@ -431,7 +431,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     @Test
     fun `skal kunne annullere tidligere utbetaling dersom siste utbetaling er uten utbetaling`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 20.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 20.mars))
         håndterSøknad(Sykdom(1.mars, 20.mars, 100.prosent), Søknad.Søknadsperiode.Ferie(17.mars, 20.mars))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(1.mars til 16.mars))
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))

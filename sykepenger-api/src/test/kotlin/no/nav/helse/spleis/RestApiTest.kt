@@ -19,6 +19,7 @@ import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Personidentifikator
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
@@ -26,14 +27,12 @@ import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.person.Person
 import no.nav.helse.person.Personopplysninger
-import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.config.AzureAdAppConfig
 import no.nav.helse.spleis.config.DataSourceConfiguration
 import no.nav.helse.spleis.config.KtorConfig
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.awaitility.Awaitility.await
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.AfterAll
@@ -136,7 +135,7 @@ internal class RestApiTest {
 
         val fom = LocalDate.of(2018, 9, 10)
         val tom = fom.plusDays(16)
-        val sykeperioder = listOf(Sykmeldingsperiode(fom, tom, 100.prosent))
+        val sykeperioder = listOf(Sykmeldingsperiode(fom, tom))
         val personopplysninger = Personopplysninger(
             Personidentifikator.somPersonidentifikator(UNG_PERSON_FNR),
             AKTØRID,
@@ -148,7 +147,6 @@ internal class RestApiTest {
             aktørId = "aktørId",
             orgnummer = ORGNUMMER,
             sykeperioder = sykeperioder,
-            sykmeldingSkrevet = fom.atStartOfDay(),
             personopplysninger = personopplysninger
         )
         val inntektsmelding = Inntektsmelding(

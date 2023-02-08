@@ -32,8 +32,8 @@ internal class KlippTest : AbstractEndToEndTest() {
 
     @Test
     fun `drawio -- HAPPY CASE`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 15.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 15.februar))
         håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent))
         håndterSøknad(Sykdom(20.januar, 15.februar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -66,8 +66,8 @@ internal class KlippTest : AbstractEndToEndTest() {
 
     @Test
     fun `drawio -- IM før søknad for forlengelse`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 15.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 15.februar))
         håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         utbetalPeriode(1.vedtaksperiode)
@@ -99,8 +99,8 @@ internal class KlippTest : AbstractEndToEndTest() {
 
     @Test
     fun `drawio -- starter inni slutter inni`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 25.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 25.januar))
         håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent))
         håndterSøknad(Sykdom(20.januar, 25.januar, 100.prosent))
         håndterSøknad(Sykdom(26.januar, 31.januar, 100.prosent))
@@ -146,8 +146,8 @@ internal class KlippTest : AbstractEndToEndTest() {
 
     @Test
     fun `drawio -- starter før slutter inni`() {
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 15.februar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 15.februar))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 15.februar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))

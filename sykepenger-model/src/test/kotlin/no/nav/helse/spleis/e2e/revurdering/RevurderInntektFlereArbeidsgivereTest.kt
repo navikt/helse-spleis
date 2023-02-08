@@ -250,7 +250,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
     @Test
     fun `a1 er avsluttet og a2 er i AvventerGodkjenning -- revurderer a1`() {
         (a1 og a2) {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         }
         (a1 og a2) { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
@@ -374,11 +374,11 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
     @Test
     fun `a1 er avsluttet og a2 er til godkjenning -- overstyrer a2`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         }
         a2 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         }
         a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
@@ -599,7 +599,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             nyttVedtak(1.januar(2017), 31.januar(2017), 100.prosent) // gammelt vedtak
         }
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(

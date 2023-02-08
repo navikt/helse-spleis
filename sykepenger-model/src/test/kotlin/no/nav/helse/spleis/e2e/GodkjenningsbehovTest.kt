@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test
 internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
     @Test
     fun `legger ved orgnummer for arbeidsgiver med kun sammenligningsgrunnlag i utbetalingsbehovet`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(

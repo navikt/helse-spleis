@@ -3,11 +3,11 @@ package no.nav.helse.hendelser
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -25,7 +25,7 @@ internal class OpprettPersonFraHendelseTest {
     @Test
     fun `sykmelding skal kunne opprette ny person`() {
         Person.fraHendelse(
-            fabrikk.lagSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent)),
+            fabrikk.lagSykmelding(Sykmeldingsperiode(1.januar, 31.januar)),
             MaskinellJurist()
         )
     }

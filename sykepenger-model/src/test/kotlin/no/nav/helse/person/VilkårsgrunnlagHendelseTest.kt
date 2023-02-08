@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.etterspurtBehov
@@ -26,9 +25,9 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt
@@ -89,7 +88,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
 
     @Test
     fun `benytter forrige måned som utgangspunkt for inntektsberegning`() {
-        person.håndter(sykmelding(perioder = listOf(Sykmeldingsperiode(8.januar, 31.januar, 100.prosent))))
+        person.håndter(sykmelding(perioder = listOf(Sykmeldingsperiode(8.januar, 31.januar))))
         person.håndter(søknad(perioder = listOf(Sykdom(8.januar, 31.januar, 100.prosent))))
         person.håndter(
             inntektsmelding(
@@ -167,10 +166,9 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     }
 
     private fun sykmelding(
-        perioder: List<Sykmeldingsperiode> = listOf(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        perioder: List<Sykmeldingsperiode> = listOf(Sykmeldingsperiode(1.januar, 31.januar))
     ) = a1Hendelsefabrikk.lagSykmelding(
-        sykeperioder = perioder.toTypedArray(),
-        sykmeldingSkrevet = Sykmeldingsperiode.periode(perioder)?.start?.atStartOfDay() ?: LocalDateTime.now()
+        sykeperioder = perioder.toTypedArray()
     ).apply {
         hendelse = this
     }

@@ -28,9 +28,9 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.oktober
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.sisteBehov
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
@@ -167,8 +167,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
 
     private fun sykmelding() =
         a1Hendelsefabrikk.lagSykmelding(
-            sykeperioder = arrayOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100.prosent)),
-            sykmeldingSkrevet = førsteSykedag.atStartOfDay()
+            sykeperioder = arrayOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag))
         ).apply {
             hendelse = this
         }

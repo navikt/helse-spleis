@@ -21,7 +21,7 @@ internal class SendTilGosysFlaggSattE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `søknad med flagg sendTilGosys ignoreres og kastes ut`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendTilGosys = true)
         assertFunksjonellFeil(RV_SØ_30, 1.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
@@ -29,12 +29,12 @@ internal class SendTilGosysFlaggSattE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `søknad med flagg sendTilGosys ignoreres og kastes ut - prøver oss ikke på forlengelsen uten flagg`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendTilGosys = true)
         assertFunksjonellFeil(RV_SØ_30, 1.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendTilGosys = false)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
     }
@@ -42,7 +42,7 @@ internal class SendTilGosysFlaggSattE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Overlapper med utbetalt - søknad med flagg sendTilGosys ignoreres og kastes ut`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendTilGosys = true)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertFunksjonellFeil(RV_SØ_30, 1.vedtaksperiode.filter())

@@ -23,7 +23,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `perioden får warnings dersom bruker har fått Dagpenger innenfor 4 uker før skjæringstidspunkt`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 19.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 19.januar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 19.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(3.januar til 18.januar), 3.januar)
@@ -39,7 +39,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `perioden får warnings dersom bruker har fått AAP innenfor 6 måneder før skjæringstidspunkt`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 19.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 19.januar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 19.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), 3.januar)

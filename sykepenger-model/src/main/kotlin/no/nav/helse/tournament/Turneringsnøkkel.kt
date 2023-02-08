@@ -2,21 +2,26 @@ package no.nav.helse.tournament
 
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrTidslinje
-import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.Dag.*
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
+import no.nav.helse.sykdomstidslinje.Dag.Feriedag
+import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
+import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
+import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 
 internal enum class Turneringsnøkkel {
     Arbeidsdag_SØ,
     Arbeidsdag_IM,
-    Sykedag_SM,
     Sykedag_SØ,
     ForeldetSykedag,
     Feriedag_SØ,
     Feriedag_IM,
     Permisjonsdag_SØ,
-    SykHelgedag_SM,
     SykHelgedag_SØ,
     Arbeidsgiverdag_IM,
     ArbeidsgiverHelgedag_IM,
@@ -45,9 +50,7 @@ internal enum class Turneringsnøkkel {
             dag is Dag.ForeldetSykedag -> ForeldetSykedag
             dag is Permisjonsdag -> Permisjonsdag_SØ
             dag is ProblemDag -> UbestemtDag
-            dag is Sykedag && dag.kommerFra(Sykmelding::class) -> Sykedag_SM
             dag is Sykedag && dag.kommerFra(Søknad::class) -> Sykedag_SØ
-            dag is SykHelgedag && dag.kommerFra(Sykmelding::class) -> SykHelgedag_SM
             dag is SykHelgedag && dag.kommerFra(Søknad::class) -> SykHelgedag_SØ
             dag is Dag.UkjentDag -> UkjentDag
             else -> throw IllegalArgumentException("Ingen turneringsnøkkel definert for ${dag::class.simpleName}")

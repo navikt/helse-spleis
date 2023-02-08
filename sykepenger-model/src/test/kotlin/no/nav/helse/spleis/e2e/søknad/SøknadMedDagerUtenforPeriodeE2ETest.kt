@@ -39,7 +39,7 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `eldgammel ferieperiode før sykdomsperioden klippes bort`() {
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 28.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 28.mars))
         håndterSøknad(
             Sykdom(1.mars, 28.mars, 100.prosent),
             Ferie(1.juli(2015), 10.juli(2015)),
@@ -50,7 +50,7 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
     @Test
     fun `søknad med arbeidsdager mellom to perioder bridger ikke de to periodene`(){
         nyttVedtak(1.januar, 19.januar)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(20.januar, 31.januar))
         håndterUtbetalingshistorikk(2.vedtaksperiode)
         assertVarsel(RV_SØ_7, AktivitetsloggFilter.person())
@@ -75,11 +75,11 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `feriedager som vi allerede vet om fra forrige periode, trimme bort ferie, ingen warning`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(25.januar, 31.januar))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
 
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(25.januar, 31.januar))
         håndterUtbetalingshistorikk(2.vedtaksperiode)
 
@@ -93,7 +93,7 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `klipper bare ferie - ikke ferie i perioden`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(
             Sykdom(1.februar, 28.februar, 100.prosent),
             Ferie(1.januar, 16.januar),
@@ -107,7 +107,7 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `klipper bare ferie - ferie litt inn i perioden`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(
             Sykdom(1.februar, 28.februar, 100.prosent),
             Ferie(1.januar, 16.januar),
@@ -121,11 +121,11 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `feriedager som vi ikke vet om og ikke treffer forrige periode, trimme bort ferie, ingen warning`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 22.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 22.januar))
         håndterSøknad(Sykdom(1.januar, 22.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
 
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(25.januar, 31.januar))
         håndterUtbetalingshistorikk(2.vedtaksperiode)
 
@@ -140,11 +140,11 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `feriedager som vi ikke vet om og bridger gapet til forrige periode, trimme bort ferie, ingen warning`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 22.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 22.januar))
         håndterSøknad(Sykdom(1.januar, 22.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
 
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(23.januar, 31.januar))
         håndterUtbetalingshistorikk(2.vedtaksperiode)
 
@@ -158,11 +158,11 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `feriedager som vi vet om og treffer forrige periode`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 22.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 22.januar))
         håndterSøknad(Sykdom(1.januar, 22.januar, 100.prosent), Ferie(18.januar, 22.januar))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
 
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(18.januar, 31.januar))
         håndterUtbetalingshistorikk(2.vedtaksperiode)
 

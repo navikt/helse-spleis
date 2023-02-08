@@ -337,7 +337,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `ferie i arbeidsgiverperiode`() {
         nyttVedtak(3.januar, 26.januar)
-        håndterSykmelding(Sykmeldingsperiode(27.januar, 14.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(27.januar, 14.februar))
         håndterSøknad(Sykdom(27.januar, 14.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -383,7 +383,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `ledende uferdig periode`() {
         nyttVedtak(3.januar, 26.januar)
-        håndterSykmelding(Sykmeldingsperiode(27.januar, 14.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(27.januar, 14.februar))
         håndterSøknad(Sykdom(27.januar, 14.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -434,7 +434,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `ledende uferdig periode som ikke har en utbetaling`() {
         nyttVedtak(3.januar, 26.januar)
-        håndterSykmelding(Sykmeldingsperiode(27.januar, 14.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(27.januar, 14.februar))
         håndterSøknad(Sykdom(27.januar, 14.februar, 100.prosent))
         nullstillTilstandsendringer()
 
@@ -679,7 +679,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `Avslag fører til feilet revurdering`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterInntektsmelding(listOf(Periode(1.januar, 17.januar)), førsteFraværsdag = 1.januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -728,7 +728,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `annullering av feilet revurdering`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterInntektsmelding(listOf(Periode(1.januar, 17.januar)), førsteFraværsdag = 1.januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -999,7 +999,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        håndterSykmelding(Sykmeldingsperiode(27.januar, 5.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(27.januar, 5.februar))
         håndterSøknad(Sykdom(27.januar, 5.februar, 100.prosent))
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -1031,7 +1031,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `revurdering endrer arbeidsgiverperioden`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent), Arbeid(25.januar, 26.januar))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(3.januar til 18.januar))
@@ -1056,7 +1056,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         // registrerer sykdomsdag 27. januar som gjør at arbeidsgiverperioden blir 3.januar - 18.januar,
         // siden det nå er sykdom på begge sider av feriedagene
-        håndterSykmelding(Sykmeldingsperiode(27.januar, 5.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(27.januar, 5.februar))
         håndterSøknad(Sykdom(27.januar, 5.februar, 100.prosent))
 
         håndterYtelser(2.vedtaksperiode)
@@ -1082,7 +1082,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje((16.januar til 26.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
 
-        håndterSykmelding(Sykmeldingsperiode(30.januar, 5.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(30.januar, 5.februar))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 30.januar)
 
         nullstillTilstandsendringer()
@@ -1125,7 +1125,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
 
-        håndterSykmelding(Sykmeldingsperiode(27.januar, 5.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(27.januar, 5.februar))
         håndterSøknad(Sykdom(27.januar, 5.februar, 100.prosent))
 
         assertTilstander(
@@ -1165,7 +1165,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `validering av infotrygdhistorikk i revurdering skal føre til en warning i stedet for en feilet revurdering`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -1193,7 +1193,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `warning dersom det er utbetalt en periode i Infotrygd etter perioden som revurderes nå`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -1236,7 +1236,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `revurderer siste utbetalte periode`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterInntektsmelding(listOf(Periode(2.januar, 18.januar)), førsteFraværsdag = 2.januar)
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -1265,7 +1265,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `revurderer siste utbetalte periode i en forlengelse med bare ferie og permisjon`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterInntektsmelding(listOf(Periode(2.januar, 18.januar)), førsteFraværsdag = 2.januar)
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -1274,7 +1274,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt()
 
-        håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar))
         håndterSøknad(Sykdom(29.januar, 23.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -1300,7 +1300,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `oppdager nye utbetalte dager fra infotrygd i revurderingen`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -1385,7 +1385,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         vi å beregne utbetaling uten å ha lagret en inntekt. Det fører til en error i aktivitetsloggen som igjen gjør at perioden ender opp i RevurderingFeilet
         og speil er i en tilstand hvor ting ikke er oppdatert i saksbildet
          */
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)

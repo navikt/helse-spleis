@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -23,7 +24,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -90,7 +90,7 @@ internal abstract class AbstractDslTest {
     protected fun List<String>.forlengVedtak(periode: Periode, grad: Prosentdel = 100.prosent) {
         forEach {
             it {
-                håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, grad))
+                håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
                 håndterSøknad(Sykdom(periode.start, periode.endInclusive, grad))
             }
         }
@@ -117,7 +117,7 @@ internal abstract class AbstractDslTest {
     ) {
         forEach {
             it {
-                håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, grad))
+                håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
                 håndterSøknad(Sykdom(periode.start, periode.endInclusive, grad))
             }
         }

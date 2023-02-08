@@ -66,17 +66,14 @@ internal class ArbeidsgiverHendelsefabrikk(
 
     internal fun lagSykmelding(
         vararg sykeperioder: Sykmeldingsperiode,
-        sykmeldingSkrevet: LocalDateTime? = null,
         id: UUID = UUID.randomUUID()
     ): Sykmelding {
-        val sykmeldingSkrevetEkte = sykmeldingSkrevet ?: Sykmeldingsperiode.periode(sykeperioder.toList())!!.start.atStartOfDay()
         return Sykmelding(
             meldingsreferanseId = id,
             fnr = personidentifikator.toString(),
             aktørId = aktørId,
             orgnummer = organisasjonsnummer,
             sykeperioder = listOf(*sykeperioder),
-            sykmeldingSkrevet = sykmeldingSkrevetEkte,
             personopplysninger = personopplysninger
         ).apply {
             sykmeldinger.add(this)

@@ -46,7 +46,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
             Inntektsopplysning(ORGNUMMER, 18.mai, INNTEKT, false)
         )
 
-        håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni))
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.juni)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
@@ -77,7 +77,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
             Inntektsopplysning("0", 18.mai(2017), INNTEKT, false)
         )
 
-        håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni))
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.juni)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
@@ -97,7 +97,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
 
     @Test
     fun `utbetaling med 0 refusjon til arbeidsgiver`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
             refusjon = Inntektsmelding.Refusjon(0.månedlig, null),
@@ -115,7 +115,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
 
     @Test
     fun `utbetaling med delvis refusjon til arbeidsgiver`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
             refusjon = Inntektsmelding.Refusjon(20000.månedlig, null),
@@ -137,7 +137,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
 
     @Test
     fun `utbetaling med delvis refusjon`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
             refusjon = Inntektsmelding.Refusjon(INNTEKT /2, null),

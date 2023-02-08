@@ -32,7 +32,7 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `periode med bare ferie - tidligere sykdom`() {
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(1.mars, 31.mars))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
@@ -46,9 +46,9 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `Finner skjæringstidspunkt for periode med arbeidsdager på slutten som overlapper med sykdom hos annen arbeidsgiver`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar), orgnummer = a2)
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(24.februar, 24.mars, 100.prosent), orgnummer = a1)
@@ -112,9 +112,9 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `Finner skjæringstidspunkt for periode med arbeidsdager på slutten som overlapper med sykdom hos annen arbeidsgiver - siste skjæringstidspunkt mangler inntekt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(23.februar, 24.mars, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(23.februar, 24.mars), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar), orgnummer = a2)
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(23.februar, 24.mars, 100.prosent), orgnummer = a1)

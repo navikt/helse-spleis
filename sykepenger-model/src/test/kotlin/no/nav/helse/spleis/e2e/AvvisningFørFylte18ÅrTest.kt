@@ -26,7 +26,7 @@ internal class AvvisningFørFylte18ÅrTest : AbstractEndToEndTest() {
 
     @Test
     fun `avviser sykmeldinger for person under 18 år ved søknadstidspunkt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.oktober, 31.oktober, 100.prosent), mottatt = 1.november.atStartOfDay(), fnr = FYLLER_18_ÅR_2_NOVEMBER)
+        håndterSykmelding(Sykmeldingsperiode(1.oktober, 31.oktober), mottatt = 1.november.atStartOfDay(), fnr = FYLLER_18_ÅR_2_NOVEMBER)
         håndterSøknad(Sykdom(1.oktober, 31.oktober, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.november, fnr = FYLLER_18_ÅR_2_NOVEMBER)
         assertTrue(hendelselogg.harFunksjonelleFeilEllerVerre())
         assertForkastetPeriodeTilstander(1, START, TIL_INFOTRYGD)
@@ -34,7 +34,7 @@ internal class AvvisningFørFylte18ÅrTest : AbstractEndToEndTest() {
 
     @Test
     fun `avviser ikke sykmeldinger for person som er 18 år ved søknadstidspunkt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.oktober, 31.oktober, 100.prosent), mottatt = 2.november.atStartOfDay(), fnr = FYLLER_18_ÅR_2_NOVEMBER)
+        håndterSykmelding(Sykmeldingsperiode(1.oktober, 31.oktober), mottatt = 2.november.atStartOfDay(), fnr = FYLLER_18_ÅR_2_NOVEMBER)
         håndterSøknad(Sykdom(1.oktober, 31.oktober, 100.prosent), sendtTilNAVEllerArbeidsgiver = 2.november, fnr = FYLLER_18_ÅR_2_NOVEMBER)
         assertFalse(hendelselogg.harFunksjonelleFeilEllerVerre())
         assertTilstander(0, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)

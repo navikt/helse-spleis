@@ -5,6 +5,7 @@ import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
@@ -42,7 +43,6 @@ import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.søknadDTOer
-import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -73,7 +73,7 @@ internal class VilkårsgrunnlagBuilderNyTest : AbstractEndToEndTest() {
 
     @Test
     fun `har en generasjon med vilkårsgrunnlag for periode til godkjenning`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = inntekt)
@@ -269,7 +269,7 @@ internal class VilkårsgrunnlagBuilderNyTest : AbstractEndToEndTest() {
     fun `flere skjæringstidspunkt`() {
         nyttVedtak(1.januar, 31.januar)
 
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterInntektsmelding(listOf(1.mars til 16.mars))
         håndterVilkårsgrunnlag(2.vedtaksperiode, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.VetIkke)
@@ -308,7 +308,7 @@ internal class VilkårsgrunnlagBuilderNyTest : AbstractEndToEndTest() {
 
     @Test
     fun `har med inntekt fra ghost`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = ORGNUMMER)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = ORGNUMMER)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = ORGNUMMER)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),

@@ -22,7 +22,7 @@ internal class ArbeidskategoriKodeTest : AbstractEndToEndTest() {
 
     @Test
     fun `kaster periode til Infotrygd ved avvikende arbeidskategoriKode`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -43,7 +43,7 @@ internal class ArbeidskategoriKodeTest : AbstractEndToEndTest() {
 
     @Test
     fun `kaster ikke periode til Infotrygd ved avvikende arbeidskategoriKode når skjæringstidspunktet ligger i Spleis`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         val arbeidskategorier = mapOf("05" to 1.desember(2017))

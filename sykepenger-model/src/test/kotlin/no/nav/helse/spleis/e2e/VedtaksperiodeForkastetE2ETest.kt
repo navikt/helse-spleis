@@ -36,11 +36,11 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `forkaster ikke kort periode`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar))
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(6.januar, 15.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(6.januar, 15.januar))
         håndterSøknad(Sykdom(6.januar, 15.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar))
         håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(3.vedtaksperiode)

@@ -33,7 +33,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `Infotrygdhistorikk som ikke medfører forlengelse`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterUtbetalingshistorikk(
@@ -55,10 +55,10 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `Forlengelse uten IT-historikk`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterUtbetalingshistorikk(vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterUtbetalingshistorikk(vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
@@ -68,10 +68,10 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `GAP til infotrygdforlengelse skal vente på inntekt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(10.mars, 31.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(10.mars, 31.mars))
         håndterSøknad(Sykdom(10.mars, 31.mars, 100.prosent))
         håndterUtbetalingshistorikk(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -84,7 +84,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `spør etter infotrygdhistorikk`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
         assertEtterspurt(
@@ -98,7 +98,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `spør om utbetalingshistorikk i AvventerInntektsmeldingEllerHistorikk ved påminnelse`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDate.EPOCH.atStartOfDay())
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)

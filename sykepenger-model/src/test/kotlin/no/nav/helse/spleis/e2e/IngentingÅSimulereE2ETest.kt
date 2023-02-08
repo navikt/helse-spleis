@@ -24,7 +24,7 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
     @Test
     fun `forlenger et vedtak med bare helg`() {
         nyttVedtak(1.januar, 19.januar)
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar))
         håndterSøknad(Sykdom(20.januar, 21.januar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -35,7 +35,7 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
     @Test
     fun `førstegangsbehandling på eksisterende utbetaling med bare helg`() {
         nyttVedtak(1.januar, 18.januar)
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar))
         håndterSøknad(Sykdom(20.januar, 21.januar, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode)
         assertTilstander(
@@ -50,7 +50,7 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
     @Test
     fun `forlenger et vedtak med bare helg og litt ferie`() {
         nyttVedtak(1.januar, 19.januar)
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 23.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 23.januar))
         håndterSøknad(Sykdom(20.januar, 23.januar, 100.prosent), Ferie(22.januar, 23.januar))
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -67,7 +67,7 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `tomt simuleringsresultat`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar))
         håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode)

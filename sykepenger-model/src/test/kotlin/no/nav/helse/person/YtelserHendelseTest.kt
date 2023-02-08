@@ -51,7 +51,7 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
             person.håndter(ytelser(vedtaksperiodeIdInnhenter = { UUID.randomUUID() }))
         }
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         person.håndter(ytelser(1.vedtaksperiode))
@@ -145,7 +145,7 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
         svangerskapsytelse: Periode? = null,
         ugyldigePerioder: List<UgyldigPeriode> = emptyList()
     ) : Ytelser {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
         val ytelser = ytelser(
@@ -167,7 +167,7 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
     }
 
     private fun håndterUgyldigYtelser() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode)

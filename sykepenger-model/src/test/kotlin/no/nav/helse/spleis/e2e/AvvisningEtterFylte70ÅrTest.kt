@@ -36,7 +36,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
     fun `Person over 70 får alle dager etter AGP avvist med Over70 som begrunnelse`() {
         person = createTestPerson(FYLLER_70_FJORTENDE_JANUAR, FYLLER_70_FJORTENDE_JANUAR_FØDSELSDATO)
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -69,7 +69,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
     fun `Får ikke plutselig penger igjen etter 26 uker hvis over 70 år`() {
         person = createTestPerson(FYLLER_70_TIENDE_JANUAR, FYLLER_70_TIENDE_JANUAR_FØDSELSDATO)
 
-        håndterSykmelding(Sykmeldingsperiode(20.desember(2017), 9.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(20.desember(2017), 9.januar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(20.desember(2017), 9.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(20.desember(2017) til 4.januar))
@@ -79,7 +79,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterSykmelding(Sykmeldingsperiode(11.juli, 31.juli, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(11.juli, 31.juli))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(11.juli, 31.juli, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode)
         håndterInntektsmelding(listOf(11.juli til 26.juli))
@@ -100,7 +100,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
     fun `Maksdato settes til dagen før 70årsdagen uavhengig av opptjente sykedager dersom person fyller 70 i perioden`() {
         person = createTestPerson(FYLLER_70_TIENDE_JANUAR, FYLLER_70_TIENDE_JANUAR_FØDSELSDATO)
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -115,7 +115,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
     fun `Maksdato settes til dagen før 70årsdagen også for perioder etter fylte 70`() {
         person = createTestPerson(FYLLER_70_TIENDE_JANUAR, FYLLER_70_TIENDE_JANUAR_FØDSELSDATO)
 
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.mars, 31.mars, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.mars til 16.mars))
@@ -130,7 +130,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
     fun `Maksdato settes til virkedagen før 70årsdagen hvis bursdagen er på en søndag`() {
         person = createTestPerson(FYLLER_70_FJORTENDE_JANUAR, FYLLER_70_FJORTENDE_JANUAR_FØDSELSDATO)
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -144,7 +144,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
     fun `Maksdato settes til virkedagen før 70årsdagen hvis bursdagen er på en mandag`() {
         person = createTestPerson(FYLLER_70_TOOGTYVENDE_JANUAR, FYLLER_70_TOOGTYVENDE_JANUAR_FØDSELSDATO)
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.januar til 16.januar))

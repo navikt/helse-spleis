@@ -1,11 +1,9 @@
 package no.nav.helse.person
 
-import java.time.LocalDateTime
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -15,7 +13,7 @@ internal class SykmeldingHendelseTest : AbstractEndToEndTest() {
 
     @Test
     fun `Sykmelding skaper Arbeidsgiver og Sykmeldingsperiode`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
+        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar)))
         assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre())
         assertTrue(person.personLogg.harAktiviteter())
         assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre())
@@ -25,8 +23,8 @@ internal class SykmeldingHendelseTest : AbstractEndToEndTest() {
 
     @Test
     fun `To søknader uten overlapp`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
-        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100.prosent)))
+        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar)))
+        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar)))
         assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre())
         assertTrue(person.personLogg.harAktiviteter())
         assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre())
@@ -36,7 +34,6 @@ internal class SykmeldingHendelseTest : AbstractEndToEndTest() {
 
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode) =
         a1Hendelsefabrikk.lagSykmelding(
-            sykeperioder = sykeperioder,
-            sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
+            sykeperioder = sykeperioder
         )
 }

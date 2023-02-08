@@ -4,7 +4,6 @@ import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_3
@@ -67,7 +66,6 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
         økonomi: Økonomi,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) {
-        if (kilde.sykmelding) return kildeSykmelding.leggTil(dato)
         periodebuilder.arbeidsgiverperiodedag(dato, økonomi, kilde)
         builder.addArbeidsgiverperiodedag(dato, inntekter.medInntekt(dato, nåværendeArbeidsgiverperiode))
     }
@@ -77,7 +75,6 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
     }
 
     override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
-        if (kilde.sykmelding) return kildeSykmelding.leggTil(dato)
         if (dato.erHelg()) return builder.addHelg(dato, inntekter.utenInntekt(dato, økonomi, nåværendeArbeidsgiverperiode))
         val medUtbetalingsopplysninger = when (dato in beregningsperiode) {
             true -> inntekter.medUtbetalingsopplysninger(dato, nåværendeArbeidsgiverperiode, økonomi, manglerRefusjonsopplysning)
@@ -102,10 +99,5 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
     override fun arbeidsgiverperiodeFerdig() {
         periodebuilder.arbeidsgiverperiodeFerdig()
         sisteArbeidsgiverperiode = periodebuilder.build()
-    }
-
-    private companion object {
-        private val SykdomstidslinjeHendelse.Hendelseskilde.sykmelding get() = erAvType(Sykmelding::class)
-        private fun MutableSet<LocalDate>.leggTil(dag: LocalDate) { add(dag) }
     }
 }

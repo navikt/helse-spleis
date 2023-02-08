@@ -66,7 +66,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
 
     @Test
     fun `sender med ghost tidslinjer til speil`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -120,9 +120,9 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
 
     @Test
     fun `sender med ghost tidslinjer til speil med flere arbeidsgivere ulik fom`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(4.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(4.januar, 31.januar), orgnummer = a2)
         håndterSøknad(Sykdom(4.januar, 31.januar, 100.prosent), orgnummer = a2)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
@@ -184,7 +184,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
 
     @Test
     fun `lager ikke ghosts for forkastede perioder med vilkårsgrunnlag fra spleis`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a2)
@@ -192,7 +192,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false, orgnummer = a2)
 
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar), orgnummer = a1)
         håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -244,7 +244,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
 
     @Test
     fun `skal ikke lage ghosts for gamle arbeidsgivere`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2017), 20.januar(2017), 100.prosent), orgnummer = a3)
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2017), 20.januar(2017)), orgnummer = a3)
         håndterSøknad(Sykdom(1.januar(2017), 20.januar(2017), 100.prosent), orgnummer = a3)
         håndterInntektsmelding(listOf(1.januar(2017) til 16.januar(2017)), orgnummer = a3)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a3)
@@ -253,7 +253,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = true, orgnummer = a3)
         håndterUtbetalt(orgnummer = a3)
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -312,7 +312,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
 
     @Test
     fun `ghost periode kuttes ved skjæringstidspunkt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(3.januar til 18.januar), førsteFraværsdag = 3.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -364,7 +364,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
 
     @Test
     fun `arbeidsforhold uten sykepengegrunnlag de tre siste månedene før skjæringstidspunktet skal ikke ha ghostperioder`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         val utbetalinger = arrayOf(
             ArbeidsgiverUtbetalingsperiode(a2, 1.januar(2017), 31.januar(2017), 100.prosent, 1000.daglig)
         )
@@ -406,7 +406,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
 
     @Test
     fun `legger ved sammenlignignsgrunnlag og sykepengegrunnlag for deaktiverte arbeidsforhold`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -464,7 +464,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
 
     @Test
     fun `deaktiverte arbeidsforhold vises i speil selvom sammenligninggrunnlag og sykepengegrunnlag ikke er rapportert til A-ordningen enda`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -503,7 +503,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
 
     @Test
     fun `legger ved sammenligningsgrunnlag ved manglende sykepengegrunnlag`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -558,7 +558,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
 
     @Test
     fun `deaktivert arbeidsforhold blir med i vilkårsgrunnlag`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(
@@ -616,7 +616,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
     fun `Skal ikke ta med inntekt på vilkårsgrunnlaget som mangler både sykepengegrunnlag og sammenligningsgrunnlag på skjæringstidspunktet`() {
         nyttVedtak(1.januar(2017), 31.januar(2017), orgnummer = a2)
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -652,7 +652,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
     fun `ikke ta med sykepengegrunnlag fra a-ordningen dersom det ikke er rapportert inntekt de 2 siste mnd`() {
         nyttVedtak(1.januar(2017), 31.januar(2017), orgnummer = a2)
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
 
@@ -688,7 +688,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
 
     @Test
     fun `Ghostpølse forsvinner ikke etter overstyring av ghost-inntekt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -738,7 +738,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
 
     @Test
     fun `Ghosten finnes i vilkårsgrunnlaget selvom ikke har noen ingen beregning enda`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -830,7 +830,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
 
     @Test
     fun `Finner riktig ghostpølse etter overstyring av ghost-inntekt selvom begge arbeidsgiverne har saksbehandlerinntekt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(

@@ -29,10 +29,10 @@ internal class InfotrygdInntektE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `krever ikke inntekt for Infotrygdperioder`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
-        håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar))
         håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
@@ -45,10 +45,10 @@ internal class InfotrygdInntektE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `krever ikke inntekt for Infotrygdperioder utbetalt etter vilkårsprøving`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
-        håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar))
         håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 10.februar)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -65,10 +65,10 @@ internal class InfotrygdInntektE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `krever ikke inntekt for Infotrygdperioder utbetalt etter utbetaling i spleis`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
-        håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar))
         håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 10.februar)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -77,7 +77,7 @@ internal class InfotrygdInntektE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 10.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 10.mars))
         håndterSøknad(Sykdom(1.mars, 10.mars, 100.prosent))
         håndterUtbetalingshistorikk(3.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)

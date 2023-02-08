@@ -28,7 +28,7 @@ internal class RutingAvSøknadOppgaverTest : AbstractEndToEndTest() {
 
     @Test
     fun `dersom vi har en nærliggende utbetaling og vi mottar overlappende søknader - skal det opprettes oppgave i speilkøen i gosys`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         val im = håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -37,7 +37,7 @@ internal class RutingAvSøknadOppgaverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 10.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 10.februar))
         val søknadId = håndterSøknad(Sykdom(20.januar, 10.februar, 100.prosent))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
@@ -47,10 +47,10 @@ internal class RutingAvSøknadOppgaverTest : AbstractEndToEndTest() {
 
     @Test
     fun `dersom vi IKKE har en nærliggende utbetaling og vi mottar overlappende søknader - skal det opprettes oppgave i den vanlige gosyskøen`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         val søknadId1 = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 10.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 10.februar))
         val søknadId2 = håndterSøknad(Sykdom(20.januar, 10.februar, 100.prosent))
         /*
         søknadId2 kommer med i to opprett_oppgave-eventer her fordi første gang blir den kalt fra
@@ -65,11 +65,11 @@ internal class RutingAvSøknadOppgaverTest : AbstractEndToEndTest() {
 
     @Test
     fun `dersom vi IKKE har en nærliggende utbetaling og vi mottar søknad som overlapper med periode i AUU - skal det opprettes oppgave i den vanlige gosyskøen`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
 
-        håndterSykmelding(Sykmeldingsperiode(14.januar, 10.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(14.januar, 10.februar))
         val søknadId2 = håndterSøknad(Sykdom(14.januar, 10.februar, 100.prosent))
         /*
         Her blir ikke 1.vedtaksperiode forkastet fordi den står i AvsluttetUtenUtbetaling, derfor sender vi kun ut et

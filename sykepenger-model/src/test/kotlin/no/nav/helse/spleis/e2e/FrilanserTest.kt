@@ -22,7 +22,7 @@ internal class FrilanserTest : AbstractEndToEndTest() {
 
     @Test
     fun `Person med frilanserinntekt i løpet av de siste 3 månedene sendes til infotrygd`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(
@@ -63,7 +63,7 @@ internal class FrilanserTest : AbstractEndToEndTest() {
 
     @Test
     fun `Person med frilanserarbeidsforhold uten inntekt i løpet av de siste 3 månedene skal `() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(

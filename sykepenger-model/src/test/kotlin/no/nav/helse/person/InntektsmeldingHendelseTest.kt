@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -9,7 +10,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -34,7 +34,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
 
     @Test
     fun `skjæringstidspunkt oppdateres i vedtaksperiode når inntektsmelding håndteres`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
+        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar)))
         person.håndter(søknad(Sykdom(6.januar, 20.januar, 100.prosent)))
         assertEquals(6.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         person.håndter(inntektsmelding(førsteFraværsdag = 1.januar))
@@ -53,7 +53,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
             begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
         assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist()).harFunksjonelleFeilEllerVerre())
-        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
+        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar)))
         person.håndter(søknad(Sykdom(6.januar, 20.januar, 100.prosent)))
         person.håndter(inntektsmelding)
         assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -72,8 +72,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
         )
 
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode) = a1Hendelsefabrikk.lagSykmelding(
-        sykeperioder = sykeperioder,
-        sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
+        sykeperioder = sykeperioder
     )
 
     private fun søknad(vararg perioder: Søknadsperiode) = a1Hendelsefabrikk.lagSøknad(

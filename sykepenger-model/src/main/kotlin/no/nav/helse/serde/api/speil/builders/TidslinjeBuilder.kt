@@ -6,7 +6,6 @@ import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.person.SykdomstidslinjeVisitor
@@ -141,7 +140,6 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
     private fun SykdomstidslinjeHendelse.Hendelseskilde.toKildetypeDTO() = when {
         erAvType(Inntektsmelding::class) -> SykdomstidslinjedagKildetype.Inntektsmelding
         erAvType(Søknad::class) -> SykdomstidslinjedagKildetype.Søknad
-        erAvType(Sykmelding::class) -> SykdomstidslinjedagKildetype.Sykmelding
         erAvType(OverstyrTidslinje::class) -> SykdomstidslinjedagKildetype.Saksbehandler
         else -> SykdomstidslinjedagKildetype.Ukjent
     }

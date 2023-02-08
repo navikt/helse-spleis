@@ -6,7 +6,6 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.serde.JsonBuilder
 import no.nav.helse.somPersonidentifikator
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -21,8 +20,8 @@ internal class SykmeldingsperioderBuilderTest() {
             "orgnummer"
         )
 
-        sykmeldingsperioder.lagre(fabrikk.lagSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent)))
-        sykmeldingsperioder.lagre(fabrikk.lagSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent)))
+        sykmeldingsperioder.lagre(fabrikk.lagSykmelding(Sykmeldingsperiode(1.januar, 31.januar)))
+        sykmeldingsperioder.lagre(fabrikk.lagSykmelding(Sykmeldingsperiode(1.mars, 31.mars)))
 
         val sykmeldingsperioderMap = mutableListOf<Map<String, Any>>()
         val sykmeldingsperioderState = JsonBuilder.SykmeldingsperioderState(sykmeldingsperioderMap)

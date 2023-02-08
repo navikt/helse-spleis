@@ -12,9 +12,9 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.serde.reflection.castAsList
 import no.nav.helse.serde.reflection.castAsMap
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -25,8 +25,8 @@ internal class AvstemmingTest : AbstractEndToEndTest() {
 
     @Test
     fun avstemmer() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 3.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 3.januar))
         håndterSøknad(Sykdom(1.januar, 2.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 3.januar, 100.prosent))
         nyttVedtak(1.februar, 20.februar, 100.prosent)

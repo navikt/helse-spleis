@@ -35,10 +35,10 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
     @Test
     fun `vilkårsgrunnlag deles med påfølgende tilstøtende perioder`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(5.april, 30.april, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
+        håndterSykmelding(Sykmeldingsperiode(5.april, 30.april))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
@@ -82,10 +82,10 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
     @Test
     fun `vilkårsgrunnlag deles med foregående`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(5.april, 30.april, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
+        håndterSykmelding(Sykmeldingsperiode(5.april, 30.april))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -101,13 +101,13 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
     @Test
     fun `inntektsmelding bryter ikke opp forlengelse`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(18.januar, 1.februar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(18.januar, 1.februar)), førsteFraværsdag = 4.mars)
 
@@ -149,10 +149,10 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
     @Test
     fun `setter ikke inntektsmeldingId flere ganger`() {
-        håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar))
         håndterSøknad(Sykdom(20.februar, 28.februar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         val søknadId = håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
 
         val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(20.februar, 8.mars)), 20.februar)
@@ -180,8 +180,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
     @Test
     fun `vilkårsgrunnlag tilbakestilles når vi ikke er en forlengelse likevel`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(22.januar, 22.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar))
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 22.februar))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterSøknad(
             Sykdom(1.januar, 21.januar, 100.prosent),

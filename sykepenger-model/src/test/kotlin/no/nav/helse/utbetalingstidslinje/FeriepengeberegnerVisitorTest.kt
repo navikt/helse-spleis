@@ -4,6 +4,7 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import java.time.Year
 import java.util.UUID
+import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -32,7 +33,6 @@ import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
-import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -369,7 +369,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         syktil: LocalDate = 31.januar,
         orgnummer: String = ORGNUMMER
     ) {
-        håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = orgnummer)
+        håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil), orgnummer = orgnummer)
         håndterSøknadMedValidering(
             observatør.sisteVedtaksperiode(),
             Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent),
@@ -395,7 +395,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         syktil: LocalDate = 31.januar,
         orgnummer: String = ORGNUMMER
     ) {
-        håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = orgnummer)
+        håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil), orgnummer = orgnummer)
         håndterSøknadMedValidering(
             observatør.sisteVedtaksperiode(),
             Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent),
@@ -422,8 +422,8 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         arbeidsgiverperiode: Periode = 1.januar til 16.januar,
         syktil: LocalDate = 31.januar
     ) {
-        håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil), orgnummer = a2)
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a1)
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a2)
         håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)

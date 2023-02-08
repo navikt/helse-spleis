@@ -82,7 +82,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         assertTilstandFørInnteksmeldingHensyntas()
 
-        håndterSykmelding(Sykmeldingsperiode(5.mars, 31.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(5.mars, 31.mars))
         // Arbeidsgiver sender inntektsmelding for forlengelse i Mars _før_ vi møttar søknad.
         // Så lenge det ikke treffer noen vedtaksperiode i Spleis skjer det ingenting.
         // Personen vært frisk 1. & 2.Mars, så er nytt skjæringstidspunkt, men samme arbeidsgiverperiode

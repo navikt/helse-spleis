@@ -13,8 +13,8 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SI_3
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SI_3
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Inntektkilde
@@ -52,7 +52,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     fun `Dødsdato ligger på person`() {
         val fom = 1.januar
         val tom = 31.januar
-        håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(fom, tom))
         håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = fom.plusDays(1))
         håndterInntektsmelding(listOf(fom til fom.plusDays(15)))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -63,7 +63,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `Negativt nettobeløp på simulering skal gi warning`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -83,7 +83,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `Skal ikke ha varsel om flere inntektsmeldinger ved replay av samme IM`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -98,7 +98,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `Viser inntektsgrunnlag for arbeidsforhold som startet innen 3 måneder før skjæringstidspunktet, selvom vi ikke har inntekt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -221,7 +221,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `endring i refusjon`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT, null, endringerIRefusjon = listOf(
             Inntektsmelding.Refusjon.EndringIRefusjon(INGEN, 1.februar))))
@@ -266,7 +266,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `Endring til ingen refusjon i forlengelsen`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), 1.februar, refusjon = Inntektsmelding.Refusjon(INGEN, null))
         håndterYtelser(2.vedtaksperiode)

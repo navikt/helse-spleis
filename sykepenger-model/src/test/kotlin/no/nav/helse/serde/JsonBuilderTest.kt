@@ -4,10 +4,12 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import java.util.UUID
+import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -49,13 +51,12 @@ import no.nav.helse.juli
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.oktober
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -69,7 +70,6 @@ import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -635,8 +635,7 @@ class JsonBuilderTest {
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar
     ) = hendelsefabrikk.lagSykmelding(
-        sykeperioder = arrayOf(Sykmeldingsperiode(fom, tom, 100.prosent)),
-        sykmeldingSkrevet = fom.atStartOfDay(),
+        sykeperioder = arrayOf(Sykmeldingsperiode(fom, tom)),
         id = hendelseId
     )
 

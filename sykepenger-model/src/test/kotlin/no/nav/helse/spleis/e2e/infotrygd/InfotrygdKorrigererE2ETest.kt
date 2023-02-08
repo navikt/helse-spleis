@@ -58,7 +58,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `infotrygd korrigerer arbeid gjenopptatt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(29.januar, 31.januar))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -66,7 +66,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar))
         håndterSøknad(Sykdom(1.februar, 16.februar, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 29.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 29.januar, INNTEKT, true)
@@ -79,7 +79,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
     fun `skjæringstidspunkt endres som følge av infotrygdperiode`() {
         nyPeriode(1.januar til 1.januar, ORGNUMMER)
         håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.now().minusDays(2))
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar))
         håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
