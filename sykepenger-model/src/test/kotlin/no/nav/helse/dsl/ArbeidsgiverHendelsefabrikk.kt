@@ -37,9 +37,9 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FØDSELSDATO
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -92,6 +92,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
         permittert: Boolean = false,
         korrigerer: UUID? = null,
+        utenlandskSykmelding: Boolean = false,
         opprinneligSendt: LocalDate? = null,
         aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
     ): Søknad {
@@ -100,6 +101,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             meldingsreferanseId = id,
             fnr = personidentifikator.toString(),
             aktørId = aktørId,
+            personopplysninger = personopplysninger,
             orgnummer = organisasjonsnummer,
             perioder = listOf(*perioder),
             andreInntektskilder = andreInntektskilder,
@@ -110,7 +112,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             korrigerer = korrigerer,
             opprinneligSendt = opprinneligSendt?.atStartOfDay(),
             aktivitetslogg = aktivitetslogg,
-            personopplysninger = personopplysninger
+            utenlandskSykmelding = utenlandskSykmelding
         ).apply {
             søknader.add(this)
         }

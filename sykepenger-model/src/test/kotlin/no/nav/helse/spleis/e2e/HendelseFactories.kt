@@ -44,17 +44,17 @@ import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.AbstractPersonTest.Companion.AKTØRID
 import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FØDSELSDATO
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.sisteBehov
 import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.fail
 
@@ -128,6 +128,7 @@ internal fun AbstractEndToEndTest.søknad(
     sykmeldingSkrevet: LocalDateTime? = null,
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
     fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
+    utenlandskSykmelding: Boolean = false,
     korrigerer: UUID? = null,
     opprinneligSendt: LocalDate? = null,
     merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
@@ -139,6 +140,7 @@ internal fun AbstractEndToEndTest.søknad(
     sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
     sykmeldingSkrevet = sykmeldingSkrevet ?: Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay(),
     korrigerer = korrigerer,
+    utenlandskSykmelding = utenlandskSykmelding,
     opprinneligSendt = opprinneligSendt,
     merknaderFraSykmelding = merknaderFraSykmelding,
     permittert = permittert

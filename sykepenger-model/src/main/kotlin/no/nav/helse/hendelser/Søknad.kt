@@ -4,26 +4,26 @@ import java.io.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.Alder
+import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerEtter
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.subsumsjonsFormat
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.Sykmeldingsperioder
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.*
-import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.Dagturnering
-import no.nav.helse.Alder
 import no.nav.helse.økonomi.Prosentdel
 
 class Søknad(
@@ -40,7 +40,8 @@ class Søknad(
     sykmeldingSkrevet: LocalDateTime,
     private val korrigerer: UUID?,
     private val opprinneligSendt: LocalDateTime?,
-    aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+    private val utenlandskSykmelding: Boolean,
+    aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class, aktivitetslogg, personopplysninger) {
 
     private val sykdomsperiode: Periode
@@ -75,6 +76,7 @@ class Søknad(
         if (permittert) varsel(RV_SØ_1)
         merknaderFraSykmelding.forEach { it.valider(this) }
         if (sykdomstidslinje.any { it is Dag.ForeldetSykedag }) varsel(RV_SØ_2)
+        if (utenlandskSykmelding) funksjonellFeil(RV_SØ_29)
         return this
     }
 
@@ -87,6 +89,11 @@ class Søknad(
             }
         }
         return this
+    }
+
+    internal fun utenlandskSykmelding(): Boolean {
+        if (utenlandskSykmelding) return true
+        return false
     }
 
     internal fun forUng(alder: Alder) = alder.forUngForÅSøke(sendtTilNAVEllerArbeidsgiver.toLocalDate()).also {

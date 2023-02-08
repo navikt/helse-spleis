@@ -43,6 +43,7 @@ enum class Varselkode(
     RV_SØ_26("Søknaden inneholder Feriedager utenfor perioden søknaden gjelder for", avviklet = true),
     RV_SØ_27("Mottatt søknad out of order innenfor 18 dager til neste"),
     RV_SØ_28("Søknad har mindre enn 20 dagers gap til en forkastet periode"),
+    RV_SØ_29("Søknaden er opprettet fra en utenlandsk sykmelding"),
 
     // OO: Out-of-order
     RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne."),

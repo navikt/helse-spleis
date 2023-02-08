@@ -1,7 +1,7 @@
 val mainClass = "no.nav.helse.AppKt"
 
 val innteksmeldingKontraktVersion = "2020.04.06-ab8f786"
-val syfokafkaVersion = "2022.10.28-10.24-aa0eced7"
+val syfokafkaVersion = "2022.12.21-07.53-20bd43a2"
 val mockkVersion = "1.12.4"
 val jsonSchemaValidatorVersion = "1.0.70"
 val jsonassertVersion = "1.5.0"

@@ -21,6 +21,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
     private var korrigerer: UUID? = null
     private var opprinneligSendt: LocalDateTime? = null
     private var harAndreInntektskilder: Boolean = false
+    private var utenlandskSykmelding: Boolean = false
 
     internal fun build() = Søknad(
         meldingsreferanseId = meldingsreferanseId,
@@ -35,11 +36,16 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         sykmeldingSkrevet = sykmeldingSkrevet,
         korrigerer = korrigerer,
         opprinneligSendt = opprinneligSendt,
-        personopplysninger = personopplysninger
+        personopplysninger = personopplysninger,
+        utenlandskSykmelding = utenlandskSykmelding
     )
 
     override fun inntektskilde(andreInntektskilder: Boolean) = apply {
         harAndreInntektskilder = andreInntektskilder
+    }
+
+    override fun utenlandskSykmelding(utenlandsk: Boolean) = apply {
+        utenlandskSykmelding = utenlandsk
     }
 
     override fun utdanning(fom: LocalDate, tom: LocalDate) = apply {

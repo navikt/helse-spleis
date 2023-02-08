@@ -29,9 +29,9 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.Personopplysninger
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -103,6 +103,7 @@ abstract class AbstractObservableTest {
         meldingsreferanseId = id,
         fnr = fnr,
         aktørId = AKTØRID,
+        personopplysninger = personopplysninger,
         orgnummer = orgnummer,
         perioder = listOf(*perioder),
         andreInntektskilder = andreInntektskilder,
@@ -112,7 +113,7 @@ abstract class AbstractObservableTest {
         sykmeldingSkrevet = sykmeldingSkrevet,
         korrigerer = null,
         opprinneligSendt = null,
-        personopplysninger = personopplysninger
+        utenlandskSykmelding = false
     )
 
     protected fun inntektsmelding(

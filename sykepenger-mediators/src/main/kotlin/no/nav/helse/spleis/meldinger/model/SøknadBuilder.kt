@@ -60,6 +60,8 @@ internal abstract class SøknadBuilder {
     internal open fun papirsykmelding(fom: LocalDate, tom: LocalDate) = apply {}
     internal open fun arbeidsgjennopptatt(fom: LocalDate, tom: LocalDate) = apply { }
 
+    internal open fun utenlandskSykmelding(utenlandsk: Boolean) = apply {}
+
     internal fun arbeidsgjennopptatt(fom: LocalDate?) = apply {
         if (fom == null) return@apply
         arbeidsgjennopptatt(fom, this.tom)
