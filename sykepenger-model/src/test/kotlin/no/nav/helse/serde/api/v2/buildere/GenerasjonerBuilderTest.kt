@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.erHelg
@@ -1705,7 +1704,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `inntektsmelding gjør at kort periode faller utenfor agp - før vilkårsprøving`() = Toggle.AUUSomFørstegangsbehandling.enable {
+    fun `inntektsmelding gjør at kort periode faller utenfor agp - før vilkårsprøving`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -1755,7 +1754,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     @Test
     @Disabled("går igjennom denne med Maxi og Simen")
-    fun `inntektsmelding for to korte perioder`() = Toggle.AUUSomFørstegangsbehandling.enable {
+    fun `inntektsmelding for to korte perioder`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -1807,7 +1806,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `avvist revurdering uten tidligere utbetaling kan forkastes`() = Toggle.AUUSomFørstegangsbehandling.enable {
+    fun `avvist revurdering uten tidligere utbetaling kan forkastes`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)

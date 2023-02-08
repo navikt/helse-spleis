@@ -3,8 +3,6 @@ package no.nav.helse.spleis.e2e.infotrygd
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.EnableToggle
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.februar
@@ -39,7 +37,6 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
 import no.nav.helse.spleis.e2e.assertSisteTilstand
-import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterPåminnelse
@@ -57,7 +54,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-@EnableToggle(Toggle.AUUSomFørstegangsbehandling::class)
 internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
 
     @Test

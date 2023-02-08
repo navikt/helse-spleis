@@ -1,8 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
-import no.nav.helse.EnableToggle
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
@@ -92,7 +90,6 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
-@EnableToggle(Toggle.AUUSomFørstegangsbehandling::class)
 internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
     @Test

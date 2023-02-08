@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.refusjon
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -141,7 +140,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `Automatisk revurdering av AUU ved inntektsmelding som mangler refusjonsopplysninger`() = Toggle.AUUSomFørstegangsbehandling.enable {
+    fun `Automatisk revurdering av AUU ved inntektsmelding som mangler refusjonsopplysninger`() {
         a1 {
             (12.juli til 17.juli i 2022).avsluttUtenUtbetaling()
             (17.august til 17.august i 2022).avsluttUtenUtbetaling()

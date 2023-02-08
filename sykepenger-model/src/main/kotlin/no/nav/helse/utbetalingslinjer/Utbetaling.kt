@@ -106,7 +106,6 @@ class Utbetaling private constructor(
     private fun erAktivEllerUbetalt() = erAktiv() || erUbetalt()
     internal fun erInFlight() = tilstand in listOf(Godkjent, Sendt, Overført, UtbetalingFeilet)
     internal fun erAvsluttet() = erUtbetalt() || tilstand == GodkjentUtenUtbetaling
-    internal fun harTidligereUtbetaling() = erAktiv() && (arbeidsgiverOppdrag.isNotEmpty() || personOppdrag.isNotEmpty())
     internal fun erAvvist() = tilstand == IkkeGodkjent
     internal fun harFeilet() = tilstand == UtbetalingFeilet
     internal fun kanIkkeForsøkesPåNy() = Oppdrag.kanIkkeForsøkesPåNy(arbeidsgiverOppdrag, personOppdrag)

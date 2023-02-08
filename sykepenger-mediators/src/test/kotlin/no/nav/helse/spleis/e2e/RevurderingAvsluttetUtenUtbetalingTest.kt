@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
-import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
@@ -15,7 +14,7 @@ import org.slf4j.LoggerFactory
 internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    fun `revurdering ved inntektsmelding for korte perioder`() = Toggle.AUUSomFørstegangsbehandling.enable {
+    fun `revurdering ved inntektsmelding for korte perioder`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 5.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 5.januar, sykmeldingsgrad = 100))
@@ -41,7 +40,7 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
     }
 
     @Test
-    fun `revurdering ved inntektsmelding for korte perioder - endring av skjæringstidspunkt`() = Toggle.AUUSomFørstegangsbehandling.enable {
+    fun `revurdering ved inntektsmelding for korte perioder - endring av skjæringstidspunkt`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 8.januar, tom = 10.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 8.januar, tom = 10.januar, sykmeldingsgrad = 100))
