@@ -1852,6 +1852,22 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Korrigerende inntektsmelding før søknad`() {
+        nyPeriode(1.januar til 16.januar)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        håndterInntektsmelding(listOf(2.januar til 17.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        // På dette tidspunktet har AUU'en lagret dagene i historikken og innsett at skjæringstidspunktet er 1.januar
+        nyPeriode(17.januar til 31.januar)
+        // IM 1 replayes først og blir lagret på 2.januar av forlengelsen -> kan ikke beregne sykepengegrunnlag
+        // IM 2 replayes deretter og blir lagret på 1.januar av forlengelsen -> kan beregne sykepengegrunnlag og går videre
+        assertInntektshistorikkForDato(INNTEKT, dato = 1.januar, førsteFraværsdag = 1.januar, inspektør = inspektør)
+        assertInntektshistorikkForDato(INNTEKT, dato = 2.januar, førsteFraværsdag = 2.januar, inspektør = inspektør)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+    }
+
+    @Test
     fun `padding med arbeidsdager før arbeidsgiverperioden`() {
         håndterSykmelding(Sykmeldingsperiode(28.januar, 16.februar, 100.prosent))
         håndterSøknad(Sykdom(28.januar, 16.februar, 100.prosent))

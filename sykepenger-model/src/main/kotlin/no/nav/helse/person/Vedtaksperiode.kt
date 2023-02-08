@@ -1468,9 +1468,10 @@ internal class Vedtaksperiode private constructor(
 
         private fun tilstandEtterInntektPåSkjæringstidspunkt(vedtaksperiode: Vedtaksperiode) = when {
             !vedtaksperiode.forventerInntekt() -> AvsluttetUtenUtbetaling
-            else -> AvventerBlokkerendePeriode.also { require(vedtaksperiode.arbeidsgiver.kanBeregneSykepengegrunnlag(vedtaksperiode.skjæringstidspunkt)) {
-                "Feil vedtaksperiode har håndtert inntekt og refusjon. Kan ikke beregne sykepengegrunnlag på skjæringstidspunkt ${vedtaksperiode.skjæringstidspunkt} for arbeidsgiver ${vedtaksperiode.arbeidsgiver.organisasjonsnummer()}"
-            }}
+            !vedtaksperiode.arbeidsgiver.kanBeregneSykepengegrunnlag(vedtaksperiode.skjæringstidspunkt) -> AvventerInntektsmeldingEllerHistorikk.also {
+                sikkerlogg.info("Har lagret inntekt, men kan ikke beregne sykepengegrunnlag på skjæringstidspunkt ${vedtaksperiode.skjæringstidspunkt} for arbeidsgiver ${vedtaksperiode.arbeidsgiver.organisasjonsnummer()}")
+            }
+            else -> AvventerBlokkerendePeriode
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
