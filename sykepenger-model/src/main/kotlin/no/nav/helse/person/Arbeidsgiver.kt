@@ -141,7 +141,7 @@ internal class Arbeidsgiver private constructor(
         }
 
         internal fun List<Arbeidsgiver>.nekterOpprettelseAvPeriode(vedtaksperiode: Vedtaksperiode, søknad: Søknad): Boolean {
-            return harPeriodeSomNekterOpprettelseAvNyPeriode(vedtaksperiode, søknad) || harForkastetVedtaksperiodeSomBlokkerBehandling(søknad)
+            return harForkastetVedtaksperiodeSomBlokkerBehandling(søknad) || harPeriodeSomNekterOpprettelseAvNyPeriode(vedtaksperiode, søknad)
         }
 
         private fun Iterable<Arbeidsgiver>.harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse: SykdomstidslinjeHendelse) =
