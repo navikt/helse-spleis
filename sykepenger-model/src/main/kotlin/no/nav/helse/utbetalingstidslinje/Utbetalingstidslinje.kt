@@ -4,9 +4,16 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.contains
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.hendelser.til
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ForeldetDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Fridag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.økonomi.Økonomi
 import no.nav.helse.økonomi.Økonomi.Companion.avgrensTilArbeidsgiverperiode
 
@@ -75,10 +82,6 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
         val tidligsteDato = this.tidligsteDato(other)
         val sisteDato = this.sisteDato(other)
         return this.utvide(tidligsteDato, sisteDato).binde(other.utvide(tidligsteDato, sisteDato))
-    }
-
-    internal fun reverse(): Utbetalingstidslinje {
-        return Utbetalingstidslinje(utbetalingsdager.asReversed())
     }
 
     internal fun harUtbetalinger() = sykepengeperiode() != null
