@@ -429,7 +429,8 @@ internal fun AbstractEndToEndTest.håndterSøknad(
     merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
     permittert: Boolean = false
 ): UUID {
-    observatør.replayInntektsmeldinger {
+    return håndterOgReplayInntektsmeldinger(orgnummer = orgnummer) {
+        søknader[id] = Triple(sendtTilNAVEllerArbeidsgiver, andreInntektskilder, perioder)
         søknad(
             id,
             *perioder,
@@ -445,18 +446,8 @@ internal fun AbstractEndToEndTest.håndterSøknad(
             merknaderFraSykmelding = merknaderFraSykmelding,
             permittert = permittert
         ).håndter(Person::håndter)
-        søknader[id] = Triple(sendtTilNAVEllerArbeidsgiver, andreInntektskilder, perioder)
-    }.forEach { vedtaksperiodeId ->
-        inntektsmeldinger
-            .mapValues { (_, gen) -> gen() }
-            .filterValues { im -> im.organisasjonsnummer() == orgnummer }
-            .forEach { (id, _) ->
-                håndterInntektsmeldingReplay(id, vedtaksperiodeId)
-            }
-        observatør.kvitterInntektsmeldingReplay(vedtaksperiodeId)
+        id
     }
-
-    return id
 }
 
 internal fun AbstractEndToEndTest.håndterInntektsmeldingMedValidering(
@@ -485,7 +476,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false
 ): UUID {
-    observatør.replayInntektsmeldinger {
+    return håndterOgReplayInntektsmeldinger(orgnummer = orgnummer) {
         inntektsmelding(
             id,
             arbeidsgiverperioder,
@@ -499,10 +490,18 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             harFlereInntektsmeldinger = harFlereInntektsmeldinger
         ).håndter(Person::håndter)
-    }.forEach { vedtaksperiodeId ->
+        id
+    }
+}
+
+private fun AbstractEndToEndTest.håndterOgReplayInntektsmeldinger(orgnummer: String, block: () -> UUID): UUID {
+    lateinit var id: UUID
+    observatør.replayInntektsmeldinger { id = block() }.forEach { vedtaksperiodeId ->
         inntektsmeldinger
-            .mapValues { (_, gen) -> gen() }
-            .filterValues { im -> im.organisasjonsnummer() == orgnummer }
+            .mapValues { (_, gen) -> gen.first to gen.second() }
+            .filterValues { (_, im) -> im.organisasjonsnummer() == orgnummer }
+            .entries
+            .sortedBy { (_, value) -> value.first }
             .forEach { (id, _) ->
                 håndterInntektsmeldingReplay(id, vedtaksperiodeId)
             }
@@ -515,7 +514,7 @@ private fun AbstractEndToEndTest.håndterInntektsmeldingReplay(
     inntektsmeldingId: UUID,
     vedtaksperiodeId: UUID
 ) {
-    val inntektsmeldinggenerator = inntektsmeldinger[inntektsmeldingId] ?: fail { "Fant ikke inntektsmelding med id $inntektsmeldingId" }
+    val inntektsmeldinggenerator = inntektsmeldinger[inntektsmeldingId]?.second ?: fail { "Fant ikke inntektsmelding med id $inntektsmeldingId" }
     inntektsmeldingReplay(inntektsmeldinggenerator(), vedtaksperiodeId)
         .håndter(Person::håndter)
 }

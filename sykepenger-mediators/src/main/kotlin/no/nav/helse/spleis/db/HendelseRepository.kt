@@ -72,7 +72,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
-                    "SELECT data FROM melding WHERE fnr = ? AND melding_type = 'INNTEKTSMELDING' ORDER BY lest_dato ASC",
+                    "SELECT data FROM melding WHERE fnr = ? AND melding_type = 'INNTEKTSMELDING' ORDER BY lest_dato DESC",
                     fnr.toLong()
                 )
                     .map { objectMapper.readTree(it.string("data")) }

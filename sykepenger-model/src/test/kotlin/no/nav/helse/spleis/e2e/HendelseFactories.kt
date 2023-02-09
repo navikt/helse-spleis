@@ -188,7 +188,7 @@ internal fun AbstractEndToEndTest.inntektsmelding(
             harFlereInntektsmeldinger = harFlereInntektsmeldinger
         )
     }
-    inntektsmeldinger[id] = inntektsmeldinggenerator
+    inntektsmeldinger[id] = LocalDateTime.now() to inntektsmeldinggenerator
     inntekter[id] = beregnetInntekt
     EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Aktivitet.Behov.Behovtype.Sykepengehistorikk)
     return inntektsmeldinggenerator().apply { hendelselogg = this }

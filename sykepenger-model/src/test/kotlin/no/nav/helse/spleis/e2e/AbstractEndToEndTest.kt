@@ -1,15 +1,16 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
-import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.person.TilstandType
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -27,7 +28,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     internal lateinit var hendelselogg: PersonHendelse
     internal val sykmeldinger = mutableMapOf<UUID, Array<out Sykmeldingsperiode>>()
     internal val søknader = mutableMapOf<UUID, Triple<LocalDate, Boolean, Array<out Søknadsperiode>>>()
-    internal val inntektsmeldinger = mutableMapOf<UUID, () -> Inntektsmelding>()
+    internal val inntektsmeldinger = mutableMapOf<UUID, Pair<LocalDateTime, () -> Inntektsmelding>>()
     internal val inntekter = mutableMapOf<UUID, Inntekt>()
 
     @BeforeEach

@@ -1863,6 +1863,17 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertInntektshistorikkForDato(INNTEKT, dato = 2.januar, førsteFraværsdag = 2.januar, inspektør = inspektør)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
     }
+    @Test
+    fun `Korrigerende inntektsmelding før søknad - velger siste inntekt`() {
+        nyPeriode(2.januar til 17.januar)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        håndterInntektsmelding(listOf(2.januar til 17.januar), beregnetInntekt = INNTEKT)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.25)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        assertInntektshistorikkForDato(INNTEKT * 1.25, dato = 1.januar, førsteFraværsdag = 1.januar, inspektør = inspektør)
+        assertInntektForDato(INNTEKT * 1.25, dato = 1.januar, inspektør = inspektør)
+    }
 
     @Test
     fun `padding med arbeidsdager før arbeidsgiverperioden`() {
