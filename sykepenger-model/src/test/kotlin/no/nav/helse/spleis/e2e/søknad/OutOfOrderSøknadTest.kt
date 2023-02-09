@@ -21,6 +21,7 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
+import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertUtbetalingsbeløp
@@ -73,7 +74,7 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertVarsel(Varselkode.RV_OO_2, 1.vedtaksperiode.filter())
+        assertIngenVarsler(1.vedtaksperiode.filter())
         assertVarsel(Varselkode.RV_OO_1, 2.vedtaksperiode.filter())
 
         håndterInntektsmelding(listOf(1.februar til 16.februar))

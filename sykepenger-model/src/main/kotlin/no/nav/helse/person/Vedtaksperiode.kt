@@ -2052,7 +2052,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             if (!vedtaksperiode.forventerInntekt()) return
-            if (!revurdering.inngåSomEndring(hendelse, vedtaksperiode)) return
             revurdering.loggDersomKorrigerendeSøknad(hendelse, "Startet omgjøring grunnet korrigerende søknad")
             hendelse.info(RV_RV_1.varseltekst)
             if (!vedtaksperiode.harNødvendigOpplysningerFraArbeidsgiver(hendelse)) {
