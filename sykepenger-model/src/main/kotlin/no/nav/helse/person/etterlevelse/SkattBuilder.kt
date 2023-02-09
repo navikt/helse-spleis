@@ -3,7 +3,7 @@ package no.nav.helse.person.etterlevelse
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.person.SkatteopplysningVisitor
+import no.nav.helse.person.inntekt.SkatteopplysningVisitor
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.økonomi.Inntekt
 

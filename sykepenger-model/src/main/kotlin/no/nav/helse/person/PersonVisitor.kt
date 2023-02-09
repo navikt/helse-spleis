@@ -3,7 +3,6 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
-import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.AlderVisitor
 import no.nav.helse.Personidentifikator
@@ -27,7 +26,7 @@ import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
-import no.nav.helse.person.inntekt.Skatteopplysning
+import no.nav.helse.person.inntekt.SkatteopplysningVisitor
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
@@ -537,19 +536,6 @@ internal interface RefusjonshistorikkVisitor {
     }
 
     fun postVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {}
-}
-
-internal interface SkatteopplysningVisitor {
-    fun visitSkatteopplysning(
-        skatteopplysning: Skatteopplysning,
-        hendelseId: UUID,
-        beløp: Inntekt,
-        måned: YearMonth,
-        type: Skatteopplysning.Inntekttype,
-        fordel: String,
-        beskrivelse: String,
-        tidsstempel: LocalDateTime
-    ) {}
 }
 
 internal interface InntektsmeldingVisitor {
