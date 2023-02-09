@@ -6,6 +6,7 @@ dependencies {
     implementation(project(":sykepenger-utbetaling"))
     implementation(project(":sykepenger-aktivitetslogg"))
     implementation(project(":sykepenger-etterlevelse"))
+    implementation(project(":sykepenger-inntekt"))
     implementation(libs.bundles.jackson)
     implementation(libs.bundles.logging) {
         exclude("com.fasterxml.jackson.core")
