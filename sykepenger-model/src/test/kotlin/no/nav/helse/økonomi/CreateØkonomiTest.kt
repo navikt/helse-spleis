@@ -13,6 +13,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.PeriodeData
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.utbetalingslinjer.utbetalingport
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -78,7 +79,7 @@ internal class CreateØkonomiTest {
         val data = sykdomstidslinjedag(79.5)
         createØkonomi(data).also { økonomi ->
             assertDoesNotThrow { økonomi
-                .inntekt(1200.daglig, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar), arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar)), refusjonsbeløp = 1200.daglig)
+                .inntekt(1200.daglig, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar), arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar)).utbetalingport(), refusjonsbeløp = 1200.daglig)
             }
         }
     }

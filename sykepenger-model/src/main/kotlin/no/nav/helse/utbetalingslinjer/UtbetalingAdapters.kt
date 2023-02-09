@@ -8,6 +8,7 @@ import UtbetalingHendelsePort
 import UtbetalingpåminnelsePort
 import UtbetalingsgodkjenningPort
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Simulering
@@ -19,6 +20,8 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.økonomi.ArbeidsgiverperiodePort
 import no.nav.helse.økonomi.Økonomi
 
 internal fun AnnullerUtbetaling.utbetalingport() = AnnullerUtbetalingAdapter(this)
@@ -92,4 +95,9 @@ class UtbetalingHendelseAdapter(private val hendelse: UtbetalingHendelse): Utbet
     override fun valider() {
         hendelse.valider()
     }
+}
+internal fun Arbeidsgiverperiode.utbetalingport() = ArbeidsgiverperiodeAdapter(this)
+internal class ArbeidsgiverperiodeAdapter(/*vent, burde ikke denne vært privat? Jo, det burde den, men noen brukte refleksjon i test.*/val arbeidsgiverperiode: Arbeidsgiverperiode): ArbeidsgiverperiodePort {
+    override fun firstOrNull(): LocalDate? = arbeidsgiverperiode.firstOrNull()
+    override fun toList(): List<LocalDate> = arbeidsgiverperiode.toList()
 }

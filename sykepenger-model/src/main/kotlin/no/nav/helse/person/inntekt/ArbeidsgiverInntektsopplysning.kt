@@ -11,6 +11,7 @@ import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.valider
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.validerStartdato
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.validerInntekterSisteTreMåneder
+import no.nav.helse.utbetalingslinjer.utbetalingport
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt
@@ -161,7 +162,7 @@ class ArbeidsgiverInntektsopplysning(
                     dekningsgrunnlag = inntekt.dekningsgrunnlag(dato, regler, subsumsjonObserver),
                     skjæringstidspunkt = skjæringstidspunkt,
                     `6G` = `6G`,
-                    arbeidsgiverperiode = arbeidsgiverperiode,
+                    arbeidsgiverperiode = arbeidsgiverperiode?.utbetalingport(),
                     refusjonsbeløp = refusjonsbeløp
                 )
             }
@@ -184,7 +185,7 @@ class ArbeidsgiverInntektsopplysning(
                 dekningsgrunnlag = inntekt.dekningsgrunnlag(dato, regler, subsumsjonObserver),
                 skjæringstidspunkt = skjæringstidspunkt,
                 `6G` = `6G`,
-                arbeidsgiverperiode = arbeidsgiverperiode,
+                arbeidsgiverperiode = arbeidsgiverperiode?.utbetalingport(),
                 refusjonsbeløp = refusjonsbeløp
             )
         }

@@ -44,6 +44,7 @@ import no.nav.helse.Alder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerOpptjening
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerStartdato
+import no.nav.helse.utbetalingslinjer.utbetalingport
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -281,7 +282,7 @@ internal class Sykepengegrunnlag(
             dekningsgrunnlag = INGEN,
             skjæringstidspunkt = skjæringstidspunkt,
             `6G` = `6G`,
-            arbeidsgiverperiode = arbeidsgiverperiode,
+            arbeidsgiverperiode = arbeidsgiverperiode?.utbetalingport(),
             refusjonsbeløp = INGEN
         )
     }

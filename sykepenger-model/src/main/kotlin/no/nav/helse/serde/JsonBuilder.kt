@@ -1738,7 +1738,7 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         fun økonomi(økonomi: Økonomi) = apply {
-            this.økonomiBuilder = ØkonomiJsonBuilder().also { økonomi.builder(it) }
+            this.økonomiBuilder = ØkonomiJsonBuilder().also { økonomi.builder(builder = it) }
         }
 
         fun build() = mutableMapOf<String, Any>().apply {

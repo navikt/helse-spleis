@@ -28,6 +28,7 @@ import no.nav.helse.testhelpers.U
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
+import no.nav.helse.utbetalingslinjer.ArbeidsgiverperiodeAdapter
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.UforventetDagException
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Økonomi
@@ -530,7 +531,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         }
     }
 
-    private val Økonomi.arbeidsgiverperiode get() = this.get<Arbeidsgiverperiode?>("arbeidsgiverperiode")
+    private val Økonomi.arbeidsgiverperiode get() = this.get<ArbeidsgiverperiodeAdapter?>("arbeidsgiverperiode")?.arbeidsgiverperiode
     private lateinit var teller: Arbeidsgiverperiodeteller
 
     @BeforeEach

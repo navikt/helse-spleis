@@ -7,6 +7,7 @@ import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.utbetalingslinjer.utbetalingport
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -61,7 +62,7 @@ internal class ØkonomiTest {
     @Test
     fun `overskriver ikke arbeidsgiverperiode`() {
         val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar))
-        val økonomi = Økonomi.ikkeBetalt(arbeidsgiverperiode)
+        val økonomi = Økonomi.ikkeBetalt(arbeidsgiverperiode.utbetalingport())
             .inntekt(INGEN, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar)) // spesifiserer ikke agp
 
         val builder = object : ØkonomiBuilder() {
@@ -545,5 +546,5 @@ internal class ØkonomiTest {
     private val Prosentdel.sykdomsgrad get() = Økonomi.sykdomsgrad(this)
 
     private fun Økonomi.inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, skjæringstidspunkt: LocalDate, `6G`: Inntekt, arbeidsgiverperiode: Arbeidsgiverperiode? = null) =
-        inntekt(aktuellDagsinntekt, dekningsgrunnlag, skjæringstidspunkt, `6G`, arbeidsgiverperiode, aktuellDagsinntekt)
+        inntekt(aktuellDagsinntekt, dekningsgrunnlag, skjæringstidspunkt, `6G`, arbeidsgiverperiode?.utbetalingport(), aktuellDagsinntekt)
 }

@@ -9,6 +9,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.ugyldigUtbetalingstidslinje
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.ManglerRefusjonsopplysning
+import no.nav.helse.utbetalingslinjer.utbetalingport
 import no.nav.helse.økonomi.Økonomi
 
 internal class Inntekter(
@@ -18,10 +19,10 @@ internal class Inntekter(
     private val subsumsjonObserver: SubsumsjonObserver,
     private val vedtaksperioder: List<Vedtaksperiode> = emptyList()
 ) {
-    internal fun medInntekt(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?, økonomi: Økonomi = Økonomi.ikkeBetalt(arbeidsgiverperiode)) =
+    internal fun medInntekt(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?, økonomi: Økonomi = Økonomi.ikkeBetalt(arbeidsgiverperiode?.utbetalingport())) =
         vilkårsgrunnlagHistorikk.medInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
 
-    internal fun medUtbetalingsopplysninger(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?, økonomi: Økonomi = Økonomi.ikkeBetalt(arbeidsgiverperiode), manglerRefusjonsopplysning: ManglerRefusjonsopplysning) = try {
+    internal fun medUtbetalingsopplysninger(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?, økonomi: Økonomi = Økonomi.ikkeBetalt(arbeidsgiverperiode?.utbetalingport()), manglerRefusjonsopplysning: ManglerRefusjonsopplysning) = try {
         vilkårsgrunnlagHistorikk.medUtbetalingsopplysninger(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver, manglerRefusjonsopplysning)
     } catch (exception: IllegalStateException) {
         exception.håndter(dato, vedtaksperioder)

@@ -84,6 +84,7 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.utbetalingport
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
@@ -1364,7 +1365,7 @@ internal data class PersonData(
             init {
                 builder.grad(grad)
                     .totalGrad(totalGrad)
-                    .arbeidsgiverperiode(arbeidsgiverperiode?.map { it.tilPeriode() }?.let { Arbeidsgiverperiode(it) })
+                    .arbeidsgiverperiode(arbeidsgiverperiode?.map { it.tilPeriode() }?.let { Arbeidsgiverperiode(it) }?.utbetalingport())
                     .aktuellDagsinntekt(aktuellDagsinntekt)
                     .dekningsgrunnlag(dekningsgrunnlag)
                     .skjæringstidspunkt(skjæringstidspunkt)
