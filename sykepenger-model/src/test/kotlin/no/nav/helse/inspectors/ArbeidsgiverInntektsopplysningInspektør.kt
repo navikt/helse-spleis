@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Subsumsjon
-import no.nav.helse.person.ArbeidsgiverInntektsopplysningVisitor
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningVisitor
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Infotrygd
@@ -17,7 +17,8 @@ import no.nav.helse.økonomi.Inntekt
 
 internal val ArbeidsgiverInntektsopplysning.inspektør get() = ArbeidsgiverInntektsopplysningInspektør(this)
 
-internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning) : ArbeidsgiverInntektsopplysningVisitor {
+internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning) :
+    ArbeidsgiverInntektsopplysningVisitor {
     internal lateinit var orgnummer: String
         private set
     internal lateinit var inntektsopplysning: Inntektsopplysning

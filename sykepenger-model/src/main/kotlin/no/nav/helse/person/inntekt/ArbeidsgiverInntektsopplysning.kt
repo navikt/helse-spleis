@@ -1,7 +1,6 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
-import no.nav.helse.person.ArbeidsgiverInntektsopplysningVisitor
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
