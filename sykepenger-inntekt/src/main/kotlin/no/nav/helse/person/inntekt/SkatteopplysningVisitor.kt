@@ -5,7 +5,7 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.økonomi.Inntekt
 
-internal interface SkatteopplysningVisitor {
+interface SkatteopplysningVisitor {
     fun visitSkatteopplysning(
         skatteopplysning: Skatteopplysning,
         hendelseId: UUID,

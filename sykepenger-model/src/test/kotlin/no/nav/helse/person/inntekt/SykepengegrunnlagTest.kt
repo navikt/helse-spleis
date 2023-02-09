@@ -516,7 +516,7 @@ internal class SykepengegrunnlagTest {
                                 hendelseId = UUID.randomUUID(),
                                 beløp = 25000.månedlig,
                                 måned = 1.januar.yearMonth,
-                                type = Skatteopplysning.Inntekttype.LØNNSINNTEKT,
+                                type = LØNNSINNTEKT,
                                 fordel = "",
                                 beskrivelse = "",
                                 tidsstempel = LocalDateTime.now()
@@ -592,7 +592,7 @@ internal class SykepengegrunnlagTest {
                                 hendelseId = UUID.randomUUID(),
                                 beløp = 25000.månedlig,
                                 måned = 1.januar.yearMonth,
-                                type = Skatteopplysning.Inntekttype.LØNNSINNTEKT,
+                                type = LØNNSINNTEKT,
                                 fordel = "",
                                 beskrivelse = "",
                                 tidsstempel = LocalDateTime.now()
