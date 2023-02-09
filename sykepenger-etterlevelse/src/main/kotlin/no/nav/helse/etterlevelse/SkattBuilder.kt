@@ -1,4 +1,4 @@
-package no.nav.helse.person.etterlevelse
+package no.nav.helse.etterlevelse
 
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -7,7 +7,7 @@ import no.nav.helse.person.inntekt.SkatteopplysningVisitor
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.økonomi.Inntekt
 
-internal class SkattBuilder(skatt: Skatteopplysning) : SkatteopplysningVisitor {
+class SkattBuilder(skatt: Skatteopplysning) : SkatteopplysningVisitor {
     private lateinit var inntekt: Map<String, Any>
 
     init {
@@ -43,6 +43,6 @@ internal class SkattBuilder(skatt: Skatteopplysning) : SkatteopplysningVisitor {
     }
 
     companion object {
-        internal fun Iterable<Skatteopplysning>.subsumsjonsformat(): List<Map<String, Any>> = map { SkattBuilder(it).inntekt() }
+        fun Iterable<Skatteopplysning>.subsumsjonsformat(): List<Map<String, Any>> = map { SkattBuilder(it).inntekt() }
     }
 }

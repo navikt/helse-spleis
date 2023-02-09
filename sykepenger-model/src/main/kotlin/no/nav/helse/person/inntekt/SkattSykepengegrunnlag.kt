@@ -7,7 +7,7 @@ import no.nav.helse.person.InntektsopplysningVisitor
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.harArbeidsforholdNyereEnn
 import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.person.etterlevelse.SkattBuilder.Companion.subsumsjonsformat
+import no.nav.helse.etterlevelse.SkattBuilder.Companion.subsumsjonsformat
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.sisteMåneder
 import no.nav.helse.økonomi.Inntekt
 
