@@ -250,29 +250,6 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, søknad)
     }
 
-    internal fun håndter(
-        inntektsmelding: Inntektsmelding,
-        other: UUID?,
-        vedtaksperioder: List<Vedtaksperiode>
-    ): Boolean {
-        val sammenhengendePerioder = arbeidsgiver.finnSammenhengendeVedtaksperioder(this)
-        val overlapper = overlapperMedSammenhengende(inntektsmelding, sammenhengendePerioder, other, vedtaksperioder)
-        return overlapper.also {
-            if (erAlleredeHensyntatt(inntektsmelding)) {
-                sikkerlogg.info("Vedtaksperiode med id=$id har allerede hensyntatt inntektsmeldingen med id=${inntektsmelding.meldingsreferanseId()}, replayes det en inntektsmelding unødvendig?")
-                inntektsmelding.trimLeft(periode.endInclusive)
-                return@also
-            }
-            if (it) inntektsmelding.leggTil(hendelseIder)
-            if (!it) return@also inntektsmelding.trimLeft(periode.endInclusive)
-            kontekst(inntektsmelding)
-            if (!inntektsmelding.erRelevant(periode, sammenhengendePerioder.map { periode -> periode.periode })) return@also
-            person.nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt, inntektsmelding, jurist())
-            tilstand.håndter(this, inntektsmelding)
-            inntektsmelding.trimLeft(periode.endInclusive)
-        }
-    }
-
     internal fun håndter(dager: DagerFraInntektsmelding): Boolean {
         val skalHåndtereDager = dager.skalHåndteresAv(periode)
         if (erAlleredeHensyntatt(dager.meldingsreferanseId()) || !skalHåndtereDager) {
@@ -316,22 +293,12 @@ internal class Vedtaksperiode private constructor(
         tilstand(inntektOgRefusjon, nesteTilstand())
     }
 
-    private fun håndterInntektOgRefusjon(inntektsmelding: Inntektsmelding) {
-        inntektsmeldingInfo = arbeidsgiver.addInntektsmelding(skjæringstidspunkt, inntektsmelding, jurist)
-        inntektsmelding.valider(periode, skjæringstidspunkt, finnArbeidsgiverperiode(), jurist)
-        inntektsmelding.info("Fullført behandling av inntektsmelding")
-        if (inntektsmelding.harFunksjonelleFeilEllerVerre()) return forkast(inntektsmelding)
-    }
-
     private fun håndterDager(dager: DagerFraInntektsmelding) {
         tilstand.håndterDagerFør(this, dager)
         dager.håndter(periode, arbeidsgiver)?.let { oppdatertSykdomstidslinje ->
             sykdomstidslinje = oppdatertSykdomstidslinje
         }
     }
-
-    private fun erAlleredeHensyntatt(inntektsmelding: Inntektsmelding) =
-        hendelseIder.ider().contains(inntektsmelding.meldingsreferanseId())
 
     private fun erAlleredeHensyntatt(meldingsreferanseId: UUID) =
         hendelseIder.ider().contains(meldingsreferanseId)
@@ -524,33 +491,11 @@ internal class Vedtaksperiode private constructor(
 
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) = hendelse.erRelevant(this.periode)
 
-    private fun overlapperMedSammenhengende(
-        inntektsmelding: Inntektsmelding,
-        perioder: List<Vedtaksperiode>,
-        other: UUID?,
-        vedtaksperioder: List<Vedtaksperiode>
-    ): Boolean {
-        return inntektsmelding.erRelevant(perioder.periode()) && relevantForReplay(other, perioder, vedtaksperioder)
-    }
-
     private fun sykefraværstilfelle() = person.sykefraværstilfelle(skjæringstidspunkt)
 
     private fun validerYtelserForSkjæringstidspunkt(ytelser: Ytelser) {
         person.validerYtelserForSkjæringstidspunkt(ytelser, skjæringstidspunkt)
         kontekst(ytelser) // resett kontekst til oss selv
-    }
-
-    // IM som replayes skal kunne påvirke alle perioder som er sammenhengende med replay-perioden, men også alle evt. påfølgende perioder.
-    // Dvs. IM skal -ikke- påvirke perioder _før_ replay-perioden som ikke er i sammenheng med vedtaksperioden som ba om replay
-    private fun relevantForReplay(
-        other: UUID?,
-        sammenhengendePerioder: List<Vedtaksperiode>,
-        vedtaksperioder: List<Vedtaksperiode>
-    ): Boolean {
-        if (other == null) return true // ingen replay
-        if (vedtaksperioder.none { it.id == other }) return false // perioden som ba om replay ikke finnes mer
-        if (sammenhengendePerioder.any { it.id == other }) return true // perioden som ba om replay er en del av de sammenhengende periodene som overlapper med IM (som vedtaksperioden er en del av)
-        return this etter vedtaksperioder.first { it.id == other } // vedtaksperioden er _etter_ den perioden som ba om replay
     }
 
     private fun tilstand(
@@ -570,16 +515,6 @@ internal class Vedtaksperiode private constructor(
         event.kontekst(tilstand)
         emitVedtaksperiodeEndret(event, previousState)
         tilstand.entering(this, event)
-    }
-
-    private fun håndterInntektsmelding(hendelse: Inntektsmelding, nesteTilstand: () -> Vedtaksperiodetilstand) {
-        periode = hendelse.oppdaterFom(periode)
-        oppdaterHistorikk(hendelse)
-        inntektsmeldingInfo = arbeidsgiver.addInntektsmelding(skjæringstidspunkt, hendelse, jurist())
-        hendelse.valider(periode, skjæringstidspunkt, finnArbeidsgiverperiode(), jurist())
-        hendelse.info("Fullført behandling av inntektsmelding")
-        if (hendelse.harFunksjonelleFeilEllerVerre()) return forkast(hendelse)
-        tilstand(hendelse, nesteTilstand())
     }
 
     private fun oppdaterHistorikk(hendelse: SykdomstidslinjeHendelse) {
@@ -1020,8 +955,6 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad)
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {}
-
         fun håndterDagerFør(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {}
         fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
             val arbeidsgiverperiodeFør = vedtaksperiode.finnArbeidsgiverperiode()
@@ -1211,16 +1144,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.revurderTidslinje(hendelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.inntektsmeldingInfo = vedtaksperiode.arbeidsgiver.addInntektsmelding(vedtaksperiode.skjæringstidspunkt, inntektsmelding, vedtaksperiode.jurist())
-            FunksjonelleFeilTilVarsler.wrap(inntektsmelding) {
-                inntektsmelding.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.finnArbeidsgiverperiode(), vedtaksperiode.jurist())
-            }
-            inntektsmelding.info("Fullført behandling av inntektsmelding")
-            vedtaksperiode.trengerIkkeInntektsmelding()
-            vedtaksperiode.person.gjenopptaBehandling(inntektsmelding)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
@@ -1448,15 +1371,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.trengerIkkeInntektsmelding()
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding) {
-                when {
-                    !vedtaksperiode.arbeidsgiver.kanBeregneSykepengegrunnlag(vedtaksperiode.skjæringstidspunkt) -> AvsluttetUtenUtbetaling
-                    else -> AvventerBlokkerendePeriode
-                }
-            }
-        }
-
         override fun håndterDagerFør(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
             dager.leggTilArbeidsdagerFør(vedtaksperiode.periode.start)
             vedtaksperiode.periode = dager.oppdatertFom(vedtaksperiode.periode)
@@ -1579,12 +1493,6 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            inntektsmelding.varsel(RV_IM_4)
-            vedtaksperiode.håndterInntektOgRefusjon(inntektsmelding)
-            vedtaksperiode.person.gjenopptaBehandling(inntektsmelding)
-        }
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
             inntektOgRefusjon.varsel(RV_IM_4)
             vedtaksperiode.håndterInntektOgRefusjon(inntektOgRefusjon) { AvventerBlokkerendePeriode }
@@ -1627,12 +1535,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            inntektsmelding.varsel(RV_IM_4)
-            vedtaksperiode.håndterInntektOgRefusjon(inntektsmelding)
-            vedtaksperiode.tilstand(inntektsmelding, AvventerBlokkerendePeriode)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
@@ -2097,24 +1999,6 @@ internal class Vedtaksperiode private constructor(
             inntektOgRefusjon.info("Varsler revurdering i tilfelle inntektsmelding påvirker andre perioder.")
             vedtaksperiode.person.igangsettOverstyring(
                 inntektOgRefusjon,
-                Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
-            )
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            if (!revurderingStøttet(vedtaksperiode, inntektsmelding)) {
-                return vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding)
-            }
-
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding) {this} // håndterInntektsmelding krever tilstandsendring, men vi må avvente til vi starter revurdering
-            if (inntektsmelding.harFunksjonelleFeilEllerVerre()) return
-
-            if (!vedtaksperiode.forventerInntekt()) {
-                vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
-            }
-            inntektsmelding.info("Varsler revurdering i tilfelle inntektsmelding påvirker andre perioder.")
-            vedtaksperiode.person.igangsettOverstyring(
-                inntektsmelding,
                 Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
             )
         }

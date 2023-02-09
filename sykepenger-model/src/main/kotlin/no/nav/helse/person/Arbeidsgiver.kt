@@ -500,17 +500,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID? = null) {
         inntektsmelding.kontekst(this)
-        if (vedtaksperiodeId != null) inntektsmelding.info("Replayer inntektsmelding til påfølgende perioder som overlapper.")
-        if (Toggle.HåndterInntektsmeldingOppdelt.enabled) return håndterInntektsmeldingOppdelt(inntektsmelding, vedtaksperiodeId)
-        håndterInntektsmelding(inntektsmelding, vedtaksperiodeId)
-    }
-
-    private fun håndterInntektsmelding(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID?) {
-        if (noenHarHåndtert(inntektsmelding) { håndter(inntektsmelding, vedtaksperiodeId, vedtaksperioder.toList()) }) return
-        inntektsmeldingIkkeHåndtert(inntektsmelding, vedtaksperiodeId)
-    }
-
-    private fun håndterInntektsmeldingOppdelt(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID?) {
+        if (vedtaksperiodeId != null) inntektsmelding.info("Replayer inntektsmelding.")
         val sammenhengendePerioder = sammenhengendePerioder()
         val dager = inntektsmelding.dager(sammenhengendePerioder).also {
             /* Den eventuelle "halen" som ikke håndteres av noen vedtaksperioder må legges til _først_
