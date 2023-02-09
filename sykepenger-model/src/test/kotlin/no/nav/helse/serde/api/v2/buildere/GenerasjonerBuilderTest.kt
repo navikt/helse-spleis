@@ -43,7 +43,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -110,7 +109,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
@@ -1753,7 +1751,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("går igjennom denne med Maxi og Simen")
     fun `inntektsmelding for to korte perioder`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
@@ -1772,6 +1769,13 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertFalse(arbeidsgiverperioden.erFørsteUtbetalingsdagFørEllerLik(17.januar.somPeriode()))
         assertTrue(arbeidsgiverperioden.erFørsteUtbetalingsdagFørEllerLik(18.januar.somPeriode()))
 
+        håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 2.januar)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -1780,29 +1784,10 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         0.generasjon {
             assertEquals(2, perioder.size)
             beregnetPeriode(0) avType UTBETALING medTilstand TilGodkjenning
-            uberegnetPeriode(1) medTilstand IngenUtbetaling
-        }
-
-        håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 2.januar)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        nullstillTilstandsendringer()
-        håndterUtbetalt()
-
-        håndterYtelser(2.vedtaksperiode)
-
-        assertEquals(1, generasjoner.size)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) avType UTBETALING medTilstand ForberederGodkjenning
             beregnetPeriode(1) avType UTBETALING medTilstand Utbetalt
         }
-
-        assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
     }
 
     @Test

@@ -1982,25 +1982,12 @@ internal class Vedtaksperiode private constructor(
                 return false
             }
             vedtaksperiode.håndterDager(dager)
-            if (!vedtaksperiode.forventerInntekt()) {
-                vedtaksperiode.emitVedtaksperiodeEndret(dager)
-                vedtaksperiode.person.igangsettOverstyring(
-                    dager,
-                    Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
-                )
-            }
-            return true
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
-            if (!vedtaksperiode.forventerInntekt()) return
-            if (!revurderingStøttet(vedtaksperiode, inntektOgRefusjon)) return
-            vedtaksperiode.håndterInntektOgRefusjon(inntektOgRefusjon) { this }
-            inntektOgRefusjon.info("Varsler revurdering i tilfelle inntektsmelding påvirker andre perioder.")
+            vedtaksperiode.emitVedtaksperiodeEndret(dager)
             vedtaksperiode.person.igangsettOverstyring(
-                inntektOgRefusjon,
+                dager,
                 Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
             )
+            return true
         }
 
         private fun revurderingStøttet(
