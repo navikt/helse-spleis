@@ -17,13 +17,13 @@ import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagVisitor
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningVisitor
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.InntektsmeldingVisitor
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.SkatteopplysningVisitor
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
@@ -133,18 +133,6 @@ interface RefusjonsopplysningerVisitor {
     fun postVisitRefusjonsopplysninger(refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger) {}
 }
 
-internal interface ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagVisitor : SkatteopplysningVisitor {
-    fun preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
-        arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag,
-        orgnummer: String,
-        rapportertInntekt: Inntekt
-    ) {}
-    fun postVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
-        arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag,
-        orgnummer: String,
-        rapportertInntekt: Inntekt
-    ) {}
-}
 internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisitor {
     fun preVisitSykepengegrunnlag(
         sykepengegrunnlag1: Sykepengegrunnlag,
