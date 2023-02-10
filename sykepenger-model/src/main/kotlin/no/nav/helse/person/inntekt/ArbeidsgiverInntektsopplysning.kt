@@ -6,8 +6,6 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.valider
-import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.validerStartdato
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.validerInntekterSisteTreMåneder
 import no.nav.helse.utbetalingslinjer.utbetalingport

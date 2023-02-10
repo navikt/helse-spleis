@@ -2,12 +2,10 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.økonomi.Inntekt
 
 abstract class Inntektsopplysning protected constructor(
-    protected val dato: LocalDate,
+    val dato: LocalDate,
     protected val tidsstempel: LocalDateTime
 ) {
     internal abstract fun accept(visitor: InntektsopplysningVisitor)
@@ -37,17 +35,4 @@ abstract class Inntektsopplysning protected constructor(
         oppfylt: Boolean
     ) {}
 
-    internal companion object {
-
-        internal fun List<Inntektsopplysning>.valider(aktivitetslogg: IAktivitetslogg) {
-            if (all { it is SkattSykepengegrunnlag }) {
-                aktivitetslogg.funksjonellFeil(Varselkode.RV_VV_5)
-            }
-        }
-
-        internal fun List<Inntektsopplysning>.validerStartdato(aktivitetslogg: IAktivitetslogg) {
-            if (distinctBy { it.dato }.size <= 1 && none { it is SkattSykepengegrunnlag || it is IkkeRapportert }) return
-            aktivitetslogg.varsel(Varselkode.RV_VV_2)
-        }
-    }
 }
