@@ -10,7 +10,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Periodetype
 import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.person.etterlevelse.SykdomstidslinjeBuilder.Companion.subsumsjonsformat
+import no.nav.helse.etterlevelse.SykdomstidslinjeBuilder.Companion.subsumsjonsformat
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje

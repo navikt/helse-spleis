@@ -5,7 +5,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.etterlevelse.SammenligningsgrunnlagBuilder.Companion.subsumsjonsformat
+import no.nav.helse.etterlevelse.SammenligningsgrunnlagBuilder.Companion.subsumsjonsformat
 class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
     init {
         require(inntekter.antallMåneder() <= 12) { "Forventer 12 eller færre inntektsmåneder" }

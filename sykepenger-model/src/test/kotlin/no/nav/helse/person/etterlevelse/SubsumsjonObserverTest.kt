@@ -9,9 +9,9 @@ import no.nav.helse.januar
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjonsformat
+import no.nav.helse.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjonsformat
 import no.nav.helse.etterlevelse.Tidslinjedag.Companion.dager
-import no.nav.helse.person.etterlevelse.SammenligningsgrunnlagBuilder.Companion.subsumsjonsformat
+import no.nav.helse.etterlevelse.SammenligningsgrunnlagBuilder.Companion.subsumsjonsformat
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.FRI
