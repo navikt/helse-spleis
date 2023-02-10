@@ -3,9 +3,8 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.person.Opptjening
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.harArbeidsforholdNyereEnn
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.inntekt.AnsattPeriode.Companion.harArbeidsforholdNyereEnn
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.sisteMåneder
 import no.nav.helse.økonomi.Inntekt
@@ -15,7 +14,7 @@ internal class SkattSykepengegrunnlag(
     private val hendelseId: UUID,
     dato: LocalDate,
     inntektsopplysninger: List<Skatteopplysning>,
-    private val ansattPerioder: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold>,
+    private val ansattPerioder: List<AnsattPeriode>,
     tidsstempel: LocalDateTime
 ) : AvklarbarSykepengegrunnlag(dato, tidsstempel) {
     private companion object {
@@ -103,5 +102,22 @@ internal class SkattSykepengegrunnlag(
             ansattPerioder = this.ansattPerioder + other.ansattPerioder,
             tidsstempel = this.tidsstempel
         )
+    }
+}
+
+class AnsattPeriode(
+    private val ansattFom: LocalDate,
+    private val ansattTom: LocalDate?
+) {
+    fun gjelder(skjæringstidspunkt: LocalDate) = ansattFom <= skjæringstidspunkt && (ansattTom == null || ansattTom >= skjæringstidspunkt)
+    fun harArbeidetMindreEnn(skjæringstidspunkt: LocalDate, antallMåneder: Int) =
+        ansattFom >= skjæringstidspunkt.withDayOfMonth(1).minusMonths(antallMåneder.toLong())
+    companion object {
+        fun List<AnsattPeriode>.harArbeidsforholdNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Int) =
+            harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder).isNotEmpty()
+
+        fun List<AnsattPeriode>.harArbeidetMindreEnn(skjæringstidspunkt: LocalDate, antallMåneder: Int) = this
+            .filter { it.harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder) }
+            .filter { it.gjelder(skjæringstidspunkt) }
     }
 }

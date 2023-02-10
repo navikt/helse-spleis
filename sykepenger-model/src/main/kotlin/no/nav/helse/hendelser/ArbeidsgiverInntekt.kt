@@ -10,6 +10,7 @@ import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.somAnsattPerioder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
@@ -26,7 +27,7 @@ class ArbeidsgiverInntekt(
             hendelseId = meldingsreferanseId,
             dato = skjæringstidspunkt,
             inntektsopplysninger = inntekter.map { it.somInntekt(meldingsreferanseId) },
-            ansattPerioder = ansattPerioder,
+            ansattPerioder = ansattPerioder.somAnsattPerioder(),
             tidsstempel = LocalDateTime.now()
         )
 
@@ -44,7 +45,7 @@ class ArbeidsgiverInntekt(
                     hendelseId = meldingsreferanseId,
                     dato = skjæringstidspunkt,
                     inntektsopplysninger = emptyList(),
-                    ansattPerioder = ansattPerioder,
+                    ansattPerioder = ansattPerioder.somAnsattPerioder(),
                     tidsstempel = LocalDateTime.now()
                 )
             }

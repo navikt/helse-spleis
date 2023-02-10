@@ -17,6 +17,7 @@ import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
 import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.somAnsattPerioder
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -67,7 +68,7 @@ internal class InntektshistorikkTest {
                 inntektsopplysninger = emptyList(),
                 ansattPerioder = listOf(
                     Arbeidsforhold(1.januar, null, false)
-                ),
+                ).somAnsattPerioder(),
                 tidsstempel = LocalDateTime.now()
             )
         )
@@ -88,7 +89,7 @@ internal class InntektshistorikkTest {
                 inntektsopplysninger = emptyList(),
                 ansattPerioder = listOf(
                     Arbeidsforhold(1.januar, null, true)
-                ),
+                ).somAnsattPerioder(),
                 tidsstempel = LocalDateTime.now()
             )
         )

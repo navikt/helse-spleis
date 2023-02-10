@@ -16,6 +16,7 @@ import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.inntekt.AnsattPeriode
 
 internal class Opptjening private constructor(
     private val skjæringstidspunkt: LocalDate,
@@ -97,9 +98,6 @@ internal class Opptjening private constructor(
                     && ansattTom == other.ansattTom
                     && deaktivert == other.deaktivert
 
-            internal fun harArbeidetMindreEnn(skjæringstidspunkt: LocalDate, antallMåneder: Int) =
-                ansattFom >= skjæringstidspunkt.withDayOfMonth(1).minusMonths(antallMåneder.toLong())
-
             override fun hashCode(): Int {
                 var result = ansattFom.hashCode()
                 result = 31 * result + (ansattTom?.hashCode() ?: 0)
@@ -115,18 +113,16 @@ internal class Opptjening private constructor(
 
             internal fun aktiver() = Arbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, deaktivert = false)
 
-            companion object {
-                private fun List<Arbeidsforhold>.harArbeidetMindreEnn(skjæringstidspunkt: LocalDate, antallMåneder: Int) = this
-                    .filter { it.harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder) }
-                    .filter { it.gjelder(skjæringstidspunkt) }
+            private fun somAnsattPeriode() = AnsattPeriode(ansattFom = ansattFom, ansattTom = ansattTom)
 
-                internal fun List<Arbeidsforhold>.harArbeidsforholdNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Int) =
-                    harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder).isNotEmpty()
+            companion object {
 
                 internal fun Collection<Arbeidsforhold>.opptjeningsperiode(skjæringstidspunkt: LocalDate) = this
                     .filter { !it.deaktivert }
                     .map { it.ansattFom til (it.ansattTom ?: skjæringstidspunkt) }
                     .sammenhengende(skjæringstidspunkt)
+
+                internal fun Collection<Arbeidsforhold>.somAnsattPerioder() = this.map { it.somAnsattPeriode() }
 
                 internal fun Collection<Arbeidsforhold>.ansattVedSkjæringstidspunkt(skjæringstidspunkt: LocalDate) = any { it.gjelder(skjæringstidspunkt) }
 

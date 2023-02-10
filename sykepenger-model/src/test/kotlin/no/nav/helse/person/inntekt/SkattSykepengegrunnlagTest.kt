@@ -9,6 +9,7 @@ import no.nav.helse.forrigeDag
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
+import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.somAnsattPerioder
 import no.nav.helse.person.inntekt.AvklarbarSykepengegrunnlag.Companion.avklarSykepengegrunnlag
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.yearMonth
@@ -58,7 +59,7 @@ internal class SkattSykepengegrunnlagTest {
             ),
             ansattPerioder = listOf(
                 Arbeidsforhold(EPOCH, null, false)
-            ),
+            ).somAnsattPerioder(),
             tidsstempel = LocalDateTime.now()
         )
         assertNull(emptyList<Inntektsmelding>().avklarSykepengegrunnlag(
@@ -102,7 +103,7 @@ internal class SkattSykepengegrunnlagTest {
             ),
             ansattPerioder = listOf(
                 Arbeidsforhold(EPOCH, null, false)
-            ),
+            ).somAnsattPerioder(),
             tidsstempel = LocalDateTime.now()
         )
         val skattSykepengegrunnlag2 = SkattSykepengegrunnlag(
@@ -122,7 +123,7 @@ internal class SkattSykepengegrunnlagTest {
             ),
             ansattPerioder = listOf(
                 Arbeidsforhold(EPOCH, null, false)
-            ),
+            ).somAnsattPerioder(),
             tidsstempel = LocalDateTime.now()
         )
         assertTrue(skattSykepengegrunnlag1 === emptyList<Inntektsmelding>().avklarSykepengegrunnlag(
@@ -147,7 +148,7 @@ internal class SkattSykepengegrunnlagTest {
             inntektsopplysninger = emptyList(),
             ansattPerioder = listOf(
                 Arbeidsforhold(1.februar, null, false)
-            ),
+            ).somAnsattPerioder(),
             tidsstempel = LocalDateTime.now()
         )
         val skattSykepengegrunnlag2 = SkattSykepengegrunnlag(
@@ -157,7 +158,7 @@ internal class SkattSykepengegrunnlagTest {
             inntektsopplysninger = emptyList(),
             ansattPerioder = listOf(
                 Arbeidsforhold(1.januar, null, false)
-            ),
+            ).somAnsattPerioder(),
             tidsstempel = LocalDateTime.now()
         )
         val resultat = emptyList<Inntektsmelding>().avklarSykepengegrunnlag(
