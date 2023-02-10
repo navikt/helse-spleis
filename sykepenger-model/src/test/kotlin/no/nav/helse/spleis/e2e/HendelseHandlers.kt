@@ -490,19 +490,21 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false
 ): UUID {
-    inntektsmelding(
-        id,
-        arbeidsgiverperioder,
-        beregnetInntekt = beregnetInntekt,
-        førsteFraværsdag = førsteFraværsdag,
-        refusjon = refusjon,
-        orgnummer = orgnummer,
-        harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-        arbeidsforholdId = arbeidsforholdId,
-        fnr = fnr,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-        harFlereInntektsmeldinger = harFlereInntektsmeldinger
-    ).håndter(Person::håndter)
+    håndterOgReplayInntektsmeldinger(orgnummer) {
+        inntektsmelding(
+            id,
+            arbeidsgiverperioder,
+            beregnetInntekt = beregnetInntekt,
+            førsteFraværsdag = førsteFraværsdag,
+            refusjon = refusjon,
+            orgnummer = orgnummer,
+            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+            arbeidsforholdId = arbeidsforholdId,
+            fnr = fnr,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger
+        ).håndter(Person::håndter)
+    }
     return id
 }
 

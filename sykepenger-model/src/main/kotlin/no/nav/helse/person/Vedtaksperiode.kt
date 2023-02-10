@@ -1982,7 +1982,7 @@ internal class Vedtaksperiode private constructor(
                 return false
             }
             vedtaksperiode.håndterDager(dager)
-            if (!vedtaksperiode.forventerInntekt()) {
+            if (!vedtaksperiode.forventerInntekt() || Toggle.AuuHåndtererIkkeInntekt.enabled) {
                 vedtaksperiode.emitVedtaksperiodeEndret(dager)
                 vedtaksperiode.person.igangsettOverstyring(
                     dager,
