@@ -39,7 +39,7 @@ class Utbetaling private constructor(
     private val id: UUID,
     private val korrelasjonsId: UUID,
     private val beregningId: UUID,
-    private val opprinneligPeriode: Periode?, // TODO: rename når alle utbetalinger er migrert og har periode
+    private val periode: Periode,
     private val utbetalingstidslinje: Utbetalingstidslinje,
     private val arbeidsgiverOppdrag: Oppdrag,
     private val personOppdrag: Oppdrag,
@@ -58,7 +58,7 @@ class Utbetaling private constructor(
     internal constructor(
         beregningId: UUID,
         korrelerendeUtbetaling: Utbetaling?,
-        periode: Periode?,
+        periode: Periode,
         utbetalingstidslinje: Utbetalingstidslinje,
         arbeidsgiverOppdrag: Oppdrag,
         personOppdrag: Oppdrag,
@@ -87,7 +87,6 @@ class Utbetaling private constructor(
     )
 
     private val oppdragsperiode = Oppdrag.periode(arbeidsgiverOppdrag, personOppdrag)
-    private val periode get() = oppdragsperiode?.oppdaterTom(utbetalingstidslinje.periode()) ?: utbetalingstidslinje.periode()
     private val stønadsdager get() = Oppdrag.stønadsdager(arbeidsgiverOppdrag, personOppdrag)
     private val observers = mutableSetOf<UtbetalingObserver>()
     private var forrigeHendelse: IAktivitetslogg? = null
@@ -320,7 +319,7 @@ class Utbetaling private constructor(
                     throw IllegalStateException("Dette støtter vi ikke helt enda: må annullere/opphøre ${forrigeUtbetalte.size - 1} oppdrag for å kunne kjøre frem igjen ett.")
                 }
             } else {
-                if (korrelerendeUtbetaling.oppdragsperiode != null && kladden.opphører(korrelerendeUtbetaling.oppdragsperiode)) {
+                if (kladden.opphører(korrelerendeUtbetaling.periode)) {
                     kladden.begrensTil(aktivitetslogg, sisteDato, korrelerendeUtbetaling.arbeidsgiverOppdrag, korrelerendeUtbetaling.personOppdrag)
                 } else {
                     kladden.begrensTilOgKopier(aktivitetslogg, sisteDato, korrelerendeUtbetaling.arbeidsgiverOppdrag, korrelerendeUtbetaling.personOppdrag)
@@ -342,7 +341,7 @@ class Utbetaling private constructor(
         internal fun List<Utbetaling>.aktive(periode: Periode) = this
             .aktive()
             .filter { utbetaling ->
-                utbetaling.oppdragsperiode?.overlapperMed(periode) == true || (utbetaling.utbetalingstidslinje.isNotEmpty() && utbetaling.utbetalingstidslinje.periode().endInclusive in periode)
+                utbetaling.periode.overlapperMed(periode)
             }
         private fun List<Utbetaling>.grupperUtbetalinger(filter: (Utbetaling) -> Boolean) =
             this.groupBy { it.korrelasjonsId }
@@ -355,7 +354,7 @@ class Utbetaling private constructor(
             if (other.erAnnullering()) return true // må godta annulleringer ettersom de vil rydde opp i nettopp overlappende utbetalinger
             val overlappendeUtbetalingsperioder = overlappendeUtbetalingsperioder(other)
             if (overlappendeUtbetalingsperioder.isNotEmpty()) {
-                sikkerlogg.warn("Vi har opprettet en utbetaling med oppdragsperiode ${other.oppdragsperiode} & korrelasjonsId ${other.korrelasjonsId} som overlapper med eksisterende utbetalinger $overlappendeUtbetalingsperioder")
+                sikkerlogg.warn("Vi har opprettet en utbetaling med periode ${other.periode} & korrelasjonsId ${other.korrelasjonsId} som overlapper med eksisterende utbetalinger $overlappendeUtbetalingsperioder")
             }
             return overlappendeUtbetalingsperioder.isEmpty()
         }
@@ -364,8 +363,8 @@ class Utbetaling private constructor(
             if (other.oppdragsperiode == null) return emptyList()
             return aktiveMedUtbetaling()
                 .filterNot { it.hørerSammen(other) }
-                .filter { it.oppdragsperiode?.overlapperMed(other.oppdragsperiode) == true }
-                .map { it.oppdragsperiode!! }
+                .filter { it.periode.overlapperMed(other.periode) }
+                .map { it.periode }
         }
 
         internal fun List<Utbetaling>.harNærliggendeUtbetaling(periode: Periode) =
@@ -376,7 +375,7 @@ class Utbetaling private constructor(
             id: UUID,
             korrelasjonsId: UUID,
             beregningId: UUID,
-            opprinneligPeriode: Periode?,
+            opprinneligPeriode: Periode,
             utbetalingstidslinje: Utbetalingstidslinje,
             arbeidsgiverOppdrag: Oppdrag,
             personOppdrag: Oppdrag,
@@ -395,7 +394,7 @@ class Utbetaling private constructor(
             id = id,
             korrelasjonsId = korrelasjonsId,
             beregningId = beregningId,
-            opprinneligPeriode = opprinneligPeriode,
+            periode = opprinneligPeriode,
             utbetalingstidslinje = utbetalingstidslinje,
             arbeidsgiverOppdrag = arbeidsgiverOppdrag,
             personOppdrag = personOppdrag,
@@ -434,7 +433,6 @@ class Utbetaling private constructor(
             this,
             id,
             korrelasjonsId,
-            opprinneligPeriode,
             type,
             tilstand,
             periode,
@@ -463,7 +461,6 @@ class Utbetaling private constructor(
             this,
             id,
             korrelasjonsId,
-            opprinneligPeriode,
             type,
             tilstand,
             periode,

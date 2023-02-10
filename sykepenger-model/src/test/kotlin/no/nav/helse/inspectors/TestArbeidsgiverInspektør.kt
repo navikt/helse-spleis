@@ -3,6 +3,7 @@ package no.nav.helse.inspectors
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.Arbeidsgiver
@@ -20,7 +21,6 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -293,7 +293,6 @@ internal class TestArbeidsgiverInspektør(
         utbetaling: Utbetaling,
         id: UUID,
         korrelasjonsId: UUID,
-        opprinneligPeriode: Periode?,
         type: Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         periode: Periode,
@@ -328,7 +327,6 @@ internal class TestArbeidsgiverInspektør(
         utbetaling: Utbetaling,
         id: UUID,
         korrelasjonsId: UUID,
-        opprinneligPeriode: Periode?,
         type: Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         periode: Periode,

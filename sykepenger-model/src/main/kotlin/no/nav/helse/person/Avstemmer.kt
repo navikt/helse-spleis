@@ -4,9 +4,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 
 internal class Avstemmer(person: Person) {
     private val tilstander = mutableListOf<PersonVisitor>(Initiell())
@@ -68,7 +68,6 @@ internal class Avstemmer(person: Person) {
             utbetaling: Utbetaling,
             id: UUID,
             korrelasjonsId: UUID,
-            opprinneligPeriode: Periode?,
             type: Utbetalingtype,
             tilstand: Utbetaling.Tilstand,
             periode: Periode,
@@ -107,7 +106,6 @@ internal class Avstemmer(person: Person) {
             utbetaling: Utbetaling,
             id: UUID,
             korrelasjonsId: UUID,
-            opprinneligPeriode: Periode?,
             type: Utbetalingtype,
             tilstand: Utbetaling.Tilstand,
             periode: Periode,
@@ -210,7 +208,6 @@ internal class Avstemmer(person: Person) {
             utbetaling: Utbetaling,
             id: UUID,
             korrelasjonsId: UUID,
-            opprinneligPeriode: Periode?,
             type: Utbetalingtype,
             tilstand: Utbetaling.Tilstand,
             periode: Periode,

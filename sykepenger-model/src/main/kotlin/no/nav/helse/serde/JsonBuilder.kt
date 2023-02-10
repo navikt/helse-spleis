@@ -1270,7 +1270,6 @@ internal class JsonBuilder : AbstractBuilder() {
             utbetaling: Utbetaling,
             id: UUID,
             korrelasjonsId: UUID,
-            opprinneligPeriode: Periode?,
             type: Utbetalingtype,
             tilstand: Utbetaling.Tilstand,
             periode: Periode,
@@ -1336,7 +1335,6 @@ internal class JsonBuilder : AbstractBuilder() {
             utbetaling: Utbetaling,
             id: UUID,
             korrelasjonsId: UUID,
-            opprinneligPeriode: Periode?,
             type: Utbetalingtype,
             tilstand: Utbetaling.Tilstand,
             periode: Periode,
@@ -1356,8 +1354,8 @@ internal class JsonBuilder : AbstractBuilder() {
             utbetalingMap["id"] = id
             utbetalingMap["korrelasjonsId"] = korrelasjonsId
             utbetalingMap["beregningId"] = beregningId
-            utbetalingMap["opprinneligPeriodeFom"] = opprinneligPeriode?.start
-            utbetalingMap["opprinneligPeriodeTom"] = opprinneligPeriode?.endInclusive
+            utbetalingMap["opprinneligPeriodeFom"] = periode.start // todo: rename opprinneligPeriodeFom til fom
+            utbetalingMap["opprinneligPeriodeTom"] = periode.endInclusive // todo: rename opprinneligPeriodeTom til tom
             utbetalingMap["utbetalingstidslinje"] = utbetalingstidslinjeMap
             utbetalingMap["arbeidsgiverOppdrag"] = arbeidsgiverOppdragMap
             utbetalingMap["personOppdrag"] = personOppdragMap
@@ -1510,7 +1508,6 @@ internal class JsonBuilder : AbstractBuilder() {
                 utbetaling: Utbetaling,
                 id: UUID,
                 korrelasjonsId: UUID,
-                opprinneligPeriode: Periode?,
                 type: Utbetalingtype,
                 tilstand: Utbetaling.Tilstand,
                 periode: Periode,

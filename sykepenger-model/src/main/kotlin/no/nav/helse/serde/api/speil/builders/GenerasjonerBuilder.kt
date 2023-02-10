@@ -117,7 +117,6 @@ internal class GenerasjonerBuilder(
         utbetaling: Utbetaling,
         id: UUID,
         korrelasjonsId: UUID,
-        opprinneligPeriode: Periode?,
         type: Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         periode: Periode,

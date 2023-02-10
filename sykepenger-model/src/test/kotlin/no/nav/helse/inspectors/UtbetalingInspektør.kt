@@ -55,7 +55,6 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
         utbetaling: Utbetaling,
         id: UUID,
         korrelasjonsId: UUID,
-        opprinneligPeriode: Periode?,
         type: Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         periode: Periode,

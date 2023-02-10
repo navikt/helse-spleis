@@ -548,7 +548,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
         inspektør(a2).gjeldendeUtbetalingForVedtaksperiode(3.vedtaksperiode).also {
-            assertEquals(17.januar til 31.mars, it.inspektør.periode)
+            assertEquals(16.januar til 31.mars, it.inspektør.periode)
         }
     }
 

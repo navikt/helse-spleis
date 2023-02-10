@@ -284,7 +284,7 @@ internal class UtbetalingTest {
             148
         ).also { it.opprett(aktivitetslogg) }
         assertEquals(1.januar til sisteDato, utbetaling.inspektør.utbetalingstidslinje.periode())
-        assertEquals(17.januar til sisteDato, utbetaling.inspektør.periode)
+        assertEquals(16.januar til sisteDato, utbetaling.inspektør.periode)
     }
 
     @Test
@@ -298,7 +298,7 @@ internal class UtbetalingTest {
         no.nav.helse.testhelpers.assertNotNull(annullering)
         val utbetalingInspektør = annullering.inspektør
         assertEquals(første.inspektør.korrelasjonsId, utbetalingInspektør.korrelasjonsId)
-        assertEquals(17.januar til 2.februar, utbetalingInspektør.periode)
+        assertEquals(16.januar til 2.februar, utbetalingInspektør.periode)
         assertEquals(16.januar, utbetalingInspektør.arbeidsgiverOppdrag.inspektør.periode.start)
         assertEquals(30.januar, utbetalingInspektør.arbeidsgiverOppdrag.first().inspektør.fom)
         assertEquals(17.januar, utbetalingInspektør.arbeidsgiverOppdrag.first().inspektør.datoStatusFom)

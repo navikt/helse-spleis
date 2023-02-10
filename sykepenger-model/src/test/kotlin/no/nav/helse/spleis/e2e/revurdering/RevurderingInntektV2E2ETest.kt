@@ -439,9 +439,9 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             assertEquals(februarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
 
             //assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNNANHH NNNNNHH NNNNNHH NNNNNHH NNN", revurdering.utbetalingstidslinje.toString().trim())
-            assertEquals(17.januar til 31.januar, januarutbetaling.periode)
-            assertEquals(17.januar til 28.februar, februarutbetaling.periode)
-            assertEquals(17.januar til 28.februar, revurdering.periode)
+            assertEquals(16.januar til 31.januar, januarutbetaling.periode)
+            assertEquals(16.januar til 28.februar, februarutbetaling.periode)
+            assertEquals(16.januar til 31.januar, revurdering.periode)
             assertEquals(1, revurdering.personOppdrag.size)
             assertEquals(2, revurdering.arbeidsgiverOppdrag.size)
             assertEquals(Endringskode.UEND, revurdering.arbeidsgiverOppdrag.inspektør.endringskode)
