@@ -429,7 +429,7 @@ internal fun AbstractEndToEndTest.håndterSøknad(
     merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
     permittert: Boolean = false
 ): UUID {
-    observatør.replayInntektsmeldinger {
+    håndterOgReplayInntektsmeldinger(orgnummer) {
         søknad(
             id,
             *perioder,
@@ -446,17 +446,22 @@ internal fun AbstractEndToEndTest.håndterSøknad(
             permittert = permittert
         ).håndter(Person::håndter)
         søknader[id] = Triple(sendtTilNAVEllerArbeidsgiver, andreInntektskilder, perioder)
-    }.forEach { vedtaksperiodeId ->
+    }
+    return id
+}
+
+private fun AbstractEndToEndTest.håndterOgReplayInntektsmeldinger(orgnummer: String, block: () -> Unit) {
+    observatør.replayInntektsmeldinger { block() }.forEach { vedtaksperiodeId ->
         inntektsmeldinger
-            .mapValues { (_, gen) -> gen() }
-            .filterValues { im -> im.organisasjonsnummer() == orgnummer }
+            .mapValues { (_, gen) -> gen.first to gen.second() }
+            .filterValues { (_, im) -> im.organisasjonsnummer() == orgnummer }
+            .entries
+            .sortedBy { (_, value) -> value.first }
             .forEach { (id, _) ->
                 håndterInntektsmeldingReplay(id, vedtaksperiodeId)
             }
         observatør.kvitterInntektsmeldingReplay(vedtaksperiodeId)
     }
-
-    return id
 }
 
 internal fun AbstractEndToEndTest.håndterInntektsmeldingMedValidering(
@@ -505,7 +510,7 @@ private fun AbstractEndToEndTest.håndterInntektsmeldingReplay(
     inntektsmeldingId: UUID,
     vedtaksperiodeId: UUID
 ) {
-    val inntektsmeldinggenerator = inntektsmeldinger[inntektsmeldingId] ?: fail { "Fant ikke inntektsmelding med id $inntektsmeldingId" }
+    val inntektsmeldinggenerator = inntektsmeldinger[inntektsmeldingId]?.second ?: fail { "Fant ikke inntektsmelding med id $inntektsmeldingId" }
     inntektsmeldingReplay(inntektsmeldinggenerator(), vedtaksperiodeId)
         .håndter(Person::håndter)
 }
