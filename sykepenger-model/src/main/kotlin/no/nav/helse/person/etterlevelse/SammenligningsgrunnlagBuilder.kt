@@ -49,19 +49,13 @@ internal class SammenligningsgrunnlagBuilder(sammenligningsgrunnlag: Sammenligni
             mapOf(
                 "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
                 "årMåned" to måned,
-                "type" to type.fromInntekttype(),
+                "type" to type.somStreng(),
                 "fordel" to fordel,
                 "beskrivelse" to beskrivelse
             )
         )
     }
 
-    private fun Skatteopplysning.Inntekttype.fromInntekttype() = when (this) {
-        Skatteopplysning.Inntekttype.LØNNSINNTEKT -> "LØNNSINNTEKT"
-        Skatteopplysning.Inntekttype.NÆRINGSINNTEKT -> "NÆRINGSINNTEKT"
-        Skatteopplysning.Inntekttype.PENSJON_ELLER_TRYGD -> "PENSJON_ELLER_TRYGD"
-        Skatteopplysning.Inntekttype.YTELSE_FRA_OFFENTLIGE -> "YTELSE_FRA_OFFENTLIGE"
-    }
     companion object {
         internal fun Sammenligningsgrunnlag.subsumsjonsformat(): SubsumsjonObserver.SammenligningsgrunnlagDTO = SammenligningsgrunnlagBuilder(this).build()
     }

@@ -24,11 +24,21 @@ class Skatteopplysning(
         LØNNSINNTEKT,
         NÆRINGSINNTEKT,
         PENSJON_ELLER_TRYGD,
-        YTELSE_FRA_OFFENTLIGE
+        YTELSE_FRA_OFFENTLIGE;
+        fun somStreng() = when (this) {
+            LØNNSINNTEKT -> "LØNNSINNTEKT"
+            NÆRINGSINNTEKT -> "NÆRINGSINNTEKT"
+            PENSJON_ELLER_TRYGD -> "PENSJON_ELLER_TRYGD"
+            YTELSE_FRA_OFFENTLIGE -> "YTELSE_FRA_OFFENTLIGE"
+        }
     }
 
     fun accept(visitor: SkatteopplysningVisitor) {
         visitor.visitSkatteopplysning(this, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel)
+    }
+
+    fun <T> accept(pseudoVisitor: (beløp: Inntekt, måned: YearMonth, type: String, fordel: String, beskrivelse: String) -> T) {
+        pseudoVisitor(beløp, måned, type.somStreng(), fordel, beskrivelse)
     }
 
     override fun equals(other: Any?): Boolean {
