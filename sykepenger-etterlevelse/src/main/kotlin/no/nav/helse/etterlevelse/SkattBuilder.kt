@@ -1,8 +1,9 @@
-package no.nav.helse.person.etterlevelse
+package no.nav.helse.etterlevelse
 
-import no.nav.helse.person.inntekt.Skatteopplysning
+import java.time.YearMonth
+import no.nav.helse.økonomi.Inntekt
 
-class SkattBuilder(skatt: Skatteopplysning) {
+class SkattBuilder(skatt: SkatteopplysningPort) {
     private lateinit var inntekt: Map<String, Any>
 
     init {
@@ -20,6 +21,11 @@ class SkattBuilder(skatt: Skatteopplysning) {
     fun inntekt() = inntekt
 
     companion object {
-        fun Iterable<Skatteopplysning>.subsumsjonsformat(): List<Map<String, Any>> = map { SkattBuilder(it).inntekt() }
+        fun Iterable<SkatteopplysningPort>.subsumsjonsformat(): List<Map<String, Any>> = map { SkattBuilder(it).inntekt() }
     }
+}
+
+interface SkatteopplysningPort {
+    fun <T> accept(pseudoVisitor: (beløp: Inntekt, måned: YearMonth, type: String, fordel: String, beskrivelse: String) -> T)
+
 }

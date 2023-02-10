@@ -4,6 +4,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.etterlevelse.SkattBuilder.Companion.subsumsjonsformat
+import no.nav.helse.etterlevelse.SkatteopplysningPort
 import no.nav.helse.isWithinRangeOf
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -86,5 +88,11 @@ class Skatteopplysning(
             .map { it.beløp }
             .summer()
             .div(12)
+
+        fun List<Skatteopplysning>.subsumsjonsformat() = this.map { SkatteopplysningAdapter(it) }.subsumsjonsformat()
     }
+}
+
+class SkatteopplysningAdapter(private val skatteopplysning: Skatteopplysning): SkatteopplysningPort {
+    override fun <T> accept(pseudoVisitor: (beløp: Inntekt, måned: YearMonth, type: String, fordel: String, beskrivelse: String) -> T) = skatteopplysning.accept(pseudoVisitor)
 }
