@@ -19,7 +19,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningVisitor
 import no.nav.helse.person.inntekt.Inntektshistorikk
-import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.InntektsmeldingVisitor
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
@@ -528,18 +528,6 @@ internal interface RefusjonshistorikkVisitor {
     }
 
     fun postVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {}
-}
-
-internal interface InntektsmeldingVisitor {
-    fun visitInntektsmelding(
-        inntektsmelding: Inntektsmelding,
-        id: UUID,
-        dato: LocalDate,
-        hendelseId: UUID,
-        beløp: Inntekt,
-        tidsstempel: LocalDateTime
-    ) {
-    }
 }
 
 internal interface InntekthistorikkVisitor : InntektsmeldingVisitor {

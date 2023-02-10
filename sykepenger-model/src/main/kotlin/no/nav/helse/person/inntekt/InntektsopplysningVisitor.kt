@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Subsumsjon
-import no.nav.helse.person.InntektsmeldingVisitor
 import no.nav.helse.økonomi.Inntekt
 
 internal interface InntektsopplysningVisitor : InntektsmeldingVisitor, SkatteopplysningVisitor {
