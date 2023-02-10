@@ -22,6 +22,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
+import no.nav.helse.hendelser.utbetaling.inntektPort
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
@@ -358,7 +359,7 @@ internal class SykepengegrunnlagTest {
                 leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, INGEN), LocalDateTime.now())
             }.build()),
         )
-        val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(opprinnelig, null, NullObserver)
+        val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(opprinnelig, null, NullObserver.inntektPort())
         val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", Saksbehandler(1.januar, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
         }.build())
@@ -380,7 +381,7 @@ internal class SykepengegrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(opprinnelig, null, NullObserver)
+        val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(opprinnelig, null, NullObserver.inntektPort())
         val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 2000.månedlig), LocalDateTime.now())
         }.build()
@@ -404,7 +405,7 @@ internal class SykepengegrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(opprinnelig, null, NullObserver)
+        val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(opprinnelig, null, NullObserver.inntektPort())
 
         val a1EndretInntektsopplysning = Saksbehandler(1.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
@@ -431,7 +432,7 @@ internal class SykepengegrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(opprinnelig, null, NullObserver)
+        val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(opprinnelig, null, NullObserver.inntektPort())
 
         val a1EndretInntektsopplysning = Saksbehandler(1.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
@@ -457,7 +458,7 @@ internal class SykepengegrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(opprinnelig, null, NullObserver)
+        val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(opprinnelig, null, NullObserver.inntektPort())
 
         val a3EndretInntektsopplysning = Saksbehandler(1.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val a3EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {

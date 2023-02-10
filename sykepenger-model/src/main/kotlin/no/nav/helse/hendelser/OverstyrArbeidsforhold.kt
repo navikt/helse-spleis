@@ -6,6 +6,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Opptjening
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.hendelser.utbetaling.inntektPort
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 
 class OverstyrArbeidsforhold(
@@ -40,8 +41,8 @@ class OverstyrArbeidsforhold(
         private val forklaring: String
     ) {
         internal fun overstyr(sykepengegrunnlag: Sykepengegrunnlag, subsumsjonObserver: SubsumsjonObserver) = when (deaktivert) {
-            true -> sykepengegrunnlag.deaktiver(orgnummer, forklaring, subsumsjonObserver)
-            else -> sykepengegrunnlag.aktiver(orgnummer, forklaring, subsumsjonObserver)
+            true -> sykepengegrunnlag.deaktiver(orgnummer, forklaring, subsumsjonObserver.inntektPort())
+            else -> sykepengegrunnlag.aktiver(orgnummer, forklaring, subsumsjonObserver.inntektPort())
         }
 
         internal fun overstyr(opptjening: Opptjening, subsumsjonObserver: SubsumsjonObserver) = when (deaktivert) {

@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.harArbeidsforholdNyereEnn
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.etterlevelse.SkattBuilder.Companion.subsumsjonsformat
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.sisteMåneder
 import no.nav.helse.økonomi.Inntekt
@@ -64,7 +63,7 @@ internal class SkattSykepengegrunnlag(
         return beløp
     }
 
-    override fun subsumerSykepengegrunnlag(subsumsjonObserver: SubsumsjonObserver, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) {
+    override fun subsumerSykepengegrunnlag(subsumsjonObserver: SubsumsjonObserverPort, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) {
         subsumsjonObserver.`§ 8-28 ledd 3 bokstav a`(
             organisasjonsnummer = organisasjonsnummer,
             skjæringstidspunkt = dato,
@@ -75,7 +74,7 @@ internal class SkattSykepengegrunnlag(
     }
 
     override fun subsumerArbeidsforhold(
-        subsumsjonObserver: SubsumsjonObserver,
+        subsumsjonObserver: SubsumsjonObserverPort,
         organisasjonsnummer: String,
         forklaring: String,
         oppfylt: Boolean

@@ -76,7 +76,7 @@ internal class Sykepengegrunnlag(
         alder: Alder,
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         skjæringstidspunkt: LocalDate,
-        subsumsjonObserver: SubsumsjonObserver,
+        subsumsjonObserver: SubsumsjonObserverPort,
         vurdertInfotrygd: Boolean = false
     ) : this(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, emptyList(), vurdertInfotrygd) {
         subsumsjonObserver.apply {
@@ -102,7 +102,7 @@ internal class Sykepengegrunnlag(
             alder: Alder,
             arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
             skjæringstidspunkt: LocalDate,
-            subsumsjonObserver: SubsumsjonObserver
+            subsumsjonObserver: SubsumsjonObserverPort
         ): Sykepengegrunnlag {
             return Sykepengegrunnlag(alder, arbeidsgiverInntektsopplysninger, skjæringstidspunkt, subsumsjonObserver)
         }
@@ -179,13 +179,13 @@ internal class Sykepengegrunnlag(
 
     private fun erOverstyrt() = deaktiverteArbeidsforhold.isNotEmpty() || arbeidsgiverInntektsopplysninger.erOverstyrt()
 
-    internal fun aktiver(orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserver) =
+    internal fun aktiver(orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserverPort) =
         deaktiverteArbeidsforhold.aktiver(arbeidsgiverInntektsopplysninger, orgnummer, forklaring, subsumsjonObserver)
             .let { (deaktiverte, aktiverte) ->
                 kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger = aktiverte, deaktiverteArbeidsforhold = deaktiverte)
             }
 
-    internal fun deaktiver(orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserver) =
+    internal fun deaktiver(orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserverPort) =
         arbeidsgiverInntektsopplysninger.deaktiver(deaktiverteArbeidsforhold, orgnummer, forklaring, subsumsjonObserver)
             .let { (aktiverte, deaktiverte) ->
                 kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger = aktiverte, deaktiverteArbeidsforhold = deaktiverte)
@@ -195,7 +195,7 @@ internal class Sykepengegrunnlag(
         return hendelse.overstyr(this, subsumsjonObserver)
     }
 
-    internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, opptjening: Opptjening?, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag? {
+    internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, opptjening: Opptjening?, subsumsjonObserver: SubsumsjonObserverPort): Sykepengegrunnlag? {
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(arbeidsgiverInntektsopplysninger, opptjening, subsumsjonObserver)
         hendelse.overstyr(builder)
         val resultat = builder.resultat() ?: return null
@@ -208,7 +208,7 @@ internal class Sykepengegrunnlag(
     internal fun inntekt(organisasjonsnummer: String): Inntekt? =
         arbeidsgiverInntektsopplysninger.inntekt(organisasjonsnummer)
 
-    internal fun nyeArbeidsgiverInntektsopplysninger(inntektsmelding: Inntektsmelding, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag? {
+    internal fun nyeArbeidsgiverInntektsopplysninger(inntektsmelding: Inntektsmelding, subsumsjonObserver: SubsumsjonObserverPort): Sykepengegrunnlag? {
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(arbeidsgiverInntektsopplysninger, null, subsumsjonObserver)
         inntektsmelding.nyeArbeidsgiverInntektsopplysninger(builder)
         val resultat = builder.resultat() ?: return  null // ingen endring
@@ -351,7 +351,7 @@ internal class Sykepengegrunnlag(
     internal class ArbeidsgiverInntektsopplysningerOverstyringer(
         private val opprinneligArbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         private val opptjening: Opptjening?,
-        private val subsumsjonObserver: SubsumsjonObserver
+        private val subsumsjonObserver: SubsumsjonObserverPort
     ) {
         private val nyeInntektsopplysninger = mutableListOf<ArbeidsgiverInntektsopplysning>()
 

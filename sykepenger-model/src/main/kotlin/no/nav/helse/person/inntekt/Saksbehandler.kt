@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Paragraf
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 
@@ -38,7 +37,7 @@ class Saksbehandler internal constructor(
     override fun erSamme(other: Inntektsopplysning) =
         other is Saksbehandler && this.dato == other.dato && this.beløp == other.beløp
 
-    override fun subsumerSykepengegrunnlag(subsumsjonObserver: SubsumsjonObserver, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) {
+    override fun subsumerSykepengegrunnlag(subsumsjonObserver: SubsumsjonObserverPort, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) {
         if(subsumsjon == null) return
         requireNotNull(forklaring) { "Det skal være en forklaring fra saksbehandler ved overstyring av inntekt" }
         if (subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref
@@ -80,7 +79,7 @@ class Saksbehandler internal constructor(
     }
 
     override fun subsumerArbeidsforhold(
-        subsumsjonObserver: SubsumsjonObserver,
+        subsumsjonObserver: SubsumsjonObserverPort,
         organisasjonsnummer: String,
         forklaring: String,
         oppfylt: Boolean

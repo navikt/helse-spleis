@@ -33,6 +33,7 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.hendelser.utbetaling.inntektPort
 import no.nav.helse.person.Arbeidsgiver.Companion.avklarSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
@@ -609,7 +610,7 @@ class Person private constructor(
             alder,
             arbeidsgivere.avklarSykepengegrunnlag(skjæringstidspunkt, skatteopplysninger),
             skjæringstidspunkt,
-            subsumsjonObserver
+            subsumsjonObserver.inntektPort()
         )
     }
 

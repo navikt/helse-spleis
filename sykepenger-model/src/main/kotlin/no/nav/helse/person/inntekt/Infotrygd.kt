@@ -3,7 +3,6 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
 
 internal class Infotrygd(
@@ -23,7 +22,7 @@ internal class Infotrygd(
     override fun omregnetÅrsinntekt(): Inntekt = beløp
 
     override fun subsumerArbeidsforhold(
-        subsumsjonObserver: SubsumsjonObserver,
+        subsumsjonObserver: SubsumsjonObserverPort,
         organisasjonsnummer: String,
         forklaring: String,
         oppfylt: Boolean

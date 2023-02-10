@@ -3,7 +3,6 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
 
 // TODO: legge til hendelseId fra SkattSykepengegrunnlag
@@ -24,7 +23,7 @@ internal class IkkeRapportert(
     override fun omregnetÅrsinntekt() = Inntekt.INGEN
 
     override fun subsumerArbeidsforhold(
-        subsumsjonObserver: SubsumsjonObserver,
+        subsumsjonObserver: SubsumsjonObserverPort,
         organisasjonsnummer: String,
         forklaring: String,
         oppfylt: Boolean
