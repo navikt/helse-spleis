@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.til
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
 
 internal class Inntektsmelding(
@@ -30,7 +31,7 @@ internal class Inntektsmelding(
     }
 
     override fun subsumerArbeidsforhold(
-        subsumsjonObserver: SubsumsjonObserverPort,
+        subsumsjonObserver: SubsumsjonObserver,
         organisasjonsnummer: String,
         forklaring: String,
         oppfylt: Boolean

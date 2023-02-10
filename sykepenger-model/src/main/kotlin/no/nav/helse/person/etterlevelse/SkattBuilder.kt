@@ -1,4 +1,4 @@
-package no.nav.helse.etterlevelse
+package no.nav.helse.person.etterlevelse
 
 import java.time.LocalDateTime
 import java.time.YearMonth

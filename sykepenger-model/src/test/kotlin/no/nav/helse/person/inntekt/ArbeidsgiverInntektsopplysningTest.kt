@@ -16,7 +16,6 @@ import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
-import no.nav.helse.hendelser.utbetaling.inntektPort
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medInntekt
@@ -49,13 +48,13 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val original = listOf(a1Opplysning, a2Opplysning)
         val new = listOf(a1Overstyrt)
 
-        assertEquals(original, original.overstyrInntekter(opptjening, listOf(a1Overstyrt, a1Overstyrt), NullObserver.inntektPort())) { "kan ikke velge mellom inntekter for samme orgnr" }
+        assertEquals(original, original.overstyrInntekter(opptjening, listOf(a1Overstyrt, a1Overstyrt), NullObserver)) { "kan ikke velge mellom inntekter for samme orgnr" }
 
-        assertEquals(emptyList<ArbeidsgiverInntektsopplysning>(), emptyList<ArbeidsgiverInntektsopplysning>().overstyrInntekter(opptjening, new, NullObserver.inntektPort()))
-        assertEquals(original, original.overstyrInntekter(opptjening, emptyList(), NullObserver.inntektPort()))
-        assertEquals(listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(opptjening, new, NullObserver.inntektPort()))
+        assertEquals(emptyList<ArbeidsgiverInntektsopplysning>(), emptyList<ArbeidsgiverInntektsopplysning>().overstyrInntekter(opptjening, new, NullObserver))
+        assertEquals(original, original.overstyrInntekter(opptjening, emptyList(), NullObserver))
+        assertEquals(listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(opptjening, new, NullObserver))
         val forMange = listOf(a1Overstyrt, a3Overstyrt)
-        assertEquals(listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(opptjening, forMange, NullObserver.inntektPort())) { "skal ikke kunne legge til inntekter som ikke finnes fra før" }
+        assertEquals(listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(opptjening, forMange, NullObserver)) { "skal ikke kunne legge til inntekter som ikke finnes fra før" }
     }
 
     @Test
@@ -85,7 +84,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val a1Overstyrt = ArbeidsgiverInntektsopplysning(orgnummer, Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), overstyrtBeløp, "Jeg bare måtte gjøre det", subsumsjon, LocalDateTime.now()), Refusjonsopplysninger())
 
         val jurist = MaskinellJurist()
-        listOf(a1Opplysning).overstyrInntekter(opptjening, listOf(a1Overstyrt), jurist.inntektPort())
+        listOf(a1Opplysning).overstyrInntekter(opptjening, listOf(a1Overstyrt), jurist)
         SubsumsjonInspektør(jurist).assertBeregnet(
             paragraf = paragraf,
             versjon = LocalDate.of(2019, 1, 1),
@@ -113,16 +112,16 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt, LocalDateTime.now()), Refusjonsopplysninger())
 
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
-        val (aktive, deaktiverte) = opprinnelig.deaktiver(emptyList(), "a2", "Denne må bort", NullObserver.inntektPort())
+        val (aktive, deaktiverte) = opprinnelig.deaktiver(emptyList(), "a2", "Denne må bort", NullObserver)
         assertEquals(a1Opplysning, aktive.single())
         assertEquals(a2Opplysning, deaktiverte.single())
 
-        val (nyDeaktivert, nyAktivert) = deaktiverte.aktiver(aktive, "a2", "Jeg gjorde en feil, jeg angrer!", NullObserver.inntektPort())
+        val (nyDeaktivert, nyAktivert) = deaktiverte.aktiver(aktive, "a2", "Jeg gjorde en feil, jeg angrer!", NullObserver)
         assertEquals(0, nyDeaktivert.size)
         assertEquals(opprinnelig, nyAktivert)
 
-        assertThrows<RuntimeException> { opprinnelig.deaktiver(emptyList(), "a3", "jeg vil deaktivere noe som ikke finnes", NullObserver.inntektPort()) }
-        assertThrows<RuntimeException> { emptyList<ArbeidsgiverInntektsopplysning>().aktiver(opprinnelig, "a3", "jeg vil aktivere noe som ikke finnes", NullObserver.inntektPort()) }
+        assertThrows<RuntimeException> { opprinnelig.deaktiver(emptyList(), "a3", "jeg vil deaktivere noe som ikke finnes", NullObserver) }
+        assertThrows<RuntimeException> { emptyList<ArbeidsgiverInntektsopplysning>().aktiver(opprinnelig, "a3", "jeg vil aktivere noe som ikke finnes", NullObserver) }
     }
 
     @Test
@@ -133,7 +132,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
 
         val jurist = MaskinellJurist()
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
-        val (aktive, deaktiverte) = opprinnelig.deaktiver(emptyList(), "a2", "Denne må bort", jurist.inntektPort())
+        val (aktive, deaktiverte) = opprinnelig.deaktiver(emptyList(), "a2", "Denne må bort", jurist)
         assertEquals(a1Opplysning, aktive.single())
         assertEquals(a2Opplysning, deaktiverte.single())
         SubsumsjonInspektør(jurist).assertOppfylt(
@@ -162,7 +161,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val opprinneligAktive = listOf(a1Opplysning)
         val opprinneligDeaktiverte = listOf(a2Opplysning)
 
-        val (deaktiverte, aktive) = opprinneligDeaktiverte.aktiver(opprinneligAktive, "a2", "Denne må tilbake", jurist.inntektPort())
+        val (deaktiverte, aktive) = opprinneligDeaktiverte.aktiver(opprinneligAktive, "a2", "Denne må tilbake", jurist)
         assertEquals(listOf(a1Opplysning, a2Opplysning), aktive)
         assertEquals(0, deaktiverte.size)
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(

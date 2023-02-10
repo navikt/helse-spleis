@@ -6,7 +6,6 @@ import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.hendelser.utbetaling.inntektPort
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonsopplysning
@@ -33,7 +32,7 @@ internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringsti
             )
         ),
         skjæringstidspunkt = skjæringstidspunkt,
-        subsumsjonObserver = subsumsjonObserver.inntektPort()
+        subsumsjonObserver = subsumsjonObserver
     )
 internal fun Inntekt.sykepengegrunnlag(orgnr: String, skjæringstidspunkt: LocalDate, virkningstidspunkt: LocalDate) =
     Sykepengegrunnlag(

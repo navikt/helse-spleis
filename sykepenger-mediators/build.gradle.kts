@@ -10,11 +10,11 @@ dependencies {
     implementation(project(":sykepenger-model"))
     implementation(project(":sykepenger-utbetaling"))
     implementation(project(":sykepenger-etterlevelse"))
-    implementation(project(":sykepenger-primitiver"))
-    implementation(project(":sykepenger-aktivitetslogg"))
     implementation(libs.rapids.and.rivers)
     implementation(libs.bundles.database)
     implementation(libs.flyway)
+    implementation(project(":sykepenger-primitiver"))
+    implementation(project(":sykepenger-aktivitetslogg"))
 
     testImplementation(libs.testcontainers) {
         exclude("com.fasterxml.jackson.core")

@@ -18,7 +18,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_16
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_11
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.hendelser.utbetaling.inntektPort
 import no.nav.helse.person.inntekt.ManglerRefusjonsopplysning
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
@@ -249,7 +248,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, subsumsjonObserver: SubsumsjonObserver): Pair<VilkårsgrunnlagElement?, Revurderingseventyr> {
             // TODO: gir ikke mening å starte revurdering når sykepengegrunnlaget er lik det forrige
-            val sykepengegrunnlag = sykepengegrunnlag.overstyrArbeidsgiveropplysninger(hendelse, opptjening, subsumsjonObserver.inntektPort())
+            val sykepengegrunnlag = sykepengegrunnlag.overstyrArbeidsgiveropplysninger(hendelse, opptjening, subsumsjonObserver)
             val endringsdato = sykepengegrunnlag?.finnEndringsdato(this.sykepengegrunnlag)
             val eventyr = Revurderingseventyr.arbeidsgiveropplysninger(skjæringstidspunkt, endringsdato ?: skjæringstidspunkt)
             return sykepengegrunnlag?.let {
@@ -272,7 +271,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             inntektsmelding: Inntektsmelding,
             subsumsjonObserver: SubsumsjonObserver
         ): Pair<VilkårsgrunnlagElement, Revurderingseventyr>?  {
-            val sykepengegrunnlag = sykepengegrunnlag.nyeArbeidsgiverInntektsopplysninger(inntektsmelding, subsumsjonObserver.inntektPort()) ?: return null
+            val sykepengegrunnlag = sykepengegrunnlag.nyeArbeidsgiverInntektsopplysninger(inntektsmelding, subsumsjonObserver) ?: return null
             val endringsdato = sykepengegrunnlag.finnEndringsdato(this.sykepengegrunnlag)
             val eventyr = Revurderingseventyr.korrigertInntektsmelding(skjæringstidspunkt, endringsdato)
             return kopierMed(inntektsmelding, sykepengegrunnlag, opptjening, SubsumsjonObserver.NullObserver) to eventyr
