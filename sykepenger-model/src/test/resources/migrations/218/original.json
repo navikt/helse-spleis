@@ -1,0 +1,33 @@
+{
+  "arbeidsgivere": [
+    {
+      "utbetalinger": [
+        {
+          "id": "cf564bb4-fe8d-49f5-8c34-94989f004974"
+        },
+        {
+          "id": "42e15bdb-a176-4681-a17f-b897202b0042",
+          "status": "GODKJENT_UTEN_UTBETALING"
+        },
+        {
+          "id": "5bef2f2e-a4de-434d-bf18-37cf4f7a13d8"
+        }
+      ]
+    },
+    {
+      "utbetalinger": [
+        {
+          "id": "0980bda0-6aeb-4056-bd66-8bff9ee4ebb0"
+        },
+        {
+          "id": "42e15bdb-a176-4681-a17f-b897202b0042",
+          "status": "GODKJENT_UTEN_UTBETALING"
+        },
+        {
+          "id": "63d57525-7abd-4e7e-810e-ad0080efd774"
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 216
+}

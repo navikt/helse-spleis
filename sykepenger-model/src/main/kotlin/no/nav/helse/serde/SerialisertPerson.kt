@@ -7,8 +7,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import no.nav.helse.person.Person
 import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.person.Person
 import no.nav.helse.serde.migration.JsonMigration
 import no.nav.helse.serde.migration.JsonMigrationException
 import no.nav.helse.serde.migration.MeldingerSupplier
@@ -142,6 +142,7 @@ import no.nav.helse.serde.migration.V214FjernerInfotrygdOgSkattSykepengegrunnlag
 import no.nav.helse.serde.migration.V215TarBortInnslagFraInntektshistorikken
 import no.nav.helse.serde.migration.V216FlytteHendelseIdOgTidsstempelTilSkattSykepengegrunnlag
 import no.nav.helse.serde.migration.V217SpissetMigreringForÅForkasteUtbetaling
+import no.nav.helse.serde.migration.V218SpissetMigreringForÅForkasteUtbetaling
 import no.nav.helse.serde.migration.V21FjernGruppeId
 import no.nav.helse.serde.migration.V22FjernFelterFraSykdomstidslinje
 import no.nav.helse.serde.migration.V23None
@@ -457,7 +458,8 @@ class SerialisertPerson(val json: String) {
             V214FjernerInfotrygdOgSkattSykepengegrunnlagFraInntektshistorikken(),
             V215TarBortInnslagFraInntektshistorikken(),
             V216FlytteHendelseIdOgTidsstempelTilSkattSykepengegrunnlag(),
-            V217SpissetMigreringForÅForkasteUtbetaling()
+            V217SpissetMigreringForÅForkasteUtbetaling(),
+            V218SpissetMigreringForÅForkasteUtbetaling()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
