@@ -3,7 +3,6 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.person.InntektsopplysningVisitor
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.harArbeidsforholdNyereEnn
 import no.nav.helse.etterlevelse.SubsumsjonObserver

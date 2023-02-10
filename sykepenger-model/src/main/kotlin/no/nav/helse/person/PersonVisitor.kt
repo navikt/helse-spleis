@@ -8,7 +8,6 @@ import no.nav.helse.AlderVisitor
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
@@ -19,14 +18,11 @@ import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningVisitor
-import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
-import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.SkatteopplysningVisitor
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
@@ -546,54 +542,6 @@ internal interface InntektsmeldingVisitor {
     }
 }
 
-internal interface InntektsopplysningVisitor : InntektsmeldingVisitor, SkatteopplysningVisitor {
-    fun visitSaksbehandler(
-        saksbehandler: Saksbehandler,
-        id: UUID,
-        dato: LocalDate,
-        hendelseId: UUID,
-        beløp: Inntekt,
-        forklaring: String?,
-        subsumsjon: Subsumsjon?,
-        tidsstempel: LocalDateTime
-    ) {
-    }
-
-    fun visitIkkeRapportert(
-        id: UUID,
-        dato: LocalDate,
-        tidsstempel: LocalDateTime
-    ) {
-    }
-
-    fun visitInfotrygd(
-        infotrygd: Infotrygd,
-        id: UUID,
-        dato: LocalDate,
-        hendelseId: UUID,
-        beløp: Inntekt,
-        tidsstempel: LocalDateTime
-    ) {
-    }
-
-    fun preVisitSkattSykepengegrunnlag(
-        skattSykepengegrunnlag: SkattSykepengegrunnlag,
-        id: UUID,
-        hendelseId: UUID,
-        dato: LocalDate,
-        beløp: Inntekt,
-        tidsstempel: LocalDateTime
-    ) {}
-
-    fun postVisitSkattSykepengegrunnlag(
-        skattSykepengegrunnlag: SkattSykepengegrunnlag,
-        id: UUID,
-        hendelseId: UUID,
-        dato: LocalDate,
-        beløp: Inntekt,
-        tidsstempel: LocalDateTime
-    ) {}
-}
 internal interface InntekthistorikkVisitor : InntektsmeldingVisitor {
     fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
     fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}

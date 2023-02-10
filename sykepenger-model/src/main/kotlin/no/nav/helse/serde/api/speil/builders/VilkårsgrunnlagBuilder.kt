@@ -7,7 +7,7 @@ import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Subsumsjon
-import no.nav.helse.person.InntektsopplysningVisitor
+import no.nav.helse.person.inntekt.InntektsopplysningVisitor
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
