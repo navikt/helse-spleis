@@ -10,8 +10,8 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode.Companion.periode
-import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.PersonHendelse
+import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.PersonObserver
@@ -116,21 +116,16 @@ internal class PersonMediator(
             "epost" to event.saksbehandlerEpost,
             "saksbehandlerIdent" to event.saksbehandlerIdent,
             "ident" to event.saksbehandlerIdent,
+            "fagsystemId" to event.arbeidsgiverFagsystemId,
+            "arbeidsgiverFagsystemId" to event.arbeidsgiverFagsystemId,
+            "personFagsystemId" to event.personFagsystemId,
             "utbetalingslinjer" to event.utbetalingslinjer.map { mapOf(
                 "fom" to it.fom,
                 "tom" to it.tom,
                 "grad" to it.grad,
                 "beløp" to it.beløp
             )}
-        ).apply {
-            event.arbeidsgiverFagsystemId?.also {
-                this["fagsystemId"] = it
-                this["arbeidsgiverFagsystemId"] = it
-            }
-            event.personFagsystemId?.also {
-                this["personFagsystemId"] = it
-            }
-        }))
+        )))
     }
 
     override fun utbetalingEndret(event: PersonObserver.UtbetalingEndretEvent) {

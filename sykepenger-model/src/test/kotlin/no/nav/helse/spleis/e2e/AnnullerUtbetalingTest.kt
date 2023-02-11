@@ -283,8 +283,9 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         val annullering = observatør.annulleringer.lastOrNull()
         no.nav.helse.testhelpers.assertNotNull(annullering)
 
-        assertEquals(inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.fagsystemId(), annullering.arbeidsgiverFagsystemId)
-        assertNull(annullering.personFagsystemId)
+        val utbetalingInspektør = inspektør.utbetaling(0).inspektør
+        assertEquals(utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), annullering.arbeidsgiverFagsystemId)
+        assertEquals(utbetalingInspektør.personOppdrag.inspektør.fagsystemId(), annullering.personFagsystemId)
 
         val utbetalingslinje = annullering.utbetalingslinjer.first()
         assertEquals("tbd@nav.no", annullering.saksbehandlerEpost)
@@ -316,8 +317,9 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         val annullering = annulleringer.lastOrNull()
         no.nav.helse.testhelpers.assertNotNull(annullering)
 
-        assertEquals(inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.fagsystemId(), annullering.arbeidsgiverFagsystemId)
-        assertNull(annullering.personFagsystemId)
+        val utbetalingInspektør = inspektør.utbetaling(0).inspektør
+        assertEquals(utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), annullering.arbeidsgiverFagsystemId)
+        assertEquals(utbetalingInspektør.personOppdrag.inspektør.fagsystemId(), annullering.personFagsystemId)
         assertEquals(18.januar, annullering.fom)
         assertEquals(20.februar, annullering.tom)
 

@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
-import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -267,7 +266,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendAnnullering(testRapid.inspektør.etterspurteBehov(Utbetaling).path(Utbetaling.name).path("fagsystemId").asText())
         sendUtbetaling()
         val utbetalt = testRapid.inspektør.siste("utbetaling_annullert")
-        assertAnnullert(utbetalt, arbeidsgiverAnnulering = true, personAnnullering = false)
+        assertAnnullert(utbetalt)
         val utbetalingEndret = testRapid.inspektør.siste("utbetaling_endret")
         assertUtbetalingEndret(utbetalingEndret, "OVERFØRT", "ANNULLERT", true)
     }
@@ -291,7 +290,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendAnnullering(testRapid.inspektør.alleEtterspurteBehov(Utbetaling).first { it.path(Utbetaling.name).path("fagområde").asText() == "SPREF"}.path(Utbetaling.name).path("fagsystemId").asText())
         sendUtbetaling()
         val utbetalt = testRapid.inspektør.siste("utbetaling_annullert")
-        assertAnnullert(utbetalt, arbeidsgiverAnnulering = true, personAnnullering = true)
+        assertAnnullert(utbetalt)
     }
 
     @Test
@@ -314,7 +313,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendAnnullering(testRapid.inspektør.alleEtterspurteBehov(Utbetaling).first { it.path(Utbetaling.name).path("fagområde").asText() == "SPREF"}.path(Utbetaling.name).path("fagsystemId").asText())
         sendUtbetaling()
         val utbetalt = testRapid.inspektør.siste("utbetaling_annullert")
-        assertAnnullert(utbetalt, arbeidsgiverAnnulering = false, personAnnullering = true)
+        assertAnnullert(utbetalt)
     }
 
     private fun assertUtbetaltInkluderAvviste(melding: JsonNode) {
@@ -370,24 +369,15 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         assertOppdragdetaljer(melding.path("personOppdrag"), false)
     }
 
-    private fun assertAnnullert(melding: JsonNode, arbeidsgiverAnnulering: Boolean, personAnnullering: Boolean) {
+    private fun assertAnnullert(melding: JsonNode) {
         assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
         assertTrue(melding.path("aktørId").asText().isNotEmpty())
         assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
         assertTrue(melding.path("utbetalingId").asText().isNotEmpty())
         assertTrue(melding.path("korrelasjonsId").asText().isNotEmpty())
-        if (arbeidsgiverAnnulering) {
-            assertTrue(melding.path("arbeidsgiverFagsystemId").asText().isNotEmpty())
-            assertEquals(melding.path("fagsystemId").asText(), melding.path("arbeidsgiverFagsystemId").asText())
-        } else {
-            assertTrue(melding.path("fagsystemId").isMissingOrNull())
-            assertTrue(melding.path("arbeidsgiverFagsystemId").isMissingOrNull())
-        }
-        if (personAnnullering) {
-            assertTrue(melding.path("personFagsystemId").asText().isNotEmpty())
-        } else {
-            assertTrue(melding.path("personFagsystemId").isMissingOrNull())
-        }
+        assertTrue(melding.path("arbeidsgiverFagsystemId").asText().isNotEmpty())
+        assertEquals(melding.path("fagsystemId").asText(), melding.path("arbeidsgiverFagsystemId").asText())
+        assertTrue(melding.path("personFagsystemId").asText().isNotEmpty())
         assertDato(melding.path("fom").asText())
         assertDato(melding.path("tom").asText())
         assertDatotid(melding.path("tidspunkt").asText())

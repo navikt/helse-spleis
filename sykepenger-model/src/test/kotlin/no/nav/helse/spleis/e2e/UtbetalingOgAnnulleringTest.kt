@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDateTime
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -25,7 +24,6 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
-import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
@@ -33,7 +31,6 @@ import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -47,22 +44,9 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-        var err: RuntimeException? = null
-        try {
-            håndterAnnullerUtbetaling(ORGNUMMER)
-        } catch (ex: RuntimeException) {
-            err = ex
-        }
-
-        assertForventetFeil(
-            forklaring = "nullpointer ved godkjenning",
-            nå = { assertNotNull(err) },
-            ønsket = {
-                assertNull(err)
-                assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-                assertEquals(Utbetaling.Annullert, inspektør.utbetaling(1).inspektør.tilstand)
-            }
-        )
+        håndterAnnullerUtbetaling(ORGNUMMER)
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertEquals(Utbetaling.Annullert, inspektør.utbetaling(1).inspektør.tilstand)
     }
 
     @Test

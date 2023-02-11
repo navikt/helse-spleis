@@ -764,11 +764,11 @@ internal class Arbeidsgiver private constructor(
         id: UUID,
         korrelasjonsId: UUID,
         periode: Periode,
-        personFagsystemId: String?,
+        personFagsystemId: String,
         godkjenttidspunkt: LocalDateTime,
         saksbehandlerEpost: String,
         saksbehandlerIdent: String,
-        arbeidsgiverFagsystemId: String?
+        arbeidsgiverFagsystemId: String
     ) {
         person.annullert(
             PersonObserver.UtbetalingAnnullertEvent(
