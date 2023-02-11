@@ -9,6 +9,7 @@ import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
@@ -267,7 +268,7 @@ internal class LagUtbetalingForRevurderingTest {
             UUID.randomUUID(),
             orgnummer,
             tidslinje,
-            sisteDato,
+            sisteDato.somPeriode(),
             aktivitetslogg,
             LocalDate.MAX,
             100,

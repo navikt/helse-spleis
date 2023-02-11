@@ -10,8 +10,8 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
@@ -30,6 +30,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_9
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.trekkerTilbakePenger
+import no.nav.helse.utbetalingslinjer.Utbetalingkladd.Companion.finnKladd
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -275,7 +276,7 @@ class Utbetaling private constructor(
             beregningId: UUID,
             organisasjonsnummer: String,
             utbetalingstidslinje: Utbetalingstidslinje,
-            sisteDato: LocalDate,
+            periode: Periode,
             aktivitetslogg: IAktivitetslogg,
             maksdato: LocalDate,
             forbrukteSykedager: Int,
@@ -285,21 +286,16 @@ class Utbetaling private constructor(
             val bb = UtbetalingkladderBuilder(utbetalingstidslinje, organisasjonsnummer, fødselsnummer)
             val oppdragene = bb.build()
 
-            val kladden = oppdragene.firstOrNull { kladd -> kladd.overlapperMed(sisteDato) }
-
-            if (kladden == null) {
-                // tror det lages utbetaling for en AUU-periode
-                return Utbetaling(
-                    beregningId = beregningId,
-                    korrelerendeUtbetaling = null,
-                    periode = sisteDato.somPeriode(),
-                    utbetalingstidslinje = utbetalingstidslinje.kutt(sisteDato),
-                    arbeidsgiverOppdrag = Oppdrag(organisasjonsnummer, SykepengerRefusjon),
-                    personOppdrag = Oppdrag(fødselsnummer, Sykepenger),
-                    type = type,
-                    maksdato = maksdato,
-                    forbrukteSykedager = forbrukteSykedager,
-                    gjenståendeSykedager = gjenståendeSykedager
+            val kladdene = oppdragene.finnKladd(periode)
+            val kladden = kladdene.firstOrNull() ?: Utbetalingkladd(
+                periode = periode,
+                arbeidsgiveroppdrag = Oppdrag(organisasjonsnummer, SykepengerRefusjon),
+                personoppdrag = Oppdrag(fødselsnummer, Sykepenger)
+            )
+            if (kladdene.size > 1) {
+                sikkerlogg.error("Vedtaksperioden $periode brytes opp i flere utbetalinger, mest sannsynlig en overlappende Infotrygd-utbetaling",
+                    keyValue("fødselsnummer", fødselsnummer),
+                    keyValue("organisasjonsnummer", organisasjonsnummer)
                 )
             }
 
@@ -309,7 +305,7 @@ class Utbetaling private constructor(
             val nyUtbetaling = if (korrelerendeUtbetaling == null) {
                 if (forrigeUtbetalte.isEmpty()) {
                     // dette er nok første gangen vi utbetaler denne perioden
-                    kladden.begrensTil(sisteDato)
+                    kladden.begrensTil(periode)
                 } else {
                     // mer enn én forrige utbetalte for samme periode, dette
                     // er nok en merge-hendelse: tidslinjen har endret seg slik at to uavhengige
@@ -320,9 +316,9 @@ class Utbetaling private constructor(
                 }
             } else {
                 if (kladden.opphører(korrelerendeUtbetaling.periode)) {
-                    kladden.begrensTil(aktivitetslogg, sisteDato, korrelerendeUtbetaling.arbeidsgiverOppdrag, korrelerendeUtbetaling.personOppdrag)
+                    kladden.begrensTil(aktivitetslogg, periode, korrelerendeUtbetaling.arbeidsgiverOppdrag, korrelerendeUtbetaling.personOppdrag)
                 } else {
-                    kladden.begrensTilOgKopier(aktivitetslogg, sisteDato, korrelerendeUtbetaling.arbeidsgiverOppdrag, korrelerendeUtbetaling.personOppdrag)
+                    kladden.begrensTilOgKopier(aktivitetslogg, periode, korrelerendeUtbetaling.arbeidsgiverOppdrag, korrelerendeUtbetaling.personOppdrag)
                 }
             }
 
@@ -360,7 +356,6 @@ class Utbetaling private constructor(
         }
 
         private fun List<Utbetaling>.overlappendeUtbetalingsperioder(other: Utbetaling): List<Periode> {
-            if (other.oppdragsperiode == null) return emptyList()
             return aktiveMedUtbetaling()
                 .filterNot { it.hørerSammen(other) }
                 .filter { it.periode.overlapperMed(other.periode) }

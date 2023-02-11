@@ -14,7 +14,7 @@ internal class Utbetalingkladd(
     private val arbeidsgiveroppdrag: Oppdrag,
     private val personoppdrag: Oppdrag
 ) {
-    internal fun overlapperMed(dato: LocalDate)  = dato in periode
+    internal fun overlapperMed(other: Periode) = other.overlapperMed(this.periode)
     fun lagUtbetaling(
         type: Utbetaling.Utbetalingtype,
         korrelerendeUtbetaling: Utbetaling?,
@@ -51,17 +51,17 @@ internal class Utbetalingkladd(
     internal fun personoppdrag(other: Oppdrag, aktivitetslogg: IAktivitetslogg) =
         this.personoppdrag.minus(other, aktivitetslogg)
 
-    internal fun begrensTil(sisteDato: LocalDate): Utbetalingkladd {
+    internal fun begrensTil(other: Periode): Utbetalingkladd {
         return Utbetalingkladd(
-            periode = periode.subset(LocalDate.MIN til sisteDato),
-            arbeidsgiveroppdrag = this.arbeidsgiveroppdrag.begrensTil(sisteDato),
-            personoppdrag = this.personoppdrag.begrensTil(sisteDato)
+            periode = periode.subset(LocalDate.MIN til other.endInclusive),
+            arbeidsgiveroppdrag = this.arbeidsgiveroppdrag.begrensTil(other.endInclusive),
+            personoppdrag = this.personoppdrag.begrensTil(other.endInclusive)
         )
     }
 
     // hensyntar bare endringer frem til og med angitt dato
-    internal fun begrensTil(aktivitetslogg: IAktivitetslogg, sisteDato: LocalDate, tidligereArbeidsgiveroppdrag: Oppdrag, tidligerePersonoppdrag: Oppdrag): Utbetalingkladd {
-        return begrensTil(sisteDato)
+    internal fun begrensTil(aktivitetslogg: IAktivitetslogg, other: Periode, tidligereArbeidsgiveroppdrag: Oppdrag, tidligerePersonoppdrag: Oppdrag): Utbetalingkladd {
+        return begrensTil(other)
             .diffMotTidligere(aktivitetslogg, tidligereArbeidsgiveroppdrag, tidligerePersonoppdrag)
     }
 
@@ -69,11 +69,11 @@ internal class Utbetalingkladd(
     // og kopierer evt. senere linjer fra tidligere oppdrag
     internal fun begrensTilOgKopier(
         aktivitetslogg: IAktivitetslogg,
-        sisteDato: LocalDate,
+        other: Periode,
         tidligereArbeidsgiveroppdrag: Oppdrag,
         tidligerePersonoppdrag: Oppdrag
     ): Utbetalingkladd {
-        return begrensTil(sisteDato)
+        return begrensTil(other)
             .kopierArbeidsgiveroppdrag(tidligereArbeidsgiveroppdrag)
             .kopierPersonoppdrag(tidligerePersonoppdrag)
             .diffMotTidligere(aktivitetslogg, tidligereArbeidsgiveroppdrag, tidligerePersonoppdrag)
@@ -99,4 +99,13 @@ internal class Utbetalingkladd(
             arbeidsgiveroppdrag = this.arbeidsgiveroppdrag,
             personoppdrag = this.personoppdrag + tidligerePersonoppdrag.begrensFra(this.periode.endInclusive.nesteDag)
         )
+
+    internal companion object {
+        internal fun List<Utbetalingkladd>.finnKladd(periode: Periode): List<Utbetalingkladd> {
+            val kladdene = filter { kladd -> kladd.overlapperMed(periode) }
+            val medUtbetaling = kladdene.filter { kladd -> kladd.arbeidsgiveroppdrag.isNotEmpty() || kladd.personoppdrag.isNotEmpty() }
+            if (kladdene.size <= 1 || medUtbetaling.isEmpty()) return kladdene.take(1)
+            return medUtbetaling
+        }
+    }
 }

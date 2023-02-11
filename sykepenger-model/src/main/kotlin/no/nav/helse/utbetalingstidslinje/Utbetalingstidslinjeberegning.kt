@@ -71,7 +71,7 @@ internal class Utbetalingstidslinjeberegning private constructor(
                 beregning.id,
                 organisasjonsnummer,
                 beregning.utbetalingstidslinje,
-                periode.endInclusive,
+                periode,
                 aktivitetslogg,
                 maksdato,
                 forbrukteSykedager,

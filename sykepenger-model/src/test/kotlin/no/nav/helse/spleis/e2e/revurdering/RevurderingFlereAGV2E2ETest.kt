@@ -50,6 +50,7 @@ import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.testhelpers.assertNotNull
+import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype.REVURDERING
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -578,6 +579,20 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         håndterYtelser(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(a2, 17.januar, 18.februar, 100.prosent, INNTEKT), orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
+
+        val utbetaling1 = inspektør.utbetaling(0).inspektør
+        val revurdering = inspektør.utbetaling(1).inspektør
+
+        assertEquals(utbetaling1.korrelasjonsId, revurdering.korrelasjonsId)
+        val oppdragInspektør = revurdering.arbeidsgiverOppdrag.inspektør
+        assertEquals(Endringskode.ENDR, oppdragInspektør.endringskode)
+        assertEquals(1, oppdragInspektør.antallLinjer())
+        revurdering.arbeidsgiverOppdrag.single().inspektør.also { linje ->
+            assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
+            assertEquals(17.januar, linje.datoStatusFom)
+            assertEquals("OPPH", linje.statuskode)
+        }
+
+        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, orgnummer = a1)
     }
 }

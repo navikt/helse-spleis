@@ -8,6 +8,7 @@ import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
@@ -254,7 +255,7 @@ internal class UtbetalingTest {
             UUID.randomUUID(),
             ORGNUMMER,
             tidslinje,
-            sisteDato,
+            sisteDato.somPeriode(),
             aktivitetslogg,
             LocalDate.MAX,
             100,
@@ -277,7 +278,7 @@ internal class UtbetalingTest {
             UUID.randomUUID(),
             ORGNUMMER,
             tidslinje,
-            sisteDato,
+            sisteDato.somPeriode(),
             aktivitetslogg,
             LocalDate.MAX,
             100,
@@ -964,7 +965,7 @@ internal class UtbetalingTest {
         UUID.randomUUID(),
         orgnummer,
         tidslinje,
-        sisteDato,
+        sisteDato.somPeriode(),
         aktivitetslogg,
         LocalDate.MAX,
         100,

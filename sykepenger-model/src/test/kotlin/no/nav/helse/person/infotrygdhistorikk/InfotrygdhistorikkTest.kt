@@ -4,13 +4,14 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.februar
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElementTest.Companion.eksisterendeInfotrygdHistorikkelement
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.serde.PersonData
@@ -386,7 +387,7 @@ internal class InfotrygdhistorikkTest {
         beregningId = UUID.randomUUID(),
         organisasjonsnummer = "",
         utbetalingstidslinje = tidslinjeOf(),
-        sisteDato = 1.januar,
+        periode = 1.januar.somPeriode(),
         aktivitetslogg = Aktivitetslogg(),
         maksdato = 1.januar,
         forbrukteSykedager = 0,

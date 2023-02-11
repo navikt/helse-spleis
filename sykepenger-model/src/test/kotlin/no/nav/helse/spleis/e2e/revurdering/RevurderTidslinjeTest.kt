@@ -78,6 +78,7 @@ import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.spleis.e2e.tilGodkjent
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.assertNotNull
+import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -1187,7 +1188,20 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             )
         )
 
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+        val utbetaling1 = inspektør.utbetaling(0).inspektør
+        val revurdering = inspektør.utbetaling(1).inspektør
+
+        assertEquals(utbetaling1.korrelasjonsId, revurdering.korrelasjonsId)
+        val oppdragInspektør = revurdering.arbeidsgiverOppdrag.inspektør
+        assertEquals(Endringskode.ENDR, oppdragInspektør.endringskode)
+        assertEquals(1, oppdragInspektør.antallLinjer())
+        revurdering.arbeidsgiverOppdrag.single().inspektør.also { linje ->
+            assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
+            assertEquals(17.januar, linje.datoStatusFom)
+            assertEquals("OPPH", linje.statuskode)
+        }
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertVarsel(RV_IT_3, AktivitetsloggFilter.person())
     }
 
