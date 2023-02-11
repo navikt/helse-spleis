@@ -9,6 +9,7 @@ import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.erHelg
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
@@ -32,7 +33,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -69,7 +69,6 @@ import no.nav.helse.serde.PersonData.VilkårsgrunnlagInnslagData.Companion.grunn
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagInnslagData.Companion.tilModellObjekt
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.reflection.Inntektsopplysningskilde
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -84,6 +83,7 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.utbetalingport
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -1164,8 +1164,8 @@ internal data class PersonData(
         val id: UUID,
         private val korrelasjonsId: UUID,
         private val beregningId: UUID,
-        private val opprinneligPeriodeFom: LocalDate,
-        private val opprinneligPeriodeTom: LocalDate,
+        private val fom: LocalDate,
+        private val tom: LocalDate,
         private val utbetalingstidslinje: UtbetalingstidslinjeData,
         private val arbeidsgiverOppdrag: OppdragData,
         private val personOppdrag: OppdragData,
@@ -1186,7 +1186,7 @@ internal data class PersonData(
             id = id,
             korrelasjonsId = korrelasjonsId,
             beregningId = beregningId,
-            opprinneligPeriode = opprinneligPeriodeFom til opprinneligPeriodeTom,
+            opprinneligPeriode = fom til tom,
             utbetalingstidslinje = utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
             arbeidsgiverOppdrag = arbeidsgiverOppdrag.konverterTilOppdrag(),
             personOppdrag = personOppdrag.konverterTilOppdrag(),

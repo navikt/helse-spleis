@@ -57,7 +57,6 @@ import no.nav.helse.serde.api.BuilderState
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.reflection.AktivitetsloggMap
 import no.nav.helse.serde.reflection.Inntektsopplysningskilde
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -73,9 +72,9 @@ import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
@@ -84,6 +83,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Fridag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
@@ -1354,8 +1354,6 @@ internal class JsonBuilder : AbstractBuilder() {
             utbetalingMap["id"] = id
             utbetalingMap["korrelasjonsId"] = korrelasjonsId
             utbetalingMap["beregningId"] = beregningId
-            utbetalingMap["opprinneligPeriodeFom"] = periode.start // todo: rename opprinneligPeriodeFom til fom
-            utbetalingMap["opprinneligPeriodeTom"] = periode.endInclusive // todo: rename opprinneligPeriodeTom til tom
             utbetalingMap["utbetalingstidslinje"] = utbetalingstidslinjeMap
             utbetalingMap["arbeidsgiverOppdrag"] = arbeidsgiverOppdragMap
             utbetalingMap["personOppdrag"] = personOppdragMap
