@@ -2,10 +2,12 @@ package no.nav.helse.spleis.graphql
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Alder.Companion.alder
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.AbstractObservableTest
 import no.nav.helse.spleis.objectMapper
 import no.nav.helse.spleis.testhelpers.ApiTestServer
@@ -37,7 +39,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     @BeforeEach
     internal fun setup() {
         val sykmelding = sykmelding()
-        person = Person.fraHendelse(sykmelding, MaskinellJurist())
+        person = Person(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), UNG_PERSON_FØDSELSDATO.alder, MaskinellJurist())
         observatør = TestObservatør().also { person.addObserver(it) }
         person.håndter(sykmelding)
         person.håndter(søknad())

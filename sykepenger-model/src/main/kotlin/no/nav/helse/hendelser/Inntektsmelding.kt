@@ -16,7 +16,6 @@ import no.nav.helse.nesteDag
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.InntektsmeldingInfo
-import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_2
@@ -47,7 +46,6 @@ import kotlin.system.measureTimeMillis
 class Inntektsmelding(
     meldingsreferanseId: UUID,
     private val refusjon: Refusjon,
-    personopplysninger: Personopplysninger,
     orgnummer: String,
     fødselsnummer: String,
     aktørId: String,
@@ -65,7 +63,8 @@ class Inntektsmelding(
     fødselsnummer = fødselsnummer,
     aktørId = aktørId,
     organisasjonsnummer = orgnummer,
-    opprettet = mottatt, aktivitetslogg = aktivitetslogg, personopplysninger = personopplysninger)
+    opprettet = mottatt, aktivitetslogg = aktivitetslogg
+)
 {
 
     companion object {

@@ -3,17 +3,18 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
-import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -22,7 +23,6 @@ import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
-import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
@@ -35,8 +35,6 @@ internal abstract class AbstractPersonTest {
         val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         const val AKTØRID = "42"
         val ORGNUMMER: String = "987654321"
-        val personopplysninger = Personopplysninger(UNG_PERSON_FNR_2018, AKTØRID, UNG_PERSON_FØDSELSDATO)
-
 
         val a1: String = ORGNUMMER
         val a1Hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
@@ -63,9 +61,8 @@ internal abstract class AbstractPersonTest {
                     arbeidsgiverperioder = listOf(1.januar til 16.januar),
                     arbeidsforholdId = null,
                     begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-                    mottatt = LocalDateTime.now(),
                     harFlereInntektsmeldinger = false,
-                    personopplysninger = personopplysninger
+                    mottatt = LocalDateTime.now()
                 )
             )
             person.håndter(

@@ -3,15 +3,14 @@ package no.nav.helse.sykdomstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.Personopplysninger
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import kotlin.reflect.KClass
 
 internal typealias Melding = KClass<out SykdomstidslinjeHendelse>
@@ -23,9 +22,8 @@ abstract class SykdomstidslinjeHendelse(
     organisasjonsnummer: String,
     private val opprettet: LocalDateTime,
     melding: Melding? = null,
-    private val aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
-    personopplysninger: Personopplysninger? = null
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg, personopplysninger) {
+    private val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg) {
     private companion object {
         private val aldri = LocalDate.MIN til LocalDate.MIN
     }

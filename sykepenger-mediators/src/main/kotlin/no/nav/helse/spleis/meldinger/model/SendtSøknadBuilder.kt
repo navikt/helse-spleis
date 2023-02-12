@@ -37,7 +37,6 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         sykmeldingSkrevet = sykmeldingSkrevet,
         korrigerer = korrigerer,
         opprinneligSendt = opprinneligSendt,
-        personopplysninger = personopplysninger,
         utenlandskSykmelding = utenlandskSykmelding,
         sendTilGosys = sendTilGosys
     )

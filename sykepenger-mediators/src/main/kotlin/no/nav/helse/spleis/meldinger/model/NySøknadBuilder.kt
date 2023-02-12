@@ -24,7 +24,6 @@ internal class NySøknadBuilder : SøknadBuilder() {
         fnr = fnr,
         aktørId = aktørId,
         orgnummer = organisasjonsnummer,
-        sykeperioder = sykemeldingsperioder,
-        personopplysninger = personopplysninger
+        sykeperioder = sykemeldingsperioder
     )
 }

@@ -1,5 +1,7 @@
 package no.nav.helse.serde
 
+import java.time.LocalDate.EPOCH
+import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -62,7 +64,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
     internal fun setup() {
         aktivitetslogg = Aktivitetslogg()
 
-        person = Person.fraHendelse(sykmelding, MaskinellJurist()).apply {
+        person = Person(aktørId, fnr.somPersonidentifikator(), EPOCH.alder, MaskinellJurist()).apply {
             håndter(sykmelding)
             håndter(søknad)
         }

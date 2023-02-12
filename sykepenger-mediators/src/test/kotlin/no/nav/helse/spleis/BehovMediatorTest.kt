@@ -8,17 +8,14 @@ import io.mockk.mockk
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.desember
-import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
-import no.nav.helse.hendelser.ArbeidstakerHendelse
-import no.nav.helse.person.Person
-import no.nav.helse.person.Personopplysninger
+import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.somPersonidentifikator
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -228,14 +225,8 @@ class BehovMediatorTest {
 
     private class TestHendelse(
         val logg: Aktivitetslogg
-    ) : ArbeidstakerHendelse(UUID.randomUUID(), fødselsnummer, aktørId, "not_relevant", logg,
-        Personopplysninger(
-            personidentifikator = fødselsnummer.somPersonidentifikator(),
-            aktørId = aktørId,
-            fødselsdato = 24.desember(2000)
-        )
-    ), Aktivitetskontekst {
-        private val person = Person.fraHendelse(this, MaskinellJurist())
+    ) : ArbeidstakerHendelse(UUID.randomUUID(), fødselsnummer, aktørId, "not_relevant", logg), Aktivitetskontekst {
+        private val person = Personopplysninger(fødselsnummer.somPersonidentifikator(), aktørId, LocalDate.EPOCH).person(MaskinellJurist())
         init {
             kontekst(person)
         }

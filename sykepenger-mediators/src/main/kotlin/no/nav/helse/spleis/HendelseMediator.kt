@@ -1,5 +1,6 @@
 package no.nav.helse.spleis
 
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
@@ -7,6 +8,7 @@ import no.nav.helse.hendelser.Migrate
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
+import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
@@ -22,10 +24,8 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Person
-import no.nav.helse.hendelser.PersonHendelse
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.serde.serialize
@@ -82,181 +82,205 @@ internal class HendelseMediator(
     }
 
     override fun behandle(
+        personopplysninger: Personopplysninger,
         message: NySøknadMessage,
         sykmelding: Sykmelding,
         context: MessageContext,
         historiskeFolkeregisteridenter: List<String>
     ) {
-        håndter(message, sykmelding, context, historiskeFolkeregisteridenter) { person ->
+        opprettPersonOgHåndter(personopplysninger, message, sykmelding, context, historiskeFolkeregisteridenter) { person ->
             HendelseProbe.onSykmelding()
             person.håndter(sykmelding)
         }
     }
 
     override fun behandle(
+        personopplysninger: Personopplysninger,
         message: SendtSøknadArbeidsgiverMessage,
         søknad: Søknad,
         context: MessageContext,
         historiskeFolkeregisteridenter: List<String>
     ) {
-        håndter(message, søknad, context, historiskeFolkeregisteridenter) { person ->
+        opprettPersonOgHåndter(personopplysninger, message, søknad, context, historiskeFolkeregisteridenter) { person ->
             HendelseProbe.onSøknadArbeidsgiver()
             person.håndter(søknad)
         }
     }
 
     override fun behandle(
+        personopplysninger: Personopplysninger,
         message: SendtSøknadNavMessage,
         søknad: Søknad,
         context: MessageContext,
         historiskeFolkeregisteridenter: List<String>
     ) {
-        håndter(message, søknad, context, historiskeFolkeregisteridenter) { person ->
+        opprettPersonOgHåndter(personopplysninger, message, søknad, context, historiskeFolkeregisteridenter) { person ->
             HendelseProbe.onSøknadNav()
             person.håndter(søknad)
         }
     }
 
-    override fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext) {
-        håndter(message, inntektsmelding, context) { person ->
+    override fun behandle(personopplysninger: Personopplysninger, message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext) {
+        opprettPersonOgHåndter(personopplysninger, message, inntektsmelding, context) { person ->
             HendelseProbe.onInntektsmelding()
             person.håndter(inntektsmelding)
         }
     }
 
     override fun behandle(message: InntektsmeldingReplayMessage, inntektsmelding: InntektsmeldingReplay, context: MessageContext) {
-        håndter(message, inntektsmelding, context) { person ->
+        hentPersonOgHåndter(message, inntektsmelding, context) { person ->
             HendelseProbe.onInntektsmeldingReplay()
             person.håndter(inntektsmelding)
         }
     }
 
     override fun behandle(message: UtbetalingshistorikkMessage, utbetalingshistorikk: Utbetalingshistorikk, context: MessageContext) {
-        håndter(message, utbetalingshistorikk, context) { person ->
+        hentPersonOgHåndter(message, utbetalingshistorikk, context) { person ->
             HendelseProbe.onUtbetalingshistorikk()
             person.håndter(utbetalingshistorikk)
         }
     }
 
     override fun behandle(message: UtbetalingshistorikkForFeriepengerMessage, utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger, context: MessageContext) {
-        håndter(message, utbetalingshistorikkForFeriepenger, context) { person ->
+        hentPersonOgHåndter(message, utbetalingshistorikkForFeriepenger, context) { person ->
             HendelseProbe.onUtbetalingshistorikkForFeriepenger()
             person.håndter(utbetalingshistorikkForFeriepenger)
         }
     }
 
     override fun behandle(message: YtelserMessage, ytelser: Ytelser, context: MessageContext) {
-        håndter(message, ytelser, context) { person ->
+        hentPersonOgHåndter(message, ytelser, context) { person ->
             HendelseProbe.onYtelser()
             person.håndter(ytelser)
         }
     }
 
     override fun behandle(message: VilkårsgrunnlagMessage, vilkårsgrunnlag: Vilkårsgrunnlag, context: MessageContext) {
-        håndter(message, vilkårsgrunnlag, context) { person ->
+        hentPersonOgHåndter(message, vilkårsgrunnlag, context) { person ->
             HendelseProbe.onVilkårsgrunnlag()
             person.håndter(vilkårsgrunnlag)
         }
     }
 
     override fun behandle(message: SimuleringMessage, simulering: Simulering, context: MessageContext) {
-        håndter(message, simulering, context) { person ->
+        hentPersonOgHåndter(message, simulering, context) { person ->
             HendelseProbe.onSimulering()
             person.håndter(simulering)
         }
     }
 
     override fun behandle(message: UtbetalingsgodkjenningMessage, utbetalingsgodkjenning: Utbetalingsgodkjenning, context: MessageContext) {
-        håndter(message, utbetalingsgodkjenning, context) { person ->
+        hentPersonOgHåndter(message, utbetalingsgodkjenning, context) { person ->
             HendelseProbe.onUtbetalingsgodkjenning()
             person.håndter(utbetalingsgodkjenning)
         }
     }
 
     override fun behandle(message: UtbetalingOverførtMessage, utbetaling: UtbetalingOverført, context: MessageContext) {
-        håndter(message, utbetaling, context) { person ->
+        hentPersonOgHåndter(message, utbetaling, context) { person ->
             person.håndter(utbetaling)
         }
     }
 
     override fun behandle(message: UtbetalingMessage, utbetaling: UtbetalingHendelse, context: MessageContext) {
-        håndter(message, utbetaling, context) { person ->
+        hentPersonOgHåndter(message, utbetaling, context) { person ->
             HendelseProbe.onUtbetaling()
             person.håndter(utbetaling)
         }
     }
 
     override fun behandle(message: UtbetalingpåminnelseMessage, påminnelse: Utbetalingpåminnelse, context: MessageContext) {
-        håndter(message, påminnelse, context) { person ->
+        hentPersonOgHåndter(message, påminnelse, context) { person ->
             person.håndter(påminnelse)
         }
     }
 
     override fun behandle(message: PåminnelseMessage, påminnelse: Påminnelse, context: MessageContext) {
-        håndter(message, påminnelse, context) { person ->
+        hentPersonOgHåndter(message, påminnelse, context) { person ->
             HendelseProbe.onPåminnelse(påminnelse)
             person.håndter(påminnelse)
         }
     }
 
     override fun behandle(message: PersonPåminnelseMessage, påminnelse: PersonPåminnelse, context: MessageContext) {
-        håndter(message, påminnelse, context) { person ->
+        hentPersonOgHåndter(message, påminnelse, context) { person ->
             person.håndter(påminnelse)
         }
     }
 
     override fun behandle(message: AnnulleringMessage, annullerUtbetaling: AnnullerUtbetaling, context: MessageContext) {
-        håndter(message, annullerUtbetaling, context) { person ->
+        hentPersonOgHåndter(message, annullerUtbetaling, context) { person ->
             HendelseProbe.onAnnullerUtbetaling()
             person.håndter(annullerUtbetaling)
         }
     }
 
     override fun behandle(message: AvstemmingMessage, avstemming: Avstemming, context: MessageContext) {
-        håndter(message, avstemming, context) { person ->
+        hentPersonOgHåndter(message, avstemming, context) { person ->
             person.håndter(avstemming)
         }
     }
 
     override fun behandle(message: MigrateMessage, migrate: Migrate, context: MessageContext) {
-        håndter(message, migrate, context) { /* intentionally left blank */ }
+        hentPersonOgHåndter(message, migrate, context) { /* intentionally left blank */ }
     }
 
     override fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje, context: MessageContext) {
-        håndter(message, overstyrTidslinje, context) { person ->
+        hentPersonOgHåndter(message, overstyrTidslinje, context) { person ->
             HendelseProbe.onOverstyrTidslinje()
             person.håndter(overstyrTidslinje)
         }
     }
 
     override fun behandle(message: OverstyrInntektMessage, overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, context: MessageContext) {
-        håndter(message, overstyrArbeidsgiveropplysninger, context) { person ->
+        hentPersonOgHåndter(message, overstyrArbeidsgiveropplysninger, context) { person ->
             HendelseProbe.onOverstyrInntekt()
             person.håndter(overstyrArbeidsgiveropplysninger)
         }
     }
 
     override fun behandle(message: OverstyrArbeidsgiveropplysningerMessage, overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, context: MessageContext) {
-        håndter(message, overstyrArbeidsgiveropplysninger, context) { person ->
+        hentPersonOgHåndter(message, overstyrArbeidsgiveropplysninger, context) { person ->
             HendelseProbe.onOverstyrArbeidsgiveropplysninger()
             person.håndter(overstyrArbeidsgiveropplysninger)
         }
     }
 
     override fun behandle(message: OverstyrArbeidsforholdMessage, overstyrArbeidsforhold: OverstyrArbeidsforhold, context: MessageContext) {
-        håndter(message, overstyrArbeidsforhold, context) { person ->
+        hentPersonOgHåndter(message, overstyrArbeidsforhold, context) { person ->
             HendelseProbe.onOverstyrArbeidsforhold()
             person.håndter(overstyrArbeidsforhold)
         }
     }
 
     override fun behandle(message: EtterbetalingMessage, grunnbeløpsregulering: Grunnbeløpsregulering, context: MessageContext) {
-        håndter(message, grunnbeløpsregulering, context) { person ->
+        hentPersonOgHåndter(message, grunnbeløpsregulering, context) { person ->
             person.håndter(grunnbeløpsregulering)
         }
     }
 
-    private fun <Hendelse : PersonHendelse> håndter(
+    private fun <Hendelse : PersonHendelse> opprettPersonOgHåndter(
+        personopplysninger: Personopplysninger,
+        message: HendelseMessage,
+        hendelse: Hendelse,
+        context: MessageContext,
+        historiskeFolkeregisteridenter: List<String> = emptyList(),
+        handler: (Person) -> Unit
+    ) {
+        hentPersonOgHåndter(personopplysninger, message, hendelse, context, historiskeFolkeregisteridenter, handler)
+    }
+
+    private fun <Hendelse : PersonHendelse> hentPersonOgHåndter(
+        message: HendelseMessage,
+        hendelse: Hendelse,
+        context: MessageContext,
+        historiskeFolkeregisteridenter: List<String> = emptyList(),
+        handler: (Person) -> Unit
+    ) {
+        hentPersonOgHåndter(null, message, hendelse, context, historiskeFolkeregisteridenter, handler)
+    }
+    private fun <Hendelse : PersonHendelse> hentPersonOgHåndter(
+        personopplysninger: Personopplysninger?,
         message: HendelseMessage,
         hendelse: Hendelse,
         context: MessageContext,
@@ -267,7 +291,7 @@ internal class HendelseMediator(
         val personMediator = PersonMediator(message, hendelse, hendelseRepository)
         val datadelingMediator = DatadelingMediator(hendelse)
         val subsumsjonMediator = SubsumsjonMediator(jurist, hendelse.fødselsnummer(), message, versjonAvKode)
-        person(message, hendelse, historiskeFolkeregisteridenter, jurist) { person  ->
+        person(message, hendelse, historiskeFolkeregisteridenter, jurist, personopplysninger) { person  ->
             person.addObserver(personMediator)
             person.addObserver(VedtaksperiodeProbe)
             handler(person)
@@ -275,13 +299,13 @@ internal class HendelseMediator(
         finalize(context, personMediator, subsumsjonMediator, datadelingMediator, hendelse)
     }
 
-    private fun person(message: HendelseMessage, hendelse: PersonHendelse, historiskeFolkeregisteridenter: List<String>, jurist: MaskinellJurist, block: (Person) -> Unit) {
+    private fun person(message: HendelseMessage, hendelse: PersonHendelse, historiskeFolkeregisteridenter: List<String>, jurist: MaskinellJurist, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
         val personidentifikator = hendelse.fødselsnummer().somPersonidentifikator()
         val tidligereBehandledeIdenter = personDao.hentTidligereBehandledeIdenter(historiskeFolkeregisteridenter)
         val tidligereBehandlinger = personDao.lesOppPersoner(tidligereBehandledeIdenter.map { tidligereBehandletIdent -> tidligereBehandletIdent.somPersonidentifikator() })
             .map { serialisertPerson -> serialisertPerson.second.deserialize(jurist) { hendelseRepository.hentAlleHendelser(serialisertPerson.first) } }
         personDao.hentEllerOpprettPerson(personidentifikator, hendelse.aktørId(), message, {
-            Person.fraHendelse(hendelse, jurist).serialize()
+            checkNotNull(personopplysninger) { "Kan ikke opprette person fra ${message::class} fordi personopplysninger mangler" }.person(jurist).serialize()
         }) { serialisertPerson ->
             serialisertPerson.deserialize(jurist, tidligereBehandlinger) { hendelseRepository.hentAlleHendelser(personidentifikator) }.also(block).serialize()
         }
@@ -307,24 +331,27 @@ internal class HendelseMediator(
 internal interface IHendelseMediator {
     fun behandle(message: HendelseMessage, context: MessageContext)
     fun behandle(
+        personopplysninger: Personopplysninger,
         message: NySøknadMessage,
         sykmelding: Sykmelding,
         context: MessageContext,
         historiskeFolkeregisteridenter: List<String>
     )
     fun behandle(
+        personopplysninger: Personopplysninger,
         message: SendtSøknadArbeidsgiverMessage,
         søknad: Søknad,
         context: MessageContext,
         historiskeFolkeregisteridenter: List<String>
     )
     fun behandle(
+        personopplysninger: Personopplysninger,
         message: SendtSøknadNavMessage,
         søknad: Søknad,
         context: MessageContext,
         historiskeFolkeregisteridenter: List<String>
     )
-    fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext)
+    fun behandle(personopplysninger: Personopplysninger, message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext)
     fun behandle(message: InntektsmeldingReplayMessage, inntektsmelding: InntektsmeldingReplay, context: MessageContext)
     fun behandle(message: UtbetalingpåminnelseMessage, påminnelse: Utbetalingpåminnelse, context: MessageContext)
     fun behandle(message: PåminnelseMessage, påminnelse: Påminnelse, context: MessageContext)

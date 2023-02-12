@@ -5,19 +5,19 @@ import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
 import java.time.Year
 import java.time.temporal.ChronoUnit.YEARS
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 
 // TODO: alder bør ha dødsdato for å regne alder riktig i tilfelle død
-internal class Alder(private val fødselsdato: LocalDate) {
+class Alder(private val fødselsdato: LocalDate) {
     private val syttiårsdagen: LocalDate = fødselsdato.plusYears(70)
     private val sisteVirkedagFørFylte70år: LocalDate = syttiårsdagen.sisteVirkedagFør()
     private val redusertYtelseAlder: LocalDate = fødselsdato.plusYears(67)
     private val forhøyetInntektskravAlder: LocalDate = fødselsdato.plusYears(67)
 
-    internal companion object {
+    companion object {
         private const val MAKS_SYKEPENGEDAGER_OVER_67 = 60
         private const val ALDER_FOR_FORHØYET_FERIEPENGESATS = 59
         private const val MINSTEALDER_UTEN_FULLMAKT_FRA_VERGE = 18

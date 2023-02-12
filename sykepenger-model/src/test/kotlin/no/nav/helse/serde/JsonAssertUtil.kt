@@ -12,12 +12,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.math.BigDecimal
 import java.math.RoundingMode
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
-import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeUtbetalinger
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.serde.reflection.AktivitetsloggMap
@@ -28,9 +27,6 @@ import org.junit.jupiter.api.Assertions
 
 @JsonIgnoreProperties("jurist")
 private class PersonMixin
-
-@JsonIgnoreProperties("historiskeFolkeregisteridenter")
-private class PersonopplysningerMixin
 
 @JsonIgnoreProperties("person", "jurist")
 private class ArbeidsgiverMixin
@@ -90,7 +86,6 @@ private val objectMapper = jacksonObjectMapper()
             InfotrygdhistorikkElement::class.java to InfotrygdhistorikkElementMixin::class.java,
             Prosentdel::class.java to ProsentdelMixin::class.java,
             Aktivitetslogg::class.java to AktivitetsloggMixin::class.java,
-            Personopplysninger::class.java to PersonopplysningerMixin::class.java,
             SkattSykepengegrunnlag::class.java to SkattSykepengegrunnlagMixin::class.java
         )
     )

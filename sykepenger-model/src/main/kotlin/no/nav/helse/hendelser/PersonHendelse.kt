@@ -1,8 +1,6 @@
 package no.nav.helse.hendelser
 
 import java.util.UUID
-import no.nav.helse.Personidentifikator
-import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggMappingPort
@@ -11,7 +9,6 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Subaktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.Alder
 
 internal class FunksjonelleFeilTilVarsler(private val other: IAktivitetslogg) : IAktivitetslogg by other {
     override fun funksjonellFeil(kode: Varselkode) = varsel(kode)
@@ -25,8 +22,7 @@ abstract class PersonHendelse protected constructor(
     private val meldingsreferanseId: UUID,
     protected val fødselsnummer: String,
     protected val aktørId: String,
-    private var aktivitetslogg: IAktivitetslogg,
-    private val personopplysninger: Personopplysninger? = null
+    private var aktivitetslogg: IAktivitetslogg
 ) : IAktivitetslogg, Aktivitetskontekst {
 
     init {
@@ -43,12 +39,6 @@ abstract class PersonHendelse protected constructor(
 
     fun aktørId() = aktørId
     fun fødselsnummer() = fødselsnummer
-
-    internal fun personopplysninger(): Personopplysninger =
-        checkNotNull(personopplysninger) {"${this::class.simpleName} inneholder ikke nødvendige personopplysninger."}
-    internal fun <T> brukPersonOpplysninger(visitor: (id: Personidentifikator, aktørId: String, alder: Alder) -> T): T {
-        return personopplysninger().brukPersonOpplysninger(visitor)
-    }
 
     fun meldingsreferanseId() = meldingsreferanseId
 

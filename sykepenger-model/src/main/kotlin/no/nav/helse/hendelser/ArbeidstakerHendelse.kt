@@ -1,7 +1,6 @@
 package no.nav.helse.hendelser
 
 import java.util.UUID
-import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 
 abstract class ArbeidstakerHendelse protected constructor(
@@ -9,11 +8,10 @@ abstract class ArbeidstakerHendelse protected constructor(
     fødselsnummer: String,
     aktørId: String,
     protected val organisasjonsnummer: String,
-    private val aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
-    private val personopplysninger: Personopplysninger? = null
-) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, aktivitetslogg, personopplysninger) {
+    private val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, aktivitetslogg) {
 
-    protected constructor(other: ArbeidstakerHendelse) : this(other.meldingsreferanseId(), other.fødselsnummer(), other.aktørId(), other.organisasjonsnummer, other.aktivitetslogg, other.personopplysninger)
+    protected constructor(other: ArbeidstakerHendelse) : this(other.meldingsreferanseId(), other.fødselsnummer(), other.aktørId(), other.organisasjonsnummer, other.aktivitetslogg)
 
     fun organisasjonsnummer() = organisasjonsnummer
 

@@ -36,8 +36,6 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FØDSELSDATO
-import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
@@ -53,16 +51,12 @@ import no.nav.helse.økonomi.Inntekt
 internal class ArbeidsgiverHendelsefabrikk(
     private val aktørId: String,
     private val personidentifikator: Personidentifikator,
-    private val organisasjonsnummer: String,
-    private val fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO
+    private val organisasjonsnummer: String
 ) {
 
     private val sykmeldinger = mutableListOf<Sykmelding>()
     private val søknader = mutableListOf<Søknad>()
     private val inntektsmeldinger = mutableMapOf<UUID, () -> Inntektsmelding>()
-    private val personopplysninger = Personopplysninger(
-        personidentifikator, aktørId, fødselsdato
-    )
 
     internal fun lagSykmelding(
         vararg sykeperioder: Sykmeldingsperiode,
@@ -73,8 +67,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             fnr = personidentifikator.toString(),
             aktørId = aktørId,
             orgnummer = organisasjonsnummer,
-            sykeperioder = listOf(*sykeperioder),
-            personopplysninger = personopplysninger
+            sykeperioder = listOf(*sykeperioder)
         ).apply {
             sykmeldinger.add(this)
         }
@@ -99,7 +92,6 @@ internal class ArbeidsgiverHendelsefabrikk(
             meldingsreferanseId = id,
             fnr = personidentifikator.toString(),
             aktørId = aktørId,
-            personopplysninger = personopplysninger,
             orgnummer = organisasjonsnummer,
             perioder = listOf(*perioder),
             andreInntektskilder = andreInntektskilder,
@@ -109,9 +101,9 @@ internal class ArbeidsgiverHendelsefabrikk(
             sykmeldingSkrevet = sykmeldingSkrevet ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay(),
             korrigerer = korrigerer,
             opprinneligSendt = opprinneligSendt?.atStartOfDay(),
-            aktivitetslogg = aktivitetslogg,
             utenlandskSykmelding = utenlandskSykmelding,
-            sendTilGosys = sendTilGosys
+            sendTilGosys = sendTilGosys,
+            aktivitetslogg = aktivitetslogg
         ).apply {
             søknader.add(this)
         }
@@ -142,10 +134,9 @@ internal class ArbeidsgiverHendelsefabrikk(
                 arbeidsforholdId = arbeidsforholdId,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-                mottatt = LocalDateTime.now(),
-                aktivitetslogg = aktivitetslogg,
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-                personopplysninger = personopplysninger
+                mottatt = LocalDateTime.now(),
+                aktivitetslogg = aktivitetslogg
             )
         }
         inntektsmeldinger[id] = inntektsmeldinggenerator

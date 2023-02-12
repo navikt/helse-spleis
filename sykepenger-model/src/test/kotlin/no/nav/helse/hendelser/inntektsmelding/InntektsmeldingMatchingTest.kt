@@ -3,7 +3,6 @@ package no.nav.helse.hendelser.inntektsmelding
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Personidentifikator
 import no.nav.helse.desember
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
@@ -17,7 +16,6 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.Personopplysninger
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -584,17 +582,12 @@ internal class InntektsmeldingMatchingTest {
             fødselsnummer = "12345678910",
             aktørId = "1",
             førsteFraværsdag = førsteFraværsdag,
-            arbeidsgiverperioder = arbeidsgiverperiode.toList(),
             beregnetInntekt = 31000.månedlig,
+            arbeidsgiverperioder = arbeidsgiverperiode.toList(),
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             harFlereInntektsmeldinger = false,
-            mottatt = LocalDateTime.now(),
-            personopplysninger = Personopplysninger(
-                Personidentifikator.somPersonidentifikator("12345678910"),
-                "1",
-                LocalDate.now()
-            )
+            mottatt = LocalDateTime.now()
         ).let { inntektsmelding ->
             val dager = inntektsmelding.dager(perioder.grupperSammenhengendePerioderMedHensynTilHelg())
             dager to inntektsmelding.inntektOgRefusjon(dager)

@@ -116,9 +116,6 @@ class Person private constructor(
             tidligereBehandlinger = tidligereBehandlinger,
             jurist = jurist
         )
-
-        fun fraHendelse(personHendelse: PersonHendelse, jurist: MaskinellJurist): Person =
-            personHendelse.brukPersonOpplysninger { id, aktørId, alder -> Person(aktørId, id, alder, jurist) }
     }
 
     internal constructor(
@@ -126,7 +123,7 @@ class Person private constructor(
         personidentifikator: Personidentifikator,
         alder: Alder,
         jurist: MaskinellJurist,
-        regler: ArbeidsgiverRegler = NormalArbeidstaker
+        regler: ArbeidsgiverRegler
     ) : this(
         aktørId,
         personidentifikator,
@@ -141,6 +138,12 @@ class Person private constructor(
         emptyList<Person>(),
         regler = regler
     )
+    constructor(
+        aktørId: String,
+        personidentifikator: Personidentifikator,
+        alder: Alder,
+        jurist: MaskinellJurist
+    ) : this(aktørId, personidentifikator, alder, jurist, NormalArbeidstaker)
 
     private val observers = mutableListOf<PersonObserver>()
 

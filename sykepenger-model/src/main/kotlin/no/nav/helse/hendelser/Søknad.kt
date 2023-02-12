@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.subsumsjonsForma
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
-import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -30,7 +29,6 @@ class Søknad(
     meldingsreferanseId: UUID,
     fnr: String,
     aktørId: String,
-    personopplysninger: Personopplysninger,
     orgnummer: String,
     private val perioder: List<Søknadsperiode>,
     private val andreInntektskilder: Boolean,
@@ -43,7 +41,7 @@ class Søknad(
     private val utenlandskSykmelding: Boolean,
     private val sendTilGosys: Boolean,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
-) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class, aktivitetslogg, personopplysninger) {
+) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class, aktivitetslogg) {
 
     private val sykdomsperiode: Periode
     private val sykdomstidslinje: Sykdomstidslinje

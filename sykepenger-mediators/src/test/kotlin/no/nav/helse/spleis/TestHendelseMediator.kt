@@ -131,6 +131,7 @@ internal class TestHendelseMediator : IHendelseMediator {
     }
 
     override fun behandle(
+        personopplysninger: Personopplysninger,
         message: NySøknadMessage,
         sykmelding: Sykmelding,
         context: MessageContext,
@@ -140,6 +141,7 @@ internal class TestHendelseMediator : IHendelseMediator {
     }
 
     override fun behandle(
+        personopplysninger: Personopplysninger,
         message: SendtSøknadArbeidsgiverMessage,
         søknad: Søknad,
         context: MessageContext,
@@ -149,6 +151,7 @@ internal class TestHendelseMediator : IHendelseMediator {
     }
 
     override fun behandle(
+        personopplysninger: Personopplysninger,
         message: SendtSøknadNavMessage,
         søknad: Søknad,
         context: MessageContext,
@@ -157,7 +160,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestSendtSøknad = true
     }
 
-    override fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext) {
+    override fun behandle(personopplysninger: Personopplysninger, message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext) {
         lestInntektsmelding = true
     }
 

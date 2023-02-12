@@ -5,21 +5,28 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.Personopplysninger
 
 // Understands a JSON message representing a Søknad
 internal abstract class SøknadMessage(private val packet: JsonMessage, private val builder: SøknadBuilder) :
     HendelseMessage(packet) {
 
-    protected val sykmeldingSkrevet = packet["sykmeldingSkrevet"].asLocalDateTime()
+    private val sykmeldingSkrevet = packet["sykmeldingSkrevet"].asLocalDateTime()
     final override val fødselsnummer = packet["fnr"].asText()
 
     final override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+        val personopplysninger = Personopplysninger(
+            personidentifikator = fødselsnummer.somPersonidentifikator(),
+            aktørId = packet["aktorId"].asText(),
+            fødselsdato = packet["fødselsdato"].asLocalDate()
+        )
         bygg()
-        _behandle(mediator, packet, context)
+        _behandle(mediator, personopplysninger, packet, context)
     }
 
-    protected abstract fun _behandle(mediator: IHendelseMediator, packet: JsonMessage, context: MessageContext)
+    protected abstract fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: MessageContext)
 
     private fun bygg() {
         builder.meldingsreferanseId(this.id)
@@ -27,11 +34,6 @@ internal abstract class SøknadMessage(private val packet: JsonMessage, private 
             .opprettet(packet["opprettet"].asLocalDateTime())
             .aktørId(packet["aktorId"].asText())
             .fødselsdato(packet["fødselsdato"].asLocalDate())
-            .personopplysninger(
-                fnr = fødselsnummer,
-                aktørId = packet["aktorId"].asText(),
-                fødselsdato = packet["fødselsdato"].asLocalDate()
-            )
             .sykmeldingSkrevet(sykmeldingSkrevet)
             .organisasjonsnummer(packet["arbeidsgiver.orgnummer"].asText())
             .fom(packet["fom"].asLocalDate())

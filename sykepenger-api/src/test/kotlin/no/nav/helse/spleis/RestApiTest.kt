@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.Personidentifikator
+import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
@@ -26,8 +26,8 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.person.Person
-import no.nav.helse.person.Personopplysninger
 import no.nav.helse.serde.serialize
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.config.AzureAdAppConfig
 import no.nav.helse.spleis.config.DataSourceConfiguration
 import no.nav.helse.spleis.config.KtorConfig
@@ -136,18 +136,12 @@ internal class RestApiTest {
         val fom = LocalDate.of(2018, 9, 10)
         val tom = fom.plusDays(16)
         val sykeperioder = listOf(Sykmeldingsperiode(fom, tom))
-        val personopplysninger = Personopplysninger(
-            Personidentifikator.somPersonidentifikator(UNG_PERSON_FNR),
-            AKTØRID,
-            UNG_PERSON_FØDSELSDATO
-        )
         val sykmelding = Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR,
             aktørId = "aktørId",
             orgnummer = ORGNUMMER,
-            sykeperioder = sykeperioder,
-            personopplysninger = personopplysninger
+            sykeperioder = sykeperioder
         )
         val inntektsmelding = Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
@@ -163,11 +157,10 @@ internal class RestApiTest {
             arbeidsgiverperioder = listOf(Periode(LocalDate.of(2018, 9, 10), LocalDate.of(2018, 9, 10).plusDays(16))),
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-            mottatt = LocalDateTime.now(),
             harFlereInntektsmeldinger = false,
-            personopplysninger = personopplysninger
+            mottatt = LocalDateTime.now()
         )
-        val person = Person.fraHendelse(sykmelding, MaskinellJurist())
+        val person = Person(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), UNG_PERSON_FØDSELSDATO.alder, MaskinellJurist())
         person.håndter(sykmelding)
         person.håndter(inntektsmelding)
         dataSource.lagrePerson(AKTØRID, UNG_PERSON_FNR, person)
