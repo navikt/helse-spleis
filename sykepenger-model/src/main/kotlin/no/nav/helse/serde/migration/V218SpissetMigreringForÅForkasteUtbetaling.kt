@@ -12,17 +12,10 @@ internal class V218SpissetMigreringForÅForkasteUtbetaling: JsonMigration(218) {
         )
     }
 
+    private val trøblete = TrøbleteUtbetalinger(trøbleteUtbetalinger)
     override val description = "spisset migrering for å forkaste trøblete utbetalinger"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
-        jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
-            arbeidsgiver.path("utbetalinger")
-                .filter { utbetaling ->
-                    utbetaling.path("id").asText() in trøbleteUtbetalinger
-                }
-                .forEach { utbetaling ->
-                    (utbetaling as ObjectNode).put("status", "FORKASTET")
-                }
-        }
+        trøblete.doMigration(jsonNode)
     }
 }
