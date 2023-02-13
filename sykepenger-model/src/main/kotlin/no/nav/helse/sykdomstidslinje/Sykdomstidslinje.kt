@@ -8,6 +8,8 @@ import java.util.SortedMap
 import java.util.stream.Collectors.toMap
 import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
+import no.nav.helse.etterlevelse.SykdomstidslinjeBuilder
+import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.contains
@@ -247,6 +249,7 @@ internal class Sykdomstidslinje private constructor(
     }
 
     internal fun sykdomsperiode() = kuttEtterSisteSykedag().periode
+    internal fun subsumsjonsformat(): List<Tidslinjedag> = SykdomstidslinjeBuilder(this).dager()
 
     internal companion object {
 
