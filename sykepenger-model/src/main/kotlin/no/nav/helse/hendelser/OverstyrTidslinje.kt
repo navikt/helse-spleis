@@ -3,9 +3,9 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -14,7 +14,13 @@ data class ManuellOverskrivingDag(
     val dato: LocalDate,
     val type: Dagtype,
     val grad: Int? = null
-)
+) {
+    init {
+        check(type != Dagtype.Sykedag || grad != null) {
+            "👉 Sykedager må ha grad altså 👈"
+        }
+    }
+}
 
 enum class Dagtype {
     Sykedag, Feriedag, Egenmeldingsdag, Permisjonsdag

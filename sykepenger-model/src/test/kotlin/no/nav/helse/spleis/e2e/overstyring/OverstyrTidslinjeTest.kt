@@ -1,6 +1,10 @@
 package no.nav.helse.spleis.e2e.overstyring
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -10,6 +14,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -23,7 +28,9 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -35,21 +42,116 @@ import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterSøknadMedValidering
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.manuellArbeidsgiverdag
 import no.nav.helse.spleis.e2e.manuellFeriedag
 import no.nav.helse.spleis.e2e.manuellPermisjonsdag
 import no.nav.helse.spleis.e2e.manuellSykedag
+import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.spleis.e2e.tilGodkjenning
+import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `vedtaksperiode strekker seg tilbake og endrer skjæringstidspunktet`() {
+        tilGodkjenning(10.januar, 31.januar, a1)
+        nullstillTilstandsendringer()
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(9.januar, Dagtype.Sykedag, 100)
+        ), orgnummer = a1)
+
+        assertForventetFeil(
+            forklaring = "vedtaksperioden må ta inn 'overstyr tidslinje' dersom den er rett før",
+            nå = {
+                val dagen = inspektør.sykdomstidslinje[9.januar]
+                assertEquals(Dag.UkjentDag::class, dagen::class)
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            },
+            ønsket = {
+                val dagen = inspektør.sykdomstidslinje[9.januar]
+                assertEquals(Dag.Sykedag::class, dagen::class)
+                assertTrue(dagen.kommerFra(OverstyrTidslinje::class))
+
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+                håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
+                håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+                assertEquals(9.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
+                assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+            }
+        )
+    }
+
+    @Test
+    fun `endrer skjæringstidspunkt på en førstegangsbehandling ved å omgjøre en arbeidsdag til sykedag`() {
+        nyPeriode(1.januar til 9.januar, a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        tilGodkjenning(10.januar, 31.januar, a1) // 1. jan - 9. jan blir omgjort til arbeidsdager ved innsending av IM her
+        nullstillTilstandsendringer()
+        // Saksbehandler korrigerer; 9.januar var vedkommende syk likevel
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(9.januar, Dagtype.Sykedag, 100)
+        ), orgnummer = a1)
+
+        val dagen = inspektør.sykdomstidslinje[9.januar]
+        assertEquals(Dag.Sykedag::class, dagen::class)
+        assertTrue(dagen.kommerFra(OverstyrTidslinje::class))
+
+        assertForventetFeil(
+            forklaring = "skjæringstidspunktet endres fra 10.jan til 9.jan, som gjør at vi også står uten inntekt",
+            nå = {
+              assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
+            },
+            ønsket = {
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
+                håndterVilkårsgrunnlag(2.vedtaksperiode, orgnummer = a1)
+                håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+
+                assertEquals(1.januar til 9.januar, inspektør.periode(1.vedtaksperiode))
+                assertEquals(10.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
+
+                assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+                assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+            }
+        )
+    }
+
+    @Test
+    fun `vedtaksperiode strekker seg ikke tilbake hvis det er en periode foran`() {
+        nyPeriode(1.januar til 9.januar, a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        nyPeriode(10.januar til 31.januar, a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        nullstillTilstandsendringer()
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(9.januar, Dagtype.Sykedag, 100)
+        ), orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+
+        val dagen = inspektør.sykdomstidslinje[9.januar]
+        assertEquals(Dag.Sykedag::class, dagen::class)
+        assertTrue(dagen.kommerFra(OverstyrTidslinje::class))
+
+        assertEquals(1.januar til 9.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(10.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+    }
 
     @Test
     fun `kan ikke utbetale overstyrt utbetaling`() {

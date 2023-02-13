@@ -2041,7 +2041,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            hendelse.info("Overstyrer ikke en vedtaksperiode som er avsluttet uten utbetaling")
+            vedtaksperiode.revurderTidslinje(hendelse)
         }
 
     }
