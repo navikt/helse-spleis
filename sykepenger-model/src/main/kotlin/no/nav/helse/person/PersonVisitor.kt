@@ -25,20 +25,9 @@ import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
-import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
-import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
-import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
-import no.nav.helse.sykdomstidslinje.Dag.Feriedag
-import no.nav.helse.sykdomstidslinje.Dag.ForeldetSykedag
-import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
-import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
-import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
-import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
-import no.nav.helse.sykdomstidslinje.Dag.Sykedag
-import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeDagVisitor
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.OppdragVisitor
@@ -51,7 +40,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel
-import no.nav.helse.økonomi.Økonomi
 
 internal interface PersonVisitor : AlderVisitor, ArbeidsgiverVisitor, AktivitetsloggVisitor, VilkårsgrunnlagHistorikkVisitor, InfotrygdhistorikkVisitor {
     fun preVisitPerson(
@@ -434,59 +422,8 @@ internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {
     fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {}
 }
 
-internal interface SykdomstidslinjeVisitor {
-    fun preVisitSykdomstidslinje(
-        tidslinje: Sykdomstidslinje,
-        låstePerioder: List<Periode>
-    ) {
-    }
-
-    fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun visitDag(
-        dag: Arbeidsgiverdag,
-        dato: LocalDate,
-        økonomi: Økonomi,
-        kilde: Hendelseskilde
-    ) {
-    }
-
-    fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun visitDag(
-        dag: ArbeidsgiverHelgedag,
-        dato: LocalDate,
-        økonomi: Økonomi,
-        kilde: Hendelseskilde
-    ) {
-    }
-
-    fun visitDag(
-        dag: Sykedag,
-        dato: LocalDate,
-        økonomi: Økonomi,
-        kilde: Hendelseskilde
-    ) {
-    }
-
-    fun visitDag(
-        dag: ForeldetSykedag,
-        dato: LocalDate,
-        økonomi: Økonomi,
-        kilde: Hendelseskilde
-    ) {
-    }
-
-    fun visitDag(
-        dag: SykHelgedag,
-        dato: LocalDate,
-        økonomi: Økonomi,
-        kilde: Hendelseskilde
-    ) {
-    }
-
-    fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, other: Hendelseskilde?, melding: String) {}
+internal interface SykdomstidslinjeVisitor: SykdomstidslinjeDagVisitor {
+    fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {}
     fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: MutableList<Periode>) {}
 }
 

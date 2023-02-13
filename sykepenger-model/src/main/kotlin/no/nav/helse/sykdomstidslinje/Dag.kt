@@ -1,7 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
 import java.time.LocalDate
-import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.økonomi.Økonomi
 
 internal typealias BesteStrategy = (Dag, Dag) -> Dag
@@ -67,14 +66,14 @@ internal sealed class Dag(
 
     override fun toString() = "${this::class.java.simpleName} ($dato) $kilde"
 
-    internal open fun accept(visitor: SykdomstidslinjeVisitor) {}
+    internal open fun accept(visitor: SykdomstidslinjeDagVisitor) {}
 
     internal class UkjentDag(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
-        override fun accept(visitor: SykdomstidslinjeVisitor) =
+        override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde)
     }
 
@@ -83,7 +82,7 @@ internal sealed class Dag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
-        override fun accept(visitor: SykdomstidslinjeVisitor) =
+        override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde)
     }
 
@@ -93,7 +92,7 @@ internal sealed class Dag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
-        override fun accept(visitor: SykdomstidslinjeVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
     }
 
     internal class Feriedag(
@@ -101,7 +100,7 @@ internal sealed class Dag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
-        override fun accept(visitor: SykdomstidslinjeVisitor) =
+        override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde)
     }
 
@@ -110,7 +109,7 @@ internal sealed class Dag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
-        override fun accept(visitor: SykdomstidslinjeVisitor) =
+        override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde)
     }
 
@@ -120,7 +119,7 @@ internal sealed class Dag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
-        override fun accept(visitor: SykdomstidslinjeVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
     }
 
     internal class Sykedag(
@@ -129,7 +128,7 @@ internal sealed class Dag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
-        override fun accept(visitor: SykdomstidslinjeVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
     }
 
     internal class ForeldetSykedag(
@@ -138,7 +137,7 @@ internal sealed class Dag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
-        override fun accept(visitor: SykdomstidslinjeVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
     }
 
     internal class SykHelgedag(
@@ -147,7 +146,7 @@ internal sealed class Dag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
-        override fun accept(visitor: SykdomstidslinjeVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
     }
 
     internal class Permisjonsdag(
@@ -155,7 +154,7 @@ internal sealed class Dag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
-        override fun accept(visitor: SykdomstidslinjeVisitor) =
+        override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde)
     }
 
@@ -168,8 +167,63 @@ internal sealed class Dag(
 
         internal constructor(dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde, melding: String) : this(dato, kilde, kilde, melding)
 
-        override fun accept(visitor: SykdomstidslinjeVisitor) =
+        override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde, other, melding)
     }
 }
 
+internal interface SykdomstidslinjeDagVisitor {
+    fun visitDag(dag: Dag.UkjentDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {}
+    fun visitDag(dag: Dag.Arbeidsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {}
+    fun visitDag(
+        dag: Dag.Arbeidsgiverdag,
+        dato: LocalDate,
+        økonomi: Økonomi,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) {
+    }
+
+    fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {}
+    fun visitDag(dag: Dag.FriskHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {}
+    fun visitDag(
+        dag: Dag.ArbeidsgiverHelgedag,
+        dato: LocalDate,
+        økonomi: Økonomi,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) {
+    }
+
+    fun visitDag(
+        dag: Dag.Sykedag,
+        dato: LocalDate,
+        økonomi: Økonomi,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) {
+    }
+
+    fun visitDag(
+        dag: Dag.ForeldetSykedag,
+        dato: LocalDate,
+        økonomi: Økonomi,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) {
+    }
+
+    fun visitDag(
+        dag: Dag.SykHelgedag,
+        dato: LocalDate,
+        økonomi: Økonomi,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) {
+    }
+
+    fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {}
+    fun visitDag(
+        dag: Dag.ProblemDag,
+        dato: LocalDate,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde,
+        other: SykdomstidslinjeHendelse.Hendelseskilde?,
+        melding: String
+    ) {
+    }
+}
