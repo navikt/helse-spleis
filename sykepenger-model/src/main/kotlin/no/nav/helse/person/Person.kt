@@ -197,7 +197,8 @@ class Person private constructor(
 
     fun håndter(infotrygdendring: Infotrygdendring) {
         infotrygdendring.kontekst(this)
-        infotrygdhistorikk.oppfrisk(infotrygdendring, LocalDate.now())
+        val tidligsteDato = arbeidsgivereMedSykdom().minOfOrNull { it.tidligsteDato() } ?: LocalDate.now()
+        infotrygdhistorikk.oppfrisk(infotrygdendring, tidligsteDato)
         håndterGjenoppta(infotrygdendring)
     }
 
