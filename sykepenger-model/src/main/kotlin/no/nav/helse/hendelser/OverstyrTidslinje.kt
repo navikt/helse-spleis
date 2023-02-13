@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.nesteDag
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -23,7 +24,7 @@ data class ManuellOverskrivingDag(
 }
 
 enum class Dagtype {
-    Sykedag, Feriedag, Egenmeldingsdag, Permisjonsdag
+    Sykedag, Feriedag, Egenmeldingsdag, Permisjonsdag, Arbeidsdag
 }
 
 class OverstyrTidslinje(
@@ -35,6 +36,7 @@ class OverstyrTidslinje(
     opprettet: LocalDateTime
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, opprettet) {
 
+    private val periode: Periode
     private val sykdomstidslinje: Sykdomstidslinje
     private var håndtert: Boolean = false
 
@@ -57,6 +59,11 @@ class OverstyrTidslinje(
                     sisteDato = it.dato,
                     kilde = kilde
                 )
+                Dagtype.Arbeidsdag -> Sykdomstidslinje.arbeidsdager(
+                    førsteDato = it.dato,
+                    sisteDato = it.dato,
+                    kilde = kilde
+                )
                 Dagtype.Egenmeldingsdag -> Sykdomstidslinje.arbeidsgiverdager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
@@ -64,7 +71,10 @@ class OverstyrTidslinje(
                     kilde = kilde
                 )
             }
-        }.reduce { acc, manuellOverskrivingDag -> acc + manuellOverskrivingDag }
+        }.reduce(Sykdomstidslinje::plus)
+        periode = checkNotNull(sykdomstidslinje.periode()) {
+            "Overstyr tidslinje må ha minst én overstyrt dag"
+        }
     }
 
     internal fun alleredeHåndtert() = håndtert
@@ -73,6 +83,8 @@ class OverstyrTidslinje(
         require(!håndtert) { "Flere perioder forsøker å markere hendelsen som håndtert. Kun én periode skal håndtere hendelsen" }
         håndtert = true
     }
+
+    override fun overlappsperiode() = periode.oppdaterTom(periode.endInclusive.nesteDag)
 
     override fun sykdomstidslinje() = sykdomstidslinje
 

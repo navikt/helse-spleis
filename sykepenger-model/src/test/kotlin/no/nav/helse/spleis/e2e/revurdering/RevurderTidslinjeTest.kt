@@ -1355,7 +1355,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Kun periode berørt av endringene skal ha hendelseIden`() {
+    fun `Kun periode berørt av endringene skal ha hendelseIden - forlengelse får hendelseId`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
         val hendelseId = UUID.randomUUID()
@@ -1363,6 +1363,23 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             meldingsreferanseId = hendelseId,
             overstyringsdager = (30.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Feriedag) }
         )
+        assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(1.februar til 28.februar, inspektør.periode(2.vedtaksperiode))
+        assertHarHendelseIder(1.vedtaksperiode, hendelseId)
+        assertHarHendelseIder(2.vedtaksperiode, hendelseId)
+    }
+
+    @Test
+    fun `Kun periode berørt av endringene skal ha hendelseIden`() {
+        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(2.februar, 28.februar)
+        val hendelseId = UUID.randomUUID()
+        håndterOverstyrTidslinje(
+            meldingsreferanseId = hendelseId,
+            overstyringsdager = (30.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Feriedag) }
+        )
+        assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(2.februar til 28.februar, inspektør.periode(2.vedtaksperiode))
         assertHarHendelseIder(1.vedtaksperiode, hendelseId)
         assertHarIkkeHendelseIder(2.vedtaksperiode, hendelseId)
     }

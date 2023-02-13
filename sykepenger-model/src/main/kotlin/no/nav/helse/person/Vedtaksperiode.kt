@@ -362,8 +362,8 @@ internal class Vedtaksperiode private constructor(
         return true
     }
 
-    internal fun håndter(hendelse: OverstyrTidslinje) = hendelse.erRelevant(periode).also { erRelevant ->
-        if (!erRelevant) return IKKE_HÅNDTERT
+    internal fun håndter(hendelse: OverstyrTidslinje) {
+        if (!hendelse.erRelevant(periode)) return
         kontekst(hendelse)
         hendelse.leggTil(hendelseIder)
         if (!hendelse.alleredeHåndtert()) {
@@ -518,11 +518,11 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun oppdaterHistorikk(hendelse: SykdomstidslinjeHendelse) {
+        periode = periode.oppdaterFom(hendelse.periode())
         sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
     }
 
     private fun håndterSøknad(søknad: Søknad, nesteTilstand: () -> Vedtaksperiodetilstand? = { null }) {
-        periode = periode.oppdaterFom(søknad.periode())
         oppdaterHistorikk(søknad)
         søknad.valider(periode, jurist())
         søknad.validerInntektskilder(vilkårsgrunnlag == null)

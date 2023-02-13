@@ -71,26 +71,67 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
             ManuellOverskrivingDag(9.januar, Dagtype.Sykedag, 100)
         ), orgnummer = a1)
 
+        assertEquals(9.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
+
         assertForventetFeil(
-            forklaring = "vedtaksperioden må ta inn 'overstyr tidslinje' dersom den er rett før",
+            forklaring = "vedtaksperioden forkastes pga. vi ikke har inntekt for det nye skjæringstidspunktet",
             nå = {
                 val dagen = inspektør.sykdomstidslinje[9.januar]
                 assertEquals(Dag.UkjentDag::class, dagen::class)
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+                assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
             },
             ønsket = {
                 val dagen = inspektør.sykdomstidslinje[9.januar]
                 assertEquals(Dag.Sykedag::class, dagen::class)
                 assertTrue(dagen.kommerFra(OverstyrTidslinje::class))
-
                 assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
                 håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
                 håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
-                assertEquals(9.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
                 assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
             }
         )
+    }
+
+    @Test
+    fun `vedtaksperiode strekker seg tilbake og endrer ikke skjæringstidspunktet`() {
+        tilGodkjenning(10.januar, 31.januar, a1)
+        nullstillTilstandsendringer()
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(9.januar, Dagtype.Arbeidsdag)
+        ), orgnummer = a1)
+
+        val dagen = inspektør.sykdomstidslinje[9.januar]
+        assertEquals(Dag.Arbeidsdag::class, dagen::class)
+        assertTrue(dagen.kommerFra(OverstyrTidslinje::class))
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        assertEquals(9.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+    }
+
+    @Test
+    fun `strekker ikke inn i forrige periode`() {
+        nyPeriode(1.januar til 9.januar, a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        tilGodkjenning(10.januar, 31.januar, a1) // 1. jan - 9. jan blir omgjort til arbeidsdager ved innsending av IM her
+        nullstillTilstandsendringer()
+        // Saksbehandler korrigerer; 9.januar var vedkommende syk likevel
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(9.januar, Dagtype.Arbeidsdag)
+        ), orgnummer = a1)
+
+        val dagen = inspektør.sykdomstidslinje[9.januar]
+        assertEquals(Dag.Arbeidsdag::class, dagen::class)
+        assertTrue(dagen.kommerFra(OverstyrTidslinje::class))
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+
+        assertEquals(1.januar til 9.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(10.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 
     @Test
@@ -122,7 +163,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
                 assertEquals(10.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
 
                 assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+                assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
             }
         )
     }
