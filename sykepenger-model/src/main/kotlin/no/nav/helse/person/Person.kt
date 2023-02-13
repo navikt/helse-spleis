@@ -197,6 +197,7 @@ class Person private constructor(
 
     fun håndter(infotrygdendring: Infotrygdendring) {
         infotrygdendring.kontekst(this)
+        infotrygdhistorikk.oppfrisk(infotrygdendring, LocalDate.now())
         håndterGjenoppta(infotrygdendring)
     }
 

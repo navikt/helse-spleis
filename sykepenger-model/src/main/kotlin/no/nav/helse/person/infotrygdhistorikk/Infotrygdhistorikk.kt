@@ -3,13 +3,13 @@ package no.nav.helse.person.infotrygdhistorikk
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Periodetype
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -144,7 +144,7 @@ internal class Infotrygdhistorikk private constructor(
     private fun oppfrisket(cutoff: LocalDateTime) =
         elementer.firstOrNull()?.oppfrisket(cutoff) ?: false
 
-    private fun oppfrisk(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate) {
+    internal fun oppfrisk(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate) {
         utbetalingshistorikk(aktivitetslogg, oppfriskningsperiode(tidligsteDato))
     }
 
