@@ -488,7 +488,8 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     arbeidsforholdId: String? = null,
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-    harFlereInntektsmeldinger: Boolean = false
+    harFlereInntektsmeldinger: Boolean = false,
+    førReplay: () -> Unit = {}
 ): UUID {
     håndterOgReplayInntektsmeldinger(orgnummer) {
         inntektsmelding(
@@ -504,6 +505,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             harFlereInntektsmeldinger = harFlereInntektsmeldinger
         ).håndter(Person::håndter)
+        førReplay()
     }
     return id
 }

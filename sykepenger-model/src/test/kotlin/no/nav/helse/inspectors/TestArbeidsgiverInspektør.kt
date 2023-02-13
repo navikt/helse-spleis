@@ -503,7 +503,8 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun arbeidsgiverperioden(vedtaksperiodeIdInnhenter: IdInnhenter) = periode(vedtaksperiodeIdInnhenter).let { arbeidsgiver.arbeidsgiverperiode(it, NullObserver) }
     internal fun arbeidsgiverperioder(vedtaksperiodeIdInnhenter: IdInnhenter) = arbeidsgiverperioden(vedtaksperiodeIdInnhenter)?.perioder ?: emptyList()
-    internal fun arbeidsgiverperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = arbeidsgiverperioder(vedtaksperiodeIdInnhenter).singleOrNull()
+    internal fun arbeidsgiverperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = arbeidsgiverperioder(vedtaksperiodeIdInnhenter).singleOrNullOrThrow()
+    private fun <R> Collection<R>.singleOrNullOrThrow() = if (size < 2) this.firstOrNull() else throw IllegalStateException("Listen inneholder $size elementer: $this")
 
     internal fun refusjonsopplysningerFraVilkårsgrunnlag(skjæringstidspunkt: LocalDate = skjæringstidspunkter.maxBy { it.key }.value()) =
         personInspektør.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(orgnummer)?.inspektør?.refusjonsopplysninger ?: Refusjonsopplysninger()

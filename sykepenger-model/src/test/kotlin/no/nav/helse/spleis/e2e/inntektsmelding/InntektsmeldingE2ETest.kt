@@ -55,6 +55,8 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertActivities
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertHarHendelseIder
+import no.nav.helse.spleis.e2e.assertHarIkkeHendelseIder
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenInfo
@@ -119,11 +121,45 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         //      -> Nå overlapper IM1 allikevel og strekker perioden tilbake til 1/1
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         assertEquals(1.januar til 2.februar, inspektør.periode(1.vedtaksperiode))
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         // Legger inntekt fra IM1 til grunn
         assertInntektForDato(im1Inntekt, 1.januar, inspektør)
+    }
+
+    @Test
+    fun `To inntektsmeldinger krangler om arbeidsgiverperioden`() = Toggle.AuuHåndtererIkkeInntekt.enable {
+        val inntektsmelding1 = UUID.randomUUID()
+        val inntektsmelding2 = UUID.randomUUID()
+
+        nyPeriode(20.mars.somPeriode())
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+
+        // Inntektsmelding treffer ikke (litt kødden siden den bare er 12 dager..)
+        håndterInntektsmelding(listOf(5.mars til 16.mars), id = inntektsmelding1)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+        assertHarIkkeHendelseIder(1.vedtaksperiode, inntektsmelding1)
+
+        // Arbeidsgiver bare kødda, dette er riktig inntektsmelding
+        håndterInntektsmelding(listOf(1.mars til 6.mars, 10.mars til 20.mars), førsteFraværsdag = 21.mars, id = inntektsmelding2) {
+            // Før replay har vi nå gått til avventer inntektsmelding på bakgrunn av denne inntektsmeldingen
+            // MEN, ettersom første fraværsdag er satt til 21.mars "treffer" ikke inntekt & refusjon
+            // Så vi trenger en annen inntektsmelding som kan gi inntekt og refusjon for 20.mars som nå skal utbetales
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+            assertHarHendelseIder(1.vedtaksperiode, inntektsmelding2)
+            assertHarIkkeHendelseIder(1.vedtaksperiode, inntektsmelding1)
+            assertEquals(1.mars til 20.mars, inspektør.periode(1.vedtaksperiode))
+            assertEquals(listOf(1.mars til 6.mars, 10.mars til 19.mars), inspektør.arbeidsgiverperioder(1.vedtaksperiode))
+            val arbeidsgiverperioden = inspektør.arbeidsgiverperioden(1.vedtaksperiode)!!
+            assertFalse(arbeidsgiverperioden.erFørsteUtbetalingsdagFørEllerLik(19.mars.somPeriode()))
+            assertTrue(arbeidsgiverperioden.erFørsteUtbetalingsdagFørEllerLik(20.mars.somPeriode()))
+        }
+
+        // Når vi nå replayer inntektsmeldinger så treffer plutselig inntektsmelding1 ettersom inntektsmelding2 strakk perioden tilbake til 1.mars
+        // Men inntektsmelding1 sier nå at arbeidsgiverperioden er noe annet og ingenting skal utbetales alikevel 🤷‍
+        assertEquals(5.mars til 20.mars, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
