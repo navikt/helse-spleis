@@ -24,6 +24,8 @@ internal class V225SondereTrøbleteUtbetalinger: JsonMigration(225) {
 
             val trøbleteKandidater = utbetalinger.mapNotNull { (_, utbetalinger) ->
                 val kandidat = utbetalinger.size == 1 && utbetalinger.single().path("status").asText() == "GODKJENT_UTEN_UTBETALING"
+                        && utbetalinger.single().path("arbeidsgiverOppdrag").path("linjer").isEmpty
+                        && utbetalinger.single().path("personOppdrag").path("linjer").isEmpty
                 utbetalinger.firstOrNull()?.takeIf { kandidat }
             }
 
