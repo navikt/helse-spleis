@@ -480,7 +480,8 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun opprettVedtaksperiodeOgHåndter(søknad: Søknad) {
-        if (noenHarHåndtert(søknad, Vedtaksperiode::håndter)) {
+        håndter(søknad, Vedtaksperiode::håndter)
+        if (søknad.noenHarHåndtert()) {
             if (!søknad.harFunksjonelleFeilEllerVerre()) return person.emitUtsettOppgaveEvent(søknad)
         }
         val vedtaksperiode = søknad.lagVedtaksperiode(person, this, jurist)

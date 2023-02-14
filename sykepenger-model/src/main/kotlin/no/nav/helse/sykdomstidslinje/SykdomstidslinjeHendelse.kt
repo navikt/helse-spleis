@@ -1,6 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import java.time.LocalDate
+import java.time.LocalDate.MIN
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
@@ -30,8 +31,7 @@ abstract class SykdomstidslinjeHendelse(
 
     protected constructor(meldingsreferanseId: UUID, other: SykdomstidslinjeHendelse) : this(meldingsreferanseId, other.fødselsnummer, other.aktørId, other.organisasjonsnummer, other.opprettet, null, other.aktivitetslogg)
 
-    private var nesteFom: LocalDate? = null
-
+    private var forrigeTom: LocalDate = LocalDate.MIN
     internal val kilde: Hendelseskilde = Hendelseskilde(melding ?: this::class, meldingsreferanseId(), opprettet)
 
     internal class Hendelseskilde(
@@ -65,26 +65,24 @@ abstract class SykdomstidslinjeHendelse(
 
     internal abstract fun sykdomstidslinje(): Sykdomstidslinje
 
-    internal fun erRelevant(other: Periode) = overlappsperiode()?.overlapperMed(other) ?: false
-
     internal fun oppdaterFom(other: Periode): Periode {
         if (trimmetForbi()) return other
         return other.oppdaterFom(this.periode())
     }
 
-    protected open fun overlappsperiode(): Periode? = sykdomstidslinje().periode()
-
     internal fun trimLeft(dato: LocalDate) {
-        nesteFom = dato.plusDays(1)
+        forrigeTom = dato
     }
 
-    protected fun trimmetForbi() = periode() == aldri
+    internal fun noenHarHåndtert() = forrigeTom != MIN
+
+    private fun trimmetForbi() = periode() == aldri
+
+    protected open fun overlappsperiode(): Periode? = sykdomstidslinje().periode()
 
     internal fun periode(): Periode {
         val periode = overlappsperiode() ?: aldri
-        val fom = nesteFom?.takeUnless { it < periode.start } ?: return periode
-        if (fom > periode.endInclusive) return aldri
-        return (sykdomstidslinje().førsteSykedagEtterEllerLik(fom) ?: fom) til periode.endInclusive
+        return periode.beholdDagerEtter(forrigeTom) ?: aldri
     }
 
     internal abstract fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg

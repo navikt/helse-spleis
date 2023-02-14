@@ -1,10 +1,10 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.til
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 
 internal class Sykmeldingsperioder(
     private var perioder: List<Periode> = listOf()
@@ -34,7 +34,9 @@ internal class Sykmeldingsperioder(
         perioder = perioder.mapNotNull { it.beholdDagerEtter(tom) }
     }
 
-    fun blirTruffetAv(inntektsmelding: SykdomstidslinjeHendelse) = perioder.any(inntektsmelding::erRelevant)
+    internal fun blirTruffetAv(inntektsmelding: Inntektsmelding) = perioder.any { periode ->
+        inntektsmelding.overlapperMed(periode)
+    }
     internal fun harSykmeldingsperiodeFør(dato: LocalDate) = perioder.any { it.start < dato }
 }
 internal interface SykmeldingsperioderVisitor {

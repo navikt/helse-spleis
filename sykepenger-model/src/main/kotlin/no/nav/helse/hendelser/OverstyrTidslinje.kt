@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.nesteDag
+import no.nav.helse.forrigeDag
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -84,7 +84,8 @@ class OverstyrTidslinje(
         håndtert = true
     }
 
-    override fun overlappsperiode() = periode.oppdaterTom(periode.endInclusive.nesteDag)
+    internal fun erRelevant(other: Periode) = other.oppdaterFom(other.start.forrigeDag).overlapperMed(periode())
+    override fun overlappsperiode() = periode
 
     override fun sykdomstidslinje() = sykdomstidslinje
 

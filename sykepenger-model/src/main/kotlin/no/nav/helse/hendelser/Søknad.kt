@@ -7,6 +7,7 @@ import java.util.*
 import no.nav.helse.Alder
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.hendelser.Periode.Companion.delvisOverlappMed
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerEtter
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.subsumsjonsFormat
 import no.nav.helse.person.Arbeidsgiver
@@ -65,9 +66,12 @@ class Søknad(
         arbeidsgiver.håndter(this)
     }
 
+    internal fun erRelevant(other: Periode) = other.overlapperMed(sykdomsperiode)
+
     override fun sykdomstidslinje() = sykdomstidslinje
 
     internal fun harArbeidsdager() = perioder.filterIsInstance<Søknadsperiode.Arbeid>().isNotEmpty()
+    internal fun delvisOverlappende(other: Periode) = other.delvisOverlappMed(sykdomsperiode)
 
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
         perioder.forEach { it.subsumsjon(this.perioder.subsumsjonsFormat(), subsumsjonObserver) }
@@ -131,7 +135,7 @@ class Søknad(
     }
 
     internal fun slettSykmeldingsperioderSomDekkes(sykmeldingsperioder: Sykmeldingsperioder, person: Person) {
-        val sisteDag = periode().endInclusive
+        val sisteDag = sykdomsperiode.endInclusive
         sykmeldingsperioder.fjern(sisteDag)
         person.slettUtgåtteSykmeldingsperioder(sisteDag)
     }

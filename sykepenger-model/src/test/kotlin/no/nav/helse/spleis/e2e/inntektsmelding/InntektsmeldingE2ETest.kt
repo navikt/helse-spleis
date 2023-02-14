@@ -1892,18 +1892,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTrue(inspektør.sykdomstidslinje[2.januar] is Dag.Arbeidsgiverdag)
         assertTrue(inspektør.sykdomstidslinje[11.januar] is Dag.Arbeidsgiverdag)
 
-        assertForventetFeil(
-            forklaring = "inntektsmelding bør være relevant for korte (dog spredte) arbeidsgiverperiode-" +
-                    "vedtaksperioder, selv om første fraværsdag er oppgitt etterpå (men bare om det ikke foreligger" +
-                    "utbetaling mellom …)",
-            nå = {
-                assertEquals(3.januar til 10.januar, inspektør.periode(1.vedtaksperiode))
-                assertEquals(12.januar til 16.januar, inspektør.periode(2.vedtaksperiode))
-            },
-            ønsket = {
-                assertEquals(1.januar til 10.januar, inspektør.periode(1.vedtaksperiode))
-                assertEquals(11.januar til 16.januar, inspektør.periode(2.vedtaksperiode))
-            })
+        assertEquals(1.januar til 10.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(11.januar til 16.januar, inspektør.periode(2.vedtaksperiode))
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -1982,11 +1972,11 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Inntektsmelding strekker ikke periode tilbake når det er en helgedag mellom agp og periode`() {
+    fun `Inntektsmelding strekker periode tilbake når det er en helgedag mellom agp og periode`() {
         nyPeriode(22.januar til 16.februar)
         assertEquals(22.januar til 16.februar, inspektør.periode(1.vedtaksperiode))
         håndterInntektsmelding(listOf(5.januar til 20.januar), førsteFraværsdag = 22.januar)
-        assertEquals(22.januar til 16.februar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(5.januar til 16.februar, inspektør.periode(1.vedtaksperiode))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
     }
 
@@ -1995,8 +1985,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         nyPeriode(22.januar til 16.februar)
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         håndterInntektsmelding(listOf(5.januar til 20.januar), førsteFraværsdag = 22.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "Mjau")
-        // Vi forkaster dagene fra søknaden, men dagene fra inntektsmeldingen beholdes på arbeidsgivers tidslinje
-        assertEquals("UGG UUUUUGG UUUUUGR", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertEquals(0, inspektør.sykdomshistorikk.sykdomstidslinje().count())
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
     }
 

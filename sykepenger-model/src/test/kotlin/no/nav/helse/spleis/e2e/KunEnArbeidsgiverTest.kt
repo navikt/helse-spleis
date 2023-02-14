@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDateTime
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -181,7 +180,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertActivities()
         inspektør.also {
             assertInntektForDato(INNTEKT, 8.januar, inspektør = it)
-            assertEquals(7, it.sykdomshistorikk.size)
+            assertEquals(6, it.sykdomshistorikk.size)
             assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
             assertEquals(13, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
         }
@@ -204,7 +203,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK
         )
     }
@@ -392,11 +391,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             assertEquals(21465, it.nettoBeløp[0])
         }
 
-        assertForventetFeil(
-            forklaring = "Hvorfor strekkes ikke denne perioden tilbake til 4.September?",
-            nå = { assertEquals(21.september(2020) til 10.oktober(2020), inspektør.vedtaksperioder(1.vedtaksperiode).periode()) },
-            ønsket = { assertEquals(4.september(2020) til 10.oktober(2020), inspektør.vedtaksperioder(1.vedtaksperiode).periode()) }
-        )
+        assertEquals(4.september(2020) til 10.oktober(2020), inspektør.vedtaksperioder(1.vedtaksperiode).periode())
     }
 
     @Test
@@ -415,7 +410,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    fun `vedtaksperioder som avventer inntektsmelding strekkes ikke tilbake til å dekke arbeidsgiverperiode om det er helg mellom`() {
+    fun `vedtaksperioder som avventer inntektsmelding strekkes tilbake til å dekke arbeidsgiverperiode om det er helg mellom`() {
         nyPeriode(1.januar til 31.januar, a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         assertEquals(1.januar til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode())
@@ -425,11 +420,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             beregnetInntekt = INNTEKT
         )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-        assertForventetFeil(
-            forklaring = "Perioden trekkes ikke tilbake til å dekke arbeidsgiverperioden",
-            nå = { assertEquals(1.januar til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode()) },
-            ønsket = { assertEquals(16.desember(2017) til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode()) }
-        )
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(14.desember(2017) til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode())
     }
 
     @Test

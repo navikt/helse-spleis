@@ -64,9 +64,7 @@ class Inntektsmelding(
     aktørId = aktørId,
     organisasjonsnummer = orgnummer,
     opprettet = mottatt, aktivitetslogg = aktivitetslogg
-)
-{
-
+) {
     companion object {
         private val log = LoggerFactory.getLogger(Inntektsmelding::class.java)
     }
@@ -111,19 +109,9 @@ class Inntektsmelding(
         sykdomstidslinje += Sykdomstidslinje.arbeidsdager(dato, førsteDag.minusDays(1), this.kilde)
     }
 
-    override fun overlappsperiode() = overlappsperiode
+    internal fun overlapperMed(other: Periode) = overlappsperiode?.let { other.overlapperMed(it) } ?: false
 
-    internal fun erRelevant(periode: Periode, perioder: List<Periode>): Boolean {
-        val relevantePerioder = perioder.dropWhile { !erRelevant(it) }
-        if (relevantePerioder.isEmpty()) return false
-
-        padLeft(periode.start)
-        if (periode !in relevantePerioder) {
-            trimLeft(periode.endInclusive)
-            return false
-        }
-        return true
-    }
+    override fun overlappsperiode() = sykdomstidslinje.periode() ?: førsteFraværsdag?.somPeriode()
 
     @OptIn(ExperimentalContracts::class)
     private fun førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag: LocalDate?): Boolean {
@@ -201,8 +189,8 @@ class Inntektsmelding(
         }
         log.info("brukte $time millis på å behandle inntektsmelding")
     }
-
     private var inntektLagret = false
+
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, førsteFraværsdagFraSpleis: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
         if (inntektLagret) return
         inntektLagret = true
@@ -238,6 +226,7 @@ class Inntektsmelding(
         )
     }
 
+
     class Refusjon(
         private val beløp: Inntekt?,
         private val opphørsdato: LocalDate?,
@@ -252,7 +241,9 @@ class Inntektsmelding(
             private val beløp: Inntekt,
             private val endringsdato: LocalDate
         ) {
+
             internal companion object {
+
                 internal fun List<EndringIRefusjon>.endrerRefusjon(periode: Periode) =
                     any { it.endringsdato in periode }
 
@@ -277,7 +268,6 @@ class Inntektsmelding(
                         )
                     }
                 )
-
                 internal fun List<EndringIRefusjon>.cacheRefusjon(
                     refusjonshistorikk: Refusjonshistorikk,
                     meldingsreferanseId: UUID,
@@ -317,7 +307,6 @@ class Inntektsmelding(
 
         private fun endrerRefusjon(periode: Periode) =
             endringerIRefusjon.endrerRefusjon(periode)
-
         internal fun cacheRefusjon(
             refusjonshistorikk: Refusjonshistorikk,
             meldingsreferanseId: UUID,
@@ -327,10 +316,10 @@ class Inntektsmelding(
             endringerIRefusjon.cacheRefusjon(refusjonshistorikk, meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, opphørsdato)
         }
     }
-
     internal fun dager(sammenhengendePerioder: List<Periode>): DagerFraInntektsmelding {
         return DagerFraInntektsmelding(this, sammenhengendePerioder)
     }
+
     internal fun inntektOgRefusjon(dagerFraInntektsmelding: DagerFraInntektsmelding): InntektOgRefusjonFraInntektsmelding {
         return InntektOgRefusjonFraInntektsmelding(
             this,

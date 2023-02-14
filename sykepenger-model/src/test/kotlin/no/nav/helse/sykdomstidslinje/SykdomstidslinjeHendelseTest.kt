@@ -33,11 +33,11 @@ internal class SykdomstidslinjeHendelseTest {
     }
 
     @Test
-    fun `oppdaterer ikke fom til arbeidsdager`() {
+    fun `oppdaterer fom til arbeidsdager`() {
         val hendelse = TestHendelse(15.A + 16.S)
         assertEquals(1.januar til 10.januar, hendelse.oppdaterFom(5.januar til 10.januar))
         hendelse.trimLeft(10.januar)
-        assertEquals(15.januar til 31.januar, hendelse.oppdaterFom(15.januar til 31.januar))
+        assertEquals(11.januar til 31.januar, hendelse.oppdaterFom(15.januar til 31.januar))
         hendelse.trimLeft(31.januar)
         assertEquals(1.februar til 5.februar, hendelse.oppdaterFom(1.februar til 5.februar))
     }

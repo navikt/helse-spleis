@@ -16,7 +16,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.delvisOverlappMed
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
@@ -243,11 +242,12 @@ internal class Vedtaksperiode private constructor(
         sykmelding.trimLeft(periode.endInclusive)
     }
 
-    internal fun håndter(søknad: Søknad) = overlapperMed(søknad).also {
-        if (!it) return it
+    internal fun håndter(søknad: Søknad) {
+        if (!søknad.erRelevant(this.periode)) return
         kontekst(søknad)
         søknad.leggTil(hendelseIder)
         tilstand.håndter(this, søknad)
+        søknad.trimLeft(periode.endInclusive)
     }
 
     internal fun håndter(dager: DagerFraInntektsmelding): Boolean {
@@ -370,6 +370,7 @@ internal class Vedtaksperiode private constructor(
             hendelse.markerHåndtert()
             tilstand.håndter(this, hendelse)
         }
+        hendelse.trimLeft(periode.endInclusive)
     }
 
     internal fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold, vedtaksperioder: Iterable<Vedtaksperiode>): Boolean {
@@ -489,8 +490,6 @@ internal class Vedtaksperiode private constructor(
         hendelse.kontekst(this.tilstand)
     }
 
-    private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) = hendelse.erRelevant(this.periode)
-
     private fun sykefraværstilfelle() = person.sykefraværstilfelle(skjæringstidspunkt)
 
     private fun validerYtelserForSkjæringstidspunkt(ytelser: Ytelser) {
@@ -518,7 +517,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun oppdaterHistorikk(hendelse: SykdomstidslinjeHendelse) {
-        periode = periode.oppdaterFom(hendelse.periode())
+        periode = hendelse.oppdaterFom(this.periode)
         sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
     }
 
@@ -538,12 +537,12 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterOverlappendeSøknad(søknad: Søknad, nesteTilstand: Vedtaksperiodetilstand? = null) {
-        if (periode.delvisOverlappMed(søknad.periode())) return overlappendeSøknadIkkeStøttet(søknad, `Mottatt søknad som delvis overlapper`)
+        if (søknad.delvisOverlappende(periode)) return overlappendeSøknadIkkeStøttet(søknad, `Mottatt søknad som delvis overlapper`)
         håndterSøknad(søknad) { nesteTilstand }
     }
 
     private fun håndterOverlappendeSøknadRevurdering(søknad: Søknad) {
-        if (periode.delvisOverlappMed(søknad.periode())) return søknad.funksjonellFeil(`Mottatt søknad som delvis overlapper`)
+        if (søknad.delvisOverlappende(periode)) return søknad.funksjonellFeil(`Mottatt søknad som delvis overlapper`)
         if (søknad.sendtTilGosys()) return søknad.funksjonellFeil(RV_SØ_30)
         if (søknad.utenlandskSykmelding()) return søknad.funksjonellFeil(RV_SØ_29)
         if (søknad.harArbeidsdager()) søknad.varsel(RV_SØ_15)

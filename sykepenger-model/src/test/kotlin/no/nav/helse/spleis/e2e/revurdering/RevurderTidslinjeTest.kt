@@ -1366,7 +1366,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(1.februar til 28.februar, inspektør.periode(2.vedtaksperiode))
         assertHarHendelseIder(1.vedtaksperiode, hendelseId)
-        assertHarHendelseIder(2.vedtaksperiode, hendelseId)
+        assertHarIkkeHendelseIder(2.vedtaksperiode, hendelseId)
     }
 
     @Test

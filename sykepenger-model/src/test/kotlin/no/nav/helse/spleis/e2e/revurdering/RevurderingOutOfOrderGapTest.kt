@@ -45,6 +45,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertIngenFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenInfo
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
@@ -383,6 +384,10 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         nyPeriode(29.januar til 15.februar)
         håndterInntektsmelding(listOf(1.januar til 15.januar, 29.januar til 29.januar))
+
+        assertEquals(1.januar til 15.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(16.januar til 15.februar, inspektør.periode(2.vedtaksperiode))
+
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -390,12 +395,10 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         nyPeriode(17.januar til 28.januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-        assertFunksjonellFeil(`Mottatt søknad out of order`, 2.vedtaksperiode.filter())
+        assertIngenFunksjonellFeil(`Mottatt søknad out of order`, 2.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
 
     @Test
