@@ -6,6 +6,17 @@ import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 
+interface UtbetalingHendelsePort: OverføringsinformasjonPort {
+    fun valider()
+    fun skalForsøkesIgjen(): Boolean
+}
+
+interface GrunnbeløpsreguleringPort: IAktivitetslogg {
+    fun erRelevant(fagsystemId: String): Boolean
+    fun fødselsnummer(): String
+    fun organisasjonsnummer(): String
+}
+
 interface OverføringsinformasjonPort: IAktivitetslogg {
     val avstemmingsnøkkel: Long
     val overføringstidspunkt: LocalDateTime
