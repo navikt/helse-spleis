@@ -3,7 +3,7 @@ package no.nav.helse.utbetalingslinjer
 import java.time.LocalDate
 import java.util.UUID
 
-internal class OppdragBuilder(
+class OppdragBuilder(
     private val fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID()),
     private val sisteArbeidsgiverdag: LocalDate,
     private val mottaker: String,
@@ -13,7 +13,7 @@ internal class OppdragBuilder(
     private var tilstand: Tilstand = MellomLinjer()
     private val linje get() = utbetalingslinjer.last()
 
-    internal fun build() = Oppdrag(mottaker, fagområde, utbetalingslinjer, fagsystemId, sisteArbeidsgiverdag)
+    fun build() = Oppdrag(mottaker, fagområde, utbetalingslinjer, fagsystemId, sisteArbeidsgiverdag)
 
     fun betalingsdag(
         beløpkilde: Beløpkilde,
