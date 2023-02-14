@@ -94,6 +94,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SI_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_15
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_16
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_19
@@ -125,6 +126,8 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.sammenlign
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjerFilter
+import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 
 internal class Vedtaksperiode private constructor(
@@ -624,34 +627,59 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerArbeidsgiveropplysninger() {
+        val fastsattInntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntekt(arbeidsgiver.organisasjonsnummer())
         val arbeidsgiverperiode = finnArbeidsgiverperiode()
-        val arbeidsgiverperiodeperioder = arbeidsgiverperiode?.toList()?.grupperSammenhengendePerioder().orEmpty()
-        val inntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntekt(arbeidsgiver.organisasjonsnummer())
-        val beregningsmåneder = 3.downTo(1).map {
-            YearMonth.from(skjæringstidspunkt).minusMonths(it.toLong())
-        }
+        val relevanteSykmeldingsperioder =
+            arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).map { it.periode() }
 
-        val trengerArbeidsgiverperiode = arbeidsgiver.erFørsteSykedagEtter(periode().start, arbeidsgiverperiode)
-            || arbeidsgiverperiodeperioder.maxByOrNull { it.endInclusive }?.overlapperMed(periode())
-            ?: false
-
-        val forespurteOpplysninger = listOf(
-            (inntekt == null) to PersonObserver.Inntekt(forslag = PersonObserver.Inntektsforslag(beregningsmåneder)),
-            (inntekt != null) to inntekt?.let { PersonObserver.FastsattInntekt(fastsattInntekt = it) },
-            true to PersonObserver.Refusjon,
-            trengerArbeidsgiverperiode to PersonObserver.Arbeidsgiverperiode(arbeidsgiverperiodeperioder)
-        ).mapNotNull { if (it.first) it.second else null }
-
-        val vedtaksperioderKnyttetTilArbeidsgiverperiode = arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
+        val forespurteOpplysninger = listOfNotNull(
+            forespurtInntekt(fastsattInntekt),
+            forespurtFastsattInntekt(fastsattInntekt),
+            forespurtRefusjon(fastsattInntekt),
+            forespurtArbeidsgiverperiode(arbeidsgiverperiode)
+        )
 
         person.trengerArbeidsgiveropplysninger(
             PersonObserver.TrengerArbeidsgiveropplysningerEvent(
                 organisasjonsnummer = organisasjonsnummer,
-                sykmeldingsperioder = vedtaksperioderKnyttetTilArbeidsgiverperiode.map { it.periode() },
+                sykmeldingsperioder = relevanteSykmeldingsperioder,
                 vedtaksperiodeId = id,
-                forespurteOpplysninger = forespurteOpplysninger.toList()
+                forespurteOpplysninger = forespurteOpplysninger
             )
         )
+    }
+
+    private fun forespurtInntekt(fastsattInntekt: Inntekt?): PersonObserver.Inntekt? {
+        val beregningsmåneder = 3.downTo(1).map {
+            YearMonth.from(skjæringstidspunkt).minusMonths(it.toLong())
+        }
+        if (fastsattInntekt == null) return PersonObserver.Inntekt(forslag = PersonObserver.Inntektsforslag(beregningsmåneder))
+        return null
+    }
+
+    private fun forespurtFastsattInntekt(fastsattInntekt: Inntekt?): PersonObserver.FastsattInntekt? =
+        fastsattInntekt?.let(PersonObserver::FastsattInntekt)
+
+    private fun forespurtRefusjon(fastsattInntekt: Inntekt?): PersonObserver.Refusjon {
+        if (fastsattInntekt != null) {
+            val refusjonsopplysninger = person
+                .vilkårsgrunnlagFor(skjæringstidspunkt)
+                ?.overlappendeEllerSenereRefusjonsopplysninger(arbeidsgiver.organisasjonsnummer(), periode())
+                .orEmpty()
+            return PersonObserver.Refusjon(forslag = refusjonsopplysninger)
+
+        }
+        return PersonObserver.Refusjon(forslag = emptyList())
+    }
+
+    private fun forespurtArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?): PersonObserver.Arbeidsgiverperiode? {
+        val arbeidsgiverperiodeperioder = arbeidsgiverperiode?.toList()?.grupperSammenhengendePerioder().orEmpty()
+        val trengerArbeidsgiverperiode = arbeidsgiver.erFørsteSykedagEtter(periode().start, arbeidsgiverperiode)
+                || arbeidsgiverperiodeperioder.maxByOrNull { it.endInclusive }?.overlapperMed(periode())
+                ?: false
+
+        if (trengerArbeidsgiverperiode) return PersonObserver.Arbeidsgiverperiode(arbeidsgiverperiodeperioder)
+        return null
     }
 
     private fun trengerInntektsmelding() {

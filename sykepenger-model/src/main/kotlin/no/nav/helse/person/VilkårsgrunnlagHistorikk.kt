@@ -19,6 +19,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_16
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_11
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.ManglerRefusjonsopplysning
+import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
@@ -325,6 +326,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun inntekt(organisasjonsnummer: String): Inntekt? =
             sykepengegrunnlag.inntekt(organisasjonsnummer)
+
+        internal fun overlappendeEllerSenereRefusjonsopplysninger(organisasjonsnummer: String, periode: Periode): List<Refusjonsopplysning> =
+            refusjonsopplysninger(organisasjonsnummer).overlappendeEllerSenereRefusjonsopplysninger(periode)
 
         internal fun lagreTidsnæreInntekter(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver) {
             sykepengegrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver)

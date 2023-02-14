@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.forrigeDag
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.til
@@ -30,6 +31,11 @@ class Refusjonsopplysning(
     }
 
     private val periode get() = fom til (tom ?: LocalDate.MAX)
+
+    internal fun fom() = fom
+    internal fun tom() = tom
+    internal fun beløp() = beløp
+
     private fun oppdatertFom(nyFom: LocalDate) = if (tom != null && nyFom > tom) null else Refusjonsopplysning(meldingsreferanseId, nyFom, tom, beløp)
     private fun oppdatertTom(nyTom: LocalDate) = if (nyTom < fom) null else Refusjonsopplysning(meldingsreferanseId, fom, nyTom, beløp)
     private fun erEtter(other: Refusjonsopplysning) = other.tom != null && fom > other.tom
@@ -236,6 +242,12 @@ class Refusjonsopplysning(
                 }
             }?.tom?.nesteDag
         }
+
+        internal fun overlappendeEllerSenereRefusjonsopplysninger(periode: Periode): List<Refusjonsopplysning> =
+            validerteRefusjonsopplysninger.filter {
+                val refusjonsperiode = Periode(it.fom, it.tom ?: LocalDate.MAX)
+                periode.overlapperMed(refusjonsperiode) || refusjonsperiode.starterEtter(periode)
+            }
 
         internal companion object {
             private fun List<Refusjonsopplysning>.overlapper() = map { it.periode }.overlapper()

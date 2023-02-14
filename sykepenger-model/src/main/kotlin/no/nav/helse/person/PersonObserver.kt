@@ -7,7 +7,8 @@ import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.person.PersonObserver.Refusjon.toJsonMap
+import no.nav.helse.person.PersonObserver.ForespurtOpplysning.Companion.toJsonMap
+import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
 
 interface PersonObserver {
@@ -108,31 +109,43 @@ interface PersonObserver {
             )
     }
     sealed class ForespurtOpplysning {
-        fun List<ForespurtOpplysning>.toJsonMap() = map { forespurtOpplysning ->
-            when (forespurtOpplysning) {
-                is Arbeidsgiverperiode -> mapOf(
-                    "opplysningstype" to "Arbeidsgiverperiode",
-                    "forslag" to forespurtOpplysning.forslag.map { forslag ->
-                        mapOf(
-                            "fom" to forslag.start,
-                            "tom" to forslag.endInclusive
-                        )
-                    }
-                )
 
-                is Inntekt -> mapOf(
-                    "opplysningstype" to "Inntekt",
-                    "forslag" to mapOf(
-                        "beregningsmåneder" to forespurtOpplysning.forslag.beregningsmåneder
+        companion object {
+            fun List<ForespurtOpplysning>.toJsonMap() = map { forespurtOpplysning ->
+                when (forespurtOpplysning) {
+                    is Arbeidsgiverperiode -> mapOf(
+                        "opplysningstype" to "Arbeidsgiverperiode",
+                        "forslag" to forespurtOpplysning.forslag.map { forslag ->
+                            mapOf(
+                                "fom" to forslag.start,
+                                "tom" to forslag.endInclusive
+                            )
+                        }
                     )
-                )
 
-                is FastsattInntekt -> mapOf(
-                    "opplysningstype" to "FastsattInntekt",
-                    "fastsattInntekt" to forespurtOpplysning.fastsattInntekt.reflection { _, månedlig, _, _ -> månedlig }
-                )
+                    is Inntekt -> mapOf(
+                        "opplysningstype" to "Inntekt",
+                        "forslag" to mapOf(
+                            "beregningsmåneder" to forespurtOpplysning.forslag.beregningsmåneder
+                        )
+                    )
 
-                Refusjon -> mapOf("opplysningstype" to "Refusjon")
+                    is FastsattInntekt -> mapOf(
+                        "opplysningstype" to "FastsattInntekt",
+                        "fastsattInntekt" to forespurtOpplysning.fastsattInntekt.reflection { _, månedlig, _, _ -> månedlig }
+                    )
+
+                    is Refusjon -> mapOf(
+                        "opplysningstype" to "Refusjon",
+                        "forslag" to forespurtOpplysning.forslag.map { forslag ->
+                            mapOf(
+                                "fom" to forslag.fom(),
+                                "tom" to forslag.tom(),
+                                "beløp" to forslag.beløp().reflection {_, månedlig, _, _ -> månedlig}
+                            )
+                        }
+                    )
+                }
             }
         }
     }
@@ -141,7 +154,7 @@ interface PersonObserver {
     data class Inntekt(val forslag: Inntektsforslag) : ForespurtOpplysning()
     data class FastsattInntekt(val fastsattInntekt: no.nav.helse.økonomi.Inntekt) : ForespurtOpplysning()
     data class Arbeidsgiverperiode(val forslag: List<Periode>) : ForespurtOpplysning()
-    object Refusjon : ForespurtOpplysning()
+    data class Refusjon(val forslag: List<Refusjonsopplysning>) : ForespurtOpplysning()
 
     data class UtbetalingAnnullertEvent(
         val organisasjonsnummer: String,
