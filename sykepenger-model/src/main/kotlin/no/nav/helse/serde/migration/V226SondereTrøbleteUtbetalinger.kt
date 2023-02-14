@@ -6,7 +6,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.til
 import org.slf4j.LoggerFactory
 
-internal class V225SondereTrøbleteUtbetalinger: JsonMigration(225) {
+internal class V226SondereTrøbleteUtbetalinger: JsonMigration(226) {
 
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -40,7 +40,13 @@ internal class V225SondereTrøbleteUtbetalinger: JsonMigration(225) {
             }
 
             if (trøbleteUtbetalinger.isNotEmpty()) {
-                sikkerlogg.info("{} har {} trøblete utbetalinger på arbeidsgiver {}: {}",
+                val ekstragreier = when {
+                    trøbleteUtbetalinger.size >= 20 -> " (minst tjue)"
+                    trøbleteUtbetalinger.size >= 10 -> " (minst ti)"
+                    trøbleteUtbetalinger.size >= 5 -> " (minst fem)"
+                    else -> ""
+                }
+                sikkerlogg.info("V226: {} har {} trøblete utbetalinger på arbeidsgiver {}: {}$ekstragreier",
                     keyValue("aktørId", jsonNode.path("aktørId").asText()),
                     trøbleteUtbetalinger.size,
                     keyValue("organisasjonsnummer", arbeidsgiver.path("organisasjonsnummer").asText()),
