@@ -14,6 +14,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.januar
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
@@ -29,10 +30,8 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
-import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.toUUID
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.spleis.HendelseMediator
 import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.TestMessageFactory
@@ -55,6 +54,7 @@ import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.e2e.SpleisDataSource.migratedDb
 import no.nav.helse.spleis.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -493,6 +493,11 @@ internal abstract class AbstractEndToEndMediatorTest {
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiveropplysninger = arbeidsgiveropplysninger
         )
+        testRapid.sendTestMessage(message)
+    }
+
+    protected fun sendInfotrygdendring() {
+        val (_, message) = meldingsfabrikk.lagInfotrygdendringer()
         testRapid.sendTestMessage(message)
     }
 

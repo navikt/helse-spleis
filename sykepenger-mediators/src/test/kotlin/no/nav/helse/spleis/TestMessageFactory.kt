@@ -20,13 +20,13 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.spleis.TestMessageFactory.UtbetalingshistorikkTestdata.Companion.toJson
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
@@ -1016,6 +1016,15 @@ internal class TestMessageFactory(
             }
         )
     )
+
+    internal fun lagInfotrygdendringer(endringsmeldingId: String = "1234567") = nyHendelse(
+        "infotrygdendring", mutableMapOf(
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "endringsmeldingId" to endringsmeldingId
+        )
+    )
+
 
     private fun nyHendelse(navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(navn, hendelse).let { it.id to it.toJson() }

@@ -1,6 +1,7 @@
 package no.nav.helse.spleis
 
 import no.nav.helse.hendelser.Avstemming
+import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.Migrate
@@ -27,6 +28,7 @@ import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.EtterbetalingMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
+import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
@@ -103,6 +105,8 @@ internal class TestHendelseMediator : IHendelseMediator {
         private set
     internal var lestEtterbetaling = false
         private set
+    internal var lestInfotrygdendring = false
+        private set
 
     fun reset() {
         lestNySøknad = false
@@ -124,6 +128,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestAvstemming = false
         lestOverstyrTidslinje = false
         lestEtterbetaling = false
+        lestInfotrygdendring = false
     }
 
     override fun behandle(message: HendelseMessage, context: MessageContext) {
@@ -242,5 +247,13 @@ internal class TestHendelseMediator : IHendelseMediator {
 
     override fun behandle(message: EtterbetalingMessage, grunnbeløpsregulering: Grunnbeløpsregulering, context: MessageContext) {
         lestEtterbetaling = true
+    }
+
+    override fun behandle(
+        message: InfotrygdendringMessage,
+        infotrygdEndring: Infotrygdendring,
+        context: MessageContext
+    ) {
+        lestInfotrygdendring = true
     }
 }

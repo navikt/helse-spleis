@@ -178,6 +178,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertÅrMåned(behov.path(InntekterForSykepengegrunnlag.name).path("beregningSlutt").asText())
     }
 
+
     private fun assertMedlemskapdetaljer(behov: JsonNode) {
         assertDato(behov.path(Medlemskap.name).path("skjæringstidspunkt").asText())
         assertDato(behov.path(Medlemskap.name).path("medlemskapPeriodeFom").asText())

@@ -10,6 +10,7 @@ import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.meldinger.AnnullerUtbetalingerRiver
 import no.nav.helse.spleis.meldinger.EtterbetalingerRiver
 import no.nav.helse.spleis.meldinger.EtterbetalingerRiverMedHistorikk
+import no.nav.helse.spleis.meldinger.InfotrygdendringerRiver
 import no.nav.helse.spleis.meldinger.InntektsmeldingerReplayRiver
 import no.nav.helse.spleis.meldinger.InntektsmeldingerRiver
 import no.nav.helse.spleis.meldinger.MigrateRiver
@@ -72,6 +73,7 @@ internal class MessageMediator(
             OverstyrInntektRiver(it, this)
             OverstyrArbeidsforholdRiver(it, this)
             OverstyrArbeidsgiveropplysningerRiver(it, this)
+            InfotrygdendringerRiver(it, this)
         }
     }
 
