@@ -2,6 +2,7 @@ package no.nav.helse.spleis
 
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.Avstemming
+import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.Migrate
@@ -36,6 +37,7 @@ import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.EtterbetalingMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
+import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
@@ -259,6 +261,17 @@ internal class HendelseMediator(
         }
     }
 
+    override fun behandle(
+        message: InfotrygdendringMessage,
+        infotrygdEndring: Infotrygdendring,
+        context: MessageContext
+    ) {
+        hentPersonOgHåndter(message, infotrygdEndring, context) { person ->
+            HendelseProbe.onOverstyrArbeidsforhold()
+            person.håndter(infotrygdEndring)
+        }
+    }
+
     private fun <Hendelse : PersonHendelse> opprettPersonOgHåndter(
         personopplysninger: Personopplysninger,
         message: HendelseMessage,
@@ -372,4 +385,5 @@ internal interface IHendelseMediator {
     fun behandle(message: OverstyrArbeidsgiveropplysningerMessage, overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, context: MessageContext)
     fun behandle(message: OverstyrArbeidsforholdMessage, overstyrArbeidsforhold: OverstyrArbeidsforhold, context: MessageContext)
     fun behandle(message: EtterbetalingMessage, grunnbeløpsregulering: Grunnbeløpsregulering, context: MessageContext)
+    fun behandle(message: InfotrygdendringMessage, infotrygdEndring: Infotrygdendring, context: MessageContext)
 }

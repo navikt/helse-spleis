@@ -1,10 +1,10 @@
 package no.nav.helse.hendelser
 
+import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import java.util.*
 
 class Infotrygdendring(
-    id: UUID,
+    meldingsreferanseId: UUID,
     fødselsnummer: String,
     aktørId: String
-) : PersonHendelse(id, fødselsnummer, aktørId, Aktivitetslogg())
+) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, Aktivitetslogg())
