@@ -29,6 +29,7 @@ import no.nav.helse.spleis.meldinger.UtbetalingerOverførtRiver
 import no.nav.helse.spleis.meldinger.UtbetalingerRiver
 import no.nav.helse.spleis.meldinger.UtbetalingpåminnelserRiver
 import no.nav.helse.spleis.meldinger.UtbetalingsgodkjenningerRiver
+import no.nav.helse.spleis.meldinger.UtbetalingshistorikkEtterInfotrygdendringRiver
 import no.nav.helse.spleis.meldinger.UtbetalingshistorikkForFeriepengerRiver
 import no.nav.helse.spleis.meldinger.UtbetalingshistorikkRiver
 import no.nav.helse.spleis.meldinger.VilkårsgrunnlagRiver
@@ -74,6 +75,7 @@ internal class MessageMediator(
             OverstyrArbeidsforholdRiver(it, this)
             OverstyrArbeidsgiveropplysningerRiver(it, this)
             InfotrygdendringerRiver(it, this)
+            UtbetalingshistorikkEtterInfotrygdendringRiver(it, this)
         }
     }
 

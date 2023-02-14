@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
@@ -46,6 +47,7 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingOverførtMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingpåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
+import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkEtterInfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
@@ -107,6 +109,8 @@ internal class TestHendelseMediator : IHendelseMediator {
         private set
     internal var lestInfotrygdendring = false
         private set
+    internal var utbetalingshistorikkEtterInfotrygdendringMessage = false
+        private set
 
     fun reset() {
         lestNySøknad = false
@@ -129,6 +133,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestOverstyrTidslinje = false
         lestEtterbetaling = false
         lestInfotrygdendring = false
+        utbetalingshistorikkEtterInfotrygdendringMessage = false
     }
 
     override fun behandle(message: HendelseMessage, context: MessageContext) {
@@ -255,5 +260,13 @@ internal class TestHendelseMediator : IHendelseMediator {
         context: MessageContext
     ) {
         lestInfotrygdendring = true
+    }
+
+    override fun behandle(
+        message: UtbetalingshistorikkEtterInfotrygdendringMessage,
+        utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring,
+        context: MessageContext
+    ) {
+        utbetalingshistorikkEtterInfotrygdendringMessage = true
     }
 }

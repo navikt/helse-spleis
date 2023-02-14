@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
@@ -55,6 +56,7 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingOverførtMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingpåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
+import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkEtterInfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
@@ -267,8 +269,19 @@ internal class HendelseMediator(
         context: MessageContext
     ) {
         hentPersonOgHåndter(message, infotrygdEndring, context) { person ->
-            HendelseProbe.onOverstyrArbeidsforhold()
+            HendelseProbe.onInfotrygdendring()
             person.håndter(infotrygdEndring)
+        }
+    }
+
+    override fun behandle(
+        message: UtbetalingshistorikkEtterInfotrygdendringMessage,
+        utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring,
+        context: MessageContext
+    ) {
+        hentPersonOgHåndter(message, utbetalingshistorikkEtterInfotrygdendring, context) { person ->
+            HendelseProbe.onUtbetalingshistorikkEtterInfotrygdendring()
+            person.håndter(utbetalingshistorikkEtterInfotrygdendring)
         }
     }
 
@@ -386,4 +399,5 @@ internal interface IHendelseMediator {
     fun behandle(message: OverstyrArbeidsforholdMessage, overstyrArbeidsforhold: OverstyrArbeidsforhold, context: MessageContext)
     fun behandle(message: EtterbetalingMessage, grunnbeløpsregulering: Grunnbeløpsregulering, context: MessageContext)
     fun behandle(message: InfotrygdendringMessage, infotrygdEndring: Infotrygdendring, context: MessageContext)
+    fun behandle(message: UtbetalingshistorikkEtterInfotrygdendringMessage, utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring, context: MessageContext)
 }
