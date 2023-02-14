@@ -92,6 +92,14 @@ object HendelseProbe {
         tell("OverstyrArbeidsforhold")
     }
 
+    fun onInfotrygdendring() {
+        tell("Infotrygdendring")
+    }
+
+    fun onUtbetalingshistorikkEtterInfotrygdendring() {
+        tell("UtbetalingshistorikkEtterInfotrygdendring")
+    }
+
     private fun tell(navn: String) {
         hendelseCounter.labels(navn).inc()
     }

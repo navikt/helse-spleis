@@ -24,6 +24,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
@@ -200,6 +201,12 @@ class Person private constructor(
         val tidligsteDato = arbeidsgivereMedSykdom().minOfOrNull { it.tidligsteDato() } ?: LocalDate.now()
         infotrygdhistorikk.oppfrisk(infotrygdendring, tidligsteDato)
         håndterGjenoppta(infotrygdendring)
+    }
+
+    fun håndter(utbetalingshistorikk: UtbetalingshistorikkEtterInfotrygdendring) {
+        utbetalingshistorikk.kontekst(this)
+        utbetalingshistorikk.oppdaterHistorikk(infotrygdhistorikk)
+        håndterGjenoppta(utbetalingshistorikk)
     }
 
     fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
