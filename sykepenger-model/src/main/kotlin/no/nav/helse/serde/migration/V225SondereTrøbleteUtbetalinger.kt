@@ -10,6 +10,7 @@ internal class V225SondereTrøbleteUtbetalinger: JsonMigration(225) {
 
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+        private val statuser = setOf("UTBETALT", "GODKJENT_UTEN_UTBETALING", "GODKJENT", "OVERFØRT", "SENDT", "UTBETALING_FEILET", "UBETALT")
     }
 
     override val description = "sonderer json etter trøblete utbetalinger"
@@ -31,7 +32,7 @@ internal class V225SondereTrøbleteUtbetalinger: JsonMigration(225) {
                 utbetalinger.any { (korrelasjonsId, utbetalinger) ->
                     korrelasjonsId != kandidat.path("korrelasjonsId").asText() && utbetalinger.any { other ->
                         val otherPeriode = LocalDate.parse(other.path("fom").asText()) til LocalDate.parse(other.path("tom").asText())
-                        other.path("status").asText() != "FORKASTET" && periode.overlapperMed(otherPeriode)
+                        other.path("status").asText() in statuser && periode.overlapperMed(otherPeriode)
                     }
                 }
             }
