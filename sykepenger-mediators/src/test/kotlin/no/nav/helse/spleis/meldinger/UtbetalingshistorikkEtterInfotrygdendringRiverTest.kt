@@ -7,18 +7,28 @@ import no.nav.helse.spleis.IMessageMediator
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 
-internal class UtbetalingshistorikkEtterInfotrygdRiverTest : RiverTest() {
+internal class UtbetalingshistorikkEtterInfotrygdendringRiverTest : RiverTest() {
     override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
         UtbetalingshistorikkEtterInfotrygdendringRiver(rapidsConnection, mediator)
     }
 
     @Test
     fun `Kan mappe om message til modell uten feil`() {
-        assertNoErrors(json)
+        assertNoErrors(json())
+    }
+
+    @Test
+    fun `ignorer melding om vedtaksperiodeId er satt`() {
+        assertIgnored(json("id"))
+    }
+
+    @Test
+    fun `ignorer melding om vedtaksperiodeId er satt`() {
+        // TODO:
     }
 
     @Language("JSON")
-    private val json = """
+    private fun json(vedtaksperiodeId: String? = null) = """
       {
           "@event_name": "behov",
           "historikkFom": "2014-12-08",
@@ -27,6 +37,7 @@ internal class UtbetalingshistorikkEtterInfotrygdRiverTest : RiverTest() {
             "Sykepengehistorikk"
           ],
           "@id": "${UUID.randomUUID()}",
+          ${if (vedtaksperiodeId != null) """"vedtaksperiodeId": "$vedtaksperiodeId",""" else ""}
           "@opprettet": "2020-01-24T11:25:00",
           "aktørId": "aktørId",
           "fødselsnummer": "08127411111",

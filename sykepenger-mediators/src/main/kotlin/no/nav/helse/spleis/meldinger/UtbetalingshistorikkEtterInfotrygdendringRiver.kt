@@ -19,7 +19,7 @@ internal class UtbetalingshistorikkEtterInfotrygdendringRiver(
     override fun validate(message: JsonMessage) {
         message.demand("@behov") { require(it.size() == 1) }
         message.demand("@besvart") { require(it.asLocalDateTime() > LocalDateTime.now().minusHours(1)) }
-        message.rejectKey("fagsystemId")
+        message.rejectKey("fagsystemId", "vedtaksperiodeId")
         validerSykepengehistorikk(message)
     }
 
