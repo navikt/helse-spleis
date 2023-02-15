@@ -22,12 +22,10 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         vedtaksperiode.accept(this)
     }
 
-    private lateinit var periodetypeGetter: () -> Periodetype
     internal lateinit var id: UUID
         private set
     internal lateinit var periode: Periode
         private set
-    internal val periodetype get() = periodetypeGetter()
     internal lateinit var skjæringstidspunkt: LocalDate
     internal lateinit var utbetalingIdTilVilkårsgrunnlagId: Pair<UUID, UUID?>
 
@@ -39,7 +37,6 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
-        periodetype: () -> Periodetype,
         skjæringstidspunkt: () -> LocalDate,
         skjæringstidspunktFraInfotrygd: LocalDate?,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
@@ -50,7 +47,6 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         this.id = id
         this.periode = periode
         this.skjæringstidspunkt = skjæringstidspunkt()
-        this.periodetypeGetter = periodetype
     }
 
     override fun preVisitVedtaksperiodeUtbetaling(

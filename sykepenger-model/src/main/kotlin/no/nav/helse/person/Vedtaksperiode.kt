@@ -148,7 +148,6 @@ internal class Vedtaksperiode private constructor(
 
     private val jurist = jurist.medVedtaksperiode(id, hendelseIder.toMap(), sykmeldingsperiode)
     private val skjæringstidspunkt get() = person.skjæringstidspunkt(sykdomstidslinje.sykdomsperiode() ?: periode)
-    private val periodetype get() = arbeidsgiver.periodetype(periode)
     private val vilkårsgrunnlag get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)
     private val inntektskilde get() = vilkårsgrunnlag?.inntektskilde() ?: Inntektskilde.EN_ARBEIDSGIVER
 
@@ -186,7 +185,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
-        val periodetypeMemoized = this::periodetype.memoized()
         val skjæringstidspunktMemoized = this::skjæringstidspunkt.memoized()
         val inntektskildeMemoized = this::inntektskilde.memoized()
         visitor.preVisitVedtaksperiode(
@@ -197,7 +195,6 @@ internal class Vedtaksperiode private constructor(
             oppdatert,
             periode,
             sykmeldingsperiode,
-            periodetypeMemoized,
             skjæringstidspunktMemoized,
             skjæringstidspunktFraInfotrygd,
             forlengelseFraInfotrygd,
@@ -217,7 +214,6 @@ internal class Vedtaksperiode private constructor(
             oppdatert,
             periode,
             sykmeldingsperiode,
-            periodetypeMemoized,
             skjæringstidspunktMemoized,
             skjæringstidspunktFraInfotrygd,
             forlengelseFraInfotrygd,
@@ -859,6 +855,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
+        val periodetype = arbeidsgiver.periodetype(periode)
         utbetalinger.godkjenning(
             hendelse = hendelse,
             periode = periode,
@@ -2172,7 +2169,6 @@ internal class Vedtaksperiode private constructor(
 
     internal companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-        private const val IKKE_HÅNDTERT: Boolean = false
 
         private val AVSLUTTET_OG_SENERE = listOf(
             Avsluttet,

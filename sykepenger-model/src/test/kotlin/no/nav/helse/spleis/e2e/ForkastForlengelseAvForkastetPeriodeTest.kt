@@ -36,7 +36,6 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
         person.søppelbøtte(hendelselogg, 1.januar til 16.januar)
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a2)
-        assertDoesNotThrow { inspektør(a2).vedtaksperioder(1.vedtaksperiode).inspektør.periodetype }
         assertDoesNotThrow { person.serialize() }
     }
 

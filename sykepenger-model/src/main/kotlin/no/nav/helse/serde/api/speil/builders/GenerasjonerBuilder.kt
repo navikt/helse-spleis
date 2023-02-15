@@ -12,7 +12,6 @@ import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.InntektsmeldingInfo
-import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.api.dto.Generasjon
 import no.nav.helse.serde.api.dto.HendelseDTO
@@ -45,7 +44,7 @@ internal typealias InntektsmeldingId = UUID
 internal class GenerasjonerBuilder(
     private val hendelser: List<HendelseDTO>,
     private val alder: Alder,
-    arbeidsgiver: Arbeidsgiver,
+    private val arbeidsgiver: Arbeidsgiver,
     private val vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
 ) : ArbeidsgiverVisitor {
     private val vedtaksperiodeAkkumulator = VedtaksperiodeAkkumulator()
@@ -83,7 +82,6 @@ internal class GenerasjonerBuilder(
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
-        periodetype: () -> Periodetype,
         skjæringstidspunkt: () -> LocalDate,
         skjæringstidspunktFraInfotrygd: LocalDate?,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
@@ -103,7 +101,7 @@ internal class GenerasjonerBuilder(
                 inntektskilde = inntektskilde(),
                 hendelser = hendelser.filter { it.id in hendelseIder.ider().map(UUID::toString) },
                 utbetalinger = utbetalinger,
-                periodetype = periodetype(),
+                periodetype = arbeidsgiver.periodetype(periode),
                 sykdomstidslinje = sykdomstidslinje,
                 oppdatert = oppdatert,
                 tilstand = tilstand,

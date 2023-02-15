@@ -22,7 +22,6 @@ import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.InntektsmeldingInfoHistorikk
 import no.nav.helse.person.Opptjening
-import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
@@ -251,7 +250,6 @@ internal class JsonBuilder : AbstractBuilder() {
             oppdatert: LocalDateTime,
             periode: Periode,
             opprinneligPeriode: Periode,
-            periodetype: () -> Periodetype,
             skjæringstidspunkt: () -> LocalDate,
             skjæringstidspunktFraInfotrygd: LocalDate?,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
@@ -1235,7 +1233,6 @@ internal class JsonBuilder : AbstractBuilder() {
             oppdatert: LocalDateTime,
             periode: Periode,
             opprinneligPeriode: Periode,
-            periodetype: () -> Periodetype,
             skjæringstidspunkt: () -> LocalDate,
             skjæringstidspunktFraInfotrygd: LocalDate?,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
@@ -1431,7 +1428,6 @@ internal class JsonBuilder : AbstractBuilder() {
             oppdatert: LocalDateTime,
             periode: Periode,
             opprinneligPeriode: Periode,
-            periodetype: () -> Periodetype,
             skjæringstidspunkt: () -> LocalDate,
             skjæringstidspunktFraInfotrygd: LocalDate?,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
@@ -1446,7 +1442,6 @@ internal class JsonBuilder : AbstractBuilder() {
                 "sykmeldingFom" to opprinneligPeriode.start,
                 "sykmeldingTom" to opprinneligPeriode.endInclusive,
                 "hendelseIder" to hendelseIder.toMap(),
-                "periodetype" to periodetype(),
                 "inntektskilde" to inntektskilde(),
                 "tilstand" to tilstand.type.name,
                 "utbetalinger" to this.utbetalinger,

@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
@@ -41,10 +42,10 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(14.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(21.januar, 25.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(3.vedtaksperiode))
-        assertEquals(FORLENGELSE, inspektør.periodetype(4.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, periodetype(1.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, periodetype(2.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, periodetype(3.vedtaksperiode))
+        assertEquals(FORLENGELSE, periodetype(4.vedtaksperiode))
     }
 
     @Test
@@ -55,8 +56,8 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
 
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, periodetype(1.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, periodetype(2.vedtaksperiode))
     }
 
     @Test
@@ -66,7 +67,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
-        assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(1.vedtaksperiode))
+        assertEquals(OVERGANG_FRA_IT, periodetype(1.vedtaksperiode))
     }
 
     @Test
@@ -81,8 +82,8 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(FORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, periodetype(1.vedtaksperiode))
+        assertEquals(FORLENGELSE, periodetype(2.vedtaksperiode))
     }
 
     @Test
@@ -92,8 +93,8 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(4.januar til 19.januar))
         håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar))
         håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, periodetype(1.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, periodetype(2.vedtaksperiode))
     }
 
     @Test
@@ -108,8 +109,8 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, periodetype(1.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, periodetype(2.vedtaksperiode))
     }
 
     @Test
@@ -122,14 +123,14 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar))
         håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, periodetype(1.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, periodetype(2.vedtaksperiode))
         assertForventetFeil(
             nå = {
-                assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(3.vedtaksperiode))
+                assertEquals(FØRSTEGANGSBEHANDLING, periodetype(3.vedtaksperiode))
             },
             ønsket = {
-                assertEquals(FORLENGELSE, inspektør.periodetype(3.vedtaksperiode))
+                assertEquals(FORLENGELSE, periodetype(3.vedtaksperiode))
             }
         )
     }
@@ -155,8 +156,8 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(FORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, periodetype(1.vedtaksperiode))
+        assertEquals(FORLENGELSE, periodetype(2.vedtaksperiode))
     }
 
     @Test
@@ -180,8 +181,8 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, periodetype(1.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, periodetype(2.vedtaksperiode))
     }
 
     @Test
@@ -207,8 +208,8 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
         ))
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(2.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, periodetype(1.vedtaksperiode))
+        assertEquals(OVERGANG_FRA_IT, periodetype(2.vedtaksperiode))
     }
 
     @Test
@@ -219,8 +220,8 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)
         ))
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(2.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, periodetype(1.vedtaksperiode))
+        assertEquals(OVERGANG_FRA_IT, periodetype(2.vedtaksperiode))
     }
 
     @Test
@@ -230,7 +231,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 20.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)
         ))
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, periodetype(1.vedtaksperiode))
     }
 
     @Test
@@ -248,9 +249,9 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             )
         )
 
-        assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(1.vedtaksperiode))
+        assertEquals(OVERGANG_FRA_IT, periodetype(1.vedtaksperiode))
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
-        assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(2.vedtaksperiode))
+        assertEquals(OVERGANG_FRA_IT, periodetype(2.vedtaksperiode))
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
     }
 
@@ -273,8 +274,8 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
         assertForventetFeil(
             forklaring = "Periodetype blir satt feil",
-            nå = { assertEquals(INFOTRYGDFORLENGELSE, inspektør.periodetype(2.vedtaksperiode)) },
-            ønsket = { assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(2.vedtaksperiode)) }
+            nå = { assertEquals(INFOTRYGDFORLENGELSE, periodetype(2.vedtaksperiode)) },
+            ønsket = { assertEquals(OVERGANG_FRA_IT, periodetype(2.vedtaksperiode)) }
         )
     }
 
@@ -300,8 +301,11 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
         assertForventetFeil(
             forklaring = "Periodetype blir satt feil",
-            nå = { assertEquals(INFOTRYGDFORLENGELSE, inspektør.periodetype(3.vedtaksperiode)) },
-            ønsket = { assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(3.vedtaksperiode)) }
+            nå = { assertEquals(INFOTRYGDFORLENGELSE, periodetype(3.vedtaksperiode)) },
+            ønsket = { assertEquals(OVERGANG_FRA_IT, periodetype(3.vedtaksperiode)) }
         )
     }
+
+    private fun periodetype(vedtaksperiodeIdInnhenter: IdInnhenter) =
+        inspektør.arbeidsgiver.periodetype(inspektør.periode(vedtaksperiodeIdInnhenter))
 }

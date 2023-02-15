@@ -9,7 +9,6 @@ import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.InntektsmeldingInfo
-import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.api.BuilderState
 
@@ -26,7 +25,6 @@ internal class VedtaksperioderBuilder(private val byggerForkastedePerioder: Bool
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
-        periodetype: () -> Periodetype,
         skjæringstidspunkt: () -> LocalDate,
         skjæringstidspunktFraInfotrygd: LocalDate?,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,

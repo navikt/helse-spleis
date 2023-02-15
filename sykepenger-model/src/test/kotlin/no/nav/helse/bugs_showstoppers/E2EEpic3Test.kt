@@ -1080,7 +1080,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             }
         ))
         håndterYtelser(1.vedtaksperiode)
-        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
 
         assertFalse(person.personLogg.harVarslerEllerVerre())
         assertTilstander(

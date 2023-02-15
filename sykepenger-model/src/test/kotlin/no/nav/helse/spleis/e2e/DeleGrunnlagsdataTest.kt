@@ -220,8 +220,5 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
         assertNotNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
         assertNotEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
-
-        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
     }
 }

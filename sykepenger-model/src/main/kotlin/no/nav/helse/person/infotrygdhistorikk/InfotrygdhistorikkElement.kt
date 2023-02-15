@@ -103,23 +103,11 @@ class InfotrygdhistorikkElement private constructor(
 
     internal fun betaltePerioder(): List<Periode> = perioder.filterIsInstance<Utbetalingsperiode>()
 
-    private data class Oppslagsnøkkel(
-        val orgnummer: String,
-        val sykdomstidslinje: Sykdomstidslinje
-    )
-
-    private val oppslag = mutableMapOf<Oppslagsnøkkel, Sykdomstidslinje>()
-
     internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
         if (sykdomstidslinje.periode() == null) return sykdomstidslinje
         val ulåst = Sykdomstidslinje().merge(sykdomstidslinje, replace)
-        return cached(orgnummer, ulåst)
+        return sykdomstidslinje(orgnummer, ulåst)
     }
-
-    private fun cached(orgnummer: String, sykdomstidslinje: Sykdomstidslinje) =
-        oppslag.computeIfAbsent(Oppslagsnøkkel(orgnummer, sykdomstidslinje)) {
-            sykdomstidslinje(orgnummer, sykdomstidslinje)
-        }
 
     internal fun periodetype(organisasjonsnummer: String, other: Periode, dag: LocalDate): Periodetype? {
         val utbetalinger = utbetalinger(organisasjonsnummer)
