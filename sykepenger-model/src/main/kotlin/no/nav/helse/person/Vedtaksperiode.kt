@@ -91,7 +91,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SI_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_15
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_16
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_19
@@ -1476,8 +1475,8 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.forkast(hendelse)
                 }
                 !vedtaksperiode.arbeidsgiver.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) -> {
-                    hendelse.funksjonellFeil(RV_SV_3)
-                    vedtaksperiode.forkast(hendelse)
+                    hendelse.info("Mangler inntekt for sykepengegrunnlag som følge av at skjæringstidspunktet har endret seg")
+                    vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
                 }
                 !arbeidsgivere.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) -> return hendelse.info(
                     "Gjenopptar ikke behandling fordi minst én arbeidsgiver ikke har tilstrekkelig inntekt for skjæringstidspunktet"

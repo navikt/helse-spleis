@@ -152,7 +152,7 @@ enum class Varselkode(
     // SV: Sykepengegrunnlagsvurdering
     RV_SV_1("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag"),
     RV_SV_2("Minst en arbeidsgiver inngår ikke i sykepengegrunnlaget"),
-    RV_SV_3("Mangler inntekt for sykepengegrunnlag som følge av at skjæringstidspunktet har endret seg"),
+    RV_SV_3("Mangler inntekt for sykepengegrunnlag som følge av at skjæringstidspunktet har endret seg", avviklet = true),
     RV_SV_4("Brukeren har flere inntekter de siste tre måneder. Kontroller om brukeren har flere arbeidsforhold eller andre ytelser på sykmeldingstidspunktet som påvirker utbetalingen.", avviklet = true),
 
     // AY: Andre ytelser

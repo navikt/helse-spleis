@@ -225,7 +225,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterUtbetalt()
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
+        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
     }
 
     @Test
