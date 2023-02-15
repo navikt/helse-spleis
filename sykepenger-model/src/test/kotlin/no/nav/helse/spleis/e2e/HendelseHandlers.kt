@@ -641,6 +641,20 @@ internal fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
     ).håndter(Person::håndter)
 }
 
+internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkEtterInfotrygdendring(
+    vararg utbetalinger: Infotrygdperiode,
+    inntektshistorikk: List<Inntektsopplysning> = emptyList(),
+    statslønn: Boolean = false,
+    besvart: LocalDateTime = LocalDateTime.now()
+) {
+    utbetalingshistorikkEtterInfotrygdEndring(
+        utbetalinger = utbetalinger.toList(),
+        inntektshistorikk = inntektshistorikk,
+        harStatslønn = statslønn,
+        besvart = besvart
+    ).håndter(Person::håndter)
+}
+
 internal fun Inntekt.repeat(antall: Int) = (0.until(antall)).map { this }
 
 private fun AbstractPersonTest.finnArbeidsgivere() = person.inspektør.arbeidsgivere()

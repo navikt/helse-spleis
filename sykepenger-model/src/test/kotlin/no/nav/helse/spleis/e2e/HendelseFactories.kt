@@ -32,6 +32,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
@@ -279,6 +280,31 @@ internal fun AbstractEndToEndTest.utbetalingshistorikk(
         fødselsnummer = fnr.toString(),
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
+        element = InfotrygdhistorikkElement.opprett(
+            oppdatert = besvart,
+            hendelseId = UUID.randomUUID(),
+            perioder = utbetalinger,
+            inntekter = inntektshistorikk,
+            arbeidskategorikoder = emptyMap(),
+            ugyldigePerioder = emptyList(),
+            harStatslønn = harStatslønn
+        )
+    ).apply {
+        hendelselogg = this
+    }
+}
+
+internal fun AbstractEndToEndTest.utbetalingshistorikkEtterInfotrygdEndring(
+    utbetalinger: List<Infotrygdperiode> = listOf(),
+    inntektshistorikk: List<Inntektsopplysning> = emptyList(),
+    fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    harStatslønn: Boolean = false,
+    besvart: LocalDateTime = LocalDateTime.now(),
+): UtbetalingshistorikkEtterInfotrygdendring {
+    return UtbetalingshistorikkEtterInfotrygdendring(
+        meldingsreferanseId = UUID.randomUUID(),
+        aktørId = AKTØRID,
+        fødselsnummer = fnr.toString(),
         element = InfotrygdhistorikkElement.opprett(
             oppdatert = besvart,
             hendelseId = UUID.randomUUID(),
