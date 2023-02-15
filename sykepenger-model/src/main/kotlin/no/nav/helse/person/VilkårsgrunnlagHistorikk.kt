@@ -314,6 +314,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun inntekt(organisasjonsnummer: String): Inntekt? =
             sykepengegrunnlag.inntekt(organisasjonsnummer)
 
+        internal fun lagreTidsnæreInntekter(skjæringstidspunkt: LocalDate, arbeidsgivere: List<Arbeidsgiver>) {
+            sykepengegrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgivere)
+        }
+
         internal companion object {
             internal fun skjæringstidspunktperioder(elementer: Collection<VilkårsgrunnlagElement>): List<Periode> {
                 val skjæringstidspunkter = elementer

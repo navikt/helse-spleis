@@ -29,6 +29,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -70,6 +71,8 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `vedtaksperiode strekker seg tilbake og endrer skjæringstidspunktet`() {
         tilGodkjenning(10.januar, 31.januar, a1)
+        val vilkårsgrunnlagFørEndring = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!
+        val inntektsopplysningerFørEndring = vilkårsgrunnlagFørEndring.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a1]!!
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(
             ManuellOverskrivingDag(9.januar, Dagtype.Sykedag, 100)
@@ -77,23 +80,21 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
         assertEquals(9.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
 
-        assertForventetFeil(
-            forklaring = "vedtaksperioden forkastes pga. vi ikke har inntekt for det nye skjæringstidspunktet",
-            nå = {
-                val dagen = inspektør.sykdomstidslinje[9.januar]
-                assertEquals(Dag.UkjentDag::class, dagen::class)
-                assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-            },
-            ønsket = {
-                val dagen = inspektør.sykdomstidslinje[9.januar]
-                assertEquals(Dag.Sykedag::class, dagen::class)
-                assertTrue(dagen.kommerFra(OverstyrTidslinje::class))
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-                håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
-                håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-                assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
-            }
-        )
+        val dagen = inspektør.sykdomstidslinje[9.januar]
+        assertEquals(Dag.Sykedag::class, dagen::class)
+        assertTrue(dagen.kommerFra(OverstyrTidslinje::class))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntekt = 20000.månedlig)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        val vilkårsgrunnlagEtterEndring = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!
+        val inntektsopplysningerEtterEndring = vilkårsgrunnlagEtterEndring.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a1]!!
+
+        assertEquals(inntektsopplysningerEtterEndring.inspektør.inntektsopplysning.inspektør.hendelseId, inntektsopplysningerFørEndring.inspektør.inntektsopplysning.inspektør.hendelseId)
+        assertEquals(inntektsopplysningerEtterEndring.inspektør.inntektsopplysning.inspektør.beløp, inntektsopplysningerFørEndring.inspektør.inntektsopplysning.inspektør.beløp)
+        assertEquals(inntektsopplysningerEtterEndring.inspektør.inntektsopplysning.inspektør.tidsstempel, inntektsopplysningerFørEndring.inspektør.inntektsopplysning.inspektør.tidsstempel)
+        assertEquals(Inntektsmelding::class, inntektsopplysningerEtterEndring.inspektør.inntektsopplysning::class)
+
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 
     @Test
@@ -161,7 +162,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
             },
             ønsket = {
                 assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
-                håndterVilkårsgrunnlag(2.vedtaksperiode, orgnummer = a1)
+                håndterVilkårsgrunnlag(2.vedtaksperiode, orgnummer = a1, inntekt = 20000.månedlig)
                 håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
                 assertEquals(1.januar til 9.januar, inspektør.periode(1.vedtaksperiode))

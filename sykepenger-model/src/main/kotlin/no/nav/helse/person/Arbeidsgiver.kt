@@ -1061,6 +1061,12 @@ internal class Arbeidsgiver private constructor(
 
 
     fun vedtaksperioderEtter(dato: LocalDate) = vedtaksperioder.filter { it.slutterEtter(dato) }
+    fun lagreTidsnærInntektsmelding(skjæringstidspunkt: LocalDate, orgnummer: String, inntektsmelding: no.nav.helse.person.inntekt.Inntektsmelding) {
+        if (this.organisasjonsnummer != orgnummer) return
+        val nyFørsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
+        if (nyFørsteFraværsdag == null) return
+        inntektshistorikk.leggTil(inntektsmelding.kopierTidsnærOpplysning(nyFørsteFraværsdag))
+    }
 
     internal class JsonRestorer private constructor() {
         internal companion object {

@@ -47,9 +47,11 @@ internal class Inntektsmelding(
 
     override fun omregnetÅrsinntekt(): Inntekt = beløp
 
-    internal fun kanLagres(other: Inntektsmelding) = this.hendelseId != other.hendelseId
+    internal fun kanLagres(other: Inntektsmelding) = this.hendelseId != other.hendelseId || this.dato != other.dato
 
     override fun erSamme(other: Inntektsopplysning): Boolean {
         return other is Inntektsmelding && this.dato == other.dato && other.beløp == this.beløp
     }
+
+    internal fun kopierTidsnærOpplysning(nyDato: LocalDate): Inntektsmelding = Inntektsmelding(UUID.randomUUID(), nyDato,hendelseId, beløp, tidsstempel)
 }

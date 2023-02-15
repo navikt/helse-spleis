@@ -514,8 +514,12 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun oppdaterHistorikk(hendelse: SykdomstidslinjeHendelse) {
+        val vilkårsgrunnlagFør = this.vilkårsgrunnlag
         periode = hendelse.oppdaterFom(this.periode)
         sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
+        if (vilkårsgrunnlagFør != null && this.vilkårsgrunnlag == null) {
+            person.lagreInntekter(vilkårsgrunnlagFør, this.skjæringstidspunkt)
+        }
     }
 
     private fun håndterSøknad(søknad: Søknad, nesteTilstand: () -> Vedtaksperiodetilstand? = { null }) {

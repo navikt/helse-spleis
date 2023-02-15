@@ -19,6 +19,11 @@ internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysni
 
     internal lateinit var beløp: Inntekt
         private set
+    internal lateinit var hendelseId: UUID
+        private set
+    internal lateinit var tidsstempel: LocalDateTime
+        private set
+
 
     init {
         inntektsopplysning.accept(this)
@@ -35,6 +40,8 @@ internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysni
         tidsstempel: LocalDateTime
     ) {
         this.beløp = beløp
+        this.hendelseId = hendelseId
+        this.tidsstempel = tidsstempel
     }
 
     override fun visitInntektsmelding(
@@ -46,10 +53,13 @@ internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysni
         tidsstempel: LocalDateTime
     ) {
         this.beløp = beløp
+        this.hendelseId = hendelseId
+        this.tidsstempel = tidsstempel
     }
 
     override fun visitIkkeRapportert(id: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
         this.beløp = INGEN
+        this.tidsstempel = tidsstempel
     }
 
     override fun visitInfotrygd(
@@ -61,6 +71,8 @@ internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysni
         tidsstempel: LocalDateTime
     ) {
         this.beløp = beløp
+        this.hendelseId = hendelseId
+        this.tidsstempel = tidsstempel
     }
 
     override fun preVisitSkattSykepengegrunnlag(
@@ -72,5 +84,7 @@ internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysni
         tidsstempel: LocalDateTime
     ) {
         this.beløp = beløp
+        this.hendelseId = hendelseId
+        this.tidsstempel = tidsstempel
     }
 }
