@@ -17,6 +17,11 @@ internal class UtbetalingshistorikkEtterInfotrygdRiverTest : RiverTest() {
         assertNoErrors(json)
     }
 
+    @Test
+    fun `ignorer melding om vedtaksperiodeId er satt`() {
+        // TODO:
+    }
+
     @Language("JSON")
     private val json = """
       {
