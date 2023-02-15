@@ -9,7 +9,7 @@ import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.til
 import org.slf4j.LoggerFactory
 
-internal class V229SondereFeilaktigFomForUtbetaling: JsonMigration(229) {
+internal class V230MigrereFeilaktigFomForUtbetaling: JsonMigration(230) {
 
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -17,7 +17,7 @@ internal class V229SondereFeilaktigFomForUtbetaling: JsonMigration(229) {
         private fun JsonNode.asOptionalLocalDate() = takeIf { it.isTextual }?.asLocalDate()
     }
 
-    override val description = "sonderer utbetalinger som kan ha en feilaktig fom-dato"
+    override val description = "migrerer utbetalinger som har en feilaktig fom-dato"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val aktørId = jsonNode.path("aktørId").asText()
@@ -42,7 +42,8 @@ internal class V229SondereFeilaktigFomForUtbetaling: JsonMigration(229) {
 
                         if (utbetalingensFom < utbetalingstidslinjeSisteUkjentDag) {
                             if (oppdragsperiode == null || oppdragsperiode.start >= utbetalingstidslinjeSisteUkjentDag) {
-                                sikkerlogg.info("[V229] utbetaling {}-{} for {} har ulik fom enn siste ukjente dag. " +
+                                (utbetaling as ObjectNode).put("fom", utbetalingstidslinjeSisteUkjentDag.toString())
+                                sikkerlogg.info("[V230] utbetaling {}-{} for {} har ulik fom enn siste ukjente dag. " +
                                         "Vi mener $utbetalingstidslinjeSisteUkjentDag er mer riktig enn $utbetalingensFom. " +
                                         "Oppdragene har tidligste linje ${oppdragsperiode?.start}. ",
                                     keyValue("utbetalingId", utbetalingId),
