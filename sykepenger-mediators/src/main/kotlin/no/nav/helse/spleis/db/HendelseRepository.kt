@@ -17,6 +17,7 @@ import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSMELDING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.KANSELLER_UTBETALING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRARBEIDSFORHOLD
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRARBEIDSGIVEROPPLYSNINGER
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRINNTEKT
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRTIDSLINJE
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_ARBEIDSGIVER
@@ -25,6 +26,7 @@ import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SIMULERING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGPÅMINNELSE
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSGODKJENNING
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSHISTORIKK_FOR_FERIEPENGER
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALING_OVERFØRT
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.VILKÅRSGRUNNLAG
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.YTELSER
@@ -32,10 +34,12 @@ import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.EtterbetalingMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
+import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsforholdMessage
+import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsgiveropplysningerMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrInntektMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrTidslinjeMessage
 import no.nav.helse.spleis.meldinger.model.PersonPåminnelseMessage
@@ -47,6 +51,7 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingOverførtMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingpåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
+import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkEtterInfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
@@ -131,12 +136,15 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is OverstyrTidslinjeMessage -> OVERSTYRTIDSLINJE
         is OverstyrInntektMessage -> OVERSTYRINNTEKT
         is OverstyrArbeidsforholdMessage -> OVERSTYRARBEIDSFORHOLD
-        is UtbetalingshistorikkForFeriepengerMessage -> null //TODO: Skal lagres som UTBETALINGSHISTORIKK_FOR_FERIEPENGER
+        is OverstyrArbeidsgiveropplysningerMessage -> OVERSTYRARBEIDSGIVEROPPLYSNINGER
+        is UtbetalingshistorikkForFeriepengerMessage -> UTBETALINGSHISTORIKK_FOR_FERIEPENGER
         is MigrateMessage,
         is AvstemmingMessage,
         is PersonPåminnelseMessage,
         is PåminnelseMessage,
-        is UtbetalingshistorikkMessage -> null // Disse trenger vi ikke å lagre
+        is UtbetalingshistorikkMessage,
+        is InfotrygdendringMessage,
+        is UtbetalingshistorikkEtterInfotrygdendringMessage -> null // Disse trenger vi ikke å lagre
         else -> null.also { log.warn("ukjent meldingstype ${melding::class.simpleName}: melding lagres ikke") }
     }
 
@@ -176,6 +184,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         SIMULERING,
         KANSELLER_UTBETALING,
         GRUNNBELØPSREGULERING,
-        UTBETALINGSHISTORIKK_FOR_FERIEPENGER
+        UTBETALINGSHISTORIKK_FOR_FERIEPENGER,
+        OVERSTYRARBEIDSGIVEROPPLYSNINGER
     }
 }
