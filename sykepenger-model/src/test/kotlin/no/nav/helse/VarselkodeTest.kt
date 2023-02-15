@@ -85,7 +85,7 @@ internal class VarselkodeTest {
             RV_SØ_20, RV_AY_10, RV_VV_10, RV_VV_11, RV_UT_6, RV_UT_7,
             RV_UT_8, RV_UT_9, RV_UT_10, RV_UT_11, RV_UT_12, RV_UT_13,
             RV_UT_14, RV_UT_15, RV_UT_16, RV_UT_17, RV_UT_18, RV_UT_19,
-            RV_AG_1, RV_SV_3, RV_RE_2, RV_SØ_27, RV_AN_5, RV_SØ_29, RV_SØ_30,
+            RV_AG_1, RV_RE_2, RV_SØ_27, RV_AN_5, RV_SØ_29, RV_SØ_30,
             RV_IV_3, RV_RV_2
         )
 
