@@ -15,7 +15,7 @@ internal class PersonDao(private val dataSource: DataSource) {
         personidentifikator: Personidentifikator,
         aktørId: String,
         message: HendelseMessage,
-        lagNyPerson: () -> SerialisertPerson,
+        lagNyPerson: () -> SerialisertPerson?,
         håndterPerson: (SerialisertPerson) -> SerialisertPerson
     ) {
         /* finner eksisterende person og låser den for oppdatering, slik at andre
@@ -29,6 +29,7 @@ internal class PersonDao(private val dataSource: DataSource) {
             it.transaction { txSession ->
                 val serialisertPerson = hentPersonOgLåsPersonForBehandling(txSession, personidentifikator)
                     ?: opprettNyPerson(txSession, personidentifikator, aktørId, lagNyPerson)
+                    ?: return
                 val oppdatertPerson = håndterPerson(serialisertPerson)
                 oppdaterAvstemmingtidspunkt(txSession, message, personidentifikator)
                 oppdaterPersonversjon(txSession, personidentifikator, oppdatertPerson.skjemaVersjon, oppdatertPerson.json)
@@ -69,8 +70,8 @@ internal class PersonDao(private val dataSource: DataSource) {
         if (size < 2) this.firstOrNull()
         else throw IllegalStateException("Listen inneholder mer enn ett element!")
 
-    private fun opprettNyPerson(session: Session, personidentifikator: Personidentifikator, aktørId: String, lagNyPerson: () -> SerialisertPerson): SerialisertPerson {
-        return lagNyPerson().also {
+    private fun opprettNyPerson(session: Session, personidentifikator: Personidentifikator, aktørId: String, lagNyPerson: () -> SerialisertPerson?): SerialisertPerson? {
+        return lagNyPerson()?.also {
             opprettNyPersonRad(session, personidentifikator, aktørId)
             opprettNyPersonversjon(session, personidentifikator, it.skjemaVersjon, it.json)
         }

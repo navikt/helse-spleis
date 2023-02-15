@@ -331,7 +331,7 @@ internal class HendelseMediator(
         val tidligereBehandlinger = personDao.lesOppPersoner(tidligereBehandledeIdenter.map { tidligereBehandletIdent -> tidligereBehandletIdent.somPersonidentifikator() })
             .map { serialisertPerson -> serialisertPerson.second.deserialize(jurist) { hendelseRepository.hentAlleHendelser(serialisertPerson.first) } }
         personDao.hentEllerOpprettPerson(personidentifikator, hendelse.aktørId(), message, {
-            checkNotNull(personopplysninger) { "Kan ikke opprette person fra ${message::class} fordi personopplysninger mangler" }.person(jurist).serialize()
+            personopplysninger?.person(jurist)?.serialize()
         }) { serialisertPerson ->
             serialisertPerson.deserialize(jurist, tidligereBehandlinger) { hendelseRepository.hentAlleHendelser(personidentifikator) }.also(block).serialize()
         }
