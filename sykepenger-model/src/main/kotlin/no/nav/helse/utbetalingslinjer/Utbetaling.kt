@@ -6,6 +6,7 @@ import OverføringsinformasjonPort
 import SimuleringPort
 import UtbetalingHendelsePort
 import UtbetalingpåminnelsePort
+import UtbetalingsgodkjenningPort
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -206,7 +207,7 @@ class Utbetaling private constructor(
     internal fun gjelderFor(hendelse: UtbetalingHendelsePort) =
         hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId(), personOppdrag.fagsystemId(), id)
 
-    internal fun gjelderFor(hendelse: UtbetalingsgodkjenningAdapter) =
+    internal fun gjelderFor(hendelse: UtbetalingsgodkjenningPort) =
         hendelse.erRelevant(id)
 
     internal fun valider(simulering: SimuleringPort): IAktivitetslogg {
