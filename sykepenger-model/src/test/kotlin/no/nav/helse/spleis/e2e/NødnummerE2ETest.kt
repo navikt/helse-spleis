@@ -29,7 +29,6 @@ internal class NødnummerE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = listOf(Inntektsopplysning(nødnummer, 1.januar, 500.daglig, false)))
         assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertFalse(person.inspektør.harArbeidsgiver(nødnummer))
-        assertFalse(person.inspektør.harLagretInntekt(0))
     }
 
     @Test

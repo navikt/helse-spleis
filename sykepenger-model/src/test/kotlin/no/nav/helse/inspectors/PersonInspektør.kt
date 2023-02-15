@@ -35,7 +35,6 @@ internal class PersonInspektør(person: Person): PersonVisitor {
     internal var dødsdato: LocalDate? = null
     internal lateinit var alder: Alder
     private val arbeidsgivere = mutableMapOf<String, Arbeidsgiver>()
-    private val infotrygdelementerLagretInntekt = mutableListOf<Boolean>()
     private val vilkårsgrunnlagHistorikkInnslag: MutableList<VilkårsgrunnlagHistorikk.Innslag> = mutableListOf()
 
     private var infotrygdInnslag = 0
@@ -54,7 +53,6 @@ internal class PersonInspektør(person: Person): PersonVisitor {
     }
     internal fun arbeidsgivere() = arbeidsgivere.keys.toList()
     internal fun arbeidsgiver(orgnummer: String) = arbeidsgivere[orgnummer]
-    internal fun harLagretInntekt(indeks: Int) = infotrygdelementerLagretInntekt[indeks]
     internal fun harArbeidsgiver(organisasjonsnummer: String) = organisasjonsnummer in arbeidsgivere.keys
     internal fun vilkårsgrunnlagHistorikkInnslag() = vilkårsgrunnlagHistorikkInnslag.toList()
 
@@ -83,18 +81,6 @@ internal class PersonInspektør(person: Person): PersonVisitor {
 
     override fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {
         vilkårsgrunnlagHistorikkInnslag.add(innslag)
-    }
-
-    override fun preVisitInfotrygdhistorikkElement(
-        id: UUID,
-        tidsstempel: LocalDateTime,
-        oppdatert: LocalDateTime,
-        hendelseId: UUID?,
-        lagretInntekter: Boolean,
-        lagretVilkårsgrunnlag: Boolean,
-        harStatslønn: Boolean
-    ) {
-        infotrygdelementerLagretInntekt.add(lagretInntekter)
     }
 
     override fun preVisitInfotrygdhistorikkPerioder() {

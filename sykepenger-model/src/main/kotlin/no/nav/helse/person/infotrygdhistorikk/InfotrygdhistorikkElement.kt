@@ -30,9 +30,7 @@ class InfotrygdhistorikkElement private constructor(
     private val arbeidskategorikoder: Map<String, LocalDate>,
     private val ugyldigePerioder: List<UgyldigPeriode>,
     private val harStatslønn: Boolean,
-    private var oppdatert: LocalDateTime,
-    private var lagretInntekter: Boolean,
-    private var lagretVilkårsgrunnlag: Boolean
+    private var oppdatert: LocalDateTime
 ) {
     private val nødnummer = Nødnummer.Sykepenger
     private val inntekter = Inntektsopplysning.sorter(inntekter)
@@ -62,9 +60,7 @@ class InfotrygdhistorikkElement private constructor(
                 arbeidskategorikoder = arbeidskategorikoder,
                 ugyldigePerioder = ugyldigePerioder,
                 harStatslønn = harStatslønn,
-                oppdatert = oppdatert,
-                lagretInntekter = false,
-                lagretVilkårsgrunnlag = false
+                oppdatert = oppdatert
             )
 
         internal fun ferdigElement(
@@ -76,9 +72,7 @@ class InfotrygdhistorikkElement private constructor(
             arbeidskategorikoder: Map<String, LocalDate>,
             ugyldigePerioder: List<UgyldigPeriode>,
             harStatslønn: Boolean,
-            oppdatert: LocalDateTime,
-            lagretInntekter: Boolean,
-            lagretVilkårsgrunnlag: Boolean
+            oppdatert: LocalDateTime
         ): InfotrygdhistorikkElement = InfotrygdhistorikkElement(
             id = id,
             tidsstempel = tidsstempel,
@@ -88,9 +82,7 @@ class InfotrygdhistorikkElement private constructor(
             arbeidskategorikoder = arbeidskategorikoder,
             ugyldigePerioder = ugyldigePerioder,
             harStatslønn = harStatslønn,
-            oppdatert = oppdatert,
-            lagretInntekter = lagretInntekter,
-            lagretVilkårsgrunnlag = lagretVilkårsgrunnlag
+            oppdatert = oppdatert
         )
     }
 
@@ -149,9 +141,6 @@ class InfotrygdhistorikkElement private constructor(
         }
     }
 
-    internal fun kanSlettes() =
-        !lagretInntekter && !lagretVilkårsgrunnlag
-
     private fun erTom() =
         perioder.isEmpty() && inntekter.isEmpty() && arbeidskategorikoder.isEmpty()
 
@@ -200,7 +189,7 @@ class InfotrygdhistorikkElement private constructor(
         oppdatert > cutoff
 
     internal fun accept(visitor: InfotrygdhistorikkVisitor) {
-        visitor.preVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId, lagretInntekter, lagretVilkårsgrunnlag, harStatslønn)
+        visitor.preVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId, harStatslønn)
         visitor.preVisitInfotrygdhistorikkPerioder()
         perioder.forEach { it.accept(visitor) }
         visitor.postVisitInfotrygdhistorikkPerioder()
@@ -209,7 +198,7 @@ class InfotrygdhistorikkElement private constructor(
         visitor.postVisitInfotrygdhistorikkInntektsopplysninger()
         visitor.visitUgyldigePerioder(ugyldigePerioder)
         visitor.visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder)
-        visitor.postVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId, lagretInntekter, lagretVilkårsgrunnlag, harStatslønn)
+        visitor.postVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId, harStatslønn)
     }
 
     private fun erNormalArbeidstaker(skjæringstidspunkt: LocalDate?): Boolean {

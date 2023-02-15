@@ -404,11 +404,9 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         hendelseId: UUID?,
-        lagretInntekter: Boolean,
-        lagretVilkårsgrunnlag: Boolean,
         harStatslønn: Boolean
     ) {
-        delegatee.preVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId, lagretInntekter, lagretVilkårsgrunnlag, harStatslønn)
+        delegatee.preVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId, harStatslønn)
     }
 
     override fun preVisitInfotrygdhistorikkPerioder() {
@@ -467,11 +465,9 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         hendelseId: UUID?,
-        lagretInntekter: Boolean,
-        lagretVilkårsgrunnlag: Boolean,
         harStatslønn: Boolean
     ) {
-        delegatee.postVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId, lagretInntekter, lagretVilkårsgrunnlag, harStatslønn)
+        delegatee.postVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId, harStatslønn)
     }
 
     override fun postVisitInfotrygdhistorikk() {

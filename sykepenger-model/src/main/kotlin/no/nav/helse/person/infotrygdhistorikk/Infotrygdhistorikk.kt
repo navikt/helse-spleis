@@ -100,7 +100,9 @@ internal class Infotrygdhistorikk private constructor(
 
     internal fun tøm() {
         if (!harHistorikk()) return
-        elementer.subList(1, elementer.size).removeIf(InfotrygdhistorikkElement::kanSlettes)
+        val nyeste = siste
+        elementer.clear()
+        elementer.add(nyeste)
     }
 
     internal fun accept(visitor: InfotrygdhistorikkVisitor) {

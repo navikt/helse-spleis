@@ -623,13 +623,18 @@ internal class JsonBuilder : AbstractBuilder() {
             tidsstempel: LocalDateTime,
             oppdatert: LocalDateTime,
             hendelseId: UUID?,
-            lagretInntekter: Boolean,
-            lagretVilkårsgrunnlag: Boolean,
             harStatslønn: Boolean
         ) {
             val element = mutableMapOf<String, Any?>()
             historikk.add(element)
-            pushState(InfotrygdhistorikkElementState(element, id, tidsstempel, oppdatert, hendelseId, lagretInntekter, lagretVilkårsgrunnlag, harStatslønn))
+            pushState(InfotrygdhistorikkElementState(
+                element,
+                id,
+                tidsstempel,
+                oppdatert,
+                hendelseId,
+                harStatslønn
+            ))
         }
 
         override fun postVisitInfotrygdhistorikk() {
@@ -643,8 +648,6 @@ internal class JsonBuilder : AbstractBuilder() {
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         hendelseId: UUID?,
-        lagretInntekter: Boolean,
-        lagretVilkårsgrunnlag: Boolean,
         harStatslønn: Boolean
     ) : BuilderState() {
         private val ferieperioder = mutableListOf<Map<String, LocalDate>>()
@@ -667,8 +670,6 @@ internal class JsonBuilder : AbstractBuilder() {
             element["arbeidskategorikoder"] = arbeidskategorikoder
             element["ugyldigePerioder"] = ugyldigePerioder
             element["harStatslønn"] = harStatslønn
-            element["lagretInntekter"] = lagretInntekter
-            element["lagretVilkårsgrunnlag"] = lagretVilkårsgrunnlag
             element["oppdatert"] = oppdatert
         }
 
@@ -743,8 +744,6 @@ internal class JsonBuilder : AbstractBuilder() {
             tidsstempel: LocalDateTime,
             oppdatert: LocalDateTime,
             hendelseId: UUID?,
-            lagretInntekter: Boolean,
-            lagretVilkårsgrunnlag: Boolean,
             harStatslønn: Boolean
         ) {
             popState()

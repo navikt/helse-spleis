@@ -124,28 +124,13 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `tømme historikk - etter lagring av tom inntektliste`() {
         val historikk = Infotrygdhistorikk.ferdigInfotrygdhistorikk(listOf(
-            eksisterendeInfotrygdHistorikkelement(lagretInntekter = false, lagretVilkårsgrunnlag = false),
-            eksisterendeInfotrygdHistorikkelement(lagretInntekter = false, lagretVilkårsgrunnlag = false)
+            eksisterendeInfotrygdHistorikkelement(),
+            eksisterendeInfotrygdHistorikkelement()
         ))
         historikk.tøm()
         assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
         assertFalse(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
         assertEquals(1, historikk.inspektør.elementer())
-    }
-
-    @Test
-    fun `tømme historikk - med lagret inntekter`() {
-        val tidsstempel = LocalDateTime.now()
-        val historikk = Infotrygdhistorikk.ferdigInfotrygdhistorikk(listOf(
-            eksisterendeInfotrygdHistorikkelement(oppdatert = tidsstempel, lagretInntekter = true, lagretVilkårsgrunnlag = true),
-            eksisterendeInfotrygdHistorikkelement(oppdatert = tidsstempel, lagretInntekter = true, lagretVilkårsgrunnlag = true)
-        ))
-        historikk.tøm()
-        assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
-        assertFalse(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
-        assertEquals(2, historikk.inspektør.elementer())
-        assertEquals(tidsstempel, historikk.inspektør.oppdatert(0))
-        assertEquals(tidsstempel, historikk.inspektør.oppdatert(1))
     }
 
     @Test
@@ -225,9 +210,7 @@ internal class InfotrygdhistorikkTest {
             arbeidskategorikoder = emptyMap(),
             ugyldigePerioder = emptyList(),
             harStatslønn = false,
-            oppdatert = nå,
-            lagretInntekter = false,
-            lagretVilkårsgrunnlag = false
+            oppdatert = nå
         )).tilModellObjekt()
         assertEquals(1, historikk.inspektør.elementer())
         assertFalse(historikk.oppdaterHistorikk(historikkelement(perioder)))

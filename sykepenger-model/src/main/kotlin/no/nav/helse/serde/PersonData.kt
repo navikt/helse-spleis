@@ -158,9 +158,7 @@ internal data class PersonData(
         private val arbeidskategorikoder: Map<String, LocalDate>,
         private val ugyldigePerioder: List<UgyldigPeriode>,
         private val harStatslønn: Boolean,
-        private val oppdatert: LocalDateTime,
-        private val lagretInntekter: Boolean,
-        private val lagretVilkårsgrunnlag: Boolean
+        private val oppdatert: LocalDateTime
     ) {
         internal companion object {
             fun List<InfotrygdhistorikkElementData>.tilModellObjekt() =
@@ -179,9 +177,7 @@ internal data class PersonData(
             arbeidskategorikoder = arbeidskategorikoder,
             ugyldigePerioder = ugyldigePerioder,
             harStatslønn = harStatslønn,
-            oppdatert = oppdatert,
-            lagretInntekter = lagretInntekter,
-            lagretVilkårsgrunnlag = lagretVilkårsgrunnlag
+            oppdatert = oppdatert
         )
 
         data class FerieperiodeData(

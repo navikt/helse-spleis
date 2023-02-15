@@ -23,8 +23,6 @@ internal class InfotrygdhistorikkInspektør(historikk: Infotrygdhistorikk) : Inf
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         hendelseId: UUID?,
-        lagretInntekter: Boolean,
-        lagretVilkårsgrunnlag: Boolean,
         harStatslønn: Boolean
     ) {
         elementer.add(Triple(id, tidsstempel, oppdatert))

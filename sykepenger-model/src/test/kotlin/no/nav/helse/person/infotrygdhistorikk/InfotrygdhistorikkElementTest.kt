@@ -45,22 +45,18 @@ internal class InfotrygdhistorikkElementTest {
             hendelseId: UUID = UUID.randomUUID(),
             harStatslønn: Boolean = false,
             oppdatert: LocalDateTime = LocalDateTime.now(),
-            lagretInntekter: Boolean = false,
-            lagretVilkårsgrunnlag: Boolean = false,
             tidsstempel: LocalDateTime = LocalDateTime.now()
         ) =
             InfotrygdhistorikkElement.ferdigElement(
                 id = UUID.randomUUID(),
-                oppdatert = oppdatert,
+                tidsstempel = tidsstempel,
                 hendelseId = hendelseId,
                 infotrygdperioder = perioder,
                 inntekter = inntekter,
                 arbeidskategorikoder = arbeidskategorikoder,
                 ugyldigePerioder = ugyldigePerioder,
                 harStatslønn = harStatslønn,
-                tidsstempel = tidsstempel,
-                lagretInntekter = lagretInntekter,
-                lagretVilkårsgrunnlag = lagretVilkårsgrunnlag,
+                oppdatert = oppdatert,
             )
     }
 
@@ -678,24 +674,6 @@ internal class InfotrygdhistorikkElementTest {
         )
         assertTrue(element.valider(aktivitetslogg, Periode(2.januar, 31.januar), 2.januar, "ag1"))
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
-    }
-
-    @Test
-    fun `nytt element er ikke låst`() {
-        val element = nyttHistorikkelement()
-        assertTrue(element.kanSlettes())
-    }
-
-    @Test
-    fun `element uten inntekter låses ikke`() {
-        val element = eksisterendeInfotrygdHistorikkelement(lagretInntekter = false)
-        assertTrue(element.kanSlettes())
-    }
-
-    @Test
-    fun `lagrer inntekter låser elementet`() {
-        val element = eksisterendeInfotrygdHistorikkelement(lagretInntekter = true)
-        assertFalse(element.kanSlettes())
     }
 
     private fun assertFlereInntekterInfotrygd() {

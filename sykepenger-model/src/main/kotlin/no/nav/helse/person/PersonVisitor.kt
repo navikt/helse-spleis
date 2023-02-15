@@ -70,8 +70,6 @@ internal interface InfotrygdhistorikkVisitor {
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         hendelseId: UUID?,
-        lagretInntekter: Boolean,
-        lagretVilkårsgrunnlag: Boolean,
         harStatslønn: Boolean
     ) {
     }
@@ -101,8 +99,6 @@ internal interface InfotrygdhistorikkVisitor {
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         hendelseId: UUID?,
-        lagretInntekter: Boolean,
-        lagretVilkårsgrunnlag: Boolean,
         harStatslønn: Boolean
     ) {
     }
