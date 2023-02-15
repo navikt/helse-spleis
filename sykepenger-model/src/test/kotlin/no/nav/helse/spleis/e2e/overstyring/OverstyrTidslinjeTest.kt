@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.overstyring
 
+import java.time.LocalDate
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -53,6 +54,7 @@ import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -60,6 +62,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.fail
+import kotlin.reflect.KClass
 
 internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
@@ -117,10 +121,11 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         tilGodkjenning(10.januar, 31.januar, a1) // 1. jan - 9. jan blir omgjort til arbeidsdager ved innsending av IM her
         nullstillTilstandsendringer()
         // Saksbehandler korrigerer; 9.januar var vedkommende syk likevel
+        assertEquals(4, inspektør.sykdomshistorikk.inspektør.elementer())
         håndterOverstyrTidslinje(listOf(
             ManuellOverskrivingDag(9.januar, Dagtype.Arbeidsdag)
         ), orgnummer = a1)
-
+        assertEquals(5, inspektør.sykdomshistorikk.inspektør.elementer())
         val dagen = inspektør.sykdomstidslinje[9.januar]
         assertEquals(Dag.Arbeidsdag::class, dagen::class)
         assertTrue(dagen.kommerFra(OverstyrTidslinje::class))
@@ -192,6 +197,40 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+    }
+
+    @Test
+    fun `overstyr tidslinje endrer to perioder samtidig`() {
+        nyPeriode(1.januar til 9.januar, a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        nyPeriode(10.januar til 31.januar, a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        nullstillTilstandsendringer()
+        assertEquals(4, inspektør.sykdomshistorikk.inspektør.elementer())
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(9.januar, Dagtype.Sykedag, 100),
+            ManuellOverskrivingDag(10.januar, Dagtype.Feriedag)
+        ), orgnummer = a1)
+        assertEquals(5, inspektør.sykdomshistorikk.inspektør.elementer())
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+
+        assertSykdomstidslinjedag(9.januar, Dag.Sykedag::class, OverstyrTidslinje::class)
+        assertSykdomstidslinjedag(10.januar, Dag.Feriedag::class, OverstyrTidslinje::class)
+
+        assertEquals(1.januar til 9.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(10.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+    }
+
+    private fun assertSykdomstidslinjedag(dato: LocalDate, dagtype: KClass<out Dag>, kommerFra: KClass<out SykdomstidslinjeHendelse>) {
+        val dagen = inspektør.sykdomstidslinje[dato] ?: fail { "$dato finnes ikke på sykdomstidslinjen" }
+        assertEquals(dagtype, dagen::class)
+        assertTrue(dagen.kommerFra(kommerFra))
     }
 
     @Test

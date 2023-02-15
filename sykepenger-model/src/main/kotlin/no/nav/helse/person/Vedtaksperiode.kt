@@ -366,10 +366,7 @@ internal class Vedtaksperiode private constructor(
         if (!hendelse.erRelevant(periode)) return
         kontekst(hendelse)
         hendelse.leggTil(hendelseIder)
-        if (!hendelse.alleredeHåndtert()) {
-            hendelse.markerHåndtert()
-            tilstand.håndter(this, hendelse)
-        }
+        tilstand.håndter(this, hendelse)
         hendelse.trimLeft(periode.endInclusive)
     }
 

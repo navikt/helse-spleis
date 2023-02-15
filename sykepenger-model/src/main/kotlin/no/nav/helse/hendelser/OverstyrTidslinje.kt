@@ -38,7 +38,6 @@ class OverstyrTidslinje(
 
     private val periode: Periode
     private val sykdomstidslinje: Sykdomstidslinje
-    private var håndtert: Boolean = false
 
     init {
         sykdomstidslinje = dager.map {
@@ -75,13 +74,6 @@ class OverstyrTidslinje(
         periode = checkNotNull(sykdomstidslinje.periode()) {
             "Overstyr tidslinje må ha minst én overstyrt dag"
         }
-    }
-
-    internal fun alleredeHåndtert() = håndtert
-
-    internal fun markerHåndtert() {
-        require(!håndtert) { "Flere perioder forsøker å markere hendelsen som håndtert. Kun én periode skal håndtere hendelsen" }
-        håndtert = true
     }
 
     internal fun erRelevant(other: Periode) = other.oppdaterFom(other.start.forrigeDag).overlapperMed(periode())
