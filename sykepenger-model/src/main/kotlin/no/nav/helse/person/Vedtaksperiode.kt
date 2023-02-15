@@ -22,6 +22,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
@@ -306,6 +307,11 @@ internal class Vedtaksperiode private constructor(
         if (!utbetalingshistorikk.erRelevant(id)) return
         kontekst(utbetalingshistorikk)
         tilstand.håndter(person, arbeidsgiver, this, utbetalingshistorikk, infotrygdhistorikk)
+    }
+
+    internal fun håndter(utbetalingshistorikk: UtbetalingshistorikkEtterInfotrygdendring) {
+        kontekst(utbetalingshistorikk)
+        tilstand.håndter(this, utbetalingshistorikk)
     }
 
     internal fun håndter(
@@ -995,6 +1001,19 @@ internal class Vedtaksperiode private constructor(
                 }
                 onSuccess { info("Utbetalingshistorikk sjekket; fant ingen feil.") }
             }
+        }
+
+        fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            utbetalingshistorikk: UtbetalingshistorikkEtterInfotrygdendring
+        ) {
+            sikkerlogg.info("""Mottatt en infotrygdendring som oppdaterte infotrygdhistorikken
+                | tilstand: {}
+                | vedtaksperiodeId: ${vedtaksperiode.id}
+                | Infotrygdendring meldingsreferanseId: ${utbetalingshistorikk.meldingsreferanseId()}
+                | aktørId: ${vedtaksperiode.aktørId}
+                | """.trimMargin(), keyValue("tilstand", type.name)
+            )
         }
 
         fun håndter(

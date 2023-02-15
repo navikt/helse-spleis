@@ -13,9 +13,10 @@ class UtbetalingshistorikkEtterInfotrygdendring(
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
 ) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, aktivitetslogg) {
 
-    internal fun oppdaterHistorikk(historikk: Infotrygdhistorikk) {
+    internal fun oppdaterHistorikk(historikk: Infotrygdhistorikk): Boolean {
         info("Oppdaterer Infotrygdhistorikk etter infotrygendring")
-        if (!historikk.oppdaterHistorikk(element)) return info("Oppfrisket Infotrygdhistorikk medførte ingen endringer etter infotrygdendring")
+        if (!historikk.oppdaterHistorikk(element)) return false.also { info("Oppfrisket Infotrygdhistorikk medførte ingen endringer etter infotrygdendring") }
         info("Oppfrisket Infotrygdhistorikk ble lagret etter infotrygdendring")
+        return true
     }
 }

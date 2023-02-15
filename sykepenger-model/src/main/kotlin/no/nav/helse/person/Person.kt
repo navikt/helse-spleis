@@ -205,7 +205,8 @@ class Person private constructor(
 
     fun håndter(utbetalingshistorikk: UtbetalingshistorikkEtterInfotrygdendring) {
         utbetalingshistorikk.kontekst(this)
-        utbetalingshistorikk.oppdaterHistorikk(infotrygdhistorikk)
+        if(!utbetalingshistorikk.oppdaterHistorikk(infotrygdhistorikk)) return
+        arbeidsgivere.håndter(utbetalingshistorikk)
         håndterGjenoppta(utbetalingshistorikk)
     }
 
@@ -583,10 +584,10 @@ class Person private constructor(
         }
     }
 
+
     internal fun lagreDødsdato(dødsdato: LocalDate) {
         this.dødsdato = dødsdato
     }
-
 
     internal fun build(skjæringstidspunkt: LocalDate, builder: VedtakFattetBuilder) {
         vilkårsgrunnlagHistorikk.build(skjæringstidspunkt, builder)
@@ -695,6 +696,7 @@ class Person private constructor(
         igangsettOverstyring(hendelse, eventyr)
     }
 
+
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
         hendelse: OverstyrArbeidsforhold,
         skjæringstidspunkt: LocalDate,
@@ -705,14 +707,13 @@ class Person private constructor(
         igangsettOverstyring(hendelse, Revurderingseventyr.arbeidsforhold(skjæringstidspunkt))
     }
 
-
     private fun nyttVilkårsgrunnlag(hendelse: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?) {
         if (vilkårsgrunnlag == null) return
         hendelse.kontekst(vilkårsgrunnlag)
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
-
     private var gjenopptaBehandlingNy = false
+
     internal fun gjenopptaBehandling(hendelse: IAktivitetslogg) {
         hendelse.info("Forbereder gjenoppta behandling")
         gjenopptaBehandlingNy = true
