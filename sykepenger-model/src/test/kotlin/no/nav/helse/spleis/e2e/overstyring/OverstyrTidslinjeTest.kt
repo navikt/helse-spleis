@@ -29,6 +29,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.inntekt.Inntektsmelding
@@ -37,6 +38,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.assertUtbetalingsdag
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
@@ -48,6 +50,7 @@ import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterSøknadMedValidering
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
 import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
+import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.manuellArbeidsgiverdag
@@ -61,6 +64,10 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -252,6 +259,92 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `vedtaksperiode flytter skjæringstidspunktet frem`() {
+        nyPeriode(1.januar til 31.januar, a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        nullstillTilstandsendringer()
+        val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(1.januar, Dagtype.Arbeidsdag, 100),
+            ManuellOverskrivingDag(4.januar, Dagtype.Arbeidsdag, 100),
+        ), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+
+        val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+
+        assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
+
+        assertSykdomstidslinjedag(1.januar, Dag.Arbeidsdag::class, OverstyrTidslinje::class)
+        assertSykdomstidslinjedag(4.januar, Dag.Arbeidsdag::class, OverstyrTidslinje::class)
+        assertEquals(5.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
+
+        assertUtbetalingsdag(18.januar, Utbetalingsdag.ArbeidsgiverperiodeDag::class, INGEN, INGEN)
+        assertUtbetalingsdag(19.januar, Utbetalingsdag.NavDag::class, 1431.daglig, INGEN)
+
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+    }
+
+    @Test
+    fun `vedtaksperiode flytter skjæringstidspunktet frem etter utbetalt`() {
+        nyPeriode(1.januar til 31.januar, a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        nullstillTilstandsendringer()
+        val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(1.januar, Dagtype.Arbeidsdag, 100),
+            ManuellOverskrivingDag(4.januar, Dagtype.Arbeidsdag, 100),
+        ), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+
+        val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+
+        assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
+
+        assertSykdomstidslinjedag(1.januar, Dag.Arbeidsdag::class, OverstyrTidslinje::class)
+        assertSykdomstidslinjedag(4.januar, Dag.Arbeidsdag::class, OverstyrTidslinje::class)
+        assertEquals(5.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
+
+        assertUtbetalingsdag(18.januar, Utbetalingsdag.ArbeidsgiverperiodeDag::class, INGEN, INGEN)
+        assertUtbetalingsdag(19.januar, Utbetalingsdag.NavDag::class, 1431.daglig, INGEN)
+
+        val førsteUtbetaling = inspektør.utbetaling(0).inspektør
+        val revurdering = inspektør.utbetaling(1).inspektør
+        assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+    }
+
+    private fun assertUtbetalingsdag(dato: LocalDate, dagtype: KClass<out Utbetalingsdag>, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt, orgnummer: String = a1) {
+        val sisteUtbetaling = inspektør(orgnummer).utbetalinger.last().inspektør
+        val utbetalingstidslinje = sisteUtbetaling.utbetalingstidslinje
+        val dagen = utbetalingstidslinje[dato]
+
+        assertEquals(dagtype, dagen::class)
+        assertEquals(arbeidsgiverbeløp, dagen.økonomi.inspektør.arbeidsgiverbeløp)
+        assertEquals(personbeløp, dagen.økonomi.inspektør.personbeløp)
+    }
+
+    private fun assertSykdomstidslinjedag(dato: LocalDate, dagtype: KClass<out Dag>, kommerFra: KClass<out SykdomstidslinjeHendelse>) {
+        val dagen = inspektør.sykdomstidslinje[dato]
+        assertEquals(dagtype, dagen::class)
+        assertTrue(dagen.kommerFra(kommerFra))
+    }
+
+    @Test
     fun `overstyr tidslinje endrer to perioder samtidig`() {
         nyPeriode(1.januar til 9.januar, a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -277,12 +370,6 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
-    }
-
-    private fun assertSykdomstidslinjedag(dato: LocalDate, dagtype: KClass<out Dag>, kommerFra: KClass<out SykdomstidslinjeHendelse>) {
-        val dagen = inspektør.sykdomstidslinje[dato] ?: fail { "$dato finnes ikke på sykdomstidslinjen" }
-        assertEquals(dagtype, dagen::class)
-        assertTrue(dagen.kommerFra(kommerFra))
     }
 
     @Test

@@ -38,7 +38,7 @@ internal class Refusjonshistorikk {
     }
 
     internal class Refusjon(
-        internal val meldingsreferanseId: UUID,
+        private val meldingsreferanseId: UUID,
         private val førsteFraværsdag: LocalDate?,
         private val arbeidsgiverperioder: List<Periode>,
         private val beløp: Inntekt?,
@@ -46,9 +46,13 @@ internal class Refusjonshistorikk {
         private val endringerIRefusjon: List<EndringIRefusjon>,
         private val tidsstempel: LocalDateTime = LocalDateTime.now()
     ) {
+        private fun muligDuplikat(other: Refusjon) =
+            this.meldingsreferanseId == other.meldingsreferanseId && this.utledetFørsteFraværsdag() == other.utledetFørsteFraværsdag()
+
         internal companion object {
             internal fun MutableList<Refusjon>.leggTilRefusjon(refusjon: Refusjon) {
-                if (refusjon.meldingsreferanseId !in map { it.meldingsreferanseId }) add(refusjon)
+                if (any { eksisterende -> eksisterende.muligDuplikat(refusjon) }) return
+                add(refusjon)
             }
 
             private fun Refusjon.utledetFørsteFraværsdag() = førsteFraværsdag ?: arbeidsgiverperioder.maxOf { it.start }

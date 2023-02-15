@@ -104,6 +104,22 @@ class Refusjonsopplysning(
         private val validerteRefusjonsopplysninger = validerteRefusjonsopplysninger(refusjonsopplysninger)
         internal constructor(): this(emptyList())
 
+        internal fun lagreTidsnær(førsteFraværsdag: LocalDate, refusjonshistorikk: Refusjonshistorikk) {
+            if (validerteRefusjonsopplysninger.isEmpty()) return
+            val sorterteOpplysninger = this.validerteRefusjonsopplysninger.sortedBy { it.fom }
+            val første = sorterteOpplysninger.first()
+            val sisteRefusjonsdag = sorterteOpplysninger.last().tom
+            val endringerIRefusjon = sorterteOpplysninger.map { refusjonsopplysning ->
+                Refusjonshistorikk.Refusjon.EndringIRefusjon(
+                    endringsdato = refusjonsopplysning.fom,
+                    beløp = refusjonsopplysning.beløp
+                )
+            }
+
+            val refusjon = Refusjonshistorikk.Refusjon(første.meldingsreferanseId, førsteFraværsdag, emptyList(), første.beløp, sisteRefusjonsdag, endringerIRefusjon)
+            refusjonshistorikk.leggTilRefusjon(refusjon)
+        }
+
         internal fun accept(visitor: RefusjonsopplysningerVisitor) {
             visitor.preVisitRefusjonsopplysninger(this)
             validerteRefusjonsopplysninger.forEach { it.accept(visitor) }
@@ -117,13 +133,13 @@ class Refusjonsopplysning(
             check(!merged.overlapper()) { "Refusjonsopplysninger skal ikke kunne inneholde overlappende informasjon etter merge. $merged" }
             return merged
         }
-
         internal fun merge(other: Refusjonsopplysninger): Refusjonsopplysninger {
             val nyeRefusjonsopplysninger = this - other
             if (nyeRefusjonsopplysninger.validerteRefusjonsopplysninger.isEmpty()) return this // Ingen endring
             return Refusjonsopplysninger(validerteRefusjonsopplysninger.merge(nyeRefusjonsopplysninger.validerteRefusjonsopplysninger))
         }
         private fun funksjoneltInneholder(other: Refusjonsopplysning) = validerteRefusjonsopplysninger.any { it.funksjoneltLik(other) }
+
         internal operator fun minus(other: Refusjonsopplysninger) =
             Refusjonsopplysninger(other.validerteRefusjonsopplysninger.filterNot { funksjoneltInneholder(it) })
 
@@ -162,10 +178,9 @@ class Refusjonsopplysning(
             hendelse: IAktivitetslogg,
             organisasjonsnummer: String
         ) = hensyntattSisteOppholdagFørUtbetalingsdager(sisteOppholdsdagFørUtbetalingsdager).harNødvendigRefusjonsopplysninger(skjæringstidspunkt, utbetalingsdager, hendelse, organisasjonsnummer)
-
         internal fun refusjonsbeløpOrNull(dag: LocalDate) = validerteRefusjonsopplysninger.singleOrNull { it.dekker(dag) }?.beløp
-        private fun førsteRefusjonsopplysning() = validerteRefusjonsopplysninger.minByOrNull { it.fom }
 
+        private fun førsteRefusjonsopplysning() = validerteRefusjonsopplysninger.minByOrNull { it.fom }
         internal fun refusjonsbeløp(skjæringstidspunkt: LocalDate, dag: LocalDate, manglerRefusjonsopplysning: ManglerRefusjonsopplysning): Inntekt {
             val lagretRefusjonsbeløp = refusjonsbeløpOrNull(dag)
             if (lagretRefusjonsbeløp != null) return lagretRefusjonsbeløp
@@ -179,6 +194,7 @@ class Refusjonsopplysning(
                 manglerRefusjonsopplysning(dag, benyttetRefusjonsbeløp)
             }
         }
+
         private fun dekker(dag: LocalDate) = validerteRefusjonsopplysninger.any { it.dekker(dag) }
 
         // finner første dato hvor refusjonsbeløpet for dagen er ulikt beløpet i forrige versjon

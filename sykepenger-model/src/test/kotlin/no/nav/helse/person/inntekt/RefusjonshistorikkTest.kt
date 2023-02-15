@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
@@ -56,16 +57,30 @@ internal class RefusjonshistorikkTest {
     }
 
     @Test
-    fun `legger ikke til refusjon for samme inntektsmelding flere ganger`() {
+    fun `legger ikke til refusjon for samme inntektsmelding på samme dato flere ganger`() {
         val meldingsreferanseId = UUID.randomUUID()
-        val refusjon1 = refusjon(1.januar til 16.januar, meldingsreferanseId = meldingsreferanseId)
-        // I praksis vil ikke arbeidsgiverperioden være noe annet, men vi har satt den for å validere duplikatsjekk
-        val refusjon2 = refusjon(1.mars til 16.mars, meldingsreferanseId = meldingsreferanseId)
+        val refusjon1 = refusjon(1.januar til 16.januar, førsteFraværsdag = 16.januar, meldingsreferanseId = meldingsreferanseId)
+        val refusjon2 = refusjon(1.januar til 16.januar, førsteFraværsdag = 16.januar, meldingsreferanseId = meldingsreferanseId)
         val refusjonshistorikk = Refusjonshistorikk()
         refusjonshistorikk.leggTilRefusjon(refusjon1)
         refusjonshistorikk.leggTilRefusjon(refusjon2)
+        assertEquals(1, refusjonshistorikk.inspektør.antall)
         assertSame(refusjon1, refusjonshistorikk.finnRefusjon(1.januar til 31.januar, aktivitetslogg = Aktivitetslogg()))
         assertNull(refusjonshistorikk.finnRefusjon(1.mars til 20.mars, aktivitetslogg = Aktivitetslogg()))
+    }
+
+    @Test
+    fun `legger til refusjon for samme inntektsmelding med ulik dato flere ganger`() {
+        val meldingsreferanseId = UUID.randomUUID()
+        val refusjon1 = refusjon(1.januar til 16.januar, førsteFraværsdag = 16.januar, meldingsreferanseId = meldingsreferanseId)
+        // I praksis vil ikke arbeidsgiverperioden være noe annet, men vi har satt den for å validere duplikatsjekk
+        val refusjon2 = refusjon(1.januar til 16.januar, førsteFraværsdag = 17.januar, meldingsreferanseId = meldingsreferanseId)
+        val refusjonshistorikk = Refusjonshistorikk()
+        refusjonshistorikk.leggTilRefusjon(refusjon1)
+        refusjonshistorikk.leggTilRefusjon(refusjon2)
+        assertEquals(2, refusjonshistorikk.inspektør.antall)
+        assertNotSame(refusjon1, refusjonshistorikk.finnRefusjon(1.januar til 31.januar, aktivitetslogg = Aktivitetslogg()))
+        assertNotNull(refusjonshistorikk.finnRefusjon(17.januar til 31.januar, aktivitetslogg = Aktivitetslogg()))
     }
 
     @Test

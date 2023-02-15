@@ -62,6 +62,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -890,6 +891,20 @@ internal class Arbeidsgiver private constructor(
         return inntektsmeldingInfo.opprett(skjæringstidspunkt, inntektsmelding)
     }
 
+    internal fun lagreTidsnærInntektsmelding(
+        skjæringstidspunkt: LocalDate,
+        orgnummer: String,
+        inntektsmelding: no.nav.helse.person.inntekt.Inntektsmelding,
+        refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger
+    ) {
+        if (this.organisasjonsnummer != orgnummer) return
+        val nyFørsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
+        if (nyFørsteFraværsdag == null) return
+        inntektshistorikk.leggTil(inntektsmelding.kopierTidsnærOpplysning(nyFørsteFraværsdag))
+        // TODO: lagre refusjonsopplysninger inni inntektsmelding-opplysningen?
+        refusjonsopplysninger.lagreTidsnær(nyFørsteFraværsdag, refusjonshistorikk)
+    }
+
     private fun søppelbøtte(hendelse: IAktivitetslogg, filter: VedtaksperiodeFilter) {
         hendelse.kontekst(this)
         val perioder = vedtaksperioder
@@ -1070,12 +1085,6 @@ internal class Arbeidsgiver private constructor(
 
 
     fun vedtaksperioderEtter(dato: LocalDate) = vedtaksperioder.filter { it.slutterEtter(dato) }
-    fun lagreTidsnærInntektsmelding(skjæringstidspunkt: LocalDate, orgnummer: String, inntektsmelding: no.nav.helse.person.inntekt.Inntektsmelding) {
-        if (this.organisasjonsnummer != orgnummer) return
-        val nyFørsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
-        if (nyFørsteFraværsdag == null) return
-        inntektshistorikk.leggTil(inntektsmelding.kopierTidsnærOpplysning(nyFørsteFraværsdag))
-    }
 
     internal class JsonRestorer private constructor() {
         internal companion object {

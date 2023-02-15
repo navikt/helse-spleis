@@ -207,8 +207,8 @@ class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.lagreTidsnæreInntekter(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver) {
             this.forEach {
-                when(it.inntektsopplysning) {
-                    is Inntektsmelding -> arbeidsgiver.lagreTidsnærInntektsmelding(skjæringstidspunkt, it.orgnummer, it.inntektsopplysning)
+                when (it.inntektsopplysning) {
+                    is Inntektsmelding -> arbeidsgiver.lagreTidsnærInntektsmelding(skjæringstidspunkt, it.orgnummer, it.inntektsopplysning, it.refusjonsopplysninger)
                 }
             }
         }
