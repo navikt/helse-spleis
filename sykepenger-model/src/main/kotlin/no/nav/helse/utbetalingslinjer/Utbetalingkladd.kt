@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.periode
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
@@ -53,7 +54,7 @@ internal class Utbetalingkladd(
 
     internal fun begrensTil(other: Periode): Utbetalingkladd {
         return Utbetalingkladd(
-            periode = periode.subset(LocalDate.MIN til other.endInclusive),
+            periode = periode.oppdaterFom(other).subset(LocalDate.MIN til other.endInclusive),
             arbeidsgiveroppdrag = this.arbeidsgiveroppdrag.begrensTil(other.endInclusive),
             personoppdrag = this.personoppdrag.begrensTil(other.endInclusive)
         )
@@ -103,7 +104,12 @@ internal class Utbetalingkladd(
     internal companion object {
         internal fun List<Utbetalingkladd>.finnKladd(periode: Periode): List<Utbetalingkladd> {
             val kladdene = filter { kladd -> kladd.overlapperMed(periode) }
-            val medUtbetaling = kladdene.filter { kladd -> kladd.arbeidsgiveroppdrag.isNotEmpty() || kladd.personoppdrag.isNotEmpty() }
+            val medUtbetaling = kladdene
+                .filter { kladd -> kladd.arbeidsgiveroppdrag.isNotEmpty() || kladd.personoppdrag.isNotEmpty() }
+                .filter { kladd ->
+                    val oppdragsperiode = periode(kladd.arbeidsgiveroppdrag, kladd.personoppdrag)
+                    oppdragsperiode != null && oppdragsperiode.overlapperMed(periode)
+                }
             if (kladdene.size <= 1 || medUtbetaling.isEmpty()) return kladdene.take(1)
             return medUtbetaling
         }
