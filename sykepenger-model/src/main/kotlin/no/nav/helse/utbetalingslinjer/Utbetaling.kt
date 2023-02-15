@@ -87,7 +87,6 @@ class Utbetaling private constructor(
         null
     )
 
-    private val oppdragsperiode = Oppdrag.periode(arbeidsgiverOppdrag, personOppdrag)
     private val stønadsdager get() = Oppdrag.stønadsdager(arbeidsgiverOppdrag, personOppdrag)
     private val observers = mutableSetOf<UtbetalingObserver>()
     private var forrigeHendelse: IAktivitetslogg? = null
