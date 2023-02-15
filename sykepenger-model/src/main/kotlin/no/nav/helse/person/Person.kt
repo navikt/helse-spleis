@@ -378,23 +378,13 @@ class Person private constructor(
     }
 
     internal fun arbeidsgiverperiodeFor(
-        organisasjonsnummer: String,
-        sykdomshistorikkId: UUID
-    ): List<Arbeidsgiverperiode>? {
-        return infotrygdhistorikk.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomshistorikkId)
-    }
-
-    internal fun arbeidsgiverperiodeFor(
         orgnummer: String,
-        sykdomshistorikkId: UUID,
         sykdomstidslinje: Sykdomstidslinje,
         subsumsjonObserver: SubsumsjonObserver
     ): List<Arbeidsgiverperiode> {
         val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
         infotrygdhistorikk.build(orgnummer, sykdomstidslinje, periodebuilder, subsumsjonObserver)
-        return periodebuilder.result().also {
-            infotrygdhistorikk.lagreResultat(orgnummer, sykdomshistorikkId, it)
-        }
+        return periodebuilder.result()
     }
 
     private fun arbeidsgiverUtbetalinger(

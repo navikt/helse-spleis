@@ -54,12 +54,17 @@ internal class ForkastetVedtaksperiode(
 
         internal fun arbeidsgiverperiodeFor(
             person: Person,
-            sykdomshistorikkId: UUID,
             forkastede: List<ForkastetVedtaksperiode>,
             organisasjonsnummer: String,
             sykdomstidslinje: Sykdomstidslinje,
             subsumsjonObserver: SubsumsjonObserver
-        ): List<Arbeidsgiverperiode> = Vedtaksperiode.arbeidsgiverperiodeFor(person, sykdomshistorikkId, forkastede.perioder(), organisasjonsnummer, sykdomstidslinje, subsumsjonObserver)
+        ): List<Arbeidsgiverperiode> = Vedtaksperiode.arbeidsgiverperiodeFor(
+            person,
+            forkastede.perioder(),
+            organisasjonsnummer,
+            sykdomstidslinje,
+            subsumsjonObserver
+        )
 
         internal fun sjekkOmOverlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, inntektsmelding: Inntektsmelding) =
             Vedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede.perioder(), inntektsmelding)

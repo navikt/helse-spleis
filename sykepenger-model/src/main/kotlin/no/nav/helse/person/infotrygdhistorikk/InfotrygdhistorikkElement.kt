@@ -86,16 +86,6 @@ class InfotrygdhistorikkElement private constructor(
         )
     }
 
-    private val arbeidsgiverperiodecache = mutableMapOf<String, MutableMap<UUID, List<Arbeidsgiverperiode>>>()
-    internal fun arbeidsgiverperiodeFor(organisasjonsnummer: String, sykdomshistorikkId: UUID): List<Arbeidsgiverperiode>? {
-        val innslag = arbeidsgiverperiodecache[organisasjonsnummer] ?: return null
-        return innslag[sykdomshistorikkId]
-    }
-
-    internal fun lagreResultat(organisasjonsnummer: String, sykdomshistorikkId: UUID, resultat: List<Arbeidsgiverperiode>) {
-        arbeidsgiverperiodecache.getOrPut(organisasjonsnummer) { mutableMapOf() }[sykdomshistorikkId] = resultat
-    }
-
     internal fun build(organisasjonsnummer: String, sykdomstidslinje: Sykdomstidslinje, teller: Arbeidsgiverperiodeteller, builder: SykdomstidslinjeVisitor) {
         val dekoratør = Infotrygddekoratør(teller, builder, perioder.filterIsInstance<Utbetalingsperiode>().filter { it.gjelder(organisasjonsnummer) })
         historikkFor(organisasjonsnummer, sykdomstidslinje).accept(dekoratør)

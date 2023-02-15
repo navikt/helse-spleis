@@ -111,16 +111,6 @@ internal class Infotrygdhistorikk private constructor(
         visitor.postVisitInfotrygdhistorikk()
     }
 
-    internal fun arbeidsgiverperiodeFor(organisasjonsnummer: String, sykdomshistorikkId: UUID): List<Arbeidsgiverperiode>? {
-        if (!harHistorikk()) return null
-        return siste.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomshistorikkId)
-    }
-
-    internal fun lagreResultat(organisasjonsnummer: String, sykdomshistorikkId: UUID, resultat: List<Arbeidsgiverperiode>) {
-        if (!harHistorikk()) return
-        return siste.lagreResultat(organisasjonsnummer, sykdomshistorikkId, resultat)
-    }
-
     internal fun build(
         organisasjonsnummer: String,
         sykdomstidslinje: Sykdomstidslinje,

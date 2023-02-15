@@ -2334,7 +2334,6 @@ internal class Vedtaksperiode private constructor(
 
         internal fun arbeidsgiverperiodeFor(
             person: Person,
-            sykdomshistorikkId: UUID,
             perioder: List<Vedtaksperiode>,
             organisasjonsnummer: String,
             sykdomstidslinje: Sykdomstidslinje,
@@ -2344,7 +2343,6 @@ internal class Vedtaksperiode private constructor(
                 Sykdomstidslinje.gammelTidslinje(perioder.map { it.sykdomstidslinje }).merge(sykdomstidslinje, replace)
             return person.arbeidsgiverperiodeFor(
                 organisasjonsnummer,
-                sykdomshistorikkId,
                 samletSykdomstidslinje,
                 subsumsjonObserver
             )

@@ -823,15 +823,13 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun arbeidsgiverperiode(periode: Periode, subsumsjonObserver: SubsumsjonObserver): Arbeidsgiverperiode? {
-        val arbeidsgiverperioder = person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomshistorikk.nyesteId()) ?:
-            ForkastetVedtaksperiode.arbeidsgiverperiodeFor(
-                person,
-                sykdomshistorikk.nyesteId(),
-                forkastede,
-                organisasjonsnummer,
-                sykdomstidslinje(),
-                subsumsjonObserver
-            )
+        val arbeidsgiverperioder = ForkastetVedtaksperiode.arbeidsgiverperiodeFor(
+            person,
+            forkastede,
+            organisasjonsnummer,
+            sykdomstidslinje(),
+            subsumsjonObserver
+        )
         return arbeidsgiverperioder.finn(periode)
     }
 
