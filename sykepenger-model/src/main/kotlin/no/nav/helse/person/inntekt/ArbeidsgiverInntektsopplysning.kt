@@ -1,12 +1,12 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
+import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.VedtakFattetBuilder
-import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.valider
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.validerStartdato
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
@@ -205,10 +205,10 @@ class ArbeidsgiverInntektsopplysning(
             return endringsDatoer.minOrNull() ?: skjæringstidspunkt
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.lagreTidsnæreInntekter(skjæringstidspunkt: LocalDate, arbeidsgivere: List<Arbeidsgiver>) {
+        internal fun List<ArbeidsgiverInntektsopplysning>.lagreTidsnæreInntekter(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver) {
             this.forEach {
                 when(it.inntektsopplysning) {
-                    is Inntektsmelding -> arbeidsgivere.forEach { arbeidsgiver -> arbeidsgiver.lagreTidsnærInntektsmelding(skjæringstidspunkt, it.orgnummer, it.inntektsopplysning) }
+                    is Inntektsmelding -> arbeidsgiver.lagreTidsnærInntektsmelding(skjæringstidspunkt, it.orgnummer, it.inntektsopplysning)
                 }
             }
         }

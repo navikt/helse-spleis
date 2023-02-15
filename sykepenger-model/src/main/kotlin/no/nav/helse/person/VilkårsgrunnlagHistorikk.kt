@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -17,7 +18,6 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_16
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_11
 import no.nav.helse.person.builders.VedtakFattetBuilder
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.ManglerRefusjonsopplysning
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
@@ -314,8 +314,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun inntekt(organisasjonsnummer: String): Inntekt? =
             sykepengegrunnlag.inntekt(organisasjonsnummer)
 
-        internal fun lagreTidsnæreInntekter(skjæringstidspunkt: LocalDate, arbeidsgivere: List<Arbeidsgiver>) {
-            sykepengegrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgivere)
+        internal fun lagreTidsnæreInntekter(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver) {
+            sykepengegrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver)
         }
 
         internal companion object {

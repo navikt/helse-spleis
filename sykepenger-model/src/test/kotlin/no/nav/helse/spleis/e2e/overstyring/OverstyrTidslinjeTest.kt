@@ -1,13 +1,15 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
-import no.nav.helse.assertForventetFeil
+import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -30,6 +32,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -56,6 +59,7 @@ import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -72,7 +76,6 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     fun `vedtaksperiode strekker seg tilbake og endrer skjæringstidspunktet`() {
         tilGodkjenning(10.januar, 31.januar, a1)
         val vilkårsgrunnlagFørEndring = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!
-        val inntektsopplysningerFørEndring = vilkårsgrunnlagFørEndring.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a1]!!
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(
             ManuellOverskrivingDag(9.januar, Dagtype.Sykedag, 100)
@@ -87,13 +90,8 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntekt = 20000.månedlig)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         val vilkårsgrunnlagEtterEndring = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!
-        val inntektsopplysningerEtterEndring = vilkårsgrunnlagEtterEndring.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a1]!!
 
-        assertEquals(inntektsopplysningerEtterEndring.inspektør.inntektsopplysning.inspektør.hendelseId, inntektsopplysningerFørEndring.inspektør.inntektsopplysning.inspektør.hendelseId)
-        assertEquals(inntektsopplysningerEtterEndring.inspektør.inntektsopplysning.inspektør.beløp, inntektsopplysningerFørEndring.inspektør.inntektsopplysning.inspektør.beløp)
-        assertEquals(inntektsopplysningerEtterEndring.inspektør.inntektsopplysning.inspektør.tidsstempel, inntektsopplysningerFørEndring.inspektør.inntektsopplysning.inspektør.tidsstempel)
-        assertEquals(Inntektsmelding::class, inntektsopplysningerEtterEndring.inspektør.inntektsopplysning::class)
-
+        assertTidsnærInntektsopplysning(a1, vilkårsgrunnlagFørEndring.inspektør.sykepengegrunnlag, vilkårsgrunnlagEtterEndring.inspektør.sykepengegrunnlag)
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 
@@ -145,33 +143,86 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 9.januar, a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         tilGodkjenning(10.januar, 31.januar, a1) // 1. jan - 9. jan blir omgjort til arbeidsdager ved innsending av IM her
+        val sykepengegrunnlagFør = inspektør(a1).vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.sykepengegrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
         nullstillTilstandsendringer()
         // Saksbehandler korrigerer; 9.januar var vedkommende syk likevel
         håndterOverstyrTidslinje(listOf(
             ManuellOverskrivingDag(9.januar, Dagtype.Sykedag, 100)
         ), orgnummer = a1)
 
-        val dagen = inspektør.sykdomstidslinje[9.januar]
-        assertEquals(Dag.Sykedag::class, dagen::class)
-        assertTrue(dagen.kommerFra(OverstyrTidslinje::class))
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, orgnummer = a1, inntekt = 20000.månedlig)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
-        assertForventetFeil(
-            forklaring = "skjæringstidspunktet endres fra 10.jan til 9.jan, som gjør at vi også står uten inntekt",
-            nå = {
-              assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
-            },
-            ønsket = {
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
-                håndterVilkårsgrunnlag(2.vedtaksperiode, orgnummer = a1, inntekt = 20000.månedlig)
-                håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        assertSykdomstidslinjedag(9.januar, Dag.Sykedag::class, OverstyrTidslinje::class)
+        val sykepengegrunnlagEtter = inspektør(a1).vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.sykepengegrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+        assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
 
-                assertEquals(1.januar til 9.januar, inspektør.periode(1.vedtaksperiode))
-                assertEquals(10.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
+        assertEquals(1.januar til 9.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(10.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
 
-                assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
-            }
-        )
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+    }
+
+    @Test
+    fun `endrer skjæringstidspunkt på sykefraværstilfelle etter - endrer ikke dato for inntekter`() {
+        håndterSøknad(Sykdom(1.januar, 9.januar, 100.prosent), Arbeid(1.januar, 9.januar), orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
+        håndterSøknad(Sykdom(15.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(listOf(15.januar til 29.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(10.januar til 25.januar), orgnummer = a2)
+
+        val inntektsvurdering = Inntektsvurdering(
+            inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt INNTEKT
+                }
+            })
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = inntektsvurdering, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+
+        nullstillTilstandsendringer()
+
+        val sykepengegrunnlagFør = inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+
+        // Saksbehandler korrigerer; 9.januar var vedkommende syk likevel
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(9.januar, Dagtype.Sykedag, 100)
+        ), orgnummer = a1)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = inntektsvurdering, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+
+        assertSykdomstidslinjedag(9.januar, Dag.Sykedag::class, OverstyrTidslinje::class)
+
+        val sykepengegrunnlagEtter = inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+
+        assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
+        assertTidsnærInntektsopplysning(a2, sykepengegrunnlagFør, sykepengegrunnlagEtter)
+
+        assertEquals(1.januar til 9.januar, inspektør(a1).periode(1.vedtaksperiode))
+        assertEquals(15.januar til 31.januar, inspektør(a1).periode(2.vedtaksperiode))
+        assertEquals(10.januar til 31.januar, inspektør(a2).periode(1.vedtaksperiode))
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, orgnummer = a2)
+    }
+
+    private fun assertTidsnærInntektsopplysning(orgnummer: String, sykepengegrunnlagFør: Sykepengegrunnlag, sykepengegrunnlagEtter: Sykepengegrunnlag) {
+        val inntektsopplysningerFørEndring = sykepengegrunnlagFør.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(orgnummer)
+        val inntektsopplysningerEtterEndring = sykepengegrunnlagEtter.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(orgnummer)
+
+        assertEquals(inntektsopplysningerEtterEndring.inspektør.inntektsopplysning.inspektør.hendelseId, inntektsopplysningerFørEndring.inspektør.inntektsopplysning.inspektør.hendelseId)
+        assertEquals(inntektsopplysningerEtterEndring.inspektør.inntektsopplysning.inspektør.beløp, inntektsopplysningerFørEndring.inspektør.inntektsopplysning.inspektør.beløp)
+        assertEquals(inntektsopplysningerEtterEndring.inspektør.inntektsopplysning.inspektør.tidsstempel, inntektsopplysningerFørEndring.inspektør.inntektsopplysning.inspektør.tidsstempel)
+        assertEquals(Inntektsmelding::class, inntektsopplysningerEtterEndring.inspektør.inntektsopplysning::class)
     }
 
     @Test

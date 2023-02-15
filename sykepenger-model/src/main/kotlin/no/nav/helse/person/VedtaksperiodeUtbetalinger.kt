@@ -22,6 +22,7 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
 
     private val utbetalingene get() = utbetalinger.map(Pair<*, Utbetaling>::second)
     private val utbetalinger = utbetalinger.toMutableList()
+    private val sisteVilkårsgrunnlag get() = utbetalinger.lastOrNull()?.first
     private val siste get() = utbetalinger.lastOrNull()?.second
 
     internal fun accept(visitor: VedtaksperiodeUtbetalingVisitor) {
@@ -53,6 +54,12 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
     internal fun hørerIkkeSammenMed(other: Utbetaling) = utbetalinger.lastOrNull { (_, utbetaling) -> utbetaling.gyldig() }?.second?.hørerSammen(other) == false
     internal fun hørerIkkeSammenMed(other: VedtaksperiodeUtbetalinger) = other.siste != null && hørerIkkeSammenMed(other.siste!!)
     internal fun gjelderIkkeFor(hendelse: UtbetalingHendelse) = siste?.gjelderFor(hendelse.utbetalingport()) != true
+
+    internal fun lagreTidsnæreInntekter(arbeidsgiver: Arbeidsgiver, skjæringstidspunkt: LocalDate) {
+        val forrige = sisteVilkårsgrunnlag ?: return
+        forrige.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver)
+    }
+
     internal fun gjelderIkkeFor(hendelse: Utbetalingsgodkjenning) = siste?.gjelderFor(hendelse.utbetalingport()) != true
 
     internal fun erHistorikkEndretSidenBeregning(infotrygdhistorikk: Infotrygdhistorikk) =
@@ -134,8 +141,8 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
     }
 
     internal fun valider(simulering: Simulering) = siste!!.valider(simulering.utbetalingport())
-
     internal fun erKlarForGodkjenning() = siste!!.erKlarForGodkjenning()
+
     internal fun simuler(hendelse: IAktivitetslogg) = siste!!.simuler(hendelse)
 
     internal fun godkjenning(
