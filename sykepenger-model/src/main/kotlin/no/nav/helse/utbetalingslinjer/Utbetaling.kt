@@ -36,7 +36,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-// Understands related payment activities for an Arbeidsgiver
 class Utbetaling private constructor(
     private val id: UUID,
     private val korrelasjonsId: UUID,
