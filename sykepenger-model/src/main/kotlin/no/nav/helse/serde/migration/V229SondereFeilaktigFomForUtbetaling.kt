@@ -9,7 +9,7 @@ import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.til
 import org.slf4j.LoggerFactory
 
-internal class V228SondereFeilaktigFomForUtbetaling: JsonMigration(228) {
+internal class V229SondereFeilaktigFomForUtbetaling: JsonMigration(229) {
 
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -40,15 +40,16 @@ internal class V228SondereFeilaktigFomForUtbetaling: JsonMigration(228) {
                         val personoppdrag = oppdragsperiode(utbetaling.path("personOppdrag"))
                         val oppdragsperiode = listOfNotNull(arbeidsgiveroppdrag, personoppdrag)?.periode()
 
-                        if (utbetalingensFom != utbetalingstidslinjeSisteUkjentDag) {
-                            sikkerlogg.info("utbetaling {} for {} har ulik fom enn siste ukjente dag. " +
-                                    "Utbetalingens fom er ${if (utbetalingensFom < utbetalingstidslinjeSisteUkjentDag) "eldre" else "nyere"}. " +
-                                    "Vi mener $utbetalingstidslinjeSisteUkjentDag er mer riktig enn $utbetalingensFom. " +
-                                    "Oppdragene har tidligste linje ${oppdragsperiode?.start}. " +
-                                    "${if (oppdragsperiode != null && oppdragsperiode.start > utbetalingstidslinjeSisteUkjentDag) "Linjene starter etter kalkulert fom" else "Linjene starter før kalkulert fom"}",
-                                keyValue("utbetalingId", utbetalingId),
-                                keyValue("aktørId", aktørId)
-                            )
+                        if (utbetalingensFom < utbetalingstidslinjeSisteUkjentDag) {
+                            if (oppdragsperiode == null || oppdragsperiode.start >= utbetalingstidslinjeSisteUkjentDag) {
+                                sikkerlogg.info("[V229] utbetaling {}-{} for {} har ulik fom enn siste ukjente dag. " +
+                                        "Vi mener $utbetalingstidslinjeSisteUkjentDag er mer riktig enn $utbetalingensFom. " +
+                                        "Oppdragene har tidligste linje ${oppdragsperiode?.start}. ",
+                                    keyValue("utbetalingId", utbetalingId),
+                                    keyValue("status", utbetaling.path("status").asText()),
+                                    keyValue("aktørId", aktørId)
+                                )
+                            }
                         }
                     }
                 }
