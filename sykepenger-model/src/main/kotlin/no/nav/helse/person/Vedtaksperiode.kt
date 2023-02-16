@@ -409,6 +409,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun påvirkerArbeidsgiverperioden(ny: Vedtaksperiode): Boolean {
+        if (Toggle.OutOfOrderInnenfor18Dager.enabled) return false
         val dagerMellom = ny.periode.periodeMellom(this.periode.start)?.count() ?: return false
         // dersom "ny" slutter på en fredag, så starter ikke oppholdstelling før påfølgende mandag.
         // det kan derfor være mer enn 16 dager avstand mellom periodene, og arbeidsgiverperioden kan være den samme
