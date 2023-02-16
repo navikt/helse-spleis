@@ -405,7 +405,7 @@ internal class Vedtaksperiode private constructor(
         // Vi er litt strengere etter perioden er utbetalt
 
         if (this.påvirkerArbeidsgiverperioden(ny)) return hendelse.funksjonellFeil(`Mottatt søknad out of order innenfor 18 dager`)
-        if (ny.periode.erRettFør(this.periode)) return hendelse.funksjonellFeil(`Mottatt søknad out of order`)
+        if (Toggle.OutOfOrderPåvirkerSkjæringstidspunkt.disabled && ny.periode.erRettFør(this.periode)) return hendelse.funksjonellFeil(`Mottatt søknad out of order`)
     }
 
     private fun påvirkerArbeidsgiverperioden(ny: Vedtaksperiode): Boolean {

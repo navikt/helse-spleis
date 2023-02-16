@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
 import no.nav.helse.Toggle
+import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
@@ -108,41 +109,47 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `out of order periode i helg mellom to andre perioder`() {
+    fun `out of order periode i helg mellom to andre perioder`() = listOf(Toggle.OutOfOrderInnenfor18Dager, Toggle.OutOfOrderPåvirkerSkjæringstidspunkt).enable {
         nyttVedtak(1.januar, 26.januar)
         forlengVedtak(29.januar, 11.februar)
         nullstillTilstandsendringer()
         nyPeriode(27.januar til 28.januar)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt()
+        håndterYtelser(2.vedtaksperiode)
 
-        assertForventetFeil(
-            nå = {
-                assertFunksjonellFeil(`Mottatt søknad out of order`, 2.vedtaksperiode.filter())
-                assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
-            },
-            ønsket = {
-                håndterYtelser(3.vedtaksperiode)
+        val andreUtbetaling = inspektør.utbetaling(1).inspektør
+        val outOfOrderUtbetaling = inspektør.utbetaling(2).inspektør
+        val revurderingutbetaling = inspektør.utbetaling(3).inspektør
 
-                val andreUtbetaling = inspektør.utbetaling(1).inspektør
-                val outOfOrderUtbetaling = inspektør.utbetaling(2).inspektør
+        assertEquals(andreUtbetaling.korrelasjonsId, outOfOrderUtbetaling.korrelasjonsId)
+        assertEquals(revurderingutbetaling.korrelasjonsId, outOfOrderUtbetaling.korrelasjonsId)
+        val arbeidsgiverOppdrag = outOfOrderUtbetaling.arbeidsgiverOppdrag
+        assertEquals(1, arbeidsgiverOppdrag.size)
+        arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(NY, linje.endringskode)
+            assertEquals(17.januar, linje.fom)
+            assertEquals(9.februar, linje.tom)
+            assertEquals(3, linje.delytelseId)
+            assertEquals(2, linje.refDelytelseId)
+            assertNull(linje.datoStatusFom)
+        }
+        assertEquals(1, revurderingutbetaling.arbeidsgiverOppdrag.size)
+        assertEquals(0, revurderingutbetaling.personOppdrag.size)
+        revurderingutbetaling.arbeidsgiverOppdrag.single().inspektør.also { linje ->
+            assertEquals(UEND, linje.endringskode)
+            assertEquals(17.januar, linje.fom)
+            assertEquals(9.februar, linje.tom)
+            assertEquals(3, linje.delytelseId)
+            assertEquals(2, linje.refDelytelseId)
+            assertNull(linje.datoStatusFom)
+        }
 
-                assertEquals(andreUtbetaling.korrelasjonsId, outOfOrderUtbetaling.korrelasjonsId)
-                val arbeidsgiverOppdrag = outOfOrderUtbetaling.arbeidsgiverOppdrag
-                assertEquals(1, arbeidsgiverOppdrag.size)
-                arbeidsgiverOppdrag[0].inspektør.also { linje ->
-                    assertEquals(NY, linje.endringskode)
-                    assertEquals(17.januar, linje.fom)
-                    assertEquals(26.januar, linje.tom)
-                    assertEquals(3, linje.delytelseId)
-                    assertEquals(2, linje.refDelytelseId)
-                    assertNull(linje.datoStatusFom)
-                }
-
-                assertTilstander(1.vedtaksperiode, AVSLUTTET)
-                assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-                assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
-
-            }
-        )
+        assertTilstander(1.vedtaksperiode, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
     }
 
     @Test
