@@ -1345,6 +1345,10 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk.valider(ytelser, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer())
             ytelser.valider(periode, skjæringstidspunkt)
         }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
+            vedtaksperiode.revurderTidslinje(hendelse)
+        }
     }
 
     internal object AvventerVilkårsprøvingRevurdering : Vedtaksperiodetilstand {

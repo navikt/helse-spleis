@@ -278,7 +278,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
     }
 
     @Test
-    fun `overstyr utkast til revurdering flere ag - kan ikke overstyre periode i én ag dersom annen ag er revurdert ferdig`() {
+    fun `overstyr utkast til revurdering flere ag - kan overstyre periode i én ag dersom annen ag er revurdert ferdig`() {
         nyeVedtak(1.januar, 31.januar, AG1, AG2)
         forlengVedtak(1.februar, 28.februar, AG1, AG2)
         nullstillTilstandsendringer()
@@ -307,7 +307,8 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
+                AVVENTER_REVURDERING
             )
         }
         inspektør(AG2) {
@@ -315,11 +316,16 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING
             )
             assertTilstander(
                 2.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING
