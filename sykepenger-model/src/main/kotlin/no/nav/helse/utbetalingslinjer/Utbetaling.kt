@@ -336,7 +336,7 @@ class Utbetaling private constructor(
         internal fun List<Utbetaling>.aktive(periode: Periode) = this
             .aktive()
             .filter { utbetaling ->
-                utbetaling.periode.overlapperMed(periode)
+                utbetaling.periode.overlapperMed(periode) || utbetaling.periode.erRettFør(periode.start)
             }
         private fun List<Utbetaling>.grupperUtbetalinger(filter: (Utbetaling) -> Boolean) =
             this.groupBy { it.korrelasjonsId }

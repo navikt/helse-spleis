@@ -369,17 +369,8 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
         assertEquals(1.januar til 31.januar, revurdering.periode)
 
-        assertForventetFeil(
-            forklaring = "vi lager ny utbetaling, burde nok ikke gjort det",
-            nå = {
-                assertNotEquals(førsteUtbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
-                assertEquals(1.februar til 28.februar, februarutbetaling.periode)
-            },
-            ønsket = {
-                assertEquals(førsteUtbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
-                assertEquals(1.januar til 28.februar, februarutbetaling.periode)
-            }
-        )
+        assertEquals(førsteUtbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
+        assertEquals(1.januar til 28.februar, februarutbetaling.periode)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING,
