@@ -14,7 +14,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 
-internal class Arbeidsgiverperiode private constructor(internal val perioder: List<Periode>, førsteUtbetalingsdag: LocalDate?) : Iterable<LocalDate>, Comparable<LocalDate> {
+internal class Arbeidsgiverperiode private constructor(private val perioder: List<Periode>, førsteUtbetalingsdag: LocalDate?) : Iterable<LocalDate>, Comparable<LocalDate> {
     constructor(perioder: List<Periode>) : this(perioder, null)
 
     private val kjenteDager = mutableListOf<Periode>()
@@ -141,7 +141,7 @@ internal class Arbeidsgiverperiode private constructor(internal val perioder: Li
         ) =
             arbeidsgiverperiode?.forventerInntekt(periode, sykdomstidslinje, subsumsjonObserver) ?: false
 
-        internal fun List<Arbeidsgiverperiode>.finn(periode: Periode) = firstOrNull { arbeidsgiverperiode ->
+        internal fun List<Arbeidsgiverperiode>.finn(periode: Periode) = lastOrNull { arbeidsgiverperiode ->
             periode in arbeidsgiverperiode
         }
 

@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
@@ -494,7 +495,7 @@ internal class TestArbeidsgiverInspektør(
     internal fun sykmeldingsperioder() = sykmeldingsperioder.toList()
 
     internal fun arbeidsgiverperioden(vedtaksperiodeIdInnhenter: IdInnhenter) = periode(vedtaksperiodeIdInnhenter).let { arbeidsgiver.arbeidsgiverperiode(it, NullObserver) }
-    internal fun arbeidsgiverperioder(vedtaksperiodeIdInnhenter: IdInnhenter) = arbeidsgiverperioden(vedtaksperiodeIdInnhenter)?.perioder ?: emptyList()
+    internal fun arbeidsgiverperioder(vedtaksperiodeIdInnhenter: IdInnhenter) = arbeidsgiverperioden(vedtaksperiodeIdInnhenter)?.toList()?.grupperSammenhengendePerioder() ?: emptyList()
     internal fun arbeidsgiverperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = arbeidsgiverperioder(vedtaksperiodeIdInnhenter).singleOrNullOrThrow()
     private fun <R> Collection<R>.singleOrNullOrThrow() = if (size < 2) this.firstOrNull() else throw IllegalStateException("Listen inneholder $size elementer: $this")
 

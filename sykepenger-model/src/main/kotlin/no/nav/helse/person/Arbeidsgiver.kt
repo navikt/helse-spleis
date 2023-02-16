@@ -1081,7 +1081,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     fun erFørsteSykedagEtter(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?): Boolean {
-        val sisteDag = arbeidsgiverperiode?.perioder?.maxBy { it.endInclusive }?.endInclusive
+        val sisteDag = arbeidsgiverperiode?.maxOrNull()
         if (sisteDag == null) return false
 
         return dato == sykdomstidslinje().førsteSykedagEtter(sisteDag)

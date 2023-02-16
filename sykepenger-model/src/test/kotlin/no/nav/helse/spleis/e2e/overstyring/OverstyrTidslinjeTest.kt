@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -485,6 +484,79 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.sykepengegrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
         håndterOverstyrTidslinje((14.februar til 16.februar).map { dag ->
             ManuellOverskrivingDag(dag, Dagtype.Arbeidsdag, 100)
+        }, orgnummer = a1)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+
+        val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.sykepengegrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+
+        assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
+
+        assertEquals(17.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(14.februar til 10.mars, inspektør.periode(2.vedtaksperiode))
+
+        val januarutbetaling = inspektør.utbetaling(0).inspektør
+        val februarutbetaling = inspektør.utbetaling(1).inspektør
+        val revurderingJanuar = inspektør.utbetaling(2).inspektør
+        val revurderingFebruar = inspektør.utbetaling(3).inspektør
+
+        assertEquals(januarutbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
+        assertEquals(1.januar til 31.januar, januarutbetaling.periode)
+        assertEquals(1.januar til 10.mars, februarutbetaling.periode)
+        assertEquals(1.januar til 10.mars, februarutbetaling.utbetalingstidslinje.periode())
+
+        februarutbetaling.arbeidsgiverOppdrag.also { oppdrag ->
+            assertEquals(2, oppdrag.size)
+            oppdrag[0].inspektør.also { linje ->
+                assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
+                assertEquals(Endringskode.UEND, linje.endringskode)
+            }
+            oppdrag[1].inspektør.also { linje ->
+                assertEquals(14.februar til 9.mars, linje.fom til linje.tom)
+                assertEquals(Endringskode.NY, linje.endringskode)
+            }
+        }
+        assertEquals(0, februarutbetaling.personOppdrag.size)
+
+        assertEquals(januarutbetaling.korrelasjonsId, revurderingJanuar.korrelasjonsId)
+        assertEquals(1.januar til 31.januar, revurderingJanuar.periode)
+        revurderingJanuar.arbeidsgiverOppdrag.also { oppdrag ->
+            assertEquals(1, oppdrag.size)
+            oppdrag[0].inspektør.also { linje ->
+                assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
+                assertEquals(Endringskode.NY, linje.endringskode)
+            }
+        }
+        assertEquals(0, revurderingJanuar.personOppdrag.size)
+
+        assertNotEquals(revurderingJanuar.korrelasjonsId, revurderingFebruar.korrelasjonsId)
+        assertEquals(14.februar til 10.mars, revurderingFebruar.periode)
+        assertEquals(0, revurderingFebruar.personOppdrag.size)
+        assertEquals(1, revurderingFebruar.arbeidsgiverOppdrag.size)
+        assertEquals(Endringskode.NY, revurderingFebruar.arbeidsgiverOppdrag.inspektør.endringskode)
+        revurderingFebruar.arbeidsgiverOppdrag.single().inspektør.also { linje ->
+            assertEquals(5.mars til 9.mars, linje.fom til linje.tom)
+            assertEquals(Endringskode.NY, linje.endringskode)
+        }
+    }
+    @Test
+    fun `innfører ny arbeidsgiverperiode ved å lage feriedager på en førstegangsbehandling etter tidligere utbetalt`() {
+        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(14.februar, 10.mars, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+        nullstillTilstandsendringer()
+        val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.sykepengegrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+        håndterOverstyrTidslinje((14.februar til 16.februar).map { dag ->
+            ManuellOverskrivingDag(dag, Dagtype.Feriedag, 100)
         }, orgnummer = a1)
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)

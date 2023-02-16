@@ -482,9 +482,19 @@ internal class Vedtaksperiode private constructor(
 
     private fun igangsettOverstyringAvTidslinje(hendelse: OverstyrTidslinje) {
         val vedtaksperiodeTilRevurdering = arbeidsgiver.finnVedtaksperiodeFør(this)
-            ?.takeIf { hendelse.harArbeidsdager() }
-            ?.takeUnless { other -> other.utbetalinger.hørerIkkeSammenMed(this.utbetalinger) } ?: this
+            ?.takeIf { nyArbeidsgiverperiodeEtterEndring(it, hendelse) } ?: this
         person.igangsettOverstyring(hendelse, Revurderingseventyr.sykdomstidslinje(vedtaksperiodeTilRevurdering.skjæringstidspunkt, vedtaksperiodeTilRevurdering.periode))
+    }
+
+    private fun nyArbeidsgiverperiodeEtterEndring(other: Vedtaksperiode, hendelse: OverstyrTidslinje): Boolean {
+        // hvorvidt man delte samme utbetaling før
+        if (other.utbetalinger.hørerIkkeSammenMed(this.utbetalinger)) return false
+        val arbeidsgiverperiodeOther = other.finnArbeidsgiverperiode()
+        val arbeidsgiverperiodeThis = this.finnArbeidsgiverperiode()
+        if (arbeidsgiverperiodeOther == null || arbeidsgiverperiodeThis == null) return false
+        val periode = arbeidsgiverperiodeThis.periode(this.periode.endInclusive)
+        // ingen overlapp i arbeidsgiverperiodene => ny arbeidsgiverperiode
+        return periode !in arbeidsgiverperiodeOther
     }
 
     internal fun periode() = periode
@@ -622,7 +632,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun trengerArbeidsgiveropplysninger() {
         val arbeidsgiverperiode = finnArbeidsgiverperiode()
-        val arbeidsgiverperiodeperioder = arbeidsgiverperiode?.perioder.orEmpty()
+        val arbeidsgiverperiodeperioder = arbeidsgiverperiode?.toList()?.grupperSammenhengendePerioder().orEmpty()
         val inntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntekt(arbeidsgiver.organisasjonsnummer())
         val beregningsmåneder = 3.downTo(1).map {
             YearMonth.from(skjæringstidspunkt).minusMonths(it.toLong())
