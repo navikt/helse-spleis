@@ -219,7 +219,7 @@ class Oppdrag private constructor(
 
     private fun kopierKunLinjerMedEndring() = kopierMed(filter(Utbetalingslinje::erForskjell))
 
-    private fun kopierUtenOpphørslinjer() = kopierMed(linjerUtenOpphør())
+    fun kopierUtenOpphørslinjer() = kopierMed(linjerUtenOpphør())
 
     fun linjerUtenOpphør() = filter { !it.erOpphør() }
 

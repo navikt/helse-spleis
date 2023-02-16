@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
@@ -45,7 +46,7 @@ internal class Utbetalingkladd(
         return utbetalinger.aktive(periode)
     }
 
-    internal fun opphører(other: Periode) = this.periode.endInclusive < other.endInclusive
+    internal fun opphørerHale(other: Periode) = this.periode.endInclusive < other.endInclusive
     internal fun arbeidsgiveroppdrag(other: Oppdrag, aktivitetslogg: IAktivitetslogg) =
         this.arbeidsgiveroppdrag.minus(other, aktivitetslogg)
 
@@ -54,7 +55,7 @@ internal class Utbetalingkladd(
 
     internal fun begrensTil(other: Periode): Utbetalingkladd {
         return Utbetalingkladd(
-            periode = periode.oppdaterFom(other).subset(LocalDate.MIN til other.endInclusive),
+            periode = periode.oppdaterFom(other).start til other.endInclusive,
             arbeidsgiveroppdrag = this.arbeidsgiveroppdrag.begrensTil(other.endInclusive),
             personoppdrag = this.personoppdrag.begrensTil(other.endInclusive)
         )

@@ -39,7 +39,6 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.assertUtbetalingsdag
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
@@ -75,7 +74,9 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.fail
 import kotlin.reflect.KClass
 
@@ -361,17 +362,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         val revurdering = inspektør.utbetaling(1).inspektør
         assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
 
-        assertForventetFeil(
-            forklaring = "oppdragbygging starter/slutter med arbeidsgiverperiodedag, så kladden som blir laget " +
-                    "for perioden 1.januar - 16.januar stoppes ved agp 17.januar. Siden det ikke er noen navdager å betale, så " +
-                    "lages det heller ikke noe nytt oppdrag for perioden",
-            nå = {
-                assertEquals(1.januar til 16.januar, revurdering.periode)
-            },
-            ønsket = {
-                assertEquals(1.januar til 31.januar, revurdering.periode)
-            }
-        )
+        assertEquals(1.januar til 31.januar, revurdering.periode)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
@@ -474,6 +465,98 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(0, revurdering.personOppdrag.size)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+    }
+
+    @Test
+    @Disabled("må skrive kode for å kaste exception; eller gjøre slik at vi starter revurdering før")
+    fun `innfører ny arbeidsgiverperiode på en førstegangsbehandling etter tidligere utbetalt`() {
+        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(14.februar, 10.mars, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+        nullstillTilstandsendringer()
+        val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.sykepengegrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+        håndterOverstyrTidslinje((14.februar til 16.februar).map { dag ->
+            ManuellOverskrivingDag(dag, Dagtype.Arbeidsdag, 100)
+        }, orgnummer = a1)
+
+        assertForventetFeil(
+            forklaring = "ved å innføre arbeidsdager/ny AGP for februar så påvirkes egentlig utbetalingen som er påstartet i januar," +
+                    "fordi utbetalingen i januar skal ikke lengre utbetale februar. februar skal utbetales på en egen fagsystemId/oppdrag." +
+                    "Derfor må overstyr tidslinje-hendelsen igangsette revurdering slik at januar blir med, og revurderes først",
+            nå = {
+                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+
+                håndterYtelser(2.vedtaksperiode)
+                håndterVilkårsgrunnlag(2.vedtaksperiode)
+                assertThrows<IllegalStateException> {
+                    håndterYtelser(2.vedtaksperiode)
+                }
+            },
+            ønsket = {
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+
+                håndterYtelser(1.vedtaksperiode)
+                håndterSimulering(1.vedtaksperiode)
+                håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+                håndterUtbetalt()
+
+                håndterYtelser(2.vedtaksperiode)
+                håndterVilkårsgrunnlag(2.vedtaksperiode)
+                håndterYtelser(2.vedtaksperiode)
+
+                val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.sykepengegrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
+
+                assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
+
+                assertEquals(17.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+                assertEquals(14.februar til 10.mars, inspektør.periode(2.vedtaksperiode))
+
+                val januarutbetaling = inspektør.utbetaling(0).inspektør
+                val februarutbetaling = inspektør.utbetaling(1).inspektør
+                val revurderingJanuar = inspektør.utbetaling(2).inspektør
+                val revurderingFebruar = inspektør.utbetaling(3).inspektør
+
+                assertEquals(januarutbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
+                assertEquals(1.januar til 31.januar, januarutbetaling.periode)
+                assertEquals(16.januar til 10.mars, februarutbetaling.periode)
+                assertEquals(1.januar til 10.mars, februarutbetaling.utbetalingstidslinje.periode())
+
+                februarutbetaling.arbeidsgiverOppdrag.also { oppdrag ->
+                    assertEquals(2, oppdrag.size)
+                    oppdrag[0].inspektør.also { linje ->
+                        assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
+                        assertEquals(Endringskode.UEND, linje.endringskode)
+                    }
+                    oppdrag[1].inspektør.also { linje ->
+                        assertEquals(14.februar til 9.mars, linje.fom til linje.tom)
+                        assertEquals(Endringskode.NY, linje.endringskode)
+                    }
+                }
+                assertEquals(0, februarutbetaling.personOppdrag.size)
+
+                assertEquals(januarutbetaling.korrelasjonsId, revurderingJanuar.korrelasjonsId)
+                assertEquals(1.januar til 31.januar, revurderingJanuar.periode)
+                revurderingJanuar.arbeidsgiverOppdrag.also { oppdrag ->
+                    assertEquals(1, oppdrag.size)
+                    oppdrag[0].inspektør.also { linje ->
+                        assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
+                        assertEquals(Endringskode.NY, linje.endringskode)
+                    }
+                }
+                assertEquals(0, revurderingJanuar.personOppdrag.size)
+
+                assertNotEquals(revurderingJanuar.korrelasjonsId, revurderingFebruar.korrelasjonsId)
+                assertEquals(14.februar til 10.mars, revurderingFebruar.periode)
+                assertEquals(0, revurderingFebruar.personOppdrag.size)
+                assertEquals(1, revurderingFebruar.arbeidsgiverOppdrag.size)
+                assertEquals(Endringskode.NY, revurderingFebruar.arbeidsgiverOppdrag.inspektør.endringskode)
+                revurderingFebruar.arbeidsgiverOppdrag.single().inspektør.also { linje ->
+                    assertEquals(17.februar til 9.mars, linje.fom til linje.tom)
+                    assertEquals(Endringskode.NY, linje.endringskode)
+                }
+            }
+        )
     }
 
     private fun assertUtbetalingsdag(dato: LocalDate, dagtype: KClass<out Utbetalingsdag>, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt, orgnummer: String = a1) {

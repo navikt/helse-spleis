@@ -119,6 +119,7 @@ internal class PersonMediator(
             "fagsystemId" to event.arbeidsgiverFagsystemId,
             "arbeidsgiverFagsystemId" to event.arbeidsgiverFagsystemId,
             "personFagsystemId" to event.personFagsystemId,
+            // TODO: disse linjene er egentlig deprecated. Må finne ut om konsumenter leser dem inn før vi kan fjerne dem trygt
             "utbetalingslinjer" to event.utbetalingslinjer.map { mapOf(
                 "fom" to it.fom,
                 "tom" to it.tom,

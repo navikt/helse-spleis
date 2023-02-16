@@ -1860,7 +1860,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             RV_IM_4,
             3.vedtaksperiode.filter()
         )
-        assertEquals(16.januar til 31.mars, inspektør.utbetalinger.last().inspektør.periode)
+        assertEquals(1.januar til 31.mars, inspektør.utbetalinger.last().inspektør.periode)
     }
 
     @Test
