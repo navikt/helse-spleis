@@ -14,7 +14,6 @@ import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.InntektsmeldingInfo
-import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
@@ -187,7 +186,7 @@ internal class TestArbeidsgiverInspektør(
         vedtaksperiode.accept(VedtaksperiodeSykdomstidslinjeinnhenter())
     }
 
-    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje, gjeldendePeriode: Periode?) {
         if (inVedtaksperiode && !inUtbetaling) utbetalingstidslinjer[vedtaksperiodeindeks] = tidslinje
         else if (!inVedtaksperiode && inUtbetaling) utbetalingutbetalingstidslinjer.add(tidslinje)
     }

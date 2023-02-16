@@ -62,7 +62,10 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
     }
 
     internal fun accept(visitor: UtbetalingsdagVisitor) {
-        visitor.preVisitUtbetalingstidslinje(this)
+        visitor.preVisitUtbetalingstidslinje(this, when(this.isEmpty()) {
+            true -> null
+            else -> this.periode()
+        })
         utbetalingsdager.forEach { it.accept(visitor) }
         visitor.postVisitUtbetalingstidslinje(this)
     }

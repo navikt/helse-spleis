@@ -213,7 +213,7 @@ internal class JsonBuilder : AbstractBuilder() {
             pushState(SykmeldingsperioderState(sykmeldingsperioderListe))
         }
 
-        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje, gjeldendePeriode: Periode?) {
             val utbetalingstidslinjeMap = mutableMapOf<String, Any?>()
             utbetalingstidslinjer.add(utbetalingstidslinjeMap)
         }
@@ -301,7 +301,7 @@ internal class JsonBuilder : AbstractBuilder() {
     private class UtbetalingstidslinjeberegningerState(private val beregninger: MutableList<Map<String, Any?>>) : BuilderState() {
         private val utbetalingstidslinjeMap = mutableMapOf<String, Any>()
 
-        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje, gjeldendePeriode: Periode?) {
             pushState(UtbetalingstidslinjeState(utbetalingstidslinjeMap))
         }
 
@@ -1298,7 +1298,7 @@ internal class JsonBuilder : AbstractBuilder() {
         private val personOppdragMap = mutableMapOf<String, Any?>()
         private var vurderingMap: Map<String, Any?>? = null
 
-        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje, gjeldendePeriode: Periode?) {
             pushState(UtbetalingstidslinjeState(utbetalingstidslinjeMap))
         }
 
@@ -1410,7 +1410,7 @@ internal class JsonBuilder : AbstractBuilder() {
             pushState(VedtaksperiodeUtbetalingerState(this.utbetalinger))
         }
 
-        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje, gjeldendePeriode: Periode?) {
             val utbetalingstidslinjeMap = mutableMapOf<String, Any>()
             vedtaksperiodeMap["utbetalingstidslinje"] = utbetalingstidslinjeMap
             pushState(UtbetalingstidslinjeState(utbetalingstidslinjeMap))

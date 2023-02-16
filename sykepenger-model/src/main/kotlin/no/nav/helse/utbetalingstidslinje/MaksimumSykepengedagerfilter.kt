@@ -129,8 +129,8 @@ internal class MaksimumSykepengedagerfilter(
         state.entering(this)
     }
 
-    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
-        sisteDag = tidslinje.periode().endInclusive
+    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje, gjeldendePeriode: Periode?) {
+        sisteDag = gjeldendePeriode!!.endInclusive
     }
 
     override fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {

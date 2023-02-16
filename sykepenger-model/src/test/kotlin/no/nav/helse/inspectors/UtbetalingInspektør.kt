@@ -84,7 +84,7 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
         this.maksdato = maksdato
     }
 
-    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje, gjeldendePeriode: Periode?) {
         this.utbetalingstidslinje = tidslinje
     }
 
