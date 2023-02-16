@@ -121,10 +121,13 @@ sealed class Aktivitet(
                 )
             }
 
-            fun foreldrepenger(aktivitetslogg: IAktivitetslogg) {
+            fun foreldrepenger(aktivitetslogg: IAktivitetslogg, periode: ClosedRange<LocalDate>) {
                 aktivitetslogg.behov(
                     Behovtype.Foreldrepenger,
-                    "Trenger informasjon om foreldrepengeytelser fra FPSAK"
+                    "Trenger informasjon om foreldrepengeytelser fra FPSAK", mapOf(
+                        "foreldrepengerFom" to periode.start.toString(),
+                        "foreldrepengerTom" to periode.endInclusive.toString()
+                    )
                 )
             }
 

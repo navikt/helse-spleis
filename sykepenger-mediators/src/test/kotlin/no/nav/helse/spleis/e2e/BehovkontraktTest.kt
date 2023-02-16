@@ -194,7 +194,8 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     private fun assertForeldrepengerdetaljer(behov: JsonNode) {
-        assertTrue(behov.path(Foreldrepenger.name).isEmpty)
+        assertDato(behov.path(Foreldrepenger.name).path("foreldrepengerFom").asText())
+        assertDato(behov.path(Foreldrepenger.name).path("foreldrepengerTom").asText())
     }
 
     private fun assertInstitusjonsoppholddetaljer(behov: JsonNode) {

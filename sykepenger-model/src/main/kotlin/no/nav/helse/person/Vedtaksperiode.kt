@@ -598,7 +598,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun trengerYtelser(hendelse: IAktivitetslogg, periode: Periode = periode()) {
         person.trengerHistorikkFraInfotrygd(hendelse)
-        foreldrepenger(hendelse)
+        foreldrepenger(hendelse, periode)
         pleiepenger(hendelse, periode)
         omsorgspenger(hendelse, periode)
         opplæringspenger(hendelse, periode)
