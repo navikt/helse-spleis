@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
@@ -28,6 +29,7 @@ internal class Utbetalingkladd(
         return Utbetaling(
             beregningId = beregningId,
             korrelerendeUtbetaling = korrelerendeUtbetaling,
+            // periode = korrelerendeUtbetaling?.periode?.subset(periode) ?: periode,
             periode = periode,
             utbetalingstidslinje = utbetalingstidslinje.kutt(periode.endInclusive),
             arbeidsgiverOppdrag = arbeidsgiveroppdrag,
@@ -45,7 +47,8 @@ internal class Utbetalingkladd(
         return utbetalinger.aktive(periode)
     }
 
-    internal fun opphører(other: Periode) = this.periode.endInclusive < other.endInclusive
+    internal fun opphørerSnute(other: Periode) = this.periode.start > other.start && this.periode.endInclusive == other.endInclusive
+    internal fun opphørerHale(other: Periode) = this.periode.endInclusive < other.endInclusive
     internal fun arbeidsgiveroppdrag(other: Oppdrag, aktivitetslogg: IAktivitetslogg) =
         this.arbeidsgiveroppdrag.minus(other, aktivitetslogg)
 
@@ -80,12 +83,27 @@ internal class Utbetalingkladd(
             .diffMotTidligere(aktivitetslogg, tidligereArbeidsgiveroppdrag, tidligerePersonoppdrag)
     }
 
-    private fun diffMotTidligere(aktivitetslogg: IAktivitetslogg, tidligereArbeidsgiveroppdrag: Oppdrag, tidligerePersonoppdrag: Oppdrag) =
-        Utbetalingkladd(
+    private fun diffMotTidligere(aktivitetslogg: IAktivitetslogg, tidligereArbeidsgiveroppdrag: Oppdrag, tidligerePersonoppdrag: Oppdrag): Utbetalingkladd {
+        val resultat = Utbetalingkladd(
             periode = this.periode,
             arbeidsgiveroppdrag = this.arbeidsgiveroppdrag.minus(tidligereArbeidsgiveroppdrag, aktivitetslogg),
             personoppdrag = this.personoppdrag.minus(tidligerePersonoppdrag, aktivitetslogg)
         )
+
+        val oppdragperiodeFør = periode(tidligereArbeidsgiveroppdrag, tidligerePersonoppdrag)
+        val oppdragperiodeEtter = periode(resultat.arbeidsgiveroppdrag.kopierUtenOpphørslinjer(), resultat.personoppdrag.kopierUtenOpphørslinjer())
+        val opphørtPeriode = when {
+            oppdragperiodeFør == null -> null
+            oppdragperiodeEtter == null -> oppdragperiodeFør
+            oppdragperiodeEtter.start <= oppdragperiodeFør.start -> null
+            else -> oppdragperiodeFør.start til oppdragperiodeEtter.start.forrigeDag
+        }
+        if (opphørtPeriode != null && !opphørtPeriode.overlapperMed(this.periode)) {
+            throw IllegalStateException("Ny utbetaling opphører tidligere utbetaling. Det må igangsettes revurdering av den tidligere utbetalte perioden for at oppdragene skal bli riktige.")
+        }
+
+        return resultat
+    }
 
     private fun kopierArbeidsgiveroppdrag(tidligereArbeidsgiveroppdrag: Oppdrag) =
         Utbetalingkladd(

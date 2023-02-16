@@ -315,7 +315,7 @@ class Utbetaling private constructor(
                     throw IllegalStateException("Dette støtter vi ikke helt enda: må annullere/opphøre ${forrigeUtbetalte.size - 1} oppdrag for å kunne kjøre frem igjen ett.")
                 }
             } else {
-                if (kladden.opphører(korrelerendeUtbetaling.periode)) {
+                if (kladden.opphørerHale(korrelerendeUtbetaling.periode)) {
                     kladden.begrensTil(aktivitetslogg, periode, korrelerendeUtbetaling.arbeidsgiverOppdrag, korrelerendeUtbetaling.personOppdrag)
                 } else {
                     kladden.begrensTilOgKopier(aktivitetslogg, periode, korrelerendeUtbetaling.arbeidsgiverOppdrag, korrelerendeUtbetaling.personOppdrag)

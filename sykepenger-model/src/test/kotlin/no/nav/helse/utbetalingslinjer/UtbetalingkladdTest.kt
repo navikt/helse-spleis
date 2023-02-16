@@ -11,7 +11,6 @@ import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype.UTBETALING
 import no.nav.helse.utbetalingslinjer.Utbetalingkladd.Companion.finnKladd
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -25,10 +24,10 @@ internal class UtbetalingkladdTest {
             personoppdrag = Oppdrag("fnr", Sykepenger)
         )
 
-        assertTrue(kladd.opphører(5.januar til 30.januar))
-        assertTrue(kladd.opphører(21.januar til 30.januar))
-        assertFalse(kladd.opphører(5.januar til 20.januar))
-        assertFalse(kladd.opphører(1.januar til 4.januar))
+        assertTrue(kladd.opphørerHale(5.januar til 30.januar))
+        assertTrue(kladd.opphørerHale(21.januar til 30.januar))
+        assertFalse(kladd.opphørerHale(5.januar til 20.januar))
+        assertFalse(kladd.opphørerHale(1.januar til 4.januar))
     }
 
     @Test

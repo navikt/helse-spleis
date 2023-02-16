@@ -289,7 +289,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
         val utbetalingslinje = annullering.utbetalingslinjer.first()
         assertEquals("tbd@nav.no", annullering.saksbehandlerEpost)
-        assertEquals(18.januar, annullering.fom)
+        assertEquals(3.januar, annullering.fom)
         assertEquals(26.januar, annullering.tom)
         assertEquals(18.januar, utbetalingslinje.fom)
         assertEquals(26.januar, utbetalingslinje.tom)
