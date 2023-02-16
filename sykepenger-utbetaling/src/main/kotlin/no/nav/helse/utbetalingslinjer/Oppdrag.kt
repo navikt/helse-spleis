@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
@@ -277,10 +276,7 @@ class Oppdrag private constructor(
         return when {
             // om man trekker fra et utbetalt oppdrag med et tomt oppdrag medfører det et oppdrag som opphører (les: annullerer) hele fagsystemIDen
             erTomt() -> annulleringsoppdrag(eldre)
-            eldre.ingenUtbetalteDager() -> {
-                aktivitetslogg.varsel(RV_OS_1)
-                kjørFrem(eldre)
-            }
+            eldre.ingenUtbetalteDager() -> kjørFrem(eldre)
             // "fom" kan flytte seg fremover i tid dersom man, eksempelvis, revurderer en utbetalt periode til å starte med ikke-utbetalte dager (f.eks. ferie)
             fomHarFlyttetSegFremover(eldre.kopierUtenOpphørslinjer()) -> {
                 aktivitetslogg.varsel(RV_OS_2)

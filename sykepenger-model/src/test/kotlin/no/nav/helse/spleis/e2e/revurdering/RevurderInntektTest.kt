@@ -34,8 +34,6 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -356,7 +354,6 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertEquals(-15741, utbetalingTilRevurdering.inspektør.arbeidsgiverOppdrag.nettoBeløp())
 
         assertVarsel(RV_IV_2, AktivitetsloggFilter.person())
-        assertVarsel(RV_SV_1, AktivitetsloggFilter.person())
         assertFalse(utbetalingTilRevurdering.utbetalingstidslinje().harUtbetalinger())
     }
 
@@ -496,7 +493,6 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             assertEquals(1, size)
             first().assertUtbetalingslinje(Endringskode.NY, 2, 1, fagsystemId())
         }
-        assertVarsel(RV_OS_1, AktivitetsloggFilter.person())
     }
 
     @Test

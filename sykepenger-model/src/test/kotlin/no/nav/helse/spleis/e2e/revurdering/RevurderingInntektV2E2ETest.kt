@@ -25,7 +25,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -588,7 +587,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             }
         }
         assertDiff(2541)
-        assertVarsel(RV_OS_1, AktivitetsloggFilter.person())
     }
 
     @Test

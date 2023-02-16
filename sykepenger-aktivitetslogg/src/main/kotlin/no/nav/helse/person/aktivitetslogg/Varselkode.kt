@@ -199,7 +199,7 @@ enum class Varselkode(
     RV_UT_22("Annullering ble ikke gjennomført", avviklet = true),
 
     // OS: Oppdragsystemet
-    RV_OS_1("Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen."),
+    RV_OS_1("Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen.", avviklet = true),
     RV_OS_2("Utbetalingens fra og med-dato er endret. Kontroller simuleringen"),
     RV_OS_3("Endrer tidligere oppdrag. Kontroller simuleringen."),
 
