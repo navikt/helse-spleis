@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -345,6 +346,12 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
 
         val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
 
@@ -357,12 +364,27 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
         val førsteUtbetaling = inspektør.utbetaling(0).inspektør
         val revurdering = inspektør.utbetaling(1).inspektør
-        assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
+        val februarutbetaling = inspektør.utbetaling(2).inspektør
 
+        assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
         assertEquals(1.januar til 31.januar, revurdering.periode)
 
+        assertForventetFeil(
+            forklaring = "vi lager ny utbetaling, burde nok ikke gjort det",
+            nå = {
+                assertNotEquals(førsteUtbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
+                assertEquals(1.februar til 28.februar, februarutbetaling.periode)
+            },
+            ønsket = {
+                assertEquals(førsteUtbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
+                assertEquals(1.januar til 28.februar, februarutbetaling.periode)
+            }
+        )
+
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+            AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET
+        )
     }
 
     @Test
