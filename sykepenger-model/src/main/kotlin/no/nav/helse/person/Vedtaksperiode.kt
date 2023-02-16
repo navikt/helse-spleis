@@ -1014,6 +1014,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingshistorikk: UtbetalingshistorikkEtterInfotrygdendring
         ) {
+            if (vedtaksperiode.tilstand.type == AVSLUTTET || vedtaksperiode.tilstand.type == AVSLUTTET_UTEN_UTBETALING) return
             sikkerlogg.info("""Mottatt en infotrygdendring som oppdaterte infotrygdhistorikken
                 | tilstand: {}
                 | vedtaksperiodeId: ${vedtaksperiode.id}
