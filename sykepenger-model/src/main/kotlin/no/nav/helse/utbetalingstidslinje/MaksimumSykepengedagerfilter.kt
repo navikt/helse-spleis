@@ -133,7 +133,7 @@ internal class MaksimumSykepengedagerfilter(
         sisteDag = gjeldendePeriode!!.endInclusive
     }
 
-    override fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+    override fun postVisitUtbetalingstidslinje() {
 
     }
 

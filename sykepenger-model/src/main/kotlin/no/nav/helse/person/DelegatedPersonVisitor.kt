@@ -765,8 +765,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visit(dag, dato, økonomi)
     }
 
-    override fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
-        delegatee.postVisitUtbetalingstidslinje(tidslinje)
+    override fun postVisitUtbetalingstidslinje() {
+        delegatee.postVisitUtbetalingstidslinje()
     }
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {

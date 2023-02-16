@@ -67,7 +67,7 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
             else -> this.periode()
         })
         utbetalingsdager.forEach { it.accept(visitor) }
-        visitor.postVisitUtbetalingstidslinje(this)
+        visitor.postVisitUtbetalingstidslinje()
     }
 
     private fun avvis(avvistePerioder: List<Periode>, begrunnelser: List<Begrunnelse>) {

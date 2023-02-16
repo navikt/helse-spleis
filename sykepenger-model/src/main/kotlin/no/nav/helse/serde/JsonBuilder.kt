@@ -1571,7 +1571,7 @@ internal class JsonBuilder : AbstractBuilder() {
             leggTilDag(dato, UtbetalingsdagJsonBuilder(TypeData.UkjentDag).økonomi(økonomi))
         }
 
-        override fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+        override fun postVisitUtbetalingstidslinje() {
             utbetalingstidslinjeMap["dager"] = dager.toList()
             popState()
         }

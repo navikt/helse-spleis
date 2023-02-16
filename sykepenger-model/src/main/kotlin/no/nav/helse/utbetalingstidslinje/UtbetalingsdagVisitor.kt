@@ -65,5 +65,5 @@ internal interface UtbetalingsdagVisitor {
     ) {
     }
 
-    fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
+    fun postVisitUtbetalingstidslinje() {}
 }
