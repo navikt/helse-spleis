@@ -32,7 +32,7 @@ class OverstyrTidslinje(
     fødselsnummer: String,
     aktørId: String,
     organisasjonsnummer: String,
-    dager: List<ManuellOverskrivingDag>,
+    private val dager: List<ManuellOverskrivingDag>,
     opprettet: LocalDateTime
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, opprettet) {
 
@@ -76,7 +76,10 @@ class OverstyrTidslinje(
         }
     }
 
+    internal fun harArbeidsdager() = dager.any { it.type == Dagtype.Arbeidsdag }
+
     internal fun erRelevant(other: Periode) = other.oppdaterFom(other.start.forrigeDag).overlapperMed(periode())
+
     override fun overlappsperiode() = periode
 
     override fun sykdomstidslinje() = sykdomstidslinje

@@ -477,7 +477,14 @@ internal class Vedtaksperiode private constructor(
 
     private fun revurderTidslinje(hendelse: OverstyrTidslinje) {
         oppdaterHistorikk(hendelse)
-        person.igangsettOverstyring(hendelse, Revurderingseventyr.sykdomstidslinje(skjæringstidspunkt, periode))
+        igangsettOverstyringAvTidslinje(hendelse)
+    }
+
+    private fun igangsettOverstyringAvTidslinje(hendelse: OverstyrTidslinje) {
+        val vedtaksperiodeTilRevurdering = arbeidsgiver.finnVedtaksperiodeFør(this)
+            ?.takeIf { hendelse.harArbeidsdager() }
+            ?.takeUnless { other -> other.utbetalinger.hørerIkkeSammenMed(this.utbetalinger) } ?: this
+        person.igangsettOverstyring(hendelse, Revurderingseventyr.sykdomstidslinje(vedtaksperiodeTilRevurdering.skjæringstidspunkt, vedtaksperiodeTilRevurdering.periode))
     }
 
     internal fun periode() = periode
@@ -2105,10 +2112,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.låsOpp()
             vedtaksperiode.oppdaterHistorikk(hendelse)
             vedtaksperiode.lås()
-            vedtaksperiode.person.igangsettOverstyring(
-                hendelse,
-                Revurderingseventyr.sykdomstidslinje(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
-            )
+            vedtaksperiode.igangsettOverstyringAvTidslinje(hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
