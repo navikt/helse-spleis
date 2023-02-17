@@ -15,6 +15,8 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -158,6 +160,10 @@ internal class ArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar, orgnummer = a2)
         nyPeriode(1.mars til 31.mars, a1)
 
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
         assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
         val actualForespurteOpplysninger = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger

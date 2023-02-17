@@ -1125,9 +1125,8 @@ internal class Vedtaksperiode private constructor(
                 søknad.varsel(RV_OO_1)
             }
             vedtaksperiode.håndterSøknad(søknad) {
-                val rettFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)
                 when {
-                    rettFør != null && rettFør.tilstand !in setOf(AvsluttetUtenUtbetaling, AvventerInntektsmeldingEllerHistorikk) -> AvventerBlokkerendePeriode
+                    vedtaksperiode.harNødvendigOpplysningerFraArbeidsgiver(søknad) -> AvventerBlokkerendePeriode
                     else -> AvventerInntektsmeldingEllerHistorikk
                 }
             }

@@ -287,13 +287,43 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `out of order periode rett før - påvirker arbeidsgiverperioden - støttes ikke`() {
+    fun `out of order periode rett før - påvirker arbeidsgiverperioden - støttes ikke`() = listOf(Toggle.OutOfOrderInnenfor18Dager, Toggle.OutOfOrderPåvirkerSkjæringstidspunkt).enable {
         nyttVedtak(29.januar, 28.februar)
         nyPeriode(1.januar til 28.januar)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+        håndterYtelser(1.vedtaksperiode)
 
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
-        assertFunksjonellFeil(`Mottatt søknad out of order`)
+        val februarutbetaling = inspektør.utbetaling(0).inspektør
+        val januarutbetaling = inspektør.utbetaling(1).inspektør
+        val revurdering = inspektør.utbetaling(2).inspektør
+
+        assertEquals(februarutbetaling.korrelasjonsId, januarutbetaling.korrelasjonsId)
+        assertEquals(revurdering.korrelasjonsId, januarutbetaling.korrelasjonsId)
+
+        assertEquals(0, januarutbetaling.personOppdrag.size)
+        assertEquals(2, januarutbetaling.arbeidsgiverOppdrag.size)
+        januarutbetaling.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(17.januar til 26.januar, linje.fom til linje.tom)
+            assertEquals(NY, linje.endringskode)
+        }
+        januarutbetaling.arbeidsgiverOppdrag[1].inspektør.also { linje ->
+            assertEquals(14.februar til 28.februar, linje.fom til linje.tom)
+            assertEquals(NY, linje.endringskode)
+        }
+
+        assertEquals(0, revurdering.personOppdrag.size)
+        assertEquals(1, revurdering.arbeidsgiverOppdrag.size)
+        revurdering.arbeidsgiverOppdrag.single().inspektør.also { linje ->
+            assertEquals(17.januar til 28.februar, linje.fom til linje.tom)
+            assertEquals(NY, linje.endringskode)
+        }
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
     }
 
     @Test

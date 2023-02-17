@@ -162,7 +162,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(24.januar, 25.januar))
         håndterSøknad(Sykdom(24.januar, 25.januar, 100.prosent), Arbeid(24.januar, 25.januar))
         håndterUtbetalingshistorikk(2.vedtaksperiode)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
