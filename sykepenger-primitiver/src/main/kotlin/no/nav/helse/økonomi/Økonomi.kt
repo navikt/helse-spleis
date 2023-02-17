@@ -32,9 +32,12 @@ class Økonomi private constructor(
         fun sykdomsgrad(grad: Prosentdel) =
             Økonomi(grad)
 
-        fun ikkeBetalt(grad: Prosentdel = 0.prosent) = sykdomsgrad(grad)
+        fun ikkeBetalt() = Økonomi(
+            grad = 0.prosent,
+            tilstand = Tilstand.IkkeBetalt
+        )
 
-        fun ikkeBetalt(arbeidsgiverperiode: ArbeidsgiverperiodePort?, grad: Prosentdel = 0.prosent) = ikkeBetalt(grad).also {
+        fun ikkeBetalt(arbeidsgiverperiode: ArbeidsgiverperiodePort?, grad: Prosentdel = 0.prosent) = ikkeBetalt().also {
             it.arbeidsgiverperiode = arbeidsgiverperiode
         }
 

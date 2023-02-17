@@ -69,7 +69,7 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         val utbetalingstidslinje = beregn(AG1, 1.januar, 2.februar)
         assertSkjæringstidspunkt(utbetalingstidslinje, 1.januar til 16.januar, null)
         assertSkjæringstidspunkt(utbetalingstidslinje, 17.januar til 31.januar, null)
-        assertSkjæringstidspunkt(utbetalingstidslinje, 1.februar til 1.februar, 1.januar)
+        assertSkjæringstidspunkt(utbetalingstidslinje, 1.februar til 1.februar, null)
         assertSkjæringstidspunkt(utbetalingstidslinje, 2.februar til 28.februar, 2.februar)
         assertAlleDager(utbetalingstidslinje, 2.februar til 17.februar, NavDag::class, NavHelgDag::class)
         assertAlleDager(utbetalingstidslinje, 18.februar til 28.februar, NavDag::class, NavHelgDag::class)
