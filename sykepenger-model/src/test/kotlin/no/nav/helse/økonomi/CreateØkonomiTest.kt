@@ -3,18 +3,13 @@ package no.nav.helse.økonomi
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`6G`
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.serde.PersonData
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.PeriodeData
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.utbetalingslinjer.utbetalingport
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -33,7 +28,7 @@ internal class CreateØkonomiTest {
         val data = sykdomstidslinjedag(79.5)
         createØkonomi(data).also { økonomi ->
             listOf(økonomi).betal()
-            økonomi.medData { grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, begrenset ->
+            økonomi.medData { grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, begrenset ->
                 assertEquals(79.5, grad)
                 assertEquals(0.0, arbeidsgiverRefusjonsbeløp)
                 assertEquals(0.0, dekningsgrunnlag)
@@ -50,7 +45,7 @@ internal class CreateØkonomiTest {
     fun `opprette bare prosenter`() {
         val data = sykdomstidslinjedag(79.5)
         createØkonomi(data).also { økonomi ->
-            økonomi.medData { grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, begrenset ->
+            økonomi.medData { grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, begrenset ->
                 assertEquals(79.5, grad)
                 assertEquals(0.0, arbeidsgiverRefusjonsbeløp)
                 assertEquals(0.0, dekningsgrunnlag)
@@ -60,13 +55,12 @@ internal class CreateØkonomiTest {
                 assertNull(begrenset)
             }
             økonomi
-                .inntekt(1200.daglig, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = INGEN)
-                .medData { grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, skjæringstidspunkt, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, begrenset ->
+                .inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = INGEN)
+                .medData { grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, begrenset ->
                     assertEquals(79.5, grad)
                     assertEquals(0.0, arbeidsgiverRefusjonsbeløp)
                     assertEquals(1200.0, dekningsgrunnlag)
                     assertEquals(1200.0, aktuellDagsinntekt)
-                    assertEquals(1.januar, skjæringstidspunkt)
                     assertNull(arbeidsgiverbeløp)
                     assertNull(personbeløp)
                     assertNull(begrenset)
@@ -79,7 +73,7 @@ internal class CreateØkonomiTest {
         val data = sykdomstidslinjedag(79.5)
         createØkonomi(data).also { økonomi ->
             assertDoesNotThrow { økonomi
-                .inntekt(1200.daglig, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar), arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar)).utbetalingport(), refusjonsbeløp = 1200.daglig)
+                .inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig)
             }
         }
     }
@@ -91,7 +85,6 @@ internal class CreateØkonomiTest {
             økonomi.medData { grad,
                               arbeidsgiverRefusjonsbeløp,
                               dekningsgrunnlag,
-                              _,
                               _,
                               aktuellDagsinntekt,
                               arbeidsgiverbeløp,
@@ -106,7 +99,7 @@ internal class CreateØkonomiTest {
                 assertNull(er6GBegrenset)
             }
             // Indirect test of Økonomi state is HarLønn
-            assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig) }
+            assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig) }
             assertDoesNotThrow { listOf(økonomi).betal() }
         }
     }
@@ -118,7 +111,6 @@ internal class CreateØkonomiTest {
             økonomi.medData { grad,
                               arbeidsgiverRefusjon,
                               dekningsgrunnlag,
-                              _,
                               totalGrad,
                               aktuellDagsinntekt,
                               arbeidsgiverbeløp,
@@ -134,7 +126,7 @@ internal class CreateØkonomiTest {
                 assertTrue(er6GBegrenset as Boolean)
             }
             // Indirect test of Økonomi state
-            assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig) }
+            assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig) }
             assertDoesNotThrow { listOf(økonomi).betal() }
         }
     }
@@ -147,14 +139,11 @@ internal class CreateØkonomiTest {
         arbeidsgiverbeløp: Double? = null,
         personbeløp: Double? = null,
         totalGrad: Double = grad,
-        er6GBegrenset: Boolean = false,
-        arbeidsgiverperiode: List<Periode>? = null
+        er6GBegrenset: Boolean = false
     ) = UtbetalingstidslinjeData.UtbetalingsdagData(
         UtbetalingstidslinjeData.TypeData.NavDag,
-        arbeidsgiverperiode?.map { PeriodeData(it.start, it.endInclusive) },
         aktuellDagsinntekt,
         dekningsgrunnlag,
-        1.januar,
         `6G`.beløp(1.januar).reflection { årlig, _, _, _ -> årlig },
         null,
         null,
@@ -166,9 +155,7 @@ internal class CreateØkonomiTest {
         er6GBegrenset
     )
 
-    private fun sykdomstidslinjedag(
-        grad: Double,
-    ) = PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData(
+    private fun sykdomstidslinjedag(grad: Double) = PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData(
         PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
         PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData("type", UUID.randomUUID(), 1.januar.atStartOfDay()),
         grad,

@@ -1,7 +1,6 @@
 package no.nav.helse.økonomi
 
 import java.time.LocalDate
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.summer
@@ -15,10 +14,8 @@ class Økonomi private constructor(
     private val grad: Prosentdel,
     private var totalGrad: Prosentdel = grad,
     private val arbeidsgiverRefusjonsbeløp: Inntekt = INGEN,
-    private var arbeidsgiverperiode: ArbeidsgiverperiodePort? = null,
     private val aktuellDagsinntekt: Inntekt = INGEN,
     private val dekningsgrunnlag: Inntekt = INGEN,
-    private val skjæringstidspunkt: LocalDate? = null,
     private var grunnbeløpgrense: Inntekt? = null,
     private var arbeidsgiverbeløp: Inntekt? = null,
     private var personbeløp: Inntekt? = null,
@@ -36,10 +33,6 @@ class Økonomi private constructor(
             grad = 0.prosent,
             tilstand = Tilstand.IkkeBetalt
         )
-
-        fun ikkeBetalt(arbeidsgiverperiode: ArbeidsgiverperiodePort?, grad: Prosentdel = 0.prosent) = ikkeBetalt().also {
-            it.arbeidsgiverperiode = arbeidsgiverperiode
-        }
 
         fun List<Økonomi>.totalSykdomsgrad() = totalSykdomsgrad(this).first().totalGrad
         fun totalSykdomsgrad(økonomiList: List<Økonomi>): List<Økonomi> {
@@ -133,8 +126,8 @@ class Økonomi private constructor(
         require(dekningsgrunnlag >= INGEN) { "dekningsgrunnlag kan ikke være negativ." }
     }
 
-    fun inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, skjæringstidspunkt: LocalDate, `6G`: Inntekt, arbeidsgiverperiode: ArbeidsgiverperiodePort? = null, refusjonsbeløp: Inntekt): Økonomi =
-        tilstand.inntekt(this, aktuellDagsinntekt, refusjonsbeløp, dekningsgrunnlag, skjæringstidspunkt, arbeidsgiverperiode, `6G`)
+    fun inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, `6G`: Inntekt, refusjonsbeløp: Inntekt): Økonomi =
+        tilstand.inntekt(this, aktuellDagsinntekt, refusjonsbeløp, dekningsgrunnlag, `6G`)
 
     fun lås() = tilstand.lås(this)
 
@@ -145,7 +138,7 @@ class Økonomi private constructor(
     }
 
     private fun _buildKunGrad(builder: ØkonomiBuilder) {
-        medData { grad, _, _, _, _, _, _, _, _ ->
+        medData { grad, _, _, _, _, _, _, _ ->
             /* ikke legg på flere felter - alle er enten null eller har defaultverdi */
             builder.grad(grad)
         }
@@ -155,7 +148,6 @@ class Økonomi private constructor(
         medData { grad,
                   arbeidsgiverRefusjonsbeløp,
                   dekningsgrunnlag,
-                  skjæringstidspunkt,
                   totalGrad,
                   aktuellDagsinntekt,
                   arbeidsgiverbeløp,
@@ -164,13 +156,11 @@ class Økonomi private constructor(
             builder.grad(grad)
                 .arbeidsgiverRefusjonsbeløp(arbeidsgiverRefusjonsbeløp)
                 .dekningsgrunnlag(dekningsgrunnlag)
-                .skjæringstidspunkt(skjæringstidspunkt)
                 .totalGrad(totalGrad)
                 .aktuellDagsinntekt(aktuellDagsinntekt)
                 .arbeidsgiverbeløp(arbeidsgiverbeløp)
                 .personbeløp(personbeløp)
                 .er6GBegrenset(er6GBegrenset)
-                .arbeidsgiverperiode(arbeidsgiverperiode)
                 .grunnbeløpsgrense(grunnbeløpgrense?.reflection { årlig, _, _, _ -> årlig })
                 .tilstand(tilstand)
         }
@@ -183,7 +173,6 @@ class Økonomi private constructor(
             grad: Int,
             arbeidsgiverRefusjonsbeløp: Int,
             dekningsgrunnlag: Int,
-            skjæringstidspunkt: LocalDate?,
             totalGrad: Int,
             aktuellDagsinntekt: Int,
             arbeidsgiverbeløp: Int?,
@@ -194,7 +183,6 @@ class Økonomi private constructor(
         medData { grad: Double,
                   arbeidsgiverRefusjonsbeløp: Double,
                   dekningsgrunnlag: Double,
-                  skjæringstidspunkt: LocalDate?,
                   totalGrad: Double,
                   aktuellDagsinntekt: Double,
                   arbeidsgiverbeløp: Double?,
@@ -204,7 +192,6 @@ class Økonomi private constructor(
                 grad.roundToInt(),
                 arbeidsgiverRefusjonsbeløp.roundToInt(),
                 dekningsgrunnlag.roundToInt(),
-                skjæringstidspunkt,
                 totalGrad.roundToInt(),
                 aktuellDagsinntekt.roundToInt(),
                 arbeidsgiverbeløp?.roundToInt(),
@@ -217,7 +204,6 @@ class Økonomi private constructor(
         medData { grad: Double,
                   _: Double,
                   _: Double?,
-                  _: LocalDate?,
                   totalGrad: Double,
                   aktuellDagsinntekt: Double,
                   _: Double?,
@@ -227,14 +213,13 @@ class Økonomi private constructor(
         }
 
     fun medAvrundetData(block: (grad: Int, aktuellDagsinntekt: Int) -> Unit) {
-        medAvrundetData { grad, _, _, _, _, aktuellDagsinntekt, _, _, _ -> block(grad, aktuellDagsinntekt) }
+        medAvrundetData { grad, _, _, _, aktuellDagsinntekt, _, _, _ -> block(grad, aktuellDagsinntekt) }
     }
 
     private fun <R> medDataFraBeløp(lambda: MedØkonomiData<R>) = lambda(
         grad.toDouble(),
         arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig },
         dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig },
-        skjæringstidspunkt,
         totalGrad.toDouble(),
         aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig },
         arbeidsgiverbeløp!!.reflection { _, _, daglig, _ -> daglig },
@@ -246,10 +231,10 @@ class Økonomi private constructor(
         grad.toDouble(),
         arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig },
         dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig },
-        skjæringstidspunkt,
         totalGrad.toDouble(),
         aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig },
-        null, null, null
+        null,
+        null, null
     )
 
     private fun utbetalingsgrad() = tilstand.utbetalingsgrad(this)
@@ -272,10 +257,8 @@ class Økonomi private constructor(
         grad: Prosentdel = this.grad,
         totalgrad: Prosentdel = this.totalGrad,
         arbeidsgiverRefusjonsbeløp: Inntekt = this.arbeidsgiverRefusjonsbeløp,
-        arbeidsgiverperiode: ArbeidsgiverperiodePort? = this.arbeidsgiverperiode,
         aktuellDagsinntekt: Inntekt = this.aktuellDagsinntekt,
         dekningsgrunnlag: Inntekt = this.dekningsgrunnlag,
-        skjæringstidspunkt: LocalDate? = this.skjæringstidspunkt,
         grunnbeløpgrense: Inntekt? = this.grunnbeløpgrense,
         arbeidsgiverbeløp: Inntekt? = this.arbeidsgiverbeløp,
         personbeløp: Inntekt? = this.personbeløp,
@@ -285,10 +268,8 @@ class Økonomi private constructor(
         grad = grad,
         totalGrad = totalgrad,
         arbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp,
-        arbeidsgiverperiode = arbeidsgiverperiode,
         aktuellDagsinntekt = aktuellDagsinntekt,
         dekningsgrunnlag = dekningsgrunnlag,
-        skjæringstidspunkt = skjæringstidspunkt,
         grunnbeløpgrense = grunnbeløpgrense,
         arbeidsgiverbeløp = arbeidsgiverbeløp,
         personbeløp = personbeløp,
@@ -312,8 +293,6 @@ class Økonomi private constructor(
             aktuellDagsinntekt: Inntekt,
             refusjonsbeløp: Inntekt,
             dekningsgrunnlag: Inntekt,
-            skjæringstidspunkt: LocalDate,
-            arbeidsgiverperiode: ArbeidsgiverperiodePort?,
             `6G`: Inntekt
         ): Økonomi {
             throw IllegalStateException("Kan ikke sette inntekt i tilstand ${this::class.simpleName}")
@@ -350,17 +329,13 @@ class Økonomi private constructor(
                 aktuellDagsinntekt: Inntekt,
                 refusjonsbeløp: Inntekt,
                 dekningsgrunnlag: Inntekt,
-                skjæringstidspunkt: LocalDate,
-                arbeidsgiverperiode: ArbeidsgiverperiodePort?,
                 `6G`: Inntekt
             ) = Økonomi(
                 grad = økonomi.grad,
                 totalGrad = økonomi.totalGrad,
-                arbeidsgiverperiode = arbeidsgiverperiode ?: økonomi.arbeidsgiverperiode,
                 arbeidsgiverRefusjonsbeløp = refusjonsbeløp,
                 aktuellDagsinntekt = aktuellDagsinntekt,
                 dekningsgrunnlag = dekningsgrunnlag,
-                skjæringstidspunkt = skjæringstidspunkt,
                 grunnbeløpgrense = `6G`,
                 tilstand = HarInntekt
             )
@@ -376,7 +351,6 @@ class Økonomi private constructor(
                     grad = økonomi.grad.toDouble(),
                     arbeidsgiverRefusjonsbeløp = økonomi.arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig },
                     dekningsgrunnlag = økonomi.dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig },
-                    skjæringstidspunkt = null,
                     totalGrad = økonomi.totalGrad.toDouble(),
                     aktuellDagsinntekt = økonomi.aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig },
                     arbeidsgiverbeløp = null,
@@ -401,17 +375,13 @@ class Økonomi private constructor(
                 aktuellDagsinntekt: Inntekt,
                 refusjonsbeløp: Inntekt,
                 dekningsgrunnlag: Inntekt,
-                skjæringstidspunkt: LocalDate,
-                arbeidsgiverperiode: ArbeidsgiverperiodePort?,
                 `6G`: Inntekt
             ) = Økonomi(
                 grad = økonomi.grad,
                 totalGrad = økonomi.totalGrad,
-                arbeidsgiverperiode = arbeidsgiverperiode ?: økonomi.arbeidsgiverperiode,
                 arbeidsgiverRefusjonsbeløp = refusjonsbeløp,
                 aktuellDagsinntekt = aktuellDagsinntekt,
                 dekningsgrunnlag = dekningsgrunnlag,
-                skjæringstidspunkt = skjæringstidspunkt,
                 grunnbeløpgrense = `6G`,
                 tilstand = IkkeBetalt
             )
@@ -427,7 +397,6 @@ class Økonomi private constructor(
                     grad = økonomi.grad.toDouble(),
                     arbeidsgiverRefusjonsbeløp = økonomi.arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig },
                     dekningsgrunnlag = økonomi.dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig },
-                    skjæringstidspunkt = null,
                     totalGrad = økonomi.totalGrad.toDouble(),
                     aktuellDagsinntekt = økonomi.aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig },
                     arbeidsgiverbeløp = null,
@@ -507,10 +476,8 @@ class Økonomi private constructor(
                 grad.prosent,
                 totalGrad?.prosent!!,
                 arbeidsgiverRefusjonsbeløp?.daglig!!,
-                arbeidsgiverperiode,
                 aktuellDagsinntekt?.daglig!!,
                 dekningsgrunnlag?.daglig!!,
-                skjæringstidspunkt,
                 grunnbeløpgrense?.årlig,
                 arbeidsgiverbeløp?.daglig,
                 personbeløp?.daglig,
@@ -525,13 +492,11 @@ abstract class ØkonomiBuilder {
     protected var grad by Delegates.notNull<Double>()
     protected var arbeidsgiverRefusjonsbeløp: Double? = null
     protected var dekningsgrunnlag: Double? = null
-    protected var skjæringstidspunkt: LocalDate? = null
     protected var totalGrad: Double? = null
     protected var aktuellDagsinntekt: Double? = null
     protected var arbeidsgiverbeløp: Double? = null
     protected var personbeløp: Double? = null
     protected var er6GBegrenset: Boolean? = null
-    protected var arbeidsgiverperiode: ArbeidsgiverperiodePort? = null
     protected var grunnbeløpgrense: Double? = null
     protected var tilstand: Økonomi.Tilstand? = null
 
@@ -544,10 +509,6 @@ abstract class ØkonomiBuilder {
         this.tilstand = tilstand
     }
 
-    fun arbeidsgiverperiode(arbeidsgiverperiode: ArbeidsgiverperiodePort?) = apply {
-        this.arbeidsgiverperiode = arbeidsgiverperiode
-    }
-
     fun grunnbeløpsgrense(grunnbeløpgrense: Double?) = apply {
         this.grunnbeløpgrense = grunnbeløpgrense
     }
@@ -558,10 +519,6 @@ abstract class ØkonomiBuilder {
 
     fun dekningsgrunnlag(dekningsgrunnlag: Double?) = apply {
         this.dekningsgrunnlag = dekningsgrunnlag
-    }
-
-    fun skjæringstidspunkt(skjæringstidspunkt: LocalDate?) = apply {
-        this.skjæringstidspunkt = skjæringstidspunkt
     }
 
     fun totalGrad(totalGrad: Double?) = apply {
@@ -594,16 +551,10 @@ fun interface MedØkonomiData<R> {
         grad: Double,
         arbeidsgiverRefusjonsbeløp: Double,
         dekningsgrunnlag: Double,
-        skjæringstidspunkt: LocalDate?,
         totalGrad: Double,
         aktuellDagsinntekt: Double,
         arbeidsgiverbeløp: Double?,
         personbeløp: Double?,
         er6GBegrenset: Boolean?
     ): R
-}
-
-interface ArbeidsgiverperiodePort {
-    fun firstOrNull(): LocalDate?
-    fun toList(): List<LocalDate>
 }

@@ -159,7 +159,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         ))
         val økonomi: Økonomi = historikk.utenInntekt(1.januar, Økonomi.ikkeBetalt(), null)
         assertEquals(INGEN, økonomi.inspektør.aktuellDagsinntekt)
-        assertNull(økonomi.inspektør.skjæringstidspunkt)
     }
 
     @Test
@@ -180,12 +179,10 @@ internal class VilkårsgrunnlagHistorikkTest {
         historikk.medInntekt(ORGNR, 1.januar, Økonomi.ikkeBetalt(), null, NormalArbeidstaker, NullObserver).also { økonomi ->
             assertEquals(INGEN, økonomi.inspektør.aktuellDagsinntekt)
             assertEquals(INGEN, økonomi.inspektør.dekningsgrunnlag)
-            assertNull(økonomi.inspektør.skjæringstidspunkt)
         }
         historikk.medInntekt(ORGNR, 3.januar, Økonomi.ikkeBetalt(), null, NormalArbeidstaker, NullObserver).also { økonomi ->
             assertNotNull(økonomi)
             assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
-            assertNull(økonomi.inspektør.skjæringstidspunkt)
         }
     }
 

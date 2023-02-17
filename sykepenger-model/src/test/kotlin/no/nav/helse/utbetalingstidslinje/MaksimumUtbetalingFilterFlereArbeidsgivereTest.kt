@@ -36,7 +36,7 @@ internal class MaksimumUtbetalingFilterFlereArbeidsgivereTest {
         val maksDagsats = Grunnbeløp.`6G`.dagsats(dato)
         MaksimumUtbetalingFilter().betal(listOf(ag2.first, ag1.first), periode, aktivitetslogg, MaskinellJurist())
 
-        val arbeidsgiverbeløp = { økonomi: Økonomi -> økonomi.medAvrundetData { _, _, _, _, _, _, arbeidsgiverbeløp, _, _ -> arbeidsgiverbeløp!! } }
+        val arbeidsgiverbeløp = { økonomi: Økonomi -> økonomi.medAvrundetData { _, _, _, _, _, arbeidsgiverbeløp, _, _ -> arbeidsgiverbeløp!! } }
         assertTrue(ag1.first.inspektør.økonomi(arbeidsgiverbeløp).all { it.daglig == maksDagsats }) {
             "noen dager har fått nytt grunnbeløp"
         }

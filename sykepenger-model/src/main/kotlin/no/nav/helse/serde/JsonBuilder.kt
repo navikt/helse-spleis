@@ -1764,13 +1764,7 @@ internal class JsonBuilder : AbstractBuilder() {
         fun build() = mutableMapOf<String, Any>().apply {
             this["grad"] = grad
             this.compute("totalGrad") { _, _ -> totalGrad }
-            this.compute("arbeidsgiverperiode") { _, _ ->
-                arbeidsgiverperiode?.toList()?.grupperSammenhengendePerioder()?.map {
-                    mapOf("fom" to it.start, "tom" to it.endInclusive)
-                }
-            }
             this.compute("arbeidsgiverRefusjonsbeløp") { _, _ -> arbeidsgiverRefusjonsbeløp }
-            this.compute("skjæringstidspunkt") { _, _ -> skjæringstidspunkt }
             this.compute("grunnbeløpgrense") { _, _ -> grunnbeløpgrense }
             this.compute("dekningsgrunnlag") { _, _ -> dekningsgrunnlag }
             this.compute("aktuellDagsinntekt") { _, _ -> aktuellDagsinntekt }

@@ -84,8 +84,6 @@ import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
-import no.nav.helse.utbetalingslinjer.utbetalingport
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.InfotrygdArbeidsgiver
@@ -1342,10 +1340,8 @@ internal data class PersonData(
 
         data class UtbetalingsdagData(
             private val type: TypeData,
-            private val arbeidsgiverperiode: List<ArbeidsgiverData.PeriodeData>?,
             private val aktuellDagsinntekt: Double,
             private val dekningsgrunnlag: Double,
-            private val skjæringstidspunkt: LocalDate?,
             private val grunnbeløpgrense: Double?,
             private val begrunnelse: BegrunnelseData?,
             private val begrunnelser: List<BegrunnelseData>?,
@@ -1361,10 +1357,8 @@ internal data class PersonData(
             init {
                 builder.grad(grad)
                     .totalGrad(totalGrad)
-                    .arbeidsgiverperiode(arbeidsgiverperiode?.map { it.tilPeriode() }?.let { Arbeidsgiverperiode(it) }?.utbetalingport())
                     .aktuellDagsinntekt(aktuellDagsinntekt)
                     .dekningsgrunnlag(dekningsgrunnlag)
-                    .skjæringstidspunkt(skjæringstidspunkt)
                     .grunnbeløpsgrense(grunnbeløpgrense)
                     .arbeidsgiverRefusjonsbeløp(arbeidsgiverRefusjonsbeløp)
                     .arbeidsgiverbeløp(arbeidsgiverbeløp)

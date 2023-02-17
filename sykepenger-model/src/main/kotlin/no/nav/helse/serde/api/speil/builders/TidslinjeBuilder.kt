@@ -208,7 +208,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
     ) {
         // TODO: Trenger speil _egentlig_ doubles?
         val (grad, totalGrad) = økonomi.medData { grad, totalGrad, _ -> grad to totalGrad }
-        økonomi.medAvrundetData { _, refusjonsbeløp, _, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, _ ->
+        økonomi.medAvrundetData { _, refusjonsbeløp, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, _ ->
             utbetalingstidslinje.add(
                 NavDag(
                     type = UtbetalingstidslinjedagType.NavDag,

@@ -263,12 +263,10 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val økonomi = listOf(arbeidsgiverInntektsopplysning).medInntekt(
             organisasjonsnummer = "orgnummer",
             `6G` = `6G`.beløp(1.januar),
-            skjæringstidspunkt = 1.januar,
             dato = 1.januar,
             økonomi = Økonomi.sykdomsgrad(100.prosent),
             regler = NormalArbeidstaker,
             subsumsjonObserver = NullObserver,
-            arbeidsgiverperiode = null
         )
         assertNotNull(økonomi)
         assertEquals(Inntekt.INGEN, økonomi.inspektør.dekningsgrunnlag)
