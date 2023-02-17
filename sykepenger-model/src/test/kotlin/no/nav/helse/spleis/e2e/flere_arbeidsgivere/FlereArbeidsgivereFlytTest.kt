@@ -110,7 +110,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Periode i AUU for a2 hensyntas på utbetalingen til a1`() {
+    fun `utbetaling på ag1 reduseres selv om det ikke utbetales noe til ag2`() {
         nyeVedtak(1.januar, 31.januar, a1, a2, inntekt = 40000.månedlig)
         forlengVedtak(1.februar, 28.februar, a1)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 10.mars), orgnummer = a2)
@@ -157,15 +157,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
-        assertForventetFeil(
-            forklaring = "vi avviser de 16 første dagene på AG1 fordi det er ny arbeidsgiverperiode på AG2: https://trello.com/c/NKpQWdsd",
-            nå = {
-                assertEquals(12, inspektør(a1).utbetalingstidslinjer(3.vedtaksperiode).inspektør.avvistDagTeller)
-            },
-            ønsket = {
-                assertEquals(0, inspektør(a1).utbetalingstidslinjer(3.vedtaksperiode).inspektør.avvistDagTeller)
-            }
-        )
+        assertEquals(0, inspektør(a1).utbetalingstidslinjer(3.vedtaksperiode).inspektør.avvistDagTeller)
     }
 
     @Test

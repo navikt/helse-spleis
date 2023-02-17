@@ -112,7 +112,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertEquals(1.januar til 31.januar, inspektør.sykdomstidslinje.periode())
         håndterYtelser(1.vedtaksperiode)
         (1..16).forEach {
-            assertEquals(0.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+            assertEquals(100.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
         }
         (17..25).forEach {
             assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)

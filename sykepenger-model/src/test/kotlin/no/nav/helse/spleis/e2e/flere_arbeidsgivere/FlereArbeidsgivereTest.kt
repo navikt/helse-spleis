@@ -768,20 +768,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 )
             )
             håndterYtelser(1.vedtaksperiode)
-            assertForventetFeil(
-                forklaring = "Ønsket oppførsel: arbeidsgiverperiodedag må ha ekte grad (ikke 0%), da den teller med i beregning av total sykdomsgrad " +
-                        "som kan slå ut negativt ved flere arbeidsgivere. Skjer eksempelvis dersom man beregner totalgrad av arbeidsgiverperiodedag hos én " +
-                        "arbeidsgiver og sykedag med 20% sykdom hos en annen arbeidsgiver",
-                nå = {
-                    assertTrue(a1.inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistDagTeller > 0)
-                },
-                ønsket = {
-                    assertEquals(
-                        0,
-                        a1.inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistDagTeller
-                    )
-                }
-            )
+            assertEquals(0, a1.inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistDagTeller)
         }
     }
 

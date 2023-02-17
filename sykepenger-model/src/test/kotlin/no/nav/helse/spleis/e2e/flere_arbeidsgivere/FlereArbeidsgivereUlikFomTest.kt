@@ -952,7 +952,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a4)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
-        assertEquals(18.januar, a1Linje.fom)
+        assertEquals(17.januar, a1Linje.fom)
         assertEquals(15.mars, a1Linje.tom)
         assertEquals(113, a1Linje.beløp)
 

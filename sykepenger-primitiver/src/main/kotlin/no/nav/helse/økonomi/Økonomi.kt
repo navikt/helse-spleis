@@ -32,14 +32,17 @@ class Økonomi private constructor(
         fun sykdomsgrad(grad: Prosentdel) =
             Økonomi(grad)
 
-        fun ikkeBetalt() = sykdomsgrad(0.prosent)
+        fun ikkeBetalt(grad: Prosentdel = 0.prosent) = sykdomsgrad(grad)
 
-        fun ikkeBetalt(arbeidsgiverperiode: ArbeidsgiverperiodePort?) = ikkeBetalt().also {
+        fun ikkeBetalt(arbeidsgiverperiode: ArbeidsgiverperiodePort?, grad: Prosentdel = 0.prosent) = ikkeBetalt(grad).also {
             it.arbeidsgiverperiode = arbeidsgiverperiode
         }
 
         fun totalSykdomsgrad(økonomiList: List<Økonomi>) =
-            Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.grad() to it.aktuellDagsinntekt })
+            Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.sykdomsgrad() to it.aktuellDagsinntekt })
+
+        fun totalUtbetalingsgrad(økonomiList: List<Økonomi>) =
+            Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.utbetalingsgrad() to it.aktuellDagsinntekt })
 
         fun List<Økonomi>.avgrensTilArbeidsgiverperiode(periode: Periode): Periode? {
             return map { it.arbeidsgiverperiode }
@@ -49,16 +52,17 @@ class Økonomi private constructor(
         }
 
         fun betal(økonomiList: List<Økonomi>): List<Økonomi> = økonomiList.also {
+            val utbetalingsgrad = totalUtbetalingsgrad(økonomiList)
             delteUtbetalinger(it)
             totalSykdomsgrad(økonomiList).also { totalSykdomsgrad ->
                 økonomiList.forEach { økonomi -> økonomi.totalGrad = totalSykdomsgrad }
             }
-            fordelBeløp(it)
+            fordelBeløp(it, utbetalingsgrad)
         }
 
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.forEach { it.betal() }
 
-        private fun fordelBeløp(økonomiList: List<Økonomi>) {
+        private fun fordelBeløp(økonomiList: List<Økonomi>, utbetalingsgrad: Prosentdel) {
             val totalArbeidsgiver = totalArbeidsgiver(økonomiList)
             val totalPerson = totalPerson(økonomiList)
             val total = totalArbeidsgiver + totalPerson
@@ -70,7 +74,7 @@ class Økonomi private constructor(
             val sykepengegrunnlagBegrenset6G = minOf(grunnlagForSykepengegrunnlag, grunnbeløp)
             val er6GBegrenset = grunnlagForSykepengegrunnlag > grunnbeløp
 
-            val sykepengegrunnlag = (sykepengegrunnlagBegrenset6G * økonomiList.first().totalGrad).rundTilDaglig()
+            val sykepengegrunnlag = (sykepengegrunnlagBegrenset6G * utbetalingsgrad).rundTilDaglig()
             fordel(økonomiList, totalArbeidsgiver, sykepengegrunnlag, { økonomi, inntekt -> økonomi.arbeidsgiverbeløp = inntekt }, arbeidsgiverBeløp)
             val totalArbeidsgiverrefusjon = totalArbeidsgiver(økonomiList)
             fordel(økonomiList, total - totalArbeidsgiverrefusjon, sykepengegrunnlag - totalArbeidsgiverrefusjon, { økonomi, inntekt -> økonomi.personbeløp = inntekt }, personBeløp)
@@ -247,22 +251,41 @@ class Økonomi private constructor(
         null, null, null
     )
 
-    private fun grad() = tilstand.grad(this)
+    private fun utbetalingsgrad() = tilstand.utbetalingsgrad(this)
+    private fun sykdomsgrad() = tilstand.sykdomsgrad(this)
 
     private fun betal() = this.also { tilstand.betal(this) }
 
     fun er6GBegrenset() = tilstand.er6GBegrenset(this)
 
     private fun _betal() {
-        val total = (dekningsgrunnlag * grad()).rundTilDaglig()
-        val gradertArbeidsgiverRefusjonsbeløp = (arbeidsgiverRefusjonsbeløp * grad()).rundTilDaglig()
+        val total = (dekningsgrunnlag * utbetalingsgrad()).rundTilDaglig()
+        val gradertArbeidsgiverRefusjonsbeløp = (arbeidsgiverRefusjonsbeløp * utbetalingsgrad()).rundTilDaglig()
         arbeidsgiverbeløp = gradertArbeidsgiverRefusjonsbeløp.coerceAtMost(total)
         personbeløp = (total - arbeidsgiverbeløp!!).coerceAtLeast(INGEN)
     }
 
+    fun ikkeBetalt(): Økonomi {
+        return Økonomi(
+            grad = grad,
+            totalGrad = totalGrad,
+            arbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp,
+            arbeidsgiverperiode = arbeidsgiverperiode,
+            aktuellDagsinntekt = aktuellDagsinntekt,
+            dekningsgrunnlag = dekningsgrunnlag,
+            skjæringstidspunkt = skjæringstidspunkt,
+            grunnbeløpgrense = grunnbeløpgrense,
+            arbeidsgiverbeløp = arbeidsgiverbeløp,
+            personbeløp = personbeløp,
+            er6GBegrenset = er6GBegrenset,
+            tilstand = Tilstand.IkkeBetalt
+        )
+    }
+
     sealed class Tilstand {
 
-        internal open fun grad(økonomi: Økonomi) = økonomi.grad
+        internal open fun utbetalingsgrad(økonomi: Økonomi) = sykdomsgrad(økonomi)
+        internal open fun sykdomsgrad(økonomi: Økonomi) = økonomi.grad
 
         internal abstract fun <R> medData(økonomi: Økonomi, lambda: MedØkonomiData<R>): R
 
@@ -306,6 +329,8 @@ class Økonomi private constructor(
                 økonomi._buildKunGrad(builder)
             }
 
+            override fun utbetalingsgrad(økonomi: Økonomi) = 0.prosent
+
             override fun inntekt(
                 økonomi: Økonomi,
                 aktuellDagsinntekt: Inntekt,
@@ -324,6 +349,57 @@ class Økonomi private constructor(
                 skjæringstidspunkt = skjæringstidspunkt,
                 grunnbeløpgrense = `6G`,
                 tilstand = HarInntekt
+            )
+
+            override fun betal(økonomi: Økonomi) {
+                økonomi.arbeidsgiverbeløp = INGEN
+                økonomi.personbeløp = INGEN
+                økonomi.tilstand = HarBeløp
+            }
+
+            override fun <R> medData(økonomi: Økonomi, lambda: MedØkonomiData<R>) =
+                lambda(
+                    grad = økonomi.grad.toDouble(),
+                    arbeidsgiverRefusjonsbeløp = økonomi.arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig },
+                    dekningsgrunnlag = økonomi.dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig },
+                    skjæringstidspunkt = null,
+                    totalGrad = økonomi.totalGrad.toDouble(),
+                    aktuellDagsinntekt = økonomi.aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig },
+                    arbeidsgiverbeløp = null,
+                    personbeløp = null,
+                    er6GBegrenset = null
+                )
+        }
+
+        // Tenkt tilstand for arbeidsgiverperiodedager: vi trenger sykdomsgraden, men ikke utbetale noe
+        internal object IkkeBetalt : Tilstand() {
+
+            override fun lås(økonomi: Økonomi) = økonomi
+
+            override fun builder(økonomi: Økonomi, builder: ØkonomiBuilder) {
+                økonomi._buildKunGrad(builder)
+            }
+
+            override fun utbetalingsgrad(økonomi: Økonomi) = 0.prosent
+
+            override fun inntekt(
+                økonomi: Økonomi,
+                aktuellDagsinntekt: Inntekt,
+                refusjonsbeløp: Inntekt,
+                dekningsgrunnlag: Inntekt,
+                skjæringstidspunkt: LocalDate,
+                arbeidsgiverperiode: ArbeidsgiverperiodePort?,
+                `6G`: Inntekt
+            ) = Økonomi(
+                grad = økonomi.grad,
+                totalGrad = økonomi.totalGrad,
+                arbeidsgiverperiode = arbeidsgiverperiode ?: økonomi.arbeidsgiverperiode,
+                arbeidsgiverRefusjonsbeløp = refusjonsbeløp,
+                aktuellDagsinntekt = aktuellDagsinntekt,
+                dekningsgrunnlag = dekningsgrunnlag,
+                skjæringstidspunkt = skjæringstidspunkt,
+                grunnbeløpgrense = `6G`,
+                tilstand = IkkeBetalt
             )
 
             override fun betal(økonomi: Økonomi) {
@@ -373,7 +449,8 @@ class Økonomi private constructor(
 
         object Låst : Tilstand() {
 
-            override fun grad(økonomi: Økonomi) = 0.prosent
+            override fun utbetalingsgrad(økonomi: Økonomi) = 0.prosent
+            override fun sykdomsgrad(økonomi: Økonomi) = 0.prosent
 
             override fun lås(økonomi: Økonomi) = økonomi
 
@@ -392,7 +469,8 @@ class Økonomi private constructor(
 
         object LåstMedBeløp : Tilstand() {
 
-            override fun grad(økonomi: Økonomi) = 0.prosent
+            override fun sykdomsgrad(økonomi: Økonomi) = 0.prosent
+            override fun utbetalingsgrad(økonomi: Økonomi) = 0.prosent
 
             override fun lås(økonomi: Økonomi) = økonomi
 

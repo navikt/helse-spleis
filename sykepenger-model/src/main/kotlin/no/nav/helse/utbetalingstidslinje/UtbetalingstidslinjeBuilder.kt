@@ -67,7 +67,7 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) {
         periodebuilder.arbeidsgiverperiodedag(dato, økonomi, kilde)
-        builder.addArbeidsgiverperiodedag(dato, inntekter.medInntekt(dato, nåværendeArbeidsgiverperiode))
+        builder.addArbeidsgiverperiodedag(dato, inntekter.medInntekt(dato, nåværendeArbeidsgiverperiode, økonomi.ikkeBetalt()))
     }
 
     override fun ukjentDag(dato: LocalDate) {
