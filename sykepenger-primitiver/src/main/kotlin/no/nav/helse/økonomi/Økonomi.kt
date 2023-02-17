@@ -38,10 +38,18 @@ class Økonomi private constructor(
             it.arbeidsgiverperiode = arbeidsgiverperiode
         }
 
-        fun totalSykdomsgrad(økonomiList: List<Økonomi>) =
-            Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.sykdomsgrad() to it.aktuellDagsinntekt })
+        fun List<Økonomi>.totalSykdomsgrad() = totalSykdomsgrad(this).first().totalGrad
+        fun totalSykdomsgrad(økonomiList: List<Økonomi>): List<Økonomi> {
+            val totalgrad = Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.sykdomsgrad() to it.aktuellDagsinntekt })
+            return økonomiList.map { økonomi: Økonomi ->
+                // todo: lage ny instans for immutability
+                økonomi.also { it.totalGrad = totalgrad }
+            }
+        }
 
-        fun totalUtbetalingsgrad(økonomiList: List<Økonomi>) =
+        fun List<Økonomi>.erUnderGrensen() = any { it.totalGrad.erUnderGrensen() }
+
+        private fun totalUtbetalingsgrad(økonomiList: List<Økonomi>) =
             Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.utbetalingsgrad() to it.aktuellDagsinntekt })
 
         fun List<Økonomi>.avgrensTilArbeidsgiverperiode(periode: Periode): Periode? {
@@ -54,9 +62,6 @@ class Økonomi private constructor(
         fun betal(økonomiList: List<Økonomi>): List<Økonomi> = økonomiList.also {
             val utbetalingsgrad = totalUtbetalingsgrad(økonomiList)
             delteUtbetalinger(it)
-            totalSykdomsgrad(økonomiList).also { totalSykdomsgrad ->
-                økonomiList.forEach { økonomi -> økonomi.totalGrad = totalSykdomsgrad }
-            }
             fordelBeløp(it, utbetalingsgrad)
         }
 
@@ -265,22 +270,35 @@ class Økonomi private constructor(
         personbeløp = (total - arbeidsgiverbeløp!!).coerceAtLeast(INGEN)
     }
 
-    fun ikkeBetalt(): Økonomi {
-        return Økonomi(
-            grad = grad,
-            totalGrad = totalGrad,
-            arbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp,
-            arbeidsgiverperiode = arbeidsgiverperiode,
-            aktuellDagsinntekt = aktuellDagsinntekt,
-            dekningsgrunnlag = dekningsgrunnlag,
-            skjæringstidspunkt = skjæringstidspunkt,
-            grunnbeløpgrense = grunnbeløpgrense,
-            arbeidsgiverbeløp = arbeidsgiverbeløp,
-            personbeløp = personbeløp,
-            er6GBegrenset = er6GBegrenset,
-            tilstand = Tilstand.IkkeBetalt
-        )
-    }
+    fun ikkeBetalt() = kopierMed(tilstand = Tilstand.IkkeBetalt)
+
+    private fun kopierMed(
+        grad: Prosentdel = this.grad,
+        totalgrad: Prosentdel = this.totalGrad,
+        arbeidsgiverRefusjonsbeløp: Inntekt = this.arbeidsgiverRefusjonsbeløp,
+        arbeidsgiverperiode: ArbeidsgiverperiodePort? = this.arbeidsgiverperiode,
+        aktuellDagsinntekt: Inntekt = this.aktuellDagsinntekt,
+        dekningsgrunnlag: Inntekt = this.dekningsgrunnlag,
+        skjæringstidspunkt: LocalDate? = this.skjæringstidspunkt,
+        grunnbeløpgrense: Inntekt? = this.grunnbeløpgrense,
+        arbeidsgiverbeløp: Inntekt? = this.arbeidsgiverbeløp,
+        personbeløp: Inntekt? = this.personbeløp,
+        er6GBegrenset: Boolean? = this.er6GBegrenset,
+        tilstand: Tilstand = this.tilstand,
+    ) = Økonomi(
+        grad = grad,
+        totalGrad = totalgrad,
+        arbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp,
+        arbeidsgiverperiode = arbeidsgiverperiode,
+        aktuellDagsinntekt = aktuellDagsinntekt,
+        dekningsgrunnlag = dekningsgrunnlag,
+        skjæringstidspunkt = skjæringstidspunkt,
+        grunnbeløpgrense = grunnbeløpgrense,
+        arbeidsgiverbeløp = arbeidsgiverbeløp,
+        personbeløp = personbeløp,
+        er6GBegrenset = er6GBegrenset,
+        tilstand = tilstand
+    )
 
     sealed class Tilstand {
 
@@ -570,8 +588,6 @@ abstract class ØkonomiBuilder {
         this.er6GBegrenset = er6GBegrenset
     }
 }
-
-fun List<Økonomi>.totalSykdomsgrad(): Prosentdel = Økonomi.totalSykdomsgrad(this)
 
 fun List<Økonomi>.betal() = Økonomi.betal(this)
 

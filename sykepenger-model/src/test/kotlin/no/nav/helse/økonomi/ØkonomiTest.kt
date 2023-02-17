@@ -16,6 +16,8 @@ import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Prosentdel.Companion.fraRatio
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi.Companion.avgrensTilArbeidsgiverperiode
+import no.nav.helse.økonomi.Økonomi.Companion.erUnderGrensen
+import no.nav.helse.økonomi.Økonomi.Companion.totalSykdomsgrad
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -56,7 +58,7 @@ internal class ØkonomiTest {
             100.prosent.sykdomsgrad.inntekt(inntekt, dekningsgrunnlag = inntekt, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar)),
             50.prosent.sykdomsgrad.inntekt(inntekt, dekningsgrunnlag = INGEN, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar))
         )
-        assertEquals(75.prosent, Økonomi.totalSykdomsgrad(økonomi))
+        assertEquals(75.prosent, økonomi.totalSykdomsgrad())
     }
 
     @Test
@@ -403,7 +405,9 @@ internal class ØkonomiTest {
         val b = 80.prosent.sykdomsgrad.inntekt(10000.månedlig, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 10000.månedlig * 90.prosent)
         val c = 20.prosent.sykdomsgrad.inntekt(31000.månedlig, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 31000.månedlig * 25.prosent)
         listOf(a, b, c).betal().also {
-            assertEquals(fraRatio(247.0.toBigDecimal().divide(620.0.toBigDecimal(), MathContext.DECIMAL128).toString()), it.totalSykdomsgrad())
+            val forventet = fraRatio(247.0.toBigDecimal().divide(620.0.toBigDecimal(), MathContext.DECIMAL128).toString())
+            val faktisk = it.totalSykdomsgrad()
+            assertEquals(forventet, faktisk)
             // grense = 864
         }
         listOf(a, b, c).forEach {

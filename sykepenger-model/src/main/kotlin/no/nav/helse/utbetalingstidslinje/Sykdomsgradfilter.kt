@@ -10,6 +10,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvis
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvisteDager
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.periode
 import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Økonomi.Companion.erUnderGrensen
 import no.nav.helse.økonomi.Økonomi.Companion.totalSykdomsgrad
 
 internal object Sykdomsgradfilter: UtbetalingstidslinjerFilter {
