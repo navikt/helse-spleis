@@ -474,9 +474,7 @@ class Utbetaling private constructor(
     }
 
     internal fun utbetalingstidslinje() = utbetalingstidslinje
-
-    internal fun utbetalingstidslinje(periode: Periode) =
-        utbetalingstidslinje.avgrensSisteArbeidsgiverperiode(periode)
+    internal fun utbetalingstidslinje(periode: Periode) = utbetalingstidslinje.subset(periode)
 
     private fun overfør(nesteTilstand: Tilstand, hendelse: IAktivitetslogg) {
         overfør(hendelse)

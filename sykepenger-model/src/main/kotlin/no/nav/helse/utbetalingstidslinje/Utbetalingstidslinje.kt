@@ -15,7 +15,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.økonomi.Økonomi
-import no.nav.helse.økonomi.Økonomi.Companion.avgrensTilArbeidsgiverperiode
 
 /**
  * Forstår utbetalingsforpliktelser for en bestemt arbeidsgiver
@@ -132,20 +131,6 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
         if (periode == periode()) return this
         return Utbetalingstidslinje(utbetalingsdager.filter { it.dato in periode }.toMutableList())
     }
-
-    internal fun avgrensSisteArbeidsgiverperiode(periode: Periode): Utbetalingstidslinje {
-        val tidslinje = subset(periode)
-        val oppdatertPeriode = tidslinje
-            .map { it.økonomi }
-            .avgrensTilArbeidsgiverperiode(periode)
-            ?.takeUnless { justertForArbeidsgiverperiode ->
-                harUtbetalinger(justertForArbeidsgiverperiode.start til periode.start.minusDays(1))
-            }
-        return oppdatertPeriode?.let { subset(it) } ?: tidslinje
-    }
-
-    private fun harUtbetalinger(periode: Periode) =
-        subset(periode).any { it is UkjentDag || it is NavDag || it is NavHelgDag || it is ForeldetDag }
 
     internal fun kutt(sisteDato: LocalDate) = subset(LocalDate.MIN til sisteDato)
 

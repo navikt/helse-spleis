@@ -15,7 +15,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Prosentdel.Companion.fraRatio
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import no.nav.helse.økonomi.Økonomi.Companion.avgrensTilArbeidsgiverperiode
 import no.nav.helse.økonomi.Økonomi.Companion.erUnderGrensen
 import no.nav.helse.økonomi.Økonomi.Companion.totalSykdomsgrad
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -72,41 +71,6 @@ internal class ØkonomiTest {
         }
         økonomi.builder(builder)
         assertNotNull(builder.arbeidsgiverperiode())
-    }
-
-    @Test
-    fun `avgrenser ikke periode dersom arbeidsgiverperioden er null`() {
-        val periode = 1.januar til 31.januar
-        val økonomi = Økonomi.sykdomsgrad(100.prosent)
-        assertNull(listOf(økonomi).avgrensTilArbeidsgiverperiode(periode))
-        assertEquals(periode, periode) { "periode skal ikke muteres" }
-    }
-
-    @Test
-    fun `avgrenser ikke periode dersom arbeidsgiverperioden lik perioden`() {
-        val periode = 1.januar til 31.januar
-        val økonomi = Økonomi.sykdomsgrad(100.prosent).inntekt(
-            INGEN,
-            skjæringstidspunkt = 1.januar,
-            `6G` = `6G`.beløp(1.januar),
-            arbeidsgiverperiode = Arbeidsgiverperiode(listOf(periode.start til periode.start.plusDays(16)))
-        )
-        assertNull(listOf(økonomi).avgrensTilArbeidsgiverperiode(periode))
-        assertEquals(periode, periode) { "periode skal ikke muteres" }
-    }
-
-    @Test
-    fun `avgrenser periode til arbeidsgiverperioden`() {
-        val arbeidsgiverperiode = 1.januar til 16.januar
-        val periode = 17.januar til 31.januar
-        val økonomi = Økonomi.sykdomsgrad(100.prosent).inntekt(
-            INGEN,
-            skjæringstidspunkt = 1.januar,
-            `6G` = `6G`.beløp(1.januar),
-            arbeidsgiverperiode = Arbeidsgiverperiode(listOf(arbeidsgiverperiode))
-        )
-        assertEquals(arbeidsgiverperiode.plus(periode), listOf(økonomi).avgrensTilArbeidsgiverperiode(periode))
-        assertEquals(periode, periode) { "periode skal ikke muteres" }
     }
 
     @Test

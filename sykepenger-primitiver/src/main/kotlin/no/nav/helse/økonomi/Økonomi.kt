@@ -55,13 +55,6 @@ class Økonomi private constructor(
         private fun totalUtbetalingsgrad(økonomiList: List<Økonomi>) =
             Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.utbetalingsgrad() to it.aktuellDagsinntekt })
 
-        fun List<Økonomi>.avgrensTilArbeidsgiverperiode(periode: Periode): Periode? {
-            return map { it.arbeidsgiverperiode }
-                .firstOrNull()?.firstOrNull()?.let { førsteArbeidsgiverperiodedag ->
-                Periode(førsteArbeidsgiverperiodedag, periode.endInclusive)
-            }?.takeUnless { it == periode }
-        }
-
         fun betal(økonomiList: List<Økonomi>): List<Økonomi> = økonomiList.also {
             val utbetalingsgrad = totalUtbetalingsgrad(økonomiList)
             delteUtbetalinger(it)
