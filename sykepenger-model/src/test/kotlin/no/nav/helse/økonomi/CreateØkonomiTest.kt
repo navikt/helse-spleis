@@ -127,7 +127,7 @@ internal class CreateØkonomiTest {
             }
             // Indirect test of Økonomi state
             assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig) }
-            assertDoesNotThrow { listOf(økonomi).betal() }
+            assertThrows<IllegalStateException> { listOf(økonomi).betal() }
         }
     }
 

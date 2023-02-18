@@ -131,8 +131,6 @@ class Økonomi private constructor(
 
     fun lås() = tilstand.lås(this)
 
-    fun låsOpp() = tilstand.låsOpp(this)
-
     fun builder(builder: ØkonomiBuilder) {
         tilstand.builder(this, builder)
     }
@@ -310,10 +308,6 @@ class Økonomi private constructor(
             throw IllegalStateException("Kan ikke låse Økonomi i tilstand ${this::class.simpleName}")
         }
 
-        internal open fun låsOpp(økonomi: Økonomi): Økonomi {
-            throw IllegalStateException("Kan ikke låse opp Økonomi i tilstand ${this::class.simpleName}")
-        }
-
         internal object KunGrad : Tilstand() {
 
             override fun lås(økonomi: Økonomi) = økonomi
@@ -392,17 +386,7 @@ class Økonomi private constructor(
                 økonomi.tilstand = HarBeløp
             }
 
-            override fun <R> medData(økonomi: Økonomi, lambda: MedØkonomiData<R>) =
-                lambda(
-                    grad = økonomi.grad.toDouble(),
-                    arbeidsgiverRefusjonsbeløp = økonomi.arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig },
-                    dekningsgrunnlag = økonomi.dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig },
-                    totalGrad = økonomi.totalGrad.toDouble(),
-                    aktuellDagsinntekt = økonomi.aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig },
-                    arbeidsgiverbeløp = null,
-                    personbeløp = null,
-                    er6GBegrenset = null
-                )
+            override fun <R> medData(økonomi: Økonomi, lambda: MedØkonomiData<R>) = økonomi.medDataFraInntekt(lambda)
         }
 
         object HarInntekt : Tilstand() {
@@ -423,10 +407,6 @@ class Økonomi private constructor(
 
             override fun er6GBegrenset(økonomi: Økonomi) = økonomi.er6GBegrenset!!
 
-            override fun betal(økonomi: Økonomi) {
-                økonomi._betal()
-            }
-
             override fun <R> medData(økonomi: Økonomi, lambda: MedØkonomiData<R>) = økonomi.medDataFraBeløp(lambda)
         }
 
@@ -436,10 +416,6 @@ class Økonomi private constructor(
             override fun sykdomsgrad(økonomi: Økonomi) = 0.prosent
 
             override fun lås(økonomi: Økonomi) = økonomi
-
-            override fun låsOpp(økonomi: Økonomi) = økonomi.apply {
-                tilstand = HarInntekt
-            }
 
             override fun <R> medData(økonomi: Økonomi, lambda: MedØkonomiData<R>) = økonomi.medDataFraInntekt(lambda)
 
@@ -456,12 +432,6 @@ class Økonomi private constructor(
             override fun utbetalingsgrad(økonomi: Økonomi) = 0.prosent
 
             override fun lås(økonomi: Økonomi) = økonomi
-
-            override fun låsOpp(økonomi: Økonomi) = økonomi.apply {
-                tilstand = HarInntekt
-            }
-
-            override fun betal(økonomi: Økonomi) {}
 
             override fun er6GBegrenset(økonomi: Økonomi) = false
 

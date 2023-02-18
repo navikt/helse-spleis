@@ -168,15 +168,6 @@ internal class ØkonomiTest {
     }
 
     @Test
-    fun `opplåsing tillater betaling`() {
-        50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig).lås().låsOpp().also { økonomi ->
-            listOf(økonomi).betal()
-            assertUtbetaling(økonomi, 600.0, 0.0)
-        }
-    }
-
-
-    @Test
     fun `arbeidsgiverrefusjon med inntekt`() {
         100.prosent.sykdomsgrad.inntekt(1000.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1000.daglig).medData { _, arbeidsgiverRefusjonsbeløp, _, _, _, _, _, _ ->
             assertEquals(1000.0, arbeidsgiverRefusjonsbeløp)
@@ -184,31 +175,9 @@ internal class ØkonomiTest {
     }
 
     @Test
-    fun `kan ikke låses opp med mindre den er låst`() {
-        assertThrows<IllegalStateException> { 50.prosent.sykdomsgrad.låsOpp() }
-        50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig).also { økonomi ->
-            assertThrows<IllegalStateException> { økonomi.låsOpp() }
-            listOf(økonomi).betal()
-            assertUtbetaling(økonomi, 600.0, 0.0)
-            assertThrows<IllegalStateException> { økonomi.låsOpp() }
-        }
-    }
-
-    @Test
     fun `dekningsgrunnlag returns clone`() {
         50.prosent.sykdomsgrad.also { original ->
             assertNotSame(original, original.inntekt(1200.daglig, 1200.daglig, `6G` = `6G`.beløp(1.januar)))
-        }
-    }
-
-    @Test
-    fun `betal 0 hvis låst`() {
-        50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig).lås().also { økonomi ->
-            listOf(økonomi).betal()
-            assertUtbetaling(økonomi, 0.0, 0.0)
-            økonomi.låsOpp()
-            listOf(økonomi).betal()
-            assertUtbetaling(økonomi, 600.0, 0.0)
         }
     }
 
@@ -250,8 +219,9 @@ internal class ØkonomiTest {
 
     @Test
     fun `kan beregne betaling bare en gang`() {
-        assertDoesNotThrow {
-            listOf(80.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6G`.beløp(1.januar))).betal()
+        assertThrows<IllegalStateException> {
+            listOf(80.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6G`.beløp(1.januar)))
+                .betal()
                 .betal()
         }
     }

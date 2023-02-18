@@ -944,13 +944,15 @@ internal class UtbetalingTest {
     private fun beregnUtbetalinger(tidslinje: Utbetalingstidslinje) = tidslinje.also { MaksimumUtbetalingFilter().betal(listOf(tidslinje), tidslinje.periode(), aktivitetslogg, MaskinellJurist()) }
 
     private fun opprettGodkjentUtbetaling(
-        tidslinje: Utbetalingstidslinje = tidslinjeOf(16.AP, 5.NAV(3000)),
+        tidslinje: Utbetalingstidslinje,
         sisteDato: LocalDate = tidslinje.periode().endInclusive,
         fødselsnummer: String = UNG_PERSON_FNR_2018,
         orgnummer: String = ORGNUMMER,
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
-    ) = opprettUbetaltUtbetaling(beregnUtbetalinger(tidslinje), null, sisteDato, fødselsnummer, orgnummer, aktivitetslogg)
+    ) = opprettUbetaltUtbetaling(tidslinje, null, sisteDato, fødselsnummer, orgnummer, aktivitetslogg)
         .also { godkjenn(it) }
+    private fun opprettGodkjentUtbetaling() =
+        opprettGodkjentUtbetaling(beregnUtbetalinger(tidslinjeOf(16.AP, 5.NAV(3000))))
 
     private fun opprettUbetaltUtbetaling(
         tidslinje: Utbetalingstidslinje,

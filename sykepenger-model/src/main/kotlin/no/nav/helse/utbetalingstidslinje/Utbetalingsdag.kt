@@ -72,8 +72,6 @@ internal sealed class Utbetalingsdag(
             AvvistDag(dato, økonomi, this.begrunnelser + begrunnelser)
 
         override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
-        internal fun navDag(): Utbetalingsdag =
-            if (Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode in begrunnelser) this else NavDag(dato, økonomi.låsOpp())
 
         override fun erAvvistMed(begrunnelse: Begrunnelse) = takeIf { begrunnelse in begrunnelser }
     }

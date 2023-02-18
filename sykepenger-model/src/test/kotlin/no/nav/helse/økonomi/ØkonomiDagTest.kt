@@ -124,18 +124,6 @@ internal class ØkonomiDagTest {
         assertØkonomi(c, 0.0)
     }
 
-    @Test
-    fun `Beløp med avvistdager som er låst opp`() {
-        val a = tidslinjeOf(2.NAV(1200))
-        val b = tidslinjeOf(2.NAV(1200))
-        val c = tidslinjeOf(2.AVV(1200, 100))
-            .onEach { (it as AvvistDag).navDag() }
-        listOf(a, b, c).betal()
-        assertØkonomi(a, 721.0)
-        assertØkonomi(b, 720.0)
-        assertØkonomi(c, 720.0)
-    }
-
     private fun assertØkonomi(tidslinje: Utbetalingstidslinje, arbeidsgiverbeløp: Double, personbeløp: Double = 0.0) {
         tidslinje.forEach {
             it.økonomi.medData {
