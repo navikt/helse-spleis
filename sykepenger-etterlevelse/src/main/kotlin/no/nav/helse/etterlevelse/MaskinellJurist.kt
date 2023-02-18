@@ -332,7 +332,7 @@ class MaskinellJurist private constructor(
         periode: Periode,
         tidslinjer: List<List<Tidslinjedag>>,
         grense: Double,
-        dagerUnderGrensen: List<LocalDate>
+        dagerUnderGrensen: Set<LocalDate>
     ) {
         periode.forEach { dagen ->
             leggTil(

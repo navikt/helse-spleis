@@ -71,11 +71,11 @@ internal class SykdomsgradfilterTest {
             tidslinjeOf(16.AP, 5.NAV(1200, 19.0))
         )
         val periode = Periode(1.januar, 21.januar)
-        undersøke(tidslinjer, periode)
-        assertEquals(3, tidslinjer.inspektør(0).avvistDagTeller)
-        assertEquals(2, tidslinjer.inspektør(0).navHelgDagTeller)
-        assertEquals(3, tidslinjer.inspektør(1).avvistDagTeller)
-        assertEquals(2, tidslinjer.inspektør(1).navHelgDagTeller)
+        val resultat = undersøke(tidslinjer, periode)
+        assertEquals(3, resultat.inspektør(0).avvistDagTeller)
+        assertEquals(2, resultat.inspektør(0).navHelgDagTeller)
+        assertEquals(3, resultat.inspektør(1).avvistDagTeller)
+        assertEquals(2, resultat.inspektør(1).navHelgDagTeller)
     }
 
     @Test
@@ -85,13 +85,13 @@ internal class SykdomsgradfilterTest {
             tidslinjeOf(16.AP, 5.NAV, 1.FRI)
         )
         val periode = Periode(1.januar, 22.januar)
-        undersøke(tidslinjer, periode)
-        assertEquals(3, tidslinjer.inspektør(0).navDagTeller)
-        assertEquals(2, tidslinjer.inspektør(0).navHelgDagTeller)
-        assertEquals(1, tidslinjer.inspektør(0).avvistDagTeller)
-        assertEquals(3, tidslinjer.inspektør(1).navDagTeller)
-        assertEquals(2, tidslinjer.inspektør(1).navHelgDagTeller)
-        assertEquals(1, tidslinjer.inspektør(1).fridagTeller)
+        val resultat = undersøke(tidslinjer, periode)
+        assertEquals(3, resultat.inspektør(0).navDagTeller)
+        assertEquals(2, resultat.inspektør(0).navHelgDagTeller)
+        assertEquals(1, resultat.inspektør(0).avvistDagTeller)
+        assertEquals(3, resultat.inspektør(1).navDagTeller)
+        assertEquals(2, resultat.inspektør(1).navHelgDagTeller)
+        assertEquals(1, resultat.inspektør(1).fridagTeller)
     }
 
     @Test
@@ -110,10 +110,11 @@ internal class SykdomsgradfilterTest {
         assertEquals(1, tidslinjer.inspektør(1).fridagTeller)
     }
 
-    private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, periode: Periode) {
+    private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, periode: Periode): List<Utbetalingstidslinje> {
         aktivitetslogg = Aktivitetslogg()
-        Sykdomsgradfilter.filter(tidslinjer, periode, aktivitetslogg, MaskinellJurist())
-        inspektør = tidslinjer.inspektør(0)
+        val resultat = Sykdomsgradfilter.filter(tidslinjer, periode, aktivitetslogg, MaskinellJurist())
+        inspektør = resultat.inspektør(0)
+        return resultat
     }
 
     private fun List<Utbetalingstidslinje>.inspektør(index: Int) = this[index].inspektør

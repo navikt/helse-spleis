@@ -1,6 +1,5 @@
 package no.nav.helse.økonomi
 
-import java.time.LocalDate
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.summer
@@ -12,11 +11,11 @@ import kotlin.properties.Delegates
 
 class Økonomi private constructor(
     private val grad: Prosentdel,
-    private var totalGrad: Prosentdel = grad,
+    private val totalGrad: Prosentdel = grad,
     private val arbeidsgiverRefusjonsbeløp: Inntekt = INGEN,
     private val aktuellDagsinntekt: Inntekt = INGEN,
     private val dekningsgrunnlag: Inntekt = INGEN,
-    private var grunnbeløpgrense: Inntekt? = null,
+    private val grunnbeløpgrense: Inntekt? = null,
     private var arbeidsgiverbeløp: Inntekt? = null,
     private var personbeløp: Inntekt? = null,
     private var er6GBegrenset: Boolean? = null,
@@ -38,8 +37,7 @@ class Økonomi private constructor(
         fun totalSykdomsgrad(økonomiList: List<Økonomi>): List<Økonomi> {
             val totalgrad = Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.sykdomsgrad() to it.aktuellDagsinntekt })
             return økonomiList.map { økonomi: Økonomi ->
-                // todo: lage ny instans for immutability
-                økonomi.also { it.totalGrad = totalgrad }
+                økonomi.kopierMed(totalgrad = totalgrad)
             }
         }
 

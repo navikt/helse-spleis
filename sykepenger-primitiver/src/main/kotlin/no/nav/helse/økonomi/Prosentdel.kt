@@ -70,6 +70,6 @@ interface ProsentdelSubsumsjonObserver {
         periode: Periode,
         tidslinjerForSubsumsjon: List<List<Tidslinjedag>>,
         grense: Double,
-        dagerUnderGrensen: List<LocalDate>
+        dagerUnderGrensen: Set<LocalDate>
     )
 }
