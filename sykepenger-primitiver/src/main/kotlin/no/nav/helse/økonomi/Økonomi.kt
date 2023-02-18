@@ -310,8 +310,6 @@ class Økonomi private constructor(
 
         internal object KunGrad : Tilstand() {
 
-            override fun lås(økonomi: Økonomi) = økonomi
-
             override fun builder(økonomi: Økonomi, builder: ØkonomiBuilder) {
                 økonomi._buildKunGrad(builder)
             }
@@ -324,9 +322,9 @@ class Økonomi private constructor(
                 refusjonsbeløp: Inntekt,
                 dekningsgrunnlag: Inntekt,
                 `6G`: Inntekt
-            ) = Økonomi(
+            ) = økonomi.kopierMed(
                 grad = økonomi.grad,
-                totalGrad = økonomi.totalGrad,
+                totalgrad = økonomi.totalGrad,
                 arbeidsgiverRefusjonsbeløp = refusjonsbeløp,
                 aktuellDagsinntekt = aktuellDagsinntekt,
                 dekningsgrunnlag = dekningsgrunnlag,
@@ -353,14 +351,9 @@ class Økonomi private constructor(
                 )
         }
 
-        // Tenkt tilstand for arbeidsgiverperiodedager: vi trenger sykdomsgraden, men ikke utbetale noe
         internal object IkkeBetalt : Tilstand() {
 
             override fun lås(økonomi: Økonomi) = økonomi
-
-            override fun builder(økonomi: Økonomi, builder: ØkonomiBuilder) {
-                økonomi._buildKunGrad(builder)
-            }
 
             override fun utbetalingsgrad(økonomi: Økonomi) = 0.prosent
 
@@ -370,9 +363,9 @@ class Økonomi private constructor(
                 refusjonsbeløp: Inntekt,
                 dekningsgrunnlag: Inntekt,
                 `6G`: Inntekt
-            ) = Økonomi(
+            ) = økonomi.kopierMed(
                 grad = økonomi.grad,
-                totalGrad = økonomi.totalGrad,
+                totalgrad = økonomi.totalGrad,
                 arbeidsgiverRefusjonsbeløp = refusjonsbeløp,
                 aktuellDagsinntekt = aktuellDagsinntekt,
                 dekningsgrunnlag = dekningsgrunnlag,
