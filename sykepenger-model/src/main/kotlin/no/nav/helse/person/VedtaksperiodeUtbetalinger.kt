@@ -2,8 +2,6 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Alder
-import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
@@ -72,63 +70,15 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
         siste?.forkast(hendelse)
     }
 
-    internal fun mottaRevurdering(
-        vedtaksperiodeId: UUID,
-        grunnlagsdata: VilkårsgrunnlagElement,
-        utbetaling: Utbetaling,
-        periode: Periode
-    ): Utbetalingstidslinje {
-        return nyUtbetaling(vedtaksperiodeId, grunnlagsdata, periode) { utbetaling }
-    }
-
-    internal fun lagUtbetaling(
-        fødselsnummer: String,
-        vedtaksperiodeId: UUID,
-        periode: Periode,
-        grunnlagsdata: VilkårsgrunnlagElement,
-        maksimumSykepenger: Alder.MaksimumSykepenger,
-        hendelse: ArbeidstakerHendelse
-    ): Utbetalingstidslinje {
-        return nyUtbetaling(vedtaksperiodeId, grunnlagsdata, periode) {
-            arbeidsgiver.lagUtbetaling(
-                aktivitetslogg = hendelse,
-                fødselsnummer = fødselsnummer,
-                maksdato = maksimumSykepenger.sisteDag(),
-                forbrukteSykedager = maksimumSykepenger.forbrukteDager(),
-                gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
-                periode = periode
-            )
-        }
-    }
-
-    private fun nyUtbetaling(
+    internal fun nyUtbetaling(
         vedtaksperiodeId: UUID,
         grunnlagsdata: VilkårsgrunnlagElement,
         periode: Periode,
-        generator: () -> Utbetaling
+        utbetaling: Utbetaling
     ): Utbetalingstidslinje {
-        return generator().also {
-            it.nyVedtaksperiodeUtbetaling(vedtaksperiodeId)
-            utbetalinger.add(grunnlagsdata to it)
-        }.utbetalingstidslinje(periode)
-    }
-
-    fun lagRevurdering(
-        vedtaksperiode: Vedtaksperiode,
-        fødselsnummer: String,
-        aktivitetslogg: IAktivitetslogg,
-        maksimumSykepenger: Alder.MaksimumSykepenger,
-        periode: Periode
-    ) {
-        arbeidsgiver.lagRevurdering(
-            vedtaksperiode = vedtaksperiode,
-            aktivitetslogg = aktivitetslogg,
-            fødselsnummer = fødselsnummer,
-            maksdato = maksimumSykepenger.sisteDag(),
-            forbrukteSykedager = maksimumSykepenger.forbrukteDager(),
-            gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
-            periode = periode
-        )
+        utbetaling.nyVedtaksperiodeUtbetaling(vedtaksperiodeId)
+        utbetalinger.add(grunnlagsdata to utbetaling)
+        return utbetaling.utbetalingstidslinje(periode)
     }
 
     internal fun build(builder: VedtakFattetBuilder) {

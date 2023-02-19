@@ -1066,6 +1066,14 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
 
         assertEquals(19, inspektør.sykdomstidslinje.inspektør.grader[17.januar])
+        assertEquals(19, inspektør.sykdomstidslinje.inspektør.grader[16.februar])
+        val utbetalingstidslinje = inspektør.utbetalingUtbetalingstidslinje(3)
+        utbetalingstidslinje[17.januar].økonomi.inspektør.also { økonomi ->
+            assertEquals(19, økonomi.totalGrad.roundToInt())
+        }
+        utbetalingstidslinje[16.februar].økonomi.inspektør.also { økonomi ->
+            assertEquals(19, økonomi.totalGrad.roundToInt())
+        }
         assertVarsel(RV_VV_4, 2.vedtaksperiode.filter())
         assertVarsel(RV_VV_4, 1.vedtaksperiode.filter())
     }

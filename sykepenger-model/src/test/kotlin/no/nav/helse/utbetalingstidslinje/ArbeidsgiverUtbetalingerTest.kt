@@ -354,7 +354,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         )
         aktivitetslogg = Aktivitetslogg()
 
-        ArbeidsgiverUtbetalinger(
+        val utbetalinger = ArbeidsgiverUtbetalinger(
             NormalArbeidstaker,
             fødselsdato.alder,
             mapOf(person.arbeidsgiver(ORGNUMMER) to {
@@ -363,17 +363,18 @@ internal class ArbeidsgiverUtbetalingerTest {
             historiskTidslinje,
             null,
             vilkårsgrunnlagHistorikk
-        ).also {
-            it.beregn(
-                "88888888",
-                Periode(1.januar, 31.desember(2019)),
-                mapOf(Periode(1.januar, 31.desember(2019)) to (aktivitetslogg to SubsumsjonObserver.NullObserver))
-            )
-            maksdato = it.maksimumSykepenger.sisteDag()
-            gjenståendeSykedager = it.maksimumSykepenger.gjenståendeDager()
-            forbrukteSykedager = it.maksimumSykepenger.forbrukteDager()
-        }
-        inspektør = person.arbeidsgiver(ORGNUMMER).nåværendeTidslinje().inspektør
+        )
+        val (maksimumSykepenger, tidslinjerPerArbeidsgiver) = utbetalinger.beregn(
+            Periode(1.januar, 31.desember(2019)),
+            listOf(Triple(Periode(1.januar, 31.desember(2019)), aktivitetslogg, SubsumsjonObserver.NullObserver))
+        )
+        maksdato = maksimumSykepenger.sisteDag()
+        gjenståendeSykedager = maksimumSykepenger.gjenståendeDager()
+        forbrukteSykedager = maksimumSykepenger.forbrukteDager()
+        inspektør = tidslinjerPerArbeidsgiver.entries
+            .single { (arbeidsgiver, _) -> arbeidsgiver.inspektør.organisasjonsnummer == ORGNUMMER }
+            .value
+            .inspektør
     }
 
     private fun sammenligningsgrunnlag(inntekt: Inntekt) = Sammenligningsgrunnlag(

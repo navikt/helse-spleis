@@ -24,6 +24,9 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
     private val sisteVedtaksperiodeTilstander: MutableMap<UUID, TilstandType> = mutableMapOf()
     private var sisteInntektshistorikk: Inntektshistorikk? = null
 
+    internal lateinit var organisasjonsnummer: String
+        private set
+
     internal lateinit var refusjonshistorikk: Refusjonshistorikk
         private set
 
@@ -37,6 +40,10 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
     internal fun aktiveVedtaksperioder() = aktiveVedtaksperioder
     internal fun sisteVedtaksperiodeTilstander() = sisteVedtaksperiodeTilstander
     internal val inntektshistorikk get() = sisteInntektshistorikk!!
+
+    override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
+        this.organisasjonsnummer = organisasjonsnummer
+    }
 
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,

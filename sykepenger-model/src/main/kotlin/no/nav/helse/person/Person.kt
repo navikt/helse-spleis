@@ -43,7 +43,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkår
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
-import no.nav.helse.person.Arbeidsgiver.Companion.lagRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.nekterOpprettelseAvPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
@@ -550,14 +549,6 @@ class Person private constructor(
         arbeidsgivere.nåværendeVedtaksperioder(filter).sorted()
 
     internal fun vedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.vedtaksperioder(filter).sorted()
-
-    internal fun lagRevurdering(
-        vedtaksperiode: Vedtaksperiode,
-        arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger,
-        hendelse: ArbeidstakerHendelse
-    ) {
-        arbeidsgivere.lagRevurdering(vedtaksperiode, arbeidsgiverUtbetalinger, hendelse)
-    }
 
     internal fun ghostPeriode(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver) =
         arbeidsgivere.ghostPeriode(

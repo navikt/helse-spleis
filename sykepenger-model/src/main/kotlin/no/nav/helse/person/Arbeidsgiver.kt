@@ -8,7 +8,6 @@ import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
-import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -47,7 +46,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_REFUSJONSOPPLYSNINGE
 import no.nav.helse.person.Vedtaksperiode.Companion.feiletRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.håndterHale
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
-import no.nav.helse.person.Vedtaksperiode.Companion.lagRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.skalHåndtere
@@ -85,7 +83,6 @@ import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Inntekter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
-import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 
 internal class Arbeidsgiver private constructor(
@@ -175,14 +172,6 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.vedtaksperioder(filter: VedtaksperiodeFilter) =
             map { it.vedtaksperioder.filter(filter) }.flatten()
 
-
-        internal fun List<Arbeidsgiver>.lagRevurdering(
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger,
-            hendelse: ArbeidstakerHendelse
-        ) {
-            flatMap { it.vedtaksperioder }.lagRevurdering(vedtaksperiode, arbeidsgiverUtbetalinger, hendelse)
-        }
 
         internal fun List<Arbeidsgiver>.avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, skatteopplysninger: Map<String, SkattSykepengegrunnlag>) =
             mapNotNull { arbeidsgiver -> arbeidsgiver.avklarSykepengegrunnlag(skjæringstidspunkt, skatteopplysninger[arbeidsgiver.organisasjonsnummer]) }
@@ -367,16 +356,19 @@ internal class Arbeidsgiver private constructor(
     internal fun lagUtbetaling(
         aktivitetslogg: IAktivitetslogg,
         fødselsnummer: String,
+        orgnummerTilDenSomBeregner: String,
+        utbetalingstidslinje: Utbetalingstidslinje,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
         periode: Periode
-    ) = lagUtbetaling(aktivitetslogg, fødselsnummer, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, Utbetalingtype.UTBETALING)
+    ) = lagUtbetaling(aktivitetslogg, fødselsnummer, orgnummerTilDenSomBeregner, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, Utbetalingtype.UTBETALING)
 
     internal fun lagRevurdering(
-        vedtaksperiode: Vedtaksperiode,
+        utbetalingstidslinje: Utbetalingstidslinje,
         aktivitetslogg: IAktivitetslogg,
         fødselsnummer: String,
+        orgnummerTilDenSomBeregner: String,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
@@ -385,25 +377,30 @@ internal class Arbeidsgiver private constructor(
         return lagUtbetaling(
             aktivitetslogg,
             fødselsnummer,
+            orgnummerTilDenSomBeregner,
+            utbetalingstidslinje,
             maksdato,
             forbrukteSykedager,
             gjenståendeSykedager,
             periode,
             Utbetalingtype.REVURDERING
-        ).also {
-            fordelRevurdertUtbetaling(aktivitetslogg.barn().also { logg -> logg.kontekst(person) }, it, vedtaksperiode)
-        }
+        )
     }
 
     private fun lagUtbetaling(
         aktivitetslogg: IAktivitetslogg,
         fødselsnummer: String,
+        orgnummerTilDenSomBeregner: String,
+        utbetalingstidslinje: Utbetalingstidslinje,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
         periode: Periode,
         type: Utbetalingtype
     ): Utbetaling {
+        val sykdomshistorikkId = sykdomshistorikk.nyesteId()
+        val vilkårsgrunnlagHistorikkId = person.nyesteIdForVilkårsgrunnlagHistorikk()
+        lagreUtbetalingstidslinjeberegning(orgnummerTilDenSomBeregner, utbetalingstidslinje, sykdomshistorikkId, vilkårsgrunnlagHistorikkId)
         return Utbetalingstidslinjeberegning.lagUtbetaling(
             beregnetUtbetalingstidslinjer,
             utbetalinger,
@@ -452,13 +449,12 @@ internal class Arbeidsgiver private constructor(
     internal fun nåværendeTidslinje() =
         beregnetUtbetalingstidslinjer.lastOrNull()?.utbetalingstidslinje() ?: throw IllegalStateException("mangler utbetalinger")
 
-    internal fun lagreUtbetalingstidslinjeberegning(
+    private fun lagreUtbetalingstidslinjeberegning(
         organisasjonsnummer: String,
         utbetalingstidslinje: Utbetalingstidslinje,
-        vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
+        sykdomshistorikkId: UUID,
+        vilkårsgrunnlagHistorikkId: UUID
     ) {
-        val sykdomshistorikkId = sykdomshistorikk.nyesteId()
-        val vilkårsgrunnlagHistorikkId = vilkårsgrunnlagHistorikk.sisteId()
         beregnetUtbetalingstidslinjer.add(
             Utbetalingstidslinjeberegning(
                 sykdomshistorikkId,
@@ -956,10 +952,6 @@ internal class Arbeidsgiver private constructor(
     internal fun harNærliggendeUtbetaling(periode: Periode) =
         utbetalinger.harNærliggendeUtbetaling(periode)
 
-    private fun fordelRevurdertUtbetaling(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling, other: Vedtaksperiode) {
-        håndter(aktivitetslogg) { håndterRevurdertUtbetaling(utbetaling, aktivitetslogg, other) }
-    }
-
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return SpesifikkKontekst("Arbeidsgiver", mapOf("organisasjonsnummer" to organisasjonsnummer))
     }
@@ -979,7 +971,7 @@ internal class Arbeidsgiver private constructor(
     private fun harSykdomFor(skjæringstidspunkt: LocalDate) =
         vedtaksperioder.any(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
 
-    internal fun finnFørsteFraværsdag(skjæringstidspunkt: LocalDate): LocalDate? {
+    private fun finnFørsteFraværsdag(skjæringstidspunkt: LocalDate): LocalDate? {
         val førstePeriodeMedUtbetaling = vedtaksperioder.firstOrNull(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt))
             ?: vedtaksperioder.firstOrNull(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             ?: return null
@@ -1021,15 +1013,6 @@ internal class Arbeidsgiver private constructor(
                 builder.result()
             }
         }
-    }
-
-    internal fun beregn(aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger, periode: Periode, perioder: Map<Periode, Pair<IAktivitetslogg, SubsumsjonObserver>>): Boolean {
-        try {
-            arbeidsgiverUtbetalinger.beregn(organisasjonsnummer, periode, perioder)
-        } catch (err: UtbetalingstidslinjeBuilderException) {
-            err.logg(aktivitetslogg)
-        }
-        return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
     private fun <Hendelse : IAktivitetslogg> håndter(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Unit) {
