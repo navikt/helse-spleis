@@ -180,7 +180,7 @@ internal class AktivitetsloggTest {
         barn.info("Hei")
 
         assertInfo("Hei", listOf("TestHendelse", "Person", "Arbeidsgiver"), aktivitetslogg)
-        assertInfo("Hei", listOf("TestHendelse", "Person", "Arbeidsgiver"), barn)
+        assertInfo("Hei", listOf("TestHendelse", "Person", "Arbeidsgiver"), barn as Aktivitetslogg)
     }
 
     @Test

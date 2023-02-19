@@ -14,7 +14,7 @@ interface IAktivitetslogg {
 
     fun aktivitetsteller(): Int
     fun behov(): List<Aktivitet.Behov>
-    fun barn(): Aktivitetslogg
+    fun barn(): IAktivitetslogg
     fun kontekst(kontekst: Aktivitetskontekst)
     fun kontekst(kontekst: Subaktivitetskontekst)
     fun kontekster(): List<IAktivitetslogg>

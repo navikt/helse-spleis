@@ -50,7 +50,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.slettUtgåtteSykmeldingsperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.sykefraværstilfelle
 import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
-import no.nav.helse.person.Arbeidsgiver.Companion.validerYtelserForSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -735,10 +734,6 @@ class Person private constructor(
     ): Boolean {
         arbeidsgivere.validerVilkårsgrunnlag(aktivitetslogg, vilkårsgrunnlag, organisasjonsnummer, skjæringstidspunkt, erForlengelse)
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
-    }
-
-    internal fun validerYtelserForSkjæringstidspunkt(ytelser: Ytelser, skjæringstidspunkt: LocalDate) {
-        arbeidsgivere.validerYtelserForSkjæringstidspunkt(ytelser, skjæringstidspunkt, infotrygdhistorikk)
     }
 
     internal fun sykefraværstilfelle(skjæringstidspunkt: LocalDate) =

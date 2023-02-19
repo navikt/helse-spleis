@@ -505,11 +505,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun sykefraværstilfelle() = person.sykefraværstilfelle(skjæringstidspunkt)
 
-    private fun validerYtelserForSkjæringstidspunkt(ytelser: Ytelser) {
-        person.validerYtelserForSkjæringstidspunkt(ytelser, skjæringstidspunkt)
-        kontekst(ytelser) // resett kontekst til oss selv
-    }
-
     private fun tilstand(
         event: IAktivitetslogg,
         nyTilstand: Vedtaksperiodetilstand,
@@ -895,11 +890,6 @@ internal class Vedtaksperiode private constructor(
         tilstand.igangsettOverstyring(this, hendelse, revurdering)
     }
 
-    private fun validerYtelser(ytelser: Ytelser, skjæringstidspunkt: LocalDate, infotrygdhistorikk: Infotrygdhistorikk) {
-        kontekst(ytelser)
-        tilstand.valider(this, periode, skjæringstidspunkt, arbeidsgiver, ytelser, infotrygdhistorikk)
-    }
-
     internal fun inngåIRevurderingseventyret(
         vedtaksperioder: MutableList<PersonObserver.OverstyringIgangsatt.VedtaksperiodeData>,
         typeEndring: String
@@ -928,7 +918,7 @@ internal class Vedtaksperiode private constructor(
         }
 
     private fun beregnUtbetalinger(
-        hendelse: IAktivitetslogg,
+        hendelse: PersonHendelse,
         arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger,
         beregningsperiode: Periode,
         beregningsperioder: List<Triple<Periode, IAktivitetslogg, SubsumsjonObserver>>,
@@ -1096,15 +1086,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
         }
 
-        fun valider(
-            vedtaksperiode: Vedtaksperiode,
-            periode: Periode,
-            skjæringstidspunkt: LocalDate,
-            arbeidsgiver: Arbeidsgiver,
-            ytelser: Ytelser,
-            infotrygdhistorikk: Infotrygdhistorikk
-        ) {}
-
         fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {}
     }
 
@@ -1204,18 +1185,6 @@ internal class Vedtaksperiode private constructor(
         ) {
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
-
-        override fun valider(
-            vedtaksperiode: Vedtaksperiode,
-            periode: Periode,
-            skjæringstidspunkt: LocalDate,
-            arbeidsgiver: Arbeidsgiver,
-            ytelser: Ytelser,
-            infotrygdhistorikk: Infotrygdhistorikk
-        ) {
-            infotrygdhistorikk.valider(ytelser, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer())
-            ytelser.valider(periode, skjæringstidspunkt)
-        }
     }
 
     internal object AvventerGjennomførtRevurdering : Vedtaksperiodetilstand {
@@ -1255,18 +1224,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.revurderTidslinje(hendelse)
         }
-
-        override fun valider(
-            vedtaksperiode: Vedtaksperiode,
-            periode: Periode,
-            skjæringstidspunkt: LocalDate,
-            arbeidsgiver: Arbeidsgiver,
-            ytelser: Ytelser,
-            infotrygdhistorikk: Infotrygdhistorikk
-        ) {
-            infotrygdhistorikk.valider(ytelser, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer())
-            ytelser.valider(periode, skjæringstidspunkt)
-        }
     }
 
     internal object AvventerHistorikkRevurdering : Vedtaksperiodetilstand {
@@ -1301,15 +1258,20 @@ internal class Vedtaksperiode private constructor(
             }
 
             FunksjonelleFeilTilVarsler.wrap(ytelser) {
-                vedtaksperiode.validerYtelserForSkjæringstidspunkt(ytelser)
-                person.valider(ytelser, vilkårsgrunnlag, vedtaksperiode.organisasjonsnummer, vedtaksperiode.skjæringstidspunkt, true)
-                person.fyllUtPeriodeMedForventedeDager(ytelser, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt)
-
-                val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
-
                 // beregningsperiode brukes for å avgjøre hvilke perioder vi skal -kreve- inntekt for
                 // beregningsperioder brukes for å lage varsel
-                val (beregningsperiode, beregningsperioder) = beregningsperioder(ytelser, person, vedtaksperiode)
+                val utvalg = beregningsperioder(person, vedtaksperiode)
+
+                utvalg.forEach {
+                    infotrygdhistorikk.valider(it.aktivitetsloggkopi(ytelser), it.periode, it.skjæringstidspunkt, it.organisasjonsnummer)
+                    it.kontekst(ytelser) // overskriver kontekst for ytelser-hendelsen
+                    ytelser.valider(it.periode, it.skjæringstidspunkt)
+                    vedtaksperiode.kontekst(ytelser) // endre kontekst tilbake for ytelser-hendelsen
+                }
+                person.valider(ytelser, vilkårsgrunnlag, vedtaksperiode.organisasjonsnummer, vedtaksperiode.skjæringstidspunkt, true)
+
+                val beregningsperiode = utvalg.periode()
+                val beregningsperioder = utvalg.map { Triple(it.periode, it.aktivitetsloggkopi(ytelser), it.jurist) }
 
                 // utbetalingsperioder brukes for å lage revurderinger
                 val utbetalingsperioder = listOf(vedtaksperiode) + person.nåværendeVedtaksperioder {
@@ -1320,6 +1282,8 @@ internal class Vedtaksperiode private constructor(
                             && it.skjæringstidspunkt == vedtaksperiode.skjæringstidspunkt
                 }
 
+                person.fyllUtPeriodeMedForventedeDager(ytelser, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt)
+                val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
                 vedtaksperiode.beregnUtbetalinger(
                     ytelser,
                     arbeidsgiverUtbetalinger,
@@ -1333,30 +1297,15 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        private fun beregningsperioder(hendelse: IAktivitetslogg, person: Person, vedtaksperiode: Vedtaksperiode): Pair<Periode, List<Triple<Periode, IAktivitetslogg, SubsumsjonObserver>>> {
-            val beregningsperioder = (listOf(vedtaksperiode) + person
+        private fun beregningsperioder(person: Person, vedtaksperiode: Vedtaksperiode) =
+            (listOf(vedtaksperiode) + person
                 .vedtaksperioder {
                     it.tilstand in listOf(AvventerGjennomførtRevurdering, AvventerRevurdering)
                             && it.skjæringstidspunkt == vedtaksperiode.skjæringstidspunkt
                 })
-            val beregningsperiode = beregningsperioder.periode()
-            return beregningsperiode to beregningsperioder.map { Triple(it.periode, it.aktivitetsloggkopi(hendelse), it.jurist) }
-        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
-        }
-
-        override fun valider(
-            vedtaksperiode: Vedtaksperiode,
-            periode: Periode,
-            skjæringstidspunkt: LocalDate,
-            arbeidsgiver: Arbeidsgiver,
-            ytelser: Ytelser,
-            infotrygdhistorikk: Infotrygdhistorikk
-        ) {
-            infotrygdhistorikk.valider(ytelser, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer())
-            ytelser.valider(periode, skjæringstidspunkt)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
@@ -1649,11 +1598,7 @@ internal class Vedtaksperiode private constructor(
                 }
                 lateinit var arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
                 valider(RV_UT_16) {
-                    person.fyllUtPeriodeMedForventedeDager(
-                        ytelser,
-                        vedtaksperiode.periode,
-                        vedtaksperiode.skjæringstidspunkt
-                    )
+                    person.fyllUtPeriodeMedForventedeDager(ytelser, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt)
                     arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
                     val beregningsperiode = vedtaksperiode.finnArbeidsgiverperiode()?.periode(vedtaksperiode.periode.endInclusive) ?: vedtaksperiode.periode
                     val beregningsperioder = listOf(Triple(vedtaksperiode.periode, this, vedtaksperiode.jurist()))
@@ -2430,11 +2375,6 @@ internal class Vedtaksperiode private constructor(
             oppdatert = oppdatert,
             jurist = medVedtaksperiode
         )
-
-        internal fun List<Vedtaksperiode>.validerYtelser(ytelser: Ytelser, skjæringstidspunkt: LocalDate, infotrygdhistorikk: Infotrygdhistorikk) {
-            filter { it.skjæringstidspunkt == skjæringstidspunkt }
-                .forEach { it.validerYtelser(ytelser, skjæringstidspunkt, infotrygdhistorikk) }
-        }
 
         internal fun List<Vedtaksperiode>.sykefraværstilfelle(skjæringstidspunkt: LocalDate): Periode {
             val sisteDato = filter { it.skjæringstidspunkt == skjæringstidspunkt }.maxOf { it.periode.endInclusive }

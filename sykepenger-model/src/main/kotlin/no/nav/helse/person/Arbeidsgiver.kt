@@ -7,7 +7,6 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -50,7 +49,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.skalHåndtere
 import no.nav.helse.person.Vedtaksperiode.Companion.sykefraværstilfelle
-import no.nav.helse.person.Vedtaksperiode.Companion.validerYtelser
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -268,10 +266,6 @@ internal class Arbeidsgiver private constructor(
             filter: VedtaksperiodeFilter
         ) {
             arbeidsgivere.forEach { it.søppelbøtte(hendelse, filter) }
-        }
-
-        internal fun List<Arbeidsgiver>.validerYtelserForSkjæringstidspunkt(ytelser: Ytelser, skjæringstidspunkt: LocalDate, infotrygdhistorikk: Infotrygdhistorikk) {
-            forEach { it.vedtaksperioder.validerYtelser(ytelser, skjæringstidspunkt, infotrygdhistorikk) }
         }
 
         internal fun List<Arbeidsgiver>.sykefraværstilfelle(skjæringstidspunkt: LocalDate) =
@@ -964,9 +958,7 @@ internal class Arbeidsgiver private constructor(
         sykdomshistorikk.sykdomstidslinje().låsOpp(periode)
     }
 
-    internal fun harSykdom() = sykdomshistorikk.harSykdom() || sykdomstidslinje().harSykedager()
-
-    internal fun harSpleisSykdom() = sykdomshistorikk.harSykdom()
+    internal fun harSykdom() = sykdomshistorikk.harSykdom()
 
     private fun harSykdomFor(skjæringstidspunkt: LocalDate) =
         vedtaksperioder.any(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))

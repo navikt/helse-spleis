@@ -51,7 +51,7 @@ internal class PersonBuilder(
         organisasjonsnummer: String
     ) {
         val arbeidsgiverBuilder = ArbeidsgiverBuilder(arbeidsgiver, id, organisasjonsnummer)
-        if (vilkårsgrunnlagHistorikk.erRelevant(organisasjonsnummer, person.skjæringstidspunkter()) || arbeidsgiver.harFerdigstiltPeriode() || arbeidsgiver.harSpleisSykdom()) {
+        if (vilkårsgrunnlagHistorikk.erRelevant(organisasjonsnummer, person.skjæringstidspunkter()) || arbeidsgiver.harFerdigstiltPeriode() || arbeidsgiver.harSykdom()) {
             arbeidsgivere.add(arbeidsgiverBuilder)
         }
         pushState(arbeidsgiverBuilder)
