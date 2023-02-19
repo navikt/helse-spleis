@@ -140,8 +140,8 @@ internal class AktivitetsloggTest {
         val hendelse = TestHendelse(aktivitetslogg.barn())
         "info message".also {
             hendelse.info(it)
-            assertInfo(it, hendelse.logg)
-            assertInfo(it, aktivitetslogg)
+            assertInfo(it, aktivitetslogg = hendelse.logg)
+            assertInfo(it, aktivitetslogg = aktivitetslogg)
         }
         hendelse.funksjonellFeil(RV_VT_1)
         assertFunksjonellFeil("Gir opp fordi tilstanden er nådd makstid", hendelse.logg)
@@ -158,8 +158,8 @@ internal class AktivitetsloggTest {
         hendelse.kontekst(vedtaksperiode)
         "info message".also {
             hendelse.info(it)
-            assertInfo(it, hendelse.logg)
-            assertInfo(it, aktivitetslogg)
+            assertInfo(it, aktivitetslogg = hendelse.logg)
+            assertInfo(it, aktivitetslogg = aktivitetslogg)
         }
         hendelse.funksjonellFeil(RV_VT_1)
         assertFunksjonellFeil("Gir opp fordi tilstanden er nådd makstid", hendelse.logg)
@@ -168,6 +168,19 @@ internal class AktivitetsloggTest {
         assertFunksjonellFeil("Vedtaksperiode", aktivitetslogg)
         assertFunksjonellFeil("Arbeidsgiver", aktivitetslogg)
         assertFunksjonellFeil("Person", aktivitetslogg)
+    }
+
+    @Test
+    fun `bevarer kontekster for barn`() {
+        val hendelse = TestHendelse(aktivitetslogg.barn())
+        hendelse.kontekst(person)
+
+        val barn = hendelse.barn()
+        barn.kontekst(TestKontekst("Arbeidsgiver", ""))
+        barn.info("Hei")
+
+        assertInfo("Hei", listOf("TestHendelse", "Person", "Arbeidsgiver"), aktivitetslogg)
+        assertInfo("Hei", listOf("TestHendelse", "Person", "Arbeidsgiver"), barn)
     }
 
     @Test
@@ -233,12 +246,14 @@ internal class AktivitetsloggTest {
         assertVarsel(message = "En melding")
     }
 
-    private fun assertInfo(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
+    private fun assertInfo(message: String, forventetKonteksttyper: List<String>? = null, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
         var visitorCalled = false
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
             override fun visitInfo(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.Info, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertEquals(message, melding)
+                if (forventetKonteksttyper != null)
+                    assertEquals(forventetKonteksttyper, kontekster.map { it.kontekstType })
             }
         })
         assertTrue(visitorCalled)

@@ -17,6 +17,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
@@ -923,7 +924,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun aktivitetsloggkopi(hendelse: IAktivitetslogg) =
         hendelse.barn().also { kopi ->
-            kopi.kontekst(person)
             this.kontekst(kopi)
         }
 

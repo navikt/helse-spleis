@@ -62,7 +62,7 @@ class Aktivitetslogg(
 
     override fun harFunksjonelleFeilEllerVerre() = funksjonellFeil().isNotEmpty() || logiskFeil().isNotEmpty()
 
-    override fun barn() = Aktivitetslogg(this)
+    override fun barn() = Aktivitetslogg(this).also { it.kontekster.addAll(this.kontekster) }
 
     override fun toString() = this.aktiviteter.map { it.inOrder() }.joinToString(separator = "\n") { it }
 
