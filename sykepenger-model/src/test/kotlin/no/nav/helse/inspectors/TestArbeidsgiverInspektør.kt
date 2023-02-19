@@ -494,7 +494,7 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun sykmeldingsperioder() = sykmeldingsperioder.toList()
 
-    internal fun arbeidsgiverperioden(vedtaksperiodeIdInnhenter: IdInnhenter) = periode(vedtaksperiodeIdInnhenter).let { arbeidsgiver.arbeidsgiverperiode(it, NullObserver) }
+    internal fun arbeidsgiverperioden(vedtaksperiodeIdInnhenter: IdInnhenter) = periode(vedtaksperiodeIdInnhenter).let { arbeidsgiver.arbeidsgiverperiode(it) }
     internal fun arbeidsgiverperioder(vedtaksperiodeIdInnhenter: IdInnhenter) = arbeidsgiverperioden(vedtaksperiodeIdInnhenter)?.toList()?.grupperSammenhengendePerioder() ?: emptyList()
     internal fun arbeidsgiverperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = arbeidsgiverperioder(vedtaksperiodeIdInnhenter).singleOrNullOrThrow()
     private fun <R> Collection<R>.singleOrNullOrThrow() = if (size < 2) this.firstOrNull() else throw IllegalStateException("Listen inneholder $size elementer: $this")

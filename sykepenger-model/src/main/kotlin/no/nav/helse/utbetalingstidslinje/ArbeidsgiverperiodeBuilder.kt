@@ -13,7 +13,7 @@ import no.nav.helse.økonomi.Økonomi
 internal class ArbeidsgiverperiodeBuilder(
     private val arbeidsgiverperiodeteller: Arbeidsgiverperiodeteller,
     mediator: ArbeidsgiverperiodeMediator,
-    subsumsjonObserver: SubsumsjonObserver
+    subsumsjonObserver: SubsumsjonObserver?
 ) : SykdomstidslinjeVisitor,
     Arbeidsgiverperiodeteller.Observatør {
 

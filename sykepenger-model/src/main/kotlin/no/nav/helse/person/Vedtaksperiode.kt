@@ -810,11 +810,7 @@ internal class Vedtaksperiode private constructor(
     override fun toString() =
         "${this.periode.start} - ${this.periode.endInclusive} (${this.tilstand::class.simpleName})"
 
-    private fun finnArbeidsgiverperiode() =
-        arbeidsgiver.arbeidsgiverperiode(
-            periode,
-            SubsumsjonObserver.NullObserver
-        ) // TODO: skal vi logge ved beregning av agp?
+    private fun finnArbeidsgiverperiode() = arbeidsgiver.arbeidsgiverperiode(periode)
 
     private fun forventerInntekt(): Boolean {
         return Arbeidsgiverperiode.forventerInntekt(finnArbeidsgiverperiode(), periode, sykdomstidslinje, jurist())
@@ -2379,7 +2375,7 @@ internal class Vedtaksperiode private constructor(
             perioder: List<Vedtaksperiode>,
             organisasjonsnummer: String,
             sykdomstidslinje: Sykdomstidslinje,
-            subsumsjonObserver: SubsumsjonObserver
+            subsumsjonObserver: SubsumsjonObserver?
         ): List<Arbeidsgiverperiode> {
             val samletSykdomstidslinje =
                 Sykdomstidslinje.gammelTidslinje(perioder.map { it.sykdomstidslinje }).merge(sykdomstidslinje, replace)

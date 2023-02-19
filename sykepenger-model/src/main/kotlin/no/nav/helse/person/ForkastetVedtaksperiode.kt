@@ -57,7 +57,7 @@ internal class ForkastetVedtaksperiode(
             forkastede: List<ForkastetVedtaksperiode>,
             organisasjonsnummer: String,
             sykdomstidslinje: Sykdomstidslinje,
-            subsumsjonObserver: SubsumsjonObserver
+            subsumsjonObserver: SubsumsjonObserver?
         ): List<Arbeidsgiverperiode> = Vedtaksperiode.arbeidsgiverperiodeFor(
             person,
             forkastede.perioder(),

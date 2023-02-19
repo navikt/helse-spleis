@@ -290,7 +290,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg) : Boolean {
-        val arbeidsgiverperiode = arbeidsgiverperiode(periode, NullObserver) ?: return false
+        val arbeidsgiverperiode = arbeidsgiverperiode(periode) ?: return false
         val vilkårsgrunnlag = person.vilkårsgrunnlagFor(skjæringstidspunkt)
         val refusjonsopplysninger = when (vilkårsgrunnlag) {
             null -> refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
@@ -830,13 +830,13 @@ internal class Arbeidsgiver private constructor(
         return sykdomshistorikk.sykdomstidslinje()
     }
 
-    internal fun arbeidsgiverperiode(periode: Periode, subsumsjonObserver: SubsumsjonObserver): Arbeidsgiverperiode? {
+    internal fun arbeidsgiverperiode(periode: Periode): Arbeidsgiverperiode? {
         val arbeidsgiverperioder = ForkastetVedtaksperiode.arbeidsgiverperiodeFor(
             person,
             forkastede,
             organisasjonsnummer,
             sykdomstidslinje(),
-            subsumsjonObserver
+            subsumsjonObserver = null
         )
         return arbeidsgiverperioder.finn(periode)
     }
@@ -979,7 +979,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun periodetype(periode: Periode): Periodetype {
-        return arbeidsgiverperiode(periode, NullObserver)?.let { person.periodetype(organisasjonsnummer, it, periode, skjæringstidspunkt(periode)) } ?: Periodetype.FØRSTEGANGSBEHANDLING
+        return arbeidsgiverperiode(periode)?.let { person.periodetype(organisasjonsnummer, it, periode, skjæringstidspunkt(periode)) } ?: Periodetype.FØRSTEGANGSBEHANDLING
     }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, skjæringstidspunkt: LocalDate) =

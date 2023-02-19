@@ -115,7 +115,7 @@ internal class Infotrygdhistorikk private constructor(
         organisasjonsnummer: String,
         sykdomstidslinje: Sykdomstidslinje,
         builder: ArbeidsgiverperiodeMediator,
-        subsumsjonObserver: SubsumsjonObserver
+        subsumsjonObserver: SubsumsjonObserver?
     ) {
         val teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
         val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, builder, subsumsjonObserver)

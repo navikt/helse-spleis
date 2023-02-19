@@ -100,7 +100,7 @@ internal class DagerFraInntektsmelding(
         forrigePeriodeSomHåndterte?.let {
             // Vi ønsker kun å validere arbeidsgiverperioden en gang, og dette til slutt
             // Dette for å unngå uenighet om agp hvis kun deler av historikken er lagt til
-            valider(arbeidsgiver.arbeidsgiverperiode(it, NullObserver))
+            valider(arbeidsgiver.arbeidsgiverperiode(it))
         }
     }
 

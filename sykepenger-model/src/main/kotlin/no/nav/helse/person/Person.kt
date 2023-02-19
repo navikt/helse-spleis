@@ -380,7 +380,7 @@ class Person private constructor(
     internal fun arbeidsgiverperiodeFor(
         orgnummer: String,
         sykdomstidslinje: Sykdomstidslinje,
-        subsumsjonObserver: SubsumsjonObserver
+        subsumsjonObserver: SubsumsjonObserver?
     ): List<Arbeidsgiverperiode> {
         val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
         infotrygdhistorikk.build(orgnummer, sykdomstidslinje, periodebuilder, subsumsjonObserver)
