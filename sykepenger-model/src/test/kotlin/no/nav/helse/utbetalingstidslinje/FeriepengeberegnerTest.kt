@@ -62,7 +62,7 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.februar)
         )
 
-        assertEquals(41 * 3000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForSpleis())
+        assertEquals(41 * 3000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver())
     }
 
     @Test
@@ -104,8 +104,8 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.januar)
         )
 
-        assertEquals(10 * 3000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForSpleis(ORGNUMMER))
-        assertEquals(0.0, feriepengeberegner.beregnFeriepengerForSpleis("otherOrgn"))
+        assertEquals(10 * 3000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver(ORGNUMMER))
+        assertEquals(0.0, feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver("otherOrgn"))
     }
 
     @Test
@@ -114,9 +114,9 @@ internal class FeriepengeberegnerTest {
             spleisArbeidsgiver = "456789123".spleisArbeidsgiver(1.januar til 10.januar) + "789123456".spleisArbeidsgiver(1.januar til 12.januar)
         )
 
-        assertEquals((10 + 12) * 3000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForSpleis())
-        assertEquals(10 * 3000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForSpleis("456789123"))
-        assertEquals(12 * 3000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForSpleis("789123456"))
+        assertEquals((10 + 12) * 3000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver())
+        assertEquals(10 * 3000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver("456789123"))
+        assertEquals(12 * 3000 * UNG_SATS, feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver("789123456"))
     }
 
     @Test
@@ -194,7 +194,7 @@ internal class FeriepengeberegnerTest {
         )
 
         assertEquals((10 * 1000 + 14 * 2000) * GAMMEL_SATS, feriepengeberegner.beregnFeriepengerForInfotrygd())
-        assertEquals(17 * 3000 * GAMMEL_SATS, feriepengeberegner.beregnFeriepengerForSpleis())
+        assertEquals(17 * 3000 * GAMMEL_SATS, feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver())
     }
 
     @Test

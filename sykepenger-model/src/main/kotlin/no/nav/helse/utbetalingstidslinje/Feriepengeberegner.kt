@@ -74,8 +74,8 @@ internal class Feriepengeberegner(
 
     internal fun beregnFeriepengerForInfotrygdArbeidsgiver() = beregnForFilter(INFOTRYGD_ARBEIDSGIVER)
     internal fun beregnFeriepengerForInfotrygdArbeidsgiver(orgnummer: String) = beregnForFilter(INFOTRYGD_ARBEIDSGIVER and orgnummerFilter(orgnummer))
-    internal fun beregnFeriepengerForSpleis() = beregnForFilter(SPLEIS_ARBEIDSGIVER)
-    internal fun beregnFeriepengerForSpleis(orgnummer: String) = beregnForFilter(SPLEIS_ARBEIDSGIVER and orgnummerFilter(orgnummer))
+    internal fun beregnFeriepengerForSpleisArbeidsgiver() = beregnForFilter(SPLEIS_ARBEIDSGIVER)
+    internal fun beregnFeriepengerForSpleisArbeidsgiver(orgnummer: String) = beregnForFilter(SPLEIS_ARBEIDSGIVER and orgnummerFilter(orgnummer))
     internal fun beregnFeriepengerForInfotrygd() = beregnForFilter(INFOTRYGD)
     internal fun beregnFeriepengerForInfotrygd(orgnummer: String) = beregnForFilter(INFOTRYGD and orgnummerFilter(orgnummer))
     internal fun beregnFeriepengerForArbeidsgiver(orgnummer: String) = beregnForFilter(ARBEIDSGIVER and orgnummerFilter(orgnummer))

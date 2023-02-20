@@ -6,8 +6,10 @@ import ch.qos.logback.core.AppenderBase
 import java.time.Year
 import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -16,6 +18,7 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Utbetalingsperi
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Personutbetalingsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.juli
@@ -35,6 +38,7 @@ import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -82,6 +86,28 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         override fun append(eventObject: ILoggingEvent) {
             messages.add(eventObject)
         }
+    }
+
+    @Test
+    fun `person som har fått utbetalt direkte`() {
+        nyttVedtak(1.januar(2022), 31.januar(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
+        inspektør.utbetalinger.single().inspektør.let { utbetalingInspektør ->
+            assertEquals(0, utbetalingInspektør.arbeidsgiverOppdrag.size)
+            assertEquals(1, utbetalingInspektør.personOppdrag.size)
+        }
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2022)
+        )
+
+        assertForventetFeil(
+            forklaring = "Vi teller alt som utbetalinger til arbeidsgiver",
+            nå = {
+                assertEquals(1605.5819999999999, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
+            },
+            ønsket = {
+                assertEquals(0.0, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
+            }
+        )
     }
 
     @Test
