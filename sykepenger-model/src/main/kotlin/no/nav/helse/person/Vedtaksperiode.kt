@@ -801,7 +801,8 @@ internal class Vedtaksperiode private constructor(
         val filter: VedtaksperiodeFilter = if (vedtaksperiodeSomBeregner.arbeidsgiver === this.arbeidsgiver)
             { it -> it.tilstand == AvventerGjennomførtRevurdering }
         else
-            { it -> it.tilstand == AvventerRevurdering && it.skjæringstidspunkt == this.skjæringstidspunkt
+            { it -> it !== this &&
+                    it.tilstand == AvventerRevurdering && it.skjæringstidspunkt == this.skjæringstidspunkt
                     // deler skjæringstidspunkt, men ikke utbetaling (Infotrygdperiode mellom)
                     && !it.utbetalinger.hørerIkkeSammenMed(utbetaling) }
 

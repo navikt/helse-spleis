@@ -76,6 +76,7 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
         periode: Periode,
         utbetaling: Utbetaling
     ): Utbetalingstidslinje {
+        check(utbetaling !== siste) { "kan ikke legge til lik utbetaling som forrige" }
         utbetaling.nyVedtaksperiodeUtbetaling(vedtaksperiodeId)
         utbetalinger.add(grunnlagsdata to utbetaling)
         return utbetaling.utbetalingstidslinje(periode)
