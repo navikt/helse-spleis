@@ -590,6 +590,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         infotrygdFeriepengebeløpPerson: Double,
         infotrygdFeriepengebeløpArbeidsgiver: Double,
         spleisFeriepengebeløpArbeidsgiver: Double,
+        spleisFeriepengebeløpPerson: Double,
         overføringstidspunkt: LocalDateTime?,
         avstemmingsnøkkel: Long?,
         utbetalingId: UUID,
@@ -601,6 +602,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             infotrygdFeriepengebeløpPerson,
             infotrygdFeriepengebeløpArbeidsgiver,
             spleisFeriepengebeløpArbeidsgiver,
+            spleisFeriepengebeløpPerson,
             overføringstidspunkt,
             avstemmingsnøkkel,
             utbetalingId,
@@ -695,6 +697,15 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         beløp: Int
     ) {
         delegatee.visitSpleisArbeidsgiverDag(spleisArbeidsgiver, orgnummer, dato, beløp)
+    }
+
+    override fun visitSpleisPersonDag(
+        spleisPerson: Feriepengeberegner.UtbetaltDag.SpleisPerson,
+        orgnummer: String,
+        dato: LocalDate,
+        beløp: Int
+    ) {
+        delegatee.visitSpleisPersonDag(spleisPerson, orgnummer, dato, beløp)
     }
 
     override fun postVisitVedtaksperiode(

@@ -266,6 +266,7 @@ internal interface FeriepengeutbetalingVisitor : OppdragVisitor {
         infotrygdFeriepengebeløpPerson: Double,
         infotrygdFeriepengebeløpArbeidsgiver: Double,
         spleisFeriepengebeløpArbeidsgiver: Double,
+        spleisFeriepengebeløpPerson: Double,
         overføringstidspunkt: LocalDateTime?,
         avstemmingsnøkkel: Long?,
         utbetalingId: UUID,
@@ -300,6 +301,7 @@ internal interface FeriepengeutbetalingVisitor : OppdragVisitor {
     }
 
     fun visitSpleisArbeidsgiverDag(spleisArbeidsgiver: Feriepengeberegner.UtbetaltDag.SpleisArbeidsgiver, orgnummer: String, dato: LocalDate, beløp: Int) {}
+    fun visitSpleisPersonDag(spleisArbeidsgiver: Feriepengeberegner.UtbetaltDag.SpleisPerson, orgnummer: String, dato: LocalDate, beløp: Int) {}
     fun postVisitFeriepengeberegner(
         feriepengeberegner: Feriepengeberegner,
         feriepengedager: List<Feriepengeberegner.UtbetaltDag>,

@@ -25,6 +25,7 @@ internal class Feriepengeutbetaling private constructor(
     private val infotrygdFeriepengebeløpPerson: Double,
     private val infotrygdFeriepengebeløpArbeidsgiver: Double,
     private val spleisFeriepengebeløpArbeidsgiver: Double,
+    private val spleisFeriepengebeløpPerson: Double,
     private val oppdrag: Oppdrag,
     private val personoppdrag: Oppdrag,
     private val utbetalingId: UUID,
@@ -42,6 +43,7 @@ internal class Feriepengeutbetaling private constructor(
             infotrygdFeriepengebeløpPerson: Double,
             infotrygdFeriepengebeløpArbeidsgiver: Double,
             spleisFeriepengebeløpArbeidsgiver: Double,
+            spleisFeriepengebeløpPerson: Double,
             oppdrag: Oppdrag,
             personoppdrag: Oppdrag,
             utbetalingId: UUID,
@@ -53,6 +55,7 @@ internal class Feriepengeutbetaling private constructor(
                 infotrygdFeriepengebeløpPerson = infotrygdFeriepengebeløpPerson,
                 infotrygdFeriepengebeløpArbeidsgiver = infotrygdFeriepengebeløpArbeidsgiver,
                 spleisFeriepengebeløpArbeidsgiver = spleisFeriepengebeløpArbeidsgiver,
+                spleisFeriepengebeløpPerson = spleisFeriepengebeløpPerson,
                 oppdrag = oppdrag,
                 personoppdrag = personoppdrag,
                 utbetalingId = utbetalingId,
@@ -67,6 +70,7 @@ internal class Feriepengeutbetaling private constructor(
             infotrygdFeriepengebeløpPerson,
             infotrygdFeriepengebeløpArbeidsgiver,
             spleisFeriepengebeløpArbeidsgiver,
+            spleisFeriepengebeløpPerson,
             overføringstidspunkt,
             avstemmingsnøkkel,
             utbetalingId,
@@ -173,6 +177,7 @@ internal class Feriepengeutbetaling private constructor(
             val infotrygdFeriepengebeløpPerson = feriepengeberegner.beregnFeriepengerForInfotrygdPerson(orgnummer)
             val infotrygdFeriepengebeløpArbeidsgiver = feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver(orgnummer)
             val spleisFeriepengebeløpArbeidsgiver = feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver(orgnummer)
+            val spleisFeriepengebeløpPerson = feriepengeberegner.beregnFeriepengerForSpleisPerson(orgnummer)
 
             val totaltFeriepengebeløpArbeidsgiver: Double = feriepengeberegner.beregnFeriepengerForArbeidsgiver(orgnummer)
             val differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd: Double = feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(orgnummer)
@@ -289,7 +294,7 @@ internal class Feriepengeutbetaling private constructor(
                 Alle feriepengeutbetalinger fra Infotrygd (alle ytelser): ${utbetalingshistorikkForFeriepenger.utbetalteFeriepengerTilPerson()}
                 Vår beregning av hva Infotrygd burde utbetalt av feriepenger for sykepenger: $hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver
                 Infotrygd skal betale: $infotrygdFeriepengebeløpPerson
-                Spleis skal betale: 0.0 Fordi Spleis ikke utbetalte til person i 2021
+                Spleis skal betale: $spleisFeriepengebeløpPerson
                 Infotrygd-utbetalingen må korrigeres med: $differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson
 
                 - GENERELT:         
@@ -311,6 +316,7 @@ internal class Feriepengeutbetaling private constructor(
                 infotrygdFeriepengebeløpPerson = infotrygdFeriepengebeløpPerson,
                 infotrygdFeriepengebeløpArbeidsgiver = infotrygdFeriepengebeløpArbeidsgiver,
                 spleisFeriepengebeløpArbeidsgiver = spleisFeriepengebeløpArbeidsgiver,
+                spleisFeriepengebeløpPerson = spleisFeriepengebeløpPerson,
                 oppdrag = oppdrag,
                 personoppdrag = personoppdrag,
                 utbetalingId = UUID.randomUUID(),

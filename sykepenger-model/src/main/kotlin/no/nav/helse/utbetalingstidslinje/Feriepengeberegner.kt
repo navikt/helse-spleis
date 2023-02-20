@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.lang.IllegalStateException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
@@ -29,6 +30,7 @@ import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companio
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.INFOTRYGD_ARBEIDSGIVER
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.INFOTRYGD_PERSON
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.SPLEIS_ARBEIDSGIVER
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.SPLEIS_PERSON
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.and
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.feriepengedager
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.opptjeningsårFilter
@@ -76,6 +78,7 @@ internal class Feriepengeberegner(
     internal fun beregnFeriepengerForInfotrygdArbeidsgiver(orgnummer: String) = beregnForFilter(INFOTRYGD_ARBEIDSGIVER and orgnummerFilter(orgnummer))
     internal fun beregnFeriepengerForSpleisArbeidsgiver() = beregnForFilter(SPLEIS_ARBEIDSGIVER)
     internal fun beregnFeriepengerForSpleisArbeidsgiver(orgnummer: String) = beregnForFilter(SPLEIS_ARBEIDSGIVER and orgnummerFilter(orgnummer))
+    internal fun beregnFeriepengerForSpleisPerson(orgnummer: String) = beregnForFilter(SPLEIS_PERSON and orgnummerFilter(orgnummer))
     internal fun beregnFeriepengerForInfotrygd() = beregnForFilter(INFOTRYGD)
     internal fun beregnFeriepengerForInfotrygd(orgnummer: String) = beregnForFilter(INFOTRYGD and orgnummerFilter(orgnummer))
     internal fun beregnFeriepengerForArbeidsgiver(orgnummer: String) = beregnForFilter(ARBEIDSGIVER and orgnummerFilter(orgnummer))
@@ -134,6 +137,7 @@ internal class Feriepengeberegner(
             internal val INFOTRYGD_ARBEIDSGIVER: UtbetaltDagSelector = { it is InfotrygdArbeidsgiver }
             internal val INFOTRYGD: UtbetaltDagSelector = INFOTRYGD_PERSON or INFOTRYGD_ARBEIDSGIVER
             internal val SPLEIS_ARBEIDSGIVER: UtbetaltDagSelector = { it is SpleisArbeidsgiver }
+            internal val SPLEIS_PERSON: UtbetaltDagSelector = { it is SpleisPerson }
             internal val ARBEIDSGIVER: UtbetaltDagSelector = INFOTRYGD_ARBEIDSGIVER or SPLEIS_ARBEIDSGIVER
             internal fun orgnummerFilter(orgnummer: String): UtbetaltDagSelector = { it.orgnummer == orgnummer }
             internal fun opptjeningsårFilter(opptjeningsår: Year): UtbetaltDagSelector = { Year.from(it.dato) == opptjeningsår }
@@ -170,6 +174,15 @@ internal class Feriepengeberegner(
         ) : UtbetaltDag(orgnummer, dato, beløp) {
             override fun accept(visitor: FeriepengeutbetalingVisitor) {
                 visitor.visitSpleisArbeidsgiverDag(this, orgnummer, dato, beløp)
+            }
+        }
+        internal class SpleisPerson(
+            orgnummer: String,
+            dato: LocalDate,
+            beløp: Int
+        ) : UtbetaltDag(orgnummer, dato, beløp) {
+            override fun accept(visitor: FeriepengeutbetalingVisitor) {
+                visitor.visitSpleisPersonDag(this, orgnummer, dato, beløp)
             }
         }
     }
@@ -233,6 +246,13 @@ internal class Feriepengeberegner(
             private var annullertUtbetaling = false
             val utbetalteDagerForFagsystemId = mutableMapOf<String, MutableList<UtbetaltDag>>()
             var utbetalteDagerForOppdrag = mutableListOf<UtbetaltDag>()
+            var oppdragFagområde: Fagområde? = null
+            private fun dagFabrikk(orgnummer: String, dato: LocalDate, beløp: Int): UtbetaltDag =
+                when(oppdragFagområde) {
+                    Fagområde.Sykepenger -> UtbetaltDag.SpleisPerson(orgnummer, dato, beløp)
+                    Fagområde.SykepengerRefusjon -> UtbetaltDag.SpleisArbeidsgiver(orgnummer, dato, beløp)
+                    else -> throw IllegalStateException("Kunne ikke lage UtbetaltDag for fagområde $oppdragFagområde")
+                }
 
             override fun preVisitUtbetaling(
                 utbetaling: Utbetaling,
@@ -278,6 +298,7 @@ internal class Feriepengeberegner(
                 if (utbetaltUtbetaling || annullertUtbetaling) {
                     utbetalteDagerForOppdrag = mutableListOf()
                     utbetalteDagerForFagsystemId[oppdrag.fagsystemId()] = utbetalteDagerForOppdrag
+                    oppdragFagområde = fagområde
                 }
             }
 
@@ -301,7 +322,7 @@ internal class Feriepengeberegner(
             ) {
                 if (inUtbetalinger && utbetaltUtbetaling && beløp != null && datoStatusFom == null) {
                     utbetalteDagerForOppdrag.addAll((fom til tom).filterNot { it.erHelg() }.map {
-                        UtbetaltDag.SpleisArbeidsgiver(this.orgnummer, it, beløp)
+                        dagFabrikk(this.orgnummer, it, beløp)
                     })
                 }
             }

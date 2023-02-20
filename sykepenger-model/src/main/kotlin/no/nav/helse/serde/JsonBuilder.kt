@@ -10,7 +10,6 @@ import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.Arbeidsgiver
@@ -334,6 +333,7 @@ internal class JsonBuilder : AbstractBuilder() {
             infotrygdFeriepengebeløpPerson: Double,
             infotrygdFeriepengebeløpArbeidsgiver: Double,
             spleisFeriepengebeløpArbeidsgiver: Double,
+            spleisFeriepengebeløpPerson: Double,
             overføringstidspunkt: LocalDateTime?,
             avstemmingsnøkkel: Long?,
             utbetalingId: UUID,
@@ -596,6 +596,15 @@ internal class JsonBuilder : AbstractBuilder() {
             beløp: Int
         ) {
             leggTilDag("SpleisArbeidsgiverDag", orgnummer, dato, beløp)
+        }
+
+        override fun visitSpleisPersonDag(
+            spleisArbeidsgiver: Feriepengeberegner.UtbetaltDag.SpleisPerson,
+            orgnummer: String,
+            dato: LocalDate,
+            beløp: Int
+        ) {
+            leggTilDag("SpleisPersonDag", orgnummer, dato, beløp)
         }
 
         private fun leggTilDag(

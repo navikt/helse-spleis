@@ -3,7 +3,6 @@ package no.nav.helse.inspectors
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.SimuleringResultat
@@ -73,6 +72,7 @@ internal class TestArbeidsgiverInspektør(
     internal val infotrygdFeriepengebeløpPerson = mutableListOf<Double>()
     internal val infotrygdFeriepengebeløpArbeidsgiver = mutableListOf<Double>()
     internal val spleisFeriepengebeløpArbeidsgiver = mutableListOf<Double>()
+    internal val spleisFeriepengebeløpPerson = mutableListOf<Double>()
     private val vedtaksperiodeutbetalinger = mutableMapOf<Int, MutableList<Int>>()
     private val vedtaksperiodeutbetalingider = mutableMapOf<Int, MutableList<UUID>>()
     private val vedtaksperiodeutbetalingstyper = mutableMapOf<Int, MutableList<Utbetalingtype>>()
@@ -347,6 +347,7 @@ internal class TestArbeidsgiverInspektør(
         infotrygdFeriepengebeløpPerson: Double,
         infotrygdFeriepengebeløpArbeidsgiver: Double,
         spleisFeriepengebeløpArbeidsgiver: Double,
+        spleisFeriepengebeløpPerson: Double,
         overføringstidspunkt: LocalDateTime?,
         avstemmingsnøkkel: Long?,
         utbetalingId: UUID,
@@ -357,6 +358,7 @@ internal class TestArbeidsgiverInspektør(
         this.infotrygdFeriepengebeløpArbeidsgiver.add(infotrygdFeriepengebeløpArbeidsgiver)
         this.infotrygdFeriepengebeløpPerson.add(infotrygdFeriepengebeløpPerson)
         this.spleisFeriepengebeløpArbeidsgiver.add(spleisFeriepengebeløpArbeidsgiver)
+        this.spleisFeriepengebeløpPerson.add(spleisFeriepengebeløpPerson)
     }
 
     override fun postVisitFeriepengeutbetaling(

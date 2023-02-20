@@ -6,7 +6,6 @@ import ch.qos.logback.core.AppenderBase
 import java.time.Year
 import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.hendelser.Inntektsmelding
@@ -99,15 +98,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             opptjeningsår = Year.of(2022)
         )
 
-        assertForventetFeil(
-            forklaring = "Vi teller alt som utbetalinger til arbeidsgiver",
-            nå = {
-                assertEquals(1605.5819999999999, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
-            },
-            ønsket = {
-                assertEquals(0.0, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
-            }
-        )
+        assertEquals(1605.5819999999999, inspektør.spleisFeriepengebeløpPerson.first())
+        assertEquals(0.0, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
     }
 
     @Test
