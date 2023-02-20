@@ -97,7 +97,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         vedtaksperiodeendringer.getOrPut(event.vedtaksperiodeId) { mutableListOf() }.add(event)
         vedtaksperioder.getOrPut(event.organisasjonsnummer) { mutableSetOf() }.add(sisteVedtaksperiode)
         tilstandsendringer.getOrPut(event.vedtaksperiodeId) { mutableListOf(event.forrigeTilstand) }.add(event.gjeldendeTilstand)
-        inntektsmeldingReplayEventer.remove(sisteVedtaksperiode)
         if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(event.vedtaksperiodeId)
     }
 
@@ -119,6 +118,10 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     override fun inntektsmeldingReplay(personidentifikator: Personidentifikator, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, førsteDagIArbeidsgiverperioden: LocalDate?) {
         inntektsmeldingReplayEventer.add(vedtaksperiodeId)
+    }
+
+    override fun trengerIkkeInntektsmeldingReplay(vedtaksperiodeId: UUID) {
+        inntektsmeldingReplayEventer.remove(vedtaksperiodeId)
     }
 
     override fun annullering(event: PersonObserver.UtbetalingAnnullertEvent) {

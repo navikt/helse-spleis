@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDate
 import java.util.UUID
@@ -31,7 +30,7 @@ internal class PersonMediator(
     private val hendelseRepository: HendelseRepository
 ) : PersonObserver {
     private val meldinger = mutableListOf<Pakke>()
-    private val replays = mutableListOf<String>()
+    private val replays = mutableListOf<Pair<UUID, String>>()
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         private val logg = LoggerFactory.getLogger(PersonMediator::class.java)
@@ -54,7 +53,7 @@ internal class PersonMediator(
     private fun sendReplays(rapidsConnection: RapidsConnection) {
         if (replays.isEmpty()) return
         message.logReplays(sikkerLogg, replays.size)
-        replays.forEach { melding ->
+        replays.forEach { (_, melding) ->
             rapidsConnection.queueReplayMessage(hendelse.fødselsnummer(), melding)
         }
     }
@@ -77,18 +76,20 @@ internal class PersonMediator(
                 periode != null && periode.overlapperMed(søkeområde)
             }
             .forEach { inntektsmelding ->
-                createReplayMessage(inntektsmelding, mapOf(
-                    "@event_name" to "inntektsmelding_replay",
-                    "vedtaksperiodeId" to vedtaksperiodeId
-                ))
+                createReplayMessage(inntektsmelding, vedtaksperiodeId)
             }
     }
 
-    private fun createReplayMessage(message: JsonNode, extraFields: Map<String, Any>) {
+    override fun trengerIkkeInntektsmeldingReplay(vedtaksperiodeId: UUID) {
+        replays.removeIf { it.first == vedtaksperiodeId }
+    }
+
+    private fun createReplayMessage(message: JsonNode, vedtaksperiodeId: UUID) {
         message as ObjectNode
         message.put("@replay", true)
-        extraFields.forEach { (key, value), -> message.replace(key, objectMapper.convertValue<JsonNode>(value)) }
-        replays.add(message.toString())
+        message.put("@event_name", "inntektsmelding_replay")
+        message.put("vedtaksperiodeId", "$vedtaksperiodeId")
+        replays.add(vedtaksperiodeId to message.toString())
     }
 
     override fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {

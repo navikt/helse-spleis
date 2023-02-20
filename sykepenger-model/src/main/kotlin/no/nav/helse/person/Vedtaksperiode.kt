@@ -1380,6 +1380,7 @@ internal class Vedtaksperiode private constructor(
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.utbetalinger.forkast(aktivitetslogg)
             vedtaksperiode.trengerIkkeInntektsmelding()
+            vedtaksperiode.person.trengerIkkeInntektsmeldingReplay(vedtaksperiode.id)
         }
 
         override fun håndterDagerFør(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
