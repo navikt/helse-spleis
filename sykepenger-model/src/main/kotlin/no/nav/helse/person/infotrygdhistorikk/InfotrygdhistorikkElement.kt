@@ -5,12 +5,13 @@ import java.time.LocalDateTime
 import java.util.Objects
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_15
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.utenUkjentPerioder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBetaltRettFør
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.utbetalingsperioder
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -18,7 +19,6 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Infotrygddekoratør
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -208,7 +208,13 @@ class InfotrygdhistorikkElement private constructor(
         other.oppdatert = this.oppdatert
     }
 
-    internal fun harEndretHistorikk(utbetaling: Utbetaling): Boolean {
-        return utbetaling.erEldreEnn(tidsstempel)
+    internal fun erEldreEnn(utbetaling: Utbetaling): Boolean {
+        return utbetaling.erNyereEnn(this.tidsstempel)
+    }
+
+    internal fun erEndretUtbetaling(sisteElementSomFantesFørUtbetaling: InfotrygdhistorikkElement): Boolean {
+        if (this === sisteElementSomFantesFørUtbetaling) return false
+        return this.perioder.utenUkjentPerioder() != sisteElementSomFantesFørUtbetaling.perioder.utenUkjentPerioder()
     }
 }
+

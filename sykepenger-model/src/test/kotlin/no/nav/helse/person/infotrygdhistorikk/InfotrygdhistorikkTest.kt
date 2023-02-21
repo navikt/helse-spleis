@@ -364,6 +364,86 @@ internal class InfotrygdhistorikkTest {
         assertEquals(1.februar til 28.februar, utbetalingstidslinje.periode())
     }
 
+    @Test
+    fun `Infotrygdutbetaling før spleisutbetaling`() {
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig),
+            Friperiode(26.januar,  31.januar),
+        )))
+        assertFalse(historikk.harEndretHistorikk(utbetaling()))
+    }
+
+    @Test
+    fun `Infotrygdutbetaling etter spleisutbetaling`() {
+        val utbetaling = utbetaling()
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig),
+            Friperiode(26.januar,  31.januar),
+        )))
+        assertTrue(historikk.harEndretHistorikk(utbetaling))
+    }
+
+    @Test
+    fun `Ny inntekt registrert i infotrygd`() {
+        val utbetaling = utbetaling()
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig)
+            )))
+        assertTrue(historikk.harEndretHistorikk(utbetaling))
+        historikk.oppdaterHistorikk(historikkelement(
+            perioder = listOf(ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig)),
+            inntekter = listOf(Inntektsopplysning("ag1", 1.januar, 1000.daglig, true))
+            )
+        )
+        assertFalse(historikk.harEndretHistorikk(utbetaling()))
+    }
+
+    @Test
+    fun `Ny statslønn registrert i infotrygd`() {
+        val utbetaling = utbetaling()
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig)
+            )))
+        assertTrue(historikk.harEndretHistorikk(utbetaling))
+        historikk.oppdaterHistorikk(historikkelement(
+            perioder = listOf(ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig)),
+            harStatslønn = true
+            )
+        )
+        assertFalse(historikk.harEndretHistorikk(utbetaling()))
+    }
+
+    @Test
+    fun `Nye arbeidskategorikoder registrert i infotrygd`() {
+        val utbetaling = utbetaling()
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig)
+            )))
+        assertTrue(historikk.harEndretHistorikk(utbetaling))
+        historikk.oppdaterHistorikk(historikkelement(
+            perioder = listOf(ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig)),
+            arbeidskategorikoder = mapOf("123" to LocalDate.now())
+            )
+        )
+        assertFalse(historikk.harEndretHistorikk(utbetaling()))
+    }
+
+    @Test
+    fun `Nye ugyldigePerioder registrert i infotrygd`() {
+        val utbetaling = utbetaling()
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig)
+            )))
+        assertTrue(historikk.harEndretHistorikk(utbetaling))
+        historikk.oppdaterHistorikk(historikkelement(
+            perioder = listOf(ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig)),
+            ugyldigePerioder = listOf(UgyldigPeriode(1.januar, 25.januar, 100))
+            )
+        )
+        assertFalse(historikk.harEndretHistorikk(utbetaling()))
+    }
+
+
     private fun utbetaling() = Utbetaling.lagUtbetaling(
         utbetalinger = emptyList(),
         fødselsnummer = "",

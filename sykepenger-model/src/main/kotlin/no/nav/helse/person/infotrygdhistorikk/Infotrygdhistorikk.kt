@@ -2,7 +2,6 @@ package no.nav.helse.person.infotrygdhistorikk
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -12,7 +11,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.utbetalingsh
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeMediator
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
@@ -95,7 +93,10 @@ internal class Infotrygdhistorikk private constructor(
 
     internal fun harEndretHistorikk(utbetaling: Utbetaling): Boolean {
         if (!harHistorikk()) return false
-        return siste.harEndretHistorikk(utbetaling)
+        val sisteElementSomFantesFørUtbetaling = elementer.firstOrNull{
+            it.erEldreEnn(utbetaling)
+        } ?: return true
+        return siste.erEndretUtbetaling(sisteElementSomFantesFørUtbetaling)
     }
 
     internal fun tøm() {
