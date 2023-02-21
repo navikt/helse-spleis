@@ -504,8 +504,8 @@ class Utbetaling private constructor(
     internal fun overlapperMed(other: Utbetaling): Boolean {
         return this.periode.overlapperMed(other.periode)
     }
-    internal fun erEldreEnn(other: LocalDateTime): Boolean {
-        return other > tidsstempel
+    internal fun erNyereEnn(other: LocalDateTime): Boolean {
+        return other <= tidsstempel
     }
     private fun lagreOverføringsinformasjon(hendelse: IAktivitetslogg, avstemmingsnøkkel: Long, tidspunkt: LocalDateTime) {
         hendelse.info("Utbetalingen ble overført til Oppdrag/UR $tidspunkt, og har fått avstemmingsnøkkel $avstemmingsnøkkel.\n")
