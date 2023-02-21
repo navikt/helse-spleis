@@ -192,9 +192,9 @@ internal class Feriepengeutbetaling private constructor(
         }
 
         internal fun build(): Feriepengeutbetaling {
+            // Arbeidsgiver
             val infotrygdHarUtbetaltTilArbeidsgiver = utbetalingshistorikkForFeriepenger.utbetalteFeriepengerTilArbeidsgiver(orgnummer)
             val hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver = feriepengeberegner.beregnUtbetalteFeriepengerForInfotrygdArbeidsgiver(orgnummer)
-            val hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver = feriepengeberegner.beregnUtbetalteFeriepengerForInfotrygdPersonForEnArbeidsgiver(orgnummer)
 
             if (hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver.roundToInt() != 0 &&
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver.roundToInt() !in infotrygdHarUtbetaltTilArbeidsgiver
@@ -210,11 +210,8 @@ internal class Feriepengeutbetaling private constructor(
                 )
             }
 
-            val infotrygdFeriepengebeløpPerson = feriepengeberegner.beregnFeriepengerForInfotrygdPerson(orgnummer)
             val infotrygdFeriepengebeløpArbeidsgiver = feriepengeberegner.beregnFeriepengerForInfotrygdArbeidsgiver(orgnummer)
             val spleisFeriepengebeløpArbeidsgiver = feriepengeberegner.beregnFeriepengerForSpleisArbeidsgiver(orgnummer)
-            val spleisFeriepengebeløpPerson = feriepengeberegner.beregnFeriepengerForSpleisPerson(orgnummer)
-
             val totaltFeriepengebeløpArbeidsgiver: Double = feriepengeberegner.beregnFeriepengerForArbeidsgiver(orgnummer)
             val differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd: Double = feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(orgnummer)
             val arbeidsgiverbeløp = differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd.roundToInt()
@@ -231,8 +228,12 @@ internal class Feriepengeutbetaling private constructor(
 
             val sendArbeidsgiveroppdrag = skalSendeOppdrag(forrigeSendteArbeidsgiverOppdrag, arbeidsgiverbeløp)
 
-
-            val differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson =  infotrygdFeriepengebeløpPerson - hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver
+            // Person
+            val differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson = feriepengeberegner.beregnFeriepengedifferansenForPerson(orgnummer)
+            val infotrygdFeriepengebeløpPerson = feriepengeberegner.beregnFeriepengerForInfotrygdPerson(orgnummer)
+            val spleisFeriepengebeløpPerson = feriepengeberegner.beregnFeriepengerForSpleisPerson(orgnummer)
+            val totaltFeriepengebeløpPerson = feriepengeberegner.beregnFeriepengerForPerson(orgnummer)
+            val hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver = feriepengeberegner.beregnUtbetalteFeriepengerForInfotrygdPersonForEnArbeidsgiver(orgnummer)
             val personbeløp = differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson.roundToInt()
 
             val forrigeSendtePersonOppdrag =
@@ -255,6 +256,8 @@ internal class Feriepengeutbetaling private constructor(
                 IT sin personandel: $infotrygdFeriepengebeløpPerson
                 """.trimIndent()
             )
+
+            // Logging
             sikkerLogg.info(
                 """
                 Nøkkelverdier om feriepengeberegning
@@ -274,6 +277,7 @@ internal class Feriepengeutbetaling private constructor(
                 Vår beregning av hva Infotrygd burde utbetalt av feriepenger for sykepenger: $hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver
                 Infotrygd skal betale: $infotrygdFeriepengebeløpPerson
                 Spleis skal betale: $spleisFeriepengebeløpPerson
+                Totalt feriepengebeløp: $totaltFeriepengebeløpPerson
                 Infotrygd-utbetalingen må korrigeres med: $differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson
 
                 - GENERELT:         

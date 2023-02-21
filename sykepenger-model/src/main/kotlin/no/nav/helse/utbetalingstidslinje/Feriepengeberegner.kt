@@ -26,6 +26,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.ARBEIDSGIVER
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.PERSON
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.INFOTRYGD
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.INFOTRYGD_ARBEIDSGIVER
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.INFOTRYGD_PERSON
@@ -82,8 +83,9 @@ internal class Feriepengeberegner(
     internal fun beregnFeriepengerForInfotrygd() = beregnForFilter(INFOTRYGD)
     internal fun beregnFeriepengerForInfotrygd(orgnummer: String) = beregnForFilter(INFOTRYGD and orgnummerFilter(orgnummer))
     internal fun beregnFeriepengerForArbeidsgiver(orgnummer: String) = beregnForFilter(ARBEIDSGIVER and orgnummerFilter(orgnummer))
+    internal fun beregnFeriepengerForPerson(orgnummer: String) = beregnForFilter(PERSON and orgnummerFilter(orgnummer))
     internal fun beregnUtbetalteFeriepengerForInfotrygdArbeidsgiver(orgnummer: String): Double {
-        val grunnlag = grunnlagForFeriepengerUtbetaltAvInfotrygd(orgnummer)
+        val grunnlag = grunnlagForFeriepengerUtbetaltAvInfotrygdTilArbeidsgiver(orgnummer)
         return alder.beregnFeriepenger(opptjeningsår, grunnlag)
     }
 
@@ -94,14 +96,23 @@ internal class Feriepengeberegner(
 
     internal fun beregnFeriepengedifferansenForArbeidsgiver(orgnummer: String): Double {
         val grunnlag = feriepengedager().filter(ARBEIDSGIVER and orgnummerFilter(orgnummer)).summer()
-        val grunnlagUtbetaltAvInfotrygd = grunnlagForFeriepengerUtbetaltAvInfotrygd(orgnummer)
+        val grunnlagUtbetaltAvInfotrygd = grunnlagForFeriepengerUtbetaltAvInfotrygdTilArbeidsgiver(orgnummer)
         return alder.beregnFeriepenger(opptjeningsår, grunnlag - grunnlagUtbetaltAvInfotrygd)
     }
 
-    private fun grunnlagForFeriepengerUtbetaltAvInfotrygd(orgnummer: String): Int {
-        val itFeriepengedager = utbetalteDager.filter(INFOTRYGD).feriepengedager().flatMap { (_, dagListe) -> dagListe }
-        return itFeriepengedager.filter(INFOTRYGD_ARBEIDSGIVER and orgnummerFilter(orgnummer)).summer()
+    internal fun beregnFeriepengedifferansenForPerson(orgnummer: String): Double {
+        val grunnlag = feriepengedager().filter(PERSON and orgnummerFilter(orgnummer)).summer()
+        val grunnlagUtbetaltAvInfotrygd = grunnlagForFeriepengerUtbetaltAvInfotrygdTilPerson(orgnummer)
+        return alder.beregnFeriepenger(opptjeningsår, grunnlag - grunnlagUtbetaltAvInfotrygd)
     }
+
+    private fun første48dageneUtbetaltIInfotrygd() = utbetalteDager.filter(INFOTRYGD).feriepengedager().flatMap { (_, dagListe) -> dagListe }
+
+    private fun grunnlagForFeriepengerUtbetaltAvInfotrygdTilArbeidsgiver(orgnummer: String) =
+        første48dageneUtbetaltIInfotrygd().filter(INFOTRYGD_ARBEIDSGIVER and orgnummerFilter(orgnummer)).summer()
+
+    private fun grunnlagForFeriepengerUtbetaltAvInfotrygdTilPerson(orgnummer: String) =
+        første48dageneUtbetaltIInfotrygd().filter(INFOTRYGD_PERSON and orgnummerFilter(orgnummer)).summer()
 
     private fun grunnlagForFeriepengerUtbetaltAvInfotrygdTilPersonForArbeidsgiver(orgnummer: String): Int {
         val itFeriepengedager = utbetalteDager.filter(INFOTRYGD).feriepengedager().flatMap { (_, dagListe) -> dagListe }
@@ -139,6 +150,7 @@ internal class Feriepengeberegner(
             internal val SPLEIS_ARBEIDSGIVER: UtbetaltDagSelector = { it is SpleisArbeidsgiver }
             internal val SPLEIS_PERSON: UtbetaltDagSelector = { it is SpleisPerson }
             internal val ARBEIDSGIVER: UtbetaltDagSelector = INFOTRYGD_ARBEIDSGIVER or SPLEIS_ARBEIDSGIVER
+            internal val PERSON: UtbetaltDagSelector = INFOTRYGD_PERSON or SPLEIS_PERSON
             internal fun orgnummerFilter(orgnummer: String): UtbetaltDagSelector = { it.orgnummer == orgnummer }
             internal fun opptjeningsårFilter(opptjeningsår: Year): UtbetaltDagSelector = { Year.from(it.dato) == opptjeningsår }
             private infix fun (UtbetaltDagSelector).or(other: UtbetaltDagSelector): UtbetaltDagSelector = { this(it) || other(it) }
