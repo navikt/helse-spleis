@@ -87,6 +87,7 @@ internal class Feriepengeutbetaling private constructor(
             infotrygdFeriepengebeløpPerson,
             infotrygdFeriepengebeløpArbeidsgiver,
             spleisFeriepengebeløpArbeidsgiver,
+            spleisFeriepengebeløpPerson,
             overføringstidspunkt,
             avstemmingsnøkkel,
             utbetalingId,

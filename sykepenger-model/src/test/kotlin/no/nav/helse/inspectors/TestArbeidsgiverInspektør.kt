@@ -366,6 +366,7 @@ internal class TestArbeidsgiverInspektør(
         infotrygdFeriepengebeløpPerson: Double,
         infotrygdFeriepengebeløpArbeidsgiver: Double,
         spleisFeriepengebeløpArbeidsgiver: Double,
+        spleisFeriepengebeløpPerson: Double,
         overføringstidspunkt: LocalDateTime?,
         avstemmingsnøkkel: Long?,
         utbetalingId: UUID,

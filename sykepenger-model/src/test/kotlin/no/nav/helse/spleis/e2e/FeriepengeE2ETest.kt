@@ -103,6 +103,17 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `serialiserer og deserialiserer Spleis feriepengebeløp for person`() {
+        nyttVedtak(1.januar(2022), 31.januar(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2022)
+        )
+        assertEquals(1605.5819999999999, inspektør.spleisFeriepengebeløpPerson.first())
+        reserialiser()
+        assertEquals(1605.5819999999999, inspektør.spleisFeriepengebeløpPerson.first())
+    }
+
+    @Test
     fun `Beregner feriepenger korrekt for enkel spleisperiode uten infotrygdhistorikk`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))

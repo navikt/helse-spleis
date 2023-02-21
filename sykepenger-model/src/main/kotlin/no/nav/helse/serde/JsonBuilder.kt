@@ -376,6 +376,7 @@ internal class JsonBuilder : AbstractBuilder() {
             infotrygdFeriepengebeløpPerson: Double,
             infotrygdFeriepengebeløpArbeidsgiver: Double,
             spleisFeriepengebeløpArbeidsgiver: Double,
+            spleisFeriepengebeløpPerson: Double,
             overføringstidspunkt: LocalDateTime?,
             avstemmingsnøkkel: Long?,
             utbetalingId: UUID,
@@ -385,6 +386,7 @@ internal class JsonBuilder : AbstractBuilder() {
             feriepengeutbetalingMap["infotrygdFeriepengebeløpPerson"] = infotrygdFeriepengebeløpPerson
             feriepengeutbetalingMap["infotrygdFeriepengebeløpArbeidsgiver"] = infotrygdFeriepengebeløpArbeidsgiver
             feriepengeutbetalingMap["spleisFeriepengebeløpArbeidsgiver"] = spleisFeriepengebeløpArbeidsgiver
+            feriepengeutbetalingMap["spleisFeriepengebeløpPerson"] = spleisFeriepengebeløpPerson
             feriepengeutbetalingMap["utbetalingId"] = utbetalingId
             feriepengeutbetalingMap["sendTilOppdrag"] = sendTilOppdrag
             feriepengeutbetalingMap["sendPersonoppdragTilOS"] = sendPersonoppdragTilOS
@@ -599,7 +601,7 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun visitSpleisPersonDag(
-            spleisArbeidsgiver: Feriepengeberegner.UtbetaltDag.SpleisPerson,
+            spleisPerson: Feriepengeberegner.UtbetaltDag.SpleisPerson,
             orgnummer: String,
             dato: LocalDate,
             beløp: Int

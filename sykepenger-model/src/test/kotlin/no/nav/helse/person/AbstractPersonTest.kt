@@ -20,6 +20,7 @@ import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.readResource
 import no.nav.helse.serde.SerialisertPerson
+import no.nav.helse.serde.serialize
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
@@ -141,6 +142,12 @@ internal abstract class AbstractPersonTest {
         observatør = TestObservatør(person)
         ugyldigeSituasjonerObservatør = UgyldigeSituasjonerObservatør(person)
         return person
+    }
+
+    internal fun reserialiser() {
+        createTestPerson {
+            SerialisertPerson(person.serialize().json).deserialize(it)
+        }
     }
 
     private fun Int.vedtaksperiode(orgnummer: String) = observatør.vedtaksperiode(orgnummer, this - 1)
