@@ -114,6 +114,33 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
         assertEquals(803.352, inspektør.spleisFeriepengebeløpPerson.first())
         assertEquals(802.2299999999999, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
+        assertEquals(0, inspektør.infotrygdFeriepengebeløpPerson.first())
+        assertEquals(0, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
+    }
+    @Test
+    fun `person som har både litt fra infotrygd og litt fra spleis`() {
+        nyttVedtak(1.januar(2022), 31.januar(2022), refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null))
+        inspektør.utbetalinger.single().inspektør.let { utbetalingInspektør ->
+            assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
+            assertEquals(1, utbetalingInspektør.personOppdrag.size)
+        }
+        val dagsatsIT = (INNTEKT/2).reflection { _, _, _, dagligInt -> dagligInt }
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2022),
+            utbetalinger = listOf(
+                Arbeidsgiverutbetalingsperiode(ORGNUMMER, 17.mars(2022), 31.mars(2022), dagsatsIT, 31.mars(2022)),
+                Personutbetalingsperiode(ORGNUMMER, 17.mars(2022), 31.mars(2022), dagsatsIT, 31.mars(2022))
+            ),
+            feriepengehistorikk = listOf(
+                UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, 802, 1.mai(2023), 31.mai(2023)),
+                UtbetalingshistorikkForFeriepenger.Feriepenger("0", 802, 1.mai(2023), 31.mai(2023))
+            )
+        )
+
+        assertEquals(803.352, inspektør.spleisFeriepengebeløpPerson.first())
+        assertEquals(802.2299999999999, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
+        assertEquals(802.2299999999999, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
+        assertEquals(802.2299999999999, inspektør.infotrygdFeriepengebeløpPerson.first())
     }
 
     @Test
