@@ -114,8 +114,8 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
         assertEquals(803.352, inspektør.spleisFeriepengebeløpPerson.first())
         assertEquals(802.2299999999999, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
-        assertEquals(0, inspektør.infotrygdFeriepengebeløpPerson.first())
-        assertEquals(0, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
+        assertEquals(0.0, inspektør.infotrygdFeriepengebeløpPerson.first())
+        assertEquals(0.0, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
     }
     @Test
     fun `person som har både litt fra infotrygd og litt fra spleis`() {
@@ -141,6 +141,27 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         assertEquals(802.2299999999999, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
         assertEquals(802.2299999999999, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
         assertEquals(802.2299999999999, inspektør.infotrygdFeriepengebeløpPerson.first())
+    }
+    @Test
+    fun `person mye rart`() {
+        nyttVedtak(1.januar(2022), 31.januar(2022), refusjon = Inntektsmelding.Refusjon(INNTEKT / 3, null))
+        inspektør.utbetalinger.single().inspektør.let { utbetalingInspektør ->
+            assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
+            assertEquals(1, utbetalingInspektør.personOppdrag.size)
+        }
+        val dagsatsIT = (INNTEKT/2).reflection { _, _, _, dagligInt -> dagligInt }
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2022),
+            utbetalinger = listOf(
+                Arbeidsgiverutbetalingsperiode(ORGNUMMER, 17.mars(2022), 31.desember(2022), dagsatsIT, 31.mars(2022)),
+                Personutbetalingsperiode(ORGNUMMER, 17.mars(2022), 31.desember(2022), dagsatsIT, 31.mars(2022))
+            )
+        )
+
+        assertEquals(1070.388, inspektør.spleisFeriepengebeløpPerson.first())
+        assertEquals(535.194, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
+        assertEquals(2698.41, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
+        assertEquals(2698.41, inspektør.infotrygdFeriepengebeløpPerson.first())
     }
 
     @Test
