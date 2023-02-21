@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
+import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -14,6 +15,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -122,10 +124,32 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 10.mars, 100.prosent), orgnummer = a1)
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
 
-        assertEquals(
-            1080.daglig,
-            inspektør(a1).utbetalingstidslinjer(3.vedtaksperiode)[1.mars].økonomi.inspektør.arbeidsgiverbeløp
-        )
+        val utbetalingstidslinje = inspektør(a1).utbetalingstidslinjer(3.vedtaksperiode)
+        assertEquals(1080.daglig, utbetalingstidslinje[1.mars].økonomi.inspektør.arbeidsgiverbeløp)
+        assertEquals(INGEN, utbetalingstidslinje[1.mars].økonomi.inspektør.personbeløp)
+        assertEquals(100.prosent, utbetalingstidslinje[1.mars].økonomi.inspektør.totalGrad)
+    }
+
+    @Test
+    fun `foreldet dag på ag1 påvirker ikke total sykdomsgrad`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai, orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+            1.januar(2017) til 1.desember(2017) inntekter {
+                a1 inntekt INNTEKT
+                a2 inntekt INNTEKT
+            }
+        }), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        val utbetalingstidslinje = inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode)
+        val økonomiInspektør = utbetalingstidslinje[17.januar].økonomi.inspektør
+        assertEquals(1081.daglig, økonomiInspektør.arbeidsgiverbeløp)
+        assertEquals(INGEN, økonomiInspektør.personbeløp)
+        assertEquals(100.prosent, økonomiInspektør.totalGrad)
     }
 
 

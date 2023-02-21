@@ -17,6 +17,7 @@ import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.A
+import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.K
 import no.nav.helse.testhelpers.P
@@ -29,6 +30,7 @@ import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.UforventetDagException
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosent.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -360,6 +362,14 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(5, inspektør.fridagTeller)
         assertEquals(1, perioder.size)
         assertEquals(listOf(1.januar til 15.januar, 29.januar til 29.januar), perioder.first())
+    }
+
+    @Test
+    fun `foreldet dag regnes fortsatt som syk`() {
+        undersøke(16.S + 1.K)
+        assertEquals(17, inspektør.size)
+        assertEquals(1, inspektør.foreldetDagTeller)
+        assertEquals(100, inspektør.grad(17.januar))
     }
 
     @Test
