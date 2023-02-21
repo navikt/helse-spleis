@@ -156,6 +156,41 @@ internal class Feriepengeutbetaling private constructor(
         private val utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
         private val tidligereFeriepengeutbetalinger: List<Feriepengeutbetaling>
     ) {
+        private fun oppdrag(fagområde: Fagområde, forrigeOppdrag: Oppdrag?, beløp: Int): Oppdrag {
+            val klassekode = when (fagområde) {
+                Fagområde.SykepengerRefusjon -> Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig
+                Fagområde.Sykepenger -> Klassekode.SykepengerArbeidstakerFeriepenger
+            }
+            val fagsystemId = forrigeOppdrag?.fagsystemId() ?: genererUtbetalingsreferanse(UUID.randomUUID())
+
+            val nyttOppdrag = Oppdrag(
+                mottaker = personidentifikator.toString(),
+                fagområde = fagområde,
+                linjer = listOf(
+                    Utbetalingslinje(
+                        fom = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY).atDay(1),
+                        tom = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY).atEndOfMonth(),
+                        satstype = Satstype.Engang,
+                        beløp = beløp,
+                        aktuellDagsinntekt = null,
+                        grad = null,
+                        klassekode = klassekode,
+                    )
+                ),
+                fagsystemId = fagsystemId,
+                sisteArbeidsgiverdag = null,
+            )
+
+            if (forrigeOppdrag == null) return nyttOppdrag
+            if (beløp == 0) forrigeOppdrag.annuller(utbetalingshistorikkForFeriepenger)
+            return nyttOppdrag.minus(forrigeOppdrag, utbetalingshistorikkForFeriepenger)
+        }
+
+        private fun skalSendeOppdrag(forrigeOppdrag: Oppdrag?, beløp: Int): Boolean {
+            if (forrigeOppdrag == null) return beløp != 0
+            return beløp != forrigeOppdrag.totalbeløp() || beløp == 0
+        }
+
         internal fun build(): Feriepengeutbetaling {
             val infotrygdHarUtbetaltTilArbeidsgiver = utbetalingshistorikkForFeriepenger.utbetalteFeriepengerTilArbeidsgiver(orgnummer)
             val hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver = feriepengeberegner.beregnUtbetalteFeriepengerForInfotrygdArbeidsgiver(orgnummer)
@@ -182,90 +217,33 @@ internal class Feriepengeutbetaling private constructor(
 
             val totaltFeriepengebeløpArbeidsgiver: Double = feriepengeberegner.beregnFeriepengerForArbeidsgiver(orgnummer)
             val differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd: Double = feriepengeberegner.beregnFeriepengedifferansenForArbeidsgiver(orgnummer)
-            val beløp = differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd.roundToInt()
+            val arbeidsgiverbeløp = differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd.roundToInt()
 
-            val forrigeSendteOppdrag =
+            val forrigeSendteArbeidsgiverOppdrag =
                 tidligereFeriepengeutbetalinger
                     .lastOrNull { it.gjelderForÅr(utbetalingshistorikkForFeriepenger.opptjeningsår) && it.sendTilOppdrag }
                     ?.oppdrag
                     ?.takeIf { it.linjerUtenOpphør().isNotEmpty() }
 
-            val fagsystemId =
-                forrigeSendteOppdrag
-                    ?.fagsystemId()
-                    ?: genererUtbetalingsreferanse(UUID.randomUUID())
+            val arbeidsgiveroppdrag = oppdrag(Fagområde.SykepengerRefusjon, forrigeSendteArbeidsgiverOppdrag, arbeidsgiverbeløp)
 
-            var oppdrag = Oppdrag(
-                mottaker = orgnummer,
-                fagområde = Fagområde.SykepengerRefusjon,
-                linjer = listOf(
-                    Utbetalingslinje(
-                        fom = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY).atDay(1),
-                        tom = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY).atEndOfMonth(),
-                        satstype = Satstype.Engang,
-                        beløp = beløp,
-                        aktuellDagsinntekt = null,
-                        grad = null,
-                        klassekode = Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig
-                    )
-                ),
-                fagsystemId = fagsystemId,
-                sisteArbeidsgiverdag = null
-            )
+            if (arbeidsgiverbeløp != 0 && orgnummer == "0") sikkerLogg.warn("Forventer ikke arbeidsgiveroppdrag til orgnummer \"0\", aktørId=$aktørId.")
 
-            if (beløp != 0 && orgnummer == "0") sikkerLogg.warn("Forventer ikke arbeidsgiveroppdrag til orgnummer \"0\", aktørId=$aktørId.")
+            val sendArbeidsgiveroppdrag = skalSendeOppdrag(forrigeSendteArbeidsgiverOppdrag, arbeidsgiverbeløp)
 
-            val sendTilOppdrag = if (forrigeSendteOppdrag == null) { beløp != 0 } else { beløp != forrigeSendteOppdrag.totalbeløp() || beløp == 0 }
-
-            if (forrigeSendteOppdrag != null) {
-                oppdrag = if (beløp == 0) {
-                    forrigeSendteOppdrag.annuller(utbetalingshistorikkForFeriepenger)
-                } else {
-                    oppdrag.minus(forrigeSendteOppdrag, utbetalingshistorikkForFeriepenger)
-                }
-            }
 
             val differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson =  infotrygdFeriepengebeløpPerson - hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver
             val personbeløp = differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson.roundToInt()
 
-            val forrigeSendteOppdragForPerson =
+            val forrigeSendtePersonOppdrag =
                 tidligereFeriepengeutbetalinger
                     .lastOrNull { it.gjelderForÅr(utbetalingshistorikkForFeriepenger.opptjeningsår) && it.sendPersonoppdragTilOS }
                     ?.personoppdrag
                     ?.takeIf { it.linjerUtenOpphør().isNotEmpty() }
 
-            val fagsystemIdPersonoppdrag =
-                forrigeSendteOppdragForPerson
-                    ?.fagsystemId()
-                    ?: genererUtbetalingsreferanse(UUID.randomUUID())
+            val personoppdrag = oppdrag(Fagområde.Sykepenger, forrigeSendtePersonOppdrag, personbeløp)
 
-            var personoppdrag = Oppdrag(
-                mottaker = personidentifikator.toString(),
-                fagområde = Fagområde.Sykepenger,
-                linjer = listOf(
-                    Utbetalingslinje(
-                        fom = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY).atDay(1),
-                        tom = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY).atEndOfMonth(),
-                        satstype = Satstype.Engang,
-                        beløp = personbeløp,
-                        aktuellDagsinntekt = null,
-                        grad = null,
-                        klassekode = Klassekode.SykepengerArbeidstakerFeriepenger,
-                    )
-                ),
-                fagsystemId = fagsystemIdPersonoppdrag,
-                sisteArbeidsgiverdag = null,
-            )
-
-            val sendPersonoppdragTilOS = if (forrigeSendteOppdragForPerson == null) { personbeløp != 0 } else { personbeløp != forrigeSendteOppdragForPerson.totalbeløp() || personbeløp == 0 }
-
-            if (forrigeSendteOppdragForPerson != null) {
-                personoppdrag = if (personbeløp == 0) {
-                    forrigeSendteOppdragForPerson.annuller(utbetalingshistorikkForFeriepenger)
-                } else {
-                    personoppdrag.minus(forrigeSendteOppdragForPerson, utbetalingshistorikkForFeriepenger)
-                }
-            }
+            val sendPersonoppdrag = skalSendeOppdrag(forrigeSendtePersonOppdrag, personbeløp)
 
             if (differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson < -499 || differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson > 100) sikkerLogg.info(
                 """
@@ -302,12 +280,12 @@ internal class Feriepengeutbetaling private constructor(
                 ${feriepengeberegner.feriepengedatoer().let { datoer -> "Datoer vi skal utbetale feriepenger for (${datoer.size}): ${datoer.grupperSammenhengendePerioder()}"}}
                 
                 - OPPDRAG:
-                Skal sende arbeidsgiveroppdrag til OS: $sendTilOppdrag
-                Differanse fra forrige sendte arbeidsgoiveroppdrag: ${forrigeSendteOppdrag?.totalbeløp()?.minus(oppdrag.totalbeløp())}
-                Arbeidsgiveroppdrag: ${oppdrag.toHendelseMap()}
+                Skal sende arbeidsgiveroppdrag til OS: $sendArbeidsgiveroppdrag
+                Differanse fra forrige sendte arbeidsgoiveroppdrag: ${forrigeSendteArbeidsgiverOppdrag?.totalbeløp()?.minus(arbeidsgiveroppdrag.totalbeløp())}
+                Arbeidsgiveroppdrag: ${arbeidsgiveroppdrag.toHendelseMap()}
                 
-                Skal sende personoppdrag til OS: $sendPersonoppdragTilOS
-                Differanse fra forrige sendte personoppdrag: ${forrigeSendteOppdragForPerson?.totalbeløp()?.minus(personoppdrag.totalbeløp())}
+                Skal sende personoppdrag til OS: $sendPersonoppdrag
+                Differanse fra forrige sendte personoppdrag: ${forrigeSendtePersonOppdrag?.totalbeløp()?.minus(personoppdrag.totalbeløp())}
                 Personoppdrag: ${personoppdrag.toHendelseMap()}
                 """.trimIndent()
             )
@@ -318,11 +296,11 @@ internal class Feriepengeutbetaling private constructor(
                 infotrygdFeriepengebeløpArbeidsgiver = infotrygdFeriepengebeløpArbeidsgiver,
                 spleisFeriepengebeløpArbeidsgiver = spleisFeriepengebeløpArbeidsgiver,
                 spleisFeriepengebeløpPerson = spleisFeriepengebeløpPerson,
-                oppdrag = oppdrag,
+                oppdrag = arbeidsgiveroppdrag,
                 personoppdrag = personoppdrag,
                 utbetalingId = UUID.randomUUID(),
-                sendTilOppdrag = sendTilOppdrag,
-                sendPersonoppdragTilOS = sendPersonoppdragTilOS,
+                sendTilOppdrag = sendArbeidsgiveroppdrag,
+                sendPersonoppdragTilOS = sendPersonoppdrag,
             )
         }
     }
