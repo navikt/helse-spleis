@@ -229,6 +229,22 @@ internal class Feriepengeutbetaling private constructor(
             val sendArbeidsgiveroppdrag = skalSendeOppdrag(forrigeSendteArbeidsgiverOppdrag, arbeidsgiverbeløp)
 
             // Person
+            val infotrygdHarUtbetaltTilPerson = utbetalingshistorikkForFeriepenger.utbetalteFeriepengerTilPerson()
+            val hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPerson = feriepengeberegner.beregnUtbetalteFeriepengerForInfotrygdPerson(orgnummer)
+            if (hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPerson.roundToInt() != 0 &&
+                hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPerson.roundToInt() !in infotrygdHarUtbetaltTilPerson
+            ) {
+                sikkerLogg.info(
+                    """
+                    Beregnet feriepengebeløp til person i IT samsvarer ikke med faktisk utbetalt beløp
+                    AktørId: $aktørId
+                    Arbeidsgiver: $orgnummer
+                    Infotrygd har utbetalt $infotrygdHarUtbetaltTilPerson
+                    Vi har beregnet at infotrygd har utbetalt ${hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPerson.roundToInt()}
+                    """.trimIndent()
+                )
+            }
+
             val differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson = feriepengeberegner.beregnFeriepengedifferansenForPerson(orgnummer)
             val infotrygdFeriepengebeløpPerson = feriepengeberegner.beregnFeriepengerForInfotrygdPerson(orgnummer)
             val spleisFeriepengebeløpPerson = feriepengeberegner.beregnFeriepengerForSpleisPerson(orgnummer)
@@ -273,7 +289,7 @@ internal class Feriepengeutbetaling private constructor(
                 Infotrygd-utbetalingen må korrigeres med: $differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd
                 
                 - PERSON:
-                Alle feriepengeutbetalinger fra Infotrygd (alle ytelser): ${utbetalingshistorikkForFeriepenger.utbetalteFeriepengerTilPerson()}
+                Alle feriepengeutbetalinger fra Infotrygd (alle ytelser): $infotrygdHarUtbetaltTilPerson
                 Vår beregning av hva Infotrygd burde utbetalt av feriepenger for sykepenger: $hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver
                 Infotrygd skal betale: $infotrygdFeriepengebeløpPerson
                 Spleis skal betale: $spleisFeriepengebeløpPerson

@@ -88,6 +88,10 @@ internal class Feriepengeberegner(
         val grunnlag = grunnlagForFeriepengerUtbetaltAvInfotrygdTilArbeidsgiver(orgnummer)
         return alder.beregnFeriepenger(opptjeningsår, grunnlag)
     }
+    internal fun beregnUtbetalteFeriepengerForInfotrygdPerson(orgnummer: String): Double {
+        val grunnlag = grunnlagForFeriepengerUtbetaltAvInfotrygdTilPerson(orgnummer)
+        return alder.beregnFeriepenger(opptjeningsår, grunnlag)
+    }
 
     internal fun beregnUtbetalteFeriepengerForInfotrygdPersonForEnArbeidsgiver(orgnummer: String): Double {
         val grunnlag = grunnlagForFeriepengerUtbetaltAvInfotrygdTilPersonForArbeidsgiver(orgnummer)
