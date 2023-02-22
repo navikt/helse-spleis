@@ -11,6 +11,8 @@ import no.nav.helse.person.Periodetype
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_15
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBetaltRettFør
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.utbetalingsperioder
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -87,11 +89,11 @@ class InfotrygdhistorikkElement private constructor(
     }
 
     internal fun build(organisasjonsnummer: String, sykdomstidslinje: Sykdomstidslinje, teller: Arbeidsgiverperiodeteller, builder: SykdomstidslinjeVisitor) {
-        val dekoratør = Infotrygddekoratør(teller, builder, perioder.filterIsInstance<Utbetalingsperiode>().filter { it.gjelder(organisasjonsnummer) })
+        val dekoratør = Infotrygddekoratør(teller, builder, perioder.utbetalingsperioder(organisasjonsnummer))
         historikkFor(organisasjonsnummer, sykdomstidslinje).accept(dekoratør)
     }
 
-    internal fun betaltePerioder(): List<Periode> = perioder.filterIsInstance<Utbetalingsperiode>()
+    internal fun betaltePerioder(): List<Periode> = perioder.utbetalingsperioder()
 
     internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
         if (sykdomstidslinje.periode() == null) return sykdomstidslinje
@@ -100,7 +102,7 @@ class InfotrygdhistorikkElement private constructor(
     }
 
     internal fun periodetype(organisasjonsnummer: String, other: Periode, dag: LocalDate): Periodetype? {
-        val utbetalinger = utbetalinger(organisasjonsnummer)
+        val utbetalinger = perioder.utbetalingsperioder(organisasjonsnummer)
         if (dag > other.start || utbetalinger.none { dag in it }) return null
         if (dag in other || utbetalinger.any { dag in it && it.erRettFør(other) }) return Periodetype.OVERGANG_FRA_IT
         return Periodetype.INFOTRYGDFORLENGELSE
@@ -154,14 +156,7 @@ class InfotrygdhistorikkElement private constructor(
             .map { it.utbetalingstidslinje() }
             .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
 
-    internal fun harBetaltRettFør(periode: Periode): Boolean {
-        return perioder.any {
-            it !is UkjentInfotrygdperiode && it.erRettFør(periode)
-        }
-    }
-
-    private fun utbetalinger(organisasjonsnummer: String) =
-        perioder.filterIsInstance<Utbetalingsperiode>().filter { it.gjelder(organisasjonsnummer) }
+    internal fun harBetaltRettFør(periode: Periode) = perioder.harBetaltRettFør(periode)
 
     internal fun oppfrisket(cutoff: LocalDateTime) =
         oppdatert > cutoff

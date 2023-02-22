@@ -6,10 +6,10 @@ import no.nav.helse.erRettFør
 import no.nav.helse.nesteDag
 
 // Understands beginning and end of a time interval
-open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable<LocalDate> {
+class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable<LocalDate> {
 
-    final override val start: LocalDate = fom
-    final override val endInclusive: LocalDate = tom
+    override val start: LocalDate = fom
+    override val endInclusive: LocalDate = tom
 
     init {
         require(start <= endInclusive) { "fom ($start) kan ikke være etter tom ($endInclusive)" }

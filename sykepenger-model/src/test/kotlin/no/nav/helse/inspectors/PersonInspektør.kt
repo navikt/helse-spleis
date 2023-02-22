@@ -14,6 +14,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.Alder
+import no.nav.helse.hendelser.til
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
 
@@ -88,21 +89,25 @@ internal class PersonInspektør(person: Person): PersonVisitor {
     }
 
     override fun visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(
-        orgnr: String,
         periode: Utbetalingsperiode,
+        orgnr: String,
+        fom: LocalDate,
+        tom: LocalDate,
         grad: Prosentdel,
         inntekt: Inntekt
     ) {
-        if (infotrygdInnslag == 1) infotrygdPerioder.add(periode)
+        if (infotrygdInnslag == 1) infotrygdPerioder.add(fom til tom)
     }
 
     override fun visitInfotrygdhistorikkPersonUtbetalingsperiode(
-        orgnr: String,
         periode: Utbetalingsperiode,
+        orgnr: String,
+        fom: LocalDate,
+        tom: LocalDate,
         grad: Prosentdel,
         inntekt: Inntekt
     ) {
-        if (infotrygdInnslag == 1) infotrygdPerioder.add(periode)
+        if (infotrygdInnslag == 1) infotrygdPerioder.add(fom til tom)
     }
 
     override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {

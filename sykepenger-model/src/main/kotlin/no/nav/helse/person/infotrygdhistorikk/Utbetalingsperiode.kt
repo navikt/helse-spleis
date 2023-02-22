@@ -31,12 +31,12 @@ abstract class Utbetalingsperiode(
     protected val inntekt: Inntekt
 ) : Infotrygdperiode(fom, tom) {
     override fun sykdomstidslinje(kilde: SykdomstidslinjeHendelse.Hendelseskilde): Sykdomstidslinje {
-        return Sykdomstidslinje.sykedager(start, endInclusive, grad, kilde)
+        return Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, grad, kilde)
     }
 
     override fun utbetalingstidslinje() =
         Utbetalingstidslinje.Builder().apply {
-            this@Utbetalingsperiode.forEach { dag -> nyDag(this, dag) }
+            periode.forEach { dag -> nyDag(this, dag) }
         }.build()
 
     private fun nyDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate) {
@@ -58,19 +58,19 @@ abstract class Utbetalingsperiode(
     }
 
     private fun validerNødnummerbruk(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, nødnummer: Nødnummer) {
-        if (this.endInclusive < skjæringstidspunkt) return
+        if (this.periode.endInclusive < skjæringstidspunkt) return
         if (orgnr !in nødnummer) return
         aktivitetslogg.funksjonellFeil(RV_IT_4)
     }
     private fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {
-        if (!overlapperMed(periode)) return
-        aktivitetslogg.info("Utbetaling i Infotrygd %s til %s overlapper med vedtaksperioden", start, endInclusive)
+        if (!this.periode.overlapperMed(periode)) return
+        aktivitetslogg.info("Utbetaling i Infotrygd %s til %s overlapper med vedtaksperioden", this.periode.start, this.periode.endInclusive)
         aktivitetslogg.funksjonellFeil(RV_IT_3)
     }
 
     private fun validerNyereOpplysninger(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, periode: Periode) {
         if (!gjelder(organisasjonsnummer)) return
-        if (this.start <= periode.endInclusive) return
+        if (this.periode.start <= periode.endInclusive) return
         aktivitetslogg.funksjonellFeil(RV_IT_1)
     }
 
@@ -80,17 +80,17 @@ abstract class Utbetalingsperiode(
     override fun equals(other: Any?): Boolean {
         if (!super.equals(other)) return false
         other as Utbetalingsperiode
-        return this.orgnr == other.orgnr && this.start == other.start && this.grad == other.grad && this.inntekt == other.inntekt
+        return this.orgnr == other.orgnr && this.periode.start == other.periode.start && this.grad == other.grad && this.inntekt == other.inntekt
     }
 
-    override fun hashCode() = Objects.hash(orgnr, start, endInclusive, grad, inntekt, this::class)
+    override fun hashCode() = Objects.hash(orgnr, periode, grad, inntekt, this::class)
 }
 
 class ArbeidsgiverUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, grad: Prosentdel, inntekt: Inntekt) :
     Utbetalingsperiode(orgnr, fom, tom, grad, inntekt.rundTilDaglig()) {
 
     override fun accept(visitor: InfotrygdhistorikkVisitor) {
-        visitor.visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(orgnr, this, grad, inntekt)
+        visitor.visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(this, orgnr, periode.start, periode.endInclusive, grad, inntekt)
     }
 }
 
@@ -98,7 +98,7 @@ class PersonUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, gr
     Utbetalingsperiode(orgnr, fom, tom, grad, inntekt.rundTilDaglig()) {
 
     override fun accept(visitor: InfotrygdhistorikkVisitor) {
-        visitor.visitInfotrygdhistorikkPersonUtbetalingsperiode(orgnr, this, grad, inntekt)
+        visitor.visitInfotrygdhistorikkPersonUtbetalingsperiode(this, orgnr, periode.start, periode.endInclusive, grad, inntekt)
     }
 }
 

@@ -6,6 +6,6 @@ import no.nav.helse.person.InfotrygdhistorikkVisitor
 class UkjentInfotrygdperiode(fom: LocalDate, tom: LocalDate) : Infotrygdperiode(fom, tom) {
 
     override fun accept(visitor: InfotrygdhistorikkVisitor) {
-        visitor.visitInfotrygdhistorikkUkjentPeriode(this)
+        visitor.visitInfotrygdhistorikkUkjentPeriode(this, periode.start, periode.endInclusive)
     }
 }

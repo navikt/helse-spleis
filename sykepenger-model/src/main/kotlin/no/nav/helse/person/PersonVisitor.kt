@@ -75,10 +75,24 @@ internal interface InfotrygdhistorikkVisitor {
     }
 
     fun preVisitInfotrygdhistorikkPerioder() {}
-    fun visitInfotrygdhistorikkFerieperiode(periode: Friperiode) {}
-    fun visitInfotrygdhistorikkPersonUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {}
-    fun visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {}
-    fun visitInfotrygdhistorikkUkjentPeriode(periode: UkjentInfotrygdperiode) {}
+    fun visitInfotrygdhistorikkFerieperiode(periode: Friperiode, fom: LocalDate, tom: LocalDate) {}
+    fun visitInfotrygdhistorikkPersonUtbetalingsperiode(
+        periode: Utbetalingsperiode,
+        orgnr: String,
+        fom: LocalDate,
+        tom: LocalDate,
+        grad: Prosentdel,
+        inntekt: Inntekt
+    ) {}
+    fun visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(
+        periode: Utbetalingsperiode,
+        orgnr: String,
+        fom: LocalDate,
+        tom: LocalDate,
+        grad: Prosentdel,
+        inntekt: Inntekt
+    ) {}
+    fun visitInfotrygdhistorikkUkjentPeriode(periode: UkjentInfotrygdperiode, fom: LocalDate, tom: LocalDate) {}
     fun postVisitInfotrygdhistorikkPerioder() {}
     fun preVisitInfotrygdhistorikkInntektsopplysninger() {}
     fun visitInfotrygdhistorikkInntektsopplysning(

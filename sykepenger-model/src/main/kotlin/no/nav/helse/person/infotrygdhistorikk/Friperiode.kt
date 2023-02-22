@@ -9,16 +9,16 @@ import no.nav.helse.økonomi.Økonomi
 
 class Friperiode(fom: LocalDate, tom: LocalDate) : Infotrygdperiode(fom, tom) {
     override fun sykdomstidslinje(kilde: SykdomstidslinjeHendelse.Hendelseskilde): Sykdomstidslinje {
-        return Sykdomstidslinje.feriedager(start, endInclusive, kilde)
+        return Sykdomstidslinje.feriedager(periode.start, periode.endInclusive, kilde)
     }
 
     override fun utbetalingstidslinje(): Utbetalingstidslinje {
         return Utbetalingstidslinje.Builder().apply {
-            forEach { dag -> addFridag(dag, Økonomi.ikkeBetalt()) }
+            periode.forEach { dag -> addFridag(dag, Økonomi.ikkeBetalt()) }
         }.build()
     }
 
     override fun accept(visitor: InfotrygdhistorikkVisitor) {
-        visitor.visitInfotrygdhistorikkFerieperiode(this)
+        visitor.visitInfotrygdhistorikkFerieperiode(this, periode.start, periode.endInclusive)
     }
 }

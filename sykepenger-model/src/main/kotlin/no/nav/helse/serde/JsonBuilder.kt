@@ -682,40 +682,54 @@ internal class JsonBuilder : AbstractBuilder() {
             element["oppdatert"] = oppdatert
         }
 
-        override fun visitInfotrygdhistorikkFerieperiode(periode: Friperiode) {
+        override fun visitInfotrygdhistorikkFerieperiode(periode: Friperiode, fom: LocalDate, tom: LocalDate) {
             ferieperioder.add(
                 mapOf(
-                    "fom" to periode.start,
-                    "tom" to periode.endInclusive
+                    "fom" to fom,
+                    "tom" to tom
                 )
             )
         }
 
-        override fun visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
+        override fun visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(
+            periode: Utbetalingsperiode,
+            orgnr: String,
+            fom: LocalDate,
+            tom: LocalDate,
+            grad: Prosentdel,
+            inntekt: Inntekt
+        ) {
             arbeidsgiverutbetalingsperioder.add(mapOf(
                 "orgnr" to orgnr,
-                "fom" to periode.start,
-                "tom" to periode.endInclusive,
+                "fom" to fom,
+                "tom" to tom,
                 "grad" to grad.roundToInt(),
                 "inntekt" to inntekt.reflection { _, månedlig, _, _ -> månedlig }
             ))
         }
 
-        override fun visitInfotrygdhistorikkPersonUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
+        override fun visitInfotrygdhistorikkPersonUtbetalingsperiode(
+            periode: Utbetalingsperiode,
+            orgnr: String,
+            fom: LocalDate,
+            tom: LocalDate,
+            grad: Prosentdel,
+            inntekt: Inntekt
+        ) {
             personutbetalingsperioder.add(mapOf(
                 "orgnr" to orgnr,
-                "fom" to periode.start,
-                "tom" to periode.endInclusive,
+                "fom" to fom,
+                "tom" to tom,
                 "grad" to grad.roundToInt(),
                 "inntekt" to inntekt.reflection { _, månedlig, _, _ -> månedlig }
             ))
         }
 
-        override fun visitInfotrygdhistorikkUkjentPeriode(periode: UkjentInfotrygdperiode) {
+        override fun visitInfotrygdhistorikkUkjentPeriode(periode: UkjentInfotrygdperiode, fom: LocalDate, tom: LocalDate) {
             ukjenteperioder.add(
                 mapOf(
-                    "fom" to periode.start,
-                    "tom" to periode.endInclusive
+                    "fom" to fom,
+                    "tom" to tom
                 )
             )
         }

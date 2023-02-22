@@ -440,20 +440,34 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder)
     }
 
-    override fun visitInfotrygdhistorikkFerieperiode(periode: Friperiode) {
-        delegatee.visitInfotrygdhistorikkFerieperiode(periode)
+    override fun visitInfotrygdhistorikkFerieperiode(periode: Friperiode, fom: LocalDate, tom: LocalDate) {
+        delegatee.visitInfotrygdhistorikkFerieperiode(periode, fom, tom)
     }
 
-    override fun visitInfotrygdhistorikkPersonUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
-        delegatee.visitInfotrygdhistorikkPersonUtbetalingsperiode(orgnr, periode, grad, inntekt)
+    override fun visitInfotrygdhistorikkPersonUtbetalingsperiode(
+        periode: Utbetalingsperiode,
+        orgnr: String,
+        fom: LocalDate,
+        tom: LocalDate,
+        grad: Prosentdel,
+        inntekt: Inntekt
+    ) {
+        delegatee.visitInfotrygdhistorikkPersonUtbetalingsperiode(periode, orgnr, fom, tom, grad, inntekt)
     }
 
-    override fun visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(orgnr: String, periode: Utbetalingsperiode, grad: Prosentdel, inntekt: Inntekt) {
-        delegatee.visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(orgnr, periode, grad, inntekt)
+    override fun visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(
+        periode: Utbetalingsperiode,
+        orgnr: String,
+        fom: LocalDate,
+        tom: LocalDate,
+        grad: Prosentdel,
+        inntekt: Inntekt
+    ) {
+        delegatee.visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(periode, orgnr, fom, tom, grad, inntekt)
     }
 
-    override fun visitInfotrygdhistorikkUkjentPeriode(periode: UkjentInfotrygdperiode) {
-        delegatee.visitInfotrygdhistorikkUkjentPeriode(periode)
+    override fun visitInfotrygdhistorikkUkjentPeriode(periode: UkjentInfotrygdperiode, fom: LocalDate, tom: LocalDate) {
+        delegatee.visitInfotrygdhistorikkUkjentPeriode(periode, fom, tom)
     }
 
     override fun postVisitInfotrygdhistorikkPerioder() {
