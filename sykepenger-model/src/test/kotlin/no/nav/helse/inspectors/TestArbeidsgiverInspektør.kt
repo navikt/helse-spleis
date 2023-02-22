@@ -266,7 +266,7 @@ internal class TestArbeidsgiverInspektør(
             feriepengeoppdrag
                 .lastOrNull()
                 ?.feriepengeutbetalingslinjer
-                ?.add(Feriepengeutbetalingslinje(fom, tom, satstype, beløp, grad, klassekode, endringskode))
+                ?.add(Feriepengeutbetalingslinje(fom, tom, satstype, beløp, grad, klassekode, endringskode, statuskode))
         }
     }
 
@@ -275,7 +275,10 @@ internal class TestArbeidsgiverInspektør(
         val feriepengeutbetalingslinjer: MutableList<Feriepengeutbetalingslinje> = mutableListOf()
     ) {
         internal companion object {
-            val List<Feriepengeoppdrag>.utbetalingslinjer get() = flatMap { it.feriepengeutbetalingslinjer }
+            val List<Feriepengeoppdrag>.utbetalingslinjer get(): List<Feriepengeutbetalingslinje> {
+                val sisteOppdragPerFagsystemId = groupBy { it.fagsystemId }.map { (_, oppdrag) -> oppdrag.last() }
+                return sisteOppdragPerFagsystemId.flatMap { it.feriepengeutbetalingslinjer }
+            }
         }
     }
 
@@ -286,7 +289,8 @@ internal class TestArbeidsgiverInspektør(
         val beløp: Int?,
         val grad: Int?,
         val klassekode: Klassekode,
-        val endringskode: Endringskode
+        val endringskode: Endringskode,
+        val statuskode: String? = null
     )
 
     override fun preVisitUtbetaling(

@@ -216,6 +216,60 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Spleis utbetaler feriepenger til person, blir annullert i Spleis mellom første og andre kjøring`() {
+        nyttVedtak(1.januar(2022), 31.mars(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
+        val dagsatsIT = (INNTEKT*1.1).reflection { _, _, _, dagligInt -> dagligInt }
+
+        // Første kjøring
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2022),
+            utbetalinger = listOf(
+                Personutbetalingsperiode(ORGNUMMER, 1.august(2022), 31.oktober(2022), dagsatsIT, 31.mars(2022))
+            )
+        )
+        assertEquals(0.0, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
+        assertEquals(0.0, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
+        assertEquals(7006.1759999999995, inspektør.spleisFeriepengebeløpPerson.first())
+        assertEquals(0.0, inspektør.infotrygdFeriepengebeløpPerson.first())
+
+        val utbetalingslinje = listOf(Feriepengeutbetalingslinje(
+            fom = 1.mai(2023),
+            tom = 31.mai(2023),
+            satstype = Satstype.Engang,
+            beløp = -700,
+            grad = null,
+            klassekode = Klassekode.SykepengerArbeidstakerFeriepenger,
+            endringskode = Endringskode.NY
+        ))
+        assertEquals(utbetalingslinje, inspektør.feriepengeoppdrag.utbetalingslinjer)
+
+        håndterAnnullerUtbetaling(
+            fagsystemId = inspektør.fagsystemId(1.vedtaksperiode) // Er personoppdraget som annuleres men gjøres basert på fagsystemid på arbeidsgiveroppdraget 🤷‍
+        )
+        håndterUtbetalt()
+        // Andre kjøring ❤️
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2022),
+            utbetalinger = listOf(
+                Personutbetalingsperiode(ORGNUMMER, 17.januar(2022), 31.mars(2022), dagsatsIT, 31.mars(2022)),
+                Personutbetalingsperiode(ORGNUMMER, 1.august(2022), 31.oktober(2022), dagsatsIT, 31.oktober(2022))
+            )
+        )
+
+        val utbetalingslinjerAndreKjøring = listOf(Feriepengeutbetalingslinje(
+            fom = 1.mai(2023),
+            tom = 31.mai(2023),
+            satstype = Satstype.Engang,
+            beløp = -700,
+            grad = null,
+            klassekode = Klassekode.SykepengerArbeidstakerFeriepenger,
+            endringskode = Endringskode.ENDR,
+            statuskode = "OPPH"
+        ))
+        assertEquals(utbetalingslinjerAndreKjøring, inspektør.feriepengeoppdrag.utbetalingslinjer)
+    }
+
+    @Test
     fun `serialiserer og deserialiserer Spleis feriepengebeløp for person`() {
         nyttVedtak(1.januar(2022), 31.januar(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
         håndterUtbetalingshistorikkForFeriepenger(
@@ -313,7 +367,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Legger ikke infotrygdcache til grunn for feriepenger 8)`() {
+    fun `Legger ikke infotrygdcache til grunn for feriepenger`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
         håndterUtbetalingshistorikk(
