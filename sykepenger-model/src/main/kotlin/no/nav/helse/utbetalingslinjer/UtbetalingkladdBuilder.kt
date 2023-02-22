@@ -36,7 +36,7 @@ internal class UtbetalingkladdBuilder(førsteDag: LocalDate, arbeidsgivermottake
 
     internal fun betalingshelgedag(dato: LocalDate, økonomi: Økonomi) {
         periode = periode.oppdaterTom(dato)
-        økonomi.medAvrundetData { grad, _ ->
+        økonomi.brukAvrundetGrad { grad->
             arbeidsgiveroppdragBuilder.betalingshelgedag(dato, grad)
             personoppdragBuilder.betalingshelgedag(dato, grad)
         }

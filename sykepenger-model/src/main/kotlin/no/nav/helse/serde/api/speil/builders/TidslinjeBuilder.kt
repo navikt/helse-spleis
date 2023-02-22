@@ -174,7 +174,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.medAvrundetData { _, aktuellDagsinntekt ->
+        økonomi.brukAvrundetDagsinntekt { aktuellDagsinntekt ->
             utbetalingstidslinje.add(
                 UtbetalingstidslinjedagUtenGrad(
                     type = UtbetalingstidslinjedagType.Arbeidsdag,
@@ -190,7 +190,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.medAvrundetData { _, aktuellDagsinntekt ->
+        økonomi.brukAvrundetDagsinntekt { aktuellDagsinntekt ->
             utbetalingstidslinje.add(
                 UtbetalingstidslinjedagUtenGrad(
                     type = UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag,
