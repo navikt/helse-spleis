@@ -73,7 +73,7 @@ internal fun <T : ArbeidstakerHendelse> AbstractEndToEndTest.assertIkkeEtterspur
 
 internal inline fun <reified R : Utbetalingsdag> assertUtbetalingsdag(dag: Utbetalingsdag, expectedDagtype: KClass<R>, expectedTotalgrad: Double = 100.0) {
     dag.let {
-        it.økonomi.medData { _, totalGrad, _ ->
+        it.økonomi.brukTotalGrad { totalGrad ->
             assertEquals(expectedTotalgrad, totalGrad)
         }
         assertEquals(it::class, expectedDagtype)

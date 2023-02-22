@@ -275,7 +275,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.medData { _, totalGrad, _ ->
+        økonomi.brukTotalGrad { totalGrad->
             utbetalingstidslinje.add(
                 AvvistDag(
                     type = UtbetalingstidslinjedagType.AvvistDag,

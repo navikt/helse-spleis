@@ -209,6 +209,7 @@ class Økonomi private constructor(
         }
 
     fun <R> brukGrad(block: (grad: Double) -> R) = medData { grad: Double, _:Double, _:Double -> block(grad) }
+    fun <R> brukTotalGrad(block: (totalGrad: Double) -> R) = medData {_:Double, totalGrad: Double, _: Double -> block(totalGrad) }
 
     fun medAvrundetData(block: (grad: Int, aktuellDagsinntekt: Int) -> Unit) {
         medAvrundetData { grad, _, _, _, aktuellDagsinntekt, _, _, _ -> block(grad, aktuellDagsinntekt) }
