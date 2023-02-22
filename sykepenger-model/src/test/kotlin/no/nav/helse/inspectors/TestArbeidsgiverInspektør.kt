@@ -273,7 +273,11 @@ internal class TestArbeidsgiverInspektør(
     internal data class Feriepengeoppdrag(
         val fagsystemId: String,
         val feriepengeutbetalingslinjer: MutableList<Feriepengeutbetalingslinje> = mutableListOf()
-    )
+    ) {
+        internal companion object {
+            val List<Feriepengeoppdrag>.utbetalingslinjer get() = flatMap { it.feriepengeutbetalingslinjer }
+        }
+    }
 
     internal data class Feriepengeutbetalingslinje(
         val fom: LocalDate,
