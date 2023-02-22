@@ -2,7 +2,7 @@ package no.nav.helse.serde.reflection
 
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_1
-import no.nav.helse.serde.mapping.AktivitetsloggMap
+import no.nav.helse.person.serde.AktivitetsloggMap
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

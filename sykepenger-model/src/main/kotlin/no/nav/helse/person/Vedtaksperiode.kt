@@ -113,7 +113,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_7
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.serde.mapping.AktivitetsloggMap
+import no.nav.helse.person.serde.AktivitetsloggMap
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse

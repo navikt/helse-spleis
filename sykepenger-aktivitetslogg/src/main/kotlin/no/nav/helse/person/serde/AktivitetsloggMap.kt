@@ -1,4 +1,4 @@
-package no.nav.helse.serde.mapping
+package no.nav.helse.person.serde
 
 import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -7,9 +7,8 @@ import no.nav.helse.person.aktivitetslogg.AktivitetsloggMappingPort
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.serde.PersonData.AktivitetsloggData.AlvorlighetsgradData.WARN
 
-internal class AktivitetsloggMap : AktivitetsloggVisitor, AktivitetsloggMappingPort {
+class AktivitetsloggMap : AktivitetsloggVisitor, AktivitetsloggMappingPort {
     private val aktiviteter = mutableListOf<Map<String, Any>>()
     // ønsker *Linked*HashMap for å sikre insertion order (med hensikt gjort eksplsitt fremfor bruk av mutableMapOf())
     private val alleKontekster = LinkedHashMap<Map<String, Any>, Int>()
@@ -31,7 +30,7 @@ internal class AktivitetsloggMap : AktivitetsloggVisitor, AktivitetsloggMappingP
             mutableMapOf(
                 "id" to id.toString(),
                 "kontekster" to kontekstIndices(kontekster),
-                "alvorlighetsgrad" to WARN.name,
+                "alvorlighetsgrad" to "WARN",
                 "melding" to melding,
                 "tidsstempel" to tidsstempel
             ).apply {
