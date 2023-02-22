@@ -17,7 +17,7 @@ internal sealed class Utbetalingsdag(
         return this.prioritet.compareTo(other.prioritet)
     }
 
-    override fun toString() = "${this.javaClass.simpleName} ($dato) ${økonomi.medData { grad, _, _ -> grad }} %"
+    override fun toString() = "${this.javaClass.simpleName} ($dato) ${økonomi.brukGrad { grad-> grad }} %"
 
     internal fun avvis(begrunnelser: List<Begrunnelse>) = begrunnelser
         .filter { it.skalAvvises(this) }
