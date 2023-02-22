@@ -19,7 +19,7 @@ import no.nav.helse.person.VedtaksperiodeUtbetalinger
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
-import no.nav.helse.serde.reflection.AktivitetsloggMap
+import no.nav.helse.serde.mapping.AktivitetsloggMap
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Prosentdel

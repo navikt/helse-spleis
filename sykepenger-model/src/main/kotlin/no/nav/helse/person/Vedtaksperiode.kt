@@ -94,7 +94,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SI_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_15
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_16
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_19
@@ -114,7 +113,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_7
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.serde.reflection.AktivitetsloggMap
+import no.nav.helse.serde.mapping.AktivitetsloggMap
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -126,7 +125,6 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.sammenlign
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException
-import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjerFilter
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 

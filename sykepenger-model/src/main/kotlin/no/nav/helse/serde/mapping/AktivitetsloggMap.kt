@@ -1,4 +1,4 @@
-package no.nav.helse.serde.reflection
+package no.nav.helse.serde.mapping
 
 import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
