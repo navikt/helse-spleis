@@ -1,4 +1,4 @@
-package no.nav.helse.serde.reflection
+package no.nav.helse.serde
 
 internal enum class Inntektsopplysningskilde {
     SKATT_SAMMENLIGNINGSGRUNNLAG, SKATT_SYKEPENGEGRUNNLAG, INFOTRYGD, INNTEKTSMELDING, SAKSBEHANDLER, IKKE_RAPPORTERT
