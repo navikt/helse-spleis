@@ -38,7 +38,7 @@ internal class UtbetalingstidslinjeBuilder(utbetalingstidslinje: Utbetalingstids
     }
 
     private fun visit(dato: LocalDate, dagtype: String, økonomi: Økonomi?) {
-        val grad = økonomi?.medData { grad, _, _ -> grad }
+        val grad = økonomi?.brukGrad { grad -> grad }
         navdager.add(Tidslinjedag(dato, dagtype, grad?.roundToInt()))
     }
 

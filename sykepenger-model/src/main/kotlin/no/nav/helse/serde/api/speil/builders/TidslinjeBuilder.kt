@@ -131,7 +131,7 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
             dato,
             dag.toDagtypeDTO(),
             Sykdomstidslinjedag.SykdomstidslinjedagKilde(kilde.toKildetypeDTO(), kilde.meldingsreferanseId()),
-            økonomi?.medData { grad, _, _ -> grad }
+            økonomi?.brukGrad { grad -> grad }
         )
 
         tidslinje.add(dagDto)
@@ -230,7 +230,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.medData { grad, _, _ ->
+        økonomi.brukGrad { grad ->
             utbetalingstidslinje.add(
                 UtbetalingstidslinjedagMedGrad(
                     type = UtbetalingstidslinjedagType.NavHelgDag,
