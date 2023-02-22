@@ -23,7 +23,6 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
-import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
@@ -312,9 +311,12 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(person, arbeidsgiver, this, utbetalingshistorikk, infotrygdhistorikk)
     }
 
-    internal fun håndter(utbetalingshistorikk: UtbetalingshistorikkEtterInfotrygdendring) {
-        kontekst(utbetalingshistorikk)
-        tilstand.håndter(this, utbetalingshistorikk)
+    internal fun håndter(
+        hendelse: IAktivitetslogg,
+        infotrygdhistorikk: Infotrygdhistorikk
+    ) {
+        kontekst(hendelse)
+        tilstand.håndter(this, hendelse, infotrygdhistorikk)
     }
 
     internal fun håndter(
@@ -1040,17 +1042,9 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            utbetalingshistorikk: UtbetalingshistorikkEtterInfotrygdendring
-        ) {
-            if (vedtaksperiode.tilstand.type == AVSLUTTET || vedtaksperiode.tilstand.type == AVSLUTTET_UTEN_UTBETALING) return
-            sikkerlogg.info("""Mottatt en infotrygdendring som oppdaterte infotrygdhistorikken
-                | tilstand: {}
-                | vedtaksperiodeId: ${vedtaksperiode.id}
-                | Infotrygdendring meldingsreferanseId: ${utbetalingshistorikk.meldingsreferanseId()}
-                | aktørId: ${vedtaksperiode.aktørId}
-                | """.trimMargin(), keyValue("tilstand", type.name)
-            )
-        }
+            hendelse: IAktivitetslogg,
+            infotrygdhistorikk: Infotrygdhistorikk
+        ) {}
 
         fun håndter(
             person: Person,
@@ -1786,12 +1780,9 @@ internal class Vedtaksperiode private constructor(
             if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode) {
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
             }
-            vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
         }
 
         override fun håndter(
-            person: Person,
-            arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
             hendelse: IAktivitetslogg,
             infotrygdhistorikk: Infotrygdhistorikk
@@ -1802,7 +1793,6 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.utbetalinger.erHistorikkEndretSidenBeregning(infotrygdhistorikk)) return vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode) {
                 hendelse.info("Infotrygdhistorikken har endret seg, reberegner periode")
             }
-
             vedtaksperiode.trengerGodkjenning(hendelse)
         }
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
@@ -1830,23 +1820,6 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.vilkårsgrunnlag == null) return vedtaksperiode.tilstand(påminnelse, AvventerHistorikkRevurdering) {
                 påminnelse.info("Reberegner perioden ettersom skjæringstidspunktet har flyttet seg")
             }
-            vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
-        }
-
-        override fun håndter(
-            person: Person,
-            arbeidsgiver: Arbeidsgiver,
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
-            infotrygdhistorikk: Infotrygdhistorikk
-        ) {
-            if (vedtaksperiode.utbetalinger.erHistorikkEndretSidenBeregning(infotrygdhistorikk)) return vedtaksperiode.tilstand(
-                hendelse,
-                AvventerHistorikkRevurdering
-            ) {
-                hendelse.info("Infotrygdhistorikken har endret seg, reberegner periode")
-            }
-            vedtaksperiode.trengerGodkjenning(hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
@@ -1869,6 +1842,19 @@ internal class Vedtaksperiode private constructor(
                     else -> Avsluttet
                 }
             )
+        }
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            infotrygdhistorikk: Infotrygdhistorikk
+        ) {
+            if (vedtaksperiode.utbetalinger.erHistorikkEndretSidenBeregning(infotrygdhistorikk)) return vedtaksperiode.tilstand(
+                hendelse,
+                AvventerHistorikkRevurdering
+            ) {
+                hendelse.info("Infotrygdhistorikken har endret seg, reberegner periode")
+            }
+            vedtaksperiode.trengerGodkjenning(hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {

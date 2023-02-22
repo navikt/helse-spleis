@@ -204,7 +204,7 @@ class Person private constructor(
     fun håndter(utbetalingshistorikk: UtbetalingshistorikkEtterInfotrygdendring) {
         utbetalingshistorikk.kontekst(this)
         if(!utbetalingshistorikk.oppdaterHistorikk(infotrygdhistorikk)) return
-        arbeidsgivere.håndter(utbetalingshistorikk)
+        arbeidsgivere.håndter(utbetalingshistorikk, infotrygdhistorikk)
         håndterGjenoppta(utbetalingshistorikk)
     }
 

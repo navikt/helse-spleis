@@ -19,7 +19,7 @@ import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -33,7 +33,7 @@ internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
     @Test
     fun `infotrygdhistorikken var tom`() {
         periodeTilGodkjenning()
-        håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk)
+        håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
@@ -42,22 +42,21 @@ internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
         periodeTilGodkjenning()
         håndterSykmelding(Sykmeldingsperiode(1.mai, 31.mai))
         håndterSøknad(Sykdom(fom = 1.mai, tom = 31.mai, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode, *utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk)
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
     @Test
     fun `infotrygdhistorikken blir tom`() {
         periodeTilGodkjenning(utbetalinger, inntektshistorikk)
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterUtbetalingshistorikkEtterInfotrygdendring()
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
     @Test
     fun `infotrygdhistorikken er uendret`() {
         periodeTilGodkjenning(utbetalinger, inntektshistorikk)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk)
+        håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
     }
 

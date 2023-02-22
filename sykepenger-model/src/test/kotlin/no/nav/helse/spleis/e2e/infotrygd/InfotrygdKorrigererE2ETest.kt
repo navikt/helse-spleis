@@ -23,6 +23,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
@@ -39,16 +40,17 @@ import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
-import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
 import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
+import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -87,8 +89,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         nullstillTilstandsendringer()
 
-        håndterPåminnelse(2.vedtaksperiode, AVVENTER_GODKJENNING)
-        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 2.januar, 2.januar, 100.prosent, INNTEKT))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 2.januar, 2.januar, 100.prosent, INNTEKT))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
@@ -103,12 +104,23 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Dagtype.Feriedag)))
         håndterYtelser(2.vedtaksperiode, besvart = LocalDate.EPOCH.atStartOfDay())
         håndterSimulering(2.vedtaksperiode)
-        håndterPåminnelse(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalingshistorikk(2.vedtaksperiode, Friperiode(1.februar, 28.februar))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.februar, 28.februar))
         håndterUtbetalt()
 
         assertForkastetPeriodeTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `Infotrygdutbetaling mens perioden er til revurdering`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 80.prosent))
+        håndterYtelser()
+        håndterSimulering()
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 2.januar, 2.januar, 100.prosent, INNTEKT))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
 
     @Test

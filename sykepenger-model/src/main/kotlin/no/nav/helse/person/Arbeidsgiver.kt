@@ -20,7 +20,6 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
-import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
@@ -137,9 +136,12 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
-        internal fun List<Arbeidsgiver>.håndter(utbetalingshistorikk: UtbetalingshistorikkEtterInfotrygdendring) {
+        internal fun List<Arbeidsgiver>.håndter(
+            hendelse: IAktivitetslogg,
+            infotrygdhistorikk: Infotrygdhistorikk
+        ) {
             forEach { arbeidsgiver ->
-                arbeidsgiver.håndter(utbetalingshistorikk)
+                arbeidsgiver.håndter(hendelse, infotrygdhistorikk)
             }
         }
 
@@ -570,8 +572,11 @@ internal class Arbeidsgiver private constructor(
             inntektsmelding.info("Ingen forkastede vedtaksperioder overlapper med uforventet inntektsmelding")
     }
 
-    private fun håndter(utbetalingshistorikk: UtbetalingshistorikkEtterInfotrygdendring) {
-        håndter(utbetalingshistorikk) { håndter(utbetalingshistorikk) }
+    private fun håndter(
+        hendelse: IAktivitetslogg,
+        infotrygdhistorikk: Infotrygdhistorikk
+    ) {
+        håndter(hendelse) { håndter(hendelse, infotrygdhistorikk) }
     }
 
     internal fun håndter(inntektsmelding: InntektsmeldingReplay) {
