@@ -347,13 +347,15 @@ class Utbetaling private constructor(
             }
         private fun List<Utbetaling>.grupperUtbetalinger(filter: (Utbetaling) -> Boolean) =
             this
+                .asSequence()
                 .filter { it.gyldig() }
                 .groupBy { it.korrelasjonsId }
                 .filter { (_, utbetalinger) -> utbetalinger.any(filter) }
                 .map { (_, utbetalinger) -> utbetalinger.sortedBy { it.tidsstempel } }
-                .mapNotNull { it.last(filter) }
+                .map { it.last(filter) }
                 .sortedBy { it.tidsstempel }
                 .filterNot(Utbetaling::erAnnullering)
+                .toList()
 
         internal fun List<Utbetaling>.tillaterOpprettelseAvUtbetaling(other: Utbetaling): Boolean {
             if (other.erAnnullering()) return true // må godta annulleringer ettersom de vil rydde opp i nettopp overlappende utbetalinger
