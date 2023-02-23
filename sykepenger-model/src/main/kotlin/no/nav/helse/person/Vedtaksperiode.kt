@@ -1367,7 +1367,7 @@ internal class Vedtaksperiode private constructor(
             }
             vedtaksperiode.trengerInntektsmeldingReplay()
             vedtaksperiode.trengerInntektsmelding()
-            vedtaksperiode.person.gjenopptaBehandling(hendelse)
+            vedtaksperiode.trengerHistorikkFraInfotrygd(hendelse)
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
@@ -1443,7 +1443,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.person.gjenopptaBehandling(påminnelse)
+            vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
         }
 
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, arbeidsgivere: Iterable<Arbeidsgiver>, hendelse: IAktivitetslogg) {

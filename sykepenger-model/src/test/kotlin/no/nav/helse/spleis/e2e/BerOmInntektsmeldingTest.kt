@@ -8,6 +8,8 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
@@ -43,7 +45,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
         val søknadId = håndterSøknad(Sykdom(1.mars, 15.mars, 100.prosent), orgnummer = a2)
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
         assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
         assertTrue(observatør.manglendeInntektsmeldingVedtaksperioder.none { event ->
             søknadId in event.søknadIder
