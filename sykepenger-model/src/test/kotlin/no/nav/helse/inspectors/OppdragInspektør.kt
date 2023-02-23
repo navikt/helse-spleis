@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.somPeriode
-import no.nav.helse.person.UtbetalingVisitor
+import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Klassekode

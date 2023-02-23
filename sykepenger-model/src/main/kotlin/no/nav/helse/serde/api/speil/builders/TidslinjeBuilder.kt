@@ -9,7 +9,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.person.UtbetalingVisitor
+import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
 import no.nav.helse.serde.api.dto.AvvistDag

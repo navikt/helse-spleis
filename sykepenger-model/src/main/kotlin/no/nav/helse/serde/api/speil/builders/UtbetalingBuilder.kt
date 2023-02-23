@@ -7,7 +7,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.Opptjening
-import no.nav.helse.person.UtbetalingVisitor
+import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeUtbetalingVisitor
 import no.nav.helse.person.VedtaksperiodeVisitor

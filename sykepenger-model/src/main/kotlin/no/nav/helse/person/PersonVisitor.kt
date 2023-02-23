@@ -28,13 +28,11 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeDagVisitor
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
-import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.OppdragVisitor
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
+import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
@@ -467,67 +465,5 @@ internal interface RefusjonshistorikkVisitor {
 internal interface InntekthistorikkVisitor : InntektsmeldingVisitor {
     fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
     fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
-}
-
-internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
-    fun preVisitUtbetaling(
-        utbetaling: Utbetaling,
-        id: UUID,
-        korrelasjonsId: UUID,
-        type: Utbetalingtype,
-        tilstand: Utbetaling.Tilstand,
-        periode: Periode,
-        tidsstempel: LocalDateTime,
-        oppdatert: LocalDateTime,
-        arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int,
-        maksdato: LocalDate,
-        forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?,
-        stønadsdager: Int,
-        beregningId: UUID,
-        overføringstidspunkt: LocalDateTime?,
-        avsluttet: LocalDateTime?,
-        avstemmingsnøkkel: Long?
-    ) {
-    }
-
-    fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {}
-    fun postVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {}
-    fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {}
-    fun postVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {}
-    fun preVisitPersonOppdrag(oppdrag: Oppdrag) {}
-    fun postVisitPersonOppdrag(oppdrag: Oppdrag) {}
-    fun visitVurdering(
-        vurdering: Utbetaling.Vurdering,
-        ident: String,
-        epost: String,
-        tidspunkt: LocalDateTime,
-        automatiskBehandling: Boolean,
-        godkjent: Boolean
-    ) {
-    }
-
-    fun postVisitUtbetaling(
-        utbetaling: Utbetaling,
-        id: UUID,
-        korrelasjonsId: UUID,
-        type: Utbetalingtype,
-        tilstand: Utbetaling.Tilstand,
-        periode: Periode,
-        tidsstempel: LocalDateTime,
-        oppdatert: LocalDateTime,
-        arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int,
-        maksdato: LocalDate,
-        forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?,
-        stønadsdager: Int,
-        beregningId: UUID,
-        overføringstidspunkt: LocalDateTime?,
-        avsluttet: LocalDateTime?,
-        avstemmingsnøkkel: Long?
-    ) {
-    }
 }
 

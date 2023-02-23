@@ -13,7 +13,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
