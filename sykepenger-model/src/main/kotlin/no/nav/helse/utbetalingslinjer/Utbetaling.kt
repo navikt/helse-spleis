@@ -339,10 +339,13 @@ class Utbetaling private constructor(
                 utbetaling.periode.overlapperMed(periode) || utbetaling.periode.erRettFør(periode.start)
             }
         private fun List<Utbetaling>.grupperUtbetalinger(filter: (Utbetaling) -> Boolean) =
-            this.groupBy { it.korrelasjonsId }
+            this
+                .filter { it.gyldig() }
+                .groupBy { it.korrelasjonsId }
+                .filter { (_, utbetalinger) -> utbetalinger.any(filter) }
                 .map { (_, utbetalinger) -> utbetalinger.sortedBy { it.tidsstempel } }
-                .sortedBy { it.last().tidsstempel }
-                .mapNotNull { it.lastOrNull(filter) }
+                .mapNotNull { it.last(filter) }
+                .sortedBy { it.tidsstempel }
                 .filterNot(Utbetaling::erAnnullering)
 
         internal fun List<Utbetaling>.tillaterOpprettelseAvUtbetaling(other: Utbetaling): Boolean {
