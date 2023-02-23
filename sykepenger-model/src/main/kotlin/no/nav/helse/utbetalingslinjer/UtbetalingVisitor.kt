@@ -51,7 +51,7 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
         id: UUID,
         korrelasjonsId: UUID,
         type: Utbetaling.Utbetalingtype,
-        tilstand: Utbetaling.Tilstand,
+        tilstand: Utbetalingstatus,
         periode: Periode,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,

@@ -107,7 +107,7 @@ internal class Avstemmer(person: Person) {
             id: UUID,
             korrelasjonsId: UUID,
             type: Utbetalingtype,
-            tilstand: Utbetaling.Tilstand,
+            tilstand: Utbetalingstatus,
             periode: Periode,
             tidsstempel: LocalDateTime,
             oppdatert: LocalDateTime,
@@ -126,7 +126,7 @@ internal class Avstemmer(person: Person) {
                 mutableMapOf<String, Any>(
                     "id" to id,
                     "type" to type.name,
-                    "status" to Utbetalingstatus.fraTilstand(tilstand),
+                    "status" to tilstand,
                     "opprettet" to tidsstempel,
                     "oppdatert" to oppdatert,
                 ).apply {

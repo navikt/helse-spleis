@@ -25,6 +25,7 @@ import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.ARBEIDSGIVER
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.PERSON
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.INFOTRYGD
@@ -348,7 +349,7 @@ internal class Feriepengeberegner(
                 id: UUID,
                 korrelasjonsId: UUID,
                 type: Utbetalingtype,
-                tilstand: Utbetaling.Tilstand,
+                tilstand: Utbetalingstatus,
                 periode: Periode,
                 tidsstempel: LocalDateTime,
                 oppdatert: LocalDateTime,

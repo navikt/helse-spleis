@@ -466,7 +466,7 @@ class Utbetaling private constructor(
             id,
             korrelasjonsId,
             type,
-            tilstand,
+            Utbetalingstatus.fraTilstand(tilstand),
             periode,
             tidsstempel,
             oppdatert,

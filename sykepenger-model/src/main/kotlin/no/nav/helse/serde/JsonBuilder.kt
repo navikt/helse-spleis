@@ -1344,7 +1344,7 @@ internal class JsonBuilder : AbstractBuilder() {
             id: UUID,
             korrelasjonsId: UUID,
             type: Utbetalingtype,
-            tilstand: Utbetaling.Tilstand,
+            tilstand: Utbetalingstatus,
             periode: Periode,
             tidsstempel: LocalDateTime,
             oppdatert: LocalDateTime,
@@ -1369,7 +1369,7 @@ internal class JsonBuilder : AbstractBuilder() {
             utbetalingMap["tom"] = periode.endInclusive
             utbetalingMap["stønadsdager"] = stønadsdager
             utbetalingMap["tidsstempel"] = tidsstempel
-            utbetalingMap["status"] = Utbetalingstatus.fraTilstand(tilstand)
+            utbetalingMap["status"] = tilstand
             utbetalingMap["type"] = type
             utbetalingMap["maksdato"] = maksdato
             utbetalingMap["forbrukteSykedager"] = forbrukteSykedager
