@@ -62,8 +62,8 @@ internal interface UtbetalingObserver {
         type: Utbetalingtype,
         arbeidsgiverOppdrag: Oppdrag,
         personOppdrag: Oppdrag,
-        forrigeTilstand: Utbetaling.Tilstand,
-        nesteTilstand: Utbetaling.Tilstand,
+        forrigeTilstand: Utbetalingstatus,
+        nesteTilstand: Utbetalingstatus,
         korrelasjonsId: UUID
     ) {
     }

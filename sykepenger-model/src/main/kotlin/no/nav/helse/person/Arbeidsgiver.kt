@@ -746,8 +746,8 @@ internal class Arbeidsgiver private constructor(
         type: Utbetalingtype,
         arbeidsgiverOppdrag: Oppdrag,
         personOppdrag: Oppdrag,
-        forrigeTilstand: Utbetaling.Tilstand,
-        nesteTilstand: Utbetaling.Tilstand,
+        forrigeTilstand: Utbetalingstatus,
+        nesteTilstand: Utbetalingstatus,
         korrelasjonsId: UUID
     ) {
         person.utbetalingEndret(
@@ -755,8 +755,8 @@ internal class Arbeidsgiver private constructor(
                 organisasjonsnummer = organisasjonsnummer,
                 utbetalingId = id,
                 type = type.name,
-                forrigeStatus = Utbetalingstatus.fraTilstand(forrigeTilstand).name,
-                gjeldendeStatus = Utbetalingstatus.fraTilstand(nesteTilstand).name,
+                forrigeStatus = forrigeTilstand.name,
+                gjeldendeStatus = nesteTilstand.name,
                 arbeidsgiverOppdrag = arbeidsgiverOppdrag.toHendelseMap(),
                 personOppdrag = personOppdrag.toHendelseMap(),
                 korrelasjonsId = korrelasjonsId

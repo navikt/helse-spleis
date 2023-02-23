@@ -256,7 +256,15 @@ class Utbetaling private constructor(
         val forrigeTilstand = tilstand
         tilstand = neste
         observers.forEach {
-            it.utbetalingEndret(id, type, arbeidsgiverOppdrag, personOppdrag, forrigeTilstand, neste, korrelasjonsId)
+            it.utbetalingEndret(
+                id,
+                type,
+                arbeidsgiverOppdrag,
+                personOppdrag,
+                Utbetalingstatus.fraTilstand(forrigeTilstand),
+                Utbetalingstatus.fraTilstand(neste),
+                korrelasjonsId
+            )
         }
         tilstand.entering(this, hendelse)
     }
