@@ -440,7 +440,7 @@ class Utbetaling private constructor(
             id,
             korrelasjonsId,
             type,
-            tilstand,
+            tilstand.status,
             periode,
             tidsstempel,
             oppdatert,
@@ -876,7 +876,7 @@ interface UtbetalingVedtakFattetBuilder {
     fun utbetalingId(id: UUID): UtbetalingVedtakFattetBuilder
 }
 
-private fun Utbetalingstatus.tilTilstand() = when(this) {
+internal fun Utbetalingstatus.tilTilstand() = when(this) {
     Utbetalingstatus.NY -> Utbetaling.Ny
     Utbetalingstatus.IKKE_UTBETALT -> Utbetaling.Ubetalt
     Utbetalingstatus.IKKE_GODKJENT -> Utbetaling.IkkeGodkjent

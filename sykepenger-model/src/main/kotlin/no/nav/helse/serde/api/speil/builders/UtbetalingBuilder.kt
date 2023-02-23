@@ -24,9 +24,11 @@ import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Satstype
-import no.nav.helse.utbetalingslinjer.Utbetaling.Forkastet
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.FORKASTET
+import no.nav.helse.utbetalingslinjer.tilTilstand
 import no.nav.helse.økonomi.Prosent
 import org.slf4j.LoggerFactory
 import no.nav.helse.utbetalingslinjer.Utbetaling as InternUtbetaling
@@ -82,7 +84,7 @@ internal class UtbetalingerBuilder(
             id: UUID,
             korrelasjonsId: UUID,
             type: Utbetalingtype,
-            tilstand: no.nav.helse.utbetalingslinjer.Utbetaling.Tilstand,
+            utbetalingstatus: Utbetalingstatus,
             periode: Periode,
             tidsstempel: LocalDateTime,
             oppdatert: LocalDateTime,
@@ -173,7 +175,7 @@ internal class UtbetalingerBuilder(
         id: UUID,
         korrelasjonsId: UUID,
         type: Utbetalingtype,
-        tilstand: no.nav.helse.utbetalingslinjer.Utbetaling.Tilstand,
+        utbetalingstatus: Utbetalingstatus,
         periode: Periode,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
@@ -188,7 +190,7 @@ internal class UtbetalingerBuilder(
         avsluttet: LocalDateTime?,
         avstemmingsnøkkel: Long?
     ) {
-        if (tilstand == Forkastet && vedtaksperiodetilstand != Vedtaksperiode.RevurderingFeilet) return
+        if (utbetalingstatus == FORKASTET && vedtaksperiodetilstand != Vedtaksperiode.RevurderingFeilet) return
         utbetalinger.entries.find { it.value.forkastet() }?.let { utbetalinger.remove(it.key) }
         utbetalinger.putIfAbsent(id, UtbetalingBuilder(utbetaling).build())
     }
@@ -208,7 +210,7 @@ internal class UtbetalingBuilder(utbetaling: InternUtbetaling) : UtbetalingVisit
         id: UUID,
         korrelasjonsId: UUID,
         type: Utbetalingtype,
-        tilstand: no.nav.helse.utbetalingslinjer.Utbetaling.Tilstand,
+        utbetalingstatus: Utbetalingstatus,
         periode: Periode,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
@@ -236,7 +238,7 @@ internal class UtbetalingBuilder(utbetaling: InternUtbetaling) : UtbetalingVisit
             gjenståendeSykedager = gjenståendeSykedager,
             forbrukteSykedager = forbrukteSykedager,
             type = type.toString(),
-            tilstand = tilstand::class.simpleName!!,
+            tilstand = utbetalingstatus.tilTilstand()::class.simpleName!!,
             arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
             personNettoBeløp = personNettoBeløp,
             arbeidsgiverFagsystemId = oppdragBuilder.arbeidsgiverFagsystemId(),

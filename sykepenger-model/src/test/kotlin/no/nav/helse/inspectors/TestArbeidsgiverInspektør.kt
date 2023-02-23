@@ -35,6 +35,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.tilTilstand
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import org.junit.jupiter.api.fail
@@ -299,7 +300,7 @@ internal class TestArbeidsgiverInspektør(
         id: UUID,
         korrelasjonsId: UUID,
         type: Utbetalingtype,
-        tilstand: Utbetaling.Tilstand,
+        utbetalingstatus: Utbetalingstatus,
         periode: Periode,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
@@ -318,7 +319,7 @@ internal class TestArbeidsgiverInspektør(
         if (!inVedtaksperiode) {
             maksdatoer.add(maksdato)
             utbetalingIder.add(id)
-            utbetalingstilstander.add(tilstand)
+            utbetalingstilstander.add(utbetalingstatus.tilTilstand())
             forbrukteSykedagerer.add(forbrukteSykedager)
             gjenståendeSykedagerer.add(gjenståendeSykedager)
         } else {

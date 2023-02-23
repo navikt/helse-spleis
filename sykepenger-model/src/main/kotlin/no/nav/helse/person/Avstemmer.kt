@@ -69,7 +69,7 @@ internal class Avstemmer(person: Person) {
             id: UUID,
             korrelasjonsId: UUID,
             type: Utbetalingtype,
-            tilstand: Utbetaling.Tilstand,
+            utbetalingstatus: Utbetalingstatus,
             periode: Periode,
             tidsstempel: LocalDateTime,
             oppdatert: LocalDateTime,
@@ -207,7 +207,7 @@ internal class Avstemmer(person: Person) {
             id: UUID,
             korrelasjonsId: UUID,
             type: Utbetalingtype,
-            tilstand: Utbetaling.Tilstand,
+            utbetalingstatus: Utbetalingstatus,
             periode: Periode,
             tidsstempel: LocalDateTime,
             oppdatert: LocalDateTime,
@@ -222,7 +222,7 @@ internal class Avstemmer(person: Person) {
             avsluttet: LocalDateTime?,
             avstemmingsnøkkel: Long?
         ) {
-            if (tilstand != Utbetaling.Forkastet) utbetalinger.getOrPut(vedtaksperiodeId) { mutableListOf() }.add(id)
+            if (utbetalingstatus != Utbetalingstatus.FORKASTET) utbetalinger.getOrPut(vedtaksperiodeId) { mutableListOf() }.add(id)
         }
 
         override fun postVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Pair<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, Utbetaling>>) {

@@ -26,6 +26,7 @@ import no.nav.helse.serde.api.speil.Tidslinjeperioder
 import no.nav.helse.serde.api.speil.VedtaksperiodeAkkumulator
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 
 internal data class GenerasjonIder(
@@ -116,7 +117,7 @@ internal class GenerasjonerBuilder(
         id: UUID,
         korrelasjonsId: UUID,
         type: Utbetalingtype,
-        tilstand: Utbetaling.Tilstand,
+        utbetalingstatus: Utbetalingstatus,
         periode: Periode,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,

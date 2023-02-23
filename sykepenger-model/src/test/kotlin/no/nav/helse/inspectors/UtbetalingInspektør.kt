@@ -9,6 +9,8 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalt
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.tilTilstand
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import kotlin.properties.Delegates
 
@@ -56,7 +58,7 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
         id: UUID,
         korrelasjonsId: UUID,
         type: Utbetalingtype,
-        tilstand: Utbetaling.Tilstand,
+        utbetalingstatus: Utbetalingstatus,
         periode: Periode,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
@@ -74,9 +76,9 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
         utbetalingId = id
         this.periode = periode
         this.korrelasjonsId = korrelasjonsId
-        this.tilstand = tilstand
+        this.tilstand = utbetalingstatus.tilTilstand()
         this.type = type
-        this.status = tilstand
+        this.status = utbetalingstatus.tilTilstand()
         this.avstemmingsnøkkel = avstemmingsnøkkel
         this.nettobeløp = arbeidsgiverNettoBeløp + personNettoBeløp
         this.forbrukteSykedager = forbrukteSykedager ?: -1

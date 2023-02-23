@@ -276,7 +276,7 @@ internal class Feriepengeberegner(
                 id: UUID,
                 korrelasjonsId: UUID,
                 type: Utbetalingtype,
-                tilstand: Utbetaling.Tilstand,
+                utbetalingstatus: Utbetalingstatus,
                 periode: Periode,
                 tidsstempel: LocalDateTime,
                 oppdatert: LocalDateTime,
@@ -291,8 +291,8 @@ internal class Feriepengeberegner(
                 avsluttet: LocalDateTime?,
                 avstemmingsnøkkel: Long?
             ) {
-                utbetaltUtbetaling = tilstand == Utbetaling.Utbetalt
-                annullertUtbetaling = tilstand == Utbetaling.Annullert
+                utbetaltUtbetaling = utbetalingstatus == Utbetalingstatus.UTBETALT
+                annullertUtbetaling = utbetalingstatus == Utbetalingstatus.ANNULLERT
             }
 
             override fun preVisitOppdrag(
