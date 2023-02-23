@@ -7,7 +7,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
-internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
+internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor, UtbetalingVurderingVisitor {
     fun preVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,
@@ -36,15 +36,6 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
     fun postVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {}
     fun preVisitPersonOppdrag(oppdrag: Oppdrag) {}
     fun postVisitPersonOppdrag(oppdrag: Oppdrag) {}
-    fun visitVurdering(
-        vurdering: Utbetaling.Vurdering,
-        ident: String,
-        epost: String,
-        tidspunkt: LocalDateTime,
-        automatiskBehandling: Boolean,
-        godkjent: Boolean
-    ) {
-    }
 
     fun postVisitUtbetaling(
         utbetaling: Utbetaling,
