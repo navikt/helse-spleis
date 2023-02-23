@@ -211,14 +211,6 @@ internal abstract class AbstractDslTest {
         id: UUID = UUID.randomUUID()
     ) =
         this { håndterInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id) }
-    protected fun String.håndterUtbetalingshistorikk(
-        vedtaksperiodeId: UUID,
-        utbetalinger: List<Infotrygdperiode> = listOf(),
-        inntektshistorikk: List<Inntektsopplysning> = emptyList(),
-        harStatslønn: Boolean = false,
-        besvart: LocalDateTime = LocalDateTime.now()
-    ) =
-        this { håndterUtbetalingshistorikk(vedtaksperiodeId, utbetalinger, inntektshistorikk, harStatslønn, besvart) }
     protected fun String.håndterVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
         inntekt: Inntekt = INNTEKT,
@@ -322,15 +314,6 @@ internal abstract class AbstractDslTest {
     ) =
         bareÈnArbeidsgiver(a1).håndterInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id)
 
-    internal fun håndterUtbetalingshistorikk(
-        vedtaksperiodeId: UUID,
-        utbetalinger: List<Infotrygdperiode> = listOf(),
-        inntektshistorikk: List<Inntektsopplysning> = emptyList(),
-        harStatslønn: Boolean = false,
-        besvart: LocalDateTime = LocalDateTime.now(),
-        orgnummer: String = a1
-    ) =
-        bareÈnArbeidsgiver(a1).håndterUtbetalingshistorikk(vedtaksperiodeId, utbetalinger, inntektshistorikk, harStatslønn, besvart)
     internal fun håndterVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
         inntekt: Inntekt = INNTEKT,

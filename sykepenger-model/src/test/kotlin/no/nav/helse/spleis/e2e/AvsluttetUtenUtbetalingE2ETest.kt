@@ -7,16 +7,8 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -31,10 +23,10 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
     fun `kort periode blokkerer neste periode i ny arbeidsgiverperiode`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar))
         håndterSøknad(Sykdom(3.januar, 10.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVSLUTTET_UTEN_UTBETALING,
         )
@@ -51,6 +43,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
@@ -70,20 +63,20 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
     fun `kort periode setter senere periode fast i AVVENTER_HISTORIKK`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar))
         håndterSøknad(Sykdom(3.januar, 10.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVSLUTTET_UTEN_UTBETALING,
         )
 
         håndterSykmelding(Sykmeldingsperiode(3.mars, 7.mars))
         håndterSøknad(Sykdom(3.mars, 7.mars, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
         assertTilstander(
             2.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVSLUTTET_UTEN_UTBETALING,
         )
@@ -91,7 +84,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(8.mars, 26.mars))
         håndterInntektsmelding(listOf(Periode(3.mars, 18.mars)))
 
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
 
         håndterSøknad(Sykdom(8.mars, 26.mars, 100.prosent))
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
@@ -103,6 +96,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         assertTilstander(
             3.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
@@ -118,21 +112,17 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
     fun `arbeidsgiverperiode med brudd i helg`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 5.januar))
         håndterSøknad(Sykdom(4.januar, 5.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterSykmelding(Sykmeldingsperiode(8.januar, 12.januar))
         håndterSøknad(Sykdom(8.januar, 12.januar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
         håndterSykmelding(Sykmeldingsperiode(13.januar, 19.januar))
         håndterSøknad(Sykdom(13.januar, 19.januar, 100.prosent))
-        håndterUtbetalingshistorikk(3.vedtaksperiode)
         håndterSykmelding(Sykmeldingsperiode(20.januar, 1.februar))
         håndterSøknad(Sykdom(20.januar, 1.februar, 100.prosent))
-        håndterUtbetalingshistorikk(4.vedtaksperiode)
 
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(4.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
 
         nullstillTilstandsendringer()
         // 6. og 7. januar blir FriskHelg og medfører brudd i arbeidsgiverperioden

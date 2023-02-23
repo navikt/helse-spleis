@@ -24,6 +24,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
@@ -48,7 +49,6 @@ import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterSøknadMedValidering
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
@@ -123,7 +123,6 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `strekker ikke inn i forrige periode`() {
         nyPeriode(1.januar til 9.januar, a1)
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
         tilGodkjenning(10.januar, 31.januar, a1) // 1. jan - 9. jan blir omgjort til arbeidsdager ved innsending av IM her
         nullstillTilstandsendringer()
         // Saksbehandler korrigerer; 9.januar var vedkommende syk likevel
@@ -148,7 +147,6 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `endrer skjæringstidspunkt på en førstegangsbehandling ved å omgjøre en arbeidsdag til sykedag`() {
         nyPeriode(1.januar til 9.januar, a1)
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
         tilGodkjenning(10.januar, 31.januar, a1) // 1. jan - 9. jan blir omgjort til arbeidsdager ved innsending av IM her
         val sykepengegrunnlagFør = inspektør(a1).vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.sykepengegrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
         nullstillTilstandsendringer()
@@ -175,7 +173,6 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `endrer skjæringstidspunkt på sykefraværstilfelle etter - endrer ikke dato for inntekter`() {
         håndterSøknad(Sykdom(1.januar, 9.januar, 100.prosent), Arbeid(1.januar, 9.januar), orgnummer = a1)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
         håndterSøknad(Sykdom(15.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent), orgnummer = a2)
 
@@ -235,7 +232,6 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `vedtaksperiode strekker seg ikke tilbake hvis det er en periode foran`() {
         nyPeriode(1.januar til 9.januar, a1)
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
         nyPeriode(10.januar til 31.januar, a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -642,7 +638,6 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `overstyr tidslinje endrer to perioder samtidig`() {
         nyPeriode(1.januar til 9.januar, a1)
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
         nyPeriode(10.januar til 31.januar, a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -716,6 +711,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
@@ -840,6 +836,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
@@ -913,6 +910,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,

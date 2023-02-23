@@ -31,7 +31,6 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Inntektsmelding opplyser om endret arbeidsgiverperiode - AUU periode inneholder utbetalingsdag`() {
         nyPeriode(2.januar til 17.januar)
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
@@ -54,8 +53,8 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertEquals(1.februar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
 
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT))
         nyPeriode(10.mars til 31.mars)
-        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT))
         håndterInntektsmelding(listOf(10.mars til 26.mars))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
 

@@ -112,6 +112,7 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, orgnummer = a1, status = SimuleringMessage.Simuleringstatus.OK)
         assertTilstander(
             0,
+            "AVVENTER_INFOTRYGDHISTORIKK",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_VILKÅRSPRØVING",

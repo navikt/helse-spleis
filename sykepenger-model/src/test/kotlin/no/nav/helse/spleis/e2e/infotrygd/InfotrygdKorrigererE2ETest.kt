@@ -24,6 +24,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
@@ -44,7 +45,6 @@ import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
@@ -59,28 +59,8 @@ import org.junit.jupiter.api.Test
 internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
 
     @Test
-    fun `infotrygd korrigerer arbeid gjenopptatt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(29.januar, 31.januar))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar))
-        håndterSøknad(Sykdom(1.februar, 16.februar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 29.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER, 29.januar, INNTEKT, true)
-        ))
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TIL_INFOTRYGD)
-    }
-
-    @Test
     fun `skjæringstidspunkt endres som følge av infotrygdperiode`() {
         nyPeriode(1.januar til 1.januar, ORGNUMMER)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.now().minusDays(2))
         håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar))
         håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar))
@@ -162,25 +142,6 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
 
     private fun createDobbelutbetalingPerson() = createTestPerson { jurist ->
         SerialisertPerson("/personer/dobbelutbetaling.json".readResource()).deserialize(jurist)
-    }
-
-    private fun createOverlappendeFraInfotrygdPerson() = createTestPerson { jurist ->
-        SerialisertPerson("/personer/infotrygd-overlappende-utbetaling.json".readResource()).deserialize(jurist).also { person ->
-            person.håndter(
-                Utbetalingshistorikk(
-                    UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),
-                    InfotrygdhistorikkElement.opprett(
-                        LocalDateTime.now(),
-                        UUID.randomUUID(),
-                        listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mars, 30.april, 100.prosent, TestPerson.INNTEKT)),
-                        listOf(Inntektsopplysning(ORGNUMMER, 1.januar, TestPerson.INNTEKT, true)),
-                        emptyMap(),
-                        emptyList(),
-                        false
-                    ),
-                ),
-            )
-        }
     }
 
     private fun createAuuBlirMedIRevureringPerson() = createTestPerson { jurist ->

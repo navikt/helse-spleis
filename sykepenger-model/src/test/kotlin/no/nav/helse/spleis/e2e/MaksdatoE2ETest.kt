@@ -29,8 +29,8 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `hensyntar tidligere arbeidsgivere fra IT`() {
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar, 100.prosent, INNTEKT))
         nyPeriode(1.mars til 31.mars, a1)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar, 100.prosent, INNTEKT))
         håndterInntektsmelding(listOf(1.mars til 16.mars))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -45,8 +45,8 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `hensyntar ikke senere arbeidsgivere fra IT`() {
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a2, 1.april, 30.april, 100.prosent, INNTEKT))
         nyPeriode(1.mars til 31.mars, a1)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(a2, 1.april, 30.april, 100.prosent, INNTEKT))
         håndterInntektsmelding(listOf(1.mars til 16.mars))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)

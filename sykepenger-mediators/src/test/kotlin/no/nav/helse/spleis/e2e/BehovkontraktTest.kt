@@ -44,6 +44,9 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
+        val utbetalinghistorikkbehov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 4)
+        assertVedtaksperiodeBehov(utbetalinghistorikkbehov, Sykepengehistorikk)
+        assertSykepengehistorikkdetaljer(utbetalinghistorikkbehov)
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendVilkårsgrunnlag(0)
         val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
@@ -56,8 +59,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             Institusjonsopphold,
             Omsorgspenger,
             Opplæringspenger,
-            Pleiepenger,
-            Sykepengehistorikk
+            Pleiepenger
         )
         assertArbeidsavklaringspengerdetaljer(behov)
         assertDagpengerdetaljer(behov)
@@ -67,7 +69,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertOmsorgspengerdetaljer(behov)
         assertOpplæringspengerdetaljer(behov)
         assertPleiepengerdetaljer(behov)
-        assertSykepengehistorikkdetaljer(behov)
     }
 
     @Test

@@ -61,6 +61,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
     fun `påminnelse i vilkårsprøving`() {
         person.håndter(sykmelding())
         person.håndter(søknad())
+        person.håndter(utbetalingshistorikk())
         person.håndter(inntektsmelding())
         val antallBehovFør = hendelse.behov().size
         person.håndter(påminnelse(AVVENTER_VILKÅRSPRØVING, 1.vedtaksperiode))
@@ -75,12 +76,13 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
     fun `påminnelse i ytelser`() {
         person.håndter(sykmelding())
         person.håndter(søknad())
+        person.håndter(utbetalingshistorikk())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
-        assertEquals(9, hendelse.behov().size)
+        assertEquals(8, hendelse.behov().size)
         person.håndter(påminnelse(AVVENTER_HISTORIKK, 1.vedtaksperiode))
         assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertEquals(9, hendelse.behov().size)
+        assertEquals(8, hendelse.behov().size)
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Foreldrepenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Pleiepenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Omsorgspenger))
@@ -88,7 +90,6 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Arbeidsavklaringspenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Dagpenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Institusjonsopphold))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Sykepengehistorikk))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Dødsinfo))
     }
 
@@ -96,12 +97,13 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
     fun `påminnelse i ytelser - gammel historikk`() {
         person.håndter(sykmelding())
         person.håndter(søknad())
+        person.håndter(utbetalingshistorikk())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
-        assertEquals(9, hendelse.behov().size)
+        assertEquals(8, hendelse.behov().size)
         person.håndter(påminnelse(AVVENTER_HISTORIKK, 1.vedtaksperiode))
         assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertEquals(9, hendelse.behov().size)
+        assertEquals(8, hendelse.behov().size)
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Foreldrepenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Pleiepenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Omsorgspenger))
@@ -109,7 +111,6 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Arbeidsavklaringspenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Dagpenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Institusjonsopphold))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Sykepengehistorikk))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Dødsinfo))
     }
 
@@ -117,6 +118,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
     fun `påminnelse i avventer simulering`() {
         person.håndter(sykmelding())
         person.håndter(søknad())
+        person.håndter(utbetalingshistorikk())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
@@ -132,6 +134,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
     fun `påminnelse i til godkjenning`() {
         person.håndter(sykmelding())
         person.håndter(søknad())
+        person.håndter(utbetalingshistorikk())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
@@ -149,6 +152,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
     fun `påminnelse i til utbetaling`() {
         person.håndter(sykmelding())
         person.håndter(søknad())
+        person.håndter(utbetalingshistorikk())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
@@ -164,6 +168,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
     fun `ignorerer påminnelser på tidligere tilstander`() {
         person.håndter(sykmelding())
         person.håndter(søknad())
+        person.håndter(utbetalingshistorikk())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
         person.håndter(påminnelse(AVVENTER_VILKÅRSPRØVING, 1.vedtaksperiode))
@@ -182,6 +187,13 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         a1Hendelsefabrikk.lagSøknad(
             perioder = perioder,
             sendtTilNAVEllerArbeidsgiver = 20.januar
+        ).apply {
+            hendelse = this
+        }
+
+    private fun utbetalingshistorikk() =
+        a1Hendelsefabrikk.lagUtbetalingshistorikk(
+            vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER)
         ).apply {
             hendelse = this
         }

@@ -2,14 +2,17 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -34,6 +37,15 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
 
     @Test
     fun `skjæringstidspunkt oppdateres i vedtaksperiode når inntektsmelding håndteres`() {
+        person.håndter(UtbetalingshistorikkEtterInfotrygdendring(UUID.randomUUID(), "", "", InfotrygdhistorikkElement.opprett(
+            oppdatert = LocalDateTime.now(),
+            hendelseId = UUID.randomUUID(),
+            perioder = emptyList(),
+            inntekter = emptyList(),
+            arbeidskategorikoder = emptyMap(),
+            ugyldigePerioder = emptyList(),
+            harStatslønn = false
+        )))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar)))
         person.håndter(søknad(Sykdom(6.januar, 20.januar, 100.prosent)))
         assertEquals(6.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -53,6 +65,15 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
             begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
         assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist()).harFunksjonelleFeilEllerVerre())
+        person.håndter(UtbetalingshistorikkEtterInfotrygdendring(UUID.randomUUID(), "", "", InfotrygdhistorikkElement.opprett(
+            oppdatert = LocalDateTime.now(),
+            hendelseId = UUID.randomUUID(),
+            perioder = emptyList(),
+            inntekter = emptyList(),
+            arbeidskategorikoder = emptyMap(),
+            ugyldigePerioder = emptyList(),
+            harStatslønn = false
+        )))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar)))
         person.håndter(søknad(Sykdom(6.januar, 20.januar, 100.prosent)))
         person.håndter(inntektsmelding)

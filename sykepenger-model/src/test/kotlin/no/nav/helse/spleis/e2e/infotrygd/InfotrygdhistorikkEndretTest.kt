@@ -26,7 +26,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
 internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
-    private val gammelHistorikk = LocalDateTime.now().minusHours(24)
     private val utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar,  31.januar, 100.prosent, INNTEKT))
     private val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
 
@@ -61,11 +60,12 @@ internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
     }
 
     private fun periodeTilGodkjenning(perioder: List<Infotrygdperiode> = emptyList(), inntektsopplysning: List<Inntektsopplysning> = emptyList()) {
+        håndterUtbetalingshistorikkEtterInfotrygdendring(*perioder.toTypedArray(), inntektshistorikk = inntektsopplysning)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterInntektsmelding(listOf(1.mars til 16.mars))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, *perioder.toTypedArray(), inntektshistorikk = inntektsopplysning, besvart = gammelHistorikk)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING)
     }

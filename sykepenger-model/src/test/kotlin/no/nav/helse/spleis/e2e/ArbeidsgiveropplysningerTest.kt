@@ -17,6 +17,8 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -359,7 +361,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 Inntektsmelding.Refusjon.EndringIRefusjon(15000.månedlig, 1.april)
             )
         ))
-
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a2)
         val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         val inntektsmeldingId = inspektør(a2).hendelseIder(1.vedtaksperiode.id(a2)).last()
 
@@ -385,6 +390,11 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 beløp = INNTEKT_FLERE_AG,
                 opphørsdato = 15.mars
         ))
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a2)
 
         val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         val inntektsmeldingId = inspektør(a2).hendelseIder(1.vedtaksperiode.id(a2)).last()

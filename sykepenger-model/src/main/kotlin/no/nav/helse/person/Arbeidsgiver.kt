@@ -9,6 +9,7 @@ import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
+import no.nav.helse.hendelser.InntektsmeldingReplayUtført
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -583,6 +584,11 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.fortsettÅBehandle(this)
     }
 
+    internal fun håndter(inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
+        inntektsmeldingReplayUtført.kontekst(this)
+        håndter(inntektsmeldingReplayUtført) { håndter(inntektsmeldingReplayUtført) }
+    }
+
     internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk, infotrygdhistorikk: Infotrygdhistorikk) {
         utbetalingshistorikk.kontekst(this)
         håndter(utbetalingshistorikk) { håndter(utbetalingshistorikk, infotrygdhistorikk) }
@@ -1068,7 +1074,7 @@ internal class Arbeidsgiver private constructor(
     }
 
 
-    fun vedtaksperioderEtter(dato: LocalDate) = vedtaksperioder.filter { it.slutterEtter(dato) }
+    internal fun vedtaksperioderEtter(dato: LocalDate) = vedtaksperioder.filter { it.slutterEtter(dato) }
 
     internal class JsonRestorer private constructor() {
         internal companion object {

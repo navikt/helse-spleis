@@ -24,17 +24,17 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Utbetaling endret får rett organisasjonsnummer ved overlappende sykemelding`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(
-            1.vedtaksperiode,
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
             ArbeidsgiverUtbetalingsperiode(ANNET_ORGNUMMER, 1.januar(2016), 31.januar(2016), 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(
                 Inntektsopplysning(ANNET_ORGNUMMER, 1.januar(2016), 1000.daglig, true)
             )
         )
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))

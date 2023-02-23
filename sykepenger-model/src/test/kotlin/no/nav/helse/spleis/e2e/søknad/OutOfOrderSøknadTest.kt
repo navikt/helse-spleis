@@ -11,6 +11,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
@@ -30,7 +31,6 @@ import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
@@ -52,8 +52,8 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(5.januar, 19.januar, 80.prosent))
         assertEquals(Utbetaling.Forkastet, inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.tilstand)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
     }
 
     @Test
@@ -61,7 +61,6 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
         tilGodkjenning(3.januar, 31.januar, ORGNUMMER)
         nullstillTilstandsendringer()
         nyPeriode(1.januar til 2.januar, ORGNUMMER)
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = 20000.månedlig)
         håndterYtelser(1.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -72,7 +71,6 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
     @Test
     fun `Revurderer vegg-i-vegg-AUU når det ikke foreligger tidligere utbetaling`() {
         nyPeriode(1.mars til 16.mars)
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
@@ -106,7 +104,6 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
     fun `out-of-order med senere periode i Avventer inntektsmelding eller historikk`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         nyPeriode(1.mars til 20.mars, ORGNUMMER)
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
         nullstillTilstandsendringer()
         forlengVedtak(1.februar, 28.februar)
 

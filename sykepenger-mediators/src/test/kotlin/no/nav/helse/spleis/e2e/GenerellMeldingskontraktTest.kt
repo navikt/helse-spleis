@@ -20,7 +20,7 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
         val søknadId = sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
-        val vedtaksperiodeEndret = testRapid.inspektør.siste("vedtaksperiode_endret")
+        val vedtaksperiodeEndret = testRapid.inspektør.meldinger("vedtaksperiode_endret").first()
         assertVedtaksperiodeEndret(vedtaksperiodeEndret, søknadId, "sendt_søknad_nav")
     }
 

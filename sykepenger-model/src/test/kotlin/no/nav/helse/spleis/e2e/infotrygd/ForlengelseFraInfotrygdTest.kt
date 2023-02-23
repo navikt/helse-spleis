@@ -14,6 +14,7 @@ import no.nav.helse.inspectors.søppelbøtte
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.START
@@ -31,7 +32,7 @@ import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
@@ -65,111 +66,60 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(18.mars, 31.mars))
         håndterSøknad(Sykdom(18.mars, 31.mars, 100.prosent))
-        håndterUtbetalingshistorikk(3.vedtaksperiode, besvart = LocalDate.EPOCH.atStartOfDay())
-        person.søppelbøtte(hendelselogg, 1.januar til 31.januar)
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, 1000.daglig)
-        )
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TIL_INFOTRYGD
-        )
-        assertTilstander(
-            3.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVSLUTTET_UTEN_UTBETALING
-        )
-    }
-
-    @Test
-    fun `lagrer ikke inntekt fra infotrygd uten utbetaling som vilkårsgrunnlag i spleis`() {
-        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = inntektshistorikk)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = inntektshistorikk)
-        assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, 1000.daglig))
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
     fun `forlenger ferieperiode i Infotrygd på samme arbeidsgiver`() {
+        håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.januar, 31.januar), inntektshistorikk = emptyList())
         nyPeriode(1.februar til 28.februar)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, Friperiode(1.januar, 31.januar), inntektshistorikk = emptyList())
+        assertForlengerInfotrygdperiode()
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `forlenger ferieperiode i Infotrygd på samme arbeidsgiver - reagerer på endring`() {
+        nyPeriode(1.februar til 28.februar)
+        håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.januar, 31.januar), inntektshistorikk = emptyList())
         assertForlengerInfotrygdperiode()
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
     }
 
     @Test
     fun `forlenger utbetaling i Infotrygd på samme arbeidsgiver`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
             utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT)),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
         )
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         assertForlengerInfotrygdperiode()
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
     }
 
     @Test
     fun `forlenger utbetaling i Infotrygd på annen arbeidsgiver`() {
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)))
         nyPeriode(1.februar til 28.februar, a1)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)))
         assertForlengerInfotrygdperiode()
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
     }
 
     @Test
-    fun `forsikrer oss om at vi plukker opp forlengelser fra infotrygd ved sen behandling`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT),
-            inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, TestPerson.INNTEKT, true))
-        )
-        assertForlengerInfotrygdperiode()
-        assertForkastetPeriodeTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TIL_INFOTRYGD
-        )
-    }
-
-    @Test
     fun `bare ferie - etter infotrygdutbetaling`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 31.januar))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT), inntektshistorikk = listOf(
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, true)
         ))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 31.januar))
         assertForlengerInfotrygdperiode()
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, TIL_INFOTRYGD)
     }
 
     private fun assertForlengerInfotrygdperiode() {
         assertFunksjonellFeil("Forlenger en Infotrygdperiode på tvers av arbeidsgivere")
-    }
-
-    private fun assertAlleDager(utbetalingstidslinje: Utbetalingstidslinje, periode: Periode, vararg dager: KClass<out Utbetalingsdag>) {
-        utbetalingstidslinje.subset(periode).also { tidslinje ->
-            assertTrue(tidslinje.all { it::class in dager }) {
-                val ulikeDager = tidslinje.filter { it::class !in dager }
-                "Forventet at alle dager skal være en av: ${dager.joinToString { it.simpleName ?: "UKJENT" }}.\n" +
-                    ulikeDager.joinToString(prefix = "  - ", separator = "\n  - ", postfix = "\n") {
-                        "${it.dato} er ${it::class.simpleName}"
-                    } + "\nUtbetalingstidslinje:\n" + tidslinje.toString() + "\n"
-            }
-        }
     }
 }

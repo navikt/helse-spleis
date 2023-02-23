@@ -46,7 +46,6 @@ import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
@@ -351,7 +350,6 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
     fun `Korrigerende søknad i AvventerVilkårsprøving - setter i gang en overstyring av behandlingen`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar))
         håndterSøknad(Sykdom(1.februar, 16.februar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
 
         håndterInntektsmelding(listOf(31.januar til 15.februar))
 

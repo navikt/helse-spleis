@@ -22,6 +22,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
@@ -44,7 +45,7 @@ import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
@@ -231,7 +232,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, TIL_UTBETALING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
     }
 
     @Test
@@ -572,14 +573,15 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
     fun `revurdere på en eldre arbeidsgiver - infotrygd har utbetalt `() {
         nyeVedtak(1.januar, 31.januar, a1)
         nyPeriode(1.februar til 18.februar, a2)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a2, besvart = LocalDateTime.now().minusHours(48))
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), orgnummer = a1)
 
         nullstillTilstandsendringer()
-
-        håndterYtelser(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(a2, 17.januar, 18.februar, 100.prosent, INNTEKT), orgnummer = a1)
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
+            ArbeidsgiverUtbetalingsperiode(a2, 17.januar, 18.februar, 100.prosent, INNTEKT)
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         val utbetaling1 = inspektør.utbetaling(0).inspektør
         val revurdering = inspektør.utbetaling(1).inspektør

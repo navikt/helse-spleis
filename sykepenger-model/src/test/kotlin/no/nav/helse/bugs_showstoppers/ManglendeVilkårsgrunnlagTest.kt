@@ -8,13 +8,8 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSammenligningsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
@@ -24,7 +19,6 @@ import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -56,11 +50,12 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
 
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(
             3.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
@@ -73,15 +68,12 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
     fun `inntektsmelding drar periode tilbake og lager tilstøtende`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar))
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDate.EPOCH.atStartOfDay())
 
         håndterSykmelding(Sykmeldingsperiode(26.januar, 2.februar))
         håndterSøknad(Sykdom(26.januar, 2.februar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode, besvart = LocalDate.EPOCH.atStartOfDay())
 
         håndterSykmelding(Sykmeldingsperiode(5.februar, 21.februar))
         håndterSøknad(Sykdom(5.februar, 21.februar, 100.prosent))
-        håndterUtbetalingshistorikk(3.vedtaksperiode, besvart = LocalDate.EPOCH.atStartOfDay())
 
         // inntektsmelding inneholder en ukjent dag — 8. januar — som vi ikke
         // har registrert før i forbindelse med verken søknad eller sykmelding
@@ -97,32 +89,12 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
                 24.januar til 2.februar
             ), 24.januar
         )
+        assertEquals(1.januar til 5.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(6.januar til 2.februar, inspektør.periode(2.vedtaksperiode))
+        assertEquals(5.februar til 21.februar, inspektør.periode(3.vedtaksperiode))
 
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVSLUTTET_UTEN_UTBETALING,
-            AVSLUTTET_UTEN_UTBETALING
-        )
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVSLUTTET_UTEN_UTBETALING,
-            AVSLUTTET_UTEN_UTBETALING
-        )
-        assertTilstander(
-            3.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING
-        )
-
-        assertEquals(1, person.personLogg.etterspurteBehov(1.vedtaksperiode).size)
-        assertEquals(1, person.personLogg.etterspurteBehov(2.vedtaksperiode).size)
-        assertTrue(person.personLogg.etterspurteBehov(3.vedtaksperiode).map { it.type }
-            .containsAll(listOf(InntekterForSammenligningsgrunnlag, Medlemskap, InntekterForSykepengegrunnlag, ArbeidsforholdV2)))
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
     }
 }

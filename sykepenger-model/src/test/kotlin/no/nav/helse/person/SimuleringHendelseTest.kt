@@ -22,6 +22,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
@@ -105,6 +106,16 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     private fun håndterYtelser(
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList())
     ) {
+        person.håndter(
+            UtbetalingshistorikkEtterInfotrygdendring(UUID.randomUUID(), "", "", InfotrygdhistorikkElement.opprett(
+            oppdatert = LocalDateTime.now(),
+            hendelseId = UUID.randomUUID(),
+            perioder = emptyList(),
+            inntekter = emptyList(),
+            arbeidskategorikoder = emptyMap(),
+            ugyldigePerioder = emptyList(),
+            harStatslønn = false
+        )))
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding(refusjon))

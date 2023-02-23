@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -46,15 +47,16 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
 
         assertTilstander(
             1.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
     }
 
@@ -68,12 +70,13 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.TIL_INFOTRYGD
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            TIL_INFOTRYGD
         )
     }
 
@@ -87,12 +90,13 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.TIL_INFOTRYGD
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            TIL_INFOTRYGD
         )
     }
 
@@ -106,12 +110,13 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.TIL_INFOTRYGD
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            TIL_INFOTRYGD
         )
     }
 
@@ -138,15 +143,16 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
 
         assertTilstander(
             1.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
     }
 }

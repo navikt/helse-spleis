@@ -11,17 +11,8 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -46,6 +37,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
@@ -61,6 +53,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
@@ -85,6 +78,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
@@ -127,6 +121,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE
         )
@@ -157,7 +152,6 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
         håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
@@ -165,11 +159,12 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
         )
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
     }
 
     @Test
@@ -180,6 +175,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING
@@ -459,39 +455,20 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    // TODO: https://trello.com/c/9qxVRTpM
     fun `Infotrygdhistorikk fører til at en senere periode ikke trenger ny AGP - må vente på infotrygdhistorikk før vi bestemmer om vi skal til AUU`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         utbetalPeriode(1.vedtaksperiode)
 
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 10.februar, 100.prosent, INNTEKT)),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true))
+        )
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.februar)
         håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar))
         håndterSøknad(Sykdom(20.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(
-            2.vedtaksperiode,
-            utbetalinger = arrayOf(
-                ArbeidsgiverUtbetalingsperiode(
-                    ORGNUMMER,
-                    1.februar,
-                    10.februar,
-                    100.prosent,
-                    INNTEKT
-                )
-            ),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true))
-        )
-
-        assertForventetFeil(
-            forklaring = "Skal vente på infotrygdhistorikk før den går til AvsluttetUtenUtbetaling",
-            nå = {
-                assertTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            },
-            ønsket = {
-                assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-            }
-        )
+        assertTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
     }
 
     @Test

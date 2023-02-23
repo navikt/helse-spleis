@@ -24,6 +24,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
@@ -99,6 +100,21 @@ abstract class AbstractObservableTest {
         opprinneligSendt = null,
         utenlandskSykmelding = false,
         sendTilGosys = false,
+    )
+
+    protected fun utbetalinghistorikk() = UtbetalingshistorikkEtterInfotrygdendring(
+        UUID.randomUUID(),
+        "",
+        "",
+        InfotrygdhistorikkElement.opprett(
+            oppdatert = LocalDateTime.now(),
+            hendelseId = UUID.randomUUID(),
+            perioder = emptyList(),
+            inntekter = emptyList(),
+            arbeidskategorikoder = emptyMap(),
+            ugyldigePerioder = emptyList(),
+            harStatslønn = false
+        )
     )
 
     protected fun inntektsmelding(

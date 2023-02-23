@@ -42,7 +42,7 @@ import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
@@ -365,18 +365,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
     @Test
     fun `arbeidsforhold uten sykepengegrunnlag de tre siste månedene før skjæringstidspunktet skal ikke ha ghostperioder`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
-        val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a2, 1.januar(2017), 31.januar(2017), 100.prosent, 1000.daglig)
-        )
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        val inntektshistorikk = listOf(
-            Inntektsopplysning(a2, 1.januar(2017), INNTEKT, true)
-        )
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode,
-            utbetalinger = utbetalinger,
-            inntektshistorikk = inntektshistorikk
-        )
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
@@ -792,7 +781,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
     @Test
     fun `Ghostperiode peker på et vilkårsgrunnlag som ingen beregnede perioder peker på`() {
         nyPeriode(1.januar til 16.januar)
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         nyPeriode(17.januar til 31.januar)

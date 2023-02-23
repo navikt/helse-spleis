@@ -5,6 +5,8 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -29,6 +31,6 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
 
         val infotrygdHistorikk = person.inspektør.utbetaltIInfotrygd
         assertEquals(1.januar(2016) til 31.januar(2016), infotrygdHistorikk.single())
-        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
     }
 }

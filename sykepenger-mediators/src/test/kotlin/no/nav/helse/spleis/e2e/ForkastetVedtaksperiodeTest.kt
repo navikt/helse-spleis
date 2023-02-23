@@ -20,7 +20,7 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 27.januar, sykmeldingsgrad = 100))
         )
 
-        assertTilstander(0, "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "TIL_INFOTRYGD")
+        assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "TIL_INFOTRYGD")
         assertTilstander(1, "TIL_INFOTRYGD")
 
         val vedtaksperiodeForkastet = testRapid.inspektør.meldinger("vedtaksperiode_forkastet")

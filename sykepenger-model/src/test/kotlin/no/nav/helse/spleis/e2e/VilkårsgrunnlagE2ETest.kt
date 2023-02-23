@@ -16,14 +16,8 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.oktober
-import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.assertNotNull
@@ -40,11 +34,9 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     fun `skjæringstidspunkt måneden før inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(26.januar, 8.februar), orgnummer = a1)
         håndterSøknad(Sykdom(26.januar, 8.februar, 100.prosent), orgnummer = a1)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(6.februar, 28.februar), orgnummer = a2)
         håndterSøknad(Sykdom(6.februar, 28.februar, 100.prosent), orgnummer = a2)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a2)
         håndterInntektsmelding(listOf(21.januar til 21.januar, 6.februar til 20.februar), orgnummer = a2)
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             orgnummer = a2,
@@ -169,6 +161,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
@@ -179,6 +172,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(
             2.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
             TIL_INFOTRYGD
@@ -215,6 +209,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
            AVVENTER_VILKÅRSPRØVING,
@@ -264,10 +259,10 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(3.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, inntektFraIT), inntektshistorikk = listOf(
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, inntektFraIT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 17.januar, inntektFraIT, true)
         ))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         assertEquals(1.januar, inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.skjæringstidspunkt)
         val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(3.vedtaksperiode)
         assertNotNull(vilkårsgrunnlag)

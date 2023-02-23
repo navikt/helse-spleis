@@ -299,6 +299,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikkEtterInfotrygdEndring(
     inntektshistorikk: List<Inntektsopplysning> = emptyList(),
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
     harStatslønn: Boolean = false,
+    arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
     besvart: LocalDateTime = LocalDateTime.now(),
 ): UtbetalingshistorikkEtterInfotrygdendring {
     return UtbetalingshistorikkEtterInfotrygdendring(
@@ -310,7 +311,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikkEtterInfotrygdEndring(
             hendelseId = UUID.randomUUID(),
             perioder = utbetalinger,
             inntekter = inntektshistorikk,
-            arbeidskategorikoder = emptyMap(),
+            arbeidskategorikoder = arbeidskategorikoder,
             ugyldigePerioder = emptyList(),
             harStatslønn = harStatslønn
         )

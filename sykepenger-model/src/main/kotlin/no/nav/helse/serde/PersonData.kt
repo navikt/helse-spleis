@@ -974,6 +974,7 @@ internal data class PersonData(
                 TilstandType.REVURDERING_FEILET -> Vedtaksperiode.RevurderingFeilet
                 TilstandType.TIL_INFOTRYGD -> Vedtaksperiode.TilInfotrygd
                 TilstandType.START -> Vedtaksperiode.Start
+                TilstandType.AVVENTER_INFOTRYGDHISTORIKK -> Vedtaksperiode.AvventerInfotrygdHistorikk
                 TilstandType.AVVENTER_VILKÅRSPRØVING -> Vedtaksperiode.AvventerVilkårsprøving
                 TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK -> Vedtaksperiode.AvventerInntektsmeldingEllerHistorikk
                 TilstandType.AVVENTER_BLOKKERENDE_PERIODE -> Vedtaksperiode.AvventerBlokkerendePeriode

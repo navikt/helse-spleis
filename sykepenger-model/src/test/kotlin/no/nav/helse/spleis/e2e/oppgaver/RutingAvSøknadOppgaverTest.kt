@@ -16,7 +16,6 @@ import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
@@ -67,7 +66,6 @@ internal class RutingAvSøknadOppgaverTest : AbstractEndToEndTest() {
     fun `dersom vi IKKE har en nærliggende utbetaling og vi mottar søknad som overlapper med periode i AUU - skal det opprettes oppgave i den vanlige gosyskøen`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(14.januar, 10.februar))
         val søknadId2 = håndterSøknad(Sykdom(14.januar, 10.februar, 100.prosent))

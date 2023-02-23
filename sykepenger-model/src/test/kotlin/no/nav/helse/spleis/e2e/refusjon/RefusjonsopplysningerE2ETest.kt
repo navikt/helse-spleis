@@ -16,7 +16,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.oktober
-import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_1
 import no.nav.helse.person.inntekt.Refusjonsopplysning
@@ -176,13 +175,10 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         }
     }
 
-    private fun Periode.avsluttUtenUtbetaling() : UUID {
+    private fun Periode.avsluttUtenUtbetaling(): UUID {
         håndterSykmelding(Sykmeldingsperiode(start, endInclusive))
         håndterSøknad(Sykdom(start, endInclusive, 100.prosent))
-        val vedtaksperiodeId = observatør.sisteVedtaksperiodeId(a1)
-        observatør.tilstandsendringer.getValue(vedtaksperiodeId).last().takeUnless { it == AVSLUTTET_UTEN_UTBETALING } ?: return vedtaksperiodeId
-        håndterUtbetalingshistorikk(vedtaksperiodeId)
-        return vedtaksperiodeId
+        return observatør.sisteVedtaksperiodeId(a1)
     }
 
     private fun Refusjonsopplysninger.assertRefusjonsbeløp(periode: Periode, beløp: Inntekt) {

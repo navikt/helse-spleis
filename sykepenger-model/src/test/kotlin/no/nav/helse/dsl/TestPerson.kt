@@ -157,6 +157,10 @@ internal class TestPerson(
                 vedtaksperiodesamler.fangVedtaksperiode {
                     arbeidsgiverHendelsefabrikk.lagSøknad(*perioder, andreInntektskilder = andreInntektskilder, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet)
                         .håndter(Person::håndter)
+                }?.also {
+                    if (behovsamler.harBehov(it, Sykepengehistorikk)){
+                        arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikk(it).håndter(Person::håndter)
+                    }
                 }
             }) { vedtaksperioderSomHarBedtOmReplay ->
                 vedtaksperioderSomHarBedtOmReplay.forEach { vedtaksperiodeId ->
@@ -194,18 +198,7 @@ internal class TestPerson(
             arbeidsgiverHendelsefabrikk.lagInntektsmeldingReplay(vedtaksperiodeId).forEach { replay ->
                 replay.håndter(Person::håndter)
             }
-        }
-
-        internal fun håndterUtbetalingshistorikk(
-            vedtaksperiodeId: UUID,
-            utbetalinger: List<Infotrygdperiode> = listOf(),
-            inntektshistorikk: List<Inntektsopplysning> = emptyList(),
-            harStatslønn: Boolean = false,
-            besvart: LocalDateTime = LocalDateTime.now()
-        ) {
-            behovsamler.bekreftBehov(vedtaksperiodeId, Sykepengehistorikk)
-            arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikk(vedtaksperiodeId, utbetalinger, inntektshistorikk, harStatslønn, besvart)
-                .håndter(Person::håndter)
+            arbeidsgiverHendelsefabrikk.lagInntektsmeldingReplayUtført(vedtaksperiodeId).håndter(Person::håndter)
         }
 
         internal fun håndterVilkårsgrunnlag(

@@ -4,11 +4,11 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.nyPeriode
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -19,9 +19,7 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndTest() {
     @Test
     fun `Kort periode ber om inntektsmelding når den går tilbake, og sier fra om at inntektsmelding ikke trengs etter at den er mottatt`() {
         nyPeriode(5.januar til 17.januar)
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
         nyPeriode(20.januar til 22.januar)
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)

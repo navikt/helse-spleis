@@ -67,7 +67,6 @@ import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterSøknadMedValidering
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
@@ -1344,7 +1343,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     fun `§ 8-17 ledd 1 bokstav a - trygden yter ikke sykepenger dersom arbeidsgiverperioden ikke er fullført`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(

@@ -36,6 +36,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
@@ -91,7 +92,6 @@ import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
@@ -793,7 +793,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     fun `korte perioder - arbeidsgiversøknader`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar))
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
 
         0.generasjon {
             uberegnetPeriode(0) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
@@ -1707,15 +1706,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     fun `inntektsmelding gjør at kort periode faller utenfor agp - før vilkårsprøving`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar))
         håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(28.januar, 31.januar))
         håndterSøknad(Sykdom(28.januar, 31.januar, 100.prosent))
-        håndterUtbetalingshistorikk(3.vedtaksperiode)
 
         nullstillTilstandsendringer()
 
@@ -1757,11 +1753,9 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     fun `inntektsmelding for to korte perioder`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(24.januar, 30.januar))
         håndterSøknad(Sykdom(24.januar, 30.januar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
 
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 24.januar)
@@ -1809,11 +1803,9 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     fun `avvist revurdering uten tidligere utbetaling kan forkastes`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar))
         håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
 
         håndterInntektsmelding(listOf(10.januar til 25.januar), beregnetInntekt = INNTEKT)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
@@ -1837,7 +1829,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     fun `avvist utbetaling`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar))
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
