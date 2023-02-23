@@ -1161,7 +1161,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterSimulering(1.vedtaksperiode)
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-        assertEquals(2, person.personLogg.antallEtterspurteBehov(1.vedtaksperiode, Aktivitet.Behov.Behovtype.Godkjenning))
+        assertEquals(3, person.personLogg.antallEtterspurteBehov(1.vedtaksperiode, Aktivitet.Behov.Behovtype.Godkjenning))
     }
 
     @Test

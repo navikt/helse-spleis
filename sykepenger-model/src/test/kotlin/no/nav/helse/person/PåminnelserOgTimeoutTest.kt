@@ -142,7 +142,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(påminnelse(AVVENTER_GODKJENNING, 1.vedtaksperiode))
 
         assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertEquals(0, hendelse.behov().size)
+        assertEquals(1, hendelse.behov().size)
     }
 
     @Test
