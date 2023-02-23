@@ -123,8 +123,8 @@ internal class Feriepengeutbetaling private constructor(
                 organisasjonsnummer = organisasjonsnummer,
                 utbetalingId = utbetalingId,
                 type = Utbetalingtype.FERIEPENGER.name,
-                forrigeStatus = Utbetalingstatus.fraTilstand(Utbetaling.Ubetalt).name,
-                gjeldendeStatus = Utbetalingstatus.fraTilstand(Utbetaling.Utbetalt).name,
+                forrigeStatus = Utbetalingstatus.IKKE_UTBETALT.name,
+                gjeldendeStatus = Utbetalingstatus.UTBETALT.name,
                 arbeidsgiverOppdrag = oppdrag.toHendelseMap(),
                 personOppdrag = personoppdrag.toHendelseMap(),
                 korrelasjonsId = UUID.randomUUID()
