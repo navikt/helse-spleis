@@ -1057,7 +1057,16 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(4.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
 
         håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars)
-        assertEquals("AAAAARR AAAAARR AAAAARR AAAAARR AAAAARR AAAAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+
+        assertForventetFeil(
+            forklaring = "Legger til arbeidsdager om siste utbetaling ikke er utbetalt",
+            nå = {
+                assertEquals("AAAAARR AAAAARR AAAAARR AAAAARR AAAAARR AAAAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            },
+            ønsket = {
+                assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            }
+        )
     }
 
     @Test
