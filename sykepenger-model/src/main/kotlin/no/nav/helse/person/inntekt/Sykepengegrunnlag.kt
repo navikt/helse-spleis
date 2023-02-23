@@ -119,8 +119,10 @@ internal class Sykepengegrunnlag(
         }
         if (avvisteDager.isEmpty()) return
         val (avvisteDagerOver67, avvisteDagerTil67) = avvisteDager.partition { alder.forhøyetInntektskrav(it) }
-        if (avvisteDagerOver67.isNotEmpty()) Utbetalingstidslinje.avvis(tidslinjer, avvisteDagerOver67.grupperSammenhengendePerioder(), listOf(Begrunnelse.MinimumInntektOver67))
-        if (avvisteDagerTil67.isNotEmpty()) Utbetalingstidslinje.avvis(tidslinjer, avvisteDagerTil67.grupperSammenhengendePerioder(), listOf(Begrunnelse.MinimumInntekt))
+        if (avvisteDagerOver67.isNotEmpty()) Utbetalingstidslinje.avvis(tidslinjer, avvisteDagerOver67.grupperSammenhengendePerioder(), listOf(
+            Begrunnelse.MinimumInntektOver67))
+        if (avvisteDagerTil67.isNotEmpty()) Utbetalingstidslinje.avvis(tidslinjer, avvisteDagerTil67.grupperSammenhengendePerioder(), listOf(
+            Begrunnelse.MinimumInntekt))
     }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {

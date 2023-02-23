@@ -1,25 +1,25 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
-import no.nav.helse.utbetalingslinjer.BeløpkildeAdapter
+import no.nav.helse.utbetalingslinjer.Beløpkilde
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.periode
 import no.nav.helse.økonomi.Økonomi
 import no.nav.helse.økonomi.Økonomi.Companion.erUnderGrensen
 
-internal sealed class Utbetalingsdag(
-    internal val dato: LocalDate,
-    internal val økonomi: Økonomi
+sealed class Utbetalingsdag(
+    val dato: LocalDate,
+    val økonomi: Økonomi
 ) : Comparable<Utbetalingsdag> {
 
     internal abstract val prioritet: Int
-    internal fun beløpkilde() = BeløpkildeAdapter(økonomi)
+    fun beløpkilde(): Beløpkilde = BeløpkildeAdapter(økonomi)
     override fun compareTo(other: Utbetalingsdag): Int {
         return this.prioritet.compareTo(other.prioritet)
     }
 
     override fun toString() = "${this.javaClass.simpleName} ($dato) ${økonomi.brukGrad { grad-> grad }} %"
 
-    internal fun avvis(begrunnelser: List<Begrunnelse>) = begrunnelser
+    fun avvis(begrunnelser: List<Begrunnelse>) = begrunnelser
         .filter { it.skalAvvises(this) }
         .takeIf(List<*>::isNotEmpty)
         ?.let(::avvisDag)
@@ -27,17 +27,17 @@ internal sealed class Utbetalingsdag(
     protected open fun avvisDag(begrunnelser: List<Begrunnelse>) = AvvistDag(dato, økonomi, begrunnelser)
     protected abstract fun kopierMed(økonomi: Økonomi): Utbetalingsdag
 
-    internal abstract fun accept(visitor: UtbetalingsdagVisitor)
+    abstract fun accept(visitor: UtbetalingsdagVisitor)
 
-    internal open fun erAvvistMed(begrunnelse: Begrunnelse): AvvistDag? = null
+    open fun erAvvistMed(begrunnelse: Begrunnelse): AvvistDag? = null
 
-    internal class ArbeidsgiverperiodeDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
+    class ArbeidsgiverperiodeDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
         override val prioritet = 30
         override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
         override fun kopierMed(økonomi: Økonomi) = ArbeidsgiverperiodeDag(dato, økonomi)
     }
 
-    internal class NavDag(
+    class NavDag(
         dato: LocalDate,
         økonomi: Økonomi
     ) : Utbetalingsdag(dato, økonomi) {
@@ -46,29 +46,29 @@ internal sealed class Utbetalingsdag(
         override fun kopierMed(økonomi: Økonomi) = NavDag(dato, økonomi)
     }
 
-    internal class NavHelgDag(dato: LocalDate, økonomi: Økonomi) :
+    class NavHelgDag(dato: LocalDate, økonomi: Økonomi) :
         Utbetalingsdag(dato, økonomi) {
         override val prioritet = 40
         override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
         override fun kopierMed(økonomi: Økonomi) = NavHelgDag(dato, økonomi)
     }
 
-    internal class Fridag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
+    class Fridag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
         override val prioritet = 20
         override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
         override fun kopierMed(økonomi: Økonomi) = Fridag(dato, økonomi)
     }
 
-    internal class Arbeidsdag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
+    class Arbeidsdag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
         override val prioritet = 10
         override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
         override fun kopierMed(økonomi: Økonomi) = Arbeidsdag(dato, økonomi)
     }
 
-    internal class AvvistDag(
+    class AvvistDag(
         dato: LocalDate,
         økonomi: Økonomi,
-        internal val begrunnelser: List<Begrunnelse>
+        val begrunnelser: List<Begrunnelse>
     ) : Utbetalingsdag(dato, økonomi) {
         init {
             økonomi.lås()
@@ -84,20 +84,20 @@ internal sealed class Utbetalingsdag(
         override fun kopierMed(økonomi: Økonomi) = AvvistDag(dato, økonomi, begrunnelser)
     }
 
-    internal class ForeldetDag(dato: LocalDate, økonomi: Økonomi) :
+    class ForeldetDag(dato: LocalDate, økonomi: Økonomi) :
         Utbetalingsdag(dato, økonomi) {
         override val prioritet = 40 // Mellom ArbeidsgiverperiodeDag og NavDag
         override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
         override fun kopierMed(økonomi: Økonomi) = ForeldetDag(dato, økonomi)
     }
 
-    internal class UkjentDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
+    class UkjentDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
         override val prioritet = 0
         override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
         override fun kopierMed(økonomi: Økonomi) = UkjentDag(dato, økonomi)
     }
 
-    internal companion object {
+    companion object {
         fun dagerUnderGrensen(tidslinjer: List<Utbetalingstidslinje>): Set<LocalDate> {
             return tidslinjer
                 .flatten()
@@ -117,4 +117,12 @@ internal sealed class Utbetalingsdag(
             }
         }
     }
+}
+
+/**
+ * Tilpasser Økonomi så det passer til Beløpkilde-porten til utbetalingslinjer
+ */
+internal class BeløpkildeAdapter(private val økonomi: Økonomi): Beløpkilde {
+    override fun arbeidsgiverbeløp(): Int = økonomi.medAvrundetData { _, _, _, _, _, arbeidsgiverbeløp, _, _ -> arbeidsgiverbeløp!! }
+    override fun personbeløp(): Int = økonomi.medAvrundetData { _, _, _, _, _, _, personbeløp, _ -> personbeløp!! }
 }

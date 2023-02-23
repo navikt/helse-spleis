@@ -4,7 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.økonomi.Økonomi
 
-internal interface UtbetalingsdagVisitor {
+interface UtbetalingsdagVisitor {
     /**
      * gjeldendePeriode vil være null om det ikke er noen utbetalingsdager her
      */

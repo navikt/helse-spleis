@@ -2,7 +2,6 @@ package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag

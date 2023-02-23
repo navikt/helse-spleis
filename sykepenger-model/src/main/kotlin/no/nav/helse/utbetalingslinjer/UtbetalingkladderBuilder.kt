@@ -47,7 +47,7 @@ internal class UtbetalingkladderBuilder(
     }
 
     override fun visit(dag: NavDag, dato: LocalDate, økonomi: Økonomi) {
-        builder(dato).betalingsdag(dag.beløpkilde(), dato, økonomi)
+        builder(dato).betalingsdag(beløpkilde = dag.beløpkilde(), dato = dato, økonomi = økonomi)
     }
 
     override fun visit(dag: NavHelgDag, dato: LocalDate, økonomi: Økonomi) {

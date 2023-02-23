@@ -17,7 +17,6 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE

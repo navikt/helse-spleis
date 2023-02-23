@@ -10,8 +10,6 @@ import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

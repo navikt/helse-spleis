@@ -20,12 +20,12 @@ import no.nav.helse.økonomi.Økonomi
  * Forstår utbetalingsforpliktelser for en bestemt arbeidsgiver
  */
 
-internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Collection<Utbetalingsdag> by utbetalingsdager {
+class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Collection<Utbetalingsdag> by utbetalingsdager {
     private val utbetalingsdager = utbetalingsdager.toMutableList()
     private val førsteDato get() = utbetalingsdager.first().dato
     private val sisteDato get() = utbetalingsdager.last().dato
 
-    internal constructor() : this(mutableListOf())
+    constructor() : this(mutableListOf())
 
     init {
         check(utbetalingsdager.distinctBy { it.dato }.size == utbetalingsdager.size) {
@@ -33,25 +33,25 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
         }
     }
 
-    internal companion object {
-        internal fun periode(tidslinjer: List<Utbetalingstidslinje>) = tidslinjer
+    companion object {
+        fun periode(tidslinjer: List<Utbetalingstidslinje>) = tidslinjer
             .filter { it.utbetalingsdager.isNotEmpty() }
             .map { it.periode() }
             .reduce(Periode::plus)
 
-        internal fun avvis(
+        fun avvis(
             tidslinjer: List<Utbetalingstidslinje>,
             avvistePerioder: List<Periode>,
             begrunnelser: List<Begrunnelse>
         ) = tidslinjer.forEach { it.avvis(avvistePerioder, begrunnelser) }
 
-        internal fun avvisteDager(
+        fun avvisteDager(
             tidslinjer: List<Utbetalingstidslinje>,
             periode: Periode,
             begrunnelse: Begrunnelse
         ) = tidslinjer.flatMap { it.subset(periode) }.mapNotNull { it.erAvvistMed(begrunnelse) }
 
-        internal fun ferdigUtbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) = Utbetalingstidslinje(utbetalingsdager.toMutableList())
+        fun ferdigUtbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) = Utbetalingstidslinje(utbetalingsdager.toMutableList())
     }
 
     internal fun er6GBegrenset(): Boolean {
@@ -60,7 +60,7 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
         }
     }
 
-    internal fun accept(visitor: UtbetalingsdagVisitor) {
+    fun accept(visitor: UtbetalingsdagVisitor) {
         visitor.preVisitUtbetalingstidslinje(this, when(this.isEmpty()) {
             true -> null
             else -> this.periode()
@@ -78,7 +78,7 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
         }
     }
 
-    internal operator fun plus(other: Utbetalingstidslinje): Utbetalingstidslinje {
+    operator fun plus(other: Utbetalingstidslinje): Utbetalingstidslinje {
         if (other.isEmpty()) return this
         if (this.isEmpty()) return other
         val tidligsteDato = this.tidligsteDato(other)
@@ -86,7 +86,7 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
         return this.utvide(tidligsteDato, sisteDato).binde(other.utvide(tidligsteDato, sisteDato))
     }
 
-    internal fun harUtbetalinger() = sykepengeperiode() != null
+    fun harUtbetalinger() = sykepengeperiode() != null
 
     override fun iterator() = this.utbetalingsdager.iterator()
 
@@ -118,23 +118,23 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
     private fun sisteDato(other: Utbetalingstidslinje) =
         maxOf(this.sisteDato, other.sisteDato)
 
-    internal fun periode() = Periode(førsteDato, sisteDato)
+    fun periode() = Periode(førsteDato, sisteDato)
 
-    internal fun sykepengeperiode(): Periode? {
+    fun sykepengeperiode(): Periode? {
         val første = utbetalingsdager.firstOrNull { it is NavDag }?.dato ?: return null
         val siste = utbetalingsdager.last { it is NavDag }.dato
         return første til siste
     }
 
-    internal fun subset(periode: Periode): Utbetalingstidslinje {
+    fun subset(periode: Periode): Utbetalingstidslinje {
         if (isEmpty()) return Utbetalingstidslinje()
         if (periode == periode()) return this
         return Utbetalingstidslinje(utbetalingsdager.filter { it.dato in periode }.toMutableList())
     }
 
-    internal fun kutt(sisteDato: LocalDate) = subset(LocalDate.MIN til sisteDato)
+    fun kutt(sisteDato: LocalDate) = subset(LocalDate.MIN til sisteDato)
 
-    internal operator fun get(dato: LocalDate) =
+    operator fun get(dato: LocalDate) =
         if (isEmpty() || dato !in periode()) UkjentDag(dato, Økonomi.ikkeBetalt())
         else utbetalingsdager.first { it.dato == dato }
 
@@ -155,39 +155,39 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
         }.trim()
     }
 
-    internal class Builder {
+    class Builder {
         private val utbetalingsdager = mutableListOf<Utbetalingsdag>()
 
-        internal fun build() = Utbetalingstidslinje(utbetalingsdager)
+        fun build() = Utbetalingstidslinje(utbetalingsdager)
 
-        internal fun addArbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi) {
+        fun addArbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi) {
             add(ArbeidsgiverperiodeDag(dato, økonomi))
         }
 
-        internal fun addNAVdag(dato: LocalDate, økonomi: Økonomi) {
+        fun addNAVdag(dato: LocalDate, økonomi: Økonomi) {
             add(NavDag(dato, økonomi))
         }
 
-        internal fun addArbeidsdag(dato: LocalDate, økonomi: Økonomi) {
+        fun addArbeidsdag(dato: LocalDate, økonomi: Økonomi) {
             add(Arbeidsdag(dato, økonomi))
         }
 
-        internal fun addFridag(dato: LocalDate, økonomi: Økonomi) {
+        fun addFridag(dato: LocalDate, økonomi: Økonomi) {
             add(Fridag(dato, økonomi))
         }
 
-        internal fun addHelg(dato: LocalDate, økonomi: Økonomi) {
+        fun addHelg(dato: LocalDate, økonomi: Økonomi) {
             add(NavHelgDag(dato, økonomi))
         }
 
-        internal fun addUkjentDag(dato: LocalDate) =
+        fun addUkjentDag(dato: LocalDate) =
             add(UkjentDag(dato, Økonomi.ikkeBetalt()))
 
-        internal fun addAvvistDag(dato: LocalDate, økonomi: Økonomi, begrunnelser: List<Begrunnelse>) {
+        fun addAvvistDag(dato: LocalDate, økonomi: Økonomi, begrunnelser: List<Begrunnelse>) {
             add(AvvistDag(dato, økonomi, begrunnelser))
         }
 
-        internal fun addForeldetDag(dato: LocalDate, økonomi: Økonomi) {
+        fun addForeldetDag(dato: LocalDate, økonomi: Økonomi) {
             add(ForeldetDag(dato, økonomi))
         }
 
@@ -197,9 +197,9 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
     }
 }
 
-internal sealed class Begrunnelse() {
+sealed class Begrunnelse() {
 
-    internal fun skalAvvises(utbetalingsdag: Utbetalingsdag) = utbetalingsdag is AvvistDag || utbetalingsdag is NavDag
+    fun skalAvvises(utbetalingsdag: Utbetalingsdag) = utbetalingsdag is AvvistDag || utbetalingsdag is NavDag
 
     object SykepengedagerOppbrukt : Begrunnelse()
     object SykepengedagerOppbruktOver67 : Begrunnelse()

@@ -17,7 +17,6 @@ import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.A
-import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.K
 import no.nav.helse.testhelpers.P
@@ -30,7 +29,6 @@ import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.UforventetDagException
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Prosent.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
