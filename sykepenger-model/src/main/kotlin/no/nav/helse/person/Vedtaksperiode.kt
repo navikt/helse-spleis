@@ -1827,16 +1827,18 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingsgodkjenning: Utbetalingsgodkjenning
         ) {
-            vedtaksperiode.tilstand(
-                utbetalingsgodkjenning,
-                when {
-                    vedtaksperiode.utbetalinger.erAvvist() -> RevurderingFeilet.also {
-                        utbetalingsgodkjenning.varsel(RV_UT_1)
-                    }
-                    vedtaksperiode.utbetalinger.harUtbetalinger() -> TilUtbetaling
-                    else -> Avsluttet
+            if (vedtaksperiode.utbetalinger.erAvvist()) {
+                utbetalingsgodkjenning.varsel(RV_UT_1)
+                if (utbetalingsgodkjenning.automatiskBehandling()) {
+                    utbetalingsgodkjenning.info("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
+                    return sikkerlogg.error("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
                 }
-            )
+            }
+            vedtaksperiode.tilstand(utbetalingsgodkjenning, when {
+                vedtaksperiode.utbetalinger.erAvvist() -> RevurderingFeilet
+                vedtaksperiode.utbetalinger.harUtbetalinger() -> TilUtbetaling
+                else -> Avsluttet
+            })
         }
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,

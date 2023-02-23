@@ -25,6 +25,7 @@ class Utbetalingsgodkjenning(
     internal fun erRelevant(vedtaksperiodeId: String) = vedtaksperiodeId == this.vedtaksperiodeId
     internal fun erRelevant(utbetalingId: UUID) = utbetalingId == this.utbetalingId
 
+    internal fun automatiskBehandling() = automatiskBehandling
     internal fun vurdering() = Utbetaling.Vurdering(
         utbetalingGodkjent,
         saksbehandler,
