@@ -81,7 +81,6 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.InfotrygdArbeidsgiver
@@ -1178,7 +1177,7 @@ internal data class PersonData(
             arbeidsgiverOppdrag = arbeidsgiverOppdrag.konverterTilOppdrag(),
             personOppdrag = personOppdrag.konverterTilOppdrag(),
             tidsstempel = tidsstempel,
-            tilstand = enumValueOf<Utbetalingstatus>(status).tilTilstand(),
+            utbetalingstatus = enumValueOf(status),
             utbetalingtype = enumValueOf(type),
             maksdato = maksdato,
             forbrukteSykedager = forbrukteSykedager,
