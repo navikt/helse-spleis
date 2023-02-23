@@ -199,7 +199,7 @@ class Utbetaling private constructor(
     internal fun håndter(påminnelse: UtbetalingpåminnelsePort) {
         if (!påminnelse.erRelevant(id)) return
         påminnelse.kontekst(this)
-        if (!påminnelse.gjelderStatus(Utbetalingstatus.fraTilstand(tilstand))) return
+        if (!påminnelse.gjelderStatus(tilstand.status)) return
         tilstand.håndter(this, påminnelse)
     }
 
@@ -261,8 +261,8 @@ class Utbetaling private constructor(
                 type,
                 arbeidsgiverOppdrag,
                 personOppdrag,
-                Utbetalingstatus.fraTilstand(forrigeTilstand),
-                Utbetalingstatus.fraTilstand(neste),
+                forrigeTilstand.status,
+                neste.status,
                 korrelasjonsId
             )
         }
@@ -466,7 +466,7 @@ class Utbetaling private constructor(
             id,
             korrelasjonsId,
             type,
-            Utbetalingstatus.fraTilstand(tilstand),
+            tilstand.status,
             periode,
             tidsstempel,
             oppdatert,
@@ -524,9 +524,10 @@ class Utbetaling private constructor(
         if (this.overføringstidspunkt == null) this.overføringstidspunkt = tidspunkt
         if (this.avstemmingsnøkkel == null) this.avstemmingsnøkkel = avstemmingsnøkkel
     }
-    override fun toString() = "$type(${Utbetalingstatus.fraTilstand(tilstand)}) - $periode"
+    override fun toString() = "$type(${tilstand.status}) - $periode"
 
     internal interface Tilstand {
+        val status: Utbetalingstatus
         fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {}
 
         fun opprett(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
@@ -586,12 +587,14 @@ class Utbetaling private constructor(
     }
 
     internal object Ny : Tilstand {
+        override val status = Utbetalingstatus.NY
         override fun opprett(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             utbetaling.tilstand(Ubetalt, hendelse)
         }
     }
 
     internal object Ubetalt : Tilstand {
+        override val status = Utbetalingstatus.IKKE_UTBETALT
         override fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             hendelse.info("Forkaster utbetaling")
             utbetaling.tilstand(Forkastet, hendelse)
@@ -632,7 +635,7 @@ class Utbetaling private constructor(
     }
 
     internal object GodkjentUtenUtbetaling : Tilstand {
-
+        override val status = Utbetalingstatus.GODKJENT_UTEN_UTBETALING
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             check(!utbetaling.harUtbetalinger())
             utbetaling.vurdering?.avsluttetUtenUtbetaling(utbetaling)
@@ -654,6 +657,7 @@ class Utbetaling private constructor(
     }
 
     internal object Godkjent : Tilstand {
+        override val status = Utbetalingstatus.GODKJENT
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             utbetaling.overfør(Sendt, hendelse)
         }
@@ -664,6 +668,7 @@ class Utbetaling private constructor(
     }
 
     internal object Sendt : Tilstand {
+        override val status = Utbetalingstatus.SENDT
         private val makstid = Duration.ofDays(7)
 
         override fun håndter(utbetaling: Utbetaling, påminnelse: UtbetalingpåminnelsePort) {
@@ -691,6 +696,7 @@ class Utbetaling private constructor(
     }
 
     internal object Overført : Tilstand {
+        override val status = Utbetalingstatus.OVERFØRT
         override fun håndter(utbetaling: Utbetaling, påminnelse: UtbetalingpåminnelsePort) {
             utbetaling.overfør(påminnelse)
         }
@@ -711,6 +717,7 @@ class Utbetaling private constructor(
     }
 
     internal object Annullert : Tilstand {
+        override val status = Utbetalingstatus.ANNULLERT
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             utbetaling.vurdering?.annullert(utbetaling)
             utbetaling.avsluttet = LocalDateTime.now()
@@ -718,6 +725,7 @@ class Utbetaling private constructor(
     }
 
     internal object Utbetalt : Tilstand {
+        override val status = Utbetalingstatus.UTBETALT
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             utbetaling.vurdering?.utbetalt(utbetaling)
             utbetaling.avsluttet = LocalDateTime.now()
@@ -739,6 +747,7 @@ class Utbetaling private constructor(
     }
 
     internal object UtbetalingFeilet : Tilstand {
+        override val status = Utbetalingstatus.UTBETALING_FEILET
         override fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             hendelse.info("Forkaster feilet utbetaling")
             utbetaling.tilstand(Forkastet, hendelse)
@@ -760,8 +769,12 @@ class Utbetaling private constructor(
         }
     }
 
-    internal object IkkeGodkjent : Tilstand
-    internal object Forkastet : Tilstand
+    internal object IkkeGodkjent : Tilstand {
+        override val status = Utbetalingstatus.IKKE_GODKJENT
+    }
+    internal object Forkastet : Tilstand {
+        override val status = Utbetalingstatus.FORKASTET
+    }
 
     class Vurdering(
         private val godkjent: Boolean,
@@ -860,4 +873,18 @@ class Utbetaling private constructor(
 interface UtbetalingVedtakFattetBuilder {
     fun utbetalingVurdert(tidspunkt: LocalDateTime): UtbetalingVedtakFattetBuilder
     fun utbetalingId(id: UUID): UtbetalingVedtakFattetBuilder
+}
+
+private fun Utbetalingstatus.tilTilstand() = when(this) {
+    Utbetalingstatus.NY -> Utbetaling.Ny
+    Utbetalingstatus.IKKE_UTBETALT -> Utbetaling.Ubetalt
+    Utbetalingstatus.IKKE_GODKJENT -> Utbetaling.IkkeGodkjent
+    Utbetalingstatus.GODKJENT -> Utbetaling.Godkjent
+    Utbetalingstatus.SENDT -> Utbetaling.Sendt
+    Utbetalingstatus.OVERFØRT -> Utbetaling.Overført
+    Utbetalingstatus.UTBETALT -> Utbetaling.Utbetalt
+    Utbetalingstatus.GODKJENT_UTEN_UTBETALING -> Utbetaling.GodkjentUtenUtbetaling
+    Utbetalingstatus.UTBETALING_FEILET -> Utbetaling.UtbetalingFeilet
+    Utbetalingstatus.ANNULLERT -> Utbetaling.Annullert
+    Utbetalingstatus.FORKASTET -> Utbetaling.Forkastet
 }
