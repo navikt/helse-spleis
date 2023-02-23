@@ -70,7 +70,7 @@ import org.junit.jupiter.api.Test
 internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
-    fun `ag2 strekkes tilbake før ag1`() {
+    fun `ag2 strekkes tilbake før ag1 - ag2 er i utgangspunktet innenfor agp`() {
         håndterSøknad(Sykdom(1.januar, 4.januar, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
         håndterSøknad(Sykdom(5.januar, 12.januar, 100.prosent), orgnummer = a1)
@@ -84,6 +84,27 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         assertEquals(13.januar til 26.januar, inspektør(a1).periode(3.vedtaksperiode))
         assertEquals(1.januar til 26.januar, inspektør(a2).periode(1.vedtaksperiode))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)
+    }
+
+    @Test
+    fun `ag2 strekkes tilbake før ag1 - ag2 er utenfor agp`() {
+        håndterSøknad(Sykdom(1.januar, 4.januar, 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
+        håndterSøknad(Sykdom(5.januar, 12.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(13.januar, 31.januar, 100.prosent), orgnummer = a1)
+
+        håndterSøknad(Sykdom(13.januar, 31.januar, 100.prosent), orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+
+        assertEquals(13.januar til 31.januar, inspektør(a1).periode(3.vedtaksperiode))
+        assertEquals(1.januar til 31.januar, inspektør(a2).periode(1.vedtaksperiode))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
