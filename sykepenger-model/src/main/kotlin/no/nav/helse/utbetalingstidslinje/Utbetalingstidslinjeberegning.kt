@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.UtbetalingstidslinjeberegningVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
 
 internal class Utbetalingstidslinjeberegning private constructor(
     private val id: UUID,
@@ -61,7 +62,7 @@ internal class Utbetalingstidslinjeberegning private constructor(
             maksdato: LocalDate,
             forbrukteSykedager: Int,
             gjenståendeSykedager: Int,
-            type: Utbetaling.Utbetalingtype,
+            type: Utbetalingtype,
             organisasjonsnummer: String
         ): Utbetaling {
             val beregning = beregnetUtbetalingstidslinjer.last()

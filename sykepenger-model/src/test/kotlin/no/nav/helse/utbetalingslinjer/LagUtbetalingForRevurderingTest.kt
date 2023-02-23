@@ -259,7 +259,7 @@ internal class LagUtbetalingForRevurderingTest {
         orgnummer: String = ORGNUMMER,
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg,
         utbetalt: Boolean = false,
-        type: Utbetaling.Utbetalingtype = Utbetaling.Utbetalingtype.UTBETALING,
+        type: Utbetalingtype = Utbetalingtype.UTBETALING,
     ): Utbetaling {
         beregnUtbetalinger(tidslinje)
         return Utbetaling.lagUtbetaling(
@@ -295,7 +295,7 @@ internal class LagUtbetalingForRevurderingTest {
         orgnummer: String = ORGNUMMER,
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg,
         utbetalt: Boolean = false,
-    ) = utbetaling(tidslinje, tidligere, sisteDato, fødselsnummer, orgnummer, aktivitetslogg, utbetalt, Utbetaling.Utbetalingtype.REVURDERING)
+    ) = utbetaling(tidslinje, tidligere, sisteDato, fødselsnummer, orgnummer, aktivitetslogg, utbetalt, Utbetalingtype.REVURDERING)
 
     private fun godkjenn(utbetaling: Utbetaling, utbetalingGodkjent: Boolean = true) =
         Utbetalingsgodkjenning(

@@ -81,12 +81,12 @@ import no.nav.helse.spleis.e2e.tilGodkjent
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
-import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -328,7 +328,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             }
         }
         inspektør.utbetaling(1).also { outOfOrderUtbetalingen ->
-            assertEquals(Utbetaling.Utbetalingtype.UTBETALING, outOfOrderUtbetalingen.inspektør.type)
+            assertEquals(Utbetalingtype.UTBETALING, outOfOrderUtbetalingen.inspektør.type)
             outOfOrderUtbetalingen.inspektør.arbeidsgiverOppdrag.also { oppdraget ->
                 assertEquals(ENDR, oppdraget.inspektør.endringskode)
                 assertEquals(2, oppdraget.size)
@@ -351,7 +351,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             }
         }
         inspektør.utbetaling(2).also { revurderingen ->
-            assertEquals(Utbetaling.Utbetalingtype.REVURDERING, revurderingen.inspektør.type)
+            assertEquals(Utbetalingtype.REVURDERING, revurderingen.inspektør.type)
             revurderingen.inspektør.arbeidsgiverOppdrag.also { oppdraget ->
                 assertEquals(ENDR, oppdraget.inspektør.endringskode)
                 assertEquals(2, oppdraget.size)

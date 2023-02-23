@@ -66,6 +66,7 @@ import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Forkastet
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
@@ -1043,13 +1044,13 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         inspektør.gjeldendeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.also {
-            assertEquals(Utbetaling.Utbetalingtype.REVURDERING, it.type)
+            assertEquals(Utbetalingtype.REVURDERING, it.type)
             assertEquals(Utbetaling.Ubetalt, it.tilstand)
             assertEquals(17.januar til 31.januar, it.periode)
         }
 
         inspektør.gjeldendeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.also {
-            assertEquals(Utbetaling.Utbetalingtype.UTBETALING, it.type)
+            assertEquals(Utbetalingtype.UTBETALING, it.type)
             assertEquals(Utbetaling.Utbetalt, it.tilstand)
             assertEquals(1.mars til 31.mars, it.periode)
         }

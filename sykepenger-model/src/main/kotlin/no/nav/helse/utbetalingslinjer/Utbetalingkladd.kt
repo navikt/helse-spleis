@@ -17,7 +17,7 @@ internal class Utbetalingkladd(
 ) {
     internal fun overlapperMed(other: Periode) = other.overlapperMed(this.periode)
     fun lagUtbetaling(
-        type: Utbetaling.Utbetalingtype,
+        type: Utbetalingtype,
         korrelerendeUtbetaling: Utbetaling?,
         beregningId: UUID,
         utbetalingstidslinje: Utbetalingstidslinje,
