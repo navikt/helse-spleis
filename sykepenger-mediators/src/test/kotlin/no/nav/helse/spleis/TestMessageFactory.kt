@@ -215,6 +215,7 @@ internal class TestMessageFactory(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,
         sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList(),
+        orgnummer: String? = null,
         besvart: LocalDateTime = LocalDateTime.now()
     ): Pair<String, String> {
         return lagBehovMedLøsning(
@@ -222,6 +223,7 @@ internal class TestMessageFactory(
             tilstand = tilstand,
             behov = listOf("Sykepengehistorikk"),
             løsninger = sykepengehistorikk.toJson(),
+            orgnummer = orgnummer ?: organisasjonsnummer,
             besvart = besvart
         )
     }

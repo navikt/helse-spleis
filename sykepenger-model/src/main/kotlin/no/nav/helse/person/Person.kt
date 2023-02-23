@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
+import no.nav.helse.hendelser.InntektsmeldingReplayUtført
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -162,6 +163,12 @@ class Person private constructor(
         registrer(inntektsmelding, "Behandler replay av inntektsmelding")
         finnArbeidsgiver(inntektsmelding).håndter(inntektsmelding)
         håndterGjenoppta(inntektsmelding)
+    }
+
+    fun håndter(inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
+        registrer(inntektsmeldingReplayUtført, "Behandler inntektsmeldingReplayUtført")
+        finnArbeidsgiver(inntektsmeldingReplayUtført).håndter(inntektsmeldingReplayUtført)
+        håndterGjenoppta(inntektsmeldingReplayUtført)
     }
 
     private fun håndter(

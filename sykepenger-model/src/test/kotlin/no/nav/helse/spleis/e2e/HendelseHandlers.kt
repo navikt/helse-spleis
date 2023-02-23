@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.InntektsmeldingReplayUtført
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -33,7 +34,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
-import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
@@ -41,20 +41,11 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest
+import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -109,7 +100,7 @@ internal fun AbstractEndToEndTest.tilGodkjenning(fom: LocalDate, tom: LocalDate,
     }
 }) {
     require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
-    nyPeriode(fom til tom, *organisasjonsnummere)
+    organisasjonsnummere.forEach { nyPeriode(fom til tom, it) }
     organisasjonsnummere.forEach {
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(15))),
@@ -204,7 +195,7 @@ internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
 
 internal fun AbstractEndToEndTest.forlengelseTilGodkjenning(fom: LocalDate, tom: LocalDate, vararg organisasjonsnumre: String) {
     require(organisasjonsnumre.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
-    nyPeriode(fom til tom, *organisasjonsnumre)
+    organisasjonsnumre.forEach { nyPeriode(fom til tom, it) }
     håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnumre.first())
     håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnumre.first())
 }
@@ -317,7 +308,6 @@ internal fun AbstractEndToEndTest.tilYtelser(
         beregnetInntekt = beregnetInntekt
     )
     val id = observatør.sisteVedtaksperiode()
-
     håndterVilkårsgrunnlag(
         vedtaksperiodeIdInnhenter = id,
         inntekt = beregnetInntekt,
@@ -354,7 +344,7 @@ internal fun AbstractEndToEndTest.forlengTilSimulering(
     nyPeriode(fom til tom, orgnummer, grad = grad, fnr = fnr)
     val id: IdInnhenter = observatør.sisteVedtaksperiode()
     håndterYtelser(id, fnr = fnr, orgnummer = orgnummer)
-    assertTrue(person.personLogg.etterspurteBehov(id, Behovtype.Simulering)) { "Forventet at simulering er etterspurt" }
+    assertTrue(person.personLogg.etterspurteBehov(id, Behovtype.Simulering, orgnummer)) { "Forventet at simulering er etterspurt" }
 }
 
 internal fun AbstractEndToEndTest.forlengTilGodkjenning(
@@ -368,7 +358,7 @@ internal fun AbstractEndToEndTest.forlengTilGodkjenning(
     nyPeriode(fom til tom, orgnummer, grad = grad, fnr = fnr)
     val id: IdInnhenter = observatør.sisteVedtaksperiode()
     håndterYtelser(id, fnr = fnr, orgnummer = orgnummer, besvart = besvart)
-    if (person.personLogg.etterspurteBehov(id, Behovtype.Simulering)) håndterSimulering(id, fnr = fnr, orgnummer = orgnummer)
+    if (person.personLogg.etterspurteBehov(id, Behovtype.Simulering, orgnummer)) håndterSimulering(id, fnr = fnr, orgnummer = orgnummer)
 }
 
 internal fun AbstractEndToEndTest.forlengVedtak(
@@ -446,6 +436,10 @@ internal fun AbstractEndToEndTest.håndterSøknad(
             permittert = permittert
         ).håndter(Person::håndter)
         søknader[id] = Triple(sendtTilNAVEllerArbeidsgiver, andreInntektskilder, perioder)
+        val vedtaksperiodeId: IdInnhenter = observatør.sisteVedtaksperiode()
+        if (hendelselogg.etterspurteBehov(vedtaksperiodeId, Behovtype.Sykepengehistorikk, orgnummer = orgnummer)) {
+            håndterUtbetalingshistorikk(vedtaksperiodeId, orgnummer = orgnummer)
+        }
     }
     return id
 }
@@ -460,6 +454,7 @@ private fun AbstractEndToEndTest.håndterOgReplayInntektsmeldinger(orgnummer: St
             .forEach { (id, _) ->
                 håndterInntektsmeldingReplay(id, vedtaksperiodeId)
             }
+        håndterInntektsmeldingReplayUtført(vedtaksperiodeId, orgnummer)
         observatør.kvitterInntektsmeldingReplay(vedtaksperiodeId)
     }
 }
@@ -517,6 +512,10 @@ private fun AbstractEndToEndTest.håndterInntektsmeldingReplay(
     val inntektsmeldinggenerator = inntektsmeldinger[inntektsmeldingId]?.second ?: fail { "Fant ikke inntektsmelding med id $inntektsmeldingId" }
     inntektsmeldingReplay(inntektsmeldinggenerator(), vedtaksperiodeId)
         .håndter(Person::håndter)
+}
+
+private fun AbstractEndToEndTest.håndterInntektsmeldingReplayUtført(vedtaksperiodeId: UUID, orgnummer: String) {
+    person.håndter(InntektsmeldingReplayUtført(UUID.randomUUID(), UNG_PERSON_FNR_2018.toString(), "aktør", orgnummer, vedtaksperiodeId))
 }
 
 internal fun YearMonth.lønnsinntekt(inntekt: Inntekt = INNTEKT) =
@@ -621,7 +620,7 @@ internal fun AbstractEndToEndTest.håndterInfotrygdendring() {
         .håndter(Person::håndter)
 }
 
-internal fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
+private fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     vararg utbetalinger: Infotrygdperiode,
     inntektshistorikk: List<Inntektsopplysning> = emptyList(),
@@ -645,12 +644,14 @@ internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkEtterInfotrygdendr
     vararg utbetalinger: Infotrygdperiode,
     inntektshistorikk: List<Inntektsopplysning> = emptyList(),
     statslønn: Boolean = false,
+    arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
     besvart: LocalDateTime = LocalDateTime.now()
 ) {
     utbetalingshistorikkEtterInfotrygdEndring(
         utbetalinger = utbetalinger.toList(),
         inntektshistorikk = inntektshistorikk,
         harStatslønn = statslønn,
+        arbeidskategorikoder = arbeidskategorikoder,
         besvart = besvart
     ).håndter(Person::håndter)
 }
@@ -815,22 +816,6 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
     }
 }
 
-internal fun AbstractEndToEndTest.håndterGrunnbeløpsregulering(
-    orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    fagsystemId: String = inspektør.arbeidsgiverOppdrag.last().fagsystemId(),
-    gyldighetsdato: LocalDate
-) {
-    Grunnbeløpsregulering(
-        meldingsreferanseId = UUID.randomUUID(),
-        aktørId = AbstractPersonTest.AKTØRID,
-        fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018.toString(),
-        organisasjonsnummer = orgnummer,
-        gyldighetsdato = gyldighetsdato,
-        fagsystemId = fagsystemId,
-        aktivitetslogg = Aktivitetslogg()
-    ).håndter(Person::håndter)
-}
-
 internal fun AbstractEndToEndTest.håndterAnnullerUtbetaling(
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     fagsystemId: String = inspektør.arbeidsgiverOppdrag.last().fagsystemId(),
@@ -950,55 +935,11 @@ internal fun AbstractEndToEndTest.håndterFeriepengerUtbetalt(
     ).håndter(Person::håndter)
 }
 
-internal fun TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(førsteAG: Boolean = true): Array<out TilstandType> =
-    if (førsteAG) arrayOf(
-        START,
-        AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-        AVVENTER_BLOKKERENDE_PERIODE,
-        AVVENTER_HISTORIKK,
-        AVVENTER_VILKÅRSPRØVING,
-        AVVENTER_HISTORIKK,
-        AVVENTER_SIMULERING,
-        AVVENTER_GODKJENNING,
-        TIL_UTBETALING,
-        AVSLUTTET
-    ) else arrayOf(
-        START,
-        AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-        AVVENTER_BLOKKERENDE_PERIODE,
-        AVVENTER_HISTORIKK,
-        AVVENTER_SIMULERING,
-        AVVENTER_GODKJENNING,
-        TIL_UTBETALING,
-        AVSLUTTET
-    )
-
-internal fun TIL_AVSLUTTET_FORLENGELSE(førsteAG: Boolean = true) =
-    if (førsteAG) arrayOf(
-        START,
-        AVVENTER_BLOKKERENDE_PERIODE,
-        AVVENTER_HISTORIKK,
-        AVVENTER_SIMULERING,
-        AVVENTER_GODKJENNING,
-        TIL_UTBETALING,
-        AVSLUTTET,
-    ) else arrayOf(
-        START,
-        AVVENTER_BLOKKERENDE_PERIODE,
-        AVVENTER_HISTORIKK,
-        AVVENTER_SIMULERING,
-        AVVENTER_GODKJENNING,
-        TIL_UTBETALING,
-        AVSLUTTET,
-    )
-
 internal fun AbstractEndToEndTest.håndterOverstyringSykedag(periode: Periode) = håndterOverstyrTidslinje(periode.map { manuellSykedag(it) })
 
-internal fun AbstractEndToEndTest.nyPeriode(periode: Periode, vararg orgnummer: String = arrayOf(AbstractPersonTest.ORGNUMMER), grad: Prosentdel = 100.prosent, fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018) {
-    orgnummer.forEach { håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), fnr = fnr, orgnummer = it) }
-    orgnummer.forEach {
-        håndterSøknad(Søknadsperiode.Sykdom(periode.start, periode.endInclusive, grad), fnr = fnr, orgnummer = it)
-    }
+internal fun AbstractEndToEndTest.nyPeriode(periode: Periode, orgnummer: String = AbstractPersonTest.ORGNUMMER, grad: Prosentdel = 100.prosent, fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018) {
+    håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), fnr = fnr, orgnummer = orgnummer)
+    håndterSøknad(Søknadsperiode.Sykdom(periode.start, periode.endInclusive, grad), fnr = fnr, orgnummer = orgnummer)
 }
 
 internal fun AbstractEndToEndTest.forkastAlle(hendelse: IAktivitetslogg) = person.søppelbøtte(hendelse) { true }

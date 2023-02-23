@@ -45,6 +45,7 @@ import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.sykmelding
 import no.nav.helse.spleis.e2e.søknad
+import no.nav.helse.spleis.e2e.utbetalingshistorikkEtterInfotrygdEndring
 import no.nav.helse.spleis.e2e.ytelser
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -293,6 +294,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         orgnummer: String,
         inntekt: Inntekt
     ) {
+        utbetalingshistorikkEtterInfotrygdEndring().håndter(Person::håndter)
         sykmelding(
             UUID.randomUUID(),
             Sykmeldingsperiode(periode.start, periode.endInclusive),

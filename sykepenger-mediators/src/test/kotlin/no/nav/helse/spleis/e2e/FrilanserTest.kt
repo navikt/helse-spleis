@@ -32,6 +32,7 @@ internal class FrilanserTest : AbstractEndToEndMediatorTest() {
         )
         assertTilstander(
             0,
+            "AVVENTER_INFOTRYGDHISTORIKK",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_VILKÅRSPRØVING",

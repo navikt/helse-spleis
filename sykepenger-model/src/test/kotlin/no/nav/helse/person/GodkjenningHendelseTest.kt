@@ -98,6 +98,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
     private fun håndterYtelser() {
         person.håndter(sykmelding())
         person.håndter(søknad())
+        person.håndter(utbetalingshistorikk())
         person.håndter(inntektsmelding())
         person.håndter(ytelser())
         person.håndter(vilkårsgrunnlag())
@@ -176,6 +177,13 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
         a1Hendelsefabrikk.lagSøknad(
             perioder = arrayOf(Sykdom(førsteSykedag, sisteSykedag, 100.prosent)),
             sendtTilNAVEllerArbeidsgiver = sisteSykedag
+        ).apply {
+            hendelse = this
+        }
+
+    private fun utbetalingshistorikk() =
+        a1Hendelsefabrikk.lagUtbetalingshistorikk(
+            vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER)
         ).apply {
             hendelse = this
         }

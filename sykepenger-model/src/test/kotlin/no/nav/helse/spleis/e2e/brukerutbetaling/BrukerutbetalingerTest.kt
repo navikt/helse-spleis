@@ -22,6 +22,7 @@ import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
@@ -45,6 +46,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
             Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true),
             Inntektsopplysning(ORGNUMMER, 18.mai, INNTEKT, false)
         )
+        håndterUtbetalingshistorikkEtterInfotrygdendring(*historikk.toTypedArray(), inntektshistorikk = inntektsopplysning)
 
         håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni))
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent))
@@ -56,7 +58,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(1.vedtaksperiode, *historikk.toTypedArray(), inntektshistorikk = inntektsopplysning)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
@@ -76,6 +78,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
             Inntektsopplysning(ORGNUMMER, 1.september(2017), INNTEKT, true),
             Inntektsopplysning("0", 18.mai(2017), INNTEKT, false)
         )
+        håndterUtbetalingshistorikkEtterInfotrygdendring(*historikk.toTypedArray(), inntektshistorikk = inntektsopplysning)
 
         håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni))
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent))
@@ -87,7 +90,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(1.vedtaksperiode, *historikk.toTypedArray(), inntektshistorikk = inntektsopplysning)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)

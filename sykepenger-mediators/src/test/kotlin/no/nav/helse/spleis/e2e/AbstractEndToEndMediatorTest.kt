@@ -140,7 +140,15 @@ internal abstract class AbstractEndToEndMediatorTest {
             historiskeFolkeregisteridenter = historiskeFolkeregisteridenter,
         )
 
+        val perioderFør = testRapid.inspektør.vedtaksperiodeteller
         testRapid.sendTestMessage(message)
+        val perioderEtter = testRapid.inspektør.vedtaksperiodeteller
+        if (perioderFør < perioderEtter) {
+            val vedtaksperiodeIndeks = perioderEtter - perioderFør - 1
+            if (testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk)) {
+                sendUtbetalingshistorikk(vedtaksperiodeIndeks, orgnummer = orgnummer)
+            }
+        }
         return id.toUUID()
     }
 
@@ -308,15 +316,17 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(message)
     }
 
-    protected fun sendUtbetalingshistorikk(
+    private fun sendUtbetalingshistorikk(
         vedtaksperiodeIndeks: Int,
-        sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList()
+        sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList(),
+        orgnummer: String? = null
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk))
         val (_, message) = meldingsfabrikk.lagUtbetalingshistorikk(
             testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            sykepengehistorikk
+            sykepengehistorikk,
+            orgnummer = orgnummer
         )
         testRapid.sendTestMessage(message)
     }

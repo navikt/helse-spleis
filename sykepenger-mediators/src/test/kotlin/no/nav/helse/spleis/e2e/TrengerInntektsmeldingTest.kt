@@ -19,7 +19,6 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 14.januar, sykmeldingsgrad = 100))
         )
-        sendUtbetalingshistorikk(0)
         assertEquals(0, testRapid.inspektør.meldinger("trenger_inntektsmelding").size)
     }
 
@@ -29,7 +28,6 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
         val søknadId = sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 17.januar, sykmeldingsgrad = 100))
         )
-        sendUtbetalingshistorikk(0)
         val melding = testRapid.inspektør.siste("trenger_inntektsmelding")
         assertEquals(søknadId, UUID.fromString(melding["søknadIder"].toList().single().asText()))
         assertTrengerInntektsmelding(melding)

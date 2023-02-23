@@ -20,17 +20,8 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.Inntektskilde
-import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.TilstandType.UTBETALING_FEILET
+import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
@@ -80,9 +71,10 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -100,7 +92,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     fun `ingen historie med søknad til arbeidsgiver først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 8.januar))
         håndterSøknad(Sykdom(3.januar, 8.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
         assertIngenVarsler()
         håndterInntektsmelding(arbeidsgiverperioder = listOf(3.januar til 18.januar), INNTEKT)
         assertIngenFunksjonelleFeil()
@@ -110,14 +101,13 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(2, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
         }
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
     fun `ingen historie med to søknader til arbeidsgiver før inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar))
         håndterSøknad(Sykdom(3.januar, 5.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(8.januar, 10.januar))
         håndterSøknad(Sykdom(8.januar, 10.januar, 100.prosent))
@@ -139,6 +129,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
@@ -146,6 +137,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
@@ -153,9 +145,10 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertTilstander(
             3.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK
         )
     }
@@ -164,7 +157,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     fun `ingen historie med to søknader (med gap mellom) til arbeidsgiver først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 4.januar))
         håndterSøknad(Sykdom(3.januar, 4.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(8.januar, 10.januar))
         håndterSøknad(Sykdom(8.januar, 10.januar, 100.prosent))
@@ -187,6 +179,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
@@ -194,6 +187,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
@@ -201,6 +195,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertTilstander(
             3.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
@@ -224,6 +219,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVSLUTTET_UTEN_UTBETALING
         )
@@ -251,9 +247,10 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -296,71 +293,12 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK
         )
-    }
-
-    @Test
-    fun `gap-historie før inntektsmelding`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode,
-            listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2017), 15.desember(2017), 100.prosent, 15000.daglig)),
-            inntektshistorikk = listOf(Inntektsopplysning(a1, 1.desember(2017), INNTEKT, true))
-        )
-        håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        assertIngenFunksjonelleFeil()
-        assertActivities()
-        inspektør.also {
-            assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
-            assertEquals(2, it.sykdomshistorikk.size)
-            assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
-            assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
-        }
-        assertNotNull(1.vedtaksperiode)
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-        assertTrue(1.vedtaksperiode in observatør.utbetalteVedtaksperioder)
-    }
-
-    @Test
-    fun `gap-historie uten inntektsmelding`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode,
-            listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2017), 16.desember(2017), 100.prosent, 15000.daglig)),
-            inntektshistorikk = listOf(Inntektsopplysning(a1, 1.desember(2017), INNTEKT, true))
-        )
-        assertIngenFunksjonelleFeil()
-        assertIngenVarsler()
-        assertActivities()
-        inspektør.also {
-            assertInntektshistorikkForDato(null, 2.januar, inspektør = it)
-            assertEquals(1, it.sykdomshistorikk.size)
-            assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
-            assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
-        }
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
     }
 
     @Test
@@ -505,9 +443,10 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -517,9 +456,10 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -560,9 +500,10 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -572,9 +513,10 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -588,7 +530,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 7.januar))
         håndterSykmelding(Sykmeldingsperiode(8.januar, 23.februar))
         håndterSøknad(Sykdom(3.januar, 7.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
         håndterSøknad(Sykdom(8.januar, 23.februar, 100.prosent))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -600,10 +541,11 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertIngenFunksjonelleFeil()
         assertActivities()
         assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(
             2.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
@@ -644,9 +586,10 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -683,9 +626,10 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -715,9 +659,10 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -778,6 +723,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             assertTilstander(
                 1.vedtaksperiode,
                 START,
+                AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
                 AVVENTER_BLOKKERENDE_PERIODE,
                AVVENTER_VILKÅRSPRØVING,
@@ -807,6 +753,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             assertTilstander(
                 1.vedtaksperiode,
                 START,
+                AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
                 AVVENTER_BLOKKERENDE_PERIODE,
                AVVENTER_VILKÅRSPRØVING,
@@ -819,6 +766,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             assertTilstander(
                 2.vedtaksperiode,
                 START,
+                AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
                 AVVENTER_BLOKKERENDE_PERIODE
             )
@@ -829,8 +777,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     fun `Person uten skjæringstidspunkt feiler ikke i validering av Utbetalingshistorikk`() {
         håndterSykmelding(Sykmeldingsperiode(23.oktober(2020), 18.november(2020)))
         håndterSøknad(Sykdom(23.oktober(2020), 18.november(2020), 100.prosent), Ferie(23.oktober(2020), 18.november(2020)))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
@@ -953,7 +900,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     fun `Starter ikke ny arbeidsgiverperiode dersom flere opphold til sammen utgjør over 16 dager når hvert opphold er under 16 dager - opphold etter arbeidsgiverperioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 10.januar(2021)))
         håndterSøknad(Sykdom(1.januar(2021), 10.januar(2021), 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(20.januar(2021), 25.januar(2021)))
         håndterSøknad(Sykdom(20.januar(2021), 25.januar(2021), 100.prosent))

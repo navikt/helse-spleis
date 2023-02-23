@@ -20,6 +20,7 @@ import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
@@ -71,7 +72,10 @@ internal class RevurderingBehovV2E2ETest : AbstractEndToEndTest() {
         val utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar,  31.januar, 100.prosent, INNTEKT))
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
         assertIngenVarsler()
-        håndterYtelser(3.vedtaksperiode, utbetalinger = utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk)
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
+            utbetalinger = utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk
+        )
+        håndterYtelser(3.vedtaksperiode)
         assertYtelser(1.januar til 31.mars)
         assertVarsler()
     }

@@ -23,6 +23,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
@@ -41,7 +42,6 @@ import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
@@ -70,7 +70,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
     fun `revurdering for periode som start samme dag som en førstegangsvurdering`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar), orgnummer = haandtverkerne)
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = haandtverkerne)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = haandtverkerne)
 
         håndterSykmelding(Sykmeldingsperiode(17.januar, 25.januar), orgnummer = haandtverkerne)
         håndterSøknad(Sykdom(17.januar, 25.januar, 100.prosent), orgnummer = haandtverkerne)
@@ -103,7 +102,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
         håndterSykmelding(Sykmeldingsperiode(17.januar, 25.januar), orgnummer = aadvokatene)
         håndterSøknad(Sykdom(17.januar, 25.januar, 100.prosent), orgnummer = aadvokatene)
-        håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = aadvokatene)
 
         håndterYtelser(2.vedtaksperiode, orgnummer = haandtverkerne)
         håndterSimulering(2.vedtaksperiode, orgnummer = haandtverkerne)
@@ -289,6 +287,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             assertTilstander(
                 2.vedtaksperiode,
                 START,
+                AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
             )
             assertIngenFunksjonelleFeil()

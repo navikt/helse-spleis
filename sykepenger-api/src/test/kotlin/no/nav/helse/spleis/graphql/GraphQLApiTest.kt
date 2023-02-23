@@ -42,6 +42,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         person = Person(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), UNG_PERSON_FØDSELSDATO.alder, MaskinellJurist())
         observatør = TestObservatør().also { person.addObserver(it) }
         person.håndter(sykmelding)
+        person.håndter(utbetalinghistorikk())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
         person.håndter(ytelser())

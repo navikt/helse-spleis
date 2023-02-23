@@ -26,6 +26,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
+            "AVVENTER_INFOTRYGDHISTORIKK",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_VILKÅRSPRØVING",
@@ -49,6 +50,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
+            "AVVENTER_INFOTRYGDHISTORIKK",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_VILKÅRSPRØVING",
@@ -69,6 +71,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
+            "AVVENTER_INFOTRYGDHISTORIKK",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_VILKÅRSPRØVING",
@@ -99,6 +102,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
+            "AVVENTER_INFOTRYGDHISTORIKK",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_VILKÅRSPRØVING",
@@ -144,6 +148,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
+            "AVVENTER_INFOTRYGDHISTORIKK",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_VILKÅRSPRØVING",
@@ -151,50 +156,6 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             "TIL_INFOTRYGD"
         )
     }
-
-
-    @Test
-    fun `Arbeidskategorikode lik 01 passerer validering`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        )
-        sendInntektsmelding(
-            listOf(Periode(fom = 17.desember(2017), tom = 31.desember(2017))),
-            førsteFraværsdag = 17.desember(2017),
-            beregnetInntekt = 36000.0
-        )
-        val historikk = listOf(UtbetalingshistorikkTestdata(
-            fom = 1.januar,
-            tom = 26.januar,
-            arbeidskategorikode = "01",
-            utbetalteSykeperioder = listOf(
-                UtbetalingshistorikkTestdata.UtbetaltSykeperiode(
-                    fom = 1.januar,
-                    tom = 1.januar,
-                    dagsats = 1400.0,
-                    typekode = "5",
-                    utbetalingsgrad = "100",
-                    organisasjonsnummer = ORGNUMMER
-                ),
-            ),
-            inntektsopplysninger = listOf(
-                UtbetalingshistorikkTestdata.Inntektsopplysninger(
-                    sykepengerFom = 1.januar,
-                    inntekt = 36000.0,
-                    organisasjonsnummer = ORGNUMMER,
-                    refusjonTilArbeidsgiver = true
-                )
-            )
-        ))
-        sendUtbetalingshistorikk(vedtaksperiodeIndeks = 0, sykepengehistorikk = historikk)
-
-        assertTilstander(
-            0,
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
-        )
-    }
-
 
     @Test
     fun `Passerer validering når utbetalte sykeperioder er tom`() {
@@ -215,6 +176,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
+            "AVVENTER_INFOTRYGDHISTORIKK",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_VILKÅRSPRØVING",
@@ -260,6 +222,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
+            "AVVENTER_INFOTRYGDHISTORIKK",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_VILKÅRSPRØVING",
@@ -321,6 +284,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
+            "AVVENTER_INFOTRYGDHISTORIKK",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_VILKÅRSPRØVING",

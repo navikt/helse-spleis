@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Dagtype
@@ -9,6 +10,7 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
+import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
@@ -25,18 +27,18 @@ internal class AvstemmingTest : AbstractEndToEndTest() {
 
     @Test
     fun avstemmer() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 3.januar))
-        håndterSøknad(Sykdom(1.januar, 2.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 3.januar, 100.prosent))
-        nyttVedtak(1.februar, 20.februar, 100.prosent)
-        nyttVedtak(1.mars, 31.mars, 100.prosent)
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.mars, Dagtype.Feriedag)))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar))
+        håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 18.januar, 100.prosent)) // delvis overlappende søknad
+        nyttVedtak(1.mars, 20.mars, 100.prosent)
+        nyttVedtak(1.april, 30.april, 100.prosent)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.april, Dagtype.Feriedag)))
         håndterYtelser(4.vedtaksperiode)
         håndterSimulering(4.vedtaksperiode)
         håndterUtbetalingsgodkjenning(4.vedtaksperiode, automatiskBehandling = true)
         håndterUtbetalt()
-        tilYtelser(1.mai, 30.mai, 100.prosent, 1.mai)
+        tilYtelser(1.juni, 30.juni, 100.prosent, 1.juni)
         val avstemming = Avstemming(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = AKTØRID,

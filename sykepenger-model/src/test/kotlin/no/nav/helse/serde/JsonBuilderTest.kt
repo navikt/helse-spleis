@@ -288,6 +288,7 @@ class JsonBuilderTest {
             )
             fangeSykdomstidslinje()
             fangeVedtaksperiode()
+            håndter(utbetalingshistorikk())
             håndter(inntektsmelding(fom = fom))
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
             håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
@@ -317,6 +318,7 @@ class JsonBuilderTest {
                 )
             )
             fangeVedtaksperiode()
+            håndter(utbetalingshistorikk())
             fangeSykdomstidslinje()
             håndter(inntektsmelding(fom = fom))
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
@@ -396,6 +398,7 @@ class JsonBuilderTest {
                 )
             )
             fangeVedtaksperiode()
+            håndter(utbetalingshistorikk())
             håndter(
                 inntektsmelding(
                     fom = fom,
@@ -481,6 +484,7 @@ class JsonBuilderTest {
             )
             fangeSykdomstidslinje()
             fangeVedtaksperiode()
+            håndter(utbetalingshistorikk())
             håndter(inntektsmelding(fom = fom))
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
             håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
@@ -555,6 +559,7 @@ class JsonBuilderTest {
             )
             fangeSykdomstidslinje()
             fangeVedtaksperiode()
+            håndter(utbetalingshistorikk())
             håndter(inntektsmelding(fom = fom))
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
             håndter(

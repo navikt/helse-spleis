@@ -19,7 +19,6 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 5.januar, sykmeldingsgrad = 100))
         )
-        sendUtbetalingshistorikk(0)
         sendNySøknad(SoknadsperiodeDTO(fom = 6.januar, tom = 10.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 6.januar, tom = 10.januar, sykmeldingsgrad = 100))
@@ -33,9 +32,9 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
         sendYtelserUtenSykepengehistorikk(2)
         sendSimulering(2, SimuleringMessage.Simuleringstatus.OK)
 
-        assertTilstander(0, "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING", "AVSLUTTET_UTEN_UTBETALING")
-        assertTilstander(1, "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING", "AVSLUTTET_UTEN_UTBETALING")
-        assertTilstander(2, "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+        assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING")
+        assertTilstander(1, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING")
+        assertTilstander(2, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING", "AVVENTER_HISTORIKK", "AVVENTER_SIMULERING", "AVVENTER_GODKJENNING")
     }
 
@@ -45,7 +44,6 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 8.januar, tom = 10.januar, sykmeldingsgrad = 100))
         )
-        sendUtbetalingshistorikk(0)
         sendNySøknad(SoknadsperiodeDTO(fom = 11.januar, tom = 22.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 11.januar, tom = 22.januar, sykmeldingsgrad = 100))
@@ -64,10 +62,10 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
         sendYtelserUtenSykepengehistorikk(1)
         sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
 
-        assertTilstander(0, "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING", "AVSLUTTET_UTEN_UTBETALING")
-        assertTilstander(1, "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+        assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING")
+        assertTilstander(1, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING", "AVVENTER_HISTORIKK", "AVVENTER_SIMULERING", "AVVENTER_GODKJENNING")
-        assertTilstander(2, "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVVENTER_BLOKKERENDE_PERIODE")
+        assertTilstander(2, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVVENTER_BLOKKERENDE_PERIODE")
     }
 
     private val logCollector = LogCollector()

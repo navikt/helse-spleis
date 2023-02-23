@@ -16,10 +16,7 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.TilstandType.REVURDERING_FEILET
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_19
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -40,7 +37,7 @@ import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
@@ -112,7 +109,8 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(17.februar, 20.februar))
         val søknadId = håndterSøknad(Sykdom(17.februar, 20.februar, 80.prosent))
         forkastAlle(hendelselogg)
-        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 3.februar, 100.prosent, 2000.daglig), inntektshistorikk = listOf(
+
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 3.februar, 100.prosent, 2000.daglig), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.februar, 2000.daglig, true)
         ))
         håndterInntektsmelding(listOf(1.januar til 16.januar), 17.februar)
@@ -365,7 +363,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)
         ))
         val søknadId = håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
@@ -379,7 +377,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(10.mars, 31.mars))
         håndterSøknad(Sykdom(10.mars, 31.mars, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)
         ))
         val søknadId = håndterSøknad(Sykdom(10.mars, 31.mars, 100.prosent))
@@ -393,7 +391,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(12.februar, 28.februar))
         håndterSøknad(Sykdom(12.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 8.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 8.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)
         ))
         val søknadId = håndterSøknad(Sykdom(12.februar, 28.februar, 100.prosent))
@@ -410,7 +408,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     fun `direkte overgang fra infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         val søknadId = håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
         ))
         person.søppelbøtte(hendelselogg, 1.februar til 28.februar)
@@ -421,7 +419,6 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     @Test
     fun `revurdering feilet medfører oppgaveopprettelse`() {
         nyPeriode(2.januar til 17.januar)
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
 
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag()
@@ -474,7 +471,6 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     fun `utsetter oppgave når inntektsmelidng kommer i AVSLUTTET_UTEN_UTBETALING`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 1.januar))
         håndterSøknad(Sykdom(1.januar, 1.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
 
         assertEquals(1, observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)).size)
 
@@ -482,8 +478,6 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         assertEquals(hendelseId, observatør.utsettOppgaveEventer().single().hendelse)
 
-        assertTilstander(1.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
     }
 }

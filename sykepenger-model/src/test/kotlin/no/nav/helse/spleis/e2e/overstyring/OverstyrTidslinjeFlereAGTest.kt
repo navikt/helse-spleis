@@ -36,17 +36,10 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = a2)
-        assertForventetFeil(
-            forklaring = "Burde sette i gang revurdering av begge arbeidsgiverne",
-            nå = {
-                assertIngenFunksjonelleFeil()
-            },
-            ønsket = {
-                nullstillTilstandsendringer()
-                assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
-                assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
-            }
-        )
+        assertIngenFunksjonelleFeil()
+        nullstillTilstandsendringer()
+        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 
     @Test

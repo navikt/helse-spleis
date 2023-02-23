@@ -90,6 +90,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     fun `benytter forrige måned som utgangspunkt for inntektsberegning`() {
         person.håndter(sykmelding(perioder = listOf(Sykmeldingsperiode(8.januar, 31.januar))))
         person.håndter(søknad(perioder = listOf(Sykdom(8.januar, 31.januar, 100.prosent))))
+        person.håndter(utbetalingshistorikk())
         person.håndter(
             inntektsmelding(
                 beregnetInntekt = 30000.månedlig,
@@ -159,6 +160,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     ) {
         person.håndter(sykmelding())
         person.håndter(søknad())
+        person.håndter(utbetalingshistorikk())
         person.håndter(inntektsmelding(beregnetInntekt = beregnetInntekt))
         person.håndter(ytelser())
         person.håndter(vilkårsgrunnlag(inntekter = inntekter, inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag, arbeidsforhold = arbeidsforhold))
@@ -235,4 +237,11 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     ).apply {
         hendelse = this
     }
+
+    private fun utbetalingshistorikk() =
+        a1Hendelsefabrikk.lagUtbetalingshistorikk(
+            vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER)
+        ).apply {
+            hendelse = this
+        }
 }

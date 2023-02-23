@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.Foreldrepermisjon
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
+import no.nav.helse.hendelser.InntektsmeldingReplayUtført
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -150,6 +151,9 @@ internal class ArbeidsgiverHendelsefabrikk(
                 vedtaksperiodeId = vedtaksperiodeId
             )
         }
+
+    internal fun lagInntektsmeldingReplayUtført(vedtaksperiodeId: UUID) =
+        InntektsmeldingReplayUtført(UUID.randomUUID(), personidentifikator.toString(), aktørId, organisasjonsnummer, vedtaksperiodeId)
 
     internal fun lagUtbetalingshistorikk(
         vedtaksperiodeId: UUID,
