@@ -1934,7 +1934,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
-            if (!revurderingStøttet(vedtaksperiode, dager)) {
+            if (!skalHensyntaInntektsmelding(vedtaksperiode, dager)) {
                 vedtaksperiode.emitVedtaksperiodeEndret(dager)
                 return false
             }
@@ -1951,7 +1951,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
             if (!vedtaksperiode.forventerInntekt()) return
-            if (!revurderingStøttet(vedtaksperiode, inntektOgRefusjon)) return
+            if (!skalHensyntaInntektsmelding(vedtaksperiode, inntektOgRefusjon)) return
             vedtaksperiode.håndterInntektOgRefusjon(inntektOgRefusjon) { this }
             inntektOgRefusjon.info("Varsler revurdering i tilfelle inntektsmelding påvirker andre perioder.")
             vedtaksperiode.person.igangsettOverstyring(
@@ -1960,24 +1960,20 @@ internal class Vedtaksperiode private constructor(
             )
         }
 
-        private fun revurderingStøttet(
+        private fun skalHensyntaInntektsmelding(
             vedtaksperiode: Vedtaksperiode,
             hendelse: IAktivitetslogg
         ): Boolean {
-            val revurderingIkkeStøttet = vedtaksperiode.person.vedtaksperioder(NYERE_ELLER_SAMME_SKJÆRINGSTIDSPUNKT_ER_UTBETALT(vedtaksperiode)).isNotEmpty()
-
-            // støttes ikke før vi støtter revurdering av eldre skjæringstidspunkt
-            if (revurderingIkkeStøttet) {
-                sikkerlogg.info(
-                    "inntektsmelding i auu: Kan ikke reberegne {} for {} {} fordi nyere skjæringstidspunkt blokkerer",
-                    keyValue("vedtaksperiodeId", vedtaksperiode.id),
-                    keyValue("aktørId", vedtaksperiode.aktørId),
-                    keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer)
-                )
-                hendelse.info("Revurdering blokkeres fordi det finnes nyere skjæringstidspunkt, og det mangler funksjonalitet for å håndtere dette.")
-                return false // på stedet hvil!
-            }
-            return true
+            val skalHensyntaInntektsmelding = vedtaksperiode.person.vedtaksperioder(NYERE_ELLER_SAMME_SKJÆRINGSTIDSPUNKT_ER_UTBETALT(vedtaksperiode)).isEmpty()
+            if (skalHensyntaInntektsmelding) return true
+            sikkerlogg.info(
+                "Inntektsmelding i AUU hensyntas ikke i {} for {} {} fordi dette eller nyere skjæringstidspunkt har vært utbetalt",
+                keyValue("vedtaksperiodeId", vedtaksperiode.id),
+                keyValue("aktørId", vedtaksperiode.aktørId),
+                keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer)
+            )
+            hendelse.info("Hensyntar ikke inntektsmelding fordi dette eller nyere skjæringstidspunkt har vært utbetalt")
+            return false
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -2161,7 +2157,7 @@ internal class Vedtaksperiode private constructor(
         internal val NYERE_ELLER_SAMME_SKJÆRINGSTIDSPUNKT_ER_UTBETALT = { segSelv: Vedtaksperiode ->
             val skjæringstidspunkt = segSelv.skjæringstidspunkt
             { vedtaksperiode: Vedtaksperiode ->
-                vedtaksperiode.utbetalinger.erAvsluttet() && vedtaksperiode.skjæringstidspunkt >= skjæringstidspunkt
+                vedtaksperiode.utbetalinger.harAvsluttede() && vedtaksperiode.skjæringstidspunkt >= skjæringstidspunkt
             }
         }
 
