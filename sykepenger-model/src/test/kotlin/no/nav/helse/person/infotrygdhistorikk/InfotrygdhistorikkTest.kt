@@ -205,7 +205,6 @@ internal class InfotrygdhistorikkTest {
                 PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.januar, 31.januar, 100, 25000.0)
             ),
             personutbetalingsperioder = emptyList(),
-            ukjenteperioder = emptyList(),
             inntekter = emptyList(),
             arbeidskategorikoder = emptyMap(),
             ugyldigePerioder = emptyList(),

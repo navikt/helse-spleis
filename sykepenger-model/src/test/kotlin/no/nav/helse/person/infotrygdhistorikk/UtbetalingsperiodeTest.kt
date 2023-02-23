@@ -10,7 +10,9 @@ import no.nav.helse.testhelpers.TestEvent
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingsperiodeTest {
@@ -34,13 +36,9 @@ internal class UtbetalingsperiodeTest {
     @Test
     fun `like perioder`() {
         val ferie = Friperiode(1.januar, 31.januar)
-        val ukjent = UkjentInfotrygdperiode(1.januar, 31.januar)
         val utbetalingAG1 = ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 28.februar, 100.prosent, 25000.månedlig)
         val utbetalingAG2 = ArbeidsgiverUtbetalingsperiode("ag2", 1.februar, 28.februar, 100.prosent, 25000.månedlig)
         assertEquals(ferie, ferie)
-        assertEquals(ukjent, ukjent)
-        assertNotEquals(ferie, ukjent)
-        assertNotEquals(ferie.hashCode(), ukjent.hashCode())
         assertNotEquals(ferie, utbetalingAG1)
         assertNotEquals(ferie.hashCode(), utbetalingAG1.hashCode())
         assertNotEquals(utbetalingAG1, utbetalingAG2)
@@ -79,12 +77,6 @@ internal class UtbetalingsperiodeTest {
     }
 
     @Test
-    fun `utbetalingstidslinje - ukjent`() {
-        val ferie = UkjentInfotrygdperiode(1.januar, 10.januar)
-        assertEquals(0, ferie.utbetalingstidslinje().size)
-    }
-
-    @Test
     fun `utbetalingstidslinje - utbetaling`() {
         val utbetaling = ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 10.januar, 100.prosent, 25000.månedlig)
         val inspektør = utbetaling.utbetalingstidslinje().inspektør
@@ -101,12 +93,6 @@ internal class UtbetalingsperiodeTest {
     }
 
     @Test
-    fun `sykdomstidslinje - ukjent`() {
-        val periode = UkjentInfotrygdperiode(1.januar, 10.januar)
-        assertTrue(periode.sykdomstidslinje(kilde).inspektør.dager.isEmpty())
-    }
-
-    @Test
     fun `sykdomstidslinje - utbetaling`() {
         val periode = ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 10.januar, 100.prosent, 25000.månedlig)
         val inspektør = periode.sykdomstidslinje(kilde).inspektør
@@ -120,12 +106,6 @@ internal class UtbetalingsperiodeTest {
         val inspektør = periode.historikkFor("orgnr", Sykdomstidslinje(), kilde).inspektør
         assertTrue(inspektør.dager.values.all { it is Dag.Feriedag })
         assertEquals(10, inspektør.dager.size)
-    }
-
-    @Test
-    fun `historikk for - ukjent`() {
-        val periode = UkjentInfotrygdperiode(1.januar, 10.januar)
-        assertTrue(periode.historikkFor("orgnr", Sykdomstidslinje(), kilde).inspektør.dager.isEmpty())
     }
 
     @Test

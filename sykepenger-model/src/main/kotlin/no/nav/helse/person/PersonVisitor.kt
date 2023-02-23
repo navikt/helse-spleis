@@ -13,7 +13,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
-import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
@@ -92,7 +91,6 @@ internal interface InfotrygdhistorikkVisitor {
         grad: Prosentdel,
         inntekt: Inntekt
     ) {}
-    fun visitInfotrygdhistorikkUkjentPeriode(periode: UkjentInfotrygdperiode, fom: LocalDate, tom: LocalDate) {}
     fun postVisitInfotrygdhistorikkPerioder() {}
     fun preVisitInfotrygdhistorikkInntektsopplysninger() {}
     fun visitInfotrygdhistorikkInntektsopplysning(

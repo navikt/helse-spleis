@@ -12,7 +12,6 @@ import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
-import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -50,7 +49,6 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
                         ArbeidsgiverUtbetalingsperiode(orgnummer, fom, tom, grad, inntekt)
                     }
                     "9" -> Friperiode(fom, tom)
-                    "" -> UkjentInfotrygdperiode(fom, tom)
                     else -> null
                 }
             }

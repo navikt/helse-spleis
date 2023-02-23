@@ -163,7 +163,6 @@ internal class InfotrygdhistorikkElementTest {
             listOf(
                 ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 10.januar, 100.prosent, 25000.månedlig),
                 Friperiode(11.januar, 20.januar),
-                UkjentInfotrygdperiode(21.januar, 31.januar)
             )
         )
         element.utbetalingstidslinje().also {
@@ -183,7 +182,6 @@ internal class InfotrygdhistorikkElementTest {
         )
         val tidslinje = element.sykdomstidslinje()
         assertTrue(tidslinje.inspektør.dager.values.none { it is Dag.UkjentDag })
-        assertEquals(1.januar, tidslinje.sisteSkjæringstidspunkt())
     }
 
     @Test
@@ -515,7 +513,6 @@ internal class InfotrygdhistorikkElementTest {
     fun `Feiler ikke selv om ukjent dag overlappes helt av ReduksjonArbeidsgiverRefusjon`() {
         val utbetalinger = listOf(
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig),
-            UkjentInfotrygdperiode(5.januar, 5.januar)
         )
 
         val tidslinje = utbetalinger.map { it.utbetalingstidslinje() }.reduce(Utbetalingstidslinje::plus)
@@ -568,8 +565,7 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `Validerer ok hvis perioder er eldre enn 26 uker før første fraværsdag`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig),
-            UkjentInfotrygdperiode(1.januar, 10.januar)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig)
         )
 
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 1234.daglig, true))

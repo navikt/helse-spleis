@@ -44,9 +44,7 @@ abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
 
         internal fun List<Infotrygdperiode>.harBetaltRettFør(other: Periode) = this
             .any {
-                it !is UkjentInfotrygdperiode && it.periode.erRettFør(other)
+                it.periode.erRettFør(other)
             }
-        internal fun List<Infotrygdperiode>.utenUkjentPerioder() = filterNot { it is UkjentInfotrygdperiode }
-
     }
 }

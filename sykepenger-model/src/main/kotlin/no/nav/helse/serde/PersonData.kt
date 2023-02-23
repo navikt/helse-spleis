@@ -40,7 +40,6 @@ import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
-import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.IkkeRapportert
@@ -151,7 +150,6 @@ internal data class PersonData(
         private val ferieperioder: List<FerieperiodeData>,
         private val arbeidsgiverutbetalingsperioder: List<ArbeidsgiverutbetalingsperiodeData>,
         private val personutbetalingsperioder: List<PersonutbetalingsperiodeData>,
-        private val ukjenteperioder: List<UkjentperiodeData>,
         private val inntekter: List<InntektsopplysningData>,
         private val arbeidskategorikoder: Map<String, LocalDate>,
         private val ugyldigePerioder: List<UgyldigPeriode>,
@@ -169,8 +167,7 @@ internal data class PersonData(
             hendelseId = hendelseId,
             infotrygdperioder = arbeidsgiverutbetalingsperioder.map { it.parsePeriode() }
                     + personutbetalingsperioder.map { it.parsePeriode() }
-                    + ferieperioder.map { it.parsePeriode() }
-                    + ukjenteperioder.map { it.parsePeriode() },
+                    + ferieperioder.map { it.parsePeriode() },
             inntekter = inntekter.map { it.parseInntektsopplysning() },
             arbeidskategorikoder = arbeidskategorikoder,
             ugyldigePerioder = ugyldigePerioder,
@@ -183,13 +180,6 @@ internal data class PersonData(
             private val tom: LocalDate
         ) {
             internal fun parsePeriode() = Friperiode(fom, tom)
-        }
-
-        data class UkjentperiodeData(
-            private val fom: LocalDate,
-            private val tom: LocalDate
-        ) {
-            internal fun parsePeriode() = UkjentInfotrygdperiode(fom, tom)
         }
 
         data class PersonutbetalingsperiodeData(

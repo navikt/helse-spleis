@@ -28,7 +28,6 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
-import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
@@ -41,6 +40,7 @@ import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
+import no.nav.helse.person.serde.AktivitetsloggMap
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSDAG
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG
@@ -53,7 +53,6 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonD
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.api.BuilderState
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
-import no.nav.helse.person.serde.AktivitetsloggMap
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -661,7 +660,6 @@ internal class JsonBuilder : AbstractBuilder() {
         private val ferieperioder = mutableListOf<Map<String, LocalDate>>()
         private val arbeidsgiverutbetalingsperioder = mutableListOf<Map<String, Any>>()
         private val personutbetalingsperioder = mutableListOf<Map<String, Any>>()
-        private val ukjenteperioder = mutableListOf<Map<String, LocalDate>>()
         private val inntekter = mutableListOf<Map<String, Any?>>()
         private val arbeidskategorikoder = mutableMapOf<String, LocalDate>()
         private val ugyldigePerioder = mutableListOf<Map<String, Any?>>()
@@ -673,7 +671,6 @@ internal class JsonBuilder : AbstractBuilder() {
             element["ferieperioder"] = ferieperioder
             element["arbeidsgiverutbetalingsperioder"] = arbeidsgiverutbetalingsperioder
             element["personutbetalingsperioder"] = personutbetalingsperioder
-            element["ukjenteperioder"] = ukjenteperioder
             element["inntekter"] = inntekter
             element["arbeidskategorikoder"] = arbeidskategorikoder
             element["ugyldigePerioder"] = ugyldigePerioder
@@ -722,15 +719,6 @@ internal class JsonBuilder : AbstractBuilder() {
                 "grad" to grad.roundToInt(),
                 "inntekt" to inntekt.reflection { _, månedlig, _, _ -> månedlig }
             ))
-        }
-
-        override fun visitInfotrygdhistorikkUkjentPeriode(periode: UkjentInfotrygdperiode, fom: LocalDate, tom: LocalDate) {
-            ukjenteperioder.add(
-                mapOf(
-                    "fom" to fom,
-                    "tom" to tom
-                )
-            )
         }
 
         override fun visitInfotrygdhistorikkInntektsopplysning(

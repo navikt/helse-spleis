@@ -17,7 +17,6 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
-import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
@@ -464,10 +463,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         inntekt: Inntekt
     ) {
         delegatee.visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(periode, orgnr, fom, tom, grad, inntekt)
-    }
-
-    override fun visitInfotrygdhistorikkUkjentPeriode(periode: UkjentInfotrygdperiode, fom: LocalDate, tom: LocalDate) {
-        delegatee.visitInfotrygdhistorikkUkjentPeriode(periode, fom, tom)
     }
 
     override fun postVisitInfotrygdhistorikkPerioder() {

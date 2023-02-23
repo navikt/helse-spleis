@@ -11,7 +11,6 @@ import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_15
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.utenUkjentPerioder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBetaltRettFør
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.utbetalingsperioder
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -214,7 +213,7 @@ class InfotrygdhistorikkElement private constructor(
 
     internal fun erEndretUtbetaling(sisteElementSomFantesFørUtbetaling: InfotrygdhistorikkElement): Boolean {
         if (this === sisteElementSomFantesFørUtbetaling) return false
-        return this.perioder.utenUkjentPerioder() != sisteElementSomFantesFørUtbetaling.perioder.utenUkjentPerioder()
+        return this.perioder != sisteElementSomFantesFørUtbetaling.perioder
     }
 }
 
