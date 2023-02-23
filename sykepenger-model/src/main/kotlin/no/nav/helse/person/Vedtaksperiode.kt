@@ -1068,9 +1068,7 @@ internal class Vedtaksperiode private constructor(
             utbetalingsgodkjenning.funksjonellFeil(RV_VT_3)
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse, LocalDateTime.now().minusHours(24))
-        }
+        fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
 
         fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
             simulering.info("Forventet ikke simulering i %s".format(type.name))
@@ -1190,7 +1188,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            super.håndter(vedtaksperiode, påminnelse)
             if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving()) {
                 påminnelse.info("Varsler arbeidsgiver at vi har behov for inntektsmelding.")
                 vedtaksperiode.trengerInntektsmelding()
@@ -1214,8 +1211,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
 
         override fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
@@ -2093,8 +2088,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.igangsettOverstyringAvTidslinje(hendelse)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
@@ -2131,11 +2124,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.forkast(hendelse)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            påminnelse.info("Forsøker å gjenoppta behandling i tilfelle perioder er stuck")
-            vedtaksperiode.person.gjenopptaBehandling(påminnelse)
-        }
-
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {}
     }
 
@@ -2160,8 +2148,6 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
         }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             hendelse.info("Overstyrer ikke en vedtaksperiode som er sendt til Infotrygd")
