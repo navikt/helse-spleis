@@ -363,7 +363,7 @@ internal class IUtbetaling(
     private val vurdering: Utbetaling.Vurdering?,
     private val oppdrag: Map<String, SpeilOppdrag>
 ) {
-    private var erTilGodkjenning by Delegates.notNull<Boolean>()
+    private var erTilGodkjenning = false
     fun erSammeSom(other: IUtbetaling) = id == other.id
     fun fagsystemId() = arbeidsgiverFagsystemId
     fun hørerSammen(other: IUtbetaling) = korrelasjonsId == other.korrelasjonsId
