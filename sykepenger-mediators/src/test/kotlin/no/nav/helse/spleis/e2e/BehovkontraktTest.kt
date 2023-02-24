@@ -44,7 +44,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
-        val utbetalinghistorikkbehov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 4)
+        val utbetalinghistorikkbehov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 5)
         assertVedtaksperiodeBehov(utbetalinghistorikkbehov, Sykepengehistorikk)
         assertSykepengehistorikkdetaljer(utbetalinghistorikkbehov)
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)

@@ -62,7 +62,7 @@ internal class PersonMediator(
         meldinger.add(Pakke(fødselsnummer, eventName, message))
     }
 
-    override fun inntektsmeldingReplay(personidentifikator: Personidentifikator, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, førsteDagIArbeidsgiverperioden: LocalDate?) {
+    override fun inntektsmeldingReplay(personidentifikator: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, førsteDagIArbeidsgiverperioden: LocalDate?) {
         // en generøs periode for å finne trolig relevant eventuell inntektsmelding
         val førstedag = listOfNotNull(skjæringstidspunkt, førsteDagIArbeidsgiverperioden).min().minusDays(30)
         val søkeområde = førstedag til førstedag.plusYears(1)
@@ -78,10 +78,20 @@ internal class PersonMediator(
             .forEach { inntektsmelding ->
                 createReplayMessage(inntektsmelding, vedtaksperiodeId)
             }
+        createReplayUtførtMessage(personidentifikator, aktørId, organisasjonsnummer, vedtaksperiodeId)
     }
 
     override fun trengerIkkeInntektsmeldingReplay(vedtaksperiodeId: UUID) {
         replays.removeIf { it.first == vedtaksperiodeId }
+    }
+
+    private fun createReplayUtførtMessage(fødselsnummer: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID) {
+        replays.add(vedtaksperiodeId to JsonMessage.newMessage("inntektsmelding_replay_utført", mapOf(
+            "fødselsnummer" to fødselsnummer.toString(),
+            "aktørId" to aktørId,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "vedtaksperiodeId" to "$vedtaksperiodeId"
+        )).toJson())
     }
 
     private fun createReplayMessage(message: JsonNode, vedtaksperiodeId: UUID) {

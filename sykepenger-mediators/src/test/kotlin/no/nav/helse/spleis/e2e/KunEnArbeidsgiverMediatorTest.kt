@@ -31,6 +31,18 @@ import org.junit.jupiter.api.Test
 internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
+    fun `kort periode`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 10.januar, sykmeldingsgrad = 100))
+        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 10.januar, sykmeldingsgrad = 100)))
+        assertTilstander(
+            0,
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVSLUTTET_UTEN_UTBETALING"
+        )
+    }
+
+    @Test
     fun `ingen historie med Søknad først`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
@@ -69,6 +81,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "AVVENTER_INFOTRYGDHISTORIKK",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVSLUTTET_UTEN_UTBETALING",
             "AVSLUTTET_UTEN_UTBETALING"
         )
     }
@@ -85,6 +98,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "AVVENTER_INFOTRYGDHISTORIKK",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVSLUTTET_UTEN_UTBETALING",
             "AVSLUTTET_UTEN_UTBETALING"
         )
     }
@@ -387,6 +401,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "AVVENTER_INFOTRYGDHISTORIKK",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVSLUTTET_UTEN_UTBETALING",
             "AVSLUTTET_UTEN_UTBETALING"
         )
 

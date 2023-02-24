@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
+import no.nav.helse.hendelser.InntektsmeldingReplayUtført
 import no.nav.helse.hendelser.Migrate
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -32,6 +33,7 @@ import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayMessage
+import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayUtførtMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsforholdMessage
@@ -177,6 +179,12 @@ internal class TestHendelseMediator : IHendelseMediator {
     override fun behandle(message: InntektsmeldingReplayMessage, inntektsmelding: InntektsmeldingReplay, context: MessageContext) {
         lestInntektsmeldingReplay = true
     }
+
+    override fun behandle(
+        message: InntektsmeldingReplayUtførtMessage,
+        replayUtført: InntektsmeldingReplayUtført,
+        context: MessageContext
+    ) {}
 
     override fun behandle(message: UtbetalingpåminnelseMessage, påminnelse: Utbetalingpåminnelse, context: MessageContext) {
         lestutbetalingpåminnelse = true
