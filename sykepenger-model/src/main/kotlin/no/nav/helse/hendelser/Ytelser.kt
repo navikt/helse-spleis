@@ -10,8 +10,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_9
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 
 class Ytelser(
     meldingsreferanseId: UUID,
@@ -19,7 +17,6 @@ class Ytelser(
     fødselsnummer: String,
     organisasjonsnummer: String,
     private val vedtaksperiodeId: String,
-    private val infotrygdhistorikk: InfotrygdhistorikkElement?,
     private val foreldrepermisjon: Foreldrepermisjon,
     private val pleiepenger: Pleiepenger,
     private val omsorgspenger: Omsorgspenger,
@@ -32,13 +29,6 @@ class Ytelser(
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg) {
 
     internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
-
-    internal fun oppdaterHistorikk(historikk: Infotrygdhistorikk) {
-        if (infotrygdhistorikk == null) return
-        info("Oppdaterer Infotrygdhistorikk")
-        if (!historikk.oppdaterHistorikk(infotrygdhistorikk)) return info("Oppfrisket Infotrygdhistorikk medførte ingen endringer")
-        info("Oppfrisket Infotrygdhistorikk ble lagret")
-    }
 
     internal fun lagreDødsdato(person: Person) {
         if (dødsinfo.dødsdato == null) return

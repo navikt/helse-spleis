@@ -48,8 +48,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.lagInntektperioder
 import no.nav.helse.testhelpers.Inntektperioder
@@ -228,8 +226,6 @@ internal class TestPerson(
 
         internal fun håndterYtelser(
             vedtaksperiodeId: UUID,
-            utbetalinger: List<Infotrygdperiode> = listOf(),
-            inntektshistorikk: List<Inntektsopplysning> = emptyList(),
             foreldrepenger: Periode? = null,
             svangerskapspenger: Periode? = null,
             pleiepenger: List<Periode> = emptyList(),
@@ -237,21 +233,13 @@ internal class TestPerson(
             opplæringspenger: List<Periode> = emptyList(),
             institusjonsoppholdsperioder: List<no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
             dødsdato: LocalDate? = null,
-            statslønn: Boolean = false,
-            arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
             arbeidsavklaringspenger: List<Periode> = emptyList(),
             dagpenger: List<Periode> = emptyList(),
-            besvart: LocalDateTime = LocalDateTime.now(),
             orgnummer: String = "aa"
         ) {
             behovsamler.bekreftBehov(vedtaksperiodeId, Dagpenger, Arbeidsavklaringspenger, Dødsinfo, Institusjonsopphold, Opplæringspenger, Pleiepenger, Omsorgspenger, Foreldrepenger)
-
-            val hendelse = if (!behovsamler.harBehov(vedtaksperiodeId, Sykepengehistorikk)) {
-                arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, dødsdato, arbeidsavklaringspenger, dagpenger)
-            } else {
-                arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, utbetalinger, inntektshistorikk, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, dødsdato, statslønn, arbeidskategorikoder, arbeidsavklaringspenger, dagpenger, besvart)
-            }
-            hendelse.håndter(Person::håndter)
+            arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, dødsdato, arbeidsavklaringspenger, dagpenger)
+                .håndter(Person::håndter)
         }
 
         internal fun håndterSimulering(vedtaksperiodeId: UUID, simuleringOK: Boolean = true) {

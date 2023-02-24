@@ -441,9 +441,7 @@ class JsonBuilderTest {
             håndter(
                 ytelser(
                     hendelseId = søknadhendelseId,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), 31000.månedlig, true)),
-                    utbetalinger = refusjoner
+                    vedtaksperiodeId = vedtaksperiodeId
                 )
             )
             håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
@@ -725,54 +723,40 @@ class JsonBuilderTest {
     private fun ytelser(
         hendelseId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: String,
-        dødsdato: LocalDate? = null,
-        inntektshistorikk: List<Inntektsopplysning> = emptyList(),
-        utbetalinger: List<Infotrygdperiode> = emptyList(),
-        ugyldigePerioder: List<UgyldigPeriode> = emptyList()
-    ) = Aktivitetslogg().let {
-        Ytelser(
-            meldingsreferanseId = hendelseId,
-            aktørId = aktørId,
-            fødselsnummer = fnr.toString(),
-            organisasjonsnummer = orgnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            infotrygdhistorikk = InfotrygdhistorikkElement.opprett(
-                oppdatert = LocalDateTime.now(),
-                hendelseId = hendelseId,
-                perioder = utbetalinger,
-                inntekter = inntektshistorikk,
-                arbeidskategorikoder = emptyMap(),
-                ugyldigePerioder = ugyldigePerioder,
-                harStatslønn = false
+        dødsdato: LocalDate? = null
+    ) = Ytelser(
+        meldingsreferanseId = hendelseId,
+        aktørId = aktørId,
+        fødselsnummer = fnr.toString(),
+        organisasjonsnummer = orgnummer,
+        vedtaksperiodeId = vedtaksperiodeId,
+        foreldrepermisjon = Foreldrepermisjon(
+            foreldrepengeytelse = Periode(
+                fom = 1.januar.minusYears(2),
+                tom = 31.januar.minusYears(2)
             ),
-            foreldrepermisjon = Foreldrepermisjon(
-                foreldrepengeytelse = Periode(
-                    fom = 1.januar.minusYears(2),
-                    tom = 31.januar.minusYears(2)
-                ),
-                svangerskapsytelse = Periode(
-                    fom = 1.juli.minusYears(2),
-                    tom = 31.juli.minusYears(2)
-                )
-            ),
-            pleiepenger = Pleiepenger(
-                perioder = emptyList()
-            ),
-            omsorgspenger = Omsorgspenger(
-                perioder = emptyList()
-            ),
-            opplæringspenger = Opplæringspenger(
-                perioder = emptyList()
-            ),
-            institusjonsopphold = Institusjonsopphold(
-                perioder = emptyList()
-            ),
-            dødsinfo = Dødsinfo(dødsdato),
-            arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
-            dagpenger = Dagpenger(emptyList()),
-            aktivitetslogg = it
-        )
-    }
+            svangerskapsytelse = Periode(
+                fom = 1.juli.minusYears(2),
+                tom = 31.juli.minusYears(2)
+            )
+        ),
+        pleiepenger = Pleiepenger(
+            perioder = emptyList()
+        ),
+        omsorgspenger = Omsorgspenger(
+            perioder = emptyList()
+        ),
+        opplæringspenger = Opplæringspenger(
+            perioder = emptyList()
+        ),
+        institusjonsopphold = Institusjonsopphold(
+            perioder = emptyList()
+        ),
+        dødsinfo = Dødsinfo(dødsdato),
+        arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
+        dagpenger = Dagpenger(emptyList()),
+        aktivitetslogg = Aktivitetslogg()
+    )
 
     private fun utbetalingshistorikkForFeriepenger(
         utbetalinger: List<Utbetalingsperiode> = listOf(),

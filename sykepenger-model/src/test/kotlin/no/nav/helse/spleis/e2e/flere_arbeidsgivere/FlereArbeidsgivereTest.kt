@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -535,7 +534,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterUtbetalt()
         }
         a2 {
-            håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList())
+            håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             håndterUtbetalt()

@@ -24,8 +24,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.spleis.e2e.lagInntektperioder
@@ -222,8 +220,6 @@ internal abstract class AbstractDslTest {
         this { håndterVilkårsgrunnlag(vedtaksperiodeId, inntekt, medlemskapstatus, inntektsvurdering, inntektsvurderingForSykepengegrunnlag, arbeidsforhold) }
     protected fun String.håndterYtelser(
         vedtaksperiodeId: UUID,
-        utbetalinger: List<Infotrygdperiode> = listOf(),
-        inntektshistorikk: List<Inntektsopplysning> = emptyList(),
         foreldrepenger: Periode? = null,
         svangerskapspenger: Periode? = null,
         pleiepenger: List<Periode> = emptyList(),
@@ -231,13 +227,10 @@ internal abstract class AbstractDslTest {
         opplæringspenger: List<Periode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
         dødsdato: LocalDate? = null,
-        statslønn: Boolean = false,
-        arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
         arbeidsavklaringspenger: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
-        besvart: LocalDateTime = LocalDateTime.now(),
     ) =
-        this { håndterYtelser(vedtaksperiodeId, utbetalinger, inntektshistorikk, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, dødsdato, statslønn, arbeidskategorikoder, arbeidsavklaringspenger, dagpenger, besvart) }
+        this { håndterYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, dødsdato, arbeidsavklaringspenger, dagpenger) }
     protected fun String.håndterSimulering(vedtaksperiodeId: UUID) =
         this { håndterSimulering(vedtaksperiodeId) }
     protected fun String.håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean = true) =
@@ -326,8 +319,6 @@ internal abstract class AbstractDslTest {
         bareÈnArbeidsgiver(a1).håndterVilkårsgrunnlag(vedtaksperiodeId, inntekt, medlemskapstatus, inntektsvurdering, inntektsvurderingForSykepengegrunnlag, arbeidsforhold)
     internal fun håndterYtelser(
         vedtaksperiodeId: UUID,
-        utbetalinger: List<Infotrygdperiode> = listOf(),
-        inntektshistorikk: List<Inntektsopplysning> = emptyList(),
         foreldrepenger: Periode? = null,
         svangerskapspenger: Periode? = null,
         pleiepenger: List<Periode> = emptyList(),
@@ -335,14 +326,11 @@ internal abstract class AbstractDslTest {
         opplæringspenger: List<Periode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
         dødsdato: LocalDate? = null,
-        statslønn: Boolean = false,
-        arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
         arbeidsavklaringspenger: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
-        besvart: LocalDateTime = LocalDateTime.now(),
         orgnummer: String = a1
     ) =
-        bareÈnArbeidsgiver(a1).håndterYtelser(vedtaksperiodeId, utbetalinger, inntektshistorikk, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, dødsdato, statslønn, arbeidskategorikoder, arbeidsavklaringspenger, dagpenger, besvart)
+        bareÈnArbeidsgiver(a1).håndterYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, dødsdato, arbeidsavklaringspenger, dagpenger)
     internal fun håndterSimulering(vedtaksperiodeId: UUID, orgnummer: String = a1) =
         bareÈnArbeidsgiver(a1).håndterSimulering(vedtaksperiodeId)
     internal fun håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean = true, orgnummer: String = a1) =

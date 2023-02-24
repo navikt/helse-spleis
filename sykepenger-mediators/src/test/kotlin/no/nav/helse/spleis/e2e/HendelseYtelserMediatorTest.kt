@@ -67,7 +67,10 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
         )
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendVilkårsgrunnlag(0)
-        sendYtelser(vedtaksperiodeIndeks = 0, opplæringspenger = listOf(OpplæringspengerTestdata(3.januar, 26.januar, 100)))
+        sendYtelser(
+            vedtaksperiodeIndeks = 0,
+            opplæringspenger = listOf(OpplæringspengerTestdata(3.januar, 26.januar, 100))
+        )
 
         assertTilstander(
             0,
@@ -114,37 +117,33 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `Arbeidskategorikode ulik 01 kaster perioden til Infotrygd`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        )
+        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendVilkårsgrunnlag(0)
-        sendYtelser(
-            vedtaksperiodeIndeks = 0,
-            sykepengehistorikk = listOf(UtbetalingshistorikkTestdata(
-                fom = 1.januar,
-                tom = 2.januar,
-                arbeidskategorikode = "07",
-                utbetalteSykeperioder = listOf(
-                    UtbetalingshistorikkTestdata.UtbetaltSykeperiode(
-                        fom = 1.januar,
-                        tom = 2.januar,
-                        dagsats = 1400.0,
-                        typekode = "0",
-                        utbetalingsgrad = "100",
-                        organisasjonsnummer = ORGNUMMER
-                    )
-                ),
-                inntektsopplysninger = listOf(
-                    UtbetalingshistorikkTestdata.Inntektsopplysninger(
-                        sykepengerFom = 1.november(2017),
-                        inntekt = 36000.0,
-                        organisasjonsnummer = ORGNUMMER,
-                        refusjonTilArbeidsgiver = true
-                    )
+        sendUtbetalingshistorikkEtterInfotrygdendring(listOf(UtbetalingshistorikkTestdata(
+            fom = 1.januar,
+            tom = 2.januar,
+            arbeidskategorikode = "07",
+            utbetalteSykeperioder = listOf(
+                UtbetalingshistorikkTestdata.UtbetaltSykeperiode(
+                    fom = 1.januar,
+                    tom = 2.januar,
+                    dagsats = 1400.0,
+                    typekode = "0",
+                    utbetalingsgrad = "100",
+                    organisasjonsnummer = ORGNUMMER
                 )
-            ))
-        )
+            ),
+            inntektsopplysninger = listOf(
+                UtbetalingshistorikkTestdata.Inntektsopplysninger(
+                    sykepengerFom = 1.november(2017),
+                    inntekt = 36000.0,
+                    organisasjonsnummer = ORGNUMMER,
+                    refusjonTilArbeidsgiver = true
+                )
+            )
+        )))
+        sendYtelser(0)
 
         assertTilstander(
             0,
@@ -172,7 +171,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             inntektsopplysninger = emptyList()
         ))
         sendVilkårsgrunnlag(0)
-        sendYtelser(vedtaksperiodeIndeks = 0, sykepengehistorikk = historikk)
+        sendYtelser(vedtaksperiodeIndeks = 0)
 
         assertTilstander(
             0,
@@ -218,7 +217,8 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
 
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendVilkårsgrunnlag(0)
-        sendYtelser(0, sykepengehistorikk = historikk)
+        sendUtbetalingshistorikkEtterInfotrygdendring(historikk)
+        sendYtelser(0)
 
         assertTilstander(
             0,
@@ -280,7 +280,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
 
         sendInntektsmelding(listOf(Periode(fom = 9.januar, tom = 25.januar)), førsteFraværsdag = 9.januar)
         sendVilkårsgrunnlag(0)
-        sendYtelser(0, sykepengehistorikk = historikk)
+        sendYtelser(0)
 
         assertTilstander(
             0,

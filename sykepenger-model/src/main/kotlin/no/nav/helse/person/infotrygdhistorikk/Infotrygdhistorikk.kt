@@ -1,7 +1,6 @@
 package no.nav.helse.person.infotrygdhistorikk
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -24,8 +23,6 @@ internal class Infotrygdhistorikk private constructor(
     constructor() : this(mutableListOf())
 
     internal companion object {
-        private val gammel: LocalDateTime get() = LocalDateTime.now().minusHours(2)
-
         private fun oppfriskningsperiode(tidligsteDato: LocalDate) =
             tidligsteDato.minusYears(4) til LocalDate.now()
 
@@ -42,10 +39,14 @@ internal class Infotrygdhistorikk private constructor(
         return siste.valider(aktivitetslogg, periode, skjæringstidspunkt, orgnummer)
     }
 
-    internal fun oppfriskNødvendig(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate, cutoff: LocalDateTime? = null): Boolean {
-        if (oppfrisket(cutoff ?: gammel)) return false
+    internal fun oppfriskNødvendig(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate): Boolean {
+        if (harHistorikk()) return false
         oppfrisk(aktivitetslogg, tidligsteDato)
         return true
+    }
+
+    internal fun oppfrisk(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate) {
+        utbetalingshistorikk(aktivitetslogg, oppfriskningsperiode(tidligsteDato))
     }
 
     internal fun utbetalingstidslinje(): Utbetalingstidslinje {
@@ -134,12 +135,6 @@ internal class Infotrygdhistorikk private constructor(
         build(organisasjonsnummer, sykdomstidslinje, dekoratør, subsumsjonObserver)
     }
 
-    private fun oppfrisket(cutoff: LocalDateTime) =
-        elementer.firstOrNull()?.oppfrisket(cutoff) ?: false
-
-    internal fun oppfrisk(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate) {
-        utbetalingshistorikk(aktivitetslogg, oppfriskningsperiode(tidligsteDato))
-    }
 
     private fun harHistorikk() = elementer.isNotEmpty()
 }

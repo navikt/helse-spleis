@@ -49,6 +49,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
@@ -645,6 +646,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkEtterInfotrygdendr
     inntektshistorikk: List<Inntektsopplysning> = emptyList(),
     statslønn: Boolean = false,
     arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
+    ugyldigePerioder: List<UgyldigPeriode> = emptyList(),
     besvart: LocalDateTime = LocalDateTime.now()
 ) {
     utbetalingshistorikkEtterInfotrygdEndring(
@@ -652,6 +654,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkEtterInfotrygdendr
         inntektshistorikk = inntektshistorikk,
         harStatslønn = statslønn,
         arbeidskategorikoder = arbeidskategorikoder,
+        ugyldigePerioder = ugyldigePerioder,
         besvart = besvart
     ).håndter(Person::håndter)
 }
@@ -692,8 +695,6 @@ internal fun AbstractEndToEndTest.håndterYtelser(
 
     ytelser(
         vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
-        utbetalinger = utbetalinger.toList(),
-        inntektshistorikk = inntektshistorikk,
         foreldrepenger = foreldrepenger,
         pleiepenger = pleiepenger,
         omsorgspenger = omsorgspenger,
@@ -701,11 +702,8 @@ internal fun AbstractEndToEndTest.håndterYtelser(
         institusjonsoppholdsperioder = institusjonsoppholdsperioder,
         orgnummer = orgnummer,
         dødsdato = dødsdato,
-        statslønn = statslønn,
-        arbeidskategorikoder = arbeidskategorikoder,
         arbeidsavklaringspenger = arbeidsavklaringspenger,
         dagpenger = dagpenger,
-        besvart = besvart,
         fnr = fnr
     ).håndter(Person::håndter)
 }

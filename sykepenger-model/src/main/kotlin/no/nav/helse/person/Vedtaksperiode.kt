@@ -611,7 +611,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerYtelser(hendelse: IAktivitetslogg, periode: Periode = periode()) {
-        person.trengerHistorikkFraInfotrygd(hendelse)
         foreldrepenger(hendelse, periode)
         pleiepenger(hendelse, periode)
         omsorgspenger(hendelse, periode)
@@ -620,10 +619,6 @@ internal class Vedtaksperiode private constructor(
         arbeidsavklaringspenger(hendelse, periode.start.minusMonths(6), periode.endInclusive)
         dagpenger(hendelse, periode.start.minusMonths(6), periode.endInclusive)
         dødsinformasjon(hendelse)
-    }
-
-    private fun trengerHistorikkFraInfotrygd(hendelse: IAktivitetslogg, maksAlder: LocalDateTime? = null) {
-        person.trengerHistorikkFraInfotrygd(hendelse, this, maksAlder)
     }
 
     private fun trengerVilkårsgrunnlag(hendelse: IAktivitetslogg) {
@@ -1137,7 +1132,7 @@ internal class Vedtaksperiode private constructor(
     internal object AvventerInfotrygdHistorikk : Vedtaksperiodetilstand {
         override val type = AVVENTER_INFOTRYGDHISTORIKK
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.trengerHistorikkFraInfotrygd(hendelse)
+            vedtaksperiode.person.trengerHistorikkFraInfotrygd(hendelse, vedtaksperiode)
         }
 
         override fun gjenopptaBehandling(
@@ -1145,7 +1140,7 @@ internal class Vedtaksperiode private constructor(
             arbeidsgivere: Iterable<Arbeidsgiver>,
             hendelse: IAktivitetslogg
         ) {
-            vedtaksperiode.trengerHistorikkFraInfotrygd(hendelse)
+            vedtaksperiode.person.trengerHistorikkFraInfotrygd(hendelse, vedtaksperiode)
         }
 
         override fun håndter(
@@ -1175,8 +1170,9 @@ internal class Vedtaksperiode private constructor(
                 }
             }
         }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
+            vedtaksperiode.person.trengerHistorikkFraInfotrygd(påminnelse, vedtaksperiode)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -1187,7 +1183,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             hendelse: IAktivitetslogg,
             revurdering: Revurderingseventyr
-        ) {}
+        ) {
+        }
     }
 
     internal object AvventerRevurdering : Vedtaksperiodetilstand {

@@ -252,14 +252,15 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(message)
     }
 
-    protected fun sendYtelserUtenSykepengehistorikk(
+    protected fun sendYtelser(
         vedtaksperiodeIndeks: Int,
         pleiepenger: List<PleiepengerTestdata> = emptyList(),
         omsorgspenger: List<OmsorgspengerTestdata> = emptyList(),
         opplæringspenger: List<OpplæringspengerTestdata> = emptyList(),
         institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList(),
         arbeidsavklaringspenger: List<ArbeidsavklaringspengerTestdata> = emptyList(),
-        dagpenger: List<DagpengerTestdata> = emptyList()
+        dagpenger: List<DagpengerTestdata> = emptyList(),
+        orgnummer: String = ORGNUMMER
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Pleiepenger))
@@ -277,40 +278,6 @@ internal abstract class AbstractEndToEndMediatorTest {
             institusjonsoppholdsperioder = institusjonsoppholdsperioder,
             arbeidsavklaringspenger = arbeidsavklaringspenger,
             dagpenger = dagpenger,
-            sykepengehistorikk = null
-        )
-        testRapid.sendTestMessage(message)
-    }
-
-    protected fun sendYtelser(
-        vedtaksperiodeIndeks: Int,
-        pleiepenger: List<PleiepengerTestdata> = emptyList(),
-        omsorgspenger: List<OmsorgspengerTestdata> = emptyList(),
-        opplæringspenger: List<OpplæringspengerTestdata> = emptyList(),
-        institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList(),
-        arbeidsavklaringspenger: List<ArbeidsavklaringspengerTestdata> = emptyList(),
-        dagpenger: List<DagpengerTestdata> = emptyList(),
-        sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList(),
-        orgnummer: String = ORGNUMMER
-    ) {
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk))
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Pleiepenger))
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Omsorgspenger))
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opplæringspenger))
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Arbeidsavklaringspenger))
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Dagpenger))
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Institusjonsopphold))
-        val (_, message) = meldingsfabrikk.lagYtelser(
-            vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-            tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk),
-            pleiepenger = pleiepenger,
-            omsorgspenger = omsorgspenger,
-            opplæringspenger = opplæringspenger,
-            institusjonsoppholdsperioder = institusjonsoppholdsperioder,
-            arbeidsavklaringspenger = arbeidsavklaringspenger,
-            dagpenger = dagpenger,
-            sykepengehistorikk = sykepengehistorikk,
             orgnummer = orgnummer
         )
         testRapid.sendTestMessage(message)
@@ -328,6 +295,11 @@ internal abstract class AbstractEndToEndMediatorTest {
             sykepengehistorikk,
             orgnummer = orgnummer
         )
+        testRapid.sendTestMessage(message)
+    }
+
+    protected fun sendUtbetalingshistorikkEtterInfotrygdendring(sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList()) {
+        val (_, message) = meldingsfabrikk.lagUtbetalingshistorikkEtterInfotrygdendring(sykepengehistorikk)
         testRapid.sendTestMessage(message)
     }
 

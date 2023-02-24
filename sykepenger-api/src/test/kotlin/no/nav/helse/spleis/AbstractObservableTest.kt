@@ -32,8 +32,6 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.testhelpers.TestObservatør
 import no.nav.helse.spleis.testhelpers.inntektperioderForSammenligningsgrunnlag
@@ -178,8 +176,6 @@ abstract class AbstractObservableTest {
 
     protected fun ytelser(
         vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
-        utbetalinger: List<Infotrygdperiode> = listOf(),
-        inntektshistorikk: List<Inntektsopplysning> = emptyList(),
         foreldrepenger: Periode? = null,
         svangerskapspenger: Periode? = null,
         pleiepenger: List<Periode> = emptyList(),
@@ -188,11 +184,8 @@ abstract class AbstractObservableTest {
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
         orgnummer: String = ORGNUMMER,
         dødsdato: LocalDate? = null,
-        statslønn: Boolean = false,
-        arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
         arbeidsavklaringspenger: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
-        besvart: LocalDateTime = LocalDateTime.now(),
         fnr: String = UNG_PERSON_FNR
     ): Ytelser {
         val aktivitetslogg = Aktivitetslogg()
@@ -203,15 +196,6 @@ abstract class AbstractObservableTest {
             fødselsnummer = fnr,
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
-            infotrygdhistorikk = InfotrygdhistorikkElement.opprett(
-                oppdatert = besvart,
-                hendelseId = meldingsreferanseId,
-                perioder = utbetalinger,
-                inntekter = inntektshistorikk,
-                arbeidskategorikoder = arbeidskategorikoder,
-                ugyldigePerioder = emptyList(),
-                harStatslønn = statslønn
-            ),
             foreldrepermisjon = Foreldrepermisjon(
                 foreldrepengeytelse = foreldrepenger,
                 svangerskapsytelse = svangerskapspenger

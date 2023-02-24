@@ -275,7 +275,6 @@ class Person private constructor(
 
     fun håndter(ytelser: Ytelser) {
         registrer(ytelser, "Behandler historiske utbetalinger og inntekter")
-        ytelser.oppdaterHistorikk(infotrygdhistorikk)
         ytelser.lagreDødsdato(this)
 
         finnArbeidsgiver(ytelser).håndter(ytelser, infotrygdhistorikk) { subsumsjonObserver ->
@@ -495,19 +494,15 @@ class Person private constructor(
 
     internal fun skjæringstidspunkterFraSpleis() = vilkårsgrunnlagHistorikk.skjæringstidspunkterFraSpleis()
 
-    internal fun trengerHistorikkFraInfotrygd(hendelse: IAktivitetslogg, cutoff: LocalDateTime? = null): Boolean {
-        val tidligsteDato = arbeidsgivereMedSykdom().minOf { it.tidligsteDato() }
-        return infotrygdhistorikk.oppfriskNødvendig(hendelse, tidligsteDato, cutoff)
-    }
-
-    internal fun trengerHistorikkFraInfotrygd(
-        hendelse: IAktivitetslogg,
-        vedtaksperiode: Vedtaksperiode,
-        cutoff: LocalDateTime? = null
-    ) {
-        if (trengerHistorikkFraInfotrygd(hendelse, cutoff)) return hendelse.info("Må oppfriske Infotrygdhistorikken")
+    internal fun trengerHistorikkFraInfotrygd(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode) {
+        if (trengerHistorikkFraInfotrygd(hendelse)) return hendelse.info("Må oppfriske Infotrygdhistorikken")
         hendelse.info("Trenger ikke oppfriske Infotrygdhistorikken, bruker lagret historikk")
         vedtaksperiode.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk)
+    }
+
+    private fun trengerHistorikkFraInfotrygd(hendelse: IAktivitetslogg): Boolean {
+        val tidligsteDato = arbeidsgivereMedSykdom().minOf { it.tidligsteDato() }
+        return infotrygdhistorikk.oppfriskNødvendig(hendelse, tidligsteDato)
     }
 
     internal fun periodetype(

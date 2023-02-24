@@ -53,7 +53,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 26.februar, sykmeldingsgrad = 100))
         )
-        sendYtelserUtenSykepengehistorikk(1)
+        sendYtelser(1)
         sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(1)
         sendUtbetaling()
@@ -61,7 +61,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         assertEquals(2, testRapid.inspektør.meldinger("vedtaksperiode_ny_utbetaling").size)
 
         sendOverstyringTidslinje(listOf(ManuellOverskrivingDag(25.januar, Dagtype.Feriedag)))
-        sendYtelserUtenSykepengehistorikk(1)
+        sendYtelser(1)
 
         val revurdering = testRapid.inspektør.siste("utbetaling_endret")
 
@@ -148,7 +148,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         )
         sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
         sendVilkårsgrunnlag(0)
-        sendYtelserUtenSykepengehistorikk(0)
+        sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0, true)
         sendUtbetaling()
@@ -197,7 +197,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
             perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)),
             fravær = listOf(FravarDTO(fom = 27.januar, tom = 31.januar, FravarstypeDTO.PERMISJON))
         )
-        sendYtelserUtenSykepengehistorikk(1)
+        sendYtelser(1)
         sendUtbetalingsgodkjenning(1)
 
         val utbetaling = testRapid.inspektør.siste("utbetaling_uten_utbetaling")
@@ -243,7 +243,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
             perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)),
             fravær = listOf(FravarDTO(fom = 27.januar, tom = 31.januar, FravarstypeDTO.FERIE))
         )
-        sendYtelserUtenSykepengehistorikk(1)
+        sendYtelser(1)
         sendUtbetalingsgodkjenning(1)
         val utbetalt = testRapid.inspektør.siste("utbetaling_uten_utbetaling")
         assertUtbetalt(utbetalt)

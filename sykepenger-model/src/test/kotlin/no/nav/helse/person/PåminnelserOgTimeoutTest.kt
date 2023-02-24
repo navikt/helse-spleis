@@ -40,14 +40,10 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sisteBehov
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -310,7 +306,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             hendelse = this
         }
 
-    private fun ytelser(besvart: LocalDateTime = LocalDateTime.now()): Ytelser {
+    private fun ytelser(): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
             meldingsreferanseId = meldingsreferanseId,
@@ -318,17 +314,6 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
-            infotrygdhistorikk = InfotrygdhistorikkElement.opprett(
-                oppdatert = besvart,
-                hendelseId = meldingsreferanseId,
-                perioder = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER,17.januar(2017),  20.januar(2017),  100.prosent, 1000.daglig)),
-                inntekter = listOf(
-                    Inntektsopplysning(ORGNUMMER, 17.januar(2017), 31000.månedlig, true)
-                ),
-                arbeidskategorikoder = emptyMap(),
-                ugyldigePerioder = emptyList(),
-                harStatslønn = false
-            ),
             foreldrepermisjon = Foreldrepermisjon(
                 foreldrepengeytelse = null,
                 svangerskapsytelse = null

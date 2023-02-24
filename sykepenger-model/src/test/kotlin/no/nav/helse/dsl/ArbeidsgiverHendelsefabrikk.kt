@@ -204,37 +204,6 @@ internal class ArbeidsgiverHendelsefabrikk(
 
     internal fun lagYtelser(
         vedtaksperiodeId: UUID,
-        utbetalinger: List<Infotrygdperiode>,
-        inntektshistorikk: List<Inntektsopplysning>,
-        foreldrepenger: Periode? = null,
-        svangerskapspenger: Periode? = null,
-        pleiepenger: List<Periode> = emptyList(),
-        omsorgspenger: List<Periode> = emptyList(),
-        opplæringspenger: List<Periode> = emptyList(),
-        institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
-        dødsdato: LocalDate? = null,
-        statslønn: Boolean = false,
-        arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
-        arbeidsavklaringspenger: List<Periode> = emptyList(),
-        dagpenger: List<Periode> = emptyList(),
-        besvart: LocalDateTime = LocalDateTime.now(),
-    ): Ytelser {
-        val element = { meldingsreferanseId: UUID ->
-            InfotrygdhistorikkElement.opprett(
-                oppdatert = besvart,
-                hendelseId = meldingsreferanseId,
-                perioder = utbetalinger,
-                inntekter = inntektshistorikk,
-                arbeidskategorikoder = arbeidskategorikoder,
-                ugyldigePerioder = emptyList(),
-                harStatslønn = statslønn
-            )
-        }
-        return lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, dødsdato, arbeidsavklaringspenger, dagpenger, element)
-    }
-
-    internal fun lagYtelser(
-        vedtaksperiodeId: UUID,
         foreldrepenger: Periode? = null,
         svangerskapspenger: Periode? = null,
         pleiepenger: List<Periode> = emptyList(),
@@ -243,18 +212,15 @@ internal class ArbeidsgiverHendelsefabrikk(
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
         dødsdato: LocalDate? = null,
         arbeidsavklaringspenger: List<Periode> = emptyList(),
-        dagpenger: List<Periode> = emptyList(),
-        element: (UUID) -> InfotrygdhistorikkElement? = { null }
+        dagpenger: List<Periode> = emptyList()
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
-
         return Ytelser(
             meldingsreferanseId = meldingsreferanseId,
             aktørId = aktørId,
             fødselsnummer = personidentifikator.toString(),
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
-            infotrygdhistorikk = element(meldingsreferanseId),
             foreldrepermisjon = Foreldrepermisjon(
                 foreldrepengeytelse = foreldrepenger,
                 svangerskapsytelse = svangerskapspenger

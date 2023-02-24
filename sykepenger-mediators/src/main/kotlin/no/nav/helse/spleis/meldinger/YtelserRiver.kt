@@ -34,10 +34,6 @@ internal class YtelserRiver(
         message.requireKey("@løsning.${Dødsinfo.name}")
         message.interestedIn("@løsning.${Foreldrepenger.name}.Foreldrepengeytelse")
         message.interestedIn("@løsning.${Foreldrepenger.name}.Svangerskapsytelse")
-        message.interestedIn("@løsning.${Sykepengehistorikk.name}")
-        if (message["@løsning.${Sykepengehistorikk.name}"].isArray) {
-            UtbetalingshistorikkRiver.validerSykepengehistorikk(message)
-        }
         message.requireArray("@løsning.${Pleiepenger.name}") {
             interestedIn("fom") { it.asLocalDate() }
             interestedIn("tom") { it.asLocalDate() }

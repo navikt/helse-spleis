@@ -36,7 +36,6 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Fagområde
@@ -124,7 +123,6 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     }
 
     private fun ytelser(
-        utbetalinger: List<Infotrygdperiode> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
     ) = Aktivitetslogg().let {
@@ -135,15 +133,6 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
-            infotrygdhistorikk = InfotrygdhistorikkElement.opprett(
-                oppdatert = LocalDateTime.now(),
-                hendelseId = meldingsreferanseId,
-                perioder = utbetalinger,
-                inntekter = emptyList(),
-                arbeidskategorikoder = emptyMap(),
-                ugyldigePerioder = emptyList(),
-                harStatslønn = false
-            ),
             foreldrepermisjon = Foreldrepermisjon(
                 foreldrepengeytelse = foreldrepengeYtelse,
                 svangerskapsytelse = svangerskapYtelse,

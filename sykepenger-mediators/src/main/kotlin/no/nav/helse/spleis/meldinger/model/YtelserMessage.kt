@@ -40,11 +40,6 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val dagpenger: List<Pair<LocalDate, LocalDate>>
     private val ugyldigeDagpengeperioder: List<Pair<LocalDate, LocalDate>>
 
-    private val utbetalingshistorikk = packet["@løsning.${Sykepengehistorikk.name}"].takeIf(JsonNode::isArray)?.let {
-        UtbetalingshistorikkMessage(packet)
-            .infotrygdhistorikk(id)
-    }
-
     private val foreldrepenger = packet["@løsning.${Foreldrepenger.name}.Foreldrepengeytelse"]
         .takeIf(JsonNode::isObject)?.let(::asPeriode)
     private val svangerskapsytelse = packet["@løsning.${Foreldrepenger.name}.Svangerskapsytelse"]
@@ -98,7 +93,6 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            infotrygdhistorikk = utbetalingshistorikk,
             foreldrepermisjon = foreldrepermisjon,
             pleiepenger = pleiepenger,
             omsorgspenger = omsorgspenger,

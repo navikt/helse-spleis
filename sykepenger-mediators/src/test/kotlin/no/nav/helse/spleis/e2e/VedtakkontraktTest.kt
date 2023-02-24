@@ -62,7 +62,7 @@ internal class VedtakkontraktTest : AbstractEndToEndMediatorTest() {
             perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)),
             fravær = listOf(FravarDTO(fom = 27.januar, tom = 31.januar, FravarstypeDTO.FERIE))
         )
-        sendYtelserUtenSykepengehistorikk(1)
+        sendYtelser(1)
         sendUtbetalingsgodkjenning(1)
         assertVedtakMedUtbetalingUtenUtbetaling()
     }

@@ -134,10 +134,10 @@ internal class InfotrygdhistorikkTest {
     }
 
     @Test
-    fun `må oppfriske gammel historikk`() {
+    fun `trenger ikke oppfriske gammel historikk`() {
         historikk.oppdaterHistorikk(historikkelement(oppdatert = LocalDateTime.now().minusHours(24)))
-        assertTrue(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
-        assertTrue(aktivitetslogg.behov().isNotEmpty())
+        assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
+        assertFalse(aktivitetslogg.behov().isNotEmpty())
         assertEquals(1, historikk.inspektør.elementer())
     }
 
@@ -145,7 +145,7 @@ internal class InfotrygdhistorikkTest {
     fun `kan bestemme tidspunkt selv`() {
         val tidsstempel = LocalDateTime.now().minusHours(24)
         historikk.oppdaterHistorikk(historikkelement(oppdatert = tidsstempel))
-        assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato, tidsstempel.minusMinutes(1)))
+        assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
         assertFalse(aktivitetslogg.behov().isNotEmpty())
         assertEquals(1, historikk.inspektør.elementer())
     }

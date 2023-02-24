@@ -32,7 +32,7 @@ internal class RevurderingseventyrkontraktTest : AbstractEndToEndMediatorTest() 
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100))
         )
-        sendYtelserUtenSykepengehistorikk(1)
+        sendYtelser(1)
         sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(1, true)
         sendUtbetaling(utbetalingOK = true)

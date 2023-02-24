@@ -48,7 +48,7 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
         )
         sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
         sendVilkårsgrunnlag(0)
-        sendYtelserUtenSykepengehistorikk(0)
+        sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()

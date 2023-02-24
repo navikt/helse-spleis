@@ -228,6 +228,18 @@ internal class TestMessageFactory(
         )
     }
 
+    fun lagUtbetalingshistorikkEtterInfotrygdendring(sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList()): Pair<String, String> {
+        return nyHendelse(
+            "behov", mutableMapOf(
+                "@behov" to listOf("Sykepengehistorikk"),
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "@løsning" to sykepengehistorikk.toJson(),
+                "@final" to true,
+                "@besvart" to LocalDateTime.now()
+            ))
+    }
+
     fun lagUtbetalingshistorikkForFeriepenger(testdata: UtbetalingshistorikkForFeriepengerTestdata) =
         lagBehovMedLøsning(
             vedtaksperiodeId = null,
@@ -484,7 +496,6 @@ internal class TestMessageFactory(
         institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList(),
         arbeidsavklaringspenger: List<ArbeidsavklaringspengerTestdata> = emptyList(),
         dagpenger: List<DagpengerTestdata> = emptyList(),
-        sykepengehistorikk: List<UtbetalingshistorikkTestdata>? = emptyList(),
         orgnummer: String = organisasjonsnummer
     ): Pair<String, String> {
         val behovliste = mutableListOf(
@@ -497,18 +508,12 @@ internal class TestMessageFactory(
             "Dødsinfo",
             "Dagpenger"
         )
-
-        val sykepengehistorikkMap = sykepengehistorikk?.let {
-            behovliste.add("Sykepengehistorikk")
-            sykepengehistorikk.toJson()
-        } ?: emptyMap()
-
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
             tilstand = tilstand,
             orgnummer = orgnummer,
             behov = behovliste,
-            løsninger = sykepengehistorikkMap + mapOf(
+            løsninger = mapOf(
                 "Foreldrepenger" to emptyMap<String, String>(),
                 "Pleiepenger" to pleiepenger.map { data ->
                     mapOf(

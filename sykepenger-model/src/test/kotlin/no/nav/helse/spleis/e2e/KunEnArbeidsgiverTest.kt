@@ -20,7 +20,6 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.Inntektskilde
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_4
@@ -35,7 +34,6 @@ import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -928,25 +926,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             assertEquals(6, it.navDagTeller)
             assertEquals(16, it.arbeidsgiverperiodeDagTeller)
         }
-    }
-
-    @Test
-    fun `Skal ikke få warning for opptjening av sykedager etter nådd maksdato for irrelevante perioder`() {
-        // Gir det noe mening å sette refusjonsbeløp når det kun er infotrygd-utbetalinger?
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)))
-        håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
-        håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)), INNTEKT)
-
-        val utbetalinger = ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 28.desember, 100.prosent, INNTEKT)
-        val inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true))
-
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, listOf(utbetalinger), inntektshistorikk)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        assertIngenVarsler(1.vedtaksperiode.filter())
     }
 
     @Test

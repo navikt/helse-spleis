@@ -25,7 +25,6 @@ import no.nav.helse.oktober
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
@@ -192,10 +191,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         ).håndter(Person::håndter)
 
         ytelser(
-            1.vedtaksperiode, orgnummer = a1, inntektshistorikk = listOf(
-                Inntektsopplysning(a1, 1.januar, 24500.månedlig, true),
-                Inntektsopplysning(a2, 1.januar(2016), 5000.månedlig, true)
-            )
+            1.vedtaksperiode, orgnummer = a1
         ).håndter(Person::håndter)
 
         val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.januar) ?: fail { "forventet vilkårsgrunnlag" }

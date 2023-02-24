@@ -140,7 +140,6 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
-            infotrygdhistorikk = null,
             foreldrepermisjon = Foreldrepermisjon(
                 foreldrepengeytelse = foreldrepengeYtelse,
                 svangerskapsytelse = svangerskapYtelse

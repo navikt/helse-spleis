@@ -29,7 +29,7 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
         )
         sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
         sendVilkårsgrunnlag(2)
-        sendYtelserUtenSykepengehistorikk(2)
+        sendYtelser(2)
         sendSimulering(2, SimuleringMessage.Simuleringstatus.OK)
 
         assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING", "AVSLUTTET_UTEN_UTBETALING")
@@ -59,7 +59,7 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
             ), førsteFraværsdag = 11.januar
         )
         sendVilkårsgrunnlag(1)
-        sendYtelserUtenSykepengehistorikk(1)
+        sendYtelser(1)
         sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
 
         assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING", "AVSLUTTET_UTEN_UTBETALING")

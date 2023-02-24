@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
@@ -16,13 +15,11 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
@@ -31,6 +28,7 @@ import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -84,15 +82,8 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ugyldig utbetalinghistorikk før inntektsmelding kaster perioden ut`() {
+    fun `ugyldig utbetalinghistorikk kaster perioden ut`() {
         håndterUgyldigYtelser()
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-    }
-
-    @Test
-    fun `ugyldig utbetalinghistorikk etter inntektsmelding kaster perioden ut`() {
-        håndterYtelser(ugyldigePerioder = listOf(UgyldigPeriode(null, null, null)))
         assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
     }
@@ -151,11 +142,8 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
         val ytelser = ytelser(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            utbetalinger = utbetalinger,
-            inntektshistorikk = inntektshistorikk,
             foreldrepengeYtelse = foreldrepengeytelse,
-            svangerskapYtelse = svangerskapsytelse,
-            ugyldigePerioder = ugyldigePerioder
+            svangerskapYtelse = svangerskapsytelse
         )
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -172,10 +160,10 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ugyldigePerioder = listOf(UgyldigPeriode(null, null, null)))
         person.håndter(
             ytelser(
                 vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                ugyldigePerioder = listOf(UgyldigPeriode(null, null, null)),
                 foreldrepengeYtelse = null,
                 svangerskapYtelse = null
             )
@@ -184,11 +172,8 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
 
     private fun ytelser(
         vedtaksperiodeIdInnhenter: IdInnhenter,
-        utbetalinger: List<Infotrygdperiode> = emptyList(),
-        inntektshistorikk: List<Inntektsopplysning> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
-        svangerskapYtelse: Periode? = null,
-        ugyldigePerioder: List<UgyldigPeriode> = emptyList()
+        svangerskapYtelse: Periode? = null
     ) = Aktivitetslogg().let {
         val meldingsreferanseId = UUID.randomUUID()
         Ytelser(
@@ -197,15 +182,6 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = "${vedtaksperiodeIdInnhenter.id(ORGNUMMER)}",
-            infotrygdhistorikk = InfotrygdhistorikkElement.opprett(
-                oppdatert = LocalDateTime.now(),
-                hendelseId = meldingsreferanseId,
-                perioder = utbetalinger,
-                inntekter = inntektshistorikk,
-                arbeidskategorikoder = emptyMap(),
-                ugyldigePerioder = ugyldigePerioder,
-                harStatslønn = false
-            ),
             foreldrepermisjon = Foreldrepermisjon(
                 foreldrepengeytelse = foreldrepengeYtelse,
                 svangerskapsytelse = svangerskapYtelse

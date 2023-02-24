@@ -22,7 +22,7 @@ internal class AvstemmingMediatorTest : AbstractEndToEndMediatorTest() {
         )
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendVilkårsgrunnlag(0)
-        sendYtelserUtenSykepengehistorikk(0)
+        sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
@@ -40,7 +40,7 @@ internal class AvstemmingMediatorTest : AbstractEndToEndMediatorTest() {
         )
         sendInntektsmelding(listOf(Periode(fom = 1.april, tom = 16.april)), førsteFraværsdag = 1.april)
         sendVilkårsgrunnlag(3, skjæringstidspunkt = 1.april)
-        sendYtelserUtenSykepengehistorikk(3)
+        sendYtelser(3)
 
         sendAvstemming()
         val avstemt = testRapid.inspektør.siste("person_avstemt")
