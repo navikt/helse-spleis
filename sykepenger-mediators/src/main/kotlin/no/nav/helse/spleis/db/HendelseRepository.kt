@@ -36,6 +36,7 @@ import no.nav.helse.spleis.meldinger.model.EtterbetalingMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
+import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayUtførtMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsforholdMessage
@@ -144,7 +145,8 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is PåminnelseMessage,
         is UtbetalingshistorikkMessage,
         is InfotrygdendringMessage,
-        is UtbetalingshistorikkEtterInfotrygdendringMessage -> null // Disse trenger vi ikke å lagre
+        is UtbetalingshistorikkEtterInfotrygdendringMessage,
+        is InntektsmeldingReplayUtførtMessage -> null // Disse trenger vi ikke å lagre
         else -> null.also { log.warn("ukjent meldingstype ${melding::class.simpleName}: melding lagres ikke") }
     }
 
