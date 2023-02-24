@@ -6,7 +6,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
-internal interface UtbetalingObserver {
+interface UtbetalingObserver {
     fun utbetalingAnnullert(
         id: UUID,
         korrelasjonsId: UUID,
