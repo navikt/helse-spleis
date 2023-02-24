@@ -1,0 +1,32 @@
+{
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "tilstand": "AVVENTER_INNTEKTSMELDING"
+        },
+        {
+          "tilstand": "AVSLUTTET_UTEN_UTBETALING"
+        }
+      ]
+    },
+    {
+      "vedtaksperioder": [
+        {
+          "tilstand": "AVVENTER_INNTEKTSMELDING"
+        },
+        {
+          "tilstand": "AVSLUTTET_UTEN_UTBETALING"
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVVENTER_INNTEKTSMELDING"
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 231
+}

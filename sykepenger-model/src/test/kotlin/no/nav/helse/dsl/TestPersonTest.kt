@@ -46,7 +46,7 @@ internal class TestPersonTest : AbstractDslTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -80,7 +80,7 @@ internal class TestPersonTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 START,
                 AVVENTER_INFOTRYGDHISTORIKK,
-                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
                AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -108,7 +108,7 @@ internal class TestPersonTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 START,
                 AVVENTER_INFOTRYGDHISTORIKK,
-                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE
             )
         }
@@ -118,11 +118,11 @@ internal class TestPersonTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 START,
                 AVVENTER_INFOTRYGDHISTORIKK,
-                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE
             )
         }
-        a1.assertTilstander(1.vedtaksperiode(a1), START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        a1.assertTilstander(1.vedtaksperiode(a1), START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
     }
 
     @Test
@@ -151,7 +151,7 @@ internal class TestPersonTest : AbstractDslTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,

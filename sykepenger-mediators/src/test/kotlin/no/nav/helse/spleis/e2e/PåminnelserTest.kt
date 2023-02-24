@@ -5,8 +5,8 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -44,7 +44,7 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
         sendNyPåminnelse(0)
         val vedtaksperiodeIkkePåminnet = testRapid.inspektør.melding(8)
         assertEquals("vedtaksperiode_ikke_påminnet", vedtaksperiodeIkkePåminnet.path("@event_name").asText())
-        assertEquals("AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", vedtaksperiodeIkkePåminnet.path("tilstand").asText())
+        assertEquals("AVVENTER_INNTEKTSMELDING", vedtaksperiodeIkkePåminnet.path("tilstand").asText())
         assertVedtaksperiodeIkkePåminnet(vedtaksperiodeIkkePåminnet)
     }
 
@@ -54,10 +54,10 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
-        sendNyPåminnelse(0, tilstandType = TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        sendNyPåminnelse(0, tilstandType = TilstandType.AVVENTER_INNTEKTSMELDING)
         val vedtaksperiodePåminnet = testRapid.inspektør.melding(8)
         assertEquals("vedtaksperiode_påminnet", vedtaksperiodePåminnet.path("@event_name").asText())
-        assertEquals("AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", vedtaksperiodePåminnet.path("tilstand").asText())
+        assertEquals("AVVENTER_INNTEKTSMELDING", vedtaksperiodePåminnet.path("tilstand").asText())
         assertVedtaksperiodePåminnet(vedtaksperiodePåminnet)
     }
 

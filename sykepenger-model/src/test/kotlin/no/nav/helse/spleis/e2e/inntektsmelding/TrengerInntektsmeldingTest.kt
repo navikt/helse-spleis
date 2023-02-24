@@ -4,8 +4,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -29,7 +28,7 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-        assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar)

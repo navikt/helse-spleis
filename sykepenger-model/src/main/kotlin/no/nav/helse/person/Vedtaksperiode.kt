@@ -54,7 +54,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
@@ -454,7 +454,7 @@ internal class Vedtaksperiode private constructor(
     private fun harNødvendigInntektForVilkårsprøving() =
         person.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt)
 
-    internal fun harNødvendigOpplysningerFraArbeidsgiver() = tilstand != AvventerInntektsmeldingEllerHistorikk || !forventerInntekt()
+    internal fun harNødvendigOpplysningerFraArbeidsgiver() = tilstand != AvventerInntektsmelding || !forventerInntekt()
 
     private fun låsOpp() = arbeidsgiver.låsOpp(periode)
     private fun lås() = arbeidsgiver.lås(periode)
@@ -1111,7 +1111,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterSøknad(søknad) {
                 val rettFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)
                 when {
-                    rettFør != null && rettFør.tilstand !in setOf(AvsluttetUtenUtbetaling, AvventerInfotrygdHistorikk, AvventerInntektsmeldingEllerHistorikk) -> AvventerBlokkerendePeriode
+                    rettFør != null && rettFør.tilstand !in setOf(AvsluttetUtenUtbetaling, AvventerInfotrygdHistorikk, AvventerInntektsmelding) -> AvventerBlokkerendePeriode
                     else -> AvventerInfotrygdHistorikk
                 }
             }
@@ -1165,7 +1165,7 @@ internal class Vedtaksperiode private constructor(
                         info("Oppdaget at perioden startet i infotrygd")
                         vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
                     } else {
-                        vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
+                        vedtaksperiode.tilstand(hendelse, AvventerInntektsmelding)
                     }
                 }
             }
@@ -1390,8 +1390,8 @@ internal class Vedtaksperiode private constructor(
 
     }
 
-    internal object AvventerInntektsmeldingEllerHistorikk : Vedtaksperiodetilstand {
-        override val type: TilstandType = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+    internal object AvventerInntektsmelding : Vedtaksperiodetilstand {
+        override val type: TilstandType = AVVENTER_INNTEKTSMELDING
 
         override fun makstid(tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             tilstandsendringstidspunkt.plusDays(180)
@@ -1425,7 +1425,7 @@ internal class Vedtaksperiode private constructor(
 
         private fun tilstandEtterInntektPåSkjæringstidspunkt(vedtaksperiode: Vedtaksperiode) = when {
             !vedtaksperiode.forventerInntekt() -> AvsluttetUtenUtbetaling
-            !vedtaksperiode.arbeidsgiver.kanBeregneSykepengegrunnlag(vedtaksperiode.skjæringstidspunkt) -> AvventerInntektsmeldingEllerHistorikk.also {
+            !vedtaksperiode.arbeidsgiver.kanBeregneSykepengegrunnlag(vedtaksperiode.skjæringstidspunkt) -> AvventerInntektsmelding.also {
                 sikkerlogg.info("Har lagret inntekt, men kan ikke beregne sykepengegrunnlag på skjæringstidspunkt ${vedtaksperiode.skjæringstidspunkt} for arbeidsgiver ${vedtaksperiode.arbeidsgiver.organisasjonsnummer()}")
             }
             else -> AvventerBlokkerendePeriode
@@ -1506,7 +1506,7 @@ internal class Vedtaksperiode private constructor(
                 }
                 !vedtaksperiode.arbeidsgiver.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) -> {
                     hendelse.info("Mangler inntekt for sykepengegrunnlag som følge av at skjæringstidspunktet har endret seg")
-                    vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
+                    vedtaksperiode.tilstand(hendelse, AvventerInntektsmelding)
                 }
                 !arbeidsgivere.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) -> return hendelse.info(
                     "Gjenopptar ikke behandling fordi minst én arbeidsgiver ikke har tilstrekkelig inntekt for skjæringstidspunktet"
@@ -1968,7 +1968,7 @@ internal class Vedtaksperiode private constructor(
             hendelse.info(RV_RV_1.varseltekst)
             if (!vedtaksperiode.harNødvendigOpplysningerFraArbeidsgiver(hendelse)) {
                 hendelse.info("mangler nødvendige opplysninger fra arbeidsgiver")
-                return vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
+                return vedtaksperiode.tilstand(hendelse, AvventerInntektsmelding)
             }
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }

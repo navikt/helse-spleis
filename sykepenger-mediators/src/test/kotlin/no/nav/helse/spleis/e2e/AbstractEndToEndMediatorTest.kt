@@ -291,7 +291,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk))
         val (_, message) = meldingsfabrikk.lagUtbetalingshistorikk(
             testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            TilstandType.AVVENTER_INNTEKTSMELDING,
             sykepengehistorikk,
             orgnummer = orgnummer
         )

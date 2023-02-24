@@ -59,7 +59,7 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             orgnummer = a1,
             tilstandsendringstidspunkt = LocalDateTime.MIN,
-            tilstandType = TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+            tilstandType = TilstandType.AVVENTER_INNTEKTSMELDING
         )
 
         val melding = testRapid.inspektør.meldinger("trenger_ikke_inntektsmelding")
@@ -113,7 +113,7 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         assertTilstander(
             0,
             "AVVENTER_INFOTRYGDHISTORIKK",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_INNTEKTSMELDING",
             "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",

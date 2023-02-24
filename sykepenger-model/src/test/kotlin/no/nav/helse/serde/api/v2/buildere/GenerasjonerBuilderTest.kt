@@ -36,8 +36,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
@@ -870,7 +869,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
 
-        assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         0.generasjon {
             assertEquals(2, perioder.size)
             uberegnetPeriode(0) medTilstand ManglerInformasjon
@@ -891,7 +890,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         0.generasjon {
             assertEquals(2, this.perioder.size)
             uberegnetPeriode(0) medTilstand ManglerInformasjon
@@ -1717,7 +1716,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
         håndterInntektsmelding(listOf(10.januar til 25.januar))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -1735,7 +1734,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode,
             AVSLUTTET_UTEN_UTBETALING,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -1743,7 +1742,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING
         )
         assertTilstander(3.vedtaksperiode,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE
         )
     }
