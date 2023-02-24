@@ -1,13 +1,10 @@
+package no.nav.helse.utbetalingslinjer
+
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.utbetalingslinjer.Fagområde
-import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 
 interface UtbetalingHendelsePort: OverføringsinformasjonPort {
     fun valider()

@@ -197,7 +197,7 @@ class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Collection<
     }
 }
 
-sealed class Begrunnelse() {
+sealed class Begrunnelse {
 
     fun skalAvvises(utbetalingsdag: Utbetalingsdag) = utbetalingsdag is AvvistDag || utbetalingsdag is NavDag
 

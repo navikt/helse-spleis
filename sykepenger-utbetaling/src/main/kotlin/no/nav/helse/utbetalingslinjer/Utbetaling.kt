@@ -1,12 +1,5 @@
 package no.nav.helse.utbetalingslinjer
 
-import AnnullerUtbetalingPort
-import GrunnbeløpsreguleringPort
-import OverføringsinformasjonPort
-import SimuleringPort
-import UtbetalingHendelsePort
-import UtbetalingpåminnelsePort
-import UtbetalingsgodkjenningPort
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime

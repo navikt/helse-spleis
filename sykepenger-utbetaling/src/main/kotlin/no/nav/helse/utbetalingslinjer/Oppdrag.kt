@@ -1,7 +1,5 @@
 package no.nav.helse.utbetalingslinjer
 
-import OverføringsinformasjonPort
-import SimuleringPort
 import java.time.LocalDate
 import java.time.LocalDate.MIN
 import java.time.LocalDateTime
@@ -218,7 +216,7 @@ class Oppdrag private constructor(
 
     private fun kopierKunLinjerMedEndring() = kopierMed(filter(Utbetalingslinje::erForskjell))
 
-    fun kopierUtenOpphørslinjer() = kopierMed(linjerUtenOpphør())
+    private fun kopierUtenOpphørslinjer() = kopierMed(linjerUtenOpphør())
 
     fun linjerUtenOpphør() = filter { !it.erOpphør() }
 
@@ -291,8 +289,6 @@ class Oppdrag private constructor(
             else -> endre(eldre.kopierUtenOpphørslinjer(), aktivitetslogg)
         }.also { it.nettoBeløp(eldre) }
     }
-
-    private fun harIngenKoblingTilTidligereOppdrag(eldre: Oppdrag) = (eldre.erTomt() && !sammenhengendeUtbetalingsperiode(eldre)) || this !in eldre
 
     private fun ingenUtbetalteDager() = linjerUtenOpphør().isEmpty()
 
