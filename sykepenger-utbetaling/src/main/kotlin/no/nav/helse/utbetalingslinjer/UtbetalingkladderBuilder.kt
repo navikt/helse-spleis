@@ -7,7 +7,7 @@ import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
 
-internal class UtbetalingkladderBuilder(
+class UtbetalingkladderBuilder(
     tidslinje: Utbetalingstidslinje,
     private val mottakerRefusjon: String,
     private val mottakerBruker: String
@@ -20,7 +20,7 @@ internal class UtbetalingkladderBuilder(
         tidslinje.accept(this)
     }
 
-    internal fun build() = ferdigstill()
+    fun build() = ferdigstill()
 
     override fun visit(dag: UkjentDag, dato: LocalDate, økonomi: Økonomi) {
         ferdigstill(dato)

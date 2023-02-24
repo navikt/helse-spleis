@@ -7,7 +7,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
-internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor, UtbetalingVurderingVisitor {
+interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor, UtbetalingVurderingVisitor {
     fun preVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,

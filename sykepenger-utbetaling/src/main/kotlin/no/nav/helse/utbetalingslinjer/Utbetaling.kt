@@ -56,7 +56,7 @@ class Utbetaling private constructor(
     private var avsluttet: LocalDateTime?,
     private var oppdatert: LocalDateTime = tidsstempel
 ) : Aktivitetskontekst {
-    internal constructor(
+    constructor(
         beregningId: UUID,
         korrelerendeUtbetaling: Utbetaling?,
         periode: Periode,
@@ -94,87 +94,87 @@ class Utbetaling private constructor(
     private fun harHåndtert(hendelse: IAktivitetslogg) =
         (hendelse == forrigeHendelse).also { forrigeHendelse = hendelse }
 
-    internal fun registrer(observer: UtbetalingObserver) {
+    fun registrer(observer: UtbetalingObserver) {
         observers.add(observer)
     }
 
-    internal fun gyldig() = tilstand !in setOf(Ny, Forkastet)
-    internal fun erUbetalt() = tilstand == Ubetalt
-    internal fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
+    fun gyldig() = tilstand !in setOf(Ny, Forkastet)
+    fun erUbetalt() = tilstand == Ubetalt
+    fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
     private fun erAktiv() = erAvsluttet() || erInFlight()
     private fun erAktivEllerUbetalt() = erAktiv() || erUbetalt()
-    internal fun erInFlight() = tilstand in listOf(Godkjent, Sendt, Overført, UtbetalingFeilet)
-    internal fun erAvsluttet() = erUtbetalt() || tilstand == GodkjentUtenUtbetaling
-    internal fun erAvvist() = tilstand == IkkeGodkjent
-    internal fun harFeilet() = tilstand == UtbetalingFeilet
-    internal fun kanIkkeForsøkesPåNy() = Oppdrag.kanIkkeForsøkesPåNy(arbeidsgiverOppdrag, personOppdrag)
+    fun erInFlight() = tilstand in listOf(Godkjent, Sendt, Overført, UtbetalingFeilet)
+    fun erAvsluttet() = erUtbetalt() || tilstand == GodkjentUtenUtbetaling
+    fun erAvvist() = tilstand == IkkeGodkjent
+    fun harFeilet() = tilstand == UtbetalingFeilet
+    fun kanIkkeForsøkesPåNy() = Oppdrag.kanIkkeForsøkesPåNy(arbeidsgiverOppdrag, personOppdrag)
     private fun erAnnullering() = type == ANNULLERING
 
-    internal fun reberegnUtbetaling(hendelse: IAktivitetslogg, hvisRevurdering: () -> Unit, hvisUtbetaling: () -> Unit) {
+    fun reberegnUtbetaling(hendelse: IAktivitetslogg, hvisRevurdering: () -> Unit, hvisUtbetaling: () -> Unit) {
         check(kanIkkeForsøkesPåNy())
         forkast(hendelse)
         if (type == Utbetalingtype.REVURDERING) return hvisRevurdering()
         return hvisUtbetaling()
     }
 
-    internal fun harNærliggendeUtbetaling(other: Periode): Boolean {
+    fun harNærliggendeUtbetaling(other: Periode): Boolean {
         if (arbeidsgiverOppdrag.isEmpty() && personOppdrag.isEmpty()) return false
         return periode.overlapperMed(other.oppdaterFom(other.start.minusDays(16)))
     }
-    internal fun trekkerTilbakePenger() = listOf(arbeidsgiverOppdrag, personOppdrag).trekkerTilbakePenger()
+    fun trekkerTilbakePenger() = listOf(arbeidsgiverOppdrag, personOppdrag).trekkerTilbakePenger()
 
     // this kan revurdere other gitt at fagsystemId == other.fagsystemId,
     // og at this er lik den siste aktive utbetalingen for fagsystemIden
-    internal fun hørerSammen(other: Utbetaling) =
+    fun hørerSammen(other: Utbetaling) =
         this.korrelasjonsId == other.korrelasjonsId
 
-    internal fun harUtbetalinger() =
+    fun harUtbetalinger() =
         arbeidsgiverOppdrag.harUtbetalinger() || personOppdrag.harUtbetalinger()
 
-    internal fun harDelvisRefusjon() = arbeidsgiverOppdrag.harUtbetalinger () && personOppdrag.harUtbetalinger()
+    fun harDelvisRefusjon() = arbeidsgiverOppdrag.harUtbetalinger () && personOppdrag.harUtbetalinger()
 
-    internal fun erKlarForGodkjenning() = personOppdrag.erKlarForGodkjenning() && arbeidsgiverOppdrag.erKlarForGodkjenning()
+    fun erKlarForGodkjenning() = personOppdrag.erKlarForGodkjenning() && arbeidsgiverOppdrag.erKlarForGodkjenning()
 
-    internal fun opprett(hendelse: IAktivitetslogg) {
+    fun opprett(hendelse: IAktivitetslogg) {
         tilstand.opprett(this, hendelse)
     }
 
-    internal fun håndter(hendelse: UtbetalingsgodkjenningAdapter) {
+    fun håndter(hendelse: UtbetalingsgodkjenningPort) {
         if (!hendelse.erRelevant(id)) return
         hendelse.valider()
         godkjenn(hendelse, hendelse.vurdering())
     }
 
-    internal fun håndter(hendelse: GrunnbeløpsreguleringPort) {
+    fun håndter(hendelse: GrunnbeløpsreguleringPort) {
         godkjenn(hendelse, Vurdering.automatiskGodkjent)
     }
 
-    internal fun håndter(utbetaling: UtbetalingHendelsePort) {
+    fun håndter(utbetaling: UtbetalingHendelsePort) {
         if (!utbetaling.erRelevant(arbeidsgiverOppdrag.fagsystemId(), personOppdrag.fagsystemId(), id)) return
         if (harHåndtert(utbetaling)) return
         utbetaling.kontekst(this)
         tilstand.kvittér(this, utbetaling)
     }
 
-    internal fun håndter(utbetalingOverført: OverføringsinformasjonPort) {
+    fun håndter(utbetalingOverført: OverføringsinformasjonPort) {
         if (!utbetalingOverført.erRelevant(arbeidsgiverOppdrag.fagsystemId(), personOppdrag.fagsystemId(), id)) return
         if (harHåndtert(utbetalingOverført)) return
         utbetalingOverført.kontekst(this)
         tilstand.overført(this, utbetalingOverført)
     }
 
-    internal fun håndter(simulering: SimuleringPort) {
+    fun håndter(simulering: SimuleringPort) {
         if (!simulering.erRelevantForUtbetaling(id)) return
         personOppdrag.håndter(simulering)
         arbeidsgiverOppdrag.håndter(simulering)
     }
 
-    internal fun simuler(hendelse: IAktivitetslogg) {
+    fun simuler(hendelse: IAktivitetslogg) {
         hendelse.kontekst(this)
         tilstand.simuler(this, hendelse)
     }
 
-    internal fun godkjenning(
+    fun godkjenning(
         hendelse: IAktivitetslogg,
         periode: Periode,
         skjæringstidspunkt: LocalDate,
@@ -196,35 +196,35 @@ class Utbetaling private constructor(
         )
     }
 
-    internal fun håndter(påminnelse: UtbetalingpåminnelsePort) {
+    fun håndter(påminnelse: UtbetalingpåminnelsePort) {
         if (!påminnelse.erRelevant(id)) return
         påminnelse.kontekst(this)
         if (!påminnelse.gjelderStatus(tilstand.status)) return
         tilstand.håndter(this, påminnelse)
     }
 
-    internal fun gjelderFor(hendelse: UtbetalingHendelsePort) =
+    fun gjelderFor(hendelse: UtbetalingHendelsePort) =
         hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId(), personOppdrag.fagsystemId(), id)
 
-    internal fun gjelderFor(hendelse: UtbetalingsgodkjenningPort) =
+    fun gjelderFor(hendelse: UtbetalingsgodkjenningPort) =
         hendelse.erRelevant(id)
 
-    internal fun valider(simulering: SimuleringPort): IAktivitetslogg {
+    fun valider(simulering: SimuleringPort): IAktivitetslogg {
         arbeidsgiverOppdrag.valider(simulering)
         personOppdrag.valider(simulering)
         return simulering
     }
 
-    internal fun build(builder: UtbetalingVedtakFattetBuilder) {
+    fun build(builder: UtbetalingVedtakFattetBuilder) {
         builder.utbetalingId(id)
         vurdering?.build(builder)
     }
 
-    internal fun håndter(hendelse: AnnullerUtbetalingPort) {
+    fun håndter(hendelse: AnnullerUtbetalingPort) {
         godkjenn(hendelse, hendelse.vurdering())
     }
 
-    internal fun annuller(hendelse: AnnullerUtbetalingPort): Utbetaling? {
+    fun annuller(hendelse: AnnullerUtbetalingPort): Utbetaling? {
         if (!hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId())) {
             hendelse.info("Kan ikke annullere: hendelsen er ikke relevant for ${arbeidsgiverOppdrag.fagsystemId()}.")
             hendelse.funksjonellFeil(RV_UT_15)
@@ -233,14 +233,14 @@ class Utbetaling private constructor(
         return tilstand.annuller(this, hendelse)
     }
 
-    internal fun forkast(hendelse: IAktivitetslogg) {
+    fun forkast(hendelse: IAktivitetslogg) {
         hendelse.kontekst(this)
         tilstand.forkast(this, hendelse)
     }
 
-    internal fun arbeidsgiverOppdrag() = arbeidsgiverOppdrag
+    fun arbeidsgiverOppdrag() = arbeidsgiverOppdrag
 
-    internal fun personOppdrag() = personOppdrag
+    fun personOppdrag() = personOppdrag
 
     override fun toSpesifikkKontekst() =
         SpesifikkKontekst("Utbetaling", mapOf("utbetalingId" to "$id"))
@@ -252,7 +252,11 @@ class Utbetaling private constructor(
 
     private fun tilstand(neste: Tilstand, hendelse: IAktivitetslogg) {
         oppdatert = LocalDateTime.now()
-        if (Oppdrag.ingenFeil(arbeidsgiverOppdrag, personOppdrag) && !Oppdrag.synkronisert(arbeidsgiverOppdrag, personOppdrag)) return hendelse.info("Venter på status på det andre oppdraget før vi kan gå videre")
+        if (Oppdrag.ingenFeil(arbeidsgiverOppdrag, personOppdrag) && !Oppdrag.synkronisert(
+                arbeidsgiverOppdrag,
+                personOppdrag
+            )
+        ) return hendelse.info("Venter på status på det andre oppdraget før vi kan gå videre")
         val forrigeTilstand = tilstand
         tilstand = neste
         observers.forEach {
@@ -270,14 +274,14 @@ class Utbetaling private constructor(
     }
 
 
-    internal companion object {
+    companion object {
 
         val log: Logger = LoggerFactory.getLogger("Utbetaling")
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
         private const val systemident = "SPLEIS"
 
-        internal fun lagUtbetaling(
+        fun lagUtbetaling(
             utbetalinger: List<Utbetaling>,
             fødselsnummer: String,
             beregningId: UUID,
@@ -332,15 +336,15 @@ class Utbetaling private constructor(
             return nyUtbetaling.lagUtbetaling(type, korrelerendeUtbetaling, beregningId, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager)
         }
 
-        internal fun finnUtbetalingForAnnullering(utbetalinger: List<Utbetaling>, hendelse: AnnullerUtbetalingPort): Utbetaling? {
+        fun finnUtbetalingForAnnullering(utbetalinger: List<Utbetaling>, hendelse: AnnullerUtbetalingPort): Utbetaling? {
             return utbetalinger.aktive().lastOrNull() ?: run {
                 hendelse.funksjonellFeil(RV_UT_4)
                 return null
             }
         }
-        internal fun List<Utbetaling>.aktive() = grupperUtbetalinger(Utbetaling::erAktiv)
+        fun List<Utbetaling>.aktive() = grupperUtbetalinger(Utbetaling::erAktiv)
         private fun List<Utbetaling>.aktiveMedUbetalte() = grupperUtbetalinger(Utbetaling::erAktivEllerUbetalt)
-        internal fun List<Utbetaling>.aktive(periode: Periode) = this
+        fun List<Utbetaling>.aktive(periode: Periode) = this
             .aktive()
             .filter { utbetaling ->
                 utbetaling.periode.overlapperMed(periode) || utbetaling.periode.erRettFør(periode.start)
@@ -357,7 +361,7 @@ class Utbetaling private constructor(
                 .filterNot(Utbetaling::erAnnullering)
                 .toList()
 
-        internal fun List<Utbetaling>.tillaterOpprettelseAvUtbetaling(other: Utbetaling): Boolean {
+        fun List<Utbetaling>.tillaterOpprettelseAvUtbetaling(other: Utbetaling): Boolean {
             if (other.erAnnullering()) return true // må godta annulleringer ettersom de vil rydde opp i nettopp overlappende utbetalinger
             val overlappendeUtbetalingsperioder = overlappendeUtbetalingsperioder(other)
             if (overlappendeUtbetalingsperioder.isNotEmpty()) {
@@ -373,11 +377,11 @@ class Utbetaling private constructor(
                 .map { it.periode }
         }
 
-        internal fun List<Utbetaling>.harNærliggendeUtbetaling(periode: Periode) =
+        fun List<Utbetaling>.harNærliggendeUtbetaling(periode: Periode) =
             aktiveMedUbetalte().any { it.harNærliggendeUtbetaling(periode) }
 
-        internal fun List<Utbetaling>.harId(id: UUID) = any { it.id == id }
-        internal fun ferdigUtbetaling(
+        fun List<Utbetaling>.harId(id: UUID) = any { it.id == id }
+        fun ferdigUtbetaling(
             id: UUID,
             korrelasjonsId: UUID,
             beregningId: UUID,
@@ -417,7 +421,7 @@ class Utbetaling private constructor(
             oppdatert = oppdatert
         )
 
-        internal fun ferdigVurdering(
+        fun ferdigVurdering(
             godkjent: Boolean,
             ident: String,
             epost: String,
@@ -434,7 +438,7 @@ class Utbetaling private constructor(
         }
     }
 
-    internal fun accept(visitor: UtbetalingVisitor) {
+    fun accept(visitor: UtbetalingVisitor) {
         visitor.preVisitUtbetaling(
             this,
             id,
@@ -485,8 +489,8 @@ class Utbetaling private constructor(
         )
     }
 
-    internal fun utbetalingstidslinje() = utbetalingstidslinje
-    internal fun utbetalingstidslinje(periode: Periode) = utbetalingstidslinje.subset(periode)
+    fun utbetalingstidslinje() = utbetalingstidslinje
+    fun utbetalingstidslinje(periode: Periode) = utbetalingstidslinje.subset(periode)
 
     private fun overfør(nesteTilstand: Tilstand, hendelse: IAktivitetslogg) {
         overfør(hendelse)
@@ -509,14 +513,14 @@ class Utbetaling private constructor(
         tilstand(nesteTilstand, hendelse)
     }
 
-    internal fun nyVedtaksperiodeUtbetaling(vedtaksperiodeId: UUID) {
+    fun nyVedtaksperiodeUtbetaling(vedtaksperiodeId: UUID) {
         observers.forEach { it.nyVedtaksperiodeUtbetaling(this.id, vedtaksperiodeId) }
     }
 
-    internal fun overlapperMed(other: Utbetaling): Boolean {
+    fun overlapperMed(other: Utbetaling): Boolean {
         return this.periode.overlapperMed(other.periode)
     }
-    internal fun erNyereEnn(other: LocalDateTime): Boolean {
+    fun erNyereEnn(other: LocalDateTime): Boolean {
         return other <= tidsstempel
     }
     private fun lagreOverføringsinformasjon(hendelse: IAktivitetslogg, avstemmingsnøkkel: Long, tidspunkt: LocalDateTime) {
@@ -528,7 +532,7 @@ class Utbetaling private constructor(
     }
     override fun toString() = "$type(${tilstand.status}) - $periode"
 
-    internal interface Tilstand {
+    interface Tilstand {
         val status: Utbetalingstatus
         fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {}
 
@@ -588,14 +592,14 @@ class Utbetaling private constructor(
         fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {}
     }
 
-    internal object Ny : Tilstand {
+    object Ny : Tilstand {
         override val status = Utbetalingstatus.NY
         override fun opprett(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             utbetaling.tilstand(Ubetalt, hendelse)
         }
     }
 
-    internal object Ubetalt : Tilstand {
+    object Ubetalt : Tilstand {
         override val status = Utbetalingstatus.IKKE_UTBETALT
         override fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             hendelse.info("Forkaster utbetaling")
@@ -636,7 +640,7 @@ class Utbetaling private constructor(
         }
     }
 
-    internal object GodkjentUtenUtbetaling : Tilstand {
+    object GodkjentUtenUtbetaling : Tilstand {
         override val status = Utbetalingstatus.GODKJENT_UTEN_UTBETALING
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             check(!utbetaling.harUtbetalinger())
@@ -658,7 +662,7 @@ class Utbetaling private constructor(
         ).also { hendelse.info("Oppretter annullering med id ${it.id}") }
     }
 
-    internal object Godkjent : Tilstand {
+    object Godkjent : Tilstand {
         override val status = Utbetalingstatus.GODKJENT
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             utbetaling.overfør(Sendt, hendelse)
@@ -669,7 +673,7 @@ class Utbetaling private constructor(
         }
     }
 
-    internal object Sendt : Tilstand {
+    object Sendt : Tilstand {
         override val status = Utbetalingstatus.SENDT
         private val makstid = Duration.ofDays(7)
 
@@ -697,7 +701,7 @@ class Utbetaling private constructor(
         }
     }
 
-    internal object Overført : Tilstand {
+    object Overført : Tilstand {
         override val status = Utbetalingstatus.OVERFØRT
         override fun håndter(utbetaling: Utbetaling, påminnelse: UtbetalingpåminnelsePort) {
             utbetaling.overfør(påminnelse)
@@ -718,7 +722,7 @@ class Utbetaling private constructor(
         }
     }
 
-    internal object Annullert : Tilstand {
+    object Annullert : Tilstand {
         override val status = Utbetalingstatus.ANNULLERT
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             utbetaling.vurdering?.annullert(utbetaling)
@@ -726,7 +730,7 @@ class Utbetaling private constructor(
         }
     }
 
-    internal object Utbetalt : Tilstand {
+    object Utbetalt : Tilstand {
         override val status = Utbetalingstatus.UTBETALT
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             utbetaling.vurdering?.utbetalt(utbetaling)
@@ -748,7 +752,7 @@ class Utbetaling private constructor(
             ).also { hendelse.info("Oppretter annullering med id ${it.id}") }
     }
 
-    internal object UtbetalingFeilet : Tilstand {
+    object UtbetalingFeilet : Tilstand {
         override val status = Utbetalingstatus.UTBETALING_FEILET
         override fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             hendelse.info("Forkaster feilet utbetaling")
@@ -771,10 +775,10 @@ class Utbetaling private constructor(
         }
     }
 
-    internal object IkkeGodkjent : Tilstand {
+    object IkkeGodkjent : Tilstand {
         override val status = Utbetalingstatus.IKKE_GODKJENT
     }
-    internal object Forkastet : Tilstand {
+    object Forkastet : Tilstand {
         override val status = Utbetalingstatus.FORKASTET
     }
 
@@ -785,15 +789,15 @@ class Utbetaling private constructor(
         private val tidspunkt: LocalDateTime,
         private val automatiskBehandling: Boolean
     ) {
-        internal companion object {
+        companion object {
             val automatiskGodkjent get() = Vurdering(true, systemident, "tbd@nav.no", LocalDateTime.now(), true)
         }
 
-        internal fun accept(visitor: UtbetalingVurderingVisitor) {
+        fun accept(visitor: UtbetalingVurderingVisitor) {
             visitor.visitVurdering(this, ident, epost, tidspunkt, automatiskBehandling, godkjent)
         }
 
-        internal fun annullert(utbetaling: Utbetaling) {
+        fun annullert(utbetaling: Utbetaling) {
             utbetaling.observers.forEach {
                 it.utbetalingAnnullert(
                     id = utbetaling.id,
@@ -808,7 +812,7 @@ class Utbetaling private constructor(
             }
         }
 
-        internal fun utbetalt(utbetaling: Utbetaling) {
+        fun utbetalt(utbetaling: Utbetaling) {
             utbetaling.observers.forEach {
                 it.utbetalingUtbetalt(
                     utbetaling.id,
@@ -830,7 +834,7 @@ class Utbetaling private constructor(
             }
         }
 
-        internal fun avsluttetUtenUtbetaling(utbetaling: Utbetaling) {
+        fun avsluttetUtenUtbetaling(utbetaling: Utbetaling) {
             utbetaling.observers.forEach {
                 it.utbetalingUtenUtbetaling(
                     utbetaling.id,
@@ -852,11 +856,11 @@ class Utbetaling private constructor(
             }
         }
 
-        internal fun overfør(hendelse: IAktivitetslogg, oppdrag: Oppdrag, maksdato: LocalDate?) {
+        fun overfør(hendelse: IAktivitetslogg, oppdrag: Oppdrag, maksdato: LocalDate?) {
             oppdrag.overfør(hendelse, maksdato, ident)
         }
 
-        internal fun avgjør(utbetaling: Utbetaling) =
+        fun avgjør(utbetaling: Utbetaling) =
             when {
                 !godkjent -> IkkeGodkjent
                 utbetaling.harUtbetalinger() -> Godkjent
@@ -864,7 +868,7 @@ class Utbetaling private constructor(
                 else -> GodkjentUtenUtbetaling
             }
 
-        internal fun build(builder: UtbetalingVedtakFattetBuilder) {
+        fun build(builder: UtbetalingVedtakFattetBuilder) {
             builder.utbetalingVurdert(tidspunkt)
         }
     }
@@ -876,7 +880,7 @@ interface UtbetalingVedtakFattetBuilder {
     fun utbetalingId(id: UUID): UtbetalingVedtakFattetBuilder
 }
 
-internal fun Utbetalingstatus.tilTilstand() = when(this) {
+fun Utbetalingstatus.tilTilstand() = when(this) {
     Utbetalingstatus.NY -> Utbetaling.Ny
     Utbetalingstatus.IKKE_UTBETALT -> Utbetaling.Ubetalt
     Utbetalingstatus.IKKE_GODKJENT -> Utbetaling.IkkeGodkjent

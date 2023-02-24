@@ -6,6 +6,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 
 interface UtbetalingHendelsePort: OverføringsinformasjonPort {
@@ -38,4 +39,15 @@ interface UtbetalingpåminnelsePort: IAktivitetslogg {
     fun erRelevant(id: UUID): Boolean
     fun harOversteget(makstid: Duration): Boolean
     fun gjelderStatus(tilstand: Utbetalingstatus): Boolean
+}
+
+interface AnnullerUtbetalingPort: IAktivitetslogg {
+    fun vurdering(): Utbetaling.Vurdering
+    fun erRelevant(fagsystemId: String): Boolean
+}
+
+interface UtbetalingsgodkjenningPort: IAktivitetslogg {
+    fun erRelevant(id: UUID): Boolean
+    fun valider()
+    fun vurdering(): Utbetaling.Vurdering
 }

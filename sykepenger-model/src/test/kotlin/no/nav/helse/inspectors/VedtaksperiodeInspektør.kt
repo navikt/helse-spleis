@@ -8,7 +8,6 @@ import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.InntektsmeldingInfo
-import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
 import no.nav.helse.person.VilkårsgrunnlagHistorikk

@@ -7,7 +7,7 @@ import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.økonomi.Økonomi
 
-internal class UtbetalingkladdBuilder(førsteDag: LocalDate, arbeidsgivermottaker: String, personmottaker: String) {
+class UtbetalingkladdBuilder(førsteDag: LocalDate, arbeidsgivermottaker: String, personmottaker: String) {
     private var periode: Periode = førsteDag.somPeriode()
     // bruker samme "sak id" i OS for begge oppdragene
     // TODO: krever at Overføringer/kvitteringer inneholder fagområde, ellers
@@ -24,9 +24,9 @@ internal class UtbetalingkladdBuilder(førsteDag: LocalDate, arbeidsgivermottake
         fagområde = Sykepenger
     )
 
-    internal fun build() = Utbetalingkladd(periode, arbeidsgiveroppdragBuilder.build(), personoppdragBuilder.build())
+    fun build() = Utbetalingkladd(periode, arbeidsgiveroppdragBuilder.build(), personoppdragBuilder.build())
 
-    internal fun betalingsdag(beløpkilde: Beløpkilde, dato: LocalDate, økonomi: Økonomi) {
+    fun betalingsdag(beløpkilde: Beløpkilde, dato: LocalDate, økonomi: Økonomi) {
         periode = periode.oppdaterTom(dato)
         økonomi.medAvrundetData { grad, aktuellDagsinntekt ->
             arbeidsgiveroppdragBuilder.betalingsdag(beløpkilde, dato, grad, aktuellDagsinntekt)
@@ -34,7 +34,7 @@ internal class UtbetalingkladdBuilder(førsteDag: LocalDate, arbeidsgivermottake
         }
     }
 
-    internal fun betalingshelgedag(dato: LocalDate, økonomi: Økonomi) {
+    fun betalingshelgedag(dato: LocalDate, økonomi: Økonomi) {
         periode = periode.oppdaterTom(dato)
         økonomi.brukAvrundetGrad { grad->
             arbeidsgiveroppdragBuilder.betalingshelgedag(dato, grad)
@@ -42,7 +42,7 @@ internal class UtbetalingkladdBuilder(førsteDag: LocalDate, arbeidsgivermottake
         }
     }
 
-    internal fun ikkeBetalingsdag(dato: LocalDate) {
+    fun ikkeBetalingsdag(dato: LocalDate) {
         periode = periode.oppdaterTom(dato)
         arbeidsgiveroppdragBuilder.ikkeBetalingsdag()
         personoppdragBuilder.ikkeBetalingsdag()
