@@ -789,7 +789,7 @@ class Utbetaling private constructor(
             val automatiskGodkjent get() = Vurdering(true, systemident, "tbd@nav.no", LocalDateTime.now(), true)
         }
 
-        internal fun accept(visitor: UtbetalingVisitor) {
+        internal fun accept(visitor: UtbetalingVurderingVisitor) {
             visitor.visitVurdering(this, ident, epost, tidspunkt, automatiskBehandling, godkjent)
         }
 
