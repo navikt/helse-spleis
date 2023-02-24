@@ -5,4 +5,9 @@ dependencies {
 
     implementation(project(":sykepenger-primitiver"))
     implementation(project(":sykepenger-aktivitetslogg"))
+
+    implementation(libs.bundles.logging) {
+        exclude("com.fasterxml.jackson.core")
+        exclude("com.fasterxml.jackson.dataformat")
+    }
 }
