@@ -488,3 +488,4 @@ class Oppdrag private constructor(
     }
 }
 
+enum class Oppdragstatus { OVERFØRT, AKSEPTERT, AKSEPTERT_MED_FEIL, AVVIST, FEIL }

@@ -28,7 +28,6 @@ import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.FORKASTET
-import no.nav.helse.utbetalingslinjer.tilTilstand
 import no.nav.helse.økonomi.Prosent
 import org.slf4j.LoggerFactory
 import no.nav.helse.utbetalingslinjer.Utbetaling as InternUtbetaling

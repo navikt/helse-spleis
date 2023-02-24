@@ -2,11 +2,6 @@ package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
 
-interface Beløpkilde {
-    fun arbeidsgiverbeløp(): Int
-    fun personbeløp(): Int
-}
-
 enum class Fagområde(
     val verdi: String,
     private val beløpStrategy: (Beløpkilde) -> Int,

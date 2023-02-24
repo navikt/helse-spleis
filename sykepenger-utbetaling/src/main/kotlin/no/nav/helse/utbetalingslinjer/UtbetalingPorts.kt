@@ -48,3 +48,13 @@ interface UtbetalingsgodkjenningPort: IAktivitetslogg {
     fun valider()
     fun vurdering(): Utbetaling.Vurdering
 }
+
+interface Beløpkilde {
+    fun arbeidsgiverbeløp(): Int
+    fun personbeløp(): Int
+}
+
+interface UtbetalingVedtakFattetBuilder {
+    fun utbetalingVurdert(tidspunkt: LocalDateTime): UtbetalingVedtakFattetBuilder
+    fun utbetalingId(id: UUID): UtbetalingVedtakFattetBuilder
+}

@@ -23,8 +23,8 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_9
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.trekkerTilbakePenger
-import no.nav.helse.utbetalingslinjer.Utbetalingtype.ANNULLERING
 import no.nav.helse.utbetalingslinjer.Utbetalingkladd.Companion.finnKladd
+import no.nav.helse.utbetalingslinjer.Utbetalingtype.ANNULLERING
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -868,21 +868,45 @@ class Utbetaling private constructor(
 
 }
 
-interface UtbetalingVedtakFattetBuilder {
-    fun utbetalingVurdert(tidspunkt: LocalDateTime): UtbetalingVedtakFattetBuilder
-    fun utbetalingId(id: UUID): UtbetalingVedtakFattetBuilder
+enum class Utbetalingstatus {
+    NY,
+    IKKE_UTBETALT,
+    IKKE_GODKJENT,
+    GODKJENT,
+    SENDT,
+    OVERFØRT,
+    UTBETALT,
+    GODKJENT_UTEN_UTBETALING,
+    UTBETALING_FEILET,
+    ANNULLERT,
+    FORKASTET;
+    fun tilTilstand() = when(this) {
+        NY -> Utbetaling.Ny
+        IKKE_UTBETALT -> Utbetaling.Ubetalt
+        IKKE_GODKJENT -> Utbetaling.IkkeGodkjent
+        GODKJENT -> Utbetaling.Godkjent
+        SENDT -> Utbetaling.Sendt
+        OVERFØRT -> Utbetaling.Overført
+        UTBETALT -> Utbetaling.Utbetalt
+        GODKJENT_UTEN_UTBETALING -> Utbetaling.GodkjentUtenUtbetaling
+        UTBETALING_FEILET -> Utbetaling.UtbetalingFeilet
+        ANNULLERT -> Utbetaling.Annullert
+        FORKASTET -> Utbetaling.Forkastet
+    }
 }
 
-fun Utbetalingstatus.tilTilstand() = when(this) {
-    Utbetalingstatus.NY -> Utbetaling.Ny
-    Utbetalingstatus.IKKE_UTBETALT -> Utbetaling.Ubetalt
-    Utbetalingstatus.IKKE_GODKJENT -> Utbetaling.IkkeGodkjent
-    Utbetalingstatus.GODKJENT -> Utbetaling.Godkjent
-    Utbetalingstatus.SENDT -> Utbetaling.Sendt
-    Utbetalingstatus.OVERFØRT -> Utbetaling.Overført
-    Utbetalingstatus.UTBETALT -> Utbetaling.Utbetalt
-    Utbetalingstatus.GODKJENT_UTEN_UTBETALING -> Utbetaling.GodkjentUtenUtbetaling
-    Utbetalingstatus.UTBETALING_FEILET -> Utbetaling.UtbetalingFeilet
-    Utbetalingstatus.ANNULLERT -> Utbetaling.Annullert
-    Utbetalingstatus.FORKASTET -> Utbetaling.Forkastet
+enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }
+enum class Endringskode { NY, UEND, ENDR }
+/* en enum-port/adapter-greie. Alternativet er en modul som inneholder ... kodeverk */
+enum class UtbetalingInntektskilde { EN_ARBEIDSGIVER, FLERE_ARBEIDSGIVERE }
+enum class Klassekode(val verdi: String) {
+    RefusjonIkkeOpplysningspliktig(verdi = "SPREFAG-IOP"),
+    RefusjonFeriepengerIkkeOpplysningspliktig(verdi = "SPREFAGFER-IOP"),
+    SykepengerArbeidstakerOrdinær(verdi = "SPATORD"),
+    SykepengerArbeidstakerFeriepenger(verdi = "SPATFER");
+
+    companion object {
+        private val map = values().associateBy(Klassekode::verdi)
+        fun from(verdi: String) = requireNotNull(map[verdi]) { "Støtter ikke klassekode: $verdi" }
+    }
 }

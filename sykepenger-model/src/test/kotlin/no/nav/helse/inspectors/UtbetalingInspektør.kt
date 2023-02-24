@@ -10,7 +10,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalt
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
-import no.nav.helse.utbetalingslinjer.tilTilstand
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import kotlin.properties.Delegates
 
