@@ -237,7 +237,7 @@ internal class UtbetalingBuilder(utbetaling: InternUtbetaling) : UtbetalingVisit
             gjenståendeSykedager = gjenståendeSykedager,
             forbrukteSykedager = forbrukteSykedager,
             type = type.toString(),
-            tilstand = utbetalingstatus.tilTilstand()::class.simpleName!!,
+            tilstand = utbetalingstatus.tilstandsnavn(),
             arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
             personNettoBeløp = personNettoBeløp,
             arbeidsgiverFagsystemId = oppdragBuilder.arbeidsgiverFagsystemId(),

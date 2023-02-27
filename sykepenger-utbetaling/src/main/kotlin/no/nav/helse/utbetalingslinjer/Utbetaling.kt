@@ -893,6 +893,8 @@ enum class Utbetalingstatus {
         ANNULLERT -> Utbetaling.Annullert
         FORKASTET -> Utbetaling.Forkastet
     }
+
+    fun tilstandsnavn() = tilTilstand()::class.simpleName!!
 }
 
 enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }
