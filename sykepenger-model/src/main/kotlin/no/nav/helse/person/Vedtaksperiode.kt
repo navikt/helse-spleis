@@ -595,14 +595,9 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterUtbetalingHendelse(hendelse: UtbetalingHendelse, onUtbetalt: () -> Unit) {
-        when {
-            utbetalinger.harFeilet() -> tilstand(hendelse, UtbetalingFeilet) {
-                hendelse.funksjonellFeil(RV_UT_5)
-            }
-            utbetalinger.erUtbetalt() -> {
-                onUtbetalt()
-            }
-        }
+        if (hendelse.harFunksjonelleFeilEllerVerre()) return hendelse.funksjonellFeil(RV_UT_5)
+        if (!utbetalinger.erUtbetalt()) return
+        onUtbetalt()
     }
 
     private fun ferdigstillVedtak(hendelse: IAktivitetslogg) {

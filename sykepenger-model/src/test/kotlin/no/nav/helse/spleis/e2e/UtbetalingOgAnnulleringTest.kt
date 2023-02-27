@@ -22,12 +22,13 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.OVERFØRT
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.SENDT
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -189,7 +190,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING
         )
-        assertEquals(Utbetalingstatus.SENDT, inspektør.utbetalingtilstand(0))
+        assertEquals(SENDT, inspektør.utbetalingtilstand(0))
     }
 
     @Test
@@ -202,7 +203,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.FEIL, sendOverførtKvittering = false)
-        håndterUtbetalingpåminnelse(0, Utbetalingstatus.SENDT, LocalDateTime.now().minusDays(1))
+        håndterUtbetalingpåminnelse(0, SENDT, LocalDateTime.now().minusDays(1))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -215,7 +216,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING
         )
-        assertEquals(Utbetalingstatus.SENDT, inspektør.utbetalingtilstand(0))
+        assertEquals(SENDT, inspektør.utbetalingtilstand(0))
     }
 
     @Test
@@ -228,7 +229,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.FEIL, sendOverførtKvittering = false)
-        håndterUtbetalingpåminnelse(0, Utbetalingstatus.SENDT, LocalDateTime.now().minusDays(8))
+        håndterUtbetalingpåminnelse(0, SENDT, LocalDateTime.now().minusDays(8))
         håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING)
         assertTilstander(
             1.vedtaksperiode,
@@ -240,10 +241,9 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            UTBETALING_FEILET
+            TIL_UTBETALING
         )
-        assertEquals(Utbetalingstatus.UTBETALING_FEILET, inspektør.utbetalingtilstand(0))
+        assertEquals(SENDT, inspektør.utbetalingtilstand(0))
     }
 
     @Test
@@ -266,8 +266,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            UTBETALING_FEILET
+            TIL_UTBETALING
         )
     }
 
@@ -281,9 +280,9 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AVVIST)
-        assertEquals(Utbetalingstatus.UTBETALING_FEILET, inspektør.utbetalingtilstand(0))
+        assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
         håndterUtbetalingpåminnelse(0, Utbetalingstatus.UTBETALING_FEILET)
-        assertEquals(Utbetalingstatus.OVERFØRT, inspektør.utbetalingtilstand(0))
+        assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
         håndterUtbetalt(Oppdragstatus.AKSEPTERT, sendOverførtKvittering = false)
         assertTilstander(
             1.vedtaksperiode,
@@ -296,7 +295,6 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            UTBETALING_FEILET,
             AVSLUTTET
         )
     }

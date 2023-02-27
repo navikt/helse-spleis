@@ -33,7 +33,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -680,7 +679,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(INNTEKT /2, skjæringstidspunkt = 1.januar)
         nullstillTilstandsendringer()
         håndterUtbetalt(status = Oppdragstatus.AVVIST)
-        assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, UTBETALING_FEILET)
+        assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
         assertNull(observatør.vedtakFattetEvent[1.vedtaksperiode.id(ORGNUMMER)])
     }
 
@@ -713,7 +712,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            UTBETALING_FEILET,
+            AVVENTER_REVURDERING
         )
     }
 

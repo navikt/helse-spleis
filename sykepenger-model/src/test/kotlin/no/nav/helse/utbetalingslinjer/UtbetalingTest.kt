@@ -570,7 +570,7 @@ internal class UtbetalingTest {
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
         kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), AVVIST)
-        assertEquals(Utbetalingstatus.UTBETALING_FEILET, utbetaling.inspektør.tilstand)
+        assertEquals(Utbetalingstatus.SENDT, utbetaling.inspektør.tilstand)
     }
 
     @Test
@@ -582,7 +582,7 @@ internal class UtbetalingTest {
         kvittèr(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId(), AKSEPTERT)
         assertEquals(AVVIST, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.status())
         assertEquals(AKSEPTERT, utbetaling.inspektør.personOppdrag.inspektør.status())
-        assertEquals(Utbetalingstatus.UTBETALING_FEILET, utbetaling.inspektør.tilstand)
+        assertEquals(Utbetalingstatus.SENDT, utbetaling.inspektør.tilstand)
     }
 
     @Test
@@ -594,7 +594,7 @@ internal class UtbetalingTest {
         overfør(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId())
         assertEquals(AVVIST, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.status())
         assertEquals(OVERFØRT, utbetaling.inspektør.personOppdrag.inspektør.status())
-        assertEquals(Utbetalingstatus.UTBETALING_FEILET, utbetaling.inspektør.tilstand)
+        assertEquals(Utbetalingstatus.OVERFØRT, utbetaling.inspektør.tilstand)
     }
 
     @Test
@@ -604,7 +604,7 @@ internal class UtbetalingTest {
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
         kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), AKSEPTERT)
         kvittèr(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId(), AVVIST)
-        assertEquals(Utbetalingstatus.UTBETALING_FEILET, utbetaling.inspektør.tilstand)
+        assertEquals(Utbetalingstatus.SENDT, utbetaling.inspektør.tilstand)
     }
 
     @Test

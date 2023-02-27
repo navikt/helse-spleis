@@ -37,7 +37,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad out of order`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad out of order innenfor 18 dager`
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
@@ -947,7 +946,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterUtbetalt(status = Oppdragstatus.AVVIST)
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, UTBETALING_FEILET)
+        assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertNull(observatør.vedtakFattetEvent[1.vedtaksperiode.id(ORGNUMMER)])
     }

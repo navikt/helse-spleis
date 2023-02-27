@@ -44,7 +44,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.serde.api.dto.BeregnetPeriode
@@ -60,7 +59,6 @@ import no.nav.helse.serde.api.dto.Periodetilstand.RevurderingFeilet
 import no.nav.helse.serde.api.dto.Periodetilstand.TilAnnullering
 import no.nav.helse.serde.api.dto.Periodetilstand.TilGodkjenning
 import no.nav.helse.serde.api.dto.Periodetilstand.TilUtbetaling
-import no.nav.helse.serde.api.dto.Periodetilstand.UtbetalingFeilet
 import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
 import no.nav.helse.serde.api.dto.Periodetilstand.UtbetaltVenterPåAnnenPeriode
 import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
@@ -1327,10 +1325,10 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(status = Oppdragstatus.FEIL)
 
-        assertTilstand(1.vedtaksperiode, UTBETALING_FEILET)
+        assertTilstand(1.vedtaksperiode, TIL_UTBETALING)
         0.generasjon {
             assertEquals(1, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.UtbetalingFeilet avType UTBETALING medTilstand UtbetalingFeilet
+            beregnetPeriode(0) er Utbetalingstatus.Overført avType UTBETALING medTilstand TilUtbetaling
         }
     }
 

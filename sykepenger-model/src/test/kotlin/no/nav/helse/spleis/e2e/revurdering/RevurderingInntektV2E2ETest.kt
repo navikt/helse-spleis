@@ -23,7 +23,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -760,7 +759,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(status = Oppdragstatus.FEIL)
         håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-        assertTilstander(2.vedtaksperiode, TIL_UTBETALING, UTBETALING_FEILET)
+        assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
     }
 
 

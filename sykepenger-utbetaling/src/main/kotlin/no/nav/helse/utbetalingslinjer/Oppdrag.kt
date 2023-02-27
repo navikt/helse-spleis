@@ -56,6 +56,7 @@ class Oppdrag private constructor(
         }
 
         fun ingenFeil(vararg oppdrag: Oppdrag) = oppdrag.none { it.status in listOf(AVVIST, FEIL) }
+        fun harFeil(vararg oppdrag: Oppdrag) = oppdrag.any { it.status in listOf(AVVIST, FEIL) }
         fun kanIkkeForsøkesPåNy(vararg oppdrag: Oppdrag) = oppdrag.any { it.status == AVVIST }
         fun ferdigOppdrag(
             mottaker: String,
@@ -165,9 +166,9 @@ class Oppdrag private constructor(
         maksdato: LocalDate?,
         saksbehandler: String
     ) {
+        if (status == Oppdragstatus.AKSEPTERT) return aktivitetslogg.info("Overfører ikke oppdrag som allerede er akseptert for fagområde=$fagområde med fagsystemId=$fagsystemId")
         if (!harUtbetalinger()) return aktivitetslogg.info("Overfører ikke oppdrag uten endring for fagområde=$fagområde med fagsystemId=$fagsystemId")
         check(endringskode != Endringskode.UEND)
-        check(status != Oppdragstatus.AKSEPTERT)
         aktivitetslogg.kontekst(this)
         aktivitetslogg.behov(Behovtype.Utbetaling, "Trenger å sende utbetaling til Oppdrag", behovdetaljer(saksbehandler, maksdato))
     }

@@ -37,7 +37,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
@@ -122,7 +121,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
         nullstillTilstandsendringer()
         håndterUtbetalt(status = Oppdragstatus.AVVIST)
-        assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, UTBETALING_FEILET)
+        assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
         assertNull(observatør.vedtakFattetEvent[1.vedtaksperiode.id(ORGNUMMER)])
     }
 
@@ -134,7 +133,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-        assertTilstander(2.vedtaksperiode, UTBETALING_FEILET)
+        assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
     }
 
     @Test
@@ -160,8 +159,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
-            TIL_UTBETALING,
-            UTBETALING_FEILET
+            TIL_UTBETALING
         )
     }
 

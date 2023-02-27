@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingslinjer
 
-import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -14,7 +13,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_12
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_13
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_14
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_15
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_6
@@ -499,7 +497,7 @@ class Utbetaling private constructor(
         hendelse.valider()
         val nesteTilstand = when {
             tilstand == Sendt && hendelse.skalForsøkesIgjen() -> return // utbetaling gjør retry ved neste påminnelse
-            hendelse.harFunksjonelleFeilEllerVerre() -> UtbetalingFeilet
+            Oppdrag.harFeil(arbeidsgiverOppdrag, personOppdrag) -> return // Får funksjonelle feil fra Spenn selv om det kan prøves på ny
             type == ANNULLERING -> Annullert
             else -> Utbetalt
         }
@@ -668,14 +666,8 @@ class Utbetaling private constructor(
 
     internal object Sendt : Tilstand {
         override val status = Utbetalingstatus.SENDT
-        private val makstid = Duration.ofDays(7)
 
         override fun håndter(utbetaling: Utbetaling, påminnelse: UtbetalingpåminnelsePort) {
-            if (påminnelse.harOversteget(makstid)) {
-                påminnelse.info("Gir opp å prøve utbetaling på nytt etter ${makstid.toHours()} timer")
-                påminnelse.funksjonellFeil(RV_UT_14)
-                return utbetaling.tilstand(UtbetalingFeilet, påminnelse)
-            }
             utbetaling.overfør(påminnelse)
         }
 
