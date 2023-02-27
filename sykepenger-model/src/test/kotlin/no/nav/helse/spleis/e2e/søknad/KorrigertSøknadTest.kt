@@ -48,7 +48,7 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
-import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -105,7 +105,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         tilSimulering(3.januar, 26.januar, 100.prosent, 3.januar)
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(3.januar, 26.januar, 80.prosent))
-        assertEquals(Utbetaling.Forkastet, inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.tilstand)
+        assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.tilstand)
         assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
     }
 

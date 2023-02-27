@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
@@ -34,7 +33,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -748,7 +747,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             )
             inspektør.utbetalinger(1.vedtaksperiode).also { utbetalinger ->
                 assertEquals(2, utbetalinger.size)
-                assertEquals(Utbetaling.Forkastet, utbetalinger.last().inspektør.tilstand)
+                assertEquals(Utbetalingstatus.FORKASTET, utbetalinger.last().inspektør.tilstand)
             }
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -786,7 +785,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             )
             inspektør.utbetalinger(1.vedtaksperiode).also { utbetalinger ->
                 assertEquals(2, utbetalinger.size)
-                assertEquals(Utbetaling.Forkastet, utbetalinger.last().inspektør.tilstand)
+                assertEquals(Utbetalingstatus.FORKASTET, utbetalinger.last().inspektør.tilstand)
             }
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -912,15 +911,4 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         }
     }
 
-    private fun TestPerson.TestArbeidsgiver.assertRevurderingUtenEndring(vedtakperiodeId: UUID, block:() -> Unit) {
-        val sykdomsHistorikkElementerFør = inspektør.sykdomshistorikk.inspektør.elementer()
-        val utbetalingerFør = inspektør.utbetalinger(vedtakperiodeId)
-        block()
-        val utbetalingerEtter = inspektør.utbetalinger(vedtakperiodeId)
-        val sykdomsHistorikkElementerEtter = inspektør.sykdomshistorikk.inspektør.elementer()
-        assertEquals(1, utbetalingerEtter.size - utbetalingerFør.size) { "Forventet at det skal være opprettet en utbetaling" }
-        assertEquals(Endringskode.UEND, utbetalingerEtter.last().inspektør.arbeidsgiverOppdrag.inspektør.endringskode)
-        assertEquals(0, utbetalingerEtter.last().inspektør.personOppdrag.size)
-        assertEquals(sykdomsHistorikkElementerFør, sykdomsHistorikkElementerEtter) { "Forventet at sykdomshistorikken skal være uendret" }
-    }
 }

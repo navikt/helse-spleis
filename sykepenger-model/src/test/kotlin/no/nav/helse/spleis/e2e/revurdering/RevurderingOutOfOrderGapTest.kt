@@ -85,7 +85,7 @@ import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -537,9 +537,9 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         val a2FørsteUtbetaling = inspektør(a2).utbetaling(0).inspektør
         val a2AndreUtbetaling = inspektør(a2).utbetaling(2).inspektør
 
-        assertEquals(a1Utbetaling.tilstand, Utbetaling.Utbetalt)
-        assertEquals(a2FørsteUtbetaling.tilstand, Utbetaling.Utbetalt)
-        assertEquals(a2AndreUtbetaling.tilstand, Utbetaling.Utbetalt)
+        assertEquals(a1Utbetaling.tilstand, Utbetalingstatus.UTBETALT)
+        assertEquals(a2FørsteUtbetaling.tilstand, Utbetalingstatus.UTBETALT)
+        assertEquals(a2AndreUtbetaling.tilstand, Utbetalingstatus.UTBETALT)
         assertEquals(a2FørsteUtbetaling.korrelasjonsId, a2AndreUtbetaling.korrelasjonsId)
         a2FørsteUtbetaling.arbeidsgiverOppdrag.also { oppdrag ->
             assertEquals(1, oppdrag.size)

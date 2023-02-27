@@ -5,7 +5,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -16,7 +15,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
-import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -31,7 +30,7 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET)
-        assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(1))
+        assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetalingtilstand(1))
     }
 
     @Test
@@ -58,7 +57,7 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             AVSLUTTET
         )
-        assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(1))
+        assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetalingtilstand(1))
     }
 
     @Test
@@ -72,7 +71,7 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
-            TilstandType.AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,

@@ -38,7 +38,7 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.person
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
-import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -285,7 +285,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, false, "test"))
             inspektør.utbetalinger(1.vedtaksperiode).also { utbetalinger ->
                 assertEquals(2, utbetalinger.size)
-                assertEquals(Utbetaling.Forkastet, utbetalinger.last().inspektør.tilstand)
+                assertEquals(Utbetalingstatus.FORKASTET, utbetalinger.last().inspektør.tilstand)
             }
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)

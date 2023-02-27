@@ -8,7 +8,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -39,7 +39,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         assertEquals(1, observatør.vedtakFattetEvent.size)
         val event = observatør.vedtakFattetEvent.getValue(1.vedtaksperiode.id(ORGNUMMER))
         assertEquals(inspektør.utbetaling(0).inspektør.utbetalingId, event.utbetalingId)
-        assertEquals(Utbetaling.Utbetalt, inspektør.utbetaling(0).inspektør.tilstand)
+        assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetaling(0).inspektør.tilstand)
     }
 
     @Test
@@ -71,6 +71,6 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         assertEquals(2, observatør.vedtakFattetEvent.size)
         val event = observatør.vedtakFattetEvent.getValue(2.vedtaksperiode.id(ORGNUMMER))
         assertEquals(inspektør.utbetaling(1).inspektør.utbetalingId, event.utbetalingId)
-        assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetaling(1).inspektør.tilstand)
+        assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetaling(1).inspektør.tilstand)
     }
 }

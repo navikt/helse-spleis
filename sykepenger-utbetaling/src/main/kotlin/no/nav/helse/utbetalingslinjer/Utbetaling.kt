@@ -525,7 +525,7 @@ class Utbetaling private constructor(
     }
     override fun toString() = "$type(${tilstand.status}) - $periode"
 
-    interface Tilstand {
+    internal interface Tilstand {
         val status: Utbetalingstatus
         fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {}
 
@@ -585,14 +585,14 @@ class Utbetaling private constructor(
         fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {}
     }
 
-    object Ny : Tilstand {
+    internal object Ny : Tilstand {
         override val status = Utbetalingstatus.NY
         override fun opprett(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             utbetaling.tilstand(Ubetalt, hendelse)
         }
     }
 
-    object Ubetalt : Tilstand {
+    internal object Ubetalt : Tilstand {
         override val status = Utbetalingstatus.IKKE_UTBETALT
         override fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             hendelse.info("Forkaster utbetaling")
@@ -633,7 +633,7 @@ class Utbetaling private constructor(
         }
     }
 
-    object GodkjentUtenUtbetaling : Tilstand {
+    internal object GodkjentUtenUtbetaling : Tilstand {
         override val status = Utbetalingstatus.GODKJENT_UTEN_UTBETALING
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             check(!utbetaling.harUtbetalinger())
@@ -655,7 +655,7 @@ class Utbetaling private constructor(
         ).also { hendelse.info("Oppretter annullering med id ${it.id}") }
     }
 
-    object Godkjent : Tilstand {
+    internal object Godkjent : Tilstand {
         override val status = Utbetalingstatus.GODKJENT
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             utbetaling.overfør(Sendt, hendelse)
@@ -666,7 +666,7 @@ class Utbetaling private constructor(
         }
     }
 
-    object Sendt : Tilstand {
+    internal object Sendt : Tilstand {
         override val status = Utbetalingstatus.SENDT
         private val makstid = Duration.ofDays(7)
 
@@ -694,7 +694,7 @@ class Utbetaling private constructor(
         }
     }
 
-    object Overført : Tilstand {
+    internal object Overført : Tilstand {
         override val status = Utbetalingstatus.OVERFØRT
         override fun håndter(utbetaling: Utbetaling, påminnelse: UtbetalingpåminnelsePort) {
             utbetaling.overfør(påminnelse)
@@ -715,7 +715,7 @@ class Utbetaling private constructor(
         }
     }
 
-    object Annullert : Tilstand {
+    internal object Annullert : Tilstand {
         override val status = Utbetalingstatus.ANNULLERT
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             utbetaling.vurdering?.annullert(utbetaling)
@@ -723,7 +723,7 @@ class Utbetaling private constructor(
         }
     }
 
-    object Utbetalt : Tilstand {
+    internal object Utbetalt : Tilstand {
         override val status = Utbetalingstatus.UTBETALT
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             utbetaling.vurdering?.utbetalt(utbetaling)
@@ -745,7 +745,7 @@ class Utbetaling private constructor(
             ).also { hendelse.info("Oppretter annullering med id ${it.id}") }
     }
 
-    object UtbetalingFeilet : Tilstand {
+    internal object UtbetalingFeilet : Tilstand {
         override val status = Utbetalingstatus.UTBETALING_FEILET
         override fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             hendelse.info("Forkaster feilet utbetaling")
@@ -768,10 +768,10 @@ class Utbetaling private constructor(
         }
     }
 
-    object IkkeGodkjent : Tilstand {
+    internal object IkkeGodkjent : Tilstand {
         override val status = Utbetalingstatus.IKKE_GODKJENT
     }
-    object Forkastet : Tilstand {
+    internal object Forkastet : Tilstand {
         override val status = Utbetalingstatus.FORKASTET
     }
 
@@ -853,7 +853,7 @@ class Utbetaling private constructor(
             oppdrag.overfør(hendelse, maksdato, ident)
         }
 
-        fun avgjør(utbetaling: Utbetaling) =
+        internal fun avgjør(utbetaling: Utbetaling) =
             when {
                 !godkjent -> IkkeGodkjent
                 utbetaling.harUtbetalinger() -> Godkjent
@@ -880,7 +880,7 @@ enum class Utbetalingstatus {
     UTBETALING_FEILET,
     ANNULLERT,
     FORKASTET;
-    fun tilTilstand() = when(this) {
+    internal fun tilTilstand() = when(this) {
         NY -> Utbetaling.Ny
         IKKE_UTBETALT -> Utbetaling.Ubetalt
         IKKE_GODKJENT -> Utbetaling.IkkeGodkjent

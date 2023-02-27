@@ -62,8 +62,7 @@ import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetaling.Forkastet
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
@@ -98,8 +97,8 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         val utbetaling4 = inspektør.utbetaling(4).inspektør
         val utbetaling5 = inspektør.utbetaling(5).inspektør
         assertEquals(utbetaling5.korrelasjonsId, utbetaling4.korrelasjonsId)
-        assertEquals(Utbetaling.GodkjentUtenUtbetaling, utbetaling4.tilstand)
-        assertEquals(Utbetaling.Utbetalt, utbetaling5.tilstand)
+        assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, utbetaling4.tilstand)
+        assertEquals(Utbetalingstatus.UTBETALT, utbetaling5.tilstand)
     }
 
     @Test
@@ -137,7 +136,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertDiff(-1431)
         val utbetalinger = inspektør.utbetalinger(2.vedtaksperiode)
         assertEquals(1, utbetalinger.size)
-        assertEquals(Forkastet, utbetalinger.single().inspektør.tilstand)
+        assertEquals(Utbetalingstatus.FORKASTET, utbetalinger.single().inspektør.tilstand)
 
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)

@@ -63,7 +63,7 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -672,7 +672,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyrTidslinje(listOf(manuellSykedag(2.januar), manuellArbeidsgiverdag(24.januar), manuellFeriedag(25.januar)))
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(0))
     }
 
     @Test
@@ -687,8 +687,8 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
-        assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(1))
+        assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.SENDT, inspektør.utbetalingtilstand(1))
         assertNotEquals(inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.fagsystemId(), inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.fagsystemId())
         assertEquals("SSSSHH SSSSSHH SSSSSHH SSUFS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
     }
@@ -702,7 +702,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyrTidslinje(listOf(manuellArbeidsgiverdag(18.januar)))
-        assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(0))
         assertNotEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
 
         håndterYtelser(1.vedtaksperiode)
@@ -898,7 +898,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje((20.januar til 29.januar).map { manuellFeriedag(it) })
         inspektør.utbetalinger(2.vedtaksperiode).also { utbetalinger ->
             assertEquals(2, utbetalinger.size)
-            assertEquals(Utbetaling.Forkastet, utbetalinger.last().inspektør.tilstand)
+            assertEquals(Utbetalingstatus.FORKASTET, utbetalinger.last().inspektør.tilstand)
         }
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

@@ -69,8 +69,8 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.OppdragVisitor
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Satstype
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -572,8 +572,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertEquals(2, inspektør.utbetalinger.size)
         assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).size)
         assertEquals(2, inspektør.utbetalinger(2.vedtaksperiode).size)
-        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
-        assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(1))
+        assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetalingtilstand(1))
         assertTilstander(
             1.vedtaksperiode,
             START,

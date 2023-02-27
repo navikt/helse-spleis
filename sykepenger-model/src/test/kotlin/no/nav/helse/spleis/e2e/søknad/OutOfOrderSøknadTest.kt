@@ -38,7 +38,7 @@ import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.spleis.e2e.tilSimulering
-import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -51,7 +51,7 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
         tilSimulering(3.mars, 26.mars, 100.prosent, 3.januar)
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(5.januar, 19.januar, 80.prosent))
-        assertEquals(Utbetaling.Forkastet, inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.tilstand)
+        assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.tilstand)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
     }

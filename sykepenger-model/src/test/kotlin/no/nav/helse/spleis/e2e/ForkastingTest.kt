@@ -29,7 +29,7 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -60,7 +60,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar))
         håndterSøknad(Sykdom(29.januar, 23.februar, 100.prosent))
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, false)
-        assertEquals(Utbetaling.IkkeGodkjent, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.IKKE_GODKJENT, inspektør.utbetalingtilstand(0))
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             START,
@@ -100,7 +100,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         } førerTil listOf(AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE) somEtterfulgtAv {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, false)
         } førerTil listOf(TIL_INFOTRYGD, TIL_INFOTRYGD)
-        assertEquals(Utbetaling.IkkeGodkjent, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.IKKE_GODKJENT, inspektør.utbetalingtilstand(0))
     }
 
     @Test
@@ -204,7 +204,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
-        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -231,7 +231,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 27.januar))
         håndterSøknad(Sykdom(3.januar, 27.januar, 100.prosent))
 
-        assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(0))
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             START,
@@ -255,8 +255,8 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         ))
         håndterYtelser(1.vedtaksperiode)
         person.søppelbøtte(hendelselogg) { true }
-        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
-        assertEquals(Utbetaling.Ubetalt, inspektør.utbetalingtilstand(1))
+        assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.IKKE_UTBETALT, inspektør.utbetalingtilstand(1))
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
     }
 
@@ -270,8 +270,8 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         person.søppelbøtte(hendelselogg) { true }
-        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
-        assertEquals(Utbetaling.Ubetalt, inspektør.utbetalingtilstand(1))
+        assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.IKKE_UTBETALT, inspektør.utbetalingtilstand(1))
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
     }
 
@@ -286,8 +286,8 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         person.søppelbøtte(hendelselogg) { true }
-        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
-        assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(1))
+        assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.SENDT, inspektør.utbetalingtilstand(1))
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING)
     }
 
@@ -302,8 +302,8 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
         person.søppelbøtte(hendelselogg) { true }
-        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
-        assertEquals(Utbetaling.IkkeGodkjent, inspektør.utbetalingtilstand(1))
+        assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.IKKE_GODKJENT, inspektør.utbetalingtilstand(1))
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, REVURDERING_FEILET)
     }
 }

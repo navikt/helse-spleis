@@ -43,7 +43,7 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -550,7 +550,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterSøknad(Sykdom(1.januar, 18.januar, 100.prosent), Arbeid(17.januar, 18.januar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(0))
         assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
     }
 

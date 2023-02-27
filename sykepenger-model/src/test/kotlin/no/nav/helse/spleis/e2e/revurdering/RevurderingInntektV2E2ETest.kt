@@ -58,7 +58,7 @@ import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.økonomi.Inntekt
@@ -114,7 +114,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
         inspektør.utbetalinger(1.vedtaksperiode).also { utbetalinger ->
             assertEquals(2, utbetalinger.size)
-            assertEquals(Utbetaling.Forkastet, utbetalinger.last().inspektør.tilstand)
+            assertEquals(Utbetalingstatus.FORKASTET, utbetalinger.last().inspektør.tilstand)
         }
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -154,7 +154,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
         inspektør.utbetalinger(2.vedtaksperiode).also { utbetalinger ->
             assertEquals(2, utbetalinger.size)
-            assertEquals(Utbetaling.Forkastet, utbetalinger.last().inspektør.tilstand)
+            assertEquals(Utbetalingstatus.FORKASTET, utbetalinger.last().inspektør.tilstand)
         }
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -650,8 +650,8 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertEquals(2, inspektør.utbetalinger.size)
         assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).size)
         assertEquals(2, inspektør.utbetalinger(2.vedtaksperiode).size)
-        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
-        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(1))
+        assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(1))
         assertTilstander(
             1.vedtaksperiode,
             AVSLUTTET_UTEN_UTBETALING

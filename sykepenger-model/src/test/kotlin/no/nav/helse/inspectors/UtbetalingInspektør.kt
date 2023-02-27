@@ -21,7 +21,7 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
         private set
     lateinit var periode: Periode
         private set
-    lateinit var tilstand: Utbetaling.Tilstand
+    lateinit var tilstand: Utbetalingstatus
         private set
     lateinit var arbeidsgiverOppdrag: Oppdrag
         private set
@@ -74,7 +74,7 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
         utbetalingId = id
         this.periode = periode
         this.korrelasjonsId = korrelasjonsId
-        this.tilstand = utbetalingstatus.tilTilstand()
+        this.tilstand = utbetalingstatus
         this.type = type
         this.status = utbetalingstatus
         this.avstemmingsnøkkel = avstemmingsnøkkel

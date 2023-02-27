@@ -31,7 +31,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -61,7 +61,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         val første = inspektør.utbetaling(0)
-        assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(2))
+        assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(2))
         inspektør.utbetaling(3).inspektør.also { utbetalingInspektør ->
             assertEquals(utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
             assertEquals(Endringskode.ENDR, utbetalingInspektør.arbeidsgiverOppdrag.inspektør.endringskode)
@@ -106,7 +106,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterPåminnelse(1.vedtaksperiode, UTBETALING_FEILET)
         håndterYtelser(1.vedtaksperiode)
-        assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(0))
         inspektør.utbetaling(1).inspektør.also { utbetalingInspektør ->
             assertForventetFeil(
                 forklaring = "cornercase kanskje håndtere på en annen måte?",
@@ -141,7 +141,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterPåminnelse(2.vedtaksperiode, UTBETALING_FEILET)
         håndterYtelser(2.vedtaksperiode)
         val første = inspektør.utbetaling(0)
-        assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(1))
+        assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(1))
         inspektør.utbetaling(2).inspektør.also { utbetalingInspektør ->
             assertEquals(utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
             assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
@@ -171,7 +171,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         val første = inspektør.utbetaling(0)
         val andre = inspektør.utbetaling(1)
         håndterSimulering(1.vedtaksperiode, andre.inspektør.utbetalingId, andre.inspektør.personOppdrag.inspektør.fagsystemId(), Fagområde.Sykepenger)
-        assertEquals(Utbetaling.Forkastet, første.inspektør.tilstand)
+        assertEquals(Utbetalingstatus.FORKASTET, første.inspektør.tilstand)
         andre.inspektør.also { utbetalingInspektør ->
             assertForventetFeil(
                 forklaring = "cornercase som vi løser på sikt",
@@ -219,7 +219,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         val første = inspektør.utbetaling(0)
         val andre = inspektør.utbetaling(1)
         håndterSimulering(1.vedtaksperiode, andre.inspektør.utbetalingId, andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), Fagområde.SykepengerRefusjon)
-        assertEquals(Utbetaling.Forkastet, første.inspektør.tilstand)
+        assertEquals(Utbetalingstatus.FORKASTET, første.inspektør.tilstand)
         andre.inspektør.also { utbetalingInspektør ->
             assertForventetFeil(
                 forklaring = "cornercase kanskje håndtere på en annen måte",

@@ -81,7 +81,7 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -335,7 +335,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(1))
+        assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetalingtilstand(1))
     }
 
     @Test
@@ -1275,8 +1275,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
-        assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(1))
+        assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.SENDT, inspektør.utbetalingtilstand(1))
         assertEquals(inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.fagsystemId(), inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.fagsystemId())
         inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.also { oppdrag ->
             assertEquals(2, oppdrag.size)
@@ -1312,9 +1312,9 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
-        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(1))
-        assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(2))
+        assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(1))
+        assertEquals(Utbetalingstatus.SENDT, inspektør.utbetalingtilstand(2))
         assertEquals(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.fagsystemId(), inspektør.utbetaling(2).inspektør.arbeidsgiverOppdrag.fagsystemId())
         inspektør.utbetaling(2).inspektør.arbeidsgiverOppdrag.also { oppdrag ->
             assertEquals(1, oppdrag.size)

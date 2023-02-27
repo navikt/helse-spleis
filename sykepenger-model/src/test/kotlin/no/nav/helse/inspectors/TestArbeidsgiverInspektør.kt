@@ -77,7 +77,7 @@ internal class TestArbeidsgiverInspektør(
     private val vedtaksperiodeutbetalinger = mutableMapOf<Int, MutableList<Int>>()
     private val vedtaksperiodeutbetalingider = mutableMapOf<Int, MutableList<UUID>>()
     private val vedtaksperiodeutbetalingstyper = mutableMapOf<Int, MutableList<Utbetalingtype>>()
-    private val utbetalingstilstander = mutableListOf<Utbetaling.Tilstand>()
+    private val utbetalingstilstander = mutableListOf<Utbetalingstatus>()
     private val utbetalingIder = mutableListOf<UUID>()
     private val utbetalingutbetalingstidslinjer = mutableListOf<Utbetalingstidslinje>()
     internal val arbeidsgiverOppdrag = mutableListOf<Oppdrag>()
@@ -318,7 +318,7 @@ internal class TestArbeidsgiverInspektør(
         if (!inVedtaksperiode) {
             maksdatoer.add(maksdato)
             utbetalingIder.add(id)
-            utbetalingstilstander.add(utbetalingstatus.tilTilstand())
+            utbetalingstilstander.add(utbetalingstatus)
             forbrukteSykedagerer.add(forbrukteSykedager)
             gjenståendeSykedagerer.add(gjenståendeSykedager)
         } else {

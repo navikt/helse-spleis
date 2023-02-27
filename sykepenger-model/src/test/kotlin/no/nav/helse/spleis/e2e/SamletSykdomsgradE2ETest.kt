@@ -18,8 +18,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_4
-import no.nav.helse.utbetalingslinjer.Utbetaling.GodkjentUtenUtbetaling
-import no.nav.helse.utbetalingslinjer.Utbetaling.Sendt
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -36,7 +35,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        assertEquals(GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetalingtilstand(0))
         val utbetalingstidslinje = inspektør.utbetalingUtbetalingstidslinje(0)
         assertTrue(utbetalingstidslinje[17.januar] is Utbetalingsdag.AvvistDag)
         assertTrue(utbetalingstidslinje[18.januar] is Utbetalingsdag.AvvistDag)
@@ -73,7 +72,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         assertTrue(utbetalingstidslinje[18.januar] is Utbetalingsdag.AvvistDag)
         assertTrue(utbetalingstidslinje[19.januar] is Utbetalingsdag.AvvistDag)
         assertEquals(3, utbetalingstidslinje.inspektør.avvistDagTeller)
-        assertEquals(Sendt, inspektør.utbetalingtilstand(1))
+        assertEquals(Utbetalingstatus.SENDT, inspektør.utbetalingtilstand(1))
         assertTilstander(
             2.vedtaksperiode,
             START,

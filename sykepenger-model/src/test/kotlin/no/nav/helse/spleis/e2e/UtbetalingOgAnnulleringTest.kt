@@ -26,7 +26,6 @@ import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -47,7 +46,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
         håndterAnnullerUtbetaling(ORGNUMMER)
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-        assertEquals(Utbetaling.Annullert, inspektør.utbetaling(1).inspektør.tilstand)
+        assertEquals(Utbetalingstatus.ANNULLERT, inspektør.utbetaling(1).inspektør.tilstand)
     }
 
     @Test
@@ -190,7 +189,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING
         )
-        assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.SENDT, inspektør.utbetalingtilstand(0))
     }
 
     @Test
@@ -216,7 +215,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING
         )
-        assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.SENDT, inspektør.utbetalingtilstand(0))
     }
 
     @Test
@@ -244,7 +243,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             UTBETALING_FEILET
         )
-        assertEquals(Utbetaling.UtbetalingFeilet, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.UTBETALING_FEILET, inspektør.utbetalingtilstand(0))
     }
 
     @Test
@@ -282,9 +281,9 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AVVIST)
-        assertEquals(Utbetaling.UtbetalingFeilet, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.UTBETALING_FEILET, inspektør.utbetalingtilstand(0))
         håndterUtbetalingpåminnelse(0, Utbetalingstatus.UTBETALING_FEILET)
-        assertEquals(Utbetaling.Overført, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.OVERFØRT, inspektør.utbetalingtilstand(0))
         håndterUtbetalt(Oppdragstatus.AKSEPTERT, sendOverførtKvittering = false)
         assertTilstander(
             1.vedtaksperiode,
@@ -312,7 +311,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT, sendOverførtKvittering = false)
-        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
         assertTilstander(
             1.vedtaksperiode,
             START,

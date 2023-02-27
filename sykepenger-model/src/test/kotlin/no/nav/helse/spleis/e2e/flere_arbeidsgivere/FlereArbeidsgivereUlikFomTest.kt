@@ -43,7 +43,7 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
-import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -84,7 +84,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(1, inspektør(a1).utbetalinger(1.vedtaksperiode).size)
         val ag2Utbetalinger = inspektør(a2).utbetalinger(1.vedtaksperiode)
         assertEquals(1, ag2Utbetalinger.size)
-        assertEquals(Utbetaling.Forkastet, ag2Utbetalinger.single().inspektør.tilstand)
+        assertEquals(Utbetalingstatus.FORKASTET, ag2Utbetalinger.single().inspektør.tilstand)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
     }
