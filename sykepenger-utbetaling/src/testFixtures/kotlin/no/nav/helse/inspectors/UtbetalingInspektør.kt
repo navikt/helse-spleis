@@ -12,9 +12,9 @@ import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import kotlin.properties.Delegates
 
-internal val Utbetaling.inspektør get() = UtbetalingInspektør(this)
+val Utbetaling.inspektør get() = UtbetalingInspektør(this)
 
-internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor {
+class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor {
     lateinit var utbetalingId: UUID
         private set
     lateinit var korrelasjonsId: UUID
@@ -32,13 +32,13 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
     var nettobeløp by Delegates.notNull<Int>()
         private set
     private lateinit var status: Utbetalingstatus
-    internal lateinit var type: Utbetalingtype
+    lateinit var type: Utbetalingtype
         private set
-    internal var forbrukteSykedager by Delegates.notNull<Int>()
+    var forbrukteSykedager by Delegates.notNull<Int>()
         private set
-    internal var gjenståendeSykedager by Delegates.notNull<Int>()
+    var gjenståendeSykedager by Delegates.notNull<Int>()
         private set
-    internal lateinit var maksdato: LocalDate
+    lateinit var maksdato: LocalDate
         private set
     var avstemmingsnøkkel: Long? = null
     val erUbetalt get() = status == Utbetalingstatus.IKKE_UTBETALT

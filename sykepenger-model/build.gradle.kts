@@ -4,6 +4,7 @@ val jacksonVersion = "2.14.0"
 dependencies {
     implementation(project(":sykepenger-primitiver"))
     implementation(project(":sykepenger-utbetaling"))
+    testImplementation(testFixtures(project(":sykepenger-utbetaling")))
     implementation(project(":sykepenger-aktivitetslogg"))
     implementation(project(":sykepenger-etterlevelse"))
     implementation(project(":sykepenger-inntekt"))
