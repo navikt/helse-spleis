@@ -38,7 +38,7 @@ internal fun Simulering.utbetalingport() = SimuleringAdapter(this)
 class SimuleringAdapter(private val simulering: Simulering): SimuleringPort, IAktivitetslogg by simulering {
     override val simuleringResultat: SimuleringResultat? = simulering.simuleringResultat
     override fun valider(oppdrag: Oppdrag): SimuleringPort = this.apply { simulering.valider(oppdrag) }
-    override fun erRelevantFor(fagområde: Fagområde, fagsystemId: String): Boolean = simulering.erRelevantFor(fagområde, fagsystemId)
+    override fun erSimulert(fagområde: Fagområde, fagsystemId: String): Boolean = simulering.erSimulert(fagområde, fagsystemId)
     override fun erRelevantForUtbetaling(id: UUID): Boolean = simulering.erRelevantForUtbetaling(id)
 }
 

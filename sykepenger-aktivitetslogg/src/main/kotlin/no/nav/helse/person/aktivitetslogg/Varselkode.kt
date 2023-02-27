@@ -166,8 +166,8 @@ enum class Varselkode(
     RV_AY_10("Behandling av Ytelser feilet, årsak ukjent"),
 
     // SI: Simulering
-    RV_SI_1("Feil under simulering"),
-    RV_SI_2("Simulering av revurdert utbetaling feilet. Utbetalingen må annulleres"),
+    RV_SI_1("Feil under simulering", avviklet = true),
+    RV_SI_2("Simulering av revurdert utbetaling feilet. Utbetalingen må annulleres", avviklet = true),
     RV_SI_3("Det er simulert et negativt beløp."),
     RV_SI_4("Ingenting ble simulert", avviklet = true),
     RV_SI_5("Simulering har endret dagsats eller antall på én eller flere utbetalingslinjer", avviklet = true),

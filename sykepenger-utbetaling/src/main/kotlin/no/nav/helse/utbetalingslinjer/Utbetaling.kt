@@ -200,10 +200,9 @@ class Utbetaling private constructor(
     fun gjelderFor(hendelse: UtbetalingsgodkjenningPort) =
         hendelse.erRelevant(id)
 
-    fun valider(simulering: SimuleringPort): IAktivitetslogg {
+    fun valider(simulering: SimuleringPort) {
         arbeidsgiverOppdrag.valider(simulering)
         personOppdrag.valider(simulering)
-        return simulering
     }
 
     fun build(builder: UtbetalingVedtakFattetBuilder) {

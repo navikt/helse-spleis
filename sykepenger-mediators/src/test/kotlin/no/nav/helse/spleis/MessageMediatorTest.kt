@@ -76,7 +76,7 @@ internal class MessageMediatorTest {
         hendelseMediator.reset()
 
         testRapid.sendTestMessage(meldingsfabrikk.lagSimulering(UUID.randomUUID(), TilstandType.START, SimuleringMessage.Simuleringstatus.OPPDRAG_UR_ER_STENGT, UUID.randomUUID()))
-        assertFalse(hendelseMediator.lestSimulering) { "Skal ikke lese simuleringhendelse når Oppdrag/UR er stengt" }
+        assertTrue(hendelseMediator.lestSimulering) { "Kan lese simuleringhendelse når Oppdrag/UR er stengt" }
         hendelseMediator.reset()
     }
 

@@ -93,7 +93,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SI_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_15
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_16
@@ -1704,12 +1703,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
-            if (vedtaksperiode.utbetalinger.valider(simulering).harFunksjonelleFeilEllerVerre())
-                return vedtaksperiode.forkast(simulering)
-            if (simulering.harNegativtTotalbeløp()) {
-                simulering.varsel(Varselkode.RV_SI_3)
-            }
-            if (!vedtaksperiode.utbetalinger.erKlarForGodkjenning()) return
+            vedtaksperiode.utbetalinger.valider(simulering)
+            if (!vedtaksperiode.utbetalinger.erKlarForGodkjenning()) return simulering.info("Kan ikke gå videre da begge oppdragene ikke er simulert.")
             vedtaksperiode.tilstand(simulering, AvventerGodkjenning)
         }
 
@@ -1741,12 +1736,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
             FunksjonelleFeilTilVarsler.wrap(simulering) {
-                if (vedtaksperiode.utbetalinger.valider(simulering).harVarslerEllerVerre()) {
-                    simulering.varsel(RV_SI_2)
-                }
-            }
-            if (simulering.harNegativtTotalbeløp()) {
-                simulering.varsel(Varselkode.RV_SI_3)
+                vedtaksperiode.utbetalinger.valider(simulering)
             }
             if (!vedtaksperiode.utbetalinger.erKlarForGodkjenning()) return simulering.info("Kan ikke gå videre da begge oppdragene ikke er simulert.")
             vedtaksperiode.tilstand(simulering, AvventerGodkjenningRevurdering)

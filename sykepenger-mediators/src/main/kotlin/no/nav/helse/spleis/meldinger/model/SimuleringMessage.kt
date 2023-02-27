@@ -2,6 +2,7 @@ package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
@@ -11,10 +12,12 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.FUNKSJONELL_FEIL
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.OK
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.OPPDRAG_UR_ER_STENGT
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.TEKNISK_FEIL
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.valueOf
+import org.slf4j.LoggerFactory
 
 internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
@@ -26,7 +29,7 @@ internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val fagområde = packet["Simulering.fagområde"].asText()
     private val status = valueOf(packet["@løsning.${Behovtype.Simulering.name}.status"].asText())
     private val simuleringOK = status == OK
-    private val melding = packet["@løsning.${Behovtype.Simulering.name}.feilmelding"].asText()
+    private val melding = packet["@løsning.${Behovtype.Simulering.name}.feilmelding"].asText() + " (status=$status)"
     private val simuleringResultat =
         packet["@løsning.${Behovtype.Simulering.name}.simulering"].takeUnless(JsonNode::isMissingOrNull)
             ?.let {
@@ -89,8 +92,6 @@ internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
         )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
-        // dont send message into the model if Oppdrag/UR is closed for biz.
-        if (status in listOf(TEKNISK_FEIL, OPPDRAG_UR_ER_STENGT)) return
         mediator.behandle(this, simulering, context)
     }
 

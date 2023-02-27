@@ -507,17 +507,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(manuellFeriedag(18.januar)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode, simuleringOK = false)
-        assertVarsel(RV_SI_1, 1.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `varsel - Simulering av revurdert utbetaling feilet, Utbetalingen må annulleres`() {
-        nyttVedtak(1.januar, 31.januar)
-
-        håndterOverstyrTidslinje(listOf(manuellFeriedag(18.januar)))
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode, simuleringOK = false)
-        assertVarsel(Varselkode.RV_SI_2, 1.vedtaksperiode.filter())
+        assertIngenVarsel(RV_SI_1, 1.vedtaksperiode.filter())
     }
 
     @Test

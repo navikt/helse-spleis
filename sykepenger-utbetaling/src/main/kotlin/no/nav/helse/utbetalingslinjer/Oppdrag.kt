@@ -385,7 +385,7 @@ class Oppdrag private constructor(
         this.status = hendelse.status
     }
     fun håndter(simulering: SimuleringPort) {
-        if (!simulering.erRelevantFor(fagområde, fagsystemId)) return
+        if (!simulering.erSimulert(fagområde, fagsystemId)) return
         this.erSimulert = true
         this.simuleringsResultat = simulering.simuleringResultat
     }

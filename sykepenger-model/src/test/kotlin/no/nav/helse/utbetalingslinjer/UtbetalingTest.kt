@@ -850,9 +850,9 @@ internal class UtbetalingTest {
         val simulering = opprettSimulering("1", Fagområde.Sykepenger, utbetalingId)
         assertTrue(simulering.erRelevantForUtbetaling(utbetalingId))
         assertFalse(simulering.erRelevantForUtbetaling(UUID.randomUUID()))
-        assertTrue(simulering.erRelevantFor(Fagområde.Sykepenger, "1"))
-        assertFalse(simulering.erRelevantFor(Fagområde.Sykepenger, "2"))
-        assertFalse(simulering.erRelevantFor(Fagområde.SykepengerRefusjon, "1"))
+        assertTrue(simulering.erSimulert(Fagområde.Sykepenger, "1"))
+        assertFalse(simulering.erSimulert(Fagområde.Sykepenger, "2"))
+        assertFalse(simulering.erSimulert(Fagområde.SykepengerRefusjon, "1"))
     }
 
     @Test
@@ -861,9 +861,9 @@ internal class UtbetalingTest {
         val simulering = opprettSimulering("1", Fagområde.SykepengerRefusjon, utbetalingId)
         assertTrue(simulering.erRelevantForUtbetaling(utbetalingId))
         assertFalse(simulering.erRelevantForUtbetaling(UUID.randomUUID()))
-        assertTrue(simulering.erRelevantFor(Fagområde.SykepengerRefusjon, "1"))
-        assertFalse(simulering.erRelevantFor(Fagområde.SykepengerRefusjon, "2"))
-        assertFalse(simulering.erRelevantFor(Fagområde.Sykepenger, "1"))
+        assertTrue(simulering.erSimulert(Fagområde.SykepengerRefusjon, "1"))
+        assertFalse(simulering.erSimulert(Fagområde.SykepengerRefusjon, "2"))
+        assertFalse(simulering.erSimulert(Fagområde.Sykepenger, "1"))
     }
 
     @Test

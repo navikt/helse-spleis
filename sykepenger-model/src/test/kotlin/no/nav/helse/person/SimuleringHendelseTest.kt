@@ -67,8 +67,8 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     fun `simulering er ikke OK`() {
         håndterYtelser()
         håndterSimuleringer(mapOf(Fagområde.SykepengerRefusjon to Pair(false, 1431)))
-        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertEquals(AVVENTER_SIMULERING, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     @Test

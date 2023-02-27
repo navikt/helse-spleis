@@ -38,6 +38,7 @@ import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_1
@@ -50,6 +51,7 @@ import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertHarHendelseIder
 import no.nav.helse.spleis.e2e.assertHarIkkeHendelseIder
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
+import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -733,8 +735,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode, simuleringOK = false)
         nullstillTilstandsendringer()
-        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-        assertVarsel("Simulering av revurdert utbetaling feilet. Utbetalingen må annulleres", 1.vedtaksperiode.filter())
+        assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+        assertIngenVarsel(Varselkode.RV_SI_1, 1.vedtaksperiode.filter())
     }
 
     @Test
