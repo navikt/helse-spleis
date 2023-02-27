@@ -8,7 +8,6 @@ import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
-import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalt
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import kotlin.properties.Delegates
@@ -32,7 +31,7 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
         private set
     var nettobeløp by Delegates.notNull<Int>()
         private set
-    private lateinit var status: Utbetaling.Tilstand
+    private lateinit var status: Utbetalingstatus
     internal lateinit var type: Utbetalingtype
         private set
     internal var forbrukteSykedager by Delegates.notNull<Int>()
@@ -42,11 +41,11 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
     internal lateinit var maksdato: LocalDate
         private set
     var avstemmingsnøkkel: Long? = null
-    val erUbetalt get() = status == Utbetaling.Ubetalt
-    val erForkastet get() = status == Utbetaling.Forkastet
+    val erUbetalt get() = status == Utbetalingstatus.IKKE_UTBETALT
+    val erForkastet get() = status == Utbetalingstatus.FORKASTET
     val erEtterutbetaling get() = type == Utbetalingtype.ETTERUTBETALING
     val erAnnullering get() = type == Utbetalingtype.ANNULLERING
-    val erUtbetalt get() = status == Utbetaling.Annullert || status == Utbetalt
+    val erUtbetalt get() = status == Utbetalingstatus.ANNULLERT || status == Utbetalingstatus.UTBETALT
 
     init {
         utbetaling.accept(this)
@@ -77,7 +76,7 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
         this.korrelasjonsId = korrelasjonsId
         this.tilstand = utbetalingstatus.tilTilstand()
         this.type = type
-        this.status = utbetalingstatus.tilTilstand()
+        this.status = utbetalingstatus
         this.avstemmingsnøkkel = avstemmingsnøkkel
         this.nettobeløp = arbeidsgiverNettoBeløp + personNettoBeløp
         this.forbrukteSykedager = forbrukteSykedager ?: -1
