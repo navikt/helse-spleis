@@ -6,7 +6,12 @@ import java.util.UUID
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
-interface UtbetalingHendelsePort: OverføringsinformasjonPort {
+interface UtbetalingHendelsePort: IAktivitetslogg {
+    val avstemmingsnøkkel: Long
+    val overføringstidspunkt: LocalDateTime
+    val status: Oppdragstatus
+    fun erRelevant(fagsystemId: String): Boolean
+    fun erRelevant(arbeidsgiverFagsystemId: String, personFagsystemId: String, utbetaling: UUID): Boolean
     fun valider()
     fun skalForsøkesIgjen(): Boolean
 }
@@ -15,14 +20,6 @@ interface GrunnbeløpsreguleringPort: IAktivitetslogg {
     fun erRelevant(fagsystemId: String): Boolean
     fun fødselsnummer(): String
     fun organisasjonsnummer(): String
-}
-
-interface OverføringsinformasjonPort: IAktivitetslogg {
-    val avstemmingsnøkkel: Long
-    val overføringstidspunkt: LocalDateTime
-    val status: Oppdragstatus
-    fun erRelevant(fagsystemId: String): Boolean
-    fun erRelevant(arbeidsgiverFagsystemId: String, personFagsystemId: String, utbetaling: UUID): Boolean
 }
 
 interface SimuleringPort: IAktivitetslogg {

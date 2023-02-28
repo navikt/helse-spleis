@@ -32,7 +32,6 @@ import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Arbeidsgiver.Companion.avklarSykepengegrunnlag
@@ -300,12 +299,6 @@ class Person private constructor(
         registrer(simulering, "Behandler simulering")
         finnArbeidsgiver(simulering).håndter(simulering)
         håndterGjenoppta(simulering)
-    }
-
-    fun håndter(utbetaling: UtbetalingOverført) {
-        registrer(utbetaling, "Behandler utbetaling overført")
-        finnArbeidsgiver(utbetaling).håndter(utbetaling)
-        håndterGjenoppta(utbetaling)
     }
 
     fun håndter(utbetaling: UtbetalingHendelse) {

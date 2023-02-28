@@ -198,10 +198,12 @@ data class SpeilOppdrag(
 enum class Utbetalingstatus {
     Annullert,
     Forkastet,
+    @Deprecated("skal slettes")
     Godkjent,
     GodkjentUtenUtbetaling,
     IkkeGodkjent,
     Overført,
+    @Deprecated("skal slettes")
     Sendt,
     Ubetalt,
     UtbetalingFeilet,

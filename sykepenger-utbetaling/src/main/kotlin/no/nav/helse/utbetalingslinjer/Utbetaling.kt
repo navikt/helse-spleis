@@ -9,7 +9,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_12
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_13
@@ -145,13 +144,6 @@ class Utbetaling private constructor(
         if (harHåndtert(utbetaling)) return
         utbetaling.kontekst(this)
         tilstand.kvittér(this, utbetaling)
-    }
-
-    fun håndter(utbetalingOverført: OverføringsinformasjonPort) {
-        if (!utbetalingOverført.erRelevant(arbeidsgiverOppdrag.fagsystemId(), personOppdrag.fagsystemId(), id)) return
-        if (harHåndtert(utbetalingOverført)) return
-        utbetalingOverført.kontekst(this)
-        tilstand.overført(this, utbetalingOverført)
     }
 
     fun håndter(simulering: SimuleringPort) {
@@ -482,12 +474,12 @@ class Utbetaling private constructor(
     fun utbetalingstidslinje() = utbetalingstidslinje
     fun utbetalingstidslinje(periode: Periode) = utbetalingstidslinje.subset(periode)
 
-    private fun overfør(nesteTilstand: Tilstand, hendelse: IAktivitetslogg) {
-        overfør(hendelse)
-        tilstand(nesteTilstand, hendelse)
+    private fun overfør(hendelse: IAktivitetslogg) {
+        overførBegge(hendelse)
+        tilstand(Overført, hendelse)
     }
 
-    private fun overfør(hendelse: IAktivitetslogg) {
+    private fun overførBegge(hendelse: IAktivitetslogg) {
         vurdering?.overfør(hendelse, arbeidsgiverOppdrag, maksdato.takeUnless { type == ANNULLERING })
         vurdering?.overfør(hendelse, personOppdrag, maksdato.takeUnless { type == ANNULLERING })
     }
@@ -544,11 +536,6 @@ class Utbetaling private constructor(
             hendelse.info("Forventet ikke å annullere på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
             hendelse.funksjonellFeil(RV_UT_9)
             return null
-        }
-
-        fun overført(utbetaling: Utbetaling, hendelse: OverføringsinformasjonPort) {
-            hendelse.info("Forventet ikke overførtkvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
-            hendelse.funksjonellFeil(RV_UT_10)
         }
 
         fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelsePort) {
@@ -652,50 +639,24 @@ class Utbetaling private constructor(
         ).also { hendelse.info("Oppretter annullering med id ${it.id}") }
     }
 
+    @Deprecated("skal slettes")
     internal object Godkjent : Tilstand {
         override val status = Utbetalingstatus.GODKJENT
-        override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
-            utbetaling.overfør(Sendt, hendelse)
-        }
-
-        override fun håndter(utbetaling: Utbetaling, påminnelse: UtbetalingpåminnelsePort) {
-            utbetaling.overfør(Sendt, påminnelse)
-        }
     }
 
+    @Deprecated("skal slettes")
     internal object Sendt : Tilstand {
         override val status = Utbetalingstatus.SENDT
-
-        override fun håndter(utbetaling: Utbetaling, påminnelse: UtbetalingpåminnelsePort) {
-            utbetaling.overfør(påminnelse)
-        }
-
-        override fun overført(utbetaling: Utbetaling, hendelse: OverføringsinformasjonPort) {
-            utbetaling.lagreOverføringsinformasjon(hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
-            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
-            utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
-            utbetaling.tilstand(Overført, hendelse)
-        }
-
-        override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelsePort) {
-            utbetaling.lagreOverføringsinformasjon(hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
-            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
-            utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
-            utbetaling.håndterKvittering(hendelse)
-        }
     }
 
     internal object Overført : Tilstand {
         override val status = Utbetalingstatus.OVERFØRT
-        override fun håndter(utbetaling: Utbetaling, påminnelse: UtbetalingpåminnelsePort) {
-            utbetaling.overfør(påminnelse)
+        override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
+            utbetaling.overførBegge(hendelse)
         }
 
-        override fun overført(utbetaling: Utbetaling, hendelse: OverføringsinformasjonPort) {
-            hendelse.info("Mottok overførtkvittering, men står allerede i Overført. Venter på kvittering.")
-            utbetaling.lagreOverføringsinformasjon(hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
-            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
-            utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
+        override fun håndter(utbetaling: Utbetaling, påminnelse: UtbetalingpåminnelsePort) {
+            utbetaling.overførBegge(påminnelse)
         }
 
         override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelsePort) {
@@ -745,12 +706,7 @@ class Utbetaling private constructor(
 
         override fun håndter(utbetaling: Utbetaling, påminnelse: UtbetalingpåminnelsePort) {
             påminnelse.info("Forsøker å sende utbetalingen på nytt")
-            utbetaling.overfør(Overført, påminnelse)
-        }
-
-        override fun overført(utbetaling: Utbetaling, hendelse: OverføringsinformasjonPort) {
-            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
-            utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
+            utbetaling.overfør(påminnelse)
         }
 
         override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelsePort) {
@@ -847,7 +803,7 @@ class Utbetaling private constructor(
         internal fun avgjør(utbetaling: Utbetaling) =
             when {
                 !godkjent -> IkkeGodkjent
-                utbetaling.harUtbetalinger() -> Godkjent
+                utbetaling.harUtbetalinger() -> Overført
                 utbetaling.type == ANNULLERING -> Annullert
                 else -> GodkjentUtenUtbetaling
             }

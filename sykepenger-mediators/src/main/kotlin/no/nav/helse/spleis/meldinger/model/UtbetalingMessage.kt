@@ -34,6 +34,7 @@ internal class UtbetalingMessage(packet: JsonMessage) : BehovMessage(packet) {
         )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+        if (status == Oppdragstatus.OVERFØRT) return // sender bare inn kvitteringer til modellen
         mediator.behandle(this, utbetaling, context)
     }
 }

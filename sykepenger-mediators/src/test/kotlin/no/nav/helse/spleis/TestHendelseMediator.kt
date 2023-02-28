@@ -22,7 +22,6 @@ import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.rapids_rivers.MessageContext
@@ -46,7 +45,6 @@ import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsgiverMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingOverførtMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingpåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkEtterInfotrygdendringMessage
@@ -87,8 +85,6 @@ internal class TestHendelseMediator : IHendelseMediator {
         private set
     internal var lestUtbetalingsgodkjenning = false
         private set
-    internal var lestUtbetalingOverført = false
-        private set
     internal var lestUtbetaling = false
         private set
     internal var lestAnnullerUtbetaling = false
@@ -128,7 +124,6 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestUtbetalingsgrunnlag = false
         lestSimulering = false
         lestUtbetalingsgodkjenning = false
-        lestUtbetalingOverført = false
         lestUtbetaling = false
         lestAnnullerUtbetaling = false
         lestAvstemming = false
@@ -216,10 +211,6 @@ internal class TestHendelseMediator : IHendelseMediator {
 
     override fun behandle(message: UtbetalingsgodkjenningMessage, utbetalingsgodkjenning: Utbetalingsgodkjenning, context: MessageContext) {
         lestUtbetalingsgodkjenning = true
-    }
-
-    override fun behandle(message: UtbetalingOverførtMessage, utbetaling: UtbetalingOverført, context: MessageContext) {
-        lestUtbetalingOverført = true
     }
 
     override fun behandle(message: UtbetalingMessage, utbetaling: UtbetalingHendelse, context: MessageContext) {

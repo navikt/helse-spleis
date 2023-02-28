@@ -266,8 +266,6 @@ internal class TestPerson(
             behovsamler.detaljerFor(orgnummer, Utbetaling).forEach { (detaljer, kontekst) ->
                 val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
                 val fagsystemId = detaljer.getValue("fagsystemId") as String
-                arbeidsgiverHendelsefabrikk.lagUtbetalingOverført(utbetalingId, fagsystemId)
-                    .håndter(Person::håndter)
                 arbeidsgiverHendelsefabrikk.lagUtbetalinghendelse(utbetalingId, fagsystemId, status)
                     .håndter(Person::håndter)
             }

@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -281,7 +280,6 @@ internal class LagUtbetalingForRevurderingTest {
                 listOf(utbetaling.inspektør.arbeidsgiverOppdrag, utbetaling.inspektør.personOppdrag)
                     .filter { it.harUtbetalinger() }
                     .map { it.fagsystemId() }
-                    .onEach { overfør(utbetaling, it) }
                     .onEach { kvittèr(utbetaling, it) }
             }
         }
@@ -313,25 +311,6 @@ internal class LagUtbetalingForRevurderingTest {
         ).also {
             utbetaling.håndter(it.utbetalingport())
         }
-
-    private fun overfør(
-        utbetaling: Utbetaling,
-        fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(),
-        utbetalingId: UUID = utbetaling.inspektør.utbetalingId
-    ) {
-        utbetaling.håndter(
-            UtbetalingOverført(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = "ignore",
-                fødselsnummer = "ignore",
-                orgnummer = "ignore",
-                fagsystemId = fagsystemId,
-                utbetalingId = "$utbetalingId",
-                avstemmingsnøkkel = 123456L,
-                overføringstidspunkt = LocalDateTime.now()
-            ).utbetalingport()
-        )
-    }
 
     private fun kvittèr(
         utbetaling: Utbetaling,

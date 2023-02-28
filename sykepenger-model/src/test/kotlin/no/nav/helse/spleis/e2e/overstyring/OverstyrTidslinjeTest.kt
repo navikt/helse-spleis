@@ -688,7 +688,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(0))
-        assertEquals(Utbetalingstatus.SENDT, inspektør.utbetalingtilstand(1))
+        assertEquals(Utbetalingstatus.OVERFØRT, inspektør.utbetalingtilstand(1))
         assertNotEquals(inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.fagsystemId(), inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.fagsystemId())
         assertEquals("SSSSHH SSSSSHH SSSSSHH SSUFS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
     }

@@ -42,7 +42,6 @@ import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
@@ -296,7 +295,6 @@ class JsonBuilderTest {
             håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
             håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
             fangeUtbetalinger()
-            håndter(overføring())
             håndter(utbetalt())
             fangeVedtaksperiode()
         }
@@ -335,7 +333,6 @@ class JsonBuilderTest {
             håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
             håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
             fangeUtbetalinger()
-            håndter(overføring())
             håndter(utbetalt())
             fangeVedtaksperiode()
         }
@@ -410,7 +407,6 @@ class JsonBuilderTest {
             håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
             håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
             fangeUtbetalinger()
-            håndter(overføring())
             håndter(utbetalt())
         }
 
@@ -447,7 +443,6 @@ class JsonBuilderTest {
             håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
             håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
             fangeUtbetalinger()
-            håndter(overføring())
             håndter(utbetalt())
         }
     }
@@ -490,7 +485,6 @@ class JsonBuilderTest {
             håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
             håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
             fangeUtbetalinger()
-            håndter(overføring())
             håndter(utbetalt())
             fangeVedtaksperiode()
             håndter(
@@ -585,7 +579,6 @@ class JsonBuilderTest {
             håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
             håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
             fangeUtbetalinger()
-            håndter(overføring())
             håndter(utbetalt())
             fangeVedtaksperiode()
         }
@@ -818,17 +811,6 @@ class JsonBuilderTest {
         saksbehandlerEpost = "tbd@nav.no",
         opprettet = LocalDateTime.now(),
         fagsystemId = fagsystemId
-    )
-
-    private fun Person.overføring() = UtbetalingOverført(
-        meldingsreferanseId = UUID.randomUUID(),
-        aktørId = aktørId,
-        fødselsnummer = fnr.toString(),
-        orgnummer = orgnummer,
-        fagsystemId = utbetalingsliste.getValue(orgnummer).last().inspektør.arbeidsgiverOppdrag.fagsystemId(),
-        utbetalingId = this.aktivitetslogg.behov().last { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId"),
-        avstemmingsnøkkel = 123456L,
-        overføringstidspunkt = LocalDateTime.now()
     )
 
     private fun Person.utbetalt() = UtbetalingHendelse(

@@ -72,8 +72,8 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
-        sendNyUtbetalingpåminnelse(0, Utbetalingstatus.SENDT)
-        assertUtbetalingTilstander(0, "NY", "IKKE_UTBETALT", "GODKJENT", "SENDT")
+        sendNyUtbetalingpåminnelse(0, Utbetalingstatus.OVERFØRT)
+        assertUtbetalingTilstander(0, "NY", "IKKE_UTBETALT", "OVERFØRT")
         assertEquals(2, (0 until testRapid.inspektør.antall()).filter { "Utbetaling" in testRapid.inspektør.melding(it).path("@behov").map(JsonNode::asText) }.size)
     }
 

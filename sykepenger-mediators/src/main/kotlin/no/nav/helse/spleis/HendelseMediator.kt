@@ -24,7 +24,6 @@ import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Person
@@ -55,7 +54,6 @@ import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsgiverMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingOverførtMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingpåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkEtterInfotrygdendringMessage
@@ -189,12 +187,6 @@ internal class HendelseMediator(
         hentPersonOgHåndter(message, utbetalingsgodkjenning, context) { person ->
             HendelseProbe.onUtbetalingsgodkjenning()
             person.håndter(utbetalingsgodkjenning)
-        }
-    }
-
-    override fun behandle(message: UtbetalingOverførtMessage, utbetaling: UtbetalingOverført, context: MessageContext) {
-        hentPersonOgHåndter(message, utbetaling, context) { person ->
-            person.håndter(utbetaling)
         }
     }
 
@@ -400,7 +392,6 @@ internal interface IHendelseMediator {
     fun behandle(message: YtelserMessage, ytelser: Ytelser, context: MessageContext)
     fun behandle(message: VilkårsgrunnlagMessage, vilkårsgrunnlag: Vilkårsgrunnlag, context: MessageContext)
     fun behandle(message: UtbetalingsgodkjenningMessage, utbetalingsgodkjenning: Utbetalingsgodkjenning, context: MessageContext)
-    fun behandle(message: UtbetalingOverførtMessage, utbetaling: UtbetalingOverført, context: MessageContext)
     fun behandle(message: UtbetalingMessage, utbetaling: UtbetalingHendelse, context: MessageContext)
     fun behandle(message: SimuleringMessage, simulering: Simulering, context: MessageContext)
     fun behandle(message: AnnulleringMessage, annullerUtbetaling: AnnullerUtbetaling, context: MessageContext)

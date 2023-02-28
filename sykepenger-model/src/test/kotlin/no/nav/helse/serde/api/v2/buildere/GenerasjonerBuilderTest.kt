@@ -165,7 +165,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         0.generasjon {
             assertEquals(1, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Sendt avType ANNULLERING medTilstand TilAnnullering
+            beregnetPeriode(0) er Utbetalingstatus.Overført avType ANNULLERING medTilstand TilAnnullering
         }
 
         1.generasjon {
@@ -641,7 +641,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertEquals(1, generasjoner[1].perioder.size)
 
         0.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Sendt avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 31 forkastet true medTilstand TilAnnullering
+            beregnetPeriode(0) er Utbetalingstatus.Overført avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 31 forkastet true medTilstand TilAnnullering
         }
 
         1.generasjon {
@@ -660,8 +660,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertEquals(2, generasjoner[1].perioder.size)
 
         0.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Sendt avType ANNULLERING fra (1.februar til 28.februar) medAntallDager 28 forkastet true medTilstand TilAnnullering
-            beregnetPeriode(1) er Utbetalingstatus.Sendt avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 31 forkastet true medTilstand TilAnnullering
+            beregnetPeriode(0) er Utbetalingstatus.Overført avType ANNULLERING fra (1.februar til 28.februar) medAntallDager 28 forkastet true medTilstand TilAnnullering
+            beregnetPeriode(1) er Utbetalingstatus.Overført avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 31 forkastet true medTilstand TilAnnullering
         }
 
         1.generasjon {
@@ -706,7 +706,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertEquals(2, generasjoner[1].perioder.size)
 
         0.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Sendt avType ANNULLERING fra (1.mars til 31.mars) medAntallDager 31 forkastet true medTilstand TilAnnullering
+            beregnetPeriode(0) er Utbetalingstatus.Overført avType ANNULLERING fra (1.mars til 31.mars) medAntallDager 31 forkastet true medTilstand TilAnnullering
             beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
         }
 

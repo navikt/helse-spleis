@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -29,7 +28,6 @@ import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
-import no.nav.helse.utbetalingslinjer.Oppdragstatus.OVERFØRT
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
@@ -490,7 +488,6 @@ internal class UtbetalingTest {
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
         assertFalse(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
-        overfør(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertFalse(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
         kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertFalse(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
@@ -501,7 +498,6 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV)
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
-        overfør(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), status = AVVIST)
         assertFalse(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
     }
@@ -527,31 +523,12 @@ internal class UtbetalingTest {
     }
 
     @Test
-    fun `går ikke videre når ett av to oppdrag er overført`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
-        beregnUtbetalinger(tidslinje)
-        val utbetaling = opprettGodkjentUtbetaling(tidslinje)
-        overfør(utbetaling)
-        assertEquals(Utbetalingstatus.SENDT, utbetaling.inspektør.tilstand)
-    }
-
-    @Test
-    fun `går videre når begge oppdragene er overført`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
-        beregnUtbetalinger(tidslinje)
-        val utbetaling = opprettGodkjentUtbetaling(tidslinje)
-        overfør(utbetaling)
-        overfør(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId())
-        assertEquals(Utbetalingstatus.OVERFØRT, utbetaling.inspektør.tilstand)
-    }
-
-    @Test
     fun `går ikke videre når ett av to oppdrag er akseptert`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
         kvittèr(utbetaling)
-        assertEquals(Utbetalingstatus.SENDT, utbetaling.inspektør.tilstand)
+        assertEquals(Utbetalingstatus.OVERFØRT, utbetaling.inspektør.tilstand)
     }
 
     @Test
@@ -570,7 +547,7 @@ internal class UtbetalingTest {
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
         kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), AVVIST)
-        assertEquals(Utbetalingstatus.SENDT, utbetaling.inspektør.tilstand)
+        assertEquals(Utbetalingstatus.OVERFØRT, utbetaling.inspektør.tilstand)
     }
 
     @Test
@@ -582,18 +559,6 @@ internal class UtbetalingTest {
         kvittèr(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId(), AKSEPTERT)
         assertEquals(AVVIST, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.status())
         assertEquals(AKSEPTERT, utbetaling.inspektør.personOppdrag.inspektør.status())
-        assertEquals(Utbetalingstatus.SENDT, utbetaling.inspektør.tilstand)
-    }
-
-    @Test
-    fun `tar imot overført på det andre oppdraget selv om utbetalingen har feilet`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
-        beregnUtbetalinger(tidslinje)
-        val utbetaling = opprettGodkjentUtbetaling(tidslinje)
-        kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), AVVIST)
-        overfør(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId())
-        assertEquals(AVVIST, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.status())
-        assertEquals(OVERFØRT, utbetaling.inspektør.personOppdrag.inspektør.status())
         assertEquals(Utbetalingstatus.OVERFØRT, utbetaling.inspektør.tilstand)
     }
 
@@ -604,7 +569,7 @@ internal class UtbetalingTest {
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
         kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), AKSEPTERT)
         kvittèr(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId(), AVVIST)
-        assertEquals(Utbetalingstatus.SENDT, utbetaling.inspektør.tilstand)
+        assertEquals(Utbetalingstatus.OVERFØRT, utbetaling.inspektør.tilstand)
     }
 
     @Test
@@ -801,37 +766,8 @@ internal class UtbetalingTest {
     }
 
     @Test
-    fun `utbetalingOverført som ikke treffer på fagsystemId`() {
-        val utbetaling = opprettGodkjentUtbetaling()
-        overfør(utbetaling, "feil fagsystemId")
-        assertEquals(Utbetalingstatus.SENDT, utbetaling.inspektør.tilstand)
-    }
-
-    @Test
-    fun `utbetalingOverført som treffer på arbeidsgiverFagsystemId`() {
-        val utbetaling = opprettGodkjentUtbetaling()
-        overfør(utbetaling)
-        assertEquals(Utbetalingstatus.OVERFØRT, utbetaling.inspektør.tilstand)
-    }
-
-    @Test
-    fun `utbetalingOverført som treffer på brukerFagsystemId`() {
-        val utbetaling = opprettGodkjentUtbetaling()
-        overfør(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId())
-        assertEquals(Utbetalingstatus.OVERFØRT, utbetaling.inspektør.tilstand)
-    }
-
-    @Test
-    fun `utbetalingOverført som bommer på utbetalingId`() {
-        val utbetaling = opprettGodkjentUtbetaling()
-        overfør(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId(), UUID.randomUUID())
-        assertEquals(Utbetalingstatus.SENDT, utbetaling.inspektør.tilstand)
-    }
-
-    @Test
     fun `utbetalingHendelse som treffer på brukeroppdraget`() {
         val utbetaling = opprettGodkjentUtbetaling()
-        overfør(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId(), UUID.randomUUID())
         kvittèr(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId())
         assertEquals(Utbetalingstatus.UTBETALT, utbetaling.inspektør.tilstand)
     }
@@ -983,27 +919,7 @@ internal class UtbetalingTest {
         listOf(utbetaling.inspektør.arbeidsgiverOppdrag, utbetaling.inspektør.personOppdrag)
             .filter { it.harUtbetalinger() }
             .map { it.fagsystemId() }
-            .onEach { overfør(utbetaling, it) }
             .onEach { kvittèr(utbetaling, it) }
-    }
-
-    private fun overfør(
-        utbetaling: Utbetaling,
-        fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(),
-        utbetalingId: UUID = utbetaling.inspektør.utbetalingId
-    ) {
-        utbetaling.håndter(
-            UtbetalingOverført(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = "ignore",
-                fødselsnummer = "ignore",
-                orgnummer = "ignore",
-                fagsystemId = fagsystemId,
-                utbetalingId = "$utbetalingId",
-                avstemmingsnøkkel = 123456L,
-                overføringstidspunkt = LocalDateTime.now()
-            ).utbetalingport()
-        )
     }
 
     private fun kvittèr(

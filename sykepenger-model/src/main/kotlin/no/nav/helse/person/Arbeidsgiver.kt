@@ -26,7 +26,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.harAvsluttedePerioder
@@ -618,11 +617,6 @@ internal class Arbeidsgiver private constructor(
         simulering.kontekst(this)
         utbetalinger.forEach { it.håndter(simulering.utbetalingport()) }
         håndter(simulering, Vedtaksperiode::håndter)
-    }
-
-    internal fun håndter(utbetaling: UtbetalingOverført) {
-        utbetaling.kontekst(this)
-        utbetalinger.forEach { it.håndter(utbetaling.utbetalingport()) }
     }
 
     internal fun håndter(utbetalingHendelse: UtbetalingHendelse) {

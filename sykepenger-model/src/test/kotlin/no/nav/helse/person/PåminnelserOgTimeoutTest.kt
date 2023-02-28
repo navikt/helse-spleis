@@ -378,7 +378,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),
         organisasjonsnummer = ORGNUMMER,
         utbetalingId = utbetalingId,
-        status = Utbetalingstatus.SENDT,
+        status = Utbetalingstatus.OVERFØRT,
         antallGangerPåminnet = 1,
         endringstidspunkt = LocalDateTime.now(),
         påminnelsestidspunkt = LocalDateTime.now()

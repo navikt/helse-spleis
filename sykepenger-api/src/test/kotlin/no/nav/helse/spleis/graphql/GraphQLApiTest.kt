@@ -1,10 +1,8 @@
 package no.nav.helse.spleis.graphql
 
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.somPersonidentifikator
@@ -55,18 +53,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         val fagområde = simuleringsbehov.detaljer().getValue("fagområde") as String
         person.håndter(simulering(utbetalingId = utbetalingId, fagsystemId = fagsystemId, fagområde = fagområde))
         person.håndter(utbetalingsgodkjenning(utbetalingId = utbetalingId))
-        person.håndter(
-            UtbetalingOverført(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = AKTØRID,
-                fødselsnummer = UNG_PERSON_FNR,
-                orgnummer = ORGNUMMER,
-                fagsystemId = fagsystemId,
-                utbetalingId = "$utbetalingId",
-                avstemmingsnøkkel = 123456L,
-                overføringstidspunkt = LocalDateTime.now()
-            )
-        )
         person.håndter(utbetaling(utbetalingId = utbetalingId, fagsystemId = fagsystemId))
 
         testServer.clean()

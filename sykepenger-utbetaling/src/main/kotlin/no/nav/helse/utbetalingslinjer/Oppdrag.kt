@@ -378,7 +378,7 @@ class Oppdrag private constructor(
         "simuleringsResultat" to simuleringsResultat?.toMap()
     )
 
-    fun lagreOverføringsinformasjon(hendelse: OverføringsinformasjonPort) {
+    fun lagreOverføringsinformasjon(hendelse: UtbetalingHendelsePort) {
         if (!hendelse.erRelevant(fagsystemId)) return
         if (this.avstemmingsnøkkel == null) this.avstemmingsnøkkel = hendelse.avstemmingsnøkkel
         if (this.overføringstidspunkt == null) this.overføringstidspunkt = hendelse.overføringstidspunkt

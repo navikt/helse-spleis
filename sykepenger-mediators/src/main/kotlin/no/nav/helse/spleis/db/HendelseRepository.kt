@@ -27,7 +27,6 @@ import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGPÅMINNELSE
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSGODKJENNING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSHISTORIKK_FOR_FERIEPENGER
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALING_OVERFØRT
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.VILKÅRSGRUNNLAG
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.YTELSER
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
@@ -49,7 +48,6 @@ import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsgiverMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingOverførtMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingpåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkEtterInfotrygdendringMessage
@@ -70,7 +68,6 @@ internal class HendelseRepository(private val dataSource: DataSource) {
     }
 
     fun lagreMelding(melding: HendelseMessage) {
-        if (!skalLagres(melding)) return
         melding.lagreMelding(this)
     }
 
@@ -116,10 +113,6 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         ) != null
     }
 
-    private fun skalLagres(melding: HendelseMessage): Boolean {
-        return meldingstype(melding) != null
-    }
-
     private fun meldingstype(melding: HendelseMessage) = when (melding) {
         is NySøknadMessage -> NY_SØKNAD
         is SendtSøknadArbeidsgiverMessage -> SENDT_SØKNAD_ARBEIDSGIVER
@@ -130,7 +123,6 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is VilkårsgrunnlagMessage -> VILKÅRSGRUNNLAG
         is SimuleringMessage -> SIMULERING
         is UtbetalingsgodkjenningMessage -> UTBETALINGSGODKJENNING
-        is UtbetalingOverførtMessage -> UTBETALING_OVERFØRT
         is UtbetalingMessage -> UTBETALING
         is AnnulleringMessage -> KANSELLER_UTBETALING
         is EtterbetalingMessage -> GRUNNBELØPSREGULERING
@@ -181,7 +173,6 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         UTBETALINGSGRUNNLAG,
         VILKÅRSGRUNNLAG,
         UTBETALINGSGODKJENNING,
-        UTBETALING_OVERFØRT,
         UTBETALING,
         SIMULERING,
         KANSELLER_UTBETALING,

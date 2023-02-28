@@ -421,15 +421,6 @@ internal abstract class AbstractEndToEndMediatorTest {
     protected fun sendUtbetaling(utbetalingOK: Boolean = true) {
         val etterspurteBehov = testRapid.inspektør.alleEtterspurteBehov(Utbetaling)
         etterspurteBehov.forEach { behov ->
-            val (_, message) = meldingsfabrikk.lagUtbetalingOverført(
-                fagsystemId = behov.path("fagsystemId").asText(),
-                utbetalingId = behov.path("utbetalingId").asText(),
-                avstemmingsnøkkel = 123456L,
-                overføringstidspunkt = LocalDateTime.now()
-            )
-            testRapid.sendTestMessage(message)
-        }
-        etterspurteBehov.forEach { behov ->
             val (_, message) = meldingsfabrikk.lagUtbetaling(
                 fagsystemId = behov.path("fagsystemId").asText(),
                 utbetalingId = behov.path("utbetalingId").asText(),

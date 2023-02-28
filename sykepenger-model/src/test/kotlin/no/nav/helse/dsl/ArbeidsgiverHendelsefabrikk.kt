@@ -35,7 +35,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -285,18 +284,6 @@ internal class ArbeidsgiverHendelsefabrikk(
         godkjenttidspunkt = LocalDateTime.now(),
         automatiskBehandling = automatiskBehandling,
     )
-
-    internal fun lagUtbetalingOverført(utbetalingId: UUID, fagsystemId: String) =
-        UtbetalingOverført(
-            meldingsreferanseId = UUID.randomUUID(),
-            aktørId = aktørId,
-            fødselsnummer = personidentifikator.toString(),
-            orgnummer = organisasjonsnummer,
-            fagsystemId = fagsystemId,
-            utbetalingId = utbetalingId.toString(),
-            avstemmingsnøkkel = 123456L,
-            overføringstidspunkt = LocalDateTime.now()
-        )
 
     internal fun lagUtbetalinghendelse(
         utbetalingId: UUID,

@@ -287,7 +287,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         person.søppelbøtte(hendelselogg) { true }
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
-        assertEquals(Utbetalingstatus.SENDT, inspektør.utbetalingtilstand(1))
+        assertEquals(Utbetalingstatus.OVERFØRT, inspektør.utbetalingtilstand(1))
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING)
     }
 

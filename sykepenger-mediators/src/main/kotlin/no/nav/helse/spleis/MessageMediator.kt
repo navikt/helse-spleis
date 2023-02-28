@@ -26,7 +26,6 @@ import no.nav.helse.spleis.meldinger.PåminnelserRiver
 import no.nav.helse.spleis.meldinger.SendtArbeidsgiverSøknaderRiver
 import no.nav.helse.spleis.meldinger.SendtNavSøknaderRiver
 import no.nav.helse.spleis.meldinger.SimuleringerRiver
-import no.nav.helse.spleis.meldinger.UtbetalingerOverførtRiver
 import no.nav.helse.spleis.meldinger.UtbetalingerRiver
 import no.nav.helse.spleis.meldinger.UtbetalingpåminnelserRiver
 import no.nav.helse.spleis.meldinger.UtbetalingsgodkjenningerRiver
@@ -61,7 +60,6 @@ internal class MessageMediator(
             YtelserRiver(it, this)
             VilkårsgrunnlagRiver(it, this)
             UtbetalingsgodkjenningerRiver(it, this)
-            UtbetalingerOverførtRiver(it, this)
             UtbetalingerRiver(it, this)
             PåminnelserRiver(it, this)
             PersonPåminnelserRiver(it, this)

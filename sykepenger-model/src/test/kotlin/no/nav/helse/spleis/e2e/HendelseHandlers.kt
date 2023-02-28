@@ -35,7 +35,6 @@ import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
@@ -750,7 +749,6 @@ internal fun AbstractEndToEndTest.håndterUtbetalingsgodkjenning(
 
 internal fun AbstractEndToEndTest.håndterUtbetalt(
     status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
-    sendOverførtKvittering: Boolean = true,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     fagsystemId: String,
@@ -758,18 +756,6 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
     meldingsreferanseId: UUID = UUID.randomUUID()
 ) {
     val faktiskUtbetalingId = utbetalingId?.toString() ?: person.personLogg.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId")
-    if (sendOverførtKvittering) {
-        UtbetalingOverført(
-            meldingsreferanseId = UUID.randomUUID(),
-            aktørId = AbstractPersonTest.AKTØRID,
-            fødselsnummer = fnr.toString(),
-            orgnummer = orgnummer,
-            fagsystemId = fagsystemId,
-            utbetalingId = faktiskUtbetalingId,
-            avstemmingsnøkkel = 123456L,
-            overføringstidspunkt = LocalDateTime.now()
-        ).håndter(Person::håndter)
-    }
     utbetaling(
         fagsystemId = fagsystemId,
         status = status,
@@ -788,7 +774,7 @@ private fun AbstractEndToEndTest.førsteUhåndterteUtbetalingsbehov(orgnummer: S
         .map { UUID.fromString(it.kontekst().getValue("utbetalingId")) }
 
     return inspektør(orgnummer).utbetalinger
-        .filter { it.inspektør.tilstand in setOf(Utbetalingstatus.SENDT, Utbetalingstatus.OVERFØRT) }
+        .filter { it.inspektør.tilstand in setOf(Utbetalingstatus.OVERFØRT) }
         .also { require(it.size < 2) { "For mange utbetalinger i spill! Er sendt ut godkjenningsbehov for periodene ${it.map { utbetaling -> utbetaling.inspektør.periode }}" } }
         .firstOrNull { it.inspektør.utbetalingId in utbetalingsbehovUtbetalingIder }
         ?.let {
@@ -808,7 +794,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
 ) {
     førsteUhåndterteUtbetalingsbehov(orgnummer)?.also { (utbetalingId, fagsystemIder) ->
         fagsystemIder.forEach { fagsystemId ->
-            håndterUtbetalt(status, sendOverførtKvittering, fnr, orgnummer, fagsystemId, utbetalingId, meldingsreferanseId)
+            håndterUtbetalt(status, fnr, orgnummer, fagsystemId, utbetalingId, meldingsreferanseId)
         }
     }
 }
