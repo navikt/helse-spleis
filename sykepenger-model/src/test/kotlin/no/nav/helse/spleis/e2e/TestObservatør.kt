@@ -8,6 +8,7 @@ import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
+import no.nav.helse.person.SykefraværstilfelleeventyrObserver
 import no.nav.helse.person.TilstandType
 import org.junit.jupiter.api.fail
 
@@ -25,7 +26,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val feriepengerUtbetaltEventer = mutableListOf<PersonObserver.FeriepengerUtbetaltEvent>()
     val utbetaltEndretEventer = mutableListOf<PersonObserver.UtbetalingEndretEvent>()
     val vedtakFattetEvent = mutableMapOf<UUID, PersonObserver.VedtakFattetEvent>()
-
+    val sykefraværstilfelleeventyr = mutableListOf<List<SykefraværstilfelleeventyrObserver.SykefraværstilfelleeventyrObserverEvent>>()
     val overstyringIgangsatt = mutableListOf<PersonObserver.OverstyringIgangsatt>()
 
     val opprettOppgaverTilSpeilsaksbehandlerEventer = mutableListOf<PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent>()
@@ -67,6 +68,10 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     fun opprettOppgaveForSpeilsaksbehandlereEvent() = opprettOppgaverTilSpeilsaksbehandlerEventer.toList()
     fun opprettOppgaveEventer() = opprettOppgaverEventer.toList()
     fun utsettOppgaveEventer() = utsettOppgaveEventer.toList()
+
+    override fun sykefraværstilfelle(sykefraværstilfeller: List<SykefraværstilfelleeventyrObserver.SykefraværstilfelleeventyrObserverEvent>) {
+        this.sykefraværstilfelleeventyr.add(sykefraværstilfeller)
+    }
 
     override fun avstemt(result: Map<String, Any>) {
         avstemming = result

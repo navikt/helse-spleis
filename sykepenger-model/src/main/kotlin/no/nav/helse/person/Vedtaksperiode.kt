@@ -45,6 +45,7 @@ import no.nav.helse.person.Dokumentsporing.Companion.toMap
 import no.nav.helse.person.ForlengelseFraInfotrygd.IKKE_ETTERSPURT
 import no.nav.helse.person.InntektsmeldingInfo.Companion.ider
 import no.nav.helse.person.Periodetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.person.Sykefraværstilfelleeventyr.Companion.bliMed
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -968,6 +969,9 @@ internal class Vedtaksperiode private constructor(
         }
         return !hendelse.harFunksjonelleFeilEllerVerre()
     }
+
+    internal fun sykefraværsfortelling(list: List<Sykefraværstilfelleeventyr>) =
+        list.bliMed(this.id, this.organisasjonsnummer, this.periode)
 
     // Gang of four State pattern
     internal sealed interface Vedtaksperiodetilstand : Aktivitetskontekst {

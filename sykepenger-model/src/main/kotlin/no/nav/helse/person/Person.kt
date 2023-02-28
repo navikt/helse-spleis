@@ -52,6 +52,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.slettUtgåtteSykmeldingsperiod
 import no.nav.helse.person.Arbeidsgiver.Companion.sykefraværstilfelle
 import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
+import no.nav.helse.person.Sykefraværstilfelleeventyr.Companion.varsleObservers
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -617,7 +618,11 @@ class Person private constructor(
     private fun arbeidsgivereMedSykdom() = arbeidsgivere.filter(Arbeidsgiver::harSykdom)
 
     internal fun sykdomshistorikkEndret(aktivitetslogg: IAktivitetslogg) {
-        vilkårsgrunnlagHistorikk.oppdaterHistorikk(aktivitetslogg, skjæringstidspunkter())
+        val skjæringstidspunkter = skjæringstidspunkter()
+        arbeidsgivere.fold(skjæringstidspunkter.map { Sykefraværstilfelleeventyr(it) }) { acc, arbeidsgiver ->
+            arbeidsgiver.sykefraværsfortelling(acc)
+        }.varsleObservers(observers)
+        vilkårsgrunnlagHistorikk.oppdaterHistorikk(aktivitetslogg, skjæringstidspunkter)
     }
 
     internal fun søppelbøtte(hendelse: IAktivitetslogg, filter: VedtaksperiodeFilter) {

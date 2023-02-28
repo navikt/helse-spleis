@@ -11,7 +11,7 @@ import no.nav.helse.person.PersonObserver.ForespurtOpplysning.Companion.toJsonMa
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
 
-interface PersonObserver {
+interface PersonObserver : SykefraværstilfelleeventyrObserver {
     data class VedtaksperiodeIkkeFunnetEvent(
         val fødselsnummer: String,
         val aktørId: String,
