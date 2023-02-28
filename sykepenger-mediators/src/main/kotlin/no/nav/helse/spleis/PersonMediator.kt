@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.SykefraværstilfelleeventyrObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -100,6 +101,24 @@ internal class PersonMediator(
         message.put("@event_name", "inntektsmelding_replay")
         message.put("vedtaksperiodeId", "$vedtaksperiodeId")
         replays.add(vedtaksperiodeId to message.toString())
+    }
+
+    override fun sykefraværstilfelle(sykefraværstilfeller: List<SykefraværstilfelleeventyrObserver.SykefraværstilfelleeventyrObserverEvent>) {
+        queueMessage(JsonMessage.newMessage("sykefraværstilfeller", mapOf(
+            "tilfeller" to sykefraværstilfeller.map { tilfelle ->
+                mapOf(
+                    "dato" to tilfelle.dato,
+                    "perioder" to tilfelle.perioder.map { periode ->
+                        mapOf(
+                            "vedtaksperiodeId" to periode.id,
+                            "organisasjonsnummer" to periode.organisasjonsnummer,
+                            "fom" to periode.fom,
+                            "tom" to periode.tom
+                        )
+                    }
+                )
+            }
+        )))
     }
 
     override fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {
