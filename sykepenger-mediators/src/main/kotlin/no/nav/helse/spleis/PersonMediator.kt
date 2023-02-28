@@ -344,6 +344,13 @@ internal class PersonMediator(
         queueMessage(JsonMessage.newMessage("trenger_opplysninger_fra_arbeidsgiver", event.toJsonMap()))
     }
 
+    override fun håndtertInntektsmelding(event: PersonObserver.HåndtertInntektsmeldingEvent) {
+        queueMessage(JsonMessage.newMessage("håndtert_inntektsmelding", mapOf(
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "inntektsmeldingId" to event.inntektsmeldingId
+        )))
+    }
+
     private fun leggPåStandardfelter(outgoingMessage: JsonMessage) = outgoingMessage.apply {
         this["aktørId"] = hendelse.aktørId()
         this["fødselsnummer"] = hendelse.fødselsnummer()

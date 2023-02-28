@@ -3,14 +3,15 @@ package no.nav.helse.spleis.e2e
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
-import junit.framework.TestCase.assertEquals
 import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.TestMessageFactory
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
+import no.nav.inntektsmeldingkontrakt.Periode
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -70,6 +71,29 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             JSONAssert.assertEquals(forventetResultatFastsattInntekt, faktiskResultat, JSONCompareMode.STRICT)
         }
 
+    @Test
+    fun `Sender ut HåndtertInntekstmeldingEvent når en vedtaksperiode har håndtert en inntektsmelding`() =
+        Toggle.Splarbeidsbros.enable {
+            sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+            sendSøknad(
+                perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+            )
+            val (inntektsmeldingId, _) = sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+            val vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(0)
+
+            Assertions.assertEquals(1, testRapid.inspektør.meldinger("håndtert_inntektsmelding").size)
+            val trengerOpplysningerEvent = testRapid.inspektør.siste("håndtert_inntektsmelding")
+            Assertions.assertEquals(
+                inntektsmeldingId.toString(),
+                trengerOpplysningerEvent["inntektsmeldingId"].asText()
+            )
+            Assertions.assertEquals(
+                vedtaksperiodeId.toString(),
+                trengerOpplysningerEvent["vedtaksperiodeId"].asText()
+            )
+            Assertions.assertNotNull(trengerOpplysningerEvent["@opprettet"].asLocalDateTime())
+        }
+
     private fun forlengMedFebruar(a1: String) {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100), orgnummer = a1)
         sendSøknad(
@@ -80,6 +104,15 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, orgnummer = a1, status = SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0, orgnummer = a1)
         sendUtbetaling()
+    }
+
+    @Test
+    fun `sender ikke ut event TrengerArbeidsgiveropplysninger med toggle disabled`() = Toggle.Splarbeidsbros.disable {
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        )
+        Assertions.assertEquals(0, testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver").size)
     }
 
     private fun nyeVedtakForJanuar(a1: String, a2: String) {
@@ -135,15 +168,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, orgnummer = a2, status = SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0, orgnummer = a2)
         sendUtbetaling()
-    }
-
-    @Test
-    fun `sender ikke ut event TrengerArbeidsgiveropplysninger med toggle disabled`() = Toggle.Splarbeidsbros.disable {
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
-        sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
-        )
-        assertEquals(0, testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver").size)
     }
 
     @Language("json")

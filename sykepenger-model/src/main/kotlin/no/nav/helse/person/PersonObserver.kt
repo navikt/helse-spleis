@@ -88,6 +88,11 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val søknadIder: Set<UUID>
     )
 
+    data class HåndtertInntektsmeldingEvent(
+        val vedtaksperiodeId: UUID,
+        val inntektsmeldingId: UUID
+    )
+
     class TrengerArbeidsgiveropplysningerEvent(
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
@@ -291,6 +296,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     fun manglerInntektsmelding(event: ManglendeInntektsmeldingEvent) {}
     fun trengerIkkeInntektsmelding(event: TrengerIkkeInntektsmeldingEvent) {}
     fun trengerArbeidsgiveropplysninger(event: TrengerArbeidsgiveropplysningerEvent) {}
+    fun håndtertInntektsmelding(event: HåndtertInntektsmeldingEvent) {}
     fun utbetalingEndret(event: UtbetalingEndretEvent) {}
     fun utbetalingUtbetalt(event: UtbetalingUtbetaltEvent) {}
     fun utbetalingUtenUtbetaling(event: UtbetalingUtbetaltEvent) {}

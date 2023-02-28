@@ -446,6 +446,10 @@ class Person private constructor(
         observers.forEach { it.trengerIkkeInntektsmelding(event) }
     }
 
+    internal fun håndtertInntektsmelding(event: PersonObserver.HåndtertInntektsmeldingEvent) {
+        observers.forEach { it.håndtertInntektsmelding(event) }
+    }
+
     internal fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
         observers.forEach { it.trengerArbeidsgiveropplysninger(event) }
     }

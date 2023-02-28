@@ -264,6 +264,15 @@ internal class Vedtaksperiode private constructor(
         kontekst(dager)
         return tilstand.håndter(this, dager).also {
             dager.vurdertTilOgMed(periode.endInclusive)
+
+            if (Toggle.Splarbeidsbros.enabled) {
+                person.håndtertInntektsmelding(
+                    PersonObserver.HåndtertInntektsmeldingEvent(
+                        id,
+                        dager.meldingsreferanseId()
+                    )
+                )
+            }
         }
     }
 
