@@ -259,7 +259,6 @@ internal class Tidslinjeperioder(
                     utbetalinger.all { it.toDTO().revurderingFeilet(periode.tilstand) } && erForkastet -> Annullert
                     else -> Periodetilstand.RevurderingFeilet
                 }
-                utbetalingDTO.utbetalingFeilet(periode.tilstand) -> Periodetilstand.UtbetalingFeilet
                 utbetalingDTO.kanUtbetales() -> when {
                     utbetalingDTO.venterPåRevurdering(periode.tilstand) && utbetalingDTO.ikkeBetalt() -> VenterPåAnnenPeriode
                     utbetalingDTO.venterPåRevurdering(periode.tilstand) && !utbetalingDTO.utbetales() -> UtbetaltVenterPåAnnenPeriode

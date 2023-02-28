@@ -280,7 +280,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AVVIST)
         assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
-        håndterUtbetalingpåminnelse(0, Utbetalingstatus.UTBETALING_FEILET)
+        håndterUtbetalingpåminnelse(0, Utbetalingstatus.OVERFØRT)
         assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
         håndterUtbetalt(Oppdragstatus.AKSEPTERT, sendOverførtKvittering = false)
         assertTilstander(

@@ -952,7 +952,6 @@ internal data class PersonData(
                     periode = Periode(fom, tom),
                     sykmeldingsperiode = sykmeldingsperiode,
                     utbetalinger = VedtaksperiodeUtbetalinger(
-                        arbeidsgiver = arbeidsgiver,
                         utbetalinger = this.utbetalinger.tilModellobjekt(grunnlag, utbetalinger)
                     ),
                     utbetalingstidslinje = this.utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
@@ -970,7 +969,6 @@ internal data class PersonData(
                 TilstandType.TIL_UTBETALING -> Vedtaksperiode.TilUtbetaling
                 TilstandType.AVSLUTTET -> Vedtaksperiode.Avsluttet
                 TilstandType.AVSLUTTET_UTEN_UTBETALING -> Vedtaksperiode.AvsluttetUtenUtbetaling
-                TilstandType.UTBETALING_FEILET -> Vedtaksperiode.UtbetalingFeilet
                 TilstandType.REVURDERING_FEILET -> Vedtaksperiode.RevurderingFeilet
                 TilstandType.TIL_INFOTRYGD -> Vedtaksperiode.TilInfotrygd
                 TilstandType.START -> Vedtaksperiode.Start

@@ -65,7 +65,6 @@ import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
@@ -181,7 +180,7 @@ internal class Vedtaksperiode private constructor(
         inntektsmeldingInfo = null,
         periode = periode,
         sykmeldingsperiode = periode,
-        utbetalinger = VedtaksperiodeUtbetalinger(arbeidsgiver),
+        utbetalinger = VedtaksperiodeUtbetalinger(),
         utbetalingstidslinje = Utbetalingstidslinje(),
         opprettet = LocalDateTime.now(),
         jurist = jurist
@@ -1898,45 +1897,6 @@ internal class Vedtaksperiode private constructor(
             when {
                 vedtaksperiode.utbetalinger.erUbetalt() -> vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode)
                 vedtaksperiode.utbetalinger.erUtbetalt() -> vedtaksperiode.tilstand(påminnelse, Avsluttet)
-                vedtaksperiode.utbetalinger.harFeilet() -> vedtaksperiode.tilstand(påminnelse, UtbetalingFeilet)
-            }
-        }
-    }
-
-    internal object UtbetalingFeilet : Vedtaksperiodetilstand {
-        override val type = UTBETALING_FEILET
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.overlappendeSøknadIkkeStøttet(søknad)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse) {
-            sjekkUtbetalingstatus(vedtaksperiode, hendelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (vedtaksperiode.utbetalinger.kanIkkeForsøkesPåNy()) {
-                return vedtaksperiode.utbetalinger.reberegnUtbetaling(påminnelse, {
-                    vedtaksperiode.tilstand(påminnelse, AvventerHistorikkRevurdering)
-                }) {
-                    vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode) {
-                        påminnelse.info("Reberegner periode ettersom utbetaling er avvist og ikke kan forsøkes på nytt")
-                    }
-                }
-            }
-            sjekkUtbetalingstatus(vedtaksperiode, påminnelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            hendelse.info("Overstyrer ikke en vedtaksperiode med utbetaling som har feilet")
-        }
-
-        override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {}
-
-        private fun sjekkUtbetalingstatus(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            if (!vedtaksperiode.utbetalinger.erUtbetalt()) return
-            vedtaksperiode.tilstand(hendelse, Avsluttet) {
-                hendelse.info("OK fra Oppdragssystemet")
             }
         }
     }

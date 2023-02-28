@@ -25,7 +25,6 @@ enum class Periodetilstand {
     Utbetalt,
     Annullert,
     AnnulleringFeilet,
-    UtbetalingFeilet,
     RevurderingFeilet,
     ForberederGodkjenning,
     ManglerInformasjon,
@@ -198,15 +197,10 @@ data class SpeilOppdrag(
 enum class Utbetalingstatus {
     Annullert,
     Forkastet,
-    @Deprecated("skal slettes")
-    Godkjent,
     GodkjentUtenUtbetaling,
     IkkeGodkjent,
     Overført,
-    @Deprecated("skal slettes")
-    Sendt,
     Ubetalt,
-    UtbetalingFeilet,
     Utbetalt
 }
 
@@ -233,17 +227,15 @@ class Utbetaling(
 ) {
     fun erAnnullering() = type == Utbetalingtype.ANNULLERING
     private fun erForkastetRevurdering() = status == Utbetalingstatus.Forkastet && type == Utbetalingtype.REVURDERING
-    private fun erUtbetalingFeilet() = status == Utbetalingstatus.UtbetalingFeilet && type == Utbetalingtype.UTBETALING
-    fun utbetales() = status in listOf(Utbetalingstatus.Godkjent, Utbetalingstatus.Sendt, Utbetalingstatus.Overført)
+    fun utbetales() = status in listOf(Utbetalingstatus.Overført)
     fun ikkeBetalt() = status == Utbetalingstatus.Ubetalt
     fun utbetalt() = status in listOf(Utbetalingstatus.Utbetalt, Utbetalingstatus.GodkjentUtenUtbetaling)
-    fun kanUtbetales() = !erUtbetalingFeilet() && !erForkastetRevurdering()
+    fun kanUtbetales() = !erForkastetRevurdering()
     fun tilGodkjenning() = tilGodkjenning
 
     fun hørerSammen(other: Utbetaling) = korrelasjonsId == other.korrelasjonsId
 
     internal fun revurderingFeilet(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) = (erForkastetRevurdering() || status in setOf(Utbetalingstatus.IkkeGodkjent, Utbetalingstatus.Ubetalt)) && tilstand == Vedtaksperiode.RevurderingFeilet
-    internal fun utbetalingFeilet(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) = erUtbetalingFeilet() && tilstand == Vedtaksperiode.UtbetalingFeilet
     internal fun venterPåRevurdering(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) = tilstand == Vedtaksperiode.AvventerRevurdering
 
     data class Vurdering(

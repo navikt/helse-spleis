@@ -93,19 +93,10 @@ class Utbetaling private constructor(
     fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
     private fun erAktiv() = erAvsluttet() || erInFlight()
     private fun erAktivEllerUbetalt() = erAktiv() || erUbetalt()
-    fun erInFlight() = tilstand in listOf(Godkjent, Sendt, Overført, UtbetalingFeilet)
+    fun erInFlight() = tilstand in listOf(Overført)
     fun erAvsluttet() = erUtbetalt() || tilstand == GodkjentUtenUtbetaling
     fun erAvvist() = tilstand == IkkeGodkjent
-    fun harFeilet() = tilstand == UtbetalingFeilet
-    fun kanIkkeForsøkesPåNy() = Oppdrag.kanIkkeForsøkesPåNy(arbeidsgiverOppdrag, personOppdrag)
     private fun erAnnullering() = type == ANNULLERING
-
-    fun reberegnUtbetaling(hendelse: IAktivitetslogg, hvisRevurdering: () -> Unit, hvisUtbetaling: () -> Unit) {
-        check(kanIkkeForsøkesPåNy())
-        forkast(hendelse)
-        if (type == Utbetalingtype.REVURDERING) return hvisRevurdering()
-        return hvisUtbetaling()
-    }
 
     fun harNærliggendeUtbetaling(other: Periode): Boolean {
         if (arbeidsgiverOppdrag.isEmpty() && personOppdrag.isEmpty()) return false
@@ -474,11 +465,6 @@ class Utbetaling private constructor(
     fun utbetalingstidslinje() = utbetalingstidslinje
     fun utbetalingstidslinje(periode: Periode) = utbetalingstidslinje.subset(periode)
 
-    private fun overfør(hendelse: IAktivitetslogg) {
-        overførBegge(hendelse)
-        tilstand(Overført, hendelse)
-    }
-
     private fun overførBegge(hendelse: IAktivitetslogg) {
         vurdering?.overfør(hendelse, arbeidsgiverOppdrag, maksdato.takeUnless { type == ANNULLERING })
         vurdering?.overfør(hendelse, personOppdrag, maksdato.takeUnless { type == ANNULLERING })
@@ -487,8 +473,7 @@ class Utbetaling private constructor(
     private fun håndterKvittering(hendelse: UtbetalingHendelsePort) {
         hendelse.valider()
         val nesteTilstand = when {
-            tilstand == Sendt && hendelse.skalForsøkesIgjen() -> return // utbetaling gjør retry ved neste påminnelse
-            Oppdrag.harFeil(arbeidsgiverOppdrag, personOppdrag) -> return // Får funksjonelle feil fra Spenn selv om det kan prøves på ny
+            hendelse.skalForsøkesIgjen() || Oppdrag.harFeil(arbeidsgiverOppdrag, personOppdrag) -> return // utbetaling gjør retry ved neste påminnelse
             type == ANNULLERING -> Annullert
             else -> Utbetalt
         }
@@ -639,16 +624,6 @@ class Utbetaling private constructor(
         ).also { hendelse.info("Oppretter annullering med id ${it.id}") }
     }
 
-    @Deprecated("skal slettes")
-    internal object Godkjent : Tilstand {
-        override val status = Utbetalingstatus.GODKJENT
-    }
-
-    @Deprecated("skal slettes")
-    internal object Sendt : Tilstand {
-        override val status = Utbetalingstatus.SENDT
-    }
-
     internal object Overført : Tilstand {
         override val status = Utbetalingstatus.OVERFØRT
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
@@ -695,24 +670,6 @@ class Utbetaling private constructor(
                 null,
                 null
             ).also { hendelse.info("Oppretter annullering med id ${it.id}") }
-    }
-
-    internal object UtbetalingFeilet : Tilstand {
-        override val status = Utbetalingstatus.UTBETALING_FEILET
-        override fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
-            hendelse.info("Forkaster feilet utbetaling")
-            utbetaling.tilstand(Forkastet, hendelse)
-        }
-
-        override fun håndter(utbetaling: Utbetaling, påminnelse: UtbetalingpåminnelsePort) {
-            påminnelse.info("Forsøker å sende utbetalingen på nytt")
-            utbetaling.overfør(påminnelse)
-        }
-
-        override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelsePort) {
-            utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
-            utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
-        }
     }
 
     internal object IkkeGodkjent : Tilstand {
@@ -819,24 +776,18 @@ enum class Utbetalingstatus {
     NY,
     IKKE_UTBETALT,
     IKKE_GODKJENT,
-    GODKJENT,
-    SENDT,
     OVERFØRT,
     UTBETALT,
     GODKJENT_UTEN_UTBETALING,
-    UTBETALING_FEILET,
     ANNULLERT,
     FORKASTET;
     internal fun tilTilstand() = when(this) {
         NY -> Utbetaling.Ny
         IKKE_UTBETALT -> Utbetaling.Ubetalt
         IKKE_GODKJENT -> Utbetaling.IkkeGodkjent
-        GODKJENT -> Utbetaling.Godkjent
-        SENDT -> Utbetaling.Sendt
         OVERFØRT -> Utbetaling.Overført
         UTBETALT -> Utbetaling.Utbetalt
         GODKJENT_UTEN_UTBETALING -> Utbetaling.GodkjentUtenUtbetaling
-        UTBETALING_FEILET -> Utbetaling.UtbetalingFeilet
         ANNULLERT -> Utbetaling.Annullert
         FORKASTET -> Utbetaling.Forkastet
     }

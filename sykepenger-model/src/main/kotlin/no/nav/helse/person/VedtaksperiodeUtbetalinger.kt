@@ -15,8 +15,8 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
 import no.nav.helse.utbetalingslinjer.utbetalingport
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
-internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver, utbetalinger: List<Pair<VilkårsgrunnlagElement, Utbetaling>>) {
-    internal constructor(arbeidsgiver: Arbeidsgiver) : this(arbeidsgiver, mutableListOf())
+internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Pair<VilkårsgrunnlagElement, Utbetaling>>) {
+    internal constructor() : this(mutableListOf())
 
     private val utbetalingene get() = utbetalinger.map(Pair<*, Utbetaling>::second)
     private val utbetalinger = utbetalinger.toMutableList()
@@ -40,10 +40,8 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
     internal fun erAvsluttet() = siste?.erAvsluttet() == true
     internal fun erAvvist() = siste?.erAvvist() == true
     internal fun harUtbetalinger() = siste?.harUtbetalinger() == true
-    internal fun harFeilet() = siste?.harFeilet() == true
     internal fun erUtbetalt() = siste?.erUtbetalt() == true
     internal fun erUbetalt() = siste?.erUbetalt() == true
-    internal fun kanIkkeForsøkesPåNy() = siste?.kanIkkeForsøkesPåNy() == true
 
     internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>) =
         Utbetaling.kanForkastes(utbetalingene, arbeidsgiverUtbetalinger)
@@ -62,9 +60,6 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
 
     internal fun erHistorikkEndretSidenBeregning(infotrygdhistorikk: Infotrygdhistorikk) =
         infotrygdhistorikk.harEndretHistorikk(siste!!)
-
-    internal fun reberegnUtbetaling(hendelse: IAktivitetslogg, hvisRevurdering: () -> Unit, hvisUtbetaling: () -> Unit) =
-        siste!!.reberegnUtbetaling(hendelse, hvisRevurdering, hvisUtbetaling)
 
     internal fun forkast(hendelse: IAktivitetslogg) {
         siste?.forkast(hendelse)

@@ -184,13 +184,10 @@ private fun mapUtbetaling(utbetaling: Utbetaling) = GraphQLUtbetaling(
     statusEnum = when (utbetaling.status) {
         Utbetalingstatus.Annullert -> GraphQLUtbetalingstatus.Annullert
         Utbetalingstatus.Forkastet -> GraphQLUtbetalingstatus.Forkastet
-        Utbetalingstatus.Godkjent -> GraphQLUtbetalingstatus.Godkjent
         Utbetalingstatus.GodkjentUtenUtbetaling -> GraphQLUtbetalingstatus.GodkjentUtenUtbetaling
         Utbetalingstatus.IkkeGodkjent -> GraphQLUtbetalingstatus.IkkeGodkjent
         Utbetalingstatus.Overført -> GraphQLUtbetalingstatus.Overfort
-        Utbetalingstatus.Sendt -> GraphQLUtbetalingstatus.Sendt
         Utbetalingstatus.Ubetalt -> GraphQLUtbetalingstatus.Ubetalt
-        Utbetalingstatus.UtbetalingFeilet -> GraphQLUtbetalingstatus.UtbetalingFeilet
         Utbetalingstatus.Utbetalt -> GraphQLUtbetalingstatus.Utbetalt
     },
     arbeidsgiverNettoBelop = utbetaling.arbeidsgiverNettoBeløp,
@@ -336,7 +333,6 @@ private fun mapTilstand(tilstand: Periodetilstand) = when (tilstand) {
     Periodetilstand.IngenUtbetaling -> GraphQLPeriodetilstand.IngenUtbetaling
     Periodetilstand.RevurderingFeilet -> GraphQLPeriodetilstand.RevurderingFeilet
     Periodetilstand.TilInfotrygd -> GraphQLPeriodetilstand.TilInfotrygd
-    Periodetilstand.UtbetalingFeilet -> GraphQLPeriodetilstand.UtbetalingFeilet
     Periodetilstand.ForberederGodkjenning -> GraphQLPeriodetilstand.ForberederGodkjenning
     Periodetilstand.ManglerInformasjon -> GraphQLPeriodetilstand.ManglerInformasjon
     Periodetilstand.VenterPåAnnenPeriode -> GraphQLPeriodetilstand.VenterPaAnnenPeriode
