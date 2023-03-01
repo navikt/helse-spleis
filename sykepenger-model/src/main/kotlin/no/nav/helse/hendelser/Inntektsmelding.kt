@@ -151,15 +151,7 @@ class Inntektsmelding(
     }
 
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
-        refusjon.valider(this, periode, beregnetInntekt)
-        if (arbeidsgiverperioder.isEmpty()) info("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode")
-        begrunnelseForReduksjonEllerIkkeUtbetalt?.takeIf(String::isNotBlank)?.also {
-            info("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s".format(it))
-            funksjonellFeil(RV_IM_8)
-        }
-        if (harOpphørAvNaturalytelser) funksjonellFeil(RV_IM_7)
-        if (harFlereInntektsmeldinger) varsel(RV_IM_4)
-        return this
+        throw IllegalStateException("Inntektsmeldingen håndteres og valideres oppdelt.")
     }
 
     private fun validerFørsteFraværsdag(skjæringstidspunkt: LocalDate) {

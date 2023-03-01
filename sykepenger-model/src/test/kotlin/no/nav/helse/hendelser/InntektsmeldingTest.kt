@@ -9,15 +9,18 @@ import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -206,7 +209,7 @@ internal class InntektsmeldingTest {
     fun `inntektsmelding uten arbeidsgiverperiode med førsteFraværsdag satt`() {
         inntektsmelding(emptyList(), førsteFraværsdag = 1.januar)
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
-        inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist())
+        inntektsmelding.validerArbeidsgiverperiode(null)
         aktivitetslogg.assertInfo("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode")
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
         assertEquals(1.januar til 1.januar, inntektsmelding.periode())
@@ -218,7 +221,7 @@ internal class InntektsmeldingTest {
     fun `inntektsmelding uten arbeidsgiverperiode med førsteFraværsdag & begrunnelseForReduksjonEllerIkkeUtbetalt satt`() {
         inntektsmelding(emptyList(), førsteFraværsdag = 1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "begrunnelse")
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
-        inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist())
+        inntektsmelding.validerArbeidsgiverperiode(null)
         aktivitetslogg.assertInfo("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode")
         aktivitetslogg.assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: begrunnelse")
         aktivitetslogg.assertFunksjonellFeil("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden")
@@ -271,7 +274,7 @@ internal class InntektsmeldingTest {
                 Periode(1.januar, 2.januar), Periode(4.januar, 5.januar), Periode(3.januar, 4.januar)
             )
         )
-        inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist())
+        inntektsmelding.validerArbeidsgiverperiode(null)
         assertFalse(inntektsmelding.harFunksjonelleFeilEllerVerre())
     }
 
@@ -308,7 +311,7 @@ internal class InntektsmeldingTest {
             listOf(Periode(1.januar, 10.januar)),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "begrunnelse"
         )
-        inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist())
+        inntektsmelding.validerArbeidsgiverperiode(null)
         aktivitetslogg.assertFunksjonellFeil("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden")
         aktivitetslogg.assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: begrunnelse")
     }
@@ -319,7 +322,7 @@ internal class InntektsmeldingTest {
             listOf(Periode(1.januar, 10.januar)),
             begrunnelseForReduksjonEllerIkkeUtbetalt = ""
         )
-        assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist()).harFunksjonelleFeilEllerVerre())
+        assertFalse(inntektsmelding.validerArbeidsgiverperiode(null).harFunksjonelleFeilEllerVerre())
     }
 
     @Test
@@ -441,6 +444,13 @@ internal class InntektsmeldingTest {
         inntektsmelding.addInntekt(inntektshistorikk, 1.februar, MaskinellJurist())
         assertEquals(2000.månedlig, inntektshistorikk.avklarSykepengegrunnlag(1.februar, 1.februar, null)?.inspektør?.beløp)
         assertNull(inntektshistorikk.avklarSykepengegrunnlag(3.februar, 3.februar, null))
+    }
+
+    @Test
+    fun `uenige om arbeidsgiverperiode`() {
+        inntektsmelding(listOf(2.januar til 17.januar))
+        inntektsmelding.validerArbeidsgiverperiode(Arbeidsgiverperiode(listOf(1.januar til 16.januar)))
+        aktivitetslogg.assertVarsel(RV_IM_3)
     }
 
     private fun inntektsmelding(
