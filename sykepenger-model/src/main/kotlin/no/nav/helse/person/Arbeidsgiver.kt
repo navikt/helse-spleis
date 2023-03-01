@@ -400,7 +400,7 @@ internal class Arbeidsgiver private constructor(
         val sykdomshistorikkId = sykdomshistorikk.nyesteId()
         val vilkårsgrunnlagHistorikkId = person.nyesteIdForVilkårsgrunnlagHistorikk()
         lagreUtbetalingstidslinjeberegning(orgnummerTilDenSomBeregner, utbetalingstidslinje, sykdomshistorikkId, vilkårsgrunnlagHistorikkId)
-        return Utbetalingstidslinjeberegning.lagUtbetaling(
+        val (utbetalingen, annulleringer) = Utbetalingstidslinjeberegning.lagUtbetaling(
             beregnetUtbetalingstidslinjer,
             utbetalinger,
             fødselsnummer,
@@ -411,15 +411,22 @@ internal class Arbeidsgiver private constructor(
             gjenståendeSykedager,
             type,
             organisasjonsnummer
-        ).also { nyUtbetaling(aktivitetslogg, it) }
+        )
+        nyUtbetaling(aktivitetslogg, utbetalingen, annulleringer)
+        return utbetalingen
     }
 
-    private fun nyUtbetaling(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling) {
+    private fun nyUtbetaling(aktivitetslogg: IAktivitetslogg, utbetalingen: Utbetaling, annulleringer: List<Utbetaling> = emptyList()) {
         utbetalinger.lastOrNull()?.forkast(aktivitetslogg)
-        check(utbetalinger.tillaterOpprettelseAvUtbetaling(utbetaling)) { "Har laget en overlappende utbetaling" }
-        utbetalinger.add(utbetaling)
-        utbetaling.registrer(this)
-        utbetaling.opprett(aktivitetslogg)
+        check (Toggle.AnnullereOgUtbetale.enabled || annulleringer.isEmpty()) {
+            "Dette støtter vi ikke helt enda: må annullere/opphøre ${annulleringer.size} oppdrag for å kunne kjøre frem igjen ett."
+        }
+        annulleringer.plus(utbetalingen).forEach { utbetaling ->
+            check(utbetalinger.tillaterOpprettelseAvUtbetaling(utbetaling)) { "Har laget en overlappende utbetaling" }
+            utbetalinger.add(utbetaling)
+            utbetaling.registrer(this)
+            utbetaling.opprett(aktivitetslogg)
+        }
     }
 
     internal fun utbetalFeriepenger(

@@ -82,7 +82,8 @@ internal class Avstemmer(person: Person) {
             beregningId: UUID,
             overføringstidspunkt: LocalDateTime?,
             avsluttet: LocalDateTime?,
-            avstemmingsnøkkel: Long?
+            avstemmingsnøkkel: Long?,
+            annulleringer: Set<UUID>
         ) {
         }
 
@@ -120,7 +121,8 @@ internal class Avstemmer(person: Person) {
             beregningId: UUID,
             overføringstidspunkt: LocalDateTime?,
             avsluttet: LocalDateTime?,
-            avstemmingsnøkkel: Long?
+            avstemmingsnøkkel: Long?,
+            annulleringer: Set<UUID>
         ) {
             utbetalinger.add(
                 mutableMapOf<String, Any>(
@@ -220,7 +222,8 @@ internal class Avstemmer(person: Person) {
             beregningId: UUID,
             overføringstidspunkt: LocalDateTime?,
             avsluttet: LocalDateTime?,
-            avstemmingsnøkkel: Long?
+            avstemmingsnøkkel: Long?,
+            annulleringer: Set<UUID>
         ) {
             if (utbetalingstatus != Utbetalingstatus.FORKASTET) utbetalinger.getOrPut(vedtaksperiodeId) { mutableListOf() }.add(id)
         }

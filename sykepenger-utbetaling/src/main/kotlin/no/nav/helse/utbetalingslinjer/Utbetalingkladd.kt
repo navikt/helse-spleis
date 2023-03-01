@@ -23,7 +23,8 @@ class Utbetalingkladd(
         utbetalingstidslinje: Utbetalingstidslinje,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
-        gjenståendeSykedager: Int
+        gjenståendeSykedager: Int,
+        annulleringer: List<Utbetaling> = emptyList()
     ): Utbetaling {
         return Utbetaling(
             beregningId = beregningId,
@@ -35,7 +36,8 @@ class Utbetalingkladd(
             type = type,
             maksdato = maksdato,
             forbrukteSykedager = forbrukteSykedager,
-            gjenståendeSykedager = gjenståendeSykedager
+            gjenståendeSykedager = gjenståendeSykedager,
+            annulleringer = annulleringer
         )
     }
 

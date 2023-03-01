@@ -573,7 +573,9 @@ internal data class PersonData(
         private val modelSykdomshistorikk = SykdomshistorikkData.parseSykdomshistorikk(sykdomshistorikk)
         private val vedtaksperiodeliste = mutableListOf<Vedtaksperiode>()
         private val forkastedeliste = mutableListOf<ForkastetVedtaksperiode>()
-        private val modelUtbetalinger = utbetalinger.map { it.konverterTilUtbetaling() }
+        private val modelUtbetalinger = utbetalinger.fold(emptyList<Pair<UUID, Utbetaling>>()) { andreUtbetalinger, utbetalingen ->
+            andreUtbetalinger.plus(utbetalingen.id to utbetalingen.konverterTilUtbetaling(andreUtbetalinger))
+        }.map(Pair<*, Utbetaling>::second)
         private val utbetalingMap = utbetalinger.zip(modelUtbetalinger) { data, utbetaling -> data.id to utbetaling }.toMap()
 
         internal fun konverterTilArbeidsgiver(
@@ -1151,6 +1153,7 @@ internal data class PersonData(
         private val beregningId: UUID,
         private val fom: LocalDate,
         private val tom: LocalDate,
+        private val annulleringer: List<UUID>?,
         private val utbetalingstidslinje: UtbetalingstidslinjeData,
         private val arbeidsgiverOppdrag: OppdragData,
         private val personOppdrag: OppdragData,
@@ -1167,10 +1170,11 @@ internal data class PersonData(
         private val oppdatert: LocalDateTime
     ) {
 
-        internal fun konverterTilUtbetaling() = Utbetaling.ferdigUtbetaling(
+        internal fun konverterTilUtbetaling(andreUtbetalinger: List<Pair<UUID, Utbetaling>>) = Utbetaling.ferdigUtbetaling(
             id = id,
             korrelasjonsId = korrelasjonsId,
             beregningId = beregningId,
+            annulleringer = annulleringer?.map { annulleringen -> andreUtbetalinger.single { it.first == annulleringen }.second } ?: emptyList(),
             opprinneligPeriode = fom til tom,
             utbetalingstidslinje = utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
             arbeidsgiverOppdrag = arbeidsgiverOppdrag.konverterTilOppdrag(),

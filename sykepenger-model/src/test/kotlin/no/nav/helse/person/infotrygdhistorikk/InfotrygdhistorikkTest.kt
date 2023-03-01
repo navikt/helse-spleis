@@ -454,7 +454,7 @@ internal class InfotrygdhistorikkTest {
         maksdato = 1.januar,
         forbrukteSykedager = 0,
         gjenståendeSykedager = 0
-    )
+    ).first
 
     private fun historikkelement(
         perioder: List<Infotrygdperiode> = emptyList(),

@@ -69,7 +69,8 @@ class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor {
         beregningId: UUID,
         overføringstidspunkt: LocalDateTime?,
         avsluttet: LocalDateTime?,
-        avstemmingsnøkkel: Long?
+        avstemmingsnøkkel: Long?,
+        annulleringer: Set<UUID>
     ) {
         utbetalingId = id
         this.periode = periode

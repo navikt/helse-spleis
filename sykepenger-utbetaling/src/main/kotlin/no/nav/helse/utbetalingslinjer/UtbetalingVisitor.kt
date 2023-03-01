@@ -26,7 +26,8 @@ interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor, UtbetalingV
         beregningId: UUID,
         overføringstidspunkt: LocalDateTime?,
         avsluttet: LocalDateTime?,
-        avstemmingsnøkkel: Long?
+        avstemmingsnøkkel: Long?,
+        annulleringer: Set<UUID>
     ) {
     }
 
@@ -55,7 +56,8 @@ interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor, UtbetalingV
         beregningId: UUID,
         overføringstidspunkt: LocalDateTime?,
         avsluttet: LocalDateTime?,
-        avstemmingsnøkkel: Long?
+        avstemmingsnøkkel: Long?,
+        annulleringer: Set<UUID>
     ) {
     }
 }

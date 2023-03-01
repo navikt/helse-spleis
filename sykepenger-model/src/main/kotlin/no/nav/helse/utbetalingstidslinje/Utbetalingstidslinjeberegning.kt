@@ -64,7 +64,7 @@ internal class Utbetalingstidslinjeberegning private constructor(
             gjenståendeSykedager: Int,
             type: Utbetalingtype,
             organisasjonsnummer: String
-        ): Utbetaling {
+        ): Pair<Utbetaling, List<Utbetaling>> {
             val beregning = beregnetUtbetalingstidslinjer.last()
             return Utbetaling.lagUtbetaling(
                 utbetalinger,

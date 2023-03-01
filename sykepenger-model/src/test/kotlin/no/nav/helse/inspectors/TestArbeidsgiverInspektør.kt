@@ -312,7 +312,8 @@ internal class TestArbeidsgiverInspektør(
         beregningId: UUID,
         overføringstidspunkt: LocalDateTime?,
         avsluttet: LocalDateTime?,
-        avstemmingsnøkkel: Long?
+        avstemmingsnøkkel: Long?,
+        annulleringer: Set<UUID>
     ) {
         inUtbetaling = true
         if (!inVedtaksperiode) {
@@ -346,7 +347,8 @@ internal class TestArbeidsgiverInspektør(
         beregningId: UUID,
         overføringstidspunkt: LocalDateTime?,
         avsluttet: LocalDateTime?,
-        avstemmingsnøkkel: Long?
+        avstemmingsnøkkel: Long?,
+        annulleringer: Set<UUID>
     ) {
         inUtbetaling = false
     }

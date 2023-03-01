@@ -130,10 +130,11 @@ internal class GenerasjonerBuilder(
         beregningId: UUID,
         overføringstidspunkt: LocalDateTime?,
         avsluttet: LocalDateTime?,
-        avstemmingsnøkkel: Long?
+        avstemmingsnøkkel: Long?,
+        annulleringer: Set<UUID>
     ) {
         if (type != Utbetalingtype.ANNULLERING) return
-        annulleringer.leggTil(UtbetalingBuilder(utbetaling).build())
+        this.annulleringer.leggTil(UtbetalingBuilder(utbetaling).build())
     }
 
     override fun preVisitUtbetalingstidslinjeberegning(

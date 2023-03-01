@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
+import no.nav.helse.harBehov
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.somPeriode
@@ -18,6 +19,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.sisteBehov
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.FRI
@@ -30,6 +32,7 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.*
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -54,6 +57,225 @@ internal class UtbetalingTest {
     @BeforeEach
     internal fun initEach() {
         aktivitetslogg = Aktivitetslogg()
+    }
+
+    @Test
+    fun `ny utbetaling erstatter flere uten utbetalinger`() {
+        val annullering1 = Utbetaling(
+            beregningId = UUID.randomUUID(),
+            korrelerendeUtbetaling = null,
+            periode = 1.februar til 15.februar,
+            utbetalingstidslinje = Utbetalingstidslinje(),
+            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
+            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+            type = Utbetalingtype.ANNULLERING,
+            maksdato = 28.desember,
+            forbrukteSykedager = 0,
+            gjenståendeSykedager = 248
+        ).also { it.opprett(Aktivitetslogg()) }
+        val annullering2 = Utbetaling(
+            beregningId = UUID.randomUUID(),
+            korrelerendeUtbetaling = null,
+            periode = 3.mars til 31.mars,
+            utbetalingstidslinje = Utbetalingstidslinje(),
+            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
+            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+            type = Utbetalingtype.ANNULLERING,
+            maksdato = 28.desember,
+            forbrukteSykedager = 0,
+            gjenståendeSykedager = 248
+        ).also { it.opprett(Aktivitetslogg()) }
+
+        val utbetalingen = Utbetaling(
+            beregningId = UUID.randomUUID(),
+            korrelerendeUtbetaling = null,
+            periode = 1.januar til 31.mars,
+            utbetalingstidslinje = Utbetalingstidslinje(),
+            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
+            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+            type = Utbetalingtype.UTBETALING,
+            maksdato = 28.desember,
+            forbrukteSykedager = 0,
+            gjenståendeSykedager = 248,
+            annulleringer = listOf(
+                annullering1,
+                annullering2
+            )
+        ).also { it.opprett(Aktivitetslogg()) }
+
+        val hendelse = godkjenn(utbetalingen)
+        assertFalse(hendelse.harBehov(Behovtype.Utbetaling))
+        assertEquals(ANNULLERT, annullering1.inspektør.tilstand)
+        assertEquals(ANNULLERT, annullering2.inspektør.tilstand)
+        assertEquals(GODKJENT_UTEN_UTBETALING, utbetalingen.inspektør.tilstand)
+    }
+
+    @Test
+    fun `ny utbetaling erstatter flere med utbetalinger`() {
+        val annullering1 = Utbetaling(
+            beregningId = UUID.randomUUID(),
+            korrelerendeUtbetaling = null,
+            periode = 1.februar til 15.februar,
+            utbetalingstidslinje = Utbetalingstidslinje(),
+            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon, linjer = listOf(
+                Utbetalingslinje(1.februar, 15.februar, beløp = 500, aktuellDagsinntekt = 500, grad = 10, delytelseId = 1, endringskode = ENDR, datoStatusFom = 1.februar)
+            )),
+            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+            type = Utbetalingtype.ANNULLERING,
+            maksdato = 28.desember,
+            forbrukteSykedager = 0,
+            gjenståendeSykedager = 248
+        ).also { it.opprett(Aktivitetslogg()) }
+        val annullering2 = Utbetaling(
+            beregningId = UUID.randomUUID(),
+            korrelerendeUtbetaling = null,
+            periode = 3.mars til 31.mars,
+            utbetalingstidslinje = Utbetalingstidslinje(),
+            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
+            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+            type = Utbetalingtype.ANNULLERING,
+            maksdato = 28.desember,
+            forbrukteSykedager = 0,
+            gjenståendeSykedager = 248
+        ).also { it.opprett(Aktivitetslogg()) }
+
+        val utbetalingen = Utbetaling(
+            beregningId = UUID.randomUUID(),
+            korrelerendeUtbetaling = null,
+            periode = 1.januar til 31.mars,
+            utbetalingstidslinje = Utbetalingstidslinje(),
+            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
+            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+            type = Utbetalingtype.UTBETALING,
+            maksdato = 28.desember,
+            forbrukteSykedager = 0,
+            gjenståendeSykedager = 248,
+            annulleringer = listOf(
+                annullering1,
+                annullering2
+            )
+        ).also { it.opprett(Aktivitetslogg()) }
+
+        val hendelse = godkjenn(utbetalingen)
+        assertEquals(1, hendelse.behov().size)
+        hendelse.sisteBehov(Behovtype.Utbetaling).also { behov ->
+            val detaljer = behov.detaljer()
+            val kontekster = behov.kontekst()
+
+            val oppdragInspektør = annullering1.inspektør.arbeidsgiverOppdrag.inspektør
+            assertEquals(oppdragInspektør.mottaker, detaljer.getValue("mottaker"))
+            assertEquals(oppdragInspektør.fagsystemId(), detaljer.getValue("fagsystemId"))
+
+            assertEquals(annullering1.inspektør.utbetalingId.toString(), kontekster.getValue("utbetalingId"))
+            assertEquals(oppdragInspektør.fagsystemId(), kontekster.getValue("fagsystemId"))
+        }
+
+        assertEquals(OVERFØRT, annullering1.inspektør.tilstand)
+        assertEquals(ANNULLERT, annullering2.inspektør.tilstand)
+        assertEquals(GODKJENT, utbetalingen.inspektør.tilstand)
+
+        kvittèr(annullering1)
+
+        assertEquals(ANNULLERT, annullering1.inspektør.tilstand)
+        assertEquals(ANNULLERT, annullering2.inspektør.tilstand)
+        assertEquals(GODKJENT, utbetalingen.inspektør.tilstand)
+
+        kvittèr(annullering1, utbetalingmottaker = utbetalingen)
+
+        assertEquals(ANNULLERT, annullering1.inspektør.tilstand)
+        assertEquals(ANNULLERT, annullering2.inspektør.tilstand)
+        assertEquals(GODKJENT_UTEN_UTBETALING, utbetalingen.inspektør.tilstand)
+    }
+
+    @Test
+    fun `ny utbetaling erstatter flere med utbetalinger - med egne utbetalinger`() {
+        val annullering1 = Utbetaling(
+            beregningId = UUID.randomUUID(),
+            korrelerendeUtbetaling = null,
+            periode = 1.februar til 15.februar,
+            utbetalingstidslinje = Utbetalingstidslinje(),
+            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon, linjer = listOf(
+                Utbetalingslinje(1.februar, 15.februar, beløp = 500, aktuellDagsinntekt = 500, grad = 10, delytelseId = 1, endringskode = ENDR, datoStatusFom = 1.februar)
+            )),
+            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+            type = Utbetalingtype.ANNULLERING,
+            maksdato = 28.desember,
+            forbrukteSykedager = 0,
+            gjenståendeSykedager = 248
+        ).also { it.opprett(Aktivitetslogg()) }
+        val annullering2 = Utbetaling(
+            beregningId = UUID.randomUUID(),
+            korrelerendeUtbetaling = null,
+            periode = 3.mars til 31.mars,
+            utbetalingstidslinje = Utbetalingstidslinje(),
+            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
+            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+            type = Utbetalingtype.ANNULLERING,
+            maksdato = 28.desember,
+            forbrukteSykedager = 0,
+            gjenståendeSykedager = 248
+        ).also { it.opprett(Aktivitetslogg()) }
+
+        val utbetalingen = Utbetaling(
+            beregningId = UUID.randomUUID(),
+            korrelerendeUtbetaling = null,
+            periode = 1.januar til 31.mars,
+            utbetalingstidslinje = Utbetalingstidslinje(),
+            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon, linjer = listOf(
+                Utbetalingslinje(1.januar, 31.januar, beløp = 500, aktuellDagsinntekt = 500, grad = 10, delytelseId = 1, endringskode = NY)
+            )),
+            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+            type = Utbetalingtype.UTBETALING,
+            maksdato = 28.desember,
+            forbrukteSykedager = 0,
+            gjenståendeSykedager = 248,
+            annulleringer = listOf(
+                annullering1,
+                annullering2
+            )
+        ).also { it.opprett(Aktivitetslogg()) }
+
+        val hendelse = godkjenn(utbetalingen)
+        assertEquals(1, hendelse.behov().size)
+        hendelse.sisteBehov(Behovtype.Utbetaling).also { behov ->
+            val detaljer = behov.detaljer()
+            val kontekster = behov.kontekst()
+
+            val oppdragInspektør = annullering1.inspektør.arbeidsgiverOppdrag.inspektør
+            assertEquals(oppdragInspektør.mottaker, detaljer.getValue("mottaker"))
+            assertEquals(oppdragInspektør.fagsystemId(), detaljer.getValue("fagsystemId"))
+
+            assertEquals(annullering1.inspektør.utbetalingId.toString(), kontekster.getValue("utbetalingId"))
+            assertEquals(oppdragInspektør.fagsystemId(), kontekster.getValue("fagsystemId"))
+        }
+
+        assertEquals(OVERFØRT, annullering1.inspektør.tilstand)
+        assertEquals(ANNULLERT, annullering2.inspektør.tilstand)
+        assertEquals(GODKJENT, utbetalingen.inspektør.tilstand)
+
+        kvittèr(annullering1)
+
+        assertEquals(ANNULLERT, annullering1.inspektør.tilstand)
+        assertEquals(ANNULLERT, annullering2.inspektør.tilstand)
+        assertEquals(GODKJENT, utbetalingen.inspektør.tilstand)
+
+        val kvitteringen = kvittèr(annullering1, utbetalingmottaker = utbetalingen)
+        assertEquals(1, kvitteringen.behov().size)
+        kvitteringen.sisteBehov(Behovtype.Utbetaling).also { behov ->
+            val detaljer = behov.detaljer()
+            val kontekster = behov.kontekst()
+
+            val oppdragInspektør = utbetalingen.inspektør.arbeidsgiverOppdrag.inspektør
+            assertEquals(oppdragInspektør.mottaker, detaljer.getValue("mottaker"))
+            assertEquals(oppdragInspektør.fagsystemId(), detaljer.getValue("fagsystemId"))
+
+            assertEquals(utbetalingen.inspektør.utbetalingId.toString(), kontekster.getValue("utbetalingId"))
+            assertEquals(oppdragInspektør.fagsystemId(), kontekster.getValue("fagsystemId"))
+        }
+
+        assertEquals(ANNULLERT, annullering1.inspektør.tilstand)
+        assertEquals(ANNULLERT, annullering2.inspektør.tilstand)
+        assertEquals(OVERFØRT, utbetalingen.inspektør.tilstand)
     }
 
     @Test
@@ -257,10 +479,10 @@ internal class UtbetalingTest {
             LocalDate.MAX,
             100,
             148
-        )
+        ).first
         assertEquals(Utbetalingstatus.NY, utbetaling.inspektør.tilstand)
         utbetaling.opprett(aktivitetslogg)
-        assertEquals(Utbetalingstatus.IKKE_UTBETALT, utbetaling.inspektør.tilstand)
+        assertEquals(IKKE_UTBETALT, utbetaling.inspektør.tilstand)
     }
 
     @Test
@@ -280,7 +502,7 @@ internal class UtbetalingTest {
             LocalDate.MAX,
             100,
             148
-        ).also { it.opprett(aktivitetslogg) }
+        ).first.also { it.opprett(aktivitetslogg) }
         assertEquals(1.januar til sisteDato, utbetaling.inspektør.utbetalingstidslinje.periode())
         assertEquals(16.januar til sisteDato, utbetaling.inspektør.periode)
     }
@@ -528,7 +750,7 @@ internal class UtbetalingTest {
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
         kvittèr(utbetaling)
-        assertEquals(Utbetalingstatus.OVERFØRT, utbetaling.inspektør.tilstand)
+        assertEquals(OVERFØRT, utbetaling.inspektør.tilstand)
     }
 
     @Test
@@ -538,7 +760,7 @@ internal class UtbetalingTest {
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
         kvittèr(utbetaling)
         kvittèr(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId())
-        assertEquals(Utbetalingstatus.UTBETALT, utbetaling.inspektør.tilstand)
+        assertEquals(UTBETALT, utbetaling.inspektør.tilstand)
     }
 
     @Test
@@ -547,7 +769,7 @@ internal class UtbetalingTest {
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
         kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), AVVIST)
-        assertEquals(Utbetalingstatus.OVERFØRT, utbetaling.inspektør.tilstand)
+        assertEquals(OVERFØRT, utbetaling.inspektør.tilstand)
     }
 
     @Test
@@ -559,7 +781,7 @@ internal class UtbetalingTest {
         kvittèr(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId(), AKSEPTERT)
         assertEquals(AVVIST, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.status())
         assertEquals(AKSEPTERT, utbetaling.inspektør.personOppdrag.inspektør.status())
-        assertEquals(Utbetalingstatus.OVERFØRT, utbetaling.inspektør.tilstand)
+        assertEquals(OVERFØRT, utbetaling.inspektør.tilstand)
     }
 
     @Test
@@ -569,7 +791,7 @@ internal class UtbetalingTest {
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
         kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), AKSEPTERT)
         kvittèr(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId(), AVVIST)
-        assertEquals(Utbetalingstatus.OVERFØRT, utbetaling.inspektør.tilstand)
+        assertEquals(OVERFØRT, utbetaling.inspektør.tilstand)
     }
 
     @Test
@@ -769,7 +991,7 @@ internal class UtbetalingTest {
     fun `utbetalingHendelse som treffer på brukeroppdraget`() {
         val utbetaling = opprettGodkjentUtbetaling()
         kvittèr(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId())
-        assertEquals(Utbetalingstatus.UTBETALT, utbetaling.inspektør.tilstand)
+        assertEquals(UTBETALT, utbetaling.inspektør.tilstand)
     }
 
     @Test
@@ -905,7 +1127,7 @@ internal class UtbetalingTest {
         LocalDate.MAX,
         100,
         148
-    ).also { it.opprett(aktivitetslogg) }
+    ).first.also { it.opprett(aktivitetslogg) }
 
     private fun opprettUtbetaling(
         tidslinje: Utbetalingstidslinje,
@@ -925,22 +1147,23 @@ internal class UtbetalingTest {
     private fun kvittèr(
         utbetaling: Utbetaling,
         fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(),
-        status: Oppdragstatus = AKSEPTERT
-    ) {
-        utbetaling.håndter(
-            UtbetalingHendelse(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = "ignore",
-                fødselsnummer = UNG_PERSON_FNR_2018,
-                orgnummer = ORGNUMMER,
-                fagsystemId = fagsystemId,
-                utbetalingId = "${utbetaling.inspektør.utbetalingId}",
-                status = status,
-                melding = "hei",
-                avstemmingsnøkkel = 123456L,
-                overføringstidspunkt = LocalDateTime.now()
-            ).utbetalingport()
-        )
+        status: Oppdragstatus = AKSEPTERT,
+        utbetalingmottaker: Utbetaling = utbetaling
+    ): UtbetalingHendelsePort {
+        val hendelsen = UtbetalingHendelse(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = "ignore",
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            orgnummer = ORGNUMMER,
+            fagsystemId = fagsystemId,
+            utbetalingId = "${utbetaling.inspektør.utbetalingId}",
+            status = status,
+            melding = "hei",
+            avstemmingsnøkkel = 123456L,
+            overføringstidspunkt = LocalDateTime.now()
+        ).utbetalingport()
+        utbetalingmottaker.håndter(hendelsen)
+        return hendelsen
     }
 
     private fun godkjenn(utbetaling: Utbetaling, utbetalingGodkjent: Boolean = true) =

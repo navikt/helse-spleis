@@ -987,7 +987,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         beregningId: UUID,
         overføringstidspunkt: LocalDateTime?,
         avsluttet: LocalDateTime?,
-        avstemmingsnøkkel: Long?
+        avstemmingsnøkkel: Long?,
+        annulleringer: Set<UUID>
     ) {
         delegatee.preVisitUtbetaling(
             utbetaling,
@@ -1007,7 +1008,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             beregningId,
             overføringstidspunkt,
             avsluttet,
-            avstemmingsnøkkel
+            avstemmingsnøkkel,
+            annulleringer
         )
     }
 
@@ -1086,7 +1088,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         beregningId: UUID,
         overføringstidspunkt: LocalDateTime?,
         avsluttet: LocalDateTime?,
-        avstemmingsnøkkel: Long?
+        avstemmingsnøkkel: Long?,
+        annulleringer: Set<UUID>
     ) {
         delegatee.postVisitUtbetaling(
             utbetaling,
@@ -1106,7 +1109,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             beregningId,
             overføringstidspunkt,
             avsluttet,
-            avstemmingsnøkkel
+            avstemmingsnøkkel,
+            annulleringer
         )
     }
 

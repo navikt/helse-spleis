@@ -273,7 +273,7 @@ internal class LagUtbetalingForRevurderingTest {
             100,
             148,
             type
-        ).also { utbetaling ->
+        ).first.also { utbetaling ->
             utbetaling.opprett(aktivitetslogg)
             if (utbetalt) {
                 godkjenn(utbetaling)

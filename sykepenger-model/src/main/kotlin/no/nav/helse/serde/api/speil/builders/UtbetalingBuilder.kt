@@ -96,7 +96,8 @@ internal class UtbetalingerBuilder(
             beregningId: UUID,
             overføringstidspunkt: LocalDateTime?,
             avsluttet: LocalDateTime?,
-            avstemmingsnøkkel: Long?
+            avstemmingsnøkkel: Long?,
+            annulleringer: Set<UUID>
         ) {
             utbetalingId = id
 
@@ -187,7 +188,8 @@ internal class UtbetalingerBuilder(
         beregningId: UUID,
         overføringstidspunkt: LocalDateTime?,
         avsluttet: LocalDateTime?,
-        avstemmingsnøkkel: Long?
+        avstemmingsnøkkel: Long?,
+        annulleringer: Set<UUID>
     ) {
         if (utbetalingstatus == FORKASTET && vedtaksperiodetilstand != Vedtaksperiode.RevurderingFeilet) return
         utbetalinger.entries.find { it.value.forkastet() }?.let { utbetalinger.remove(it.key) }
@@ -222,7 +224,8 @@ internal class UtbetalingBuilder(utbetaling: InternUtbetaling) : UtbetalingVisit
         beregningId: UUID,
         overføringstidspunkt: LocalDateTime?,
         avsluttet: LocalDateTime?,
-        avstemmingsnøkkel: Long?
+        avstemmingsnøkkel: Long?,
+        annulleringer: Set<UUID>
     ) {
         val tidslinje = UtbetalingstidslinjeBuilder(utbetaling).build()
         val vurdering = VurderingBuilder(utbetaling).build()

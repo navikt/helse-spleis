@@ -1292,7 +1292,8 @@ internal class JsonBuilder : AbstractBuilder() {
             beregningId: UUID,
             overføringstidspunkt: LocalDateTime?,
             avsluttet: LocalDateTime?,
-            avstemmingsnøkkel: Long?
+            avstemmingsnøkkel: Long?,
+            annulleringer: Set<UUID>
         ) {
             val utbetalingMap = mutableMapOf<String, Any?>()
             utbetalinger.add(utbetalingMap)
@@ -1357,11 +1358,13 @@ internal class JsonBuilder : AbstractBuilder() {
             beregningId: UUID,
             overføringstidspunkt: LocalDateTime?,
             avsluttet: LocalDateTime?,
-            avstemmingsnøkkel: Long?
+            avstemmingsnøkkel: Long?,
+            annulleringer: Set<UUID>
         ) {
             utbetalingMap["id"] = id
             utbetalingMap["korrelasjonsId"] = korrelasjonsId
             utbetalingMap["beregningId"] = beregningId
+            utbetalingMap["annulleringer"] = annulleringer
             utbetalingMap["utbetalingstidslinje"] = utbetalingstidslinjeMap
             utbetalingMap["arbeidsgiverOppdrag"] = arbeidsgiverOppdragMap
             utbetalingMap["personOppdrag"] = personOppdragMap
@@ -1526,7 +1529,8 @@ internal class JsonBuilder : AbstractBuilder() {
                 beregningId: UUID,
                 overføringstidspunkt: LocalDateTime?,
                 avsluttet: LocalDateTime?,
-                avstemmingsnøkkel: Long?
+                avstemmingsnøkkel: Long?,
+                annulleringer: Set<UUID>
             ) {
                 utbetalingId = id
             }

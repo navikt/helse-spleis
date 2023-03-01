@@ -289,7 +289,8 @@ internal class Feriepengeberegner(
                 beregningId: UUID,
                 overføringstidspunkt: LocalDateTime?,
                 avsluttet: LocalDateTime?,
-                avstemmingsnøkkel: Long?
+                avstemmingsnøkkel: Long?,
+                annulleringer: Set<UUID>
             ) {
                 utbetaltUtbetaling = utbetalingstatus == Utbetalingstatus.UTBETALT
                 annullertUtbetaling = utbetalingstatus == Utbetalingstatus.ANNULLERT
@@ -362,7 +363,8 @@ internal class Feriepengeberegner(
                 beregningId: UUID,
                 overføringstidspunkt: LocalDateTime?,
                 avsluttet: LocalDateTime?,
-                avstemmingsnøkkel: Long?
+                avstemmingsnøkkel: Long?,
+                annulleringer: Set<UUID>
             ) {
                 utbetaltUtbetaling = false
             }

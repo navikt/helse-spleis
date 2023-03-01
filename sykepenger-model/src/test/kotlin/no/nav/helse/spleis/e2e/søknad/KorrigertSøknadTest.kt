@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.søknad
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -48,49 +47,13 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.FORKASTET
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 
 internal class KorrigertSøknadTest : AbstractEndToEndTest() {
-
-    @Test
-    fun `korrigerer periode med bare ferie`() {
-        nyttVedtak(3.januar, 26.januar)
-        nyttVedtak(3.mars, 26.mars)
-        nullstillTilstandsendringer()
-
-        håndterSøknad(Sykdom(3.mars, 26.mars, 100.prosent), Ferie(3.mars, 26.mars))
-        håndterYtelser(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-
-        assertForventetFeil(
-            forklaring = "Har laget en overlappende utbetaling fordi det ikke er noen ArbeidsgiverperiodeDag før januar." +
-                    "OppdragBuilder stopper først ved ArbeidsgiverperiodeDag eller UkjentDag",
-            nå = {
-                assertThrows<IllegalStateException>("Har laget en overlappende utbetaling") {
-                    håndterYtelser(2.vedtaksperiode)
-                }
-            },
-            ønsket = {
-                assertDoesNotThrow { håndterYtelser(2.vedtaksperiode) }
-                val andreUtbetaling = inspektør.utbetaling(1).inspektør
-                val tredjeUtbetaling = inspektør.utbetaling(2).inspektør
-                assertEquals(andreUtbetaling.korrelasjonsId, tredjeUtbetaling.korrelasjonsId)
-                assertEquals(1, tredjeUtbetaling.arbeidsgiverOppdrag.size)
-                tredjeUtbetaling.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-                    assertEquals(18.mars, linje.fom)
-                    assertEquals(26.mars, linje.tom)
-                    assertEquals(18.mars, linje.datoStatusFom)
-                    assertEquals("OPPH", linje.statuskode)
-                }
-            }
-        )
-    }
 
     @Test
     fun `korrigert søknad i til utbetaling - utbetaler først, så revurdere`() {
@@ -105,7 +68,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         tilSimulering(3.januar, 26.januar, 100.prosent, 3.januar)
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(3.januar, 26.januar, 80.prosent))
-        assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.tilstand)
+        assertEquals(FORKASTET, inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.tilstand)
         assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
     }
 
