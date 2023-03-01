@@ -122,12 +122,6 @@ class Inntektsmelding(
         return arbeidsgiverperiode == null || førsteFraværsdag > arbeidsgiverperiode.endInclusive.nesteDag
     }
 
-    internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
-        validerFørsteFraværsdag(skjæringstidspunkt)
-        if (arbeidsgiverperiode != null) validerArbeidsgiverperiode(arbeidsgiverperiode)
-        return valider(periode, subsumsjonObserver)
-    }
-
     internal fun validerArbeidsgiverperiode(
         arbeidsgiverperiode: Arbeidsgiverperiode?
     ): IAktivitetslogg {

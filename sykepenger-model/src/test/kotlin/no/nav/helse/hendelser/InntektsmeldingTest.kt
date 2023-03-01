@@ -4,25 +4,20 @@ import java.time.LocalDate
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
-import no.nav.helse.spleis.e2e.assertIngenVarsel
-import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -155,29 +150,6 @@ internal class InntektsmeldingTest {
         assertFalse(tidslinje[20.januar] is FriskHelgedag)
         assertFalse(tidslinje[24.januar] is Arbeidsdag)
         assertTrue(tidslinje[25.januar] is UkjentDag)
-    }
-
-    @Test
-    fun `uenighet om arbeidsgiverperiode`() {
-        inntektsmelding(listOf(1.januar til 10.januar, 11.januar til 16.januar))
-        inntektsmelding.valider(1.februar til 28.februar, 1.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)), SubsumsjonObserver.NullObserver)
-        aktivitetslogg.assertIngenVarsel(RV_IM_3)
-
-        inntektsmelding(listOf(1.januar til 10.januar, 12.januar til 17.januar))
-        inntektsmelding.valider(1.februar til 28.februar, 1.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)), SubsumsjonObserver.NullObserver)
-        aktivitetslogg.assertVarsel(RV_IM_3)
-
-        inntektsmelding(listOf(1.januar til 10.januar, 12.januar til 17.januar), førsteFraværsdag = 20.januar)
-        inntektsmelding.valider(1.februar til 28.februar, 1.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)), SubsumsjonObserver.NullObserver)
-        aktivitetslogg.assertVarsel(RV_IM_3)
-
-        inntektsmelding(listOf(12.januar til 27.januar))
-        inntektsmelding.valider(1.februar til 28.februar, 11.januar, Arbeidsgiverperiode(listOf(11.januar til 27.januar)), SubsumsjonObserver.NullObserver)
-        aktivitetslogg.assertIngenVarsel(RV_IM_3)
-
-        inntektsmelding(listOf(12.januar til 27.januar))
-        inntektsmelding.valider(1.februar til 28.februar, 13.januar, Arbeidsgiverperiode(listOf(13.januar til 28.januar)), SubsumsjonObserver.NullObserver)
-        aktivitetslogg.assertIngenVarsel(RV_IM_3)
     }
 
     @Test
