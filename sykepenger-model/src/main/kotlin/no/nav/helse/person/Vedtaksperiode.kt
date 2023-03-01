@@ -36,8 +36,8 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.memoized
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
-import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigOpplysningerFraArbeidsgiver
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigRefusjonsopplysninger
+import no.nav.helse.person.Arbeidsgiver.Companion.trengerInntektsmelding
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
@@ -461,8 +461,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun harNødvendigInntektForVilkårsprøving() =
         person.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt)
-
-    internal fun harNødvendigOpplysningerFraArbeidsgiver() = tilstand != AvventerInntektsmelding || !forventerInntekt()
 
     private fun låsOpp() = arbeidsgiver.låsOpp(periode)
     private fun lås() = arbeidsgiver.lås(periode)
@@ -1517,7 +1515,7 @@ internal class Vedtaksperiode private constructor(
                 !arbeidsgivere.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) -> return hendelse.info(
                     "Gjenopptar ikke behandling fordi minst én arbeidsgiver ikke har tilstrekkelig inntekt for skjæringstidspunktet"
                 )
-                !arbeidsgivere.harNødvendigOpplysningerFraArbeidsgiver(vedtaksperiode.periode) -> return hendelse.info(
+                arbeidsgivere.trengerInntektsmelding(vedtaksperiode.periode) -> return hendelse.info(
                     "Gjenopptar ikke behandling fordi minst én overlappende periode venter på nødvendig opplysninger fra arbeidsgiver"
                 )
                 !arbeidsgivere.harNødvendigRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, hendelse) -> {
@@ -2188,6 +2186,12 @@ internal class Vedtaksperiode private constructor(
 
         internal fun Iterable<Vedtaksperiode>.nåværendeVedtaksperiode(filter: VedtaksperiodeFilter) =
             firstOrNull(filter)
+
+        internal fun List<Vedtaksperiode>.trengerInntektsmelding() = filter {
+            it.tilstand == AvventerInntektsmelding
+        }.filter {
+            it.forventerInntekt()
+        }
 
         internal fun List<Vedtaksperiode>.medSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
             this.filter { it.skjæringstidspunkt == skjæringstidspunkt }

@@ -48,6 +48,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.skalHåndtere
 import no.nav.helse.person.Vedtaksperiode.Companion.sykefraværstilfelle
+import no.nav.helse.person.Vedtaksperiode.Companion.trengerInntektsmelding
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -68,9 +69,9 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harNærliggendeUtbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
-import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.utbetalingport
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
@@ -238,10 +239,12 @@ internal class Arbeidsgiver private constructor(
             .somTrengerRefusjonsopplysninger(skjæringstidspunkt, periode)
             .all { arbeidsgiver -> arbeidsgiver.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, periode, hendelse) }
 
-        internal fun Iterable<Arbeidsgiver>.harNødvendigOpplysningerFraArbeidsgiver(periode: Periode) = this
+        internal fun Iterable<Arbeidsgiver>.trengerInntektsmelding(periode: Periode) = this
             .flatMap { it.vedtaksperioder }
             .filter { it.periode().overlapperMed(periode) }
-            .all { vedtaksperiode -> vedtaksperiode.harNødvendigOpplysningerFraArbeidsgiver() }
+            .trengerInntektsmelding()
+            .isNotEmpty()
+
         internal fun Iterable<Arbeidsgiver>.avventerSøknad(skjæringstidspunkt: LocalDate) = this
             .any { it.sykmeldingsperioder.avventerSøknad(skjæringstidspunkt) && !it.harSykdomFor(skjæringstidspunkt) }
         internal fun Iterable<Arbeidsgiver>.avventerSøknad(periode: Periode) = this
