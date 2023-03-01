@@ -9,26 +9,26 @@ import java.time.LocalDate
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import kotlin.reflect.KClass
 
-internal val Utbetalingstidslinje.inspektør get() = UtbetalingstidslinjeInspektør(this)
+val Utbetalingstidslinje.inspektør get() = UtbetalingstidslinjeInspektør(this)
 
 // Collects assertable statistics for a Utbetalingstidslinje
-internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalingstidslinje):
+class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalingstidslinje):
     UtbetalingsdagVisitor {
     var førstedato = LocalDate.MIN
     var sistedato = LocalDate.MAX
     lateinit var førstedag: Utbetalingsdag
     lateinit var sistedag: Utbetalingsdag
 
-    internal var arbeidsdagTeller = 0
-    internal var arbeidsgiverperiodeDagTeller = 0
-    internal var avvistDagTeller = 0
-    internal var fridagTeller = 0
-    internal var navDagTeller = 0
-    internal var navHelgDagTeller = 0
-    internal var foreldetDagTeller = 0
-    internal var ukjentDagTeller = 0
-    internal var totalUtbetaling = 0.0
-    internal var totalInntekt = 0.0
+    var arbeidsdagTeller = 0
+    var arbeidsgiverperiodeDagTeller = 0
+    var avvistDagTeller = 0
+    var fridagTeller = 0
+    var navDagTeller = 0
+    var navHelgDagTeller = 0
+    var foreldetDagTeller = 0
+    var ukjentDagTeller = 0
+    var totalUtbetaling = 0.0
+    var totalInntekt = 0.0
 
     val navdager = mutableListOf<NavDag>()
     val navHelgdager = mutableListOf<NavHelgDag>()
@@ -42,7 +42,7 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
     private val økonomi = mutableMapOf<LocalDate, Økonomi>()
     val unikedager = mutableSetOf<KClass<out Utbetalingsdag>>()
 
-    internal val size get() =
+    val size get() =
         arbeidsdagTeller +
             arbeidsgiverperiodeDagTeller +
             avvistDagTeller +
@@ -64,16 +64,16 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
         utbetalingstidslinje.accept(this)
     }
 
-    internal fun grad(dag: LocalDate) = økonomi.getValue(dag).medAvrundetData { grad, _, _, _, _, _, _, _ -> grad }
-    internal fun <R> økonomi(lambda: (Økonomi) -> R): List<R> = økonomi.values.map(lambda)
+    fun grad(dag: LocalDate) = økonomi.getValue(dag).medAvrundetData { grad, _, _, _, _, _, _, _ -> grad }
+    fun <R> økonomi(lambda: (Økonomi) -> R): List<R> = økonomi.values.map(lambda)
 
-    internal fun totalUtbetaling() = totalUtbetaling
-    internal fun totalInntekt() = totalInntekt
+    fun totalUtbetaling() = totalUtbetaling
+    fun totalInntekt() = totalInntekt
 
-    internal fun begrunnelse(dato: LocalDate) =
+    fun begrunnelse(dato: LocalDate) =
         begrunnelser[dato] ?: emptyList()
 
-    internal fun erNavdag(dato: LocalDate) = utbetalingstidslinje[dato] is NavDag
+    fun erNavdag(dato: LocalDate) = utbetalingstidslinje[dato] is NavDag
 
     private fun collect(dag: Utbetalingsdag, dato: LocalDate, økonomi: Økonomi) {
         this.økonomi[dato] = økonomi
