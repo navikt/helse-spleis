@@ -15,9 +15,11 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -66,6 +68,8 @@ internal class AnnulleringOgUtbetalingTest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
+
+        assertVarsel(Varselkode.RV_UT_21, 2.vedtaksperiode.filter())
 
         assertEquals(5, inspektør.utbetalinger.size)
         val januarutbetaling = inspektør.utbetaling(0).inspektør

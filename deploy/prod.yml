@@ -84,3 +84,5 @@ spec:
     value: "100"
   - name: KAFKA_MAX_POLL_INTERVAL_MS
     value: "1500000" # 1,500,000 millisekunder er 25 minutter
+  - name: ANNULLERE_OG_UTBETALE
+    value: "true"
