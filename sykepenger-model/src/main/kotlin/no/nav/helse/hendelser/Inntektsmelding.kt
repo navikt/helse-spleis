@@ -18,10 +18,9 @@ import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
@@ -144,7 +143,7 @@ class Inntektsmelding(
 
     private fun validerØvrig() {
         if (harOpphørAvNaturalytelser) funksjonellFeil(RV_IM_7)
-        if (harFlereInntektsmeldinger) varsel(RV_IM_4, "Mottatt flere inntektsmeldinger innenfor kort tid (flagg fra Spedisjon)")
+        if (harFlereInntektsmeldinger) varsel(RV_IM_22)
         begrunnelseForReduksjonEllerIkkeUtbetalt?.takeIf(String::isNotBlank)?.also {
             info("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s".format(it))
             funksjonellFeil(RV_IM_8)
