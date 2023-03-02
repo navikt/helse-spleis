@@ -530,6 +530,7 @@ internal class JsonBuilder : AbstractBuilder() {
             oppdragMap["endringskode"] = "$endringskode"
             oppdragMap["sisteArbeidsgiverdag"] = sisteArbeidsgiverdag
             oppdragMap["tidsstempel"] = tidsstempel
+            oppdragMap["totalbeløp"] = totalBeløp
             oppdragMap["nettoBeløp"] = nettoBeløp
             oppdragMap["stønadsdager"] = stønadsdager
             oppdragMap["avstemmingsnøkkel"] = avstemmingsnøkkel?.let { "$it" }
