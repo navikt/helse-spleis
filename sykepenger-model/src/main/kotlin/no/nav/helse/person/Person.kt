@@ -766,6 +766,6 @@ class Person private constructor(
         observers.forEach { it.nyVedtaksperiodeUtbetaling(personidentifikator, aktørId, organisasjonsnummer, utbetalingId, vedtaksperiodeId) }
     }
 
-    internal val vedtaksperiodeVenterBuilder get() = VedtaksperiodeVenter.Builder(arbeidsgivere)
+    internal fun venteårsak(vedtaksperiode: Vedtaksperiode) = vedtaksperiode.venteårsak(arbeidsgivere)
 }
 
