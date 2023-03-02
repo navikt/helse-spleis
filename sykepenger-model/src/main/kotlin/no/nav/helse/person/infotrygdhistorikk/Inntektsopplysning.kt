@@ -3,9 +3,8 @@ package no.nav.helse.person.infotrygdhistorikk
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Objects
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_11
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_12
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_13
 import no.nav.helse.økonomi.Inntekt
@@ -26,10 +25,9 @@ class Inntektsopplysning private constructor(
         refusjonTom: LocalDate? = null
     ) : this(orgnummer, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom, null)
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, nødnummer: Nødnummer): Boolean {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate): Boolean {
         if (!erRelevant(skjæringstidspunkt)) return true
         if (orgnummer.isBlank()) aktivitetslogg.funksjonellFeil(RV_IT_12)
-        else if (orgnummer in nødnummer) aktivitetslogg.funksjonellFeil(RV_IT_11)
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
@@ -60,12 +58,11 @@ class Inntektsopplysning private constructor(
         internal fun valider(
             liste: List<Inntektsopplysning>,
             aktivitetslogg: IAktivitetslogg,
-            skjæringstidspunkt: LocalDate,
-            nødnummer: Nødnummer
+            skjæringstidspunkt: LocalDate
         ) {
-            liste.forEach { it.valider(aktivitetslogg, skjæringstidspunkt, nødnummer) }
-            liste.fjern(nødnummer).validerAlleInntekterForSammenhengendePeriode(skjæringstidspunkt, aktivitetslogg)
-            liste.fjern(nødnummer).validerAntallInntekterPerArbeidsgiverPerDato(skjæringstidspunkt, aktivitetslogg)
+            liste.forEach { it.valider(aktivitetslogg, skjæringstidspunkt) }
+            liste.validerAlleInntekterForSammenhengendePeriode(skjæringstidspunkt, aktivitetslogg)
+            liste.validerAntallInntekterPerArbeidsgiverPerDato(skjæringstidspunkt, aktivitetslogg)
         }
 
         private fun List<Inntektsopplysning>.validerAlleInntekterForSammenhengendePeriode(
@@ -89,8 +86,6 @@ class Inntektsopplysning private constructor(
             if (harFlereInntekterPåSammeAGogDato)
                 aktivitetslogg.info("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato.")
         }
-
-        internal fun List<Inntektsopplysning>.fjern(nødnummer: Nødnummer) = filterNot { it.orgnummer in nødnummer }
 
         internal fun sorter(inntekter: List<Inntektsopplysning>) =
             inntekter.sortedWith(compareBy({ it.sykepengerFom }, { it.hashCode() }))

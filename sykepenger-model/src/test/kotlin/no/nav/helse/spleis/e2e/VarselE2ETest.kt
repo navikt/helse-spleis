@@ -35,13 +35,11 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_12
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_13
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_15
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_33
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_1
@@ -444,25 +442,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `varsel - Det er registrert utbetaling på nødnummer`() {
-        val nødnummer = "973626108"
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterVilkårsgrunnlag()
-        håndterYtelser(besvart = LocalDateTime.now().minusYears(1))
-        håndterSimulering()
-        håndterUtbetalingsgodkjenning()
-        håndterUtbetalt()
-
-        håndterOverstyrTidslinje((20.januar til 26.januar).map { manuellFeriedag(it) })
-
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(nødnummer, 1.februar, 15.februar, 100.prosent, INNTEKT))
-        håndterYtelser(1.vedtaksperiode)
-        assertVarsel(RV_IT_4, 1.vedtaksperiode.filter())
-    }
-
-    @Test
     fun `varsel - Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
@@ -671,27 +650,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         nyttVedtak(1.mars, 31.mars)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         assertVarsel(RV_OO_2, 1.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `varsel - Det er registrert bruk av på nødnummer`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(inntektshistorikk = listOf(Inntektsopplysning.ferdigInntektsopplysning("973626108", 1.januar, inntekt = INNTEKT, true, null, null)))
-        assertIngenVarsel(RV_IT_11, 1.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `varsel revurdering - Det er registrert bruk av på nødnummer`() {
-        nyttVedtak(1.januar, 31.januar)
-        håndterUtbetalingshistorikkEtterInfotrygdendring(
-            inntektshistorikk = listOf(Inntektsopplysning.ferdigInntektsopplysning("973626108", 1.januar, inntekt = INNTEKT, true, null, null))
-        )
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
-        håndterYtelser()
-        assertVarsel(RV_IT_11, 1.vedtaksperiode.filter())
     }
 
     @Test

@@ -4,13 +4,12 @@ import java.time.LocalDate
 import java.util.Objects
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_8
@@ -48,20 +47,12 @@ abstract class Utbetalingsperiode(
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,
         organisasjonsnummer: String,
-        periode: Periode,
-        skjæringstidspunkt: LocalDate,
-        nødnummer: Nødnummer
+        periode: Periode
     ) {
         validerOverlapp(aktivitetslogg, periode)
-        validerNødnummerbruk(aktivitetslogg, skjæringstidspunkt, nødnummer)
         validerNyereOpplysninger(aktivitetslogg, organisasjonsnummer, periode)
     }
 
-    private fun validerNødnummerbruk(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, nødnummer: Nødnummer) {
-        if (this.periode.endInclusive < skjæringstidspunkt) return
-        if (orgnr !in nødnummer) return
-        aktivitetslogg.funksjonellFeil(RV_IT_4)
-    }
     private fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {
         if (!this.periode.overlapperMed(periode)) return
         aktivitetslogg.info("Utbetaling i Infotrygd %s til %s overlapper med vedtaksperioden", this.periode.start, this.periode.endInclusive)
@@ -74,7 +65,6 @@ abstract class Utbetalingsperiode(
         aktivitetslogg.funksjonellFeil(RV_IT_1)
     }
 
-    override fun gjelder(nødnummer: Nødnummer) = this.orgnr in nødnummer
     override fun gjelder(orgnummer: String) = orgnummer == this.orgnr
 
     override fun equals(other: Any?): Boolean {

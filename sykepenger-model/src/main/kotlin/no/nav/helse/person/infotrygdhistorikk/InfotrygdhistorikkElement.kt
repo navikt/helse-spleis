@@ -33,7 +33,6 @@ class InfotrygdhistorikkElement private constructor(
     private val harStatslønn: Boolean,
     private var oppdatert: LocalDateTime
 ) {
-    private val nødnummer = Nødnummer.Sykepenger
     private val inntekter = Inntektsopplysning.sorter(inntekter)
     private val perioder = Infotrygdperiode.sorter(perioder)
     private val kilde = SykdomstidslinjeHendelse.Hendelseskilde("Infotrygdhistorikk", id, tidsstempel)
@@ -133,9 +132,9 @@ class InfotrygdhistorikkElement private constructor(
         validerBetaltRettFør(periode, aktivitetslogg)
         aktivitetslogg.info("Sjekker utbetalte perioder")
         perioder.filterIsInstance<Utbetalingsperiode>()
-            .forEach { it.valider(aktivitetslogg, organisasjonsnummer, periode, skjæringstidspunkt, nødnummer) }
+            .forEach { it.valider(aktivitetslogg, organisasjonsnummer, periode) }
         aktivitetslogg.info("Sjekker inntektsopplysninger")
-        Inntektsopplysning.valider(inntekter, aktivitetslogg, skjæringstidspunkt, nødnummer)
+        Inntektsopplysning.valider(inntekter, aktivitetslogg, skjæringstidspunkt)
         aktivitetslogg.info("Sjekker arbeidskategorikoder")
         if (!erNormalArbeidstaker(skjæringstidspunkt)) aktivitetslogg.funksjonellFeil(RV_IT_15)
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()

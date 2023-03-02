@@ -7,15 +7,14 @@ import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.FeriepengeutbetalingVisitor
 import no.nav.helse.person.Person
-import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.infotrygdhistorikk.Nødnummer
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import org.slf4j.LoggerFactory
 import kotlin.math.roundToInt
@@ -281,7 +280,7 @@ internal class Feriepengeutbetaling private constructor(
                 """
                 Nøkkelverdier om feriepengeberegning
                 AktørId: $aktørId
-                Arbeidsgiver: $orgnummer${if(Nødnummer.Sykepenger.contains(orgnummer)) " (NØDNUMMER)" else ""}
+                Arbeidsgiver: $orgnummer
                 
                 - ARBEIDSGIVER:
                 Alle feriepengeutbetalinger fra Infotrygd (alle ytelser): $infotrygdHarUtbetaltTilArbeidsgiver (NB! Dette bruks ikke i beregning, bare til logging)

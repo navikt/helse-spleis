@@ -23,7 +23,6 @@ abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
         return sykdomstidslinje.merge(sykdomstidslinje(kilde), replace)
     }
 
-    internal open fun gjelder(nødnummer: Nødnummer) = false
     internal open fun gjelder(orgnummer: String) = true
 
     override fun hashCode() = Objects.hash(this::class, periode)
