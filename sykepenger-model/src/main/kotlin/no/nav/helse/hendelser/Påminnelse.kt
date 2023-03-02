@@ -2,9 +2,10 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.VedtaksperiodeVenter
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 
 class Påminnelse(
     meldingsreferanseId: UUID,
@@ -39,6 +40,15 @@ class Påminnelse(
         if (!it) {
             info("Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}")
         }
+    }
+
+    internal fun venter(builder: VedtaksperiodeVenter.Builder, makstid: (tilstandsendringstidspunkt: LocalDateTime) -> LocalDateTime) {
+        builder.venter(
+            UUID.fromString(vedtaksperiodeId),
+            organisasjonsnummer,
+            tilstandsendringstidspunkt,
+            makstid(tilstandsendringstidspunkt)
+        )
     }
 
     internal fun vedtaksperiodeIkkeFunnet(observer: PersonObserver) {
