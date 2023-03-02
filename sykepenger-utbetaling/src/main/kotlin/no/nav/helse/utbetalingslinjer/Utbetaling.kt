@@ -584,6 +584,8 @@ class Utbetaling private constructor(
     internal object Ubetalt : Tilstand {
         override val status = Utbetalingstatus.IKKE_UTBETALT
         override fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
+            utbetaling.annulleringer.forEach { it.forkast(hendelse) }
+            hendelse.kontekst(utbetaling)
             hendelse.info("Forkaster utbetaling")
             utbetaling.tilstand(Forkastet, hendelse)
         }

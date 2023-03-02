@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -16,6 +17,7 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -25,19 +27,15 @@ import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus.ANNULLERT
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus.GODKJENT
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus.GODKJENT_UTEN_UTBETALING
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_UTBETALT
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus.NY
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus.OVERFØRT
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus.UTBETALT
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.*
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -120,6 +118,43 @@ internal class AnnulleringOgUtbetalingTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVSLUTTET)
         assertSisteTilstand(3.vedtaksperiode, TilstandType.AVSLUTTET)
 
+    }
+
+    @Test
+    fun `reberegne og forkaste utbetaling som inneholder annulleringer`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(1.februar, 28.februar))
+
+        nyttVedtak(1.mars, 31.mars)
+
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode("orgnr", 1.mai(2017), 5.mai(2017), 100.prosent, 1000.daglig))
+        håndterYtelser(2.vedtaksperiode)
+
+        assertEquals(6, inspektør.utbetalinger.size)
+        val januarutbetaling = inspektør.utbetaling(0).inspektør
+        val marsutbetaling = inspektør.utbetaling(1).inspektør
+        val annulleringAvJanuarForkastet = inspektør.utbetaling(2).inspektør
+        val februarutbetalingForkastet = inspektør.utbetaling(3).inspektør
+
+        val annulleringAvJanuarReberegnet = inspektør.utbetaling(4).inspektør
+        val februarutbetalingReberegnet = inspektør.utbetaling(5).inspektør
+
+        assertEquals(GODKJENT_UTEN_UTBETALING, januarutbetaling.tilstand)
+        assertEquals(UTBETALT, marsutbetaling.tilstand)
+
+        assertEquals(FORKASTET, annulleringAvJanuarForkastet.tilstand)
+        assertEquals(FORKASTET, februarutbetalingForkastet.tilstand)
+
+        assertEquals(IKKE_UTBETALT, annulleringAvJanuarReberegnet.tilstand)
+        assertEquals(IKKE_UTBETALT, februarutbetalingReberegnet.tilstand)
     }
 
     @Test

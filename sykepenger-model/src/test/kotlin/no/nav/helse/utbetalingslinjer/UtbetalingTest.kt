@@ -60,6 +60,57 @@ internal class UtbetalingTest {
     }
 
     @Test
+    fun `forkaster annulleringer som utbetalingen peker på`() {
+        val annullering1 = Utbetaling(
+            beregningId = UUID.randomUUID(),
+            korrelerendeUtbetaling = null,
+            periode = 1.februar til 15.februar,
+            utbetalingstidslinje = Utbetalingstidslinje(),
+            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
+            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+            type = Utbetalingtype.ANNULLERING,
+            maksdato = 28.desember,
+            forbrukteSykedager = 0,
+            gjenståendeSykedager = 248
+        ).also { it.opprett(Aktivitetslogg()) }
+        val annullering2 = Utbetaling(
+            beregningId = UUID.randomUUID(),
+            korrelerendeUtbetaling = null,
+            periode = 3.mars til 31.mars,
+            utbetalingstidslinje = Utbetalingstidslinje(),
+            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
+            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+            type = Utbetalingtype.ANNULLERING,
+            maksdato = 28.desember,
+            forbrukteSykedager = 0,
+            gjenståendeSykedager = 248
+        ).also { it.opprett(Aktivitetslogg()) }
+
+        val utbetalingen = Utbetaling(
+            beregningId = UUID.randomUUID(),
+            korrelerendeUtbetaling = null,
+            periode = 1.januar til 31.mars,
+            utbetalingstidslinje = Utbetalingstidslinje(),
+            arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon),
+            personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
+            type = Utbetalingtype.UTBETALING,
+            maksdato = 28.desember,
+            forbrukteSykedager = 0,
+            gjenståendeSykedager = 248,
+            annulleringer = listOf(
+                annullering1,
+                annullering2
+            )
+        ).also { it.opprett(Aktivitetslogg()) }
+
+        utbetalingen.forkast(Aktivitetslogg())
+
+        assertEquals(FORKASTET, annullering1.inspektør.tilstand)
+        assertEquals(FORKASTET, annullering2.inspektør.tilstand)
+        assertEquals(FORKASTET, utbetalingen.inspektør.tilstand)
+    }
+
+    @Test
     fun `ny utbetaling erstatter flere uten utbetalinger`() {
         val annullering1 = Utbetaling(
             beregningId = UUID.randomUUID(),
