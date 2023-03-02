@@ -7,6 +7,9 @@ import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeDat
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.*
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+
 
 class Revurderingseventyr private constructor(
     private val hvorfor: RevurderingÅrsak,
@@ -120,7 +123,7 @@ class Revurderingseventyr private constructor(
         object KorrigertInntektsmelding : RevurderingÅrsak {
 
             override fun dersomInngått(hendelse: IAktivitetslogg) {
-                hendelse.varsel(Varselkode.RV_IM_4)
+                hendelse.varsel(RV_IM_4, "Inngår i revurdering på grunn av korrigert inntektsmelding")
                 hendelse.info("korrigert inntektsmelding trigget revurdering")
             }
 

@@ -111,6 +111,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_7
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.serde.AktivitetsloggMap
@@ -1012,12 +1013,12 @@ internal class Vedtaksperiode private constructor(
             if (!arbeidsgiverperiodeFør.sammenlign(arbeidsgiverperiodeEtter)) {
                 // Hvis AGP er uendret så legger vi ikke til varsel om at det er mottatt flere inntektsmeldinger
                 // Det kan derimot være at inntekt- og refusjon legger på varselet
-                dager.varsel(RV_IM_4)
+                dager.varsel(RV_IM_4, "Endrer arbeidsgiverperiode etter håndtering av dager fra inntektsmelding i ${type.name} ")
             }
             return true
         }
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
-            inntektOgRefusjon.varsel(RV_IM_4)
+            inntektOgRefusjon.varsel(RV_IM_4, "Håndterer inntekt og refusjon fra inntektsmelding i ${type.name}")
         }
 
         fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) {}
@@ -1529,7 +1530,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
-            inntektOgRefusjon.varsel(RV_IM_4)
+            super.håndter(vedtaksperiode, inntektOgRefusjon)
             vedtaksperiode.håndterInntektOgRefusjon(inntektOgRefusjon) { AvventerBlokkerendePeriode }
             vedtaksperiode.person.gjenopptaBehandling(inntektOgRefusjon)
         }
@@ -1573,7 +1574,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
-            inntektOgRefusjon.varsel(RV_IM_4)
+            super.håndter(vedtaksperiode, inntektOgRefusjon)
             vedtaksperiode.håndterInntektOgRefusjon(inntektOgRefusjon) { AvventerBlokkerendePeriode }
         }
     }

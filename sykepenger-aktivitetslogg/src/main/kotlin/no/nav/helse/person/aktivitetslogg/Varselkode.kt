@@ -248,5 +248,10 @@ enum class Varselkode(
         val `Mottatt søknad out of order` = RV_SØ_11
         val `Mottatt søknad som overlapper` = RV_SØ_12
         val `Mottatt søknad som delvis overlapper` = RV_SØ_13
+
+        fun IAktivitetslogg.varsel(varselkode: Varselkode, detaljer: String) {
+            varsel(varselkode)
+            info("${varselkode.name} detaljer: $detaljer")
+        }
     }
 }

@@ -2,7 +2,6 @@ package no.nav.helse.hendelser.inntektsmelding
 
 import java.time.LocalDate
 import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
