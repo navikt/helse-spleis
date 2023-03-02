@@ -65,6 +65,7 @@ import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.Venteårsak.INNTEKTSMELDING
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
@@ -944,6 +945,15 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndtertInntektPåSkjæringstidspunktet(this, hendelse)
     }
 
+    private fun vedtaksperiodeVenter(påminnelse: Påminnelse) {
+        val nestemann = person.nestemann() ?: return sikkerlogg.warn("Hvordan kan det ha seg at {} for {} ikke er nestemann?", keyValue("vedtaksperiodeId", id), keyValue("aktørId", aktørId))
+        val builder = person.vedtaksperiodeVenterBuilder
+        påminnelse.venter(builder, tilstand::makstid)
+        nestemann.tilstand.venterPå(this, builder)
+        val vedtaksperiodeVenter = builder.build() ?: return
+        sikkerlogg.info("$vedtaksperiodeVenter", keyValue("aktørId", aktørId))
+    }
+
     fun slutterEtter(dato: LocalDate) = periode.slutterEtter(dato)
 
     private fun aktivitetsloggkopi(hendelse: IAktivitetslogg) =
@@ -1001,6 +1011,9 @@ internal class Vedtaksperiode private constructor(
                 )
             )
         }
+
+        // Gitt at du er nestemann som skal behandles - hva venter du på?
+        fun venterPå(vedtaksperiode: Vedtaksperiode, builder: VedtaksperiodeVenter.Builder) {}
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad)
 
@@ -1397,7 +1410,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerInntektsmelding : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_INNTEKTSMELDING
-
         override fun makstid(tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             tilstandsendringstidspunkt.plusDays(180)
 
@@ -1407,6 +1419,10 @@ internal class Vedtaksperiode private constructor(
             }
             vedtaksperiode.trengerInntektsmeldingReplay()
             vedtaksperiode.trengerInntektsmelding()
+        }
+
+        override fun venterPå(vedtaksperiode: Vedtaksperiode, builder: VedtaksperiodeVenter.Builder) {
+            builder.venterPå(vedtaksperiode.id, vedtaksperiode.organisasjonsnummer, INNTEKTSMELDING)
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
@@ -1537,16 +1553,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vedtaksperiode.person.gjenopptaBehandling(påminnelse)
+            vedtaksperiode.vedtaksperiodeVenter(påminnelse)
             if (vedtaksperiode.arbeidsgiver.harSykmeldingsperiodeFør(vedtaksperiode.periode.endInclusive.plusDays(1))) {
                 sikkerlogg.warn("Har sykmeldingsperiode før eller lik tom. VedtaksperiodeId=${vedtaksperiode.id}, aktørId=${påminnelse.aktørId()}")
             }
-            val nestemann = vedtaksperiode.person.nestemann() ?: return sikkerlogg.warn("Hvordan kan det ha seg at vi ikke er nestemann?")
-            if (nestemann.id == vedtaksperiode.id) return sikkerlogg.info("Vi er nestemann") // vi kommer til å bli gjenopptatt og sender ut eventuell årsak til at vi venter
-            val arbeidsgiver = if (vedtaksperiode.arbeidsgiver.organisasjonsnummer() == nestemann.arbeidsgiver.organisasjonsnummer()) "samme" else "annen"
-            sikkerlogg.info("Venter på en annen vedtaksperiode på $arbeidsgiver arbeidsgiver i tilstand ${nestemann.tilstand.type.name} (${nestemann.id})",
-                keyValue("vedtaksperiodeId", vedtaksperiode.id),
-                keyValue("aktørId", vedtaksperiode.aktørId)
-            )
         }
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {}
 
