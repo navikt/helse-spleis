@@ -12,9 +12,13 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -39,6 +43,80 @@ import org.junit.jupiter.api.Test
 
 @EnableToggle(Toggle.AnnullereOgUtbetale::class)
 internal class AnnulleringOgUtbetalingTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `tidligere periode med ferie får samme arbeidsgiverperiode som nyere periode`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(1.februar, 28.februar))
+
+        nyttVedtak(1.mars, 31.mars)
+
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertEquals(5, inspektør.utbetalinger.size)
+        val januarutbetaling = inspektør.utbetaling(0).inspektør
+        val marsutbetaling = inspektør.utbetaling(1).inspektør
+        val annulleringAvJanuar = inspektør.utbetaling(2).inspektør
+        val februarutbetaling = inspektør.utbetaling(3).inspektør
+        val revurderingAvMars = inspektør.utbetaling(4).inspektør
+
+        assertEquals(13, observatør.utbetaltEndretEventer.size)
+        assertUtbetalingtilstander(januarutbetaling.utbetalingId, NY, IKKE_UTBETALT, GODKJENT_UTEN_UTBETALING)
+        assertUtbetalingtilstander(marsutbetaling.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
+        assertUtbetalingtilstander(annulleringAvJanuar.utbetalingId, NY, IKKE_UTBETALT, ANNULLERT)
+        assertUtbetalingtilstander(februarutbetaling.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
+        assertUtbetalingtilstander(revurderingAvMars.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
+
+        assertNotEquals(januarutbetaling.korrelasjonsId, marsutbetaling.korrelasjonsId)
+        assertEquals(januarutbetaling.korrelasjonsId, annulleringAvJanuar.korrelasjonsId)
+        assertEquals(marsutbetaling.korrelasjonsId, februarutbetaling.korrelasjonsId)
+        assertEquals(revurderingAvMars.korrelasjonsId, februarutbetaling.korrelasjonsId)
+
+        assertEquals(0, annulleringAvJanuar.arbeidsgiverOppdrag.size)
+        assertEquals(0, annulleringAvJanuar.personOppdrag.size)
+
+        assertEquals(2, februarutbetaling.arbeidsgiverOppdrag.size)
+        assertEquals(0, februarutbetaling.personOppdrag.size)
+        assertEquals(Endringskode.ENDR, februarutbetaling.arbeidsgiverOppdrag.inspektør.endringskode)
+        februarutbetaling.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(1.februar, linje.fom)
+            assertEquals(28.februar, linje.tom)
+            assertEquals(Endringskode.NY, linje.endringskode)
+        }
+        februarutbetaling.arbeidsgiverOppdrag[1].inspektør.also { linje ->
+            assertEquals(17.mars, linje.fom)
+            assertEquals(30.mars, linje.tom)
+            assertEquals(Endringskode.NY, linje.endringskode)
+        }
+
+        assertEquals(1, revurderingAvMars.arbeidsgiverOppdrag.size)
+        assertEquals(0, revurderingAvMars.personOppdrag.size)
+        assertEquals(Endringskode.ENDR, revurderingAvMars.arbeidsgiverOppdrag.inspektør.endringskode)
+        revurderingAvMars.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(1.februar, linje.fom)
+            assertEquals(30.mars, linje.tom)
+            assertEquals(Endringskode.NY, linje.endringskode)
+        }
+
+        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, TilstandType.AVSLUTTET)
+        assertSisteTilstand(3.vedtaksperiode, TilstandType.AVSLUTTET)
+
+    }
 
     @Test
     fun `korrigerer periode med bare ferie`()  {

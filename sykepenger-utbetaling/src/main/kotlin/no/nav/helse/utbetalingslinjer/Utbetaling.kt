@@ -9,10 +9,12 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_12
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_13
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_15
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_21
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_7
@@ -301,7 +303,7 @@ class Utbetaling private constructor(
             }
 
             val forrigeUtbetalte = kladden.forrigeUtbetalte(utbetalinger)
-            val korrelerendeUtbetaling = forrigeUtbetalte.firstOrNull()
+            val korrelerendeUtbetaling = forrigeUtbetalte.firstOrNull { it.harOppdragMedUtbetalinger() } ?: forrigeUtbetalte.firstOrNull()
 
             val nyUtbetaling = if (korrelerendeUtbetaling == null) {
                 kladden.begrensTil(periode)
@@ -313,7 +315,8 @@ class Utbetaling private constructor(
                 }
             }
 
-            val annulleringer = forrigeUtbetalte.drop(1).mapNotNull { it.opphør(aktivitetslogg) }
+            val annulleringer = forrigeUtbetalte.filterNot { it === korrelerendeUtbetaling }.mapNotNull { it.opphør(aktivitetslogg) }
+            if (annulleringer.isNotEmpty()) aktivitetslogg.varsel(RV_UT_21)
             val utbetalingen = nyUtbetaling.lagUtbetaling(type, korrelerendeUtbetaling, beregningId, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, annulleringer)
             return utbetalingen to annulleringer
         }
