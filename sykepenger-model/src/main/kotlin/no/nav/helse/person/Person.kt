@@ -45,6 +45,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyrArbeidsgiverop
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.nekterOpprettelseAvPeriode
+import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.slettUtgåtteSykmeldingsperioder
@@ -730,6 +731,8 @@ class Person private constructor(
         arbeidsgivere.igangsettOverstyring(hendelse, revurdering)
         revurdering.sendOverstyringIgangsattEvent(this)
     }
+
+    internal fun nestemann() = arbeidsgivere.nestemann()
 
     internal fun slettUtgåtteSykmeldingsperioder(tom: LocalDate) {
         arbeidsgivere.slettUtgåtteSykmeldingsperioder(tom)

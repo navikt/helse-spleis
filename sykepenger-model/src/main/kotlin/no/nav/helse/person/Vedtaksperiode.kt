@@ -87,6 +87,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad 
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad out of order innenfor 18 dager`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad som delvis overlapper`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad som overlapper`
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
@@ -111,7 +112,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_7
-import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.serde.AktivitetsloggMap
@@ -1540,6 +1540,13 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.arbeidsgiver.harSykmeldingsperiodeFør(vedtaksperiode.periode.endInclusive.plusDays(1))) {
                 sikkerlogg.warn("Har sykmeldingsperiode før eller lik tom. VedtaksperiodeId=${vedtaksperiode.id}, aktørId=${påminnelse.aktørId()}")
             }
+            val nestemann = vedtaksperiode.person.nestemann() ?: return sikkerlogg.warn("Hvordan kan det ha seg at vi ikke er nestemann?")
+            if (nestemann.id == vedtaksperiode.id) return sikkerlogg.info("Vi er nestemann") // vi kommer til å bli gjenopptatt og sender ut eventuell årsak til at vi venter
+            val arbeidsgiver = if (vedtaksperiode.arbeidsgiver.organisasjonsnummer() == nestemann.arbeidsgiver.organisasjonsnummer()) "samme" else "annen"
+            sikkerlogg.info("Venter på en annen vedtaksperiode på $arbeidsgiver arbeidsgiver i tilstand ${nestemann.tilstand.type.name} (${nestemann.id})",
+                keyValue("vedtaksperiodeId", vedtaksperiode.id),
+                keyValue("aktørId", vedtaksperiode.aktørId)
+            )
         }
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {}
 
