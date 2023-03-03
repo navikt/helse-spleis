@@ -676,58 +676,6 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyrer sykedag på slutten av perioden`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterInntektsmelding(listOf(Periode(2.januar, 17.januar)), førsteFraværsdag = 2.januar)
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterOverstyrTidslinje(listOf(manuellSykedag(2.januar), manuellArbeidsgiverdag(24.januar), manuellFeriedag(25.januar)))
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(0))
-        assertEquals(Utbetalingstatus.OVERFØRT, inspektør.utbetalingtilstand(1))
-        assertNotEquals(inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.fagsystemId(), inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.fagsystemId())
-        assertEquals("SSSSHH SSSSSHH SSSSSHH SSUFS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-    }
-
-    @Test
-    fun `vedtaksperiode rebehandler informasjon etter overstyring fra saksbehandler`() {
-        håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar))
-        håndterInntektsmelding(listOf(Periode(2.januar, 17.januar)), førsteFraværsdag = 2.januar)
-        håndterSøknad(Sykdom(2.januar, 25.januar, 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterOverstyrTidslinje(listOf(manuellArbeidsgiverdag(18.januar)))
-        assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(0))
-        assertNotEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
-
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-
-        assertTilstander(
-            0,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING
-        )
-        assertNotEquals(inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.fagsystemId(), inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.fagsystemId())
-        assertEquals(19.januar, inspektør.utbetalinger.last().utbetalingstidslinje().sykepengeperiode()?.start)
-    }
-
-    @Test
     fun `grad over grensen overstyres på enkeltdag`() {
         håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar))
         håndterInntektsmelding(listOf(Periode(2.januar, 17.januar)), førsteFraværsdag = 2.januar)

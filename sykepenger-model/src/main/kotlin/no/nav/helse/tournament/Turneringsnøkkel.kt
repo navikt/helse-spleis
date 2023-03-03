@@ -31,11 +31,15 @@ internal enum class Turneringsnøkkel {
     AnnenInntekt_SØ,
     AvslåttDag,
     Saksbehandlerdag,
+    Arbeidsgiverdag_SB,
+    Arbeidsdag_SB,
     UkjentDag,
     UbestemtDag;
 
     companion object {
         fun fraDag(dag: Dag) = when {
+            dag is Arbeidsgiverdag && dag.kommerFra(OverstyrTidslinje::class) -> Arbeidsgiverdag_SB
+            dag is Arbeidsdag && dag.kommerFra(OverstyrTidslinje::class) -> Arbeidsdag_SB
             dag.kommerFra(OverstyrTidslinje::class) -> Saksbehandlerdag
             dag is Arbeidsdag && dag.kommerFra(Inntektsmelding::class) -> Arbeidsdag_IM
             dag is Arbeidsdag && dag.kommerFra(Søknad::class) -> Arbeidsdag_SØ

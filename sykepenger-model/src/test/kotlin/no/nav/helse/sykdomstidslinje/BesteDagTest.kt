@@ -23,6 +23,8 @@ internal class BesteDagTest {
         private val ferieFraSøknad get() = Dag.Feriedag(2.mandag, TestEvent.søknad)
         private val permisjonFraSøknad get() = Dag.Permisjonsdag(2.mandag, TestEvent.søknad)
         private val sykedagFraSøknad get() = Dag.Sykedag(2.mandag, Økonomi.sykdomsgrad(100.prosent), TestEvent.søknad)
+        private val egenmeldingsdagFraSaksbehandler get() = Dag.Arbeidsgiverdag(2.mandag, Økonomi.sykdomsgrad(100.prosent), TestEvent.saksbehandler)
+        private val arbeidsdagFraSaksbehandler get() = Dag.Arbeidsdag(2.mandag, TestEvent.saksbehandler)
     }
 
     @Test
@@ -38,6 +40,26 @@ internal class BesteDagTest {
     @Test
     fun `inntektsmelding sier ferie, søknad sier syk blir feriedag`() {
         assertWinnerBidirectional(sykedagFraSøknad, ferieFraInntektsmelding, ferieFraInntektsmelding)
+    }
+
+    @Test
+    fun `egensmeldingdag fra saksbehandler`() {
+        assertWinnerBidirectional(egenmeldingsdagFraSaksbehandler, arbeidsdagFraSøknad, egenmeldingsdagFraSaksbehandler)
+        assertWinnerBidirectional(egenmeldingsdagFraSaksbehandler, sykedagFraSøknad, sykedagFraSøknad)
+        assertWinnerBidirectional(egenmeldingsdagFraSaksbehandler, ferieFraSøknad, ferieFraSøknad)
+        assertWinnerBidirectional(egenmeldingsdagFraSaksbehandler, permisjonFraSøknad, permisjonFraSøknad)
+        assertWinnerBidirectional(egenmeldingsdagFraSaksbehandler, arbeidsgiverdagFraInntektsmelding, arbeidsgiverdagFraInntektsmelding)
+        assertWinnerBidirectional(egenmeldingsdagFraSaksbehandler, ukjentDag, egenmeldingsdagFraSaksbehandler)
+    }
+
+    @Test
+    fun `arbeidsdag fra saksbehandler`() {
+        assertWinnerBidirectional(arbeidsdagFraSaksbehandler, arbeidsdagFraSøknad, arbeidsdagFraSaksbehandler)
+        assertWinnerBidirectional(arbeidsdagFraSaksbehandler, sykedagFraSøknad, arbeidsdagFraSaksbehandler)
+        assertWinnerBidirectional(arbeidsdagFraSaksbehandler, ferieFraSøknad, arbeidsdagFraSaksbehandler)
+        assertWinnerBidirectional(arbeidsdagFraSaksbehandler, permisjonFraSøknad, arbeidsdagFraSaksbehandler)
+        assertWinnerBidirectional(arbeidsdagFraSaksbehandler, arbeidsgiverdagFraInntektsmelding, arbeidsdagFraSaksbehandler)
+        assertWinnerBidirectional(arbeidsdagFraSaksbehandler, ukjentDag, arbeidsdagFraSaksbehandler)
     }
 
     @Test
