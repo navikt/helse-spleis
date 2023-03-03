@@ -70,6 +70,7 @@ import no.nav.helse.person.Venteårsak.GODKJENNING
 import no.nav.helse.person.Venteårsak.HJELP
 import no.nav.helse.person.Venteårsak.INFOTRYGDHISTORIKK
 import no.nav.helse.person.Venteårsak.INNTEKTSMELDING
+import no.nav.helse.person.Venteårsak.SØKNAD
 import no.nav.helse.person.Venteårsak.UTBETALING
 import no.nav.helse.person.Venteårsak.VILKÅRPRØVING
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
@@ -1585,6 +1586,68 @@ internal class Vedtaksperiode private constructor(
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.utbetalinger.forkast(aktivitetslogg)
+        }
+
+        private sealed interface Tilstand {
+            fun venteårsak(): Venteårsak? = null
+            fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg)
+        }
+        private object AvventerSøknadISammeMånedSomSkjæringstidspunktet: Tilstand {
+            override fun venteårsak() = SØKNAD
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+                hendelse.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding i samme måned som skjæringstidspunktet")
+            }
+        }
+        private object AvventerTidligereEllerOverlappendeSøknad: Tilstand {
+            override fun venteårsak() = SØKNAD
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+                hendelse.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding som er før eller overlapper med vedtaksperioden")
+            }
+        }
+        private object ForventerIkkeInntekt: Tilstand {
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+                vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
+            }
+        }
+        private object ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag: Tilstand {
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+                hendelse.funksjonellFeil(RV_SV_2)
+                vedtaksperiode.forkast(hendelse)
+            }
+        }
+        private object ManglerNødvendigInntektForVilkårsprøving: Tilstand {
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+                hendelse.info("Mangler inntekt for sykepengegrunnlag som følge av at skjæringstidspunktet har endret seg")
+                vedtaksperiode.tilstand(hendelse, AvventerInntektsmelding)
+            }
+        }
+        private object ManglerNødvendigInntektForVilkårsprøvingForAndreArbeidsgivere: Tilstand {
+            override fun venteårsak() = INNTEKTSMELDING
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+                hendelse.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver ikke har tilstrekkelig inntekt for skjæringstidspunktet")
+            }
+        }
+        private object TrengerInntektsmelding: Tilstand {
+            override fun venteårsak() = INNTEKTSMELDING
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+                hendelse.info("Gjenopptar ikke behandling fordi minst én overlappende periode venter på nødvendig opplysninger fra arbeidsgiver")
+            }
+        }
+        private object ManglerNødvendigRefusjonsopplysninger: Tilstand {
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+                hendelse.funksjonellFeil(RV_RE_2)
+                vedtaksperiode.forkast(hendelse)
+            }
+        }
+        private object KlarForVilkårsprøving: Tilstand {
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+                vedtaksperiode.tilstand(hendelse, AvventerVilkårsprøving)
+            }
+        }
+        private object KlarForBeregning: Tilstand {
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+                vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+            }
         }
     }
 
