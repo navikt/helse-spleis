@@ -77,6 +77,10 @@ internal class AnnulleringerAkkumulator {
     internal fun leggTil(utbetaling: IUtbetaling) {
         annulleringer = annulleringer.leggTil(utbetaling)
     }
+    internal fun fjerne(utbetalingerErstattet: Set<UUID>) {
+        annulleringer = annulleringer.filterNot { (_, annulleringen) -> annulleringen.id in utbetalingerErstattet }
+    }
+
     internal fun finnAnnullering(utbetaling: IUtbetaling) = annulleringer.values.firstOrNull { it.hørerSammen(utbetaling) }
 }
 

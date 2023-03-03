@@ -133,7 +133,7 @@ internal class GenerasjonerBuilder(
         avstemmingsnøkkel: Long?,
         annulleringer: Set<UUID>
     ) {
-        if (type != Utbetalingtype.ANNULLERING) return
+        if (type != Utbetalingtype.ANNULLERING) return this.annulleringer.fjerne(annulleringer)
         this.annulleringer.leggTil(UtbetalingBuilder(utbetaling).build())
     }
 
