@@ -9,8 +9,9 @@ internal class VedtaksperiodeVenter private constructor(
     private val ventetSiden: LocalDateTime,
     private val venterTil: LocalDateTime,
     private val venterPå: VenterPå,
-    private val organisasjonsnummer: String) {
-
+    private val organisasjonsnummer: String,
+    private val hendelseIder: Set<UUID>
+    ) {
     private fun lesbarVentetid(): String {
         if (venterTil == LocalDateTime.MAX) return "venter for alltid"
         return Duration.between(ventetSiden, venterTil).abs().let { duration ->
@@ -23,12 +24,13 @@ internal class VedtaksperiodeVenter private constructor(
     override fun toString() =
         "vedtaksperiode $vedtaksperiodeId for arbeidsgiver $organisasjonsnummer venter på $venterPå. Ventet siden $ventetSiden og venter til $venterTil (${lesbarVentetid()})"
 
-    internal class Builder() {
+    internal class Builder {
         private lateinit var vedtaksperiodeId: UUID
         private lateinit var ventetSiden: LocalDateTime
         private lateinit var venterTil: LocalDateTime
         private lateinit var orgnanisasjonsnummer : String
         private lateinit var venterPå: VenterPå
+        private val hendelseIder = mutableSetOf<UUID>()
 
         internal fun venter(vedtaksperiodeId: UUID, orgnummer: String, ventetSiden: LocalDateTime, venterTil: LocalDateTime) {
             this.vedtaksperiodeId = vedtaksperiodeId
@@ -36,13 +38,16 @@ internal class VedtaksperiodeVenter private constructor(
             this.venterTil = venterTil
             this.orgnanisasjonsnummer = orgnummer
         }
+        internal fun hendelseIder(hendelseIder: Set<UUID>) {
+            this.hendelseIder.addAll(hendelseIder)
+        }
 
         internal fun venterPå(vedtaksperiodeId: UUID, orgnummer: String, venteÅrsak: Venteårsak) {
             venterPå = VenterPå(vedtaksperiodeId, orgnummer, venteÅrsak)
         }
 
         internal fun build() =
-            VedtaksperiodeVenter(vedtaksperiodeId, ventetSiden, venterTil, venterPå, orgnanisasjonsnummer)
+            VedtaksperiodeVenter(vedtaksperiodeId, ventetSiden, venterTil, venterPå, orgnanisasjonsnummer, hendelseIder.toSet())
     }
 }
 

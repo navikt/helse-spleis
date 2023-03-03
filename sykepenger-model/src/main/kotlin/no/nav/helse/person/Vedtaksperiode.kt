@@ -958,6 +958,7 @@ internal class Vedtaksperiode private constructor(
         val venteårsak = person.venteårsak(nestemann) ?: return
         builder.venterPå(nestemann.id, nestemann.organisasjonsnummer, venteårsak)
         påminnelse.venter(builder, tilstand::makstid)
+        builder.hendelseIder(hendelseIder())
         sikkerlogg.info("${builder.build()}", keyValue("aktørId", aktørId))
     }
 
