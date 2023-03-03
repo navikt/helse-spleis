@@ -70,6 +70,7 @@ import no.nav.helse.person.Venteårsak.GODKJENNING
 import no.nav.helse.person.Venteårsak.HJELP
 import no.nav.helse.person.Venteårsak.INFOTRYGDHISTORIKK
 import no.nav.helse.person.Venteårsak.INNTEKTSMELDING
+import no.nav.helse.person.Venteårsak.SØKNAD
 import no.nav.helse.person.Venteårsak.UTBETALING
 import no.nav.helse.person.Venteårsak.VILKÅRPRØVING
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
@@ -1229,7 +1230,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
 
-        override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) = HJELP
+        override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
+            if (vedtaksperiode.harNødvendigInntektForVilkårsprøving()) return null
+            return HJELP
+        }
 
         override fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
@@ -1524,7 +1528,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
-            return null // TODO
+            return tilstand(vedtaksperiode, arbeidsgivere).venteårsak()
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -1535,38 +1539,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgivere: Iterable<Arbeidsgiver>,
             hendelse: IAktivitetslogg
-        ) {
-            when {
-                arbeidsgivere.avventerSøknad(vedtaksperiode.skjæringstidspunkt) -> return hendelse.info(
-                    "Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding i samme måned som skjæringstidspunktet"
-                )
-                arbeidsgivere.avventerSøknad(vedtaksperiode.periode) -> return hendelse.info(
-                    "Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding som er før eller overlapper med vedtaksperioden"
-                )
-                !vedtaksperiode.forventerInntekt() -> vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
-                vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() -> {
-                    hendelse.funksjonellFeil(RV_SV_2)
-                    vedtaksperiode.forkast(hendelse)
-                }
-                !vedtaksperiode.arbeidsgiver.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) -> {
-                    hendelse.info("Mangler inntekt for sykepengegrunnlag som følge av at skjæringstidspunktet har endret seg")
-                    vedtaksperiode.tilstand(hendelse, AvventerInntektsmelding)
-                }
-                !arbeidsgivere.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) -> return hendelse.info(
-                    "Gjenopptar ikke behandling fordi minst én arbeidsgiver ikke har tilstrekkelig inntekt for skjæringstidspunktet"
-                )
-                arbeidsgivere.trengerInntektsmelding(vedtaksperiode.periode) -> return hendelse.info(
-                    "Gjenopptar ikke behandling fordi minst én overlappende periode venter på nødvendig opplysninger fra arbeidsgiver"
-                )
-                !arbeidsgivere.harNødvendigRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, hendelse) -> {
-                    hendelse.funksjonellFeil(RV_RE_2)
-                    vedtaksperiode.forkast(hendelse)
-                }
-                else -> {
-                    vedtaksperiode.tilstand(hendelse, if (vedtaksperiode.vilkårsgrunnlag == null) AvventerVilkårsprøving else AvventerHistorikk)
-                }
-            }
-        }
+        ) = tilstand(vedtaksperiode, arbeidsgivere, hendelse).gjenopptaBehandling(vedtaksperiode, hendelse)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
             super.håndter(vedtaksperiode, inntektOgRefusjon)
@@ -1585,6 +1558,84 @@ internal class Vedtaksperiode private constructor(
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.utbetalinger.forkast(aktivitetslogg)
+        }
+        private fun tilstand(
+            vedtaksperiode: Vedtaksperiode,
+            arbeidsgivere: Iterable<Arbeidsgiver>,
+            hendelse: IAktivitetslogg = Aktivitetslogg()
+        ) = when {
+            arbeidsgivere.avventerSøknad(vedtaksperiode.skjæringstidspunkt) -> AvventerSøknadISammeMånedSomSkjæringstidspunktet
+            arbeidsgivere.avventerSøknad(vedtaksperiode.periode) -> AvventerTidligereEllerOverlappendeSøknad
+            !vedtaksperiode.forventerInntekt() -> ForventerIkkeInntekt
+            vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() -> ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
+            !vedtaksperiode.arbeidsgiver.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) -> ManglerNødvendigInntektForVilkårsprøving
+            !arbeidsgivere.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) -> ManglerNødvendigInntektForVilkårsprøvingForAndreArbeidsgivere
+            arbeidsgivere.trengerInntektsmelding(vedtaksperiode.periode) -> TrengerInntektsmelding
+            !arbeidsgivere.harNødvendigRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, hendelse) -> ManglerNødvendigRefusjonsopplysninger
+            vedtaksperiode.vilkårsgrunnlag == null -> KlarForVilkårsprøving
+            else -> KlarForBeregning
+        }
+
+        private sealed interface Tilstand {
+            fun venteårsak(): Venteårsak? = null
+            fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg)
+        }
+        private object AvventerSøknadISammeMånedSomSkjæringstidspunktet: Tilstand {
+            override fun venteårsak() = SØKNAD
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+                hendelse.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding i samme måned som skjæringstidspunktet")
+            }
+        }
+        private object AvventerTidligereEllerOverlappendeSøknad: Tilstand {
+            override fun venteårsak() = SØKNAD
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+                hendelse.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding som er før eller overlapper med vedtaksperioden")
+            }
+        }
+        private object ForventerIkkeInntekt: Tilstand {
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+                vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
+            }
+        }
+        private object ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag: Tilstand {
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+                hendelse.funksjonellFeil(RV_SV_2)
+                vedtaksperiode.forkast(hendelse)
+            }
+        }
+        private object ManglerNødvendigInntektForVilkårsprøving: Tilstand {
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+                hendelse.info("Mangler inntekt for sykepengegrunnlag som følge av at skjæringstidspunktet har endret seg")
+                vedtaksperiode.tilstand(hendelse, AvventerInntektsmelding)
+            }
+        }
+        private object ManglerNødvendigInntektForVilkårsprøvingForAndreArbeidsgivere: Tilstand {
+            override fun venteårsak() = INNTEKTSMELDING
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+                hendelse.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver ikke har tilstrekkelig inntekt for skjæringstidspunktet")
+            }
+        }
+        private object TrengerInntektsmelding: Tilstand {
+            override fun venteårsak() = INNTEKTSMELDING
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+                hendelse.info("Gjenopptar ikke behandling fordi minst én overlappende periode venter på nødvendig opplysninger fra arbeidsgiver")
+            }
+        }
+        private object ManglerNødvendigRefusjonsopplysninger: Tilstand {
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+                hendelse.funksjonellFeil(RV_RE_2)
+                vedtaksperiode.forkast(hendelse)
+            }
+        }
+        private object KlarForVilkårsprøving: Tilstand {
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+                vedtaksperiode.tilstand(hendelse, AvventerVilkårsprøving)
+            }
+        }
+        private object KlarForBeregning: Tilstand {
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+                vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+            }
         }
     }
 
