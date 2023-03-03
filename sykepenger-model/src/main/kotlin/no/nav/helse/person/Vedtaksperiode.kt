@@ -1233,7 +1233,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
             if (vedtaksperiode.harNødvendigInntektForVilkårsprøving()) return null
-            return HJELP
+            return HJELP // I påminnelsen sender vi signal om at vi trenger inntektsmelding, men den kommer nok aldri - så vi trenger nok hjelp
         }
 
         override fun gjenopptaBehandling(
@@ -1275,6 +1275,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.vedtaksperiodeVenter(påminnelse)
             if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving()) {
                 påminnelse.info("Varsler arbeidsgiver at vi har behov for inntektsmelding.")
                 vedtaksperiode.trengerInntektsmelding()
