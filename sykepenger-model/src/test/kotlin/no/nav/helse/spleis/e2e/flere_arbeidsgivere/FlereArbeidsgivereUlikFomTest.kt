@@ -1456,6 +1456,24 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
 
+        val manglendeInntektsmeldingEvents = observatør.manglendeInntektsmeldingVedtaksperioder
+        assertEquals(2, manglendeInntektsmeldingEvents.size)
+        manglendeInntektsmeldingEvents[0].also { event ->
+            assertEquals(1.vedtaksperiode.id(a1), event.vedtaksperiodeId)
+            assertEquals(a1, event.organisasjonsnummer)
+        }
+        manglendeInntektsmeldingEvents[1].also { event ->
+            assertEquals(1.vedtaksperiode.id(a2), event.vedtaksperiodeId)
+            assertEquals(a2, event.organisasjonsnummer)
+        }
+
+        val trengerIkkeInntektsmeldingEvents = observatør.trengerIkkeInntektsmeldingVedtaksperioder
+        assertEquals(1, trengerIkkeInntektsmeldingEvents.size)
+        trengerIkkeInntektsmeldingEvents[0].also { event ->
+            assertEquals(1.vedtaksperiode.id(a1), event.vedtaksperiodeId)
+            assertEquals(a1, event.organisasjonsnummer)
+        }
+
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a1)
