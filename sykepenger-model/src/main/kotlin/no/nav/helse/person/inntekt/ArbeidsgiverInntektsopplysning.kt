@@ -24,9 +24,6 @@ class ArbeidsgiverInntektsopplysning(
         return acc + inntektsopplysning.omregnetÅrsinntekt()
     }
 
-    internal fun harInntektFraAOrdningen() =
-        inntektsopplysning is SkattSykepengegrunnlag || inntektsopplysning is IkkeRapportert
-
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
 
     internal fun accept(visitor: ArbeidsgiverInntektsopplysningVisitor) {
@@ -96,7 +93,6 @@ class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.overstyrInntekter(opptjening: Opptjening?, other: List<ArbeidsgiverInntektsopplysning>, subsumsjonObserver: SubsumsjonObserver) = this
             .map { inntekt -> inntekt.overstyr(other) }
             .also { it.subsummer(subsumsjonObserver, opptjening) }
-        internal fun List<ArbeidsgiverInntektsopplysning>.erOverstyrt() = any { it.inntektsopplysning is Saksbehandler }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.validerOpptjening(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening, orgnummer: String) {
             val arbeidsforholdAktivePåSkjæringstidspunktet = filter { opptjening.ansattVedSkjæringstidspunkt(it.orgnummer) }.singleOrNull() ?: return

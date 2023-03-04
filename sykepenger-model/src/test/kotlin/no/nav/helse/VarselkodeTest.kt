@@ -51,7 +51,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_12
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_9
 import no.nav.helse.person.aktivitetslogg.varselkodeformat
 import org.junit.jupiter.api.Assertions.assertEquals

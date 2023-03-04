@@ -741,10 +741,9 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
         vilkårsgrunnlag: VilkårsgrunnlagElement,
         organisasjonsnummer: String,
-        skjæringstidspunkt: LocalDate,
-        erForlengelse: Boolean
+        skjæringstidspunkt: LocalDate
     ): Boolean {
-        arbeidsgivere.validerVilkårsgrunnlag(aktivitetslogg, vilkårsgrunnlag, organisasjonsnummer, skjæringstidspunkt, erForlengelse)
+        arbeidsgivere.validerVilkårsgrunnlag(aktivitetslogg, vilkårsgrunnlag, organisasjonsnummer, skjæringstidspunkt)
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 

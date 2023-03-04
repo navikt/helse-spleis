@@ -555,7 +555,7 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
     ),
     arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = finnArbeidsgivere().map { Vilkårsgrunnlag.Arbeidsforhold(it, LocalDate.EPOCH, null) },
     fnr: Personidentifikator = UNG_PERSON_FNR_2018
-) {
+): Vilkårsgrunnlag {
     fun assertEtterspurt(behovtype: Behovtype) =
         assertEtterspurt(Vilkårsgrunnlag::class, behovtype, vedtaksperiodeIdInnhenter, orgnummer)
 
@@ -563,7 +563,7 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
     assertEtterspurt(Behovtype.InntekterForSykepengegrunnlag)
     assertEtterspurt(Behovtype.ArbeidsforholdV2)
     assertEtterspurt(Behovtype.Medlemskap)
-    vilkårsgrunnlag(
+    return vilkårsgrunnlag(
         vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
         skjæringstidspunkt = finnSkjæringstidspunkt(orgnummer, vedtaksperiodeIdInnhenter),
         medlemskapstatus = medlemskapstatus,

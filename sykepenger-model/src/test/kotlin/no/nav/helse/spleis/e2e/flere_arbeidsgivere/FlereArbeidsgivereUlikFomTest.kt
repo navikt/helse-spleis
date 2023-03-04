@@ -23,8 +23,6 @@ import no.nav.helse.oktober
 import no.nav.helse.person.Inntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_21
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8

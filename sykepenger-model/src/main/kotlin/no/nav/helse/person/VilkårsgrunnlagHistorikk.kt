@@ -15,7 +15,6 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Com
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_16
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_11
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.ManglerRefusjonsopplysning
@@ -224,18 +223,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             innslag.add(skjæringstidspunkt, this)
         }
 
-        internal fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, organisasjonsnummerRelevanteArbeidsgivere: List<String>, erForlengelse: Boolean): Boolean {
-            sykepengegrunnlag.validerInntekt(aktivitetslogg, organisasjonsnummerRelevanteArbeidsgivere)
-            sykepengegrunnlag.validerOpptjening(aktivitetslogg, opptjening, organisasjonsnummer)
-            if (!erForlengelse) {
-                sykepengegrunnlag.validerOpptjening(aktivitetslogg, opptjening)
-                sykepengegrunnlag.validerStartdato(aktivitetslogg)
-            }
-            valider(aktivitetslogg, erForlengelse)
-            return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
-        }
-
-        protected open fun valider(aktivitetslogg: IAktivitetslogg, erForlengelse: Boolean) {}
+        internal open fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, organisasjonsnummerRelevanteArbeidsgivere: List<String>) = true
 
         internal abstract fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
         internal open fun inngårISammenligningsgrunnlaget(organisasjonsnummer: String): Boolean = false
@@ -420,11 +408,17 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         private val meldingsreferanseId: UUID?,
         vilkårsgrunnlagId: UUID
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag, opptjening) {
-        override fun valider(aktivitetslogg: IAktivitetslogg, erForlengelse: Boolean) {
+        internal fun validerFørstegangsvurdering(aktivitetslogg: IAktivitetslogg) {
             sykepengegrunnlag.validerAvvik(aktivitetslogg, sammenligningsgrunnlag)
-            if (!erForlengelse) {
-                sammenligningsgrunnlag.validerInntekter(aktivitetslogg, sykepengegrunnlag)
-            }
+            sykepengegrunnlag.validerOpptjening(aktivitetslogg, opptjening)
+            sykepengegrunnlag.validerStartdato(aktivitetslogg)
+            sammenligningsgrunnlag.validerInntekter(aktivitetslogg, sykepengegrunnlag)
+        }
+
+        override fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, organisasjonsnummerRelevanteArbeidsgivere: List<String>): Boolean {
+            sykepengegrunnlag.validerInntekt(aktivitetslogg, organisasjonsnummerRelevanteArbeidsgivere)
+            sykepengegrunnlag.validerOpptjening(aktivitetslogg, opptjening, organisasjonsnummer)
+            return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
         }
 
         override fun ghostPeriode(sisteId: UUID, organisasjonsnummer: String, periode: Periode): GhostPeriode? {
@@ -487,6 +481,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         ): VilkårsgrunnlagElement {
             val sykepengegrunnlagOk = sykepengegrunnlag.valider(hendelse)
             val opptjeningOk = opptjening?.valider(hendelse)
+            sykepengegrunnlag.validerAvvik(hendelse, sammenligningsgrunnlag, IAktivitetslogg::varsel)
             return Grunnlagsdata(
                 skjæringstidspunkt = skjæringstidspunkt,
                 sykepengegrunnlag = sykepengegrunnlag,
@@ -499,8 +494,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 vilkårsgrunnlagId = UUID.randomUUID()
             )
         }
-
-        internal fun harInntektFraAOrdningen(): Boolean = sykepengegrunnlag.harInntektFraAOrdningen()
     }
 
     internal class InfotrygdVilkårsgrunnlag(
@@ -510,14 +503,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag, null) {
 
         override fun ghostPeriode(sisteId: UUID, organisasjonsnummer: String, periode: Periode) = null
-
-        override fun valider(aktivitetslogg: IAktivitetslogg, erForlengelse: Boolean) {
-            if (erForlengelse) {
-                aktivitetslogg.info("Perioden har opphav i Infotrygd, men saken beholdes i Spleis fordi det er utbetalt i Spleis tidligere.")
-                return
-            }
-            aktivitetslogg.funksjonellFeil(RV_IT_16)
-        }
 
         override fun overstyrArbeidsforhold(
             hendelse: OverstyrArbeidsforhold,

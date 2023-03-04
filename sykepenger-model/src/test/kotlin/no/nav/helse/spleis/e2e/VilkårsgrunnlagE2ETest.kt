@@ -25,6 +25,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.assertNotNull
@@ -120,9 +121,8 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(1.vedtaksperiode)
 
-        assertFunksjonellFeil("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
+        assertFunksjonellFeil(Varselkode.RV_IV_2, 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -132,9 +132,8 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(emptyList()))
-        håndterYtelser(1.vedtaksperiode)
 
-        assertFunksjonellFeil("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
+        assertFunksjonellFeil(Varselkode.RV_IV_2, 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -155,7 +154,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(1.vedtaksperiode)
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
@@ -164,7 +162,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
             TIL_INFOTRYGD
         )
 
@@ -235,9 +232,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(1.vedtaksperiode)
-
-        assertFunksjonellFeil("Har mer enn 25 % avvik")
+        assertFunksjonellFeil(Varselkode.RV_IV_2)
     }
 
     @Test
@@ -255,7 +250,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(2.vedtaksperiode)
         assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, inntektFraIT), inntektshistorikk = listOf(

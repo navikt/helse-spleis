@@ -27,7 +27,6 @@ import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.build
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.erOverstyrt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnEndringsdato
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.inntekt
@@ -94,9 +93,6 @@ internal class Sykepengegrunnlag(
     }
 
     internal companion object {
-        private val varsel: IAktivitetslogg.(Varselkode) -> Unit = IAktivitetslogg::varsel
-        private val funksjonellFeil: IAktivitetslogg.(Varselkode) -> Unit = IAktivitetslogg::funksjonellFeil
-
         fun opprett(
             alder: Alder,
             arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
@@ -141,7 +137,7 @@ internal class Sykepengegrunnlag(
         manglerInntekt.forEach {
             aktivitetslogg.info("Mangler inntekt for $it på skjæringstidspunkt $skjæringstidspunkt")
         }
-        valideringstrategi()(aktivitetslogg, RV_SV_2)
+        aktivitetslogg.varsel(RV_SV_2)
     }
 
     internal fun validerOpptjening(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening?, orgnummer: String) {
@@ -162,22 +158,13 @@ internal class Sykepengegrunnlag(
         return arbeidsgiverInntektsopplysninger.validerInntekter(aktivitetslogg, skjæringstidspunkt, sammenligningsgrunnlag)
     }
 
-    internal fun validerAvvik(aktivitetslogg: IAktivitetslogg, sammenligningsgrunnlag: Sammenligningsgrunnlag) {
+    internal fun validerAvvik(aktivitetslogg: IAktivitetslogg, sammenligningsgrunnlag: Sammenligningsgrunnlag, valideringstrategi: IAktivitetslogg.(Varselkode) -> Unit = IAktivitetslogg::funksjonellFeil) {
         val avvik = avviksprosent(sammenligningsgrunnlag, SubsumsjonObserver.NullObserver)
-        if (harAkseptabeltAvvik(avvik)) aktivitetslogg.info("Har %.0f %% eller mindre avvik i inntekt (%.2f %%)", Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent(), avvik.prosent())
-        else valideringstrategi()(aktivitetslogg, RV_IV_2)
+        if (!harAkseptabeltAvvik(avvik)) return valideringstrategi(aktivitetslogg, RV_IV_2)
+        aktivitetslogg.info("Har %.0f %% eller mindre avvik i inntekt (%.2f %%)", Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent(), avvik.prosent())
     }
 
     private fun harAkseptabeltAvvik(avvik: Prosent) = avvik <= Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
-
-    private fun valideringstrategi(): IAktivitetslogg.(Varselkode) -> Unit {
-        return when {
-            erOverstyrt() -> varsel
-            else -> funksjonellFeil
-        }
-    }
-
-    private fun erOverstyrt() = deaktiverteArbeidsforhold.isNotEmpty() || arbeidsgiverInntektsopplysninger.erOverstyrt()
 
     internal fun aktiver(orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserver) =
         deaktiverteArbeidsforhold.aktiver(arbeidsgiverInntektsopplysninger, orgnummer, forklaring, subsumsjonObserver)
@@ -269,8 +256,6 @@ internal class Sykepengegrunnlag(
         arbeidsgiverInntektsopplysninger.size > 1 -> Inntektskilde.FLERE_ARBEIDSGIVERE
         else -> Inntektskilde.EN_ARBEIDSGIVER
     }
-    internal fun harInntektFraAOrdningen() =
-        arbeidsgiverInntektsopplysninger.any { it.harInntektFraAOrdningen() }
 
     internal fun erRelevant(organisasjonsnummer: String) = arbeidsgiverInntektsopplysninger.any {
         it.gjelder(organisasjonsnummer)

@@ -504,9 +504,8 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         nyPeriode(1.januar til 31.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(inntekt = INNTEKT * 2)
-        håndterYtelser()
         assertIngenVarsel(RV_IV_2, 1.vedtaksperiode.filter())
-        assertFunksjonellFeil("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
+        assertFunksjonellFeil(RV_IV_2, 1.vedtaksperiode.filter())
     }
 
     @Test

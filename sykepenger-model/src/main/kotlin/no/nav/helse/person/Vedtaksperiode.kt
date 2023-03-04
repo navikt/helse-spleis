@@ -595,10 +595,12 @@ internal class Vedtaksperiode private constructor(
         person.igangsettOverstyring(søknad, Revurderingseventyr.korrigertSøknad(skjæringstidspunkt, periode))
     }
 
-    private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
+    private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand, block: (VilkårsgrunnlagHistorikk.Grunnlagsdata) -> Unit = {}) {
         val grunnlagForSykepengegrunnlag = vilkårsgrunnlag.avklarSykepengegrunnlag(person, jurist())
         vilkårsgrunnlag.valider(grunnlagForSykepengegrunnlag, jurist())
-        person.lagreVilkårsgrunnlag(vilkårsgrunnlag.grunnlagsdata())
+        val grunnlagsdata = vilkårsgrunnlag.grunnlagsdata()
+        block(grunnlagsdata)
+        person.lagreVilkårsgrunnlag(grunnlagsdata)
         if (vilkårsgrunnlag.harFunksjonelleFeilEllerVerre()) {
             return forkast(vilkårsgrunnlag)
         }
@@ -1372,7 +1374,7 @@ internal class Vedtaksperiode private constructor(
                     ytelser.valider(it.periode, it.skjæringstidspunkt)
                     vedtaksperiode.kontekst(ytelser) // endre kontekst tilbake for ytelser-hendelsen
                 }
-                person.valider(ytelser, vilkårsgrunnlag, vedtaksperiode.organisasjonsnummer, vedtaksperiode.skjæringstidspunkt, true)
+                person.valider(ytelser, vilkårsgrunnlag, vedtaksperiode.organisasjonsnummer, vedtaksperiode.skjæringstidspunkt)
 
                 val beregningsperiode = utvalg.periode()
                 val beregningsperioder = utvalg.map { Triple(it.periode, it.aktivitetsloggkopi(ytelser), it.jurist) }
@@ -1666,7 +1668,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikk)
+            vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikk) { grunnlagsdata ->
+                grunnlagsdata.validerFørstegangsvurdering(vilkårsgrunnlag)
+            }
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
@@ -1725,7 +1729,7 @@ internal class Vedtaksperiode private constructor(
                         this,
                         vedtaksperiode.periode,
                         vedtaksperiode.skjæringstidspunkt,
-                        arbeidsgiver.organisasjonsnummer()
+                        vedtaksperiode.organisasjonsnummer
                     )
                 }
                 valider { ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
@@ -1744,7 +1748,7 @@ internal class Vedtaksperiode private constructor(
                     ytelser.kontekst(vilkårsgrunnlag)
                 }
                 valider {
-                    arbeidsgiver.valider(this, vedtaksperiode, vilkårsgrunnlag, vedtaksperiode.skjæringstidspunkt)
+                    person.valider(this, vilkårsgrunnlag, vedtaksperiode.organisasjonsnummer, vedtaksperiode.skjæringstidspunkt)
                 }
                 onSuccess {
                     if (vedtaksperiode.inntektsmeldingInfo == null) {

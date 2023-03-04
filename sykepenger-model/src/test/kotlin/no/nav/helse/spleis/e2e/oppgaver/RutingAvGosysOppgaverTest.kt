@@ -247,7 +247,6 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(11.januar, 20.januar, 100.prosent))
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
 
         assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
         assertTrue(observatør.opprettOppgaveEventer().any { inntektsmeldingId in it.hendelser })

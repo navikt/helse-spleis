@@ -187,11 +187,10 @@ internal class Arbeidsgiver private constructor(
             aktivitetslogg: IAktivitetslogg,
             vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
             organisasjonsnummer: String,
-            skjæringstidspunkt: LocalDate,
-            erForlengelse: Boolean
+            skjæringstidspunkt: LocalDate
         ) {
             val relevanteArbeidsgivere = medSkjæringstidspunkt(skjæringstidspunkt).map { it.organisasjonsnummer }
-            vilkårsgrunnlag.valider(aktivitetslogg, organisasjonsnummer, relevanteArbeidsgivere, erForlengelse)
+            vilkårsgrunnlag.valider(aktivitetslogg, organisasjonsnummer, relevanteArbeidsgivere)
         }
 
         internal fun Iterable<Arbeidsgiver>.ghostPeriode(
@@ -1002,12 +1001,6 @@ internal class Arbeidsgiver private constructor(
     internal fun periodetype(periode: Periode): Periodetype {
         return arbeidsgiverperiode(periode)?.let { person.periodetype(organisasjonsnummer, it, periode, skjæringstidspunkt(periode)) } ?: Periodetype.FØRSTEGANGSBEHANDLING
     }
-
-    internal fun valider(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, skjæringstidspunkt: LocalDate) =
-        person.valider(aktivitetslogg, vilkårsgrunnlag, organisasjonsnummer, skjæringstidspunkt, !erFørstegangsbehandling(vedtaksperiode, skjæringstidspunkt))
-
-    private fun erFørstegangsbehandling(vedtaksperiode: Vedtaksperiode, skjæringstidspunkt: LocalDate) =
-        vedtaksperioder.filter(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt)).none { it.erVedtaksperiodeRettFør(vedtaksperiode) }
 
     private fun skjæringstidspunkt(periode: Periode) = person.skjæringstidspunkt(organisasjonsnummer, sykdomstidslinje(), periode)
 

@@ -475,12 +475,11 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         håndterInntektsmelding(listOf(10.januar til 25.januar), beregnetInntekt = INNTEKT)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT * 2)
-        håndterYtelser(2.vedtaksperiode)
 
         assertIngenVarsler(1.vedtaksperiode.filter(a1))
         assertFunksjonellFeil(RV_IV_2.funksjonellFeilTekst, 2.vedtaksperiode.filter(a1))
 
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, TIL_INFOTRYGD)
     }
 
     @Test

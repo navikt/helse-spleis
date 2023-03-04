@@ -351,7 +351,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(a1, 1.februar, 28.februar),
             Vilkårsgrunnlag.Arbeidsforhold(a1, 2.mars, 31.mars) // Gjelder ikke etter endring
         )
-        håndterVilkårsgrunnlag(
+        val vilkårsgrunnlag = håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
@@ -360,9 +360,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             ),
             arbeidsforhold = arbeidsforhold1
         )
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.mars)
-        assertNotNull(vilkårsgrunnlag)
-        assertEquals(5, vilkårsgrunnlag.inspektør.opptjening.inspektør.arbeidsforhold.getValue(a1).size)
+        val grunnlagsdata = vilkårsgrunnlag.grunnlagsdata()
+        assertEquals(5, grunnlagsdata.inspektør.opptjening.inspektør.arbeidsforhold.getValue(a1).size)
     }
 
     @Test

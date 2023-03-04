@@ -32,6 +32,8 @@ import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
@@ -219,7 +221,7 @@ internal class VilkårsgrunnlagHistorikkTest {
     @Test
     fun `setter inntekt på økonomi om vurdering ikke er ok`() {
         val inntekt = 21000.månedlig
-        historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
+        val grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt * 1.35, emptyList()),
@@ -229,13 +231,14 @@ internal class VilkårsgrunnlagHistorikkTest {
             vurdertOk = false,
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
-        ))
+        )
+        historikk.lagre(grunnlagsdata)
         val økonomi: Økonomi = historikk.medInntekt(ORGNR, 1.januar, Økonomi.ikkeBetalt(), null, NormalArbeidstaker, NullObserver)
         assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
 
         val aktivitetslogg = Aktivitetslogg()
-        historikk.vilkårsgrunnlagFor(1.januar)?.valider(aktivitetslogg, ORGNR, listOf(ORGNR), false)
-        assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        grunnlagsdata.validerFørstegangsvurdering(aktivitetslogg)
+        aktivitetslogg.assertFunksjonellFeil(Varselkode.RV_IV_2)
     }
 
     @Test
