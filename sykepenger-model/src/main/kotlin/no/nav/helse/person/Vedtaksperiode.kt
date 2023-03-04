@@ -1229,7 +1229,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
-            if (arbeidsgivere.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, Aktivitetslogg())) return null
+            if (harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode, arbeidsgivere, Aktivitetslogg())) return null
             return HJELP // I påminnelsen sender vi signal om at vi trenger inntektsmelding, men den kommer nok aldri - så vi trenger nok hjelp
         }
 
@@ -1240,10 +1240,16 @@ internal class Vedtaksperiode private constructor(
         ) {
             if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse))
                 return hendelse.info("Mangler nødvendig inntekt for vilkårsprøving eller refusjonsopplysninger og kan derfor ikke gjenoppta revurdering.")
-            if (!arbeidsgivere.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, hendelse))
+            if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode, arbeidsgivere, hendelse))
                 return hendelse.info("En annen arbeidsgiver mangler nødvendig inntekt for vilkårsprøving eller refusjonsopplysninger og kan derfor ikke gjenoppta revurdering.")
             vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
             vedtaksperiode.arbeidsgiver.gjenopptaRevurdering(vedtaksperiode, hendelse)
+        }
+
+        private fun harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode: Vedtaksperiode, arbeidsgivere: Iterable<Arbeidsgiver>, hendelse: IAktivitetslogg): Boolean {
+            val skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt
+            val periode = arbeidsgivere.vedtaksperioder { other -> other.skjæringstidspunkt == skjæringstidspunkt && other.tilstand == AvventerRevurdering }.periode()
+            return arbeidsgivere.harTilstrekkeligInformasjonTilUtbetaling(skjæringstidspunkt, periode, hendelse)
         }
 
         override fun gjenopptaRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, første: Vedtaksperiode) {

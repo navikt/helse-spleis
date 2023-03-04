@@ -1477,5 +1477,145 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a1)
+
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+
+        nullstillTilstandsendringer()
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET, orgnummer = a1)
+
+        val revurderingen = inspektør(a1).utbetalinger.last().inspektør
+        assertEquals(2, revurderingen.arbeidsgiverOppdrag.size)
+        assertEquals(0, revurderingen.personOppdrag.size)
+        revurderingen.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(17.januar til 18.februar, linje.fom til linje.tom)
+            assertEquals(1080, linje.beløp)
+        }
+        revurderingen.arbeidsgiverOppdrag[1].inspektør.also { linje ->
+            assertEquals(19.februar til 28.februar, linje.fom til linje.tom)
+            assertEquals(1081, linje.beløp)
+        }
+
+        val førstegangsutbetalingen = inspektør(a2).utbetalinger.last().inspektør
+        assertEquals(1, førstegangsutbetalingen.arbeidsgiverOppdrag.size)
+        assertEquals(0, førstegangsutbetalingen.personOppdrag.size)
+        førstegangsutbetalingen.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(17.februar til 28.februar, linje.fom til linje.tom)
+            assertEquals(1080, linje.beløp)
+        }
+    }
+
+    @Test
+    fun `søknad for ghost etter utbetalt som delvis overlapper med to perioder hos a1`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt INNTEKT
+                }
+            }),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt INNTEKT
+                }
+            }, arbeidsforhold = emptyList()),
+            arbeidsforhold = listOf(
+              Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH),
+              Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH)
+            ),
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt()
+
+        forlengVedtak(1.februar, 28.februar, orgnummer = a1)
+
+        nullstillTilstandsendringer()
+        håndterSøknad(Sykdom(20.januar, 28.februar, 100.prosent), orgnummer = a2)
+
+        val manglendeInntektsmeldingEvents = observatør.manglendeInntektsmeldingVedtaksperioder
+        assertEquals(2, manglendeInntektsmeldingEvents.size)
+        manglendeInntektsmeldingEvents[0].also { event ->
+            assertEquals(1.vedtaksperiode.id(a1), event.vedtaksperiodeId)
+            assertEquals(a1, event.organisasjonsnummer)
+        }
+        manglendeInntektsmeldingEvents[1].also { event ->
+            assertEquals(1.vedtaksperiode.id(a2), event.vedtaksperiodeId)
+            assertEquals(a2, event.organisasjonsnummer)
+        }
+
+        val trengerIkkeInntektsmeldingEvents = observatør.trengerIkkeInntektsmeldingVedtaksperioder
+        assertEquals(1, trengerIkkeInntektsmeldingEvents.size)
+        trengerIkkeInntektsmeldingEvents[0].also { event ->
+            assertEquals(1.vedtaksperiode.id(a1), event.vedtaksperiodeId)
+            assertEquals(a1, event.organisasjonsnummer)
+        }
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a1)
+
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(20.januar til 4.februar), orgnummer = a2)
+
+        assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+
+        nullstillTilstandsendringer()
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVSLUTTET, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET, orgnummer = a1)
+
+        val revurderingen = inspektør(a1).utbetalinger.last().inspektør
+        assertEquals(2, revurderingen.arbeidsgiverOppdrag.size)
+        assertEquals(0, revurderingen.personOppdrag.size)
+        revurderingen.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(17.januar til 4.februar, linje.fom til linje.tom)
+            assertEquals(1080, linje.beløp)
+        }
+        revurderingen.arbeidsgiverOppdrag[1].inspektør.also { linje ->
+            assertEquals(5.februar til 28.februar, linje.fom til linje.tom)
+            assertEquals(1081, linje.beløp)
+        }
+
+        val førstegangsutbetalingen = inspektør(a2).utbetalinger.last().inspektør
+        assertEquals(1, førstegangsutbetalingen.arbeidsgiverOppdrag.size)
+        assertEquals(0, førstegangsutbetalingen.personOppdrag.size)
+        førstegangsutbetalingen.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(5.februar til 28.februar, linje.fom til linje.tom)
+            assertEquals(1080, linje.beløp)
+        }
     }
 }
