@@ -39,7 +39,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeid
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
-import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
@@ -758,9 +757,6 @@ class Person private constructor(
 
     internal fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt)
-
-    internal fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate) =
-        arbeidsgivere.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt)
 
     internal fun nyVedtaksperiodeUtbetaling(organisasjonsnummer: String, utbetalingId: UUID, vedtaksperiodeId: UUID) {
         observers.forEach { it.nyVedtaksperiodeUtbetaling(personidentifikator, aktørId, organisasjonsnummer, utbetalingId, vedtaksperiodeId) }

@@ -29,6 +29,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
@@ -1029,7 +1030,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterSøknad(Sykdom(15.januar, 15.februar, 100.prosent), andreInntektskilder = true)
         }
         a1 {
-            assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
             assertIngenFunksjonelleFeil()
         }
         a2 {

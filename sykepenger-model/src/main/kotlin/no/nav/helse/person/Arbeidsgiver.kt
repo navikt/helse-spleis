@@ -220,24 +220,22 @@ internal class Arbeidsgiver private constructor(
         }
 
         private fun Iterable<Arbeidsgiver>.medSkjæringstidspunkt(skjæringstidspunkt: LocalDate) = this
-            .filter { arbeidsgiver -> arbeidsgiver.vedtaksperioder.any(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt)) }
+            .filter { arbeidsgiver -> arbeidsgiver.skalInngåISykepengegrunnlaget(skjæringstidspunkt) }
 
-        private fun Iterable<Arbeidsgiver>.somTrengerRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode) = this
-            .filter { arbeidsgiver -> arbeidsgiver.vedtaksperioder.any(TRENGER_REFUSJONSOPPLYSNINGER(skjæringstidspunkt, periode)) }
         internal fun Iterable<Arbeidsgiver>.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) = this
-            .medSkjæringstidspunkt(skjæringstidspunkt)
             .any { arbeidsgiver -> arbeidsgiver.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt) }
 
         /* krever inntekt for alle vedtaksperioder som deler skjæringstidspunkt,
             men tillater at det ikke er inntekt for perioder innenfor arbeidsgiverperioden/uten utbetaling
          */
         internal fun Iterable<Arbeidsgiver>.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate) = this
-            .medSkjæringstidspunkt(skjæringstidspunkt)
             .all { arbeidsgiver -> arbeidsgiver.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt) }
 
         internal fun Iterable<Arbeidsgiver>.harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg) = this
-            .somTrengerRefusjonsopplysninger(skjæringstidspunkt, periode)
             .all { arbeidsgiver -> arbeidsgiver.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, periode, hendelse) }
+
+        internal fun Iterable<Arbeidsgiver>.harTilstrekkeligInformasjonTilUtbetaling(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg) = this
+            .all { arbeidsgiver -> arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(skjæringstidspunkt, periode, hendelse) }
 
         internal fun Iterable<Arbeidsgiver>.trengerInntektsmelding(periode: Periode) = this
             .flatMap { it.vedtaksperioder }
@@ -287,13 +285,18 @@ internal class Arbeidsgiver private constructor(
         etterhvert syk fra ny arbeidsgiver (f.eks. jobb-bytte)
      */
     internal fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
-        harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt) == false
+        harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt) == false && skalInngåISykepengegrunnlaget(skjæringstidspunkt)
 
     internal fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate) : Boolean {
+        if (!skalInngåISykepengegrunnlaget(skjæringstidspunkt)) return true
         return harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt) ?: kanBeregneSykepengegrunnlag(skjæringstidspunkt)
     }
 
+    private fun skalInngåISykepengegrunnlaget(skjæringstidspunkt: LocalDate) =
+        vedtaksperioder.any(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt))
+
     internal fun harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg) : Boolean {
+        if (!trengerRefusjonsopplysninger(skjæringstidspunkt, periode)) return true
         val arbeidsgiverperiode = arbeidsgiverperiode(periode) ?: return false
         val vilkårsgrunnlag = person.vilkårsgrunnlagFor(skjæringstidspunkt)
         val refusjonsopplysninger = when (vilkårsgrunnlag) {
@@ -302,6 +305,12 @@ internal class Arbeidsgiver private constructor(
         }
         return Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, hendelse, organisasjonsnummer)
     }
+
+    private fun trengerRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode) =
+        vedtaksperioder.any(TRENGER_REFUSJONSOPPLYSNINGER(skjæringstidspunkt, periode))
+
+    internal fun harTilstrekkeligInformasjonTilUtbetaling(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg) =
+        harNødvendigInntektForVilkårsprøving(skjæringstidspunkt) && harNødvendigRefusjonsopplysninger(skjæringstidspunkt, periode, hendelse)
 
     private fun harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
         person.vilkårsgrunnlagFor(skjæringstidspunkt)?.harNødvendigInntektForVilkårsprøving(organisasjonsnummer)

@@ -1458,14 +1458,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
-        assertForventetFeil(
-            forklaring = "AG1 må vente til det foreligger refusjonsopplysninger for AG2",
-            nå = {
-                assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
-            },
-            ønsket = {
-                assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
-            }
-        )
+        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a1)
     }
 }

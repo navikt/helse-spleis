@@ -37,6 +37,7 @@ import no.nav.helse.memoized
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigRefusjonsopplysninger
+import no.nav.helse.person.Arbeidsgiver.Companion.harTilstrekkeligInformasjonTilUtbetaling
 import no.nav.helse.person.Arbeidsgiver.Companion.trengerInntektsmelding
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Dokumentsporing.Companion.ider
@@ -464,12 +465,8 @@ internal class Vedtaksperiode private constructor(
     private fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() =
         person.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt)
 
-    private fun harNødvendigOpplysningerFraArbeidsgiver(hendelse: IAktivitetslogg) =
-        arbeidsgiver.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt) &&
-                arbeidsgiver.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, periode, hendelse)
-
-    private fun harNødvendigInntektForVilkårsprøving() =
-        person.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt)
+    private fun harTilstrekkeligInformasjonTilUtbetaling(hendelse: IAktivitetslogg) =
+        arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(skjæringstidspunkt, periode, hendelse)
 
     private fun låsOpp() = arbeidsgiver.låsOpp(periode)
     private fun lås() = arbeidsgiver.lås(periode)
@@ -1224,7 +1221,7 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_REVURDERING
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if(!vedtaksperiode.harNødvendigInntektForVilkårsprøving()) {
+            if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse)) {
                 hendelse.info("Revurdering førte til at sykefraværstilfellet trenger inntektsmelding")
                 vedtaksperiode.trengerInntektsmelding()
             }
@@ -1232,7 +1229,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
-            if (vedtaksperiode.harNødvendigInntektForVilkårsprøving()) return null
+            if (arbeidsgivere.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, Aktivitetslogg())) return null
             return HJELP // I påminnelsen sender vi signal om at vi trenger inntektsmelding, men den kommer nok aldri - så vi trenger nok hjelp
         }
 
@@ -1241,8 +1238,10 @@ internal class Vedtaksperiode private constructor(
             arbeidsgivere: Iterable<Arbeidsgiver>,
             hendelse: IAktivitetslogg
         ) {
-            if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving())
-                return hendelse.info("Mangler nødvendig inntekt for vilkårsprøving og kan derfor ikke gjenoppta revurdering.")
+            if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse))
+                return hendelse.info("Mangler nødvendig inntekt for vilkårsprøving eller refusjonsopplysninger og kan derfor ikke gjenoppta revurdering.")
+            if (!arbeidsgivere.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, hendelse))
+                return hendelse.info("En annen arbeidsgiver mangler nødvendig inntekt for vilkårsprøving eller refusjonsopplysninger og kan derfor ikke gjenoppta revurdering.")
             vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
             vedtaksperiode.arbeidsgiver.gjenopptaRevurdering(vedtaksperiode, hendelse)
         }
@@ -1276,7 +1275,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vedtaksperiode.vedtaksperiodeVenter(påminnelse)
-            if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving()) {
+            if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(påminnelse)) {
                 påminnelse.info("Varsler arbeidsgiver at vi har behov for inntektsmelding.")
                 vedtaksperiode.trengerInntektsmelding()
             }
@@ -1518,7 +1517,7 @@ internal class Vedtaksperiode private constructor(
 
         private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             if (!vedtaksperiode.forventerInntekt()) return vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
-            if (!vedtaksperiode.harNødvendigOpplysningerFraArbeidsgiver(hendelse)) return
+            if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse)) return
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
     }
@@ -2032,7 +2031,7 @@ internal class Vedtaksperiode private constructor(
             if (!vedtaksperiode.forventerInntekt()) return
             revurdering.loggDersomKorrigerendeSøknad(hendelse, "Startet omgjøring grunnet korrigerende søknad")
             hendelse.info(RV_RV_1.varseltekst)
-            if (!vedtaksperiode.harNødvendigOpplysningerFraArbeidsgiver(hendelse)) {
+            if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse)) {
                 hendelse.info("mangler nødvendige opplysninger fra arbeidsgiver")
                 return vedtaksperiode.tilstand(hendelse, AvventerInntektsmelding)
             }
