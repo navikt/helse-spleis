@@ -342,7 +342,8 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mars, 31.mars, 100.prosent, INNTEKT),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.mars, INNTEKT, true)))
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.mars, INNTEKT, true))
+        )
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.januar, Dagtype.Sykedag, 80)))
         håndterYtelser(1.vedtaksperiode)
         assertVarsel(RV_IT_1, 1.vedtaksperiode.filter())

@@ -74,9 +74,7 @@ internal abstract class AbstractPersonTest {
                         UUID.randomUUID(),
                         listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, TestPerson.INNTEKT)),
                         listOf(Inntektsopplysning(ORGNUMMER, 1.januar, TestPerson.INNTEKT, true)),
-                        emptyMap(),
-                        emptyList(),
-                        false
+                        emptyMap()
                     ),
                 ),
             )
@@ -92,9 +90,7 @@ internal abstract class AbstractPersonTest {
                         UUID.randomUUID(),
                         listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, TestPerson.INNTEKT)),
                         listOf(Inntektsopplysning(ORGNUMMER, 1.februar, TestPerson.INNTEKT, true)),
-                        emptyMap(),
-                        emptyList(),
-                        false
+                        emptyMap()
                     ),
                 ),
             )

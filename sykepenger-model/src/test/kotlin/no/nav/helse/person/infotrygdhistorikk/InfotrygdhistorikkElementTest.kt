@@ -43,9 +43,7 @@ internal class InfotrygdhistorikkElementTest {
             perioder: List<Infotrygdperiode> = emptyList(),
             inntekter: List<Inntektsopplysning> = emptyList(),
             arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
-            ugyldigePerioder: List<UgyldigPeriode> = emptyList(),
             hendelseId: UUID = UUID.randomUUID(),
-            harStatslønn: Boolean = false,
             oppdatert: LocalDateTime = LocalDateTime.now(),
             tidsstempel: LocalDateTime = LocalDateTime.now()
         ) =
@@ -56,8 +54,6 @@ internal class InfotrygdhistorikkElementTest {
                 infotrygdperioder = perioder,
                 inntekter = inntekter,
                 arbeidskategorikoder = arbeidskategorikoder,
-                ugyldigePerioder = ugyldigePerioder,
-                harStatslønn = harStatslønn,
                 oppdatert = oppdatert,
             )
     }
@@ -82,51 +78,16 @@ internal class InfotrygdhistorikkElementTest {
         val arbeidskategorikoder = mapOf(
             "01" to 1.januar
         )
-        val ugyldigePerioder = listOf(UgyldigPeriode(1.januar, 1.januar, 100))
-        assertEquals(nyttHistorikkelement().hashCode(), nyttHistorikkelement().hashCode())
         assertEquals(nyttHistorikkelement(), nyttHistorikkelement())
-        assertNotEquals(nyttHistorikkelement().hashCode(), nyttHistorikkelement(perioder).hashCode())
-        assertEquals(nyttHistorikkelement(perioder).hashCode(), nyttHistorikkelement(perioder).hashCode())
         assertEquals(nyttHistorikkelement(perioder), nyttHistorikkelement(perioder))
-        assertEquals(
-            nyttHistorikkelement(inntekter = inntekter).hashCode(),
-            nyttHistorikkelement(inntekter = inntekter).hashCode()
-        )
-        assertNotEquals(
-            nyttHistorikkelement(perioder, inntekter).hashCode(),
-            nyttHistorikkelement(inntekter = inntekter).hashCode()
-        )
         assertNotEquals(nyttHistorikkelement(perioder, inntekter), nyttHistorikkelement(inntekter = inntekter))
-        assertEquals(
-            nyttHistorikkelement(perioder, inntekter, arbeidskategorikoder).hashCode(),
-            nyttHistorikkelement(perioder, inntekter, arbeidskategorikoder).hashCode()
-        )
-        assertNotEquals(
-            nyttHistorikkelement(perioder, inntekter).hashCode(),
-            nyttHistorikkelement(perioder, inntekter, arbeidskategorikoder).hashCode()
-        )
-        assertNotEquals(
-            nyttHistorikkelement(perioder, inntekter),
-            nyttHistorikkelement(perioder, inntekter, arbeidskategorikoder)
-        )
-        assertNotEquals(
-            nyttHistorikkelement().hashCode(),
-            nyttHistorikkelement(ugyldigePerioder = ugyldigePerioder).hashCode()
-        )
-        assertEquals(
-            nyttHistorikkelement(ugyldigePerioder = ugyldigePerioder).hashCode(),
-            nyttHistorikkelement(ugyldigePerioder = ugyldigePerioder).hashCode()
-        )
-        assertEquals(
-            nyttHistorikkelement(ugyldigePerioder = ugyldigePerioder),
-            nyttHistorikkelement(ugyldigePerioder = ugyldigePerioder)
-        )
-        assertNotEquals(nyttHistorikkelement().hashCode(), nyttHistorikkelement(harStatslønn = true).hashCode())
-        assertEquals(
-            nyttHistorikkelement(harStatslønn = true).hashCode(),
-            nyttHistorikkelement(harStatslønn = true).hashCode()
-        )
-        assertEquals(nyttHistorikkelement(harStatslønn = true), nyttHistorikkelement(harStatslønn = true))
+        assertNotEquals(nyttHistorikkelement(perioder, inntekter), nyttHistorikkelement(perioder, inntekter, arbeidskategorikoder))
+        assertEquals(nyttHistorikkelement(), nyttHistorikkelement())
+    }
+
+    private fun assertEquals(one: InfotrygdhistorikkElement, other: InfotrygdhistorikkElement) {
+        assertTrue(one.funksjoneltLik(other))
+        assertTrue(other.funksjoneltLik(one))
     }
 
     @Test
@@ -144,7 +105,6 @@ internal class InfotrygdhistorikkElementTest {
             )
         )
         assertEquals(element1, identiskElement)
-        assertEquals(element1.hashCode(), identiskElement.hashCode())
         assertTrue(identiskElement.erstatter(element1))
     }
 
@@ -156,7 +116,6 @@ internal class InfotrygdhistorikkElementTest {
         val element1 = nyttHistorikkelement(inntekter = listOf(inntekt1, inntekt2))
         val identiskElement = nyttHistorikkelement(inntekter = listOf(inntekt2, inntekt1))
         assertEquals(element1, identiskElement)
-        assertEquals(element1.hashCode(), identiskElement.hashCode())
         assertTrue(identiskElement.erstatter(element1))
     }
 
@@ -173,18 +132,8 @@ internal class InfotrygdhistorikkElementTest {
         val element1 = nyttHistorikkelement(arbeidskategorikoder = arbeidskategorikoder1)
         val identiskElement = nyttHistorikkelement(arbeidskategorikoder = arbeidskategorikoder2)
         assertEquals(arbeidskategorikoder1, arbeidskategorikoder2)
-        assertEquals(arbeidskategorikoder1.hashCode(), arbeidskategorikoder2.hashCode())
         assertEquals(element1, identiskElement)
-        assertEquals(element1.hashCode(), identiskElement.hashCode())
         assertTrue(identiskElement.erstatter(element1))
-    }
-
-    @Test
-    fun `lik ugyldig periode`() {
-        val element1 = nyttHistorikkelement(ugyldigePerioder = listOf(UgyldigPeriode(1.januar, 1.januar, 100)))
-        val identiskElement = nyttHistorikkelement(ugyldigePerioder = listOf(UgyldigPeriode(1.januar, 1.januar, 100)))
-        assertEquals(element1, identiskElement)
-        assertEquals(element1.hashCode(), identiskElement.hashCode())
     }
 
     @Test
@@ -352,8 +301,8 @@ internal class InfotrygdhistorikkElementTest {
         )
         val element = nyttHistorikkelement(
             perioder = utbetalinger,
-            arbeidskategorikoder = arbeidskategorikoder,
-            inntekter = inntekter
+            inntekter = inntekter,
+            arbeidskategorikoder = arbeidskategorikoder
         )
         assertTrue(element.valider(aktivitetslogg, Periode(9.januar, 23.januar), 9.januar, "ag1"))
         aktivitetslogg.assertIngenFunksjonellFeil()
@@ -513,20 +462,6 @@ internal class InfotrygdhistorikkElementTest {
         assertEquals(1.januar, inspektør.førstedato)
         assertEquals(10.januar, inspektør.sistedato)
         assertEquals(8, inspektør.navDagTeller)
-    }
-
-    @Test
-    fun `Feiler selv om ugyldig dag overlappes helt av ReduksjonArbeidsgiverRefusjon`() {
-        val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig)
-        )
-        val element = nyttHistorikkelement(
-            perioder = utbetalinger,
-            ugyldigePerioder = listOf(UgyldigPeriode(5.januar, 5.januar, 100))
-        )
-
-        assertTrue(element.valider(aktivitetslogg, Periode(1.mars, 1.mars), 1.mars, "ag1"))
-        aktivitetslogg.assertIngenFunksjonellFeil()
     }
 
     @Test
@@ -714,9 +649,7 @@ internal class InfotrygdhistorikkElementTest {
         perioder: List<Infotrygdperiode> = emptyList(),
         inntekter: List<Inntektsopplysning> = emptyList(),
         arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
-        ugyldigePerioder: List<UgyldigPeriode> = emptyList(),
         hendelseId: UUID = UUID.randomUUID(),
-        harStatslønn: Boolean = false,
         oppdatert: LocalDateTime = LocalDateTime.now()
     ) =
         InfotrygdhistorikkElement.opprett(
@@ -724,9 +657,7 @@ internal class InfotrygdhistorikkElementTest {
             hendelseId = hendelseId,
             perioder = perioder,
             inntekter = inntekter,
-            arbeidskategorikoder = arbeidskategorikoder,
-            ugyldigePerioder = ugyldigePerioder,
-            harStatslønn = harStatslønn
+            arbeidskategorikoder = arbeidskategorikoder
         )
 
 

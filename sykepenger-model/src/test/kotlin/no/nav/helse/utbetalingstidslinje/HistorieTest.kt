@@ -97,9 +97,7 @@ internal abstract class HistorieTest {
                 hendelseId = UUID.randomUUID(),
                 perioder = perioder.toList(),
                 inntekter = emptyList(),
-                arbeidskategorikoder = emptyMap(),
-                ugyldigePerioder = emptyList(),
-                harStatslønn = false
+                arbeidskategorikoder = emptyMap()
             )
         )
     }

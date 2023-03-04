@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
-import java.time.LocalDateTime
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til

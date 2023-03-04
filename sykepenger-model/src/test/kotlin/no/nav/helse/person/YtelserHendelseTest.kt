@@ -22,19 +22,16 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -83,13 +80,6 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ugyldig utbetalinghistorikk kaster ikke perioden ut`() {
-        håndterUgyldigYtelser()
-        assertEquals(TilstandType.AVVENTER_SIMULERING, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
-    }
-
-    @Test
     fun `fordrepengeytelse før periode`() {
         ferdigstill(håndterYtelser(foreldrepengeytelse = Periode(førsteSykedag.minusDays(10), førsteSykedag.minusDays(1))))
 
@@ -135,8 +125,7 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
         utbetalinger: List<Infotrygdperiode> = emptyList(),
         inntektshistorikk: List<Inntektsopplysning> = emptyList(),
         foreldrepengeytelse: Periode? = null,
-        svangerskapsytelse: Periode? = null,
-        ugyldigePerioder: List<UgyldigPeriode> = emptyList()
+        svangerskapsytelse: Periode? = null
     ) : Ytelser {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -154,21 +143,6 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
 
     private fun ferdigstill(ytelser: Ytelser) {
         håndterSimulering(1.vedtaksperiode)
-    }
-
-    private fun håndterUgyldigYtelser() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ugyldigePerioder = listOf(UgyldigPeriode(null, null, null)))
-        person.håndter(
-            ytelser(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                foreldrepengeYtelse = null,
-                svangerskapYtelse = null
-            )
-        )
     }
 
     private fun ytelser(

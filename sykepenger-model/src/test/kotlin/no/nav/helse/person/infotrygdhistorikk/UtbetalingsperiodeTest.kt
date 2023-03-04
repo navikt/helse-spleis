@@ -11,6 +11,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -68,6 +69,15 @@ internal class UtbetalingsperiodeTest {
         val periode2 = PersonUtbetalingsperiode("orgnr", 1.januar, 1.januar, prosent, inntekt2)
         assertNotEquals(inntekt1, inntekt2)
         assertEquals(periode1, periode2)
+    }
+
+    private fun assertEquals(one: Infotrygdperiode, two: Infotrygdperiode) {
+        assertTrue(one.funksjoneltLik(two))
+        assertTrue(two.funksjoneltLik(one))
+    }
+    private fun assertNotEquals(one: Infotrygdperiode, two: Infotrygdperiode) {
+        assertFalse(one.funksjoneltLik(two))
+        assertFalse(two.funksjoneltLik(one))
     }
 
     @Test

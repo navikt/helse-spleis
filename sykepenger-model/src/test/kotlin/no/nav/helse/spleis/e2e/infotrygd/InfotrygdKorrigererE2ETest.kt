@@ -150,9 +150,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
                             Friperiode(fom = 1.februar, tom = 28.februar)
                         ),
                         inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, TestPerson.INNTEKT, true)),
-                        arbeidskategorikoder = emptyMap(),
-                        ugyldigePerioder = emptyList(),
-                        harStatslønn = false
+                        arbeidskategorikoder = emptyMap()
                     ),
                 ),
             )

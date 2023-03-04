@@ -41,9 +41,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
             hendelseId = UUID.randomUUID(),
             perioder = emptyList(),
             inntekter = emptyList(),
-            arbeidskategorikoder = emptyMap(),
-            ugyldigePerioder = emptyList(),
-            harStatslønn = false
+            arbeidskategorikoder = emptyMap()
         )))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar)))
         person.håndter(søknad(Sykdom(6.januar, 20.januar, 100.prosent)))
@@ -68,9 +66,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
             hendelseId = UUID.randomUUID(),
             perioder = emptyList(),
             inntekter = emptyList(),
-            arbeidskategorikoder = emptyMap(),
-            ugyldigePerioder = emptyList(),
-            harStatslønn = false
+            arbeidskategorikoder = emptyMap()
         )))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar)))
         person.håndter(søknad(Sykdom(6.januar, 20.januar, 100.prosent)))

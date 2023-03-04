@@ -207,8 +207,6 @@ internal class InfotrygdhistorikkTest {
             personutbetalingsperioder = emptyList(),
             inntekter = emptyList(),
             arbeidskategorikoder = emptyMap(),
-            ugyldigePerioder = emptyList(),
-            harStatslønn = false,
             oppdatert = nå
         )).tilModellObjekt()
         assertEquals(1, historikk.inspektør.elementer())
@@ -311,12 +309,6 @@ internal class InfotrygdhistorikkTest {
     }
 
     @Test
-    fun `har ikke endret historikk om ugyldige perioder er lik`() {
-        assertTrue(historikk.oppdaterHistorikk(historikkelement(ugyldigePerioder = listOf(UgyldigPeriode(1.januar, 1.januar, 100)))))
-        assertFalse(historikk.oppdaterHistorikk(historikkelement(ugyldigePerioder = listOf(UgyldigPeriode(1.januar, 1.januar, 100)))))
-    }
-
-    @Test
     fun `har ikke endret historikk dersom utbetaling er nyere enn siste element`() {
         historikk.oppdaterHistorikk(historikkelement())
         val utbetaling = utbetaling()
@@ -398,21 +390,6 @@ internal class InfotrygdhistorikkTest {
     }
 
     @Test
-    fun `Ny statslønn registrert i infotrygd`() {
-        val utbetaling = utbetaling()
-        historikk.oppdaterHistorikk(historikkelement(listOf(
-            ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig)
-            )))
-        assertTrue(historikk.harEndretHistorikk(utbetaling))
-        historikk.oppdaterHistorikk(historikkelement(
-            perioder = listOf(ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig)),
-            harStatslønn = true
-            )
-        )
-        assertFalse(historikk.harEndretHistorikk(utbetaling()))
-    }
-
-    @Test
     fun `Nye arbeidskategorikoder registrert i infotrygd`() {
         val utbetaling = utbetaling()
         historikk.oppdaterHistorikk(historikkelement(listOf(
@@ -426,22 +403,6 @@ internal class InfotrygdhistorikkTest {
         )
         assertFalse(historikk.harEndretHistorikk(utbetaling()))
     }
-
-    @Test
-    fun `Nye ugyldigePerioder registrert i infotrygd`() {
-        val utbetaling = utbetaling()
-        historikk.oppdaterHistorikk(historikkelement(listOf(
-            ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig)
-            )))
-        assertTrue(historikk.harEndretHistorikk(utbetaling))
-        historikk.oppdaterHistorikk(historikkelement(
-            perioder = listOf(ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig)),
-            ugyldigePerioder = listOf(UgyldigPeriode(1.januar, 25.januar, 100))
-            )
-        )
-        assertFalse(historikk.harEndretHistorikk(utbetaling()))
-    }
-
 
     private fun utbetaling() = Utbetaling.lagUtbetaling(
         utbetalinger = emptyList(),
@@ -460,9 +421,7 @@ internal class InfotrygdhistorikkTest {
         perioder: List<Infotrygdperiode> = emptyList(),
         inntekter: List<Inntektsopplysning> = emptyList(),
         arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
-        ugyldigePerioder: List<UgyldigPeriode> = emptyList(),
         hendelseId: UUID = UUID.randomUUID(),
-        harStatslønn: Boolean = false,
         oppdatert: LocalDateTime = LocalDateTime.now()
     ) =
         InfotrygdhistorikkElement.opprett(
@@ -470,8 +429,6 @@ internal class InfotrygdhistorikkTest {
             hendelseId = hendelseId,
             perioder = perioder,
             inntekter = inntekter,
-            arbeidskategorikoder = arbeidskategorikoder,
-            ugyldigePerioder = ugyldigePerioder,
-            harStatslønn = harStatslønn
+            arbeidskategorikoder = arbeidskategorikoder
         )
 }

@@ -1198,7 +1198,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
                     ORGNUMMER,
                     17.januar, INNTEKT, true
                 )
-            ))
+            )
+        )
         håndterOverstyrTidslinje((20.januar til 26.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
 

@@ -27,7 +27,6 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
-import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
@@ -630,8 +629,7 @@ internal class JsonBuilder : AbstractBuilder() {
             id: UUID,
             tidsstempel: LocalDateTime,
             oppdatert: LocalDateTime,
-            hendelseId: UUID?,
-            harStatslønn: Boolean
+            hendelseId: UUID?
         ) {
             val element = mutableMapOf<String, Any?>()
             historikk.add(element)
@@ -640,8 +638,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 id,
                 tidsstempel,
                 oppdatert,
-                hendelseId,
-                harStatslønn
+                hendelseId
             ))
         }
 
@@ -655,15 +652,13 @@ internal class JsonBuilder : AbstractBuilder() {
         id: UUID,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
-        hendelseId: UUID?,
-        harStatslønn: Boolean
+        hendelseId: UUID?
     ) : BuilderState() {
         private val ferieperioder = mutableListOf<Map<String, LocalDate>>()
         private val arbeidsgiverutbetalingsperioder = mutableListOf<Map<String, Any>>()
         private val personutbetalingsperioder = mutableListOf<Map<String, Any>>()
         private val inntekter = mutableListOf<Map<String, Any?>>()
         private val arbeidskategorikoder = mutableMapOf<String, LocalDate>()
-        private val ugyldigePerioder = mutableListOf<Map<String, Any?>>()
 
         init {
             element["id"] = id
@@ -674,8 +669,6 @@ internal class JsonBuilder : AbstractBuilder() {
             element["personutbetalingsperioder"] = personutbetalingsperioder
             element["inntekter"] = inntekter
             element["arbeidskategorikoder"] = arbeidskategorikoder
-            element["ugyldigePerioder"] = ugyldigePerioder
-            element["harStatslønn"] = harStatslønn
             element["oppdatert"] = oppdatert
         }
 
@@ -746,16 +739,11 @@ internal class JsonBuilder : AbstractBuilder() {
             this.arbeidskategorikoder.putAll(arbeidskategorikoder)
         }
 
-        override fun visitUgyldigePerioder(ugyldigePerioder: List<UgyldigPeriode>) {
-            this.ugyldigePerioder.addAll(ugyldigePerioder.map { it.toMap() })
-        }
-
         override fun postVisitInfotrygdhistorikkElement(
             id: UUID,
             tidsstempel: LocalDateTime,
             oppdatert: LocalDateTime,
-            hendelseId: UUID?,
-            harStatslønn: Boolean
+            hendelseId: UUID?
         ) {
             popState()
         }

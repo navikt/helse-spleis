@@ -39,7 +39,6 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.IkkeRapportert
@@ -151,8 +150,6 @@ internal data class PersonData(
         private val personutbetalingsperioder: List<PersonutbetalingsperiodeData>,
         private val inntekter: List<InntektsopplysningData>,
         private val arbeidskategorikoder: Map<String, LocalDate>,
-        private val ugyldigePerioder: List<UgyldigPeriode>,
-        private val harStatslønn: Boolean,
         private val oppdatert: LocalDateTime
     ) {
         internal companion object {
@@ -169,8 +166,6 @@ internal data class PersonData(
                     + ferieperioder.map { it.parsePeriode() },
             inntekter = inntekter.map { it.parseInntektsopplysning() },
             arbeidskategorikoder = arbeidskategorikoder,
-            ugyldigePerioder = ugyldigePerioder,
-            harStatslønn = harStatslønn,
             oppdatert = oppdatert
         )
 
@@ -816,13 +811,6 @@ internal data class PersonData(
                 internal fun parseKilde() =
                     SykdomstidslinjeHendelse.Hendelseskilde(type, id, tidsstempel)
             }
-        }
-
-        data class PeriodeData(
-            private val fom: LocalDate,
-            private val tom: LocalDate
-        ) {
-            internal fun tilPeriode() = Periode(fom, tom)
         }
 
         data class ForkastetVedtaksperiodeData(

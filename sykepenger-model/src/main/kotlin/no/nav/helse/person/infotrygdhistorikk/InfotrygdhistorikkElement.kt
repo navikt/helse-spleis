@@ -2,7 +2,6 @@ package no.nav.helse.person.infotrygdhistorikk
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.Objects
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.InfotrygdhistorikkVisitor
@@ -29,8 +28,6 @@ class InfotrygdhistorikkElement private constructor(
     perioder: List<Infotrygdperiode>,
     inntekter: List<Inntektsopplysning>,
     private val arbeidskategorikoder: Map<String, LocalDate>,
-    private val ugyldigePerioder: List<UgyldigPeriode>,
-    private val harStatslønn: Boolean,
     private var oppdatert: LocalDateTime
 ) {
     private val inntekter = Inntektsopplysning.sorter(inntekter)
@@ -47,9 +44,7 @@ class InfotrygdhistorikkElement private constructor(
             hendelseId: UUID,
             perioder: List<Infotrygdperiode>,
             inntekter: List<Inntektsopplysning>,
-            arbeidskategorikoder: Map<String, LocalDate>,
-            ugyldigePerioder: List<UgyldigPeriode>,
-            harStatslønn: Boolean
+            arbeidskategorikoder: Map<String, LocalDate>
         ) =
             InfotrygdhistorikkElement(
                 id = UUID.randomUUID(),
@@ -58,8 +53,6 @@ class InfotrygdhistorikkElement private constructor(
                 perioder = perioder,
                 inntekter = inntekter,
                 arbeidskategorikoder = arbeidskategorikoder,
-                ugyldigePerioder = ugyldigePerioder,
-                harStatslønn = harStatslønn,
                 oppdatert = oppdatert
             )
 
@@ -70,8 +63,6 @@ class InfotrygdhistorikkElement private constructor(
             infotrygdperioder: List<Infotrygdperiode>,
             inntekter: List<Inntektsopplysning>,
             arbeidskategorikoder: Map<String, LocalDate>,
-            ugyldigePerioder: List<UgyldigPeriode>,
-            harStatslønn: Boolean,
             oppdatert: LocalDateTime
         ): InfotrygdhistorikkElement = InfotrygdhistorikkElement(
             id = id,
@@ -80,8 +71,6 @@ class InfotrygdhistorikkElement private constructor(
             perioder = infotrygdperioder,
             inntekter = inntekter,
             arbeidskategorikoder = arbeidskategorikoder,
-            ugyldigePerioder = ugyldigePerioder,
-            harStatslønn = harStatslønn,
             oppdatert = oppdatert
         )
     }
@@ -149,20 +138,16 @@ class InfotrygdhistorikkElement private constructor(
 
     internal fun harBetaltRettFør(periode: Periode) = perioder.harBetaltRettFør(periode)
 
-    internal fun oppfrisket(cutoff: LocalDateTime) =
-        oppdatert > cutoff
-
     internal fun accept(visitor: InfotrygdhistorikkVisitor) {
-        visitor.preVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId, harStatslønn)
+        visitor.preVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId)
         visitor.preVisitInfotrygdhistorikkPerioder()
         perioder.forEach { it.accept(visitor) }
         visitor.postVisitInfotrygdhistorikkPerioder()
         visitor.preVisitInfotrygdhistorikkInntektsopplysninger()
         inntekter.forEach { it.accept(visitor) }
         visitor.postVisitInfotrygdhistorikkInntektsopplysninger()
-        visitor.visitUgyldigePerioder(ugyldigePerioder)
         visitor.visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder)
-        visitor.postVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId, harStatslønn)
+        visitor.postVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId)
     }
 
     private fun erNormalArbeidstaker(skjæringstidspunkt: LocalDate?): Boolean {
@@ -172,25 +157,21 @@ class InfotrygdhistorikkElement private constructor(
             .all { (arbeidskategorikode, _) -> arbeidskategorikode == "01" }
     }
 
-    override fun hashCode(): Int {
-        return Objects.hash(perioder, inntekter, arbeidskategorikoder, ugyldigePerioder, harStatslønn)
+    internal fun funksjoneltLik(other: InfotrygdhistorikkElement): Boolean {
+        if (!harLikePerioder(other)) return false
+        if (!harLikeInntekter(other)) return false
+        return this.arbeidskategorikoder == other.arbeidskategorikoder
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (other !is InfotrygdhistorikkElement) return false
-        return equals(other)
-    }
-
-    private fun equals(other: InfotrygdhistorikkElement): Boolean {
-        if (this.perioder != other.perioder) return false
-        if (this.inntekter != other.inntekter) return false
-        if (this.arbeidskategorikoder != other.arbeidskategorikoder) return false
-        if (this.ugyldigePerioder != other.ugyldigePerioder) return false
-        return this.harStatslønn == other.harStatslønn
+    private fun harLikePerioder(other: InfotrygdhistorikkElement) = likhet(this.perioder, other.perioder, Infotrygdperiode::funksjoneltLik)
+    private fun harLikeInntekter(other: InfotrygdhistorikkElement) = likhet(this.inntekter, other.inntekter, Inntektsopplysning::funksjoneltLik)
+    private fun <R> likhet(one: List<R>, two: List<R>, comparator: (R, R) -> Boolean): Boolean {
+        if (one.size != two.size) return false
+        return one.zip(two, comparator).all { it }
     }
 
     internal fun erstatter(other: InfotrygdhistorikkElement): Boolean {
-        if (!this.equals(other)) return false
+        if (!this.funksjoneltLik(other)) return false
         oppdater(other)
         return true
     }

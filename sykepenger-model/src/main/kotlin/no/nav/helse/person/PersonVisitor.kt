@@ -12,7 +12,6 @@ import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
-import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
@@ -66,8 +65,7 @@ internal interface InfotrygdhistorikkVisitor {
         id: UUID,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
-        hendelseId: UUID?,
-        harStatslønn: Boolean
+        hendelseId: UUID?
     ) {
     }
 
@@ -102,14 +100,12 @@ internal interface InfotrygdhistorikkVisitor {
     }
 
     fun postVisitInfotrygdhistorikkInntektsopplysninger() {}
-    fun visitUgyldigePerioder(ugyldigePerioder: List<UgyldigPeriode>) {}
     fun visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder: Map<String, LocalDate>) {}
     fun postVisitInfotrygdhistorikkElement(
         id: UUID,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
-        hendelseId: UUID?,
-        harStatslønn: Boolean
+        hendelseId: UUID?
     ) {
     }
 

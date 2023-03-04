@@ -1,7 +1,6 @@
 package no.nav.helse.person.infotrygdhistorikk
 
 import java.time.LocalDate
-import java.util.Objects
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.InfotrygdhistorikkVisitor
@@ -61,13 +60,11 @@ abstract class Utbetalingsperiode(
 
     override fun gjelder(orgnummer: String) = orgnummer == this.orgnr
 
-    override fun equals(other: Any?): Boolean {
-        if (!super.equals(other)) return false
+    override fun funksjoneltLik(other: Infotrygdperiode): Boolean {
+        if (!super.funksjoneltLik(other)) return false
         other as Utbetalingsperiode
         return this.orgnr == other.orgnr && this.periode.start == other.periode.start && this.grad == other.grad && this.inntekt == other.inntekt
     }
-
-    override fun hashCode() = Objects.hash(orgnr, periode, grad, inntekt, this::class)
 }
 
 class ArbeidsgiverUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, grad: Prosentdel, inntekt: Inntekt) :
@@ -84,16 +81,4 @@ class PersonUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, gr
     override fun accept(visitor: InfotrygdhistorikkVisitor) {
         visitor.visitInfotrygdhistorikkPersonUtbetalingsperiode(this, orgnr, periode.start, periode.endInclusive, grad, inntekt)
     }
-}
-
-data class UgyldigPeriode(
-    private val fom: LocalDate?,
-    private val tom: LocalDate?,
-    private val utbetalingsgrad: Int?
-) {
-    internal fun toMap() = mapOf<String, Any?>(
-        "fom" to fom,
-        "tom" to tom,
-        "utbetalingsgrad" to utbetalingsgrad
-    )
 }

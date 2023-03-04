@@ -10,9 +10,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage.Companion.arbeidskategorikoder
-import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage.Companion.harStatslønn
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage.Companion.inntektshistorikk
-import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage.Companion.ugyldigePerioder
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage.Companion.utbetalinger
 
 // Understands a JSON message representing an Ytelserbehov
@@ -21,11 +19,7 @@ internal class UtbetalingshistorikkEtterInfotrygdendringMessage(packet: JsonMess
     private val aktørId = packet["aktørId"].asText()
     private val besvart = packet["@besvart"].asLocalDateTime()
 
-    private val harStatslønn = packet.harStatslønn()
-
     private val utbetalinger = packet.utbetalinger()
-
-    private val ugyldigePerioder = packet.ugyldigePerioder()
 
     private val arbeidskategorikoder: Map<String, LocalDate> = packet.arbeidskategorikoder()
 
@@ -37,9 +31,7 @@ internal class UtbetalingshistorikkEtterInfotrygdendringMessage(packet: JsonMess
             hendelseId = meldingsreferanseId,
             perioder = utbetalinger,
             inntekter = inntektshistorikk,
-            arbeidskategorikoder = arbeidskategorikoder,
-            ugyldigePerioder = ugyldigePerioder,
-            harStatslønn = harStatslønn
+            arbeidskategorikoder = arbeidskategorikoder
         )
 
     private fun utbetalingshistorikkEtterInfotrygdendring() =

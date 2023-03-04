@@ -109,9 +109,7 @@ abstract class AbstractObservableTest {
             hendelseId = UUID.randomUUID(),
             perioder = emptyList(),
             inntekter = emptyList(),
-            arbeidskategorikoder = emptyMap(),
-            ugyldigePerioder = emptyList(),
-            harStatslønn = false
+            arbeidskategorikoder = emptyMap()
         )
     )
 

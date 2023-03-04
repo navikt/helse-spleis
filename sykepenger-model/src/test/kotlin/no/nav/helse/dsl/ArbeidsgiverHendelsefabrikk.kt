@@ -172,9 +172,7 @@ internal class ArbeidsgiverHendelsefabrikk(
                 hendelseId = UUID.randomUUID(),
                 perioder = utbetalinger,
                 inntekter = inntektshistorikk,
-                arbeidskategorikoder = emptyMap(),
-                ugyldigePerioder = emptyList(),
-                harStatslønn = harStatslønn
+                arbeidskategorikoder = emptyMap()
             )
         )
 

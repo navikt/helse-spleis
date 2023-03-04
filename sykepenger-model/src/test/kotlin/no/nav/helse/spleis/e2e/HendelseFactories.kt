@@ -52,7 +52,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.sisteBehov
 import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -271,7 +270,6 @@ internal fun AbstractEndToEndTest.utbetalingshistorikk(
     inntektshistorikk: List<Inntektsopplysning> = emptyList(),
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    harStatslønn: Boolean = false,
     besvart: LocalDateTime = LocalDateTime.now(),
 ): Utbetalingshistorikk {
     return Utbetalingshistorikk(
@@ -285,9 +283,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikk(
             hendelseId = UUID.randomUUID(),
             perioder = utbetalinger,
             inntekter = inntektshistorikk,
-            arbeidskategorikoder = emptyMap(),
-            ugyldigePerioder = emptyList(),
-            harStatslønn = harStatslønn
+            arbeidskategorikoder = emptyMap()
         )
     ).apply {
         hendelselogg = this
@@ -298,9 +294,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikkEtterInfotrygdEndring(
     utbetalinger: List<Infotrygdperiode> = listOf(),
     inntektshistorikk: List<Inntektsopplysning> = emptyList(),
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
-    harStatslønn: Boolean = false,
     arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
-    ugyldigePerioder: List<UgyldigPeriode> = emptyList(),
     besvart: LocalDateTime = LocalDateTime.now(),
 ): UtbetalingshistorikkEtterInfotrygdendring {
     return UtbetalingshistorikkEtterInfotrygdendring(
@@ -312,9 +306,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikkEtterInfotrygdEndring(
             hendelseId = UUID.randomUUID(),
             perioder = utbetalinger,
             inntekter = inntektshistorikk,
-            arbeidskategorikoder = arbeidskategorikoder,
-            ugyldigePerioder = ugyldigePerioder,
-            harStatslønn = harStatslønn
+            arbeidskategorikoder = arbeidskategorikoder
         )
     ).apply {
         hendelselogg = this

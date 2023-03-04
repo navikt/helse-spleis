@@ -11,7 +11,6 @@ import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -51,16 +50,6 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
                     "9" -> Friperiode(fom, tom)
                     else -> null
                 }
-            }
-
-        internal fun JsonMessage.ugyldigePerioder() = this["@løsning.${Sykepengehistorikk.name}"]
-            .flatMap { it.path("utbetalteSykeperioder") }
-            .filterNot(::erGyldigPeriode)
-            .map { utbetaling ->
-                val fom = utbetaling["fom"].asOptionalLocalDate()
-                val tom = utbetaling["tom"].asOptionalLocalDate()
-                val utbetalingsGrad = utbetaling["utbetalingsGrad"].asInt()
-                UgyldigPeriode(fom, tom, utbetalingsGrad)
             }
 
         private fun erGyldigPeriode(node: JsonNode): Boolean {
@@ -109,25 +98,19 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
     private val aktørId = packet["aktørId"].asText()
     private val besvart = packet["@besvart"].asLocalDateTime()
 
-    private val harStatslønn = packet.harStatslønn()
-
     private val utbetalinger = packet.utbetalinger()
-
-    private val ugyldigePerioder = packet.ugyldigePerioder()
 
     private val arbeidskategorikoder: Map<String, LocalDate> = packet.arbeidskategorikoder()
 
     private val inntektshistorikk = packet.inntektshistorikk()
 
-    internal fun infotrygdhistorikk(meldingsreferanseId: UUID) =
+    private fun infotrygdhistorikk(meldingsreferanseId: UUID) =
         InfotrygdhistorikkElement.opprett(
             oppdatert = besvart,
             hendelseId = meldingsreferanseId,
             perioder = utbetalinger,
             inntekter = inntektshistorikk,
-            arbeidskategorikoder = arbeidskategorikoder,
-            ugyldigePerioder = ugyldigePerioder,
-            harStatslønn = harStatslønn
+            arbeidskategorikoder = arbeidskategorikoder
         )
 
     private fun utbetalingshistorikk() =

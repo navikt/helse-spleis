@@ -60,7 +60,6 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.sisteBehov
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -204,9 +203,6 @@ class JsonBuilderTest {
     @Test
     fun `Skal serialisere ghost uten inntekt`() =
         testSerialiseringAvPerson(personMedGhostUtenInntekt())
-
-    @Test
-    fun `Serialisering av ugyldig periode i infotrygdhistorikk`() = testSerialiseringAvPerson(personMedUgyldigPeriodeIHistorikken())
 
     private fun testSerialiseringAvPerson(person: Person) {
         val serialisert = person.serialize().json
@@ -447,18 +443,6 @@ class JsonBuilderTest {
         }
     }
 
-    private fun personMedUgyldigPeriodeIHistorikken(søknadhendelseId: UUID = UUID.randomUUID()): Person {
-        val refusjoner = listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, 1.desember(2017), 24.desember(2017), 100.prosent, 31000.månedlig))
-        val inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), 31000.månedlig, true))
-        val ugyldigePerioder = listOf(UgyldigPeriode(1.mai(2017), 20.mai(2017), 0), UgyldigPeriode(1.februar(2017), 31.januar(2017), 100))
-        return person.apply {
-            håndter(sykmelding(fom = 1.januar, tom = 31.januar))
-            håndter(søknad(fom = 1.januar, tom = 31.januar, hendelseId = søknadhendelseId))
-            fangeVedtaksperiode()
-            håndter(utbetalingshistorikk(refusjoner, inntektshistorikk, ugyldigePerioder))
-        }
-    }
-
     private fun personMedFeriepenger(
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
@@ -694,7 +678,6 @@ class JsonBuilderTest {
     private fun utbetalingshistorikk(
         utbetalinger: List<Infotrygdperiode> = emptyList(),
         inntektsopplysning: List<Inntektsopplysning> = emptyList(),
-        ugyldigePerioder: List<UgyldigPeriode> = emptyList(),
         besvart: LocalDateTime = LocalDateTime.now()
     ) = Utbetalingshistorikk(
         meldingsreferanseId = UUID.randomUUID(),
@@ -707,9 +690,7 @@ class JsonBuilderTest {
             hendelseId = UUID.randomUUID(),
             perioder = utbetalinger,
             inntekter = inntektsopplysning,
-            arbeidskategorikoder = emptyMap(),
-            ugyldigePerioder = ugyldigePerioder,
-            harStatslønn = false
+            arbeidskategorikoder = emptyMap()
         )
     )
 

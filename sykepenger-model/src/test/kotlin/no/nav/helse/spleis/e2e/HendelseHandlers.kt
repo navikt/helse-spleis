@@ -48,7 +48,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
@@ -634,7 +633,6 @@ private fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
         utbetalinger = utbetalinger.toList(),
         inntektshistorikk = inntektshistorikk,
         orgnummer = orgnummer,
-        harStatslønn = statslønn,
         besvart = besvart
     ).håndter(Person::håndter)
 }
@@ -642,17 +640,13 @@ private fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
 internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkEtterInfotrygdendring(
     vararg utbetalinger: Infotrygdperiode,
     inntektshistorikk: List<Inntektsopplysning> = emptyList(),
-    statslønn: Boolean = false,
     arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
-    ugyldigePerioder: List<UgyldigPeriode> = emptyList(),
     besvart: LocalDateTime = LocalDateTime.now()
 ) {
     utbetalingshistorikkEtterInfotrygdEndring(
         utbetalinger = utbetalinger.toList(),
         inntektshistorikk = inntektshistorikk,
-        harStatslønn = statslønn,
         arbeidskategorikoder = arbeidskategorikoder,
-        ugyldigePerioder = ugyldigePerioder,
         besvart = besvart
     ).håndter(Person::håndter)
 }

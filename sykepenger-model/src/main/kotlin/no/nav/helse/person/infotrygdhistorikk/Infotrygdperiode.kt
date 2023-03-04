@@ -1,7 +1,6 @@
 package no.nav.helse.person.infotrygdhistorikk
 
 import java.time.LocalDate
-import java.util.Objects
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.InfotrygdhistorikkVisitor
@@ -25,16 +24,14 @@ abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
 
     internal open fun gjelder(orgnummer: String) = true
 
-    override fun hashCode() = Objects.hash(this::class, periode)
-    override fun equals(other: Any?): Boolean {
-        if (other !is Infotrygdperiode) return false
+    internal open fun funksjoneltLik(other: Infotrygdperiode): Boolean {
         if (this::class != other::class) return false
         return this.periode == other.periode
     }
 
     internal companion object {
         internal fun sorter(perioder: List<Infotrygdperiode>) =
-            perioder.sortedWith(compareBy( { it.periode.start }, { it.hashCode() }))
+            perioder.sortedWith(compareBy( { it.periode.start }, { it.periode.endInclusive }, { it::class.simpleName }))
 
         internal fun List<Infotrygdperiode>.utbetalingsperioder(organisasjonsnummer: String? = null) =  this
             .filterIsInstance<Utbetalingsperiode>()

@@ -2,7 +2,6 @@ package no.nav.helse.person.infotrygdhistorikk
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.Objects
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.økonomi.Inntekt
 
@@ -26,15 +25,7 @@ class Inntektsopplysning private constructor(
         visitor.visitInfotrygdhistorikkInntektsopplysning(orgnummer, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom, lagret)
     }
 
-    override fun hashCode() =
-        Objects.hash(orgnummer, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom)
-
-    override fun equals(other: Any?): Boolean {
-        if (other !is Inntektsopplysning) return false
-        return equals(other)
-    }
-
-    private fun equals(other: Inntektsopplysning): Boolean {
+    internal fun funksjoneltLik(other: Inntektsopplysning): Boolean {
         if (this.orgnummer != other.orgnummer) return false
         if (this.sykepengerFom != other.sykepengerFom) return false
         if (this.inntekt != other.inntekt) return false

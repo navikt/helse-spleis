@@ -32,7 +32,6 @@ import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
@@ -44,7 +43,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class SimuleringHendelseTest : AbstractPersonTest() {
@@ -107,14 +105,12 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     ) {
         person.håndter(
             UtbetalingshistorikkEtterInfotrygdendring(UUID.randomUUID(), "", "", InfotrygdhistorikkElement.opprett(
-            oppdatert = LocalDateTime.now(),
-            hendelseId = UUID.randomUUID(),
-            perioder = emptyList(),
-            inntekter = emptyList(),
-            arbeidskategorikoder = emptyMap(),
-            ugyldigePerioder = emptyList(),
-            harStatslønn = false
-        )))
+                oppdatert = LocalDateTime.now(),
+                hendelseId = UUID.randomUUID(),
+                perioder = emptyList(),
+                inntekter = emptyList(),
+                arbeidskategorikoder = emptyMap()
+            )))
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding(refusjon))

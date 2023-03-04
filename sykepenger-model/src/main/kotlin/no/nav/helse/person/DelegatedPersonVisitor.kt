@@ -16,7 +16,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
-import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
@@ -403,10 +402,9 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         id: UUID,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
-        hendelseId: UUID?,
-        harStatslønn: Boolean
+        hendelseId: UUID?
     ) {
-        delegatee.preVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId, harStatslønn)
+        delegatee.preVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId)
     }
 
     override fun preVisitInfotrygdhistorikkPerioder() {
@@ -430,10 +428,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
 
     override fun postVisitInfotrygdhistorikkInntektsopplysninger() {
         delegatee.postVisitInfotrygdhistorikkInntektsopplysninger()
-    }
-
-    override fun visitUgyldigePerioder(ugyldigePerioder: List<UgyldigPeriode>) {
-        delegatee.visitUgyldigePerioder(ugyldigePerioder)
     }
 
     override fun visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder: Map<String, LocalDate>) {
@@ -474,10 +468,9 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         id: UUID,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
-        hendelseId: UUID?,
-        harStatslønn: Boolean
+        hendelseId: UUID?
     ) {
-        delegatee.postVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId, harStatslønn)
+        delegatee.postVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId)
     }
 
     override fun postVisitInfotrygdhistorikk() {
