@@ -105,7 +105,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_15
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_16
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_19
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_20
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_28
@@ -568,13 +567,11 @@ internal class Vedtaksperiode private constructor(
         nesteTilstand()?.also { tilstand(søknad, it) }
     }
 
-    private fun overlappendeSøknadIkkeStøttet(søknad: Søknad, egendefinertFeiltekst: Varselkode? = null) {
-        søknad.funksjonellFeil(egendefinertFeiltekst ?: RV_SØ_16)
-        forkast(søknad)
-    }
-
     private fun håndterOverlappendeSøknad(søknad: Søknad, nesteTilstand: Vedtaksperiodetilstand? = null) {
-        if (søknad.delvisOverlappende(periode)) return overlappendeSøknadIkkeStøttet(søknad, `Mottatt søknad som delvis overlapper`)
+        if (søknad.delvisOverlappende(periode)) {
+            søknad.funksjonellFeil(`Mottatt søknad som delvis overlapper`)
+            return forkast(søknad)
+        }
         håndterSøknad(søknad) { nesteTilstand }
     }
 
