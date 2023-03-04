@@ -410,14 +410,14 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag, opptjening) {
         internal fun validerFørstegangsvurdering(aktivitetslogg: IAktivitetslogg) {
             sykepengegrunnlag.validerAvvik(aktivitetslogg, sammenligningsgrunnlag)
-            sykepengegrunnlag.validerOpptjening(aktivitetslogg, opptjening)
-            sykepengegrunnlag.validerStartdato(aktivitetslogg)
-            sammenligningsgrunnlag.validerInntekter(aktivitetslogg, sykepengegrunnlag)
+            sykepengegrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjening)
+            sykepengegrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
+            sammenligningsgrunnlag.sjekkMuligeGhostsUtenArbeidsforhold(aktivitetslogg, sykepengegrunnlag)
         }
 
         override fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, organisasjonsnummerRelevanteArbeidsgivere: List<String>): Boolean {
-            sykepengegrunnlag.validerInntekt(aktivitetslogg, organisasjonsnummerRelevanteArbeidsgivere)
-            sykepengegrunnlag.validerOpptjening(aktivitetslogg, opptjening, organisasjonsnummer)
+            sykepengegrunnlag.sjekkForNyeArbeidsgivere(aktivitetslogg, organisasjonsnummerRelevanteArbeidsgivere)
+            sykepengegrunnlag.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, organisasjonsnummer)
             return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
         }
 

@@ -4,7 +4,7 @@ import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag.Companion.sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag.Companion.validerInntekter
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag.Companion.sjekkMuligeGhostsUtenArbeidsforhold
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 
@@ -23,8 +23,8 @@ internal class Sammenligningsgrunnlag(
         arbeidsgiverInntektsopplysninger
     )
 
-    internal fun validerInntekter(aktivitetslogg: IAktivitetslogg, sykepengegrunnlag: Sykepengegrunnlag) {
-        arbeidsgiverInntektsopplysninger.validerInntekter(aktivitetslogg, sykepengegrunnlag)
+    internal fun sjekkMuligeGhostsUtenArbeidsforhold(aktivitetslogg: IAktivitetslogg, sykepengegrunnlag: Sykepengegrunnlag) {
+        arbeidsgiverInntektsopplysninger.sjekkMuligeGhostsUtenArbeidsforhold(aktivitetslogg, sykepengegrunnlag)
     }
 
     internal fun erRelevant(organisasjonsnummer: String) =

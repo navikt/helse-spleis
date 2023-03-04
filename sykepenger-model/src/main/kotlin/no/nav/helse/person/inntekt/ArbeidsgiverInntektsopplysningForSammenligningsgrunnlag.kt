@@ -33,8 +33,8 @@ internal class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
     }
 
     internal companion object {
-        internal fun List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>.validerInntekter(aktivitetslogg: IAktivitetslogg, sykepengegrunnlag: Sykepengegrunnlag) {
-            sykepengegrunnlag.validerInntekter(aktivitetslogg, associateBy({ it.orgnummer}) { it.inntektsopplysninger })
+        internal fun List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>.sjekkMuligeGhostsUtenArbeidsforhold(aktivitetslogg: IAktivitetslogg, sykepengegrunnlag: Sykepengegrunnlag) {
+            sykepengegrunnlag.sjekkMuligeGhostsUtenArbeidsforhold(aktivitetslogg, associateBy({ it.orgnummer}) { it.inntektsopplysninger })
         }
 
         internal fun List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>.sammenligningsgrunnlag(): Inntekt {

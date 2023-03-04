@@ -73,7 +73,7 @@ class Skatteopplysning(
         fun sisteTreMåneder(dato: LocalDate, inntektsopplysninger: List<Skatteopplysning>) =
             sisteMåneder(dato, 3, inntektsopplysninger)
 
-        fun List<Skatteopplysning>.validerInntekterSisteTreMåneder(aktivitetslogg: IAktivitetslogg, dato: LocalDate) {
+        fun List<Skatteopplysning>.sjekkMuligeGhostsUtenArbeidsforhold(aktivitetslogg: IAktivitetslogg, dato: LocalDate) {
             if (sisteTreMåneder(dato, this).filterNot { it.type == YTELSE_FRA_OFFENTLIGE }.isEmpty()) return
             aktivitetslogg.varsel(Varselkode.RV_IV_1)
         }

@@ -549,12 +549,12 @@ internal class SykepengegrunnlagTest {
         ), skjæringstidspunkt, NullObserver)
 
         Aktivitetslogg().also { aktivitetslogg ->
-            sykepengegrunnlag.validerOpptjening(aktivitetslogg, opptjening, a1)
+            sykepengegrunnlag.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, a1)
             aktivitetslogg.assertVarsel(RV_VV_8)
         }
 
         Aktivitetslogg().also { aktivitetslogg ->
-            sykepengegrunnlag.validerOpptjening(aktivitetslogg, opptjening, a2)
+            sykepengegrunnlag.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, a2)
             aktivitetslogg.assertIngenVarsel(RV_VV_8)
         }
     }
@@ -609,7 +609,7 @@ internal class SykepengegrunnlagTest {
 
 
         Aktivitetslogg().also { aktivitetslogg ->
-            sykepengegrunnlag.validerStartdato(aktivitetslogg)
+            sykepengegrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
             aktivitetslogg.assertVarsel(RV_VV_2)
         }
     }
@@ -654,7 +654,7 @@ internal class SykepengegrunnlagTest {
 
 
         Aktivitetslogg().also { aktivitetslogg ->
-            sykepengegrunnlag.validerStartdato(aktivitetslogg)
+            sykepengegrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
             aktivitetslogg.assertVarsel(RV_VV_2)
         }
     }
@@ -722,12 +722,12 @@ internal class SykepengegrunnlagTest {
         ), skjæringstidspunkt, NullObserver)
 
         Aktivitetslogg().also { aktivitetslogg ->
-            sykepengegrunnlag.validerOpptjening(aktivitetslogg, opptjeningUtenA2)
+            sykepengegrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjeningUtenA2)
             aktivitetslogg.assertVarsel(RV_VV_1)
         }
 
         Aktivitetslogg().also { aktivitetslogg ->
-            sykepengegrunnlag.validerOpptjening(aktivitetslogg, opptjeningMedA2)
+            sykepengegrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjeningMedA2)
             aktivitetslogg.assertIngenVarsel(RV_VV_1)
         }
     }
@@ -772,7 +772,7 @@ internal class SykepengegrunnlagTest {
 
 
         Aktivitetslogg().also { aktivitetslogg ->
-            sykepengegrunnlag.validerStartdato(aktivitetslogg)
+            sykepengegrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
             aktivitetslogg.assertIngenVarsel(RV_VV_2)
         }
     }
@@ -803,7 +803,7 @@ internal class SykepengegrunnlagTest {
         )
 
         Aktivitetslogg().also { aktivitetslogg ->
-            sykepengegrunnlag.validerInntekter(aktivitetslogg, mapOf(
+            sykepengegrunnlag.sjekkMuligeGhostsUtenArbeidsforhold(aktivitetslogg, mapOf(
                 a2 to listOf(
                     Skatteopplysning(
                         hendelseId = UUID.randomUUID(),
@@ -819,7 +819,7 @@ internal class SykepengegrunnlagTest {
         }
 
         Aktivitetslogg().also { aktivitetslogg ->
-            sykepengegrunnlag.validerInntekter(aktivitetslogg, mapOf(
+            sykepengegrunnlag.sjekkMuligeGhostsUtenArbeidsforhold(aktivitetslogg, mapOf(
                 a2 to listOf(
                     Skatteopplysning(
                         hendelseId = UUID.randomUUID(),
@@ -861,7 +861,7 @@ internal class SykepengegrunnlagTest {
         )
 
         Aktivitetslogg().also { aktivitetslogg ->
-            sykepengegrunnlag.validerInntekter(aktivitetslogg, mapOf(
+            sykepengegrunnlag.sjekkMuligeGhostsUtenArbeidsforhold(aktivitetslogg, mapOf(
                 a2 to listOf(
                     Skatteopplysning(
                         hendelseId = UUID.randomUUID(),

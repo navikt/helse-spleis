@@ -7,9 +7,9 @@ import no.nav.helse.person.Opptjening
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.VedtakFattetBuilder
-import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.validerStartdato
+import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.person.inntekt.Skatteopplysning.Companion.validerInntekterSisteTreMåneder
+import no.nav.helse.person.inntekt.Skatteopplysning.Companion.sjekkMuligeGhostsUtenArbeidsforhold
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -94,28 +94,28 @@ class ArbeidsgiverInntektsopplysning(
             .map { inntekt -> inntekt.overstyr(other) }
             .also { it.subsummer(subsumsjonObserver, opptjening) }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.validerOpptjening(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening, orgnummer: String) {
+        internal fun List<ArbeidsgiverInntektsopplysning>.sjekkForNyArbeidsgiver(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening, orgnummer: String) {
             val arbeidsforholdAktivePåSkjæringstidspunktet = filter { opptjening.ansattVedSkjæringstidspunkt(it.orgnummer) }.singleOrNull() ?: return
             if (arbeidsforholdAktivePåSkjæringstidspunktet.orgnummer == orgnummer) return
             aktivitetslogg.varsel(Varselkode.RV_VV_8)
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.validerOpptjening(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening) {
+        internal fun List<ArbeidsgiverInntektsopplysning>.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening) {
             if (none { opptjening.startdatoFor(it.orgnummer) == null }) return
             aktivitetslogg.varsel(Varselkode.RV_VV_1)
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.validerStartdato(aktivitetslogg: IAktivitetslogg) {
-            return map { it.inntektsopplysning }.validerStartdato(aktivitetslogg)
+        internal fun List<ArbeidsgiverInntektsopplysning>.markerFlereArbeidsgivere(aktivitetslogg: IAktivitetslogg) {
+            return map { it.inntektsopplysning }.markerFlereArbeidsgivere(aktivitetslogg)
         }
 
         // sjekker at det ikke er arbeidsgivere i sammenligningsgrunnlaget siste tre måneder, som ikke inngår i sykepengegrunnlaget
-        internal fun List<ArbeidsgiverInntektsopplysning>.validerInntekter(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, sammenligningsgrunnlag: Map<String, List<Skatteopplysning>>) {
+        internal fun List<ArbeidsgiverInntektsopplysning>.sjekkMuligeGhostsUtenArbeidsforhold(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, sammenligningsgrunnlag: Map<String, List<Skatteopplysning>>) {
             val arbeidsgivereSisteTreMåneder = map { it.orgnummer }
             sammenligningsgrunnlag
                 .filterNot { (orgnummer, _) -> orgnummer in arbeidsgivereSisteTreMåneder }
                 .flatMap { it.value }
-                .validerInntekterSisteTreMåneder(aktivitetslogg, skjæringstidspunkt)
+                .sjekkMuligeGhostsUtenArbeidsforhold(aktivitetslogg, skjæringstidspunkt)
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.refusjonsopplysninger(organisasjonsnummer: String) =

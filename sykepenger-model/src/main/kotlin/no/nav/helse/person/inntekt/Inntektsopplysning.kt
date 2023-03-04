@@ -40,7 +40,7 @@ abstract class Inntektsopplysning protected constructor(
 
     internal companion object {
 
-        internal fun List<Inntektsopplysning>.validerStartdato(aktivitetslogg: IAktivitetslogg) {
+        internal fun List<Inntektsopplysning>.markerFlereArbeidsgivere(aktivitetslogg: IAktivitetslogg) {
             if (distinctBy { it.dato }.size <= 1 && none { it is SkattSykepengegrunnlag || it is IkkeRapportert }) return
             aktivitetslogg.varsel(Varselkode.RV_VV_2)
         }

@@ -37,9 +37,10 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.omre
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.subsummer
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerInntekter
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerOpptjening
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerStartdato
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.sjekkMuligeGhostsUtenArbeidsforhold
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.sjekkForNyArbeidsgiver
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.måHaRegistrertOpptjeningForArbeidsgivere
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
@@ -129,10 +130,7 @@ internal class Sykepengegrunnlag(
     internal fun harNødvendigInntektForVilkårsprøving(organisasjonsnummer: String) =
         arbeidsgiverInntektsopplysninger.harInntekt(organisasjonsnummer)
 
-    internal fun validerInntekt(
-        aktivitetslogg: IAktivitetslogg,
-        organisasjonsnummer: List<String>
-    ) {
+    internal fun sjekkForNyeArbeidsgivere(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: List<String>) {
         val manglerInntekt = organisasjonsnummer.filterNot { harNødvendigInntektForVilkårsprøving(it) }.takeUnless { it.isEmpty() } ?: return
         manglerInntekt.forEach {
             aktivitetslogg.info("Mangler inntekt for $it på skjæringstidspunkt $skjæringstidspunkt")
@@ -140,22 +138,22 @@ internal class Sykepengegrunnlag(
         aktivitetslogg.varsel(RV_SV_2)
     }
 
-    internal fun validerOpptjening(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening?, orgnummer: String) {
+    internal fun sjekkForNyArbeidsgiver(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening?, orgnummer: String) {
         if (opptjening == null) return
-        arbeidsgiverInntektsopplysninger.validerOpptjening(aktivitetslogg, opptjening, orgnummer)
+        arbeidsgiverInntektsopplysninger.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, orgnummer)
     }
 
-    internal fun validerOpptjening(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening?) {
+    internal fun måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening?) {
         if (opptjening == null) return
-        arbeidsgiverInntektsopplysninger.validerOpptjening(aktivitetslogg, opptjening)
+        arbeidsgiverInntektsopplysninger.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjening)
     }
 
-    internal fun validerStartdato(aktivitetslogg: IAktivitetslogg) {
-        arbeidsgiverInntektsopplysninger.validerStartdato(aktivitetslogg)
+    internal fun markerFlereArbeidsgivere(aktivitetslogg: IAktivitetslogg) {
+        arbeidsgiverInntektsopplysninger.markerFlereArbeidsgivere(aktivitetslogg)
     }
 
-    internal fun validerInntekter(aktivitetslogg: IAktivitetslogg, sammenligningsgrunnlag: Map<String, List<Skatteopplysning>>) {
-        return arbeidsgiverInntektsopplysninger.validerInntekter(aktivitetslogg, skjæringstidspunkt, sammenligningsgrunnlag)
+    internal fun sjekkMuligeGhostsUtenArbeidsforhold(aktivitetslogg: IAktivitetslogg, sammenligningsgrunnlag: Map<String, List<Skatteopplysning>>) {
+        return arbeidsgiverInntektsopplysninger.sjekkMuligeGhostsUtenArbeidsforhold(aktivitetslogg, skjæringstidspunkt, sammenligningsgrunnlag)
     }
 
     internal fun validerAvvik(aktivitetslogg: IAktivitetslogg, sammenligningsgrunnlag: Sammenligningsgrunnlag, valideringstrategi: IAktivitetslogg.(Varselkode) -> Unit = IAktivitetslogg::funksjonellFeil) {
