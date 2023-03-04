@@ -6,7 +6,6 @@ import java.util.Objects
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_12
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_13
 import no.nav.helse.økonomi.Inntekt
 
 class Inntektsopplysning private constructor(
@@ -60,31 +59,6 @@ class Inntektsopplysning private constructor(
             aktivitetslogg: IAktivitetslogg,
             skjæringstidspunkt: LocalDate
         ) {
-            liste.forEach { it.valider(aktivitetslogg, skjæringstidspunkt) }
-            liste.validerAlleInntekterForSammenhengendePeriode(skjæringstidspunkt, aktivitetslogg)
-            liste.validerAntallInntekterPerArbeidsgiverPerDato(skjæringstidspunkt, aktivitetslogg)
-        }
-
-        private fun List<Inntektsopplysning>.validerAlleInntekterForSammenhengendePeriode(
-            skjæringstidspunkt: LocalDate,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            val relevanteInntektsopplysninger = filter { it.erRelevant(skjæringstidspunkt) }
-            if (relevanteInntektsopplysninger.distinctBy { it.orgnummer }.size > 1) {
-                return aktivitetslogg.funksjonellFeil(RV_IT_13)
-            }
-        }
-
-        private fun List<Inntektsopplysning>.validerAntallInntekterPerArbeidsgiverPerDato(
-            skjæringstidspunkt: LocalDate,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            val harFlereInntekterPåSammeAGogDato = filter { it.erRelevant(skjæringstidspunkt) }
-                .toSet()
-                .groupBy { it.orgnummer to it.sykepengerFom }
-                .any { (_, inntekter) -> inntekter.size > 1 }
-            if (harFlereInntekterPåSammeAGogDato)
-                aktivitetslogg.info("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato.")
         }
 
         internal fun sorter(inntekter: List<Inntektsopplysning>) =

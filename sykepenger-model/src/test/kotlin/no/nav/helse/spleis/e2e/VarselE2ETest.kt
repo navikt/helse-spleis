@@ -685,7 +685,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
             )
         )
         håndterYtelser()
-        assertVarsel(RV_IT_13, 1.vedtaksperiode.filter())
+        assertIngenVarsel(RV_IT_13, 1.vedtaksperiode.filter())
         assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
     }
 

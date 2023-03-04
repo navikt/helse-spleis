@@ -37,6 +37,16 @@ import org.junit.jupiter.api.Test
 internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
     @Test
+    fun `forkaster ikke førstegangsbehandling selv om det er lagret inntekter i IT`() {
+        håndterUtbetalingshistorikkEtterInfotrygdendring(inntektshistorikk = listOf(
+            Inntektsopplysning(a1, 17.januar, INNTEKT, true),
+            Inntektsopplysning(a2, 17.januar, INNTEKT, true)
+        ))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+    }
+
+    @Test
     fun `førstegangsbehandling skal ikke hoppe videre dersom det kun er inntekt i Infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))

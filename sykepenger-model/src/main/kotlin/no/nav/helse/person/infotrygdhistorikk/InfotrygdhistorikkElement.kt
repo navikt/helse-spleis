@@ -134,7 +134,7 @@ class InfotrygdhistorikkElement private constructor(
         perioder.filterIsInstance<Utbetalingsperiode>()
             .forEach { it.valider(aktivitetslogg, organisasjonsnummer, periode) }
         aktivitetslogg.info("Sjekker inntektsopplysninger")
-        Inntektsopplysning.valider(inntekter, aktivitetslogg, skjæringstidspunkt)
+        inntekter.forEach { it.valider(aktivitetslogg, skjæringstidspunkt) }
         aktivitetslogg.info("Sjekker arbeidskategorikoder")
         if (!erNormalArbeidstaker(skjæringstidspunkt)) aktivitetslogg.funksjonellFeil(RV_IT_15)
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()

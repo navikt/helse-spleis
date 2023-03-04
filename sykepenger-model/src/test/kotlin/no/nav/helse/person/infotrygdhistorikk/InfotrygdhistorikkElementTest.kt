@@ -14,8 +14,6 @@ import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.spleis.e2e.assertInfo
-import no.nav.helse.spleis.e2e.assertIngenInfo
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
@@ -86,33 +84,61 @@ internal class InfotrygdhistorikkElementTest {
         assertNotEquals(nyttHistorikkelement().hashCode(), nyttHistorikkelement(perioder).hashCode())
         assertEquals(nyttHistorikkelement(perioder).hashCode(), nyttHistorikkelement(perioder).hashCode())
         assertEquals(nyttHistorikkelement(perioder), nyttHistorikkelement(perioder))
-        assertEquals(nyttHistorikkelement(inntekter = inntekter).hashCode(), nyttHistorikkelement(inntekter = inntekter).hashCode())
-        assertNotEquals(nyttHistorikkelement(perioder, inntekter).hashCode(), nyttHistorikkelement(inntekter = inntekter).hashCode())
+        assertEquals(
+            nyttHistorikkelement(inntekter = inntekter).hashCode(),
+            nyttHistorikkelement(inntekter = inntekter).hashCode()
+        )
+        assertNotEquals(
+            nyttHistorikkelement(perioder, inntekter).hashCode(),
+            nyttHistorikkelement(inntekter = inntekter).hashCode()
+        )
         assertNotEquals(nyttHistorikkelement(perioder, inntekter), nyttHistorikkelement(inntekter = inntekter))
         assertEquals(
             nyttHistorikkelement(perioder, inntekter, arbeidskategorikoder).hashCode(),
             nyttHistorikkelement(perioder, inntekter, arbeidskategorikoder).hashCode()
         )
-        assertNotEquals(nyttHistorikkelement(perioder, inntekter).hashCode(), nyttHistorikkelement(perioder, inntekter, arbeidskategorikoder).hashCode())
-        assertNotEquals(nyttHistorikkelement(perioder, inntekter), nyttHistorikkelement(perioder, inntekter, arbeidskategorikoder))
-        assertNotEquals(nyttHistorikkelement().hashCode(), nyttHistorikkelement(ugyldigePerioder = ugyldigePerioder).hashCode())
-        assertEquals(nyttHistorikkelement(ugyldigePerioder = ugyldigePerioder).hashCode(), nyttHistorikkelement(ugyldigePerioder = ugyldigePerioder).hashCode())
-        assertEquals(nyttHistorikkelement(ugyldigePerioder = ugyldigePerioder), nyttHistorikkelement(ugyldigePerioder = ugyldigePerioder))
+        assertNotEquals(
+            nyttHistorikkelement(perioder, inntekter).hashCode(),
+            nyttHistorikkelement(perioder, inntekter, arbeidskategorikoder).hashCode()
+        )
+        assertNotEquals(
+            nyttHistorikkelement(perioder, inntekter),
+            nyttHistorikkelement(perioder, inntekter, arbeidskategorikoder)
+        )
+        assertNotEquals(
+            nyttHistorikkelement().hashCode(),
+            nyttHistorikkelement(ugyldigePerioder = ugyldigePerioder).hashCode()
+        )
+        assertEquals(
+            nyttHistorikkelement(ugyldigePerioder = ugyldigePerioder).hashCode(),
+            nyttHistorikkelement(ugyldigePerioder = ugyldigePerioder).hashCode()
+        )
+        assertEquals(
+            nyttHistorikkelement(ugyldigePerioder = ugyldigePerioder),
+            nyttHistorikkelement(ugyldigePerioder = ugyldigePerioder)
+        )
         assertNotEquals(nyttHistorikkelement().hashCode(), nyttHistorikkelement(harStatslønn = true).hashCode())
-        assertEquals(nyttHistorikkelement(harStatslønn = true).hashCode(), nyttHistorikkelement(harStatslønn = true).hashCode())
+        assertEquals(
+            nyttHistorikkelement(harStatslønn = true).hashCode(),
+            nyttHistorikkelement(harStatslønn = true).hashCode()
+        )
         assertEquals(nyttHistorikkelement(harStatslønn = true), nyttHistorikkelement(harStatslønn = true))
     }
 
     @Test
     fun `person- og arbeidsgiverutbetaling på samme dag`() {
-        val element1 = nyttHistorikkelement(perioder = listOf(
-            ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 1.januar, 100.prosent, 1000.daglig),
-            PersonUtbetalingsperiode("orgnr", 1.januar, 1.januar, 100.prosent, 1000.daglig)
-        ))
-        val identiskElement = nyttHistorikkelement(perioder = listOf(
-            PersonUtbetalingsperiode("orgnr", 1.januar, 1.januar, 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 1.januar, 100.prosent, 1000.daglig)
-        ))
+        val element1 = nyttHistorikkelement(
+            perioder = listOf(
+                ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 1.januar, 100.prosent, 1000.daglig),
+                PersonUtbetalingsperiode("orgnr", 1.januar, 1.januar, 100.prosent, 1000.daglig)
+            )
+        )
+        val identiskElement = nyttHistorikkelement(
+            perioder = listOf(
+                PersonUtbetalingsperiode("orgnr", 1.januar, 1.januar, 100.prosent, 1000.daglig),
+                ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 1.januar, 100.prosent, 1000.daglig)
+            )
+        )
         assertEquals(element1, identiskElement)
         assertEquals(element1.hashCode(), identiskElement.hashCode())
         assertTrue(identiskElement.erstatter(element1))
@@ -320,7 +346,11 @@ internal class InfotrygdhistorikkElementTest {
         val inntekter = listOf(
             Inntektsopplysning(ORGNUMMER, 1.januar, 1234.daglig, true)
         )
-        val element = nyttHistorikkelement(perioder = utbetalinger, arbeidskategorikoder = arbeidskategorikoder, inntekter = inntekter)
+        val element = nyttHistorikkelement(
+            perioder = utbetalinger,
+            arbeidskategorikoder = arbeidskategorikoder,
+            inntekter = inntekter
+        )
         assertTrue(element.valider(aktivitetslogg, Periode(9.januar, 23.januar), 9.januar, "ag1"))
         assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
@@ -430,7 +460,11 @@ internal class InfotrygdhistorikkElementTest {
         val dagsats = 2468
         val utbetalinger = listOf(
             ArbeidsgiverUtbetalingsperiode(
-                ORGNUMMER, 1.januar, 31.januar, (100 * gradering).roundToInt().prosent, (dagsats * gradering).roundToInt().daglig
+                ORGNUMMER,
+                1.januar,
+                31.januar,
+                (100 * gradering).roundToInt().prosent,
+                (dagsats * gradering).roundToInt().daglig
             ),
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, dagsats.daglig)
         )
@@ -595,7 +629,7 @@ internal class InfotrygdhistorikkElementTest {
         )
 
         assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), 1.januar, "ag1"))
-        assertFlereInntekterInfotrygd()
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -607,7 +641,7 @@ internal class InfotrygdhistorikkElementTest {
             )
         )
         assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), 1.januar, "ag1"))
-        assertEnInntektInfotrygd()
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -620,7 +654,7 @@ internal class InfotrygdhistorikkElementTest {
         )
 
         assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), 1.januar, "ag1"))
-        assertFlereInntekterInfotrygd()
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -633,7 +667,7 @@ internal class InfotrygdhistorikkElementTest {
         )
 
         assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), 1.januar, "ag1"))
-        assertFlereInntekterInfotrygd()
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -669,16 +703,6 @@ internal class InfotrygdhistorikkElementTest {
             )
         )
         assertTrue(element.valider(aktivitetslogg, Periode(2.januar, 31.januar), 2.januar, "ag1"))
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
-    }
-
-    private fun assertFlereInntekterInfotrygd() {
-        aktivitetslogg.assertInfo("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato.")
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
-    }
-
-    private fun assertEnInntektInfotrygd() {
-        aktivitetslogg.assertIngenInfo("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato.")
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
