@@ -41,10 +41,15 @@ internal class SkattSykepengegrunnlag(
     override fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): AvklarbarSykepengegrunnlag? {
         if (this.dato != skjæringstidspunkt) return null
         if (ansattPerioder.isEmpty()) return null
+        // ser bort fra skatteinntekter om man ikke er ansatt på skjæringstidspunktet:
         if (!ansattVedSkjæringstidspunkt(skjæringstidspunkt)) return null
+        // bruker skatteinntekter om det foreligger inntekter innenfor 2 mnd fra skjæringstidspunktet:
         if (sisteMåneder(skjæringstidspunkt, MAKS_INNTEKT_GAP, inntektsopplysninger).isNotEmpty()) return this
+        // ser bort fra skatteinntekter om man er ansatt på skjæringstidspunktet, men inntektene er eldre enn 2 mnd fra skjæringstidspunktet (avsluttet arb.forhold?):
         if (inntektsopplysninger.isNotEmpty()) return null
+        // ser bort fra skatteinntekter om arb.forholdet er eldre enn 2 mnd fra skjæringstidspunktet:
         if (!nyoppstartetArbeidsforhold(skjæringstidspunkt)) return null
+        // nyoppstartet arbeidsforhold (startdato innen 2 mnd fra skjæringstidspunktet), og ingen inntekter foreligger:
         // todo bare returnere "this" og mappe ut IKKE_RAPPORTERT i SpeilBuilder?
         return IkkeRapportert(
             id = UUID.randomUUID(),

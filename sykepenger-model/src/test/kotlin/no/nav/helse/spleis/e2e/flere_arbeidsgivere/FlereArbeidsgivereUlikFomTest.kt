@@ -13,16 +13,22 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.Inntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_21
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
+import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -1617,5 +1623,79 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             assertEquals(5.februar til 28.februar, linje.fom til linje.tom)
             assertEquals(1080, linje.beløp)
         }
+    }
+
+    @Test
+    fun `skjæringstidspunktet er i måneden før ag1`() {
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.februar til 28.februar), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt INNTEKT
+                }
+            }),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt INNTEKT
+                }
+            }, arbeidsforhold = emptyList()),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH)
+            ),
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode) ?: fail { "forventer vilkårsgrunnlag" }
+        vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.also { inntekter ->
+            assertEquals(2, inntekter.size)
+            assertEquals(SkattSykepengegrunnlag::class, inntekter.getValue(a1).inspektør.inntektsopplysning::class)
+            assertEquals(SkattSykepengegrunnlag::class, inntekter.getValue(a2).inspektør.inntektsopplysning::class)
+        }
+
+        assertIngenVarsel(RV_VV_5, 1.vedtaksperiode.filter(a1))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+    }
+    @Test
+    fun `skjæringstidspunktet er i måneden før ag1 og ag2 - nyoppstartet arbeidsforhold ag2 - bare inntekt 3 mnd før`() {
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(31.januar, 14.februar, 100.prosent), orgnummer = a3)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
+        håndterVilkårsgrunnlag(1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                }
+            }),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                }
+            }, arbeidsforhold = emptyList()),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.november(2017)),
+                Vilkårsgrunnlag.Arbeidsforhold(a3, 1.oktober(2017))
+            ),
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        val vilkårsgrunnlag = inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode) ?: fail { "forventer vilkårsgrunnlag" }
+        vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.also { inntekter ->
+            assertEquals(2, inntekter.size)
+            assertEquals(SkattSykepengegrunnlag::class, inntekter.getValue(a1).inspektør.inntektsopplysning::class)
+            assertEquals(IkkeRapportert::class, inntekter.getValue(a2).inspektør.inntektsopplysning::class)
+        }
+
+        assertIngenVarsel(RV_VV_5, 1.vedtaksperiode.filter(a1))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
     }
 }

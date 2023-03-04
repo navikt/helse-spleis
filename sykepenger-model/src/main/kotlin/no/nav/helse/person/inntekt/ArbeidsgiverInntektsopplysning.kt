@@ -7,7 +7,6 @@ import no.nav.helse.person.Opptjening
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.VedtakFattetBuilder
-import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.valider
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.validerStartdato
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.validerInntekterSisteTreMåneder
@@ -140,10 +139,6 @@ class ArbeidsgiverInntektsopplysning(
 
         private fun List<ArbeidsgiverInntektsopplysning>.omregnetÅrsinntektPerArbeidsgiver() =
             associate { it.orgnummer to it.inntektsopplysning.omregnetÅrsinntekt() }
-
-        internal fun List<ArbeidsgiverInntektsopplysning>.valider(aktivitetslogg: IAktivitetslogg) {
-            map { it.inntektsopplysning }.valider(aktivitetslogg)
-        }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.harInntekt(organisasjonsnummer: String) =
             singleOrNull { it.orgnummer == organisasjonsnummer } != null

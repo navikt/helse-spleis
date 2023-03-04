@@ -38,7 +38,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.omre
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.subsummer
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.valider
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerOpptjening
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerStartdato
@@ -126,7 +125,6 @@ internal class Sykepengegrunnlag(
     }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
-        arbeidsgiverInntektsopplysninger.valider(aktivitetslogg)
         if (oppfyllerMinsteinntektskrav) aktivitetslogg.info("Krav til minste sykepengegrunnlag er oppfylt")
         else aktivitetslogg.varsel(RV_SV_1)
         return oppfyllerMinsteinntektskrav && !aktivitetslogg.harFunksjonelleFeilEllerVerre()

@@ -74,16 +74,8 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
                 Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar(2017), null)
             )
         )
-        assertForventetFeil(
-            forklaring = "vi må avklare hva vi ønsker å gjøre med sykepengegrunnlag hvor grunnlaget for begge arbeidsgiverne kommer fra skatt",
-            nå = {
-                assertFunksjonellFeil("Bruker mangler nødvendig inntekt ved validering av Vilkårsgrunnlag", 1.vedtaksperiode.filter(a2))
-                assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
-            },
-            ønsket = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
-            }
-        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2)
     }
 
     @Test
