@@ -4,8 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Objects
 import no.nav.helse.person.InfotrygdhistorikkVisitor
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_12
 import no.nav.helse.økonomi.Inntekt
 
 class Inntektsopplysning private constructor(
@@ -24,17 +22,9 @@ class Inntektsopplysning private constructor(
         refusjonTom: LocalDate? = null
     ) : this(orgnummer, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom, null)
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate): Boolean {
-        if (!erRelevant(skjæringstidspunkt)) return true
-        if (orgnummer.isBlank()) aktivitetslogg.funksjonellFeil(RV_IT_12)
-        return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
-    }
-
     internal fun accept(visitor: InfotrygdhistorikkVisitor) {
         visitor.visitInfotrygdhistorikkInntektsopplysning(orgnummer, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom, lagret)
     }
-
-    private fun erRelevant(skjæringstidspunkt: LocalDate) = sykepengerFom >= skjæringstidspunkt
 
     override fun hashCode() =
         Objects.hash(orgnummer, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom)
@@ -53,14 +43,6 @@ class Inntektsopplysning private constructor(
     }
 
     internal companion object {
-
-        internal fun valider(
-            liste: List<Inntektsopplysning>,
-            aktivitetslogg: IAktivitetslogg,
-            skjæringstidspunkt: LocalDate
-        ) {
-        }
-
         internal fun sorter(inntekter: List<Inntektsopplysning>) =
             inntekter.sortedWith(compareBy({ it.sykepengerFom }, { it.hashCode() }))
 

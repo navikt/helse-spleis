@@ -87,13 +87,13 @@ enum class Varselkode(
     RV_IT_3("Utbetaling i Infotrygd overlapper med vedtaksperioden"), // funksjonellFeil
     RV_IT_4("Det er registrert utbetaling på nødnummer", avviklet = true), // funksjonellFeil
     RV_IT_5("Mangler inntekt for første utbetalingsdag i en av infotrygdperiodene", avviklet = true), // funksjonellFeil
-    RV_IT_6("Det er en ugyldig utbetalingsperiode i Infotrygd (mangler fom- eller tomdato)"),
-    RV_IT_7("Det er en ugyldig utbetalingsperiode i Infotrygd (fom er nyere enn tom)"),
-    RV_IT_8("Det er en ugyldig utbetalingsperiode i Infotrygd (utbetalingsgrad mangler)"),
-    RV_IT_9("Det er en ugyldig utbetalingsperiode i Infotrygd (utbetalingsgrad er mindre eller lik 0)"),
-    RV_IT_10("Det er en ugyldig utbetalingsperiode i Infotrygd"),
+    RV_IT_6("Det er en ugyldig utbetalingsperiode i Infotrygd (mangler fom- eller tomdato)", avviklet = true),
+    RV_IT_7("Det er en ugyldig utbetalingsperiode i Infotrygd (fom er nyere enn tom)", avviklet = true),
+    RV_IT_8("Det er en ugyldig utbetalingsperiode i Infotrygd (utbetalingsgrad mangler)", avviklet = true),
+    RV_IT_9("Det er en ugyldig utbetalingsperiode i Infotrygd (utbetalingsgrad er mindre eller lik 0)", avviklet = true),
+    RV_IT_10("Det er en ugyldig utbetalingsperiode i Infotrygd", avviklet = true),
     RV_IT_11("Det er registrert bruk av på nødnummer", avviklet = true),
-    RV_IT_12("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler"),
+    RV_IT_12("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler", avviklet = true),
     RV_IT_13("Støtter ikke overgang fra infotrygd for flere arbeidsgivere", avviklet = true),
     RV_IT_14("Forlenger en Infotrygdperiode på tvers av arbeidsgivere"),
     RV_IT_15("Personen er ikke registrert som normal arbeidstaker i Infotrygd"),

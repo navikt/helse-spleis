@@ -34,6 +34,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -82,10 +83,10 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ugyldig utbetalinghistorikk kaster perioden ut`() {
+    fun `ugyldig utbetalinghistorikk kaster ikke perioden ut`() {
         håndterUgyldigYtelser()
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertEquals(TilstandType.AVVENTER_SIMULERING, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
     }
 
     @Test

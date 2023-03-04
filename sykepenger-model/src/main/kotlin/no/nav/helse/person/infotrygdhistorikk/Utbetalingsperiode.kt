@@ -6,14 +6,8 @@ import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_6
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_7
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_8
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_9
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -97,18 +91,6 @@ data class UgyldigPeriode(
     private val tom: LocalDate?,
     private val utbetalingsgrad: Int?
 ) {
-    internal fun valider(aktivitetslogg: IAktivitetslogg) {
-        aktivitetslogg.funksjonellFeil(feiltekst())
-    }
-
-    private fun feiltekst(): Varselkode = when {
-        fom == null || tom == null -> RV_IT_6
-        fom > tom -> RV_IT_7
-        utbetalingsgrad == null -> RV_IT_8
-        utbetalingsgrad <= 0 -> RV_IT_9
-        else -> RV_IT_10
-    }
-
     internal fun toMap() = mapOf<String, Any?>(
         "fom" to fom,
         "tom" to tom,

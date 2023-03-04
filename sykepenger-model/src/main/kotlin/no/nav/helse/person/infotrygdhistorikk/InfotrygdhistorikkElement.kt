@@ -128,13 +128,10 @@ class InfotrygdhistorikkElement private constructor(
         skjæringstidspunkt: LocalDate,
         organisasjonsnummer: String
     ): Boolean {
-        validerUgyldigePerioder(aktivitetslogg)
         validerBetaltRettFør(periode, aktivitetslogg)
         aktivitetslogg.info("Sjekker utbetalte perioder")
         perioder.filterIsInstance<Utbetalingsperiode>()
             .forEach { it.valider(aktivitetslogg, organisasjonsnummer, periode) }
-        aktivitetslogg.info("Sjekker inntektsopplysninger")
-        inntekter.forEach { it.valider(aktivitetslogg, skjæringstidspunkt) }
         aktivitetslogg.info("Sjekker arbeidskategorikoder")
         if (!erNormalArbeidstaker(skjæringstidspunkt)) aktivitetslogg.funksjonellFeil(RV_IT_15)
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
@@ -143,10 +140,6 @@ class InfotrygdhistorikkElement private constructor(
     private fun validerBetaltRettFør(periode: Periode, aktivitetslogg: IAktivitetslogg){
         if (!harBetaltRettFør(periode)) return
         aktivitetslogg.funksjonellFeil(RV_IT_14)
-    }
-
-    private fun validerUgyldigePerioder(aktivitetslogg: IAktivitetslogg) {
-        ugyldigePerioder.forEach { ugyldigPeriode -> ugyldigPeriode.valider(aktivitetslogg) }
     }
 
     internal fun utbetalingstidslinje() =

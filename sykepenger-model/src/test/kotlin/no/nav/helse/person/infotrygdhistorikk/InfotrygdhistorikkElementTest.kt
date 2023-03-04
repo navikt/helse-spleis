@@ -14,6 +14,10 @@ import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertIngenFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
@@ -326,7 +330,7 @@ internal class InfotrygdhistorikkElementTest {
         val arbeidskategorikoder = mapOf("07" to 1.januar)
         val element = nyttHistorikkelement(arbeidskategorikoder = arbeidskategorikoder)
         assertFalse(element.valider(aktivitetslogg, Periode(6.januar, 23.januar), 1.januar, "ag1"))
-        assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        aktivitetslogg.assertFunksjonellFeil(Varselkode.RV_IT_15)
     }
 
     @Test
@@ -334,7 +338,7 @@ internal class InfotrygdhistorikkElementTest {
         val arbeidskategorikoder = mapOf("01" to 1.januar)
         val element = nyttHistorikkelement(arbeidskategorikoder = arbeidskategorikoder)
         assertTrue(element.valider(aktivitetslogg, Periode(6.januar, 23.januar), 1.januar, "ag1"))
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        aktivitetslogg.assertIngenFunksjonellFeil()
     }
 
     @Test
@@ -352,7 +356,7 @@ internal class InfotrygdhistorikkElementTest {
             inntekter = inntekter
         )
         assertTrue(element.valider(aktivitetslogg, Periode(9.januar, 23.januar), 9.januar, "ag1"))
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        aktivitetslogg.assertIngenFunksjonellFeil()
     }
 
     @Test
@@ -360,7 +364,7 @@ internal class InfotrygdhistorikkElementTest {
         val arbeidskategorikoder = mapOf("01" to 1.januar, "07" to 6.januar)
         val element = nyttHistorikkelement(arbeidskategorikoder = arbeidskategorikoder)
         assertFalse(element.valider(aktivitetslogg, Periode(11.januar, 23.januar), 1.januar, "ag1"))
-        assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        aktivitetslogg.assertFunksjonellFeil(Varselkode.RV_IT_15)
     }
 
     @Test
@@ -368,14 +372,14 @@ internal class InfotrygdhistorikkElementTest {
         val arbeidskategorikoder = mapOf("01" to 1.januar, "01" to 6.januar)
         val element = nyttHistorikkelement(arbeidskategorikoder = arbeidskategorikoder)
         assertTrue(element.valider(aktivitetslogg, Periode(11.januar, 23.januar), 1.januar, "ag1"))
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        aktivitetslogg.assertIngenFunksjonellFeil()
     }
 
     @Test
     fun `validering skal ikke feile når utbetalingshistorikken er tom`() {
         val element = nyttHistorikkelement()
         assertTrue(element.valider(aktivitetslogg, Periode(11.januar, 23.januar), 1.januar, "ag1"))
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        aktivitetslogg.assertIngenFunksjonellFeil()
     }
 
     @Test
@@ -418,7 +422,7 @@ internal class InfotrygdhistorikkElementTest {
         )
 
         assertTrue(element.valider(aktivitetslogg, Periode(9.januar, 31.januar), 1.januar, "ag1"))
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        aktivitetslogg.assertIngenFunksjonellFeil()
     }
 
     @Test
@@ -435,7 +439,7 @@ internal class InfotrygdhistorikkElementTest {
         )
 
         assertTrue(element.valider(aktivitetslogg, Periode(9.januar, 31.januar), 1.januar, "ag1"))
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        aktivitetslogg.assertIngenFunksjonellFeil()
     }
 
     @Test
@@ -451,7 +455,7 @@ internal class InfotrygdhistorikkElementTest {
 
         val element = nyttHistorikkelement(utbetalinger, inntekter)
         assertTrue(element.valider(aktivitetslogg, Periode(2.juni, 30.juni), 1.april, "ag1"))
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
+        aktivitetslogg.assertIngenVarsler()
     }
 
     @Test
@@ -476,7 +480,7 @@ internal class InfotrygdhistorikkElementTest {
 
         val element = nyttHistorikkelement(utbetalinger, inntekter)
         assertTrue(element.valider(aktivitetslogg, Periode(1.april, 30.april), 1.april, "ag1"))
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
+        aktivitetslogg.assertIngenVarsler()
     }
 
     @Test
@@ -491,7 +495,7 @@ internal class InfotrygdhistorikkElementTest {
         )
         val element = nyttHistorikkelement(utbetalinger, inntekter)
         assertTrue(element.valider(aktivitetslogg, Periode(1.april, 30.april), 1.april, "ag1"))
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
+        aktivitetslogg.assertIngenVarsler()
     }
 
     @Test
@@ -503,7 +507,7 @@ internal class InfotrygdhistorikkElementTest {
 
         val tidslinje = utbetalinger.map { it.utbetalingstidslinje() }.reduce(Utbetalingstidslinje::plus)
 
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
+        aktivitetslogg.assertIngenVarsler()
 
         val inspektør = tidslinje.inspektør
         assertEquals(1.januar, inspektør.førstedato)
@@ -521,8 +525,8 @@ internal class InfotrygdhistorikkElementTest {
             ugyldigePerioder = listOf(UgyldigPeriode(5.januar, 5.januar, 100))
         )
 
-        assertFalse(element.valider(aktivitetslogg, Periode(1.mars, 1.mars), 1.mars, "ag1"))
-        assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
+        assertTrue(element.valider(aktivitetslogg, Periode(1.mars, 1.mars), 1.mars, "ag1"))
+        aktivitetslogg.assertIngenFunksjonellFeil()
     }
 
     @Test
@@ -535,7 +539,7 @@ internal class InfotrygdhistorikkElementTest {
 
         val tidslinje = utbetalinger.map { it.utbetalingstidslinje() }.reduce(Utbetalingstidslinje::plus)
 
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
+        aktivitetslogg.assertIngenVarsler()
 
         val inspektør = tidslinje.inspektør
         assertEquals(1.januar, inspektør.førstedato)
@@ -560,7 +564,7 @@ internal class InfotrygdhistorikkElementTest {
     fun `Validerer ok hvis det ikke finnes noen utbetalinger fra Infotrygd`() {
         val element = nyttHistorikkelement()
         assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 1.januar), 1.januar, "ag1"))
-        assertFalse(aktivitetslogg.harVarslerEllerVerre()) { aktivitetslogg.toString() }
+        aktivitetslogg.assertIngenVarsler()
     }
 
     @Test
@@ -570,7 +574,7 @@ internal class InfotrygdhistorikkElementTest {
         )
         val element = nyttHistorikkelement(utbetalinger)
         assertFalse(element.valider(aktivitetslogg, Periode(1.januar, 1.januar), 1.januar, "ag1"))
-        assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre()) { aktivitetslogg.toString() }
+        aktivitetslogg.assertFunksjonellFeil(Varselkode.RV_IT_3)
     }
 
     @Test
@@ -582,7 +586,7 @@ internal class InfotrygdhistorikkElementTest {
 
         val element = nyttHistorikkelement(utbetalinger, inntekter)
         assertTrue(element.valider(aktivitetslogg, Periode(28.januar, 28.januar), 28.januar, "ag1"))
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
+        aktivitetslogg.assertIngenVarsler()
     }
 
     @Test
@@ -593,7 +597,7 @@ internal class InfotrygdhistorikkElementTest {
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 1234.daglig, true))
         val element = nyttHistorikkelement(utbetalinger, inntekter)
         assertTrue(element.valider(aktivitetslogg, Periode(29.januar, 29.januar), 29.januar, "ag1"))
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
+        aktivitetslogg.assertIngenVarsler()
     }
 
     @Test
@@ -605,7 +609,7 @@ internal class InfotrygdhistorikkElementTest {
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 1234.daglig, true))
         val element = nyttHistorikkelement(utbetalinger, inntekter)
         assertTrue(element.valider(aktivitetslogg, Periode(1.august, 1.august), 1.august, "ag1"))
-        assertFalse(aktivitetslogg.harVarslerEllerVerre()) { aktivitetslogg.toString() }
+        aktivitetslogg.assertIngenVarsler()
     }
 
     @Test
@@ -616,7 +620,7 @@ internal class InfotrygdhistorikkElementTest {
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 1234.daglig, true))
         val element = nyttHistorikkelement(utbetalinger, inntekter)
         assertTrue(element.valider(aktivitetslogg, Periode(1.august, 1.august), 1.august, "ag1"))
-        assertFalse(aktivitetslogg.harVarslerEllerVerre()) { aktivitetslogg.toString() }
+        aktivitetslogg.assertIngenVarsler()
     }
 
     @Test
@@ -629,7 +633,7 @@ internal class InfotrygdhistorikkElementTest {
         )
 
         assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), 1.januar, "ag1"))
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
+        aktivitetslogg.assertIngenVarsler()
     }
 
     @Test
@@ -641,7 +645,7 @@ internal class InfotrygdhistorikkElementTest {
             )
         )
         assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), 1.januar, "ag1"))
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
+        aktivitetslogg.assertIngenVarsler()
     }
 
     @Test
@@ -654,7 +658,7 @@ internal class InfotrygdhistorikkElementTest {
         )
 
         assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), 1.januar, "ag1"))
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
+        aktivitetslogg.assertIngenVarsler()
     }
 
     @Test
@@ -667,7 +671,7 @@ internal class InfotrygdhistorikkElementTest {
         )
 
         assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), 1.januar, "ag1"))
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
+        aktivitetslogg.assertIngenVarsler()
     }
 
     @Test
@@ -679,7 +683,7 @@ internal class InfotrygdhistorikkElementTest {
             )
         )
         assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), 1.januar, "ag1"))
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
+        aktivitetslogg.assertIngenVarsler()
     }
 
     @Test
@@ -691,7 +695,7 @@ internal class InfotrygdhistorikkElementTest {
             )
         )
         assertTrue(element.valider(aktivitetslogg, Periode(1.februar(2019), 28.februar(2019)), 1.februar(2019), "ag1"))
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
+        aktivitetslogg.assertIngenVarsler()
     }
 
     @Test
@@ -703,7 +707,7 @@ internal class InfotrygdhistorikkElementTest {
             )
         )
         assertTrue(element.valider(aktivitetslogg, Periode(2.januar, 31.januar), 2.januar, "ag1"))
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
+        aktivitetslogg.assertIngenVarsler()
     }
 
     private fun nyttHistorikkelement(

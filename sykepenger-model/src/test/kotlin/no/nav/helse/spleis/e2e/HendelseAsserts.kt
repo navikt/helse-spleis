@@ -238,6 +238,11 @@ internal fun Aktivitetslogg.assertFunksjonelleFeil(vararg filtre: Aktivitetslogg
     assertTrue(errors.isNotEmpty(), "forventet errors, fant ingen.")
 }
 
+internal fun Aktivitetslogg.assertFunksjonellFeil(varselkode: Varselkode, vararg filtre: AktivitetsloggFilter) {
+    val errors = collectFunksjonelleFeil(*filtre)
+    assertTrue(errors.contains(varselkode.funksjonellFeilTekst), "fant ikke forventet error. Errors:\n${errors.joinToString("\n")}")
+}
+
 internal fun Aktivitetslogg.assertIngenFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) {
     val errors = collectFunksjonelleFeil(*filtre)
     assertTrue(errors.isEmpty(), "forventet ingen errors. Errors: \n${errors.joinToString("\n")}")
@@ -246,6 +251,11 @@ internal fun Aktivitetslogg.assertIngenFunksjonelleFeil(vararg filtre: Aktivitet
 internal fun Aktivitetslogg.assertIngenFunksjonellFeil(varselkode: Varselkode, vararg filtre: AktivitetsloggFilter) {
     val errors = collectFunksjonelleFeil(*filtre)
     assertFalse(errors.contains(varselkode.varseltekst), "\nFant en varselkode vi ikke forventet:\n\t$varselkode\nVarselkoder funnet:\n\t${errors.joinToString("\n\t")}\n")
+}
+
+internal fun Aktivitetslogg.assertIngenFunksjonellFeil(vararg filtre: AktivitetsloggFilter) {
+    val errors = collectFunksjonelleFeil(*filtre)
+    assertTrue(errors.isEmpty(), "\nVarselkoder funnet:\n\t${errors.joinToString("\n\t")}\n")
 }
 
 internal fun Aktivitetslogg.assertLogiskFeil(severe: String, vararg filtre: AktivitetsloggFilter) {

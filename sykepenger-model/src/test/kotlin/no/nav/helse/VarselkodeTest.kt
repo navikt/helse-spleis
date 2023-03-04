@@ -10,13 +10,8 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_16
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_17
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_6
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_7
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_8
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_9
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
@@ -75,8 +70,7 @@ internal class VarselkodeTest {
 
         val varselkoderSomKjentManglerTest = listOf(
             RV_VV_9, RV_VV_12, RV_IM_6, RV_IM_7, RV_IM_8, RV_UT_3, RV_UT_4,
-            RV_ST_1, RV_IT_6, RV_IT_7, RV_IT_8, RV_IT_9, RV_IT_10,
-            RV_IT_16, RV_IT_17, RV_SØ_11, RV_SØ_12, RV_SØ_13,
+            RV_ST_1, RV_IT_16, RV_IT_17, RV_SØ_11, RV_SØ_12, RV_SØ_13,
             RV_SØ_15, RV_SØ_16, RV_UT_5, RV_SØ_17, RV_SØ_22,
             RV_VT_1, RV_VT_2, RV_VT_3, RV_VT_4, RV_VT_5, RV_VT_6, RV_VT_7,
             RV_SØ_20, RV_AY_10, RV_VV_10, RV_VV_11, RV_UT_6, RV_UT_7,

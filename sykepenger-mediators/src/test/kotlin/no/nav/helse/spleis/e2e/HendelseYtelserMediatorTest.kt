@@ -227,7 +227,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
-            "TIL_INFOTRYGD"
+            "AVVENTER_SIMULERING"
         )
     }
 
