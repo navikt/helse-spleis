@@ -117,8 +117,8 @@ internal class LagUtbetalingForRevurderingTest {
         perioder.add(utbetaling1)
         perioder.add(utbetaling2)
         assertEquals(2, perioder.sistePeriodeForUtbetalinger().size)
-        assertEquals(16.januar til 31.januar, utbetaling1.first.inspektør.periode)
-        assertEquals(16.januar til 31.januar, utbetaling2.first.inspektør.periode)
+        assertEquals(1.januar til 31.januar, utbetaling1.first.inspektør.periode)
+        assertEquals(1.januar til 31.januar, utbetaling2.first.inspektør.periode)
         assertEquals(utbetaling1.second, perioder.sistePeriodeForUtbetalinger()[0])
         assertEquals(utbetaling2.second, perioder.sistePeriodeForUtbetalinger()[1])
     }

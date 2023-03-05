@@ -2,24 +2,22 @@ package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.økonomi.Økonomi
 
-class UtbetalingkladdBuilder(førsteDag: LocalDate, arbeidsgivermottaker: String, personmottaker: String) {
-    private var periode: Periode = førsteDag.somPeriode()
+class UtbetalingkladdBuilder(private var periode: Periode, arbeidsgivermottaker: String, personmottaker: String) {
     // bruker samme "sak id" i OS for begge oppdragene
     // TODO: krever at Overføringer/kvitteringer inneholder fagområde, ellers
     // kan ikke meldingene mappes til riktig oppdrag
     // private val fagsystemId = genererUtbetalingsreferanse(UUID.randomUUID())
     private var arbeidsgiveroppdragBuilder = OppdragBuilder(
-        sisteArbeidsgiverdag = førsteDag,
+        sisteArbeidsgiverdag = periode.endInclusive,
         mottaker = arbeidsgivermottaker,
         fagområde = SykepengerRefusjon
     )
     private var personoppdragBuilder = OppdragBuilder(
-        sisteArbeidsgiverdag = førsteDag,
+        sisteArbeidsgiverdag = periode.endInclusive,
         mottaker = personmottaker,
         fagområde = Sykepenger
     )

@@ -108,9 +108,9 @@ class Utbetalingkladd(
             val kladdene = filter { kladd -> kladd.overlapperMed(periode) }
             val medUtbetaling = kladdene
                 .filter { kladd -> kladd.arbeidsgiveroppdrag.isNotEmpty() || kladd.personoppdrag.isNotEmpty() }
-                .filter { kladd ->
+                .filterNot { kladd ->
                     val oppdragsperiode = periode(kladd.arbeidsgiveroppdrag, kladd.personoppdrag)
-                    oppdragsperiode != null && oppdragsperiode.overlapperMed(periode)
+                    oppdragsperiode != null && oppdragsperiode.endInclusive < periode.start
                 }
             if (kladdene.size <= 1 || medUtbetaling.isEmpty()) return kladdene.take(1)
             return medUtbetaling

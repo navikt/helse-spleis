@@ -463,7 +463,7 @@ internal class UtbetalingTest {
         assertTrue(utbetaling.harNærliggendeUtbetaling(1.desember(2017) til 20.januar))
         assertTrue(utbetaling.harNærliggendeUtbetaling(1.februar til 15.februar))
         assertTrue(utbetaling.harNærliggendeUtbetaling(15.februar til 5.mars))
-        assertFalse(utbetaling.harNærliggendeUtbetaling(1.januar til 15.januar))
+        assertFalse(utbetaling.harNærliggendeUtbetaling(1.desember(2017) til 31.desember(2017)))
     }
 
     @Test
@@ -555,7 +555,7 @@ internal class UtbetalingTest {
             148
         ).first.also { it.opprett(aktivitetslogg) }
         assertEquals(1.januar til sisteDato, utbetaling.inspektør.utbetalingstidslinje.periode())
-        assertEquals(16.januar til sisteDato, utbetaling.inspektør.periode)
+        assertEquals(1.januar til sisteDato, utbetaling.inspektør.periode)
     }
 
     @Test
@@ -569,7 +569,7 @@ internal class UtbetalingTest {
         no.nav.helse.testhelpers.assertNotNull(annullering)
         val utbetalingInspektør = annullering.inspektør
         assertEquals(første.inspektør.korrelasjonsId, utbetalingInspektør.korrelasjonsId)
-        assertEquals(16.januar til 2.februar, utbetalingInspektør.periode)
+        assertEquals(1.januar til 2.februar, utbetalingInspektør.periode)
         assertEquals(16.januar, utbetalingInspektør.arbeidsgiverOppdrag.inspektør.periode.start)
         assertEquals(30.januar, utbetalingInspektør.arbeidsgiverOppdrag.first().inspektør.fom)
         assertEquals(17.januar, utbetalingInspektør.arbeidsgiverOppdrag.first().inspektør.datoStatusFom)
@@ -658,7 +658,7 @@ internal class UtbetalingTest {
     @Test
     fun `sorterer etter når fagsystemIDen ble oppretta`() {
         val tidslinje = tidslinjeOf(
-            16.AP, 3.NAV, 5.NAV(1200, 50.0), 7.FRI, 16.AP, 1.NAV,
+            16.AP, 3.NAV, 5.NAV(1200, 50.0), 16.ARB, 16.AP, 1.NAV,
             startDato = 1.januar(2020)
         )
 
@@ -701,6 +701,7 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(
             16.AP,
             9.NAV,
+            16.ARB,
             5.AP,
             30.NAV,
             startDato = 1.januar(2020)

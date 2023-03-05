@@ -1,6 +1,11 @@
 package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
+import no.nav.helse.forrigeDag
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.somPeriode
+import no.nav.helse.hendelser.til
+import no.nav.helse.nesteDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
@@ -12,9 +17,12 @@ class UtbetalingkladderBuilder(
     private val mottakerRefusjon: String,
     private val mottakerBruker: String
 ) : UtbetalingsdagVisitor {
+    private companion object {
+        private const val MaksimaltAntallOppholdsdagerFørNyArbeidsgiverperiode = 15
+    }
     private val oppdrag = mutableListOf<Utbetalingkladd>()
     private var kladdBuilder: UtbetalingkladdBuilder? = null
-    private var sisteArbeidsgiverdag: LocalDate? = null
+    private var arbeidsgiverdager: Periode? = null
 
     init {
         tidslinje.accept(this)
@@ -27,13 +35,23 @@ class UtbetalingkladderBuilder(
     }
 
     override fun visit(dag: ArbeidsgiverperiodeDag, dato: LocalDate, økonomi: Økonomi) {
+        val forrige = arbeidsgiverdager
+        val gapFraForrige = forrige?.periodeMellom(dato)
+        val dagerMellomForrige = forrige?.let { gapFraForrige?.count() ?: 0 }
+        // forsøker å la utbetalingene starte på første agp-dag, men siden vi ikke vet 100 % når agp starter,
+        // så forholder vi oss til at det kan maksimalt være 15 dager opphold fra forrige agp-dag. Det vil derfor ikke
+        // gi et helt nøyaktig bilde, f.eks. i situasjoner hvor det er ferie inni arbeidsgiverperioden: da kan avstanden mellom
+        // agp-dagene egentlig være mye høyere, og fortsatt samme arbeidsgiverperiode
+        if (dagerMellomForrige != null && dagerMellomForrige <= MaksimaltAntallOppholdsdagerFørNyArbeidsgiverperiode) {
+            arbeidsgiverdager = forrige.oppdaterTom(dato)
+            return
+        }
         ferdigstill(dato)
     }
 
     private fun builder(dato: LocalDate) = kladdBuilder ?: resettBuilder(dato)
     private fun resettBuilder(førsteDag: LocalDate) =
-        UtbetalingkladdBuilder(sisteArbeidsgiverdag ?: førsteDag, mottakerRefusjon, mottakerBruker).also {
-            sisteArbeidsgiverdag = null
+        UtbetalingkladdBuilder(arbeidsgiverdager ?: førsteDag.somPeriode(), mottakerRefusjon, mottakerBruker).also {
             kladdBuilder = it
         }
 
@@ -42,7 +60,7 @@ class UtbetalingkladderBuilder(
             oppdrag.add(it)
         }
         kladdBuilder = null
-        sisteArbeidsgiverdag = dato
+        arbeidsgiverdager = dato?.somPeriode()
         return oppdrag.toList()
     }
 
