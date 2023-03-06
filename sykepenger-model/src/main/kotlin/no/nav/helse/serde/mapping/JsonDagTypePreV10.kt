@@ -15,25 +15,3 @@ enum class JsonDagType {
     UTENLANDSDAG,
     UKJENT_DAG,
 }
-
-enum class SpeilDagtype {
-    ARBEIDSDAG,
-    ARBEIDSGIVERDAG,
-    FERIEDAG,
-    FORELDET_SYKEDAG,
-    FRISK_HELGEDAG,
-    IMPLISITT_DAG,
-    PERMISJONSDAG,
-    SYKEDAG,
-    SYK_HELGEDAG,
-    UBESTEMTDAG,
-    AVSLÅTT
-}
-
-enum class SpeilKildetype {
-    Inntektsmelding,
-    Søknad,
-    Sykmelding,
-    Saksbehandler,
-    Ukjent
-}

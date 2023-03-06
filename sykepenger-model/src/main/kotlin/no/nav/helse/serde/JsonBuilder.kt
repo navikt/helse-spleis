@@ -1653,8 +1653,6 @@ internal class JsonBuilder : AbstractBuilder() {
             popState()
         }
 
-        // TODO: serialiserer ikke UKJENT_DAG eller AVSLÅTT_DAG
-
         override fun visitDag(dag: Dag.Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) =
             leggTilDag(dato, DagJsonBuilder(ARBEIDSDAG, kilde))
 

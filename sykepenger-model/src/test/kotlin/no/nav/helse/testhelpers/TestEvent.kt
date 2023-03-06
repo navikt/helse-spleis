@@ -19,7 +19,6 @@ internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomstidslinjeHend
         val inntektsmelding = Inntektsmelding(LocalDateTime.now()).kilde
         val sykmelding = Sykmelding(LocalDateTime.now()).kilde
         val saksbehandler = OverstyrTidslinje(LocalDateTime.now()).kilde
-        val aareg = Aareg(LocalDateTime.now()).kilde
         val testkilde = TestHendelse(LocalDateTime.now()).kilde
     }
 
@@ -28,7 +27,6 @@ internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomstidslinjeHend
     class Sykmelding(opprettet: LocalDateTime) : TestEvent(opprettet)
     class OverstyrTidslinje(opprettet: LocalDateTime) : TestEvent(opprettet)
     class Søknad(opprettet: LocalDateTime) : TestEvent(opprettet)
-    class Aareg(opprettet: LocalDateTime) : TestEvent(opprettet) // Dette er ren spekulasjon omkring AAreg som kildo
     class TestHendelse(opprettet: LocalDateTime) : TestEvent(opprettet)
 
     override fun sykdomstidslinje() = Sykdomstidslinje()
