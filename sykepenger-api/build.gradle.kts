@@ -1,8 +1,8 @@
-val micrometerRegistryPrometheusVersion = "1.9.4"
-val ktorVersion = "2.1.1"
-val wireMockVersion = "2.31.0"
-val awaitilityVersion = "4.1.1"
-val mockVersion = "1.12.4"
+val micrometerRegistryPrometheusVersion = "1.10.4"
+val ktorVersion = "2.2.4"
+val wireMockVersion = "2.35.0"
+val awaitilityVersion = "4.2.0"
+val mockVersion = "1.13.4"
 
 val mainClass = "no.nav.helse.spleis.AppKt"
 
@@ -35,6 +35,7 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
     implementation("io.ktor:ktor-server-call-id:$ktorVersion")
+    implementation("io.ktor:ktor-server-auth:$ktorVersion")
     implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion") {
         exclude(group = "junit")
     }
