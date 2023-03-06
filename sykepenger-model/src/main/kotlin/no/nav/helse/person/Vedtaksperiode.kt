@@ -506,6 +506,12 @@ internal class Vedtaksperiode private constructor(
         oppdaterHistorikk(hendelse)
         igangsettOverstyringAvTidslinje(hendelse)
     }
+    private fun revurderLåstTidslinje(hendelse: OverstyrTidslinje) {
+        låsOpp()
+        oppdaterHistorikk(hendelse)
+        lås()
+        igangsettOverstyringAvTidslinje(hendelse)
+    }
 
     private fun igangsettOverstyringAvTidslinje(hendelse: OverstyrTidslinje) {
         val vedtaksperiodeTilRevurdering = arbeidsgiver.finnVedtaksperiodeFør(this)
@@ -582,7 +588,14 @@ internal class Vedtaksperiode private constructor(
         håndterSøknad(søknad) { nesteTilstand }
     }
 
-    private fun håndterOverlappendeSøknadRevurdering(søknad: Søknad) {
+    private fun håndterLåstOverlappendeSøknadRevurdering(søknad: Søknad) {
+        håndterOverlappendeSøknadRevurdering(søknad) {
+            låsOpp()
+            oppdaterHistorikk(søknad)
+            lås()
+        }
+    }
+    private fun håndterOverlappendeSøknadRevurdering(søknad: Søknad, oppdaterHistorikkBlock: (SykdomstidslinjeHendelse) -> Unit = ::oppdaterHistorikk) {
         if (søknad.delvisOverlappende(periode)) return søknad.funksjonellFeil(`Mottatt søknad som delvis overlapper`)
         if (søknad.sendtTilGosys()) return søknad.funksjonellFeil(RV_SØ_30)
         if (søknad.utenlandskSykmelding()) return søknad.funksjonellFeil(RV_SØ_29)
@@ -591,9 +604,7 @@ internal class Vedtaksperiode private constructor(
             søknad.valider(periode, jurist())
             søknad.validerInntektskilder(vilkårsgrunnlag == null)
             søknad.info("Søknad har trigget en revurdering")
-            if (tilstand == Avsluttet) låsOpp()
-            oppdaterHistorikk(søknad)
-            if (tilstand == Avsluttet) lås()
+            oppdaterHistorikkBlock(søknad)
         }
 
         person.igangsettOverstyring(søknad, Revurderingseventyr.korrigertSøknad(skjæringstidspunkt, periode))
@@ -2063,8 +2074,13 @@ internal class Vedtaksperiode private constructor(
         override val erFerdigBehandlet = true
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            vedtaksperiode.lås()
             check(!vedtaksperiode.utbetalinger.harUtbetaling()) { "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. " }
             vedtaksperiode.ferdigstillVedtak(hendelse)
+        }
+
+        override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+            vedtaksperiode.låsOpp()
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, arbeidsgivere: List<Arbeidsgiver>) = HJELP.utenBegrunnelse
@@ -2082,7 +2098,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             søknad.info("Prøver å igangsette revurdering grunnet korrigerende søknad")
-            vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
+            vedtaksperiode.håndterLåstOverlappendeSøknadRevurdering(søknad)
             if (!søknad.harFunksjonelleFeilEllerVerre() && !vedtaksperiode.forventerInntekt()) {
                 vedtaksperiode.emitVedtaksperiodeEndret(søknad) // TODO: for å unngå at flex oppretter oppgaver
             }
@@ -2098,7 +2114,9 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.emitVedtaksperiodeEndret(dager)
                 return false
             }
+            vedtaksperiode.låsOpp()
             vedtaksperiode.håndterDager(dager)
+            vedtaksperiode.lås()
             if (!vedtaksperiode.forventerInntekt() || Toggle.AuuHåndtererIkkeInntekt.enabled) {
                 vedtaksperiode.emitVedtaksperiodeEndret(dager)
                 vedtaksperiode.person.igangsettOverstyring(
@@ -2145,7 +2163,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            vedtaksperiode.revurderTidslinje(hendelse)
+            vedtaksperiode.revurderLåstTidslinje(hendelse)
         }
 
     }
@@ -2178,14 +2196,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            vedtaksperiode.låsOpp()
-            vedtaksperiode.oppdaterHistorikk(hendelse)
-            vedtaksperiode.lås()
-            vedtaksperiode.igangsettOverstyringAvTidslinje(hendelse)
+            vedtaksperiode.revurderLåstTidslinje(hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
+            vedtaksperiode.håndterLåstOverlappendeSøknadRevurdering(søknad)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
