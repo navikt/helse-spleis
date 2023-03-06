@@ -87,15 +87,15 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(
             (17.januar til 31.januar).map { dagen -> ManuellOverskrivingDag(dagen, Dagtype.Sykedag, 100) }
         )
-        assertForventetFeil(
-            forklaring = "auu-perioden lagrer ikke inntekt, men markeres som håndtert av perioden, som gjør at perioden ikke har inntekt når vi overstyrer den",
-            nå = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            },
-            ønsket = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-            }
-        )
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        val vilkårsgrunnlaget = inspektør.vilkårsgrunnlag(1.vedtaksperiode) ?: fail { "fant ikke vilkårsgrunnlag" }
+        val sykepengegrunnlagInspektør = vilkårsgrunnlaget.inspektør.sykepengegrunnlag.inspektør
+        val arbeidsgiverInntektsopplysning = sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(ORGNUMMER).inspektør
+        assertEquals(INNTEKT, arbeidsgiverInntektsopplysning.inntektsopplysning.inspektør.beløp)
+        assertEquals(Inntektsmelding::class, arbeidsgiverInntektsopplysning.inntektsopplysning::class)
     }
 
     @Test

@@ -1188,12 +1188,23 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyttVedtak(1.mars, 31.mars)
 
         nyPeriode(1.januar til 31.januar)
-        assertEquals(2, observatør.manglendeInntektsmeldingVedtaksperioder.size)
-        assertEquals(1, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
+        val manglendeInntektsmeldingEvents = observatør.manglendeInntektsmeldingVedtaksperioder
+        assertEquals(2, manglendeInntektsmeldingEvents.size)
+        manglendeInntektsmeldingEvents[0].also { event ->
+            assertEquals(1.vedtaksperiode.id(ORGNUMMER), event.vedtaksperiodeId)
+        }
+        manglendeInntektsmeldingEvents[1].also { event ->
+            assertEquals(2.vedtaksperiode.id(ORGNUMMER), event.vedtaksperiodeId)
+        }
+        val trengerIkkeInntektsmeldingEvents = observatør.trengerIkkeInntektsmeldingVedtaksperioder
+        assertEquals(1, trengerIkkeInntektsmeldingEvents.size)
+        trengerIkkeInntektsmeldingEvents[0].also { event ->
+            assertEquals(1.vedtaksperiode.id(ORGNUMMER), event.vedtaksperiodeId)
+        }
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_REVURDERING)
-        assertEquals(2, observatør.manglendeInntektsmeldingVedtaksperioder.size)
+        assertEquals(2, manglendeInntektsmeldingEvents.size)
     }
 
     @Test
