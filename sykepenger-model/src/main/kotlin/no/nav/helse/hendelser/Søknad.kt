@@ -37,7 +37,6 @@ class Søknad(
     private val permittert: Boolean,
     private val merknaderFraSykmelding: List<Merknad>,
     sykmeldingSkrevet: LocalDateTime,
-    private val korrigerer: UUID?,
     private val opprinneligSendt: LocalDateTime?,
     private val utenlandskSykmelding: Boolean,
     private val sendTilGosys: Boolean,
@@ -108,11 +107,8 @@ class Søknad(
     internal fun forUng(alder: Alder) = alder.forUngForÅSøke(sendtTilNAVEllerArbeidsgiver.toLocalDate()).also {
         if (it) funksjonellFeil(RV_SØ_17)
     }
-    private fun avskjæringsdato(): LocalDate = when (korrigerer) {
-        null -> sendtTilNAVEllerArbeidsgiver.toLocalDate().minusMonths(3).withDayOfMonth(1)
-        else -> opprinneligSendt?.toLocalDate()?.minusMonths(3)?.withDayOfMonth(1) ?: LocalDate.MIN
-        //else -> LocalDate.MIN // det er tidspunktet den originale søknaden ble sendt inn som er bestemmende for foreldelse
-    }
+    private fun avskjæringsdato(): LocalDate =
+        (opprinneligSendt ?: sendtTilNAVEllerArbeidsgiver).toLocalDate().minusMonths(3).withDayOfMonth(1)
 
     override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
         hendelseIder.add(Dokumentsporing.søknad(meldingsreferanseId()))

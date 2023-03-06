@@ -94,7 +94,6 @@ abstract class AbstractObservableTest {
         permittert = false,
         merknaderFraSykmelding = emptyList(),
         sykmeldingSkrevet = sykmeldingSkrevet,
-        korrigerer = null,
         opprinneligSendt = null,
         utenlandskSykmelding = false,
         sendTilGosys = false,

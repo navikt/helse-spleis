@@ -27,7 +27,7 @@ internal class SendtNavSøknaderRiver(
             interestedIn("tom") { it.asLocalDate() }
         }
         message.require("sendtNav", JsonNode::asLocalDateTime)
-        message.interestedIn("arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "korrigerer", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys")
+        message.interestedIn("arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys")
     }
 
     override fun createMessage(packet: JsonMessage) = SendtSøknadNavMessage(packet)

@@ -41,9 +41,6 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, private val builder: 
                 val tom = it.path("tom").takeUnless { it.isMissingOrNull() }?.asLocalDate()
                 builder.fravær(fraværstype, fom, tom)
             }
-            packet["korrigerer"].takeUnless(JsonNode::isMissingOrNull)?.let {
-                builder.korrigerer(UUID.fromString(it.asText()))
-            }
             packet["opprinneligSendt"].takeUnless(JsonNode::isMissingOrNull)?.let {
                 builder.opprinneligSendt(it.asLocalDateTime())
             }

@@ -99,7 +99,6 @@ internal class ArbeidsgiverHendelsefabrikk(
             permittert = permittert,
             merknaderFraSykmelding = merknaderFraSykmelding,
             sykmeldingSkrevet = sykmeldingSkrevet ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay(),
-            korrigerer = korrigerer,
             opprinneligSendt = opprinneligSendt?.atStartOfDay(),
             utenlandskSykmelding = utenlandskSykmelding,
             sendTilGosys = sendTilGosys,

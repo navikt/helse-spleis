@@ -18,7 +18,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 internal class SendtSøknadBuilder : SøknadBuilder() {
     private val perioder = mutableListOf<Søknadsperiode>()
     private val merkander = mutableListOf<Merknad>()
-    private var korrigerer: UUID? = null
     private var opprinneligSendt: LocalDateTime? = null
     private var harAndreInntektskilder: Boolean = false
     private var utenlandskSykmelding: Boolean = false
@@ -35,7 +34,6 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         permittert = permittert,
         merknaderFraSykmelding = merkander,
         sykmeldingSkrevet = sykmeldingSkrevet,
-        korrigerer = korrigerer,
         opprinneligSendt = opprinneligSendt,
         utenlandskSykmelding = utenlandskSykmelding,
         sendTilGosys = sendTilGosys
@@ -91,9 +89,6 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         )
     }
 
-    fun korrigerer(korrigerer: UUID) {
-        this.korrigerer = korrigerer
-    }
     fun opprinneligSendt(opprinneligSendt: LocalDateTime) {
         this.opprinneligSendt = opprinneligSendt
     }
