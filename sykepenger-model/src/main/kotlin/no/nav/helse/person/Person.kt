@@ -484,8 +484,6 @@ class Person private constructor(
         hendelseId: UUID?
     ) {
         val event = PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
-            fødselsnummer = personidentifikator.toString(),
-            aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             vedtaksperiodeFom = vedtaksperiode.start,

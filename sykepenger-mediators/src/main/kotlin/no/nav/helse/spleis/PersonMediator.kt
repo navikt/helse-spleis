@@ -121,6 +121,25 @@ internal class PersonMediator(
         )))
     }
 
+    override fun overlappendeInfotrygdperiodeEtterInfotrygdendring(event: PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring) {
+        queueMessage(JsonMessage.newMessage("overlappende_infotrygdperiode_etter_infotrygdendring", mapOf(
+            "organisasjonsnummer" to event.organisasjonsnummer,
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "vedtaksperiodeFom" to event.vedtaksperiodeFom,
+            "vedtaksperiodeTom" to event.vedtaksperiodeTom,
+            "vedtaksperiodetilstand" to event.vedtaksperiodetilstand,
+            "infotrygdhistorikkHendelseId" to (event.infotrygdhistorikkHendelseId ?: ""),
+            "infotrygdperioder" to event.infotrygdperioder.map {
+                mapOf(
+                    "fom" to it.fom,
+                    "tom" to it.tom,
+                    "type" to it.type,
+                    "organisasjonsnummer" to (it.orgnummer ?: "")
+                )
+            }
+        )))
+    }
+
     override fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {
         queueMessage(JsonMessage.newMessage("vedtaksperiode_påminnet", påminnelse.toOutgoingMessage()))
     }

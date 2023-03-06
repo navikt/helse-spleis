@@ -7,8 +7,10 @@ import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.spleis.TestMessageFactory.UtbetalingshistorikkTestdata
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -27,6 +29,35 @@ internal class InfotrygdendringTest : AbstractEndToEndMediatorTest() {
     fun `sender infotrygdendring uten at vi vet om person fra før`() {
         sendInfotrygdendring()
         assertTrue(testRapid.inspektør.antall() == 0)
+    }
+
+    @Test
+    fun `utgående melding om overlappende infotrygdutbetaling`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInfotrygdendring()
+        sendUtbetalingshistorikkEtterInfotrygdendring(
+            listOf(
+                UtbetalingshistorikkTestdata(
+                    fom = 3.januar,
+                    tom = 26.januar,
+                    arbeidskategorikode = "01",
+                    utbetalteSykeperioder = listOf(
+                        UtbetalingshistorikkTestdata.UtbetaltSykeperiode(
+                            fom = 3.januar,
+                            tom = 26.januar,
+                            dagsats = 1400.0,
+                            typekode = "0",
+                            utbetalingsgrad = "100",
+                            organisasjonsnummer = ORGNUMMER
+                        )
+                    ),
+                    inntektsopplysninger = emptyList()
+                )
+            )
+        )
+        val overlappendeInfotrygdperiodeEtterInfotrygdendringEvent = testRapid.inspektør.siste("overlappende_infotrygdperiode_etter_infotrygdendring")
+        assertNotNull(overlappendeInfotrygdperiodeEtterInfotrygdendringEvent)
     }
 
     private fun assertSykepengehistorikkdetaljer(behov: JsonNode) {

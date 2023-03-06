@@ -253,8 +253,6 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     )
 
     data class OverlappendeInfotrygdperiodeEtterInfotrygdendring(
-        val fødselsnummer: String,
-        val aktørId: String,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
         val vedtaksperiodeFom: LocalDate,

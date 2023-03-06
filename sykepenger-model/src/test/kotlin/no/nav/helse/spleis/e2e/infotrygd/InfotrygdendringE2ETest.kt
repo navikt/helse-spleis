@@ -51,8 +51,6 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
         val event = observatør.overlappendeInfotrygdperiodeEtterInfotrygdendring.single()
         val forventet =
             PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = AKTØRID,
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = observatør.sisteVedtaksperiodeId(ORGNUMMER),
                 vedtaksperiodeFom = 1.januar,
