@@ -3,6 +3,7 @@ val ktorVersion = "2.2.4"
 val wireMockVersion = "2.35.0"
 val awaitilityVersion = "4.2.0"
 val mockVersion = "1.13.4"
+val kGraphQLVersion = "0.19.0"
 
 val mainClass = "no.nav.helse.spleis.AppKt"
 
@@ -23,12 +24,8 @@ dependencies {
     implementation(libs.cloudsql)
     implementation("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryPrometheusVersion")
 
-    // Midledertidig løsnings, pga problemer med KGraphQL og ktor 2.0 se: https://github.com/aPureBase/KGraphQL/issues/185
-    // Etter evt fix fra apurebase Legg tilbake importerne:
-    // implementation("com.apurebase:kgraphql:$kGraphQLVersion")
-    // implementation("com.apurebase:kgraphql-ktor:$kGraphQLVersion")
-    implementation("com.github.untoldwind.KGraphQL:kgraphql:0.17.14-fork-8")
-    implementation("com.github.untoldwind.KGraphQL:kgraphql-ktor:0.17.14-fork-8")
+    implementation("com.apurebase:kgraphql:$kGraphQLVersion")
+    implementation("com.apurebase:kgraphql-ktor:$kGraphQLVersion")
 
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-server-metrics-micrometer:$ktorVersion")
