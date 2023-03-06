@@ -54,19 +54,39 @@ internal class VedtaksperiodeVenter private constructor(
 internal class VenterPå(
     private val vedtaksperiodeId: UUID,
     private val organisasjonsnummer: String,
-    private val venteÅrsak: Venteårsak
+    private val venteårsak: Venteårsak
 ) {
     override fun toString() =
-        "vedtaksperiode $vedtaksperiodeId for arbeidsgiver $organisasjonsnummer med venteårsak ${venteÅrsak.name}"
+        "vedtaksperiode $vedtaksperiodeId for arbeidsgiver $organisasjonsnummer som venter på $venteårsak"
 }
 
-enum class Venteårsak {
-    GODKJENNING,
-    SØKNAD,
-    INNTEKTSMELDING,
-    VILKÅRPRØVING,
-    INFOTRYGDHISTORIKK,
-    BEREGNING,
-    UTBETALING,
-    HJELP
+internal class Venteårsak private constructor(
+    private val hva: Hva,
+    private val hvorfor: Hvorfor?,
+){
+    override fun toString() =
+        hva.name + if(hvorfor == null) "" else "fordi ${hvorfor.name}"
+    enum class Hva {
+        GODKJENNING,
+        SØKNAD,
+        INNTEKTSMELDING,
+        BEREGNING,
+        UTBETALING,
+        HJELP
+    }
+
+    enum class Hvorfor {
+        MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER,
+        MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE,
+        HAR_SYKMELDING_I_SAMME_MÅNED_SOM_SKJÆRINGSTIDSPUNKTET_PÅ_ANDRE_ARBEIDSGIVERE,
+        HAR_SYKMELDING_SOM_STARTER_FØR_ELLER_OVERLAPPER_PÅ_ANDRE_ARBEIDSGIVERE,
+        MANGLER_INNTEKT_FOR_VILKÅRSPRØVING_PÅ_ANDRE_ARBEIDSGIVERE,
+        MANGLER_REFUSJONSOPPLYSNINGER_PÅ_ANDRE_ARBEIDSGIVERE
+    }
+
+    internal companion object {
+        internal infix fun Hva.fordi(hvorfor: Hvorfor) = Venteårsak(this, hvorfor)
+        internal val Hva.utenBegrunnelse get() = Venteårsak(this, null)
+    }
 }
+
