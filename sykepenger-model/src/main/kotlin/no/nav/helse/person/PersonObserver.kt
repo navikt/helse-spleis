@@ -8,8 +8,11 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.PersonObserver.ForespurtOpplysning.Companion.toJsonMap
+import no.nav.helse.person.infotrygdhistorikk.Friperiode
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
+import no.nav.helse.økonomi.Prosentdel
 
 interface PersonObserver : SykefraværstilfelleeventyrObserver {
     data class VedtaksperiodeIkkeFunnetEvent(
@@ -249,6 +252,58 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val årsaker: List<String>,
     )
 
+    data class OverlappendeInfotrygdperiodeEtterInfotrygdendring(
+        val fødselsnummer: String,
+        val aktørId: String,
+        val organisasjonsnummer: String,
+        val vedtaksperiodeId: UUID,
+        val vedtaksperiodeFom: LocalDate,
+        val vedtaksperiodeTom: LocalDate,
+        val vedtaksperiodetilstand: String,
+        val infotrygdhistorikkHendelseId: String?,
+        val infotrygdperioder: List<Infotrygdperiode>
+    ) {
+        data class Infotrygdperiode(
+            val fom: LocalDate,
+            val tom: LocalDate,
+            val type: String,
+            val orgnummer: String?
+        )
+        internal class InfotrygdperiodeBuilder(infotrygdperiode: no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode): InfotrygdperiodeVisitor {
+            var infotrygdperiode: Infotrygdperiode? = null
+
+            init {
+                infotrygdperiode.accept(this)
+            }
+
+            override fun visitInfotrygdhistorikkFerieperiode(periode: Friperiode, fom: LocalDate, tom: LocalDate) {
+                infotrygdperiode = Infotrygdperiode(fom, tom, "FRIPERIODE", null)
+            }
+
+            override fun visitInfotrygdhistorikkPersonUtbetalingsperiode(
+                periode: Utbetalingsperiode,
+                orgnr: String,
+                fom: LocalDate,
+                tom: LocalDate,
+                grad: Prosentdel,
+                inntekt: no.nav.helse.økonomi.Inntekt
+            ) {
+                infotrygdperiode = Infotrygdperiode(fom, tom, "PERSONUTBETALING", orgnr)
+            }
+
+            override fun visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(
+                periode: Utbetalingsperiode,
+                orgnr: String,
+                fom: LocalDate,
+                tom: LocalDate,
+                grad: Prosentdel,
+                inntekt: no.nav.helse.økonomi.Inntekt
+            ) {
+                infotrygdperiode = Infotrygdperiode(fom, tom, "ARBEIDSGIVERUTBETALING", orgnr)
+            }
+        }
+    }
+
     data class VedtakFattetEvent(
         val fødselsnummer: String,
         val aktørId: String,
@@ -313,4 +368,6 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     ) {}
 
     fun overstyringIgangsatt(event: OverstyringIgangsatt) {}
+
+    fun overlappendeInfotrygdperiodeEtterInfotrygdendring(event: OverlappendeInfotrygdperiodeEtterInfotrygdendring) {}
 }

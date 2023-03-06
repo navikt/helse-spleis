@@ -3,7 +3,7 @@ package no.nav.helse.person.infotrygdhistorikk
 import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.InfotrygdhistorikkVisitor
+import no.nav.helse.person.InfotrygdperiodeVisitor
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -15,12 +15,14 @@ abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
     internal open fun sykdomstidslinje(kilde: SykdomstidslinjeHendelse.Hendelseskilde): Sykdomstidslinje = Sykdomstidslinje()
     internal open fun utbetalingstidslinje(): Utbetalingstidslinje = Utbetalingstidslinje()
 
-    internal abstract fun accept(visitor: InfotrygdhistorikkVisitor)
+    internal abstract fun accept(visitor: InfotrygdperiodeVisitor)
 
     internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje, kilde: SykdomstidslinjeHendelse.Hendelseskilde): Sykdomstidslinje {
         if (!gjelder(orgnummer)) return sykdomstidslinje
         return sykdomstidslinje.merge(sykdomstidslinje(kilde), replace)
     }
+
+    internal fun overlapperMed(other: Periode) = periode.overlapperMed(other)
 
     internal open fun gjelder(orgnummer: String) = true
 

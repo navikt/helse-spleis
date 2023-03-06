@@ -291,6 +291,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikk(
 }
 
 internal fun AbstractEndToEndTest.utbetalingshistorikkEtterInfotrygdEndring(
+    meldingsreferanseId : UUID = UUID.randomUUID(),
     utbetalinger: List<Infotrygdperiode> = listOf(),
     inntektshistorikk: List<Inntektsopplysning> = emptyList(),
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
@@ -298,12 +299,12 @@ internal fun AbstractEndToEndTest.utbetalingshistorikkEtterInfotrygdEndring(
     besvart: LocalDateTime = LocalDateTime.now(),
 ): UtbetalingshistorikkEtterInfotrygdendring {
     return UtbetalingshistorikkEtterInfotrygdendring(
-        meldingsreferanseId = UUID.randomUUID(),
+        meldingsreferanseId = meldingsreferanseId,
         aktørId = AKTØRID,
         fødselsnummer = fnr.toString(),
         element = InfotrygdhistorikkElement.opprett(
             oppdatert = besvart,
-            hendelseId = UUID.randomUUID(),
+            hendelseId = meldingsreferanseId,
             perioder = utbetalinger,
             inntekter = inntektshistorikk,
             arbeidskategorikoder = arbeidskategorikoder

@@ -21,6 +21,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
@@ -138,7 +139,7 @@ internal class Arbeidsgiver private constructor(
         }
 
         internal fun List<Arbeidsgiver>.håndter(
-            hendelse: IAktivitetslogg,
+            hendelse: UtbetalingshistorikkEtterInfotrygdendring,
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
             forEach { arbeidsgiver ->
@@ -596,7 +597,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun håndter(
-        hendelse: IAktivitetslogg,
+        hendelse: UtbetalingshistorikkEtterInfotrygdendring,
         infotrygdhistorikk: Infotrygdhistorikk
     ) {
         håndter(hendelse) { håndter(hendelse, infotrygdhistorikk) }

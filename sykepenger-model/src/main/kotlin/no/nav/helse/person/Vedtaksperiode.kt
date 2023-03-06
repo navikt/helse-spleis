@@ -24,6 +24,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
@@ -343,7 +344,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(
-        hendelse: IAktivitetslogg,
+        hendelse: UtbetalingshistorikkEtterInfotrygdendring,
         infotrygdhistorikk: Infotrygdhistorikk
     ) {
         kontekst(hendelse)
@@ -1064,9 +1065,17 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
+            hendelse: UtbetalingshistorikkEtterInfotrygdendring,
             infotrygdhistorikk: Infotrygdhistorikk
-        ) {}
+        ) {
+            infotrygdhistorikk.utbetalingshistorikkEtterInfotrygdendring(
+                vedtaksperiode.id,
+                vedtaksperiode.periode,
+                vedtaksperiode.tilstand.type.toString(),
+                vedtaksperiode.organisasjonsnummer,
+                vedtaksperiode.person
+            )
+        }
 
         fun håndter(
             person: Person,
@@ -1508,9 +1517,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
+            hendelse: UtbetalingshistorikkEtterInfotrygdendring,
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
+            super.håndter(vedtaksperiode, hendelse, infotrygdhistorikk)
             validation(hendelse) {
                 onValidationFailed { vedtaksperiode.forkast(hendelse) }
                 valider {
@@ -1930,9 +1940,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
+            hendelse: UtbetalingshistorikkEtterInfotrygdendring,
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
+            super.håndter(vedtaksperiode, hendelse, infotrygdhistorikk)
             if (vedtaksperiode.utbetalinger.erHistorikkEndretSidenBeregning(infotrygdhistorikk)) return vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode) {
                 hendelse.info("Infotrygdhistorikken har endret seg, reberegner periode")
             }
@@ -1990,9 +2001,10 @@ internal class Vedtaksperiode private constructor(
         }
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
+            hendelse: UtbetalingshistorikkEtterInfotrygdendring,
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
+            super.håndter(vedtaksperiode, hendelse, infotrygdhistorikk)
             if (vedtaksperiode.utbetalinger.erHistorikkEndretSidenBeregning(infotrygdhistorikk)) return vedtaksperiode.tilstand(
                 hendelse,
                 AvventerHistorikkRevurdering

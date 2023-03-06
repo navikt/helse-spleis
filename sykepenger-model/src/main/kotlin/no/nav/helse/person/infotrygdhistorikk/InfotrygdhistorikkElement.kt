@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Person
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
@@ -187,6 +188,21 @@ class InfotrygdhistorikkElement private constructor(
     internal fun erEndretUtbetaling(sisteElementSomFantesFørUtbetaling: InfotrygdhistorikkElement): Boolean {
         if (this === sisteElementSomFantesFørUtbetaling) return false
         return this.perioder != sisteElementSomFantesFørUtbetaling.perioder
+    }
+
+    internal fun utbetalingshistorikkEtterInfotrygdendring(
+        vedtaksperiodeId: UUID,
+        vedtaksperiode: Periode,
+        tilstand: String,
+        organisasjonsnummer: String,
+        person: Person
+    ) {
+        val overlappendePerioder : List<Infotrygdperiode> = perioder.filter { it.overlapperMed(vedtaksperiode) }
+        if (overlappendePerioder.isEmpty()) return
+        person.emitOverlappendeInfotrygdperiodeEtterInfotrygdendring(
+            vedtaksperiodeId, vedtaksperiode, tilstand, organisasjonsnummer, overlappendePerioder, hendelseId
+        )
+
     }
 }
 

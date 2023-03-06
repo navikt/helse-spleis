@@ -1,11 +1,13 @@
 package no.nav.helse.person.infotrygdhistorikk
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -133,6 +135,16 @@ internal class Infotrygdhistorikk private constructor(
     ) {
         val dekoratør = if (harHistorikk()) InfotrygdUtbetalingstidslinjedekoratør(builder, sykdomstidslinje.periode()!!, siste.betaltePerioder()) else builder
         build(organisasjonsnummer, sykdomstidslinje, dekoratør, subsumsjonObserver)
+    }
+    internal fun utbetalingshistorikkEtterInfotrygdendring(
+        vedtaksperiodeId: UUID,
+        vedtaksperiode: Periode,
+        tilstand: String,
+        organisasjonsnummer: String,
+        person: Person
+    ) {
+        if (!harHistorikk()) return
+        siste.utbetalingshistorikkEtterInfotrygdendring(vedtaksperiodeId, vedtaksperiode, tilstand, organisasjonsnummer, person)
     }
 
 

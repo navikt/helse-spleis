@@ -3,7 +3,7 @@ package no.nav.helse.person.infotrygdhistorikk
 import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.InfotrygdhistorikkVisitor
+import no.nav.helse.person.InfotrygdperiodeVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
@@ -70,7 +70,7 @@ abstract class Utbetalingsperiode(
 class ArbeidsgiverUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, grad: Prosentdel, inntekt: Inntekt) :
     Utbetalingsperiode(orgnr, fom, tom, grad, inntekt.rundTilDaglig()) {
 
-    override fun accept(visitor: InfotrygdhistorikkVisitor) {
+    override fun accept(visitor: InfotrygdperiodeVisitor) {
         visitor.visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(this, orgnr, periode.start, periode.endInclusive, grad, inntekt)
     }
 }
@@ -78,7 +78,7 @@ class ArbeidsgiverUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDa
 class PersonUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, grad: Prosentdel, inntekt: Inntekt) :
     Utbetalingsperiode(orgnr, fom, tom, grad, inntekt.rundTilDaglig()) {
 
-    override fun accept(visitor: InfotrygdhistorikkVisitor) {
+    override fun accept(visitor: InfotrygdperiodeVisitor) {
         visitor.visitInfotrygdhistorikkPersonUtbetalingsperiode(this, orgnr, periode.start, periode.endInclusive, grad, inntekt)
     }
 }

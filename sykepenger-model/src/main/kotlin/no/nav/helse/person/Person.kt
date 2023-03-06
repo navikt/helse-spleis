@@ -62,6 +62,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AG_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -211,7 +212,7 @@ class Person private constructor(
     fun håndter(utbetalingshistorikk: UtbetalingshistorikkEtterInfotrygdendring) {
         utbetalingshistorikk.kontekst(this)
         if(!utbetalingshistorikk.oppdaterHistorikk(infotrygdhistorikk)) return
-        arbeidsgivere.håndter(utbetalingshistorikk, infotrygdhistorikk)
+        arbeidsgivere.håndter(utbetalingshistorikk, infotrygdhistorikk) // diff
         håndterGjenoppta(utbetalingshistorikk)
     }
 
@@ -472,6 +473,31 @@ class Person private constructor(
 
     internal fun emitOverstyringIgangsattEvent(event: PersonObserver.OverstyringIgangsatt) {
         observers.forEach { it.overstyringIgangsatt(event) }
+    }
+
+    internal fun emitOverlappendeInfotrygdperiodeEtterInfotrygdendring(
+        vedtaksperiodeId: UUID,
+        vedtaksperiode: Periode,
+        vedtaksperiodetilstand: String,
+        organisasjonsnummer: String,
+        overlappendeInfotrygdPerioder: List<Infotrygdperiode>,
+        hendelseId: UUID?
+    ) {
+        val event = PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
+            fødselsnummer = personidentifikator.toString(),
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            vedtaksperiodeFom = vedtaksperiode.start,
+            vedtaksperiodeTom = vedtaksperiode.endInclusive,
+            vedtaksperiodetilstand = vedtaksperiodetilstand,
+            infotrygdhistorikkHendelseId = hendelseId.toString(),
+            infotrygdperioder = overlappendeInfotrygdPerioder.mapNotNull {
+                PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.InfotrygdperiodeBuilder(it).infotrygdperiode
+            }
+        )
+
+        observers.forEach { it.overlappendeInfotrygdperiodeEtterInfotrygdendring(event) }
     }
 
     internal fun feriepengerUtbetalt(feriepengerUtbetaltEvent: PersonObserver.FeriepengerUtbetaltEvent) {

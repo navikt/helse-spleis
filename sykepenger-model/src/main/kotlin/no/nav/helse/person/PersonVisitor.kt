@@ -59,17 +59,7 @@ internal interface PersonVisitor : AlderVisitor, ArbeidsgiverVisitor, Aktivitets
     ) {}
 }
 
-internal interface InfotrygdhistorikkVisitor {
-    fun preVisitInfotrygdhistorikk() {}
-    fun preVisitInfotrygdhistorikkElement(
-        id: UUID,
-        tidsstempel: LocalDateTime,
-        oppdatert: LocalDateTime,
-        hendelseId: UUID?
-    ) {
-    }
-
-    fun preVisitInfotrygdhistorikkPerioder() {}
+internal interface InfotrygdperiodeVisitor {
     fun visitInfotrygdhistorikkFerieperiode(periode: Friperiode, fom: LocalDate, tom: LocalDate) {}
     fun visitInfotrygdhistorikkPersonUtbetalingsperiode(
         periode: Utbetalingsperiode,
@@ -87,6 +77,19 @@ internal interface InfotrygdhistorikkVisitor {
         grad: Prosentdel,
         inntekt: Inntekt
     ) {}
+}
+
+internal interface InfotrygdhistorikkVisitor: InfotrygdperiodeVisitor {
+    fun preVisitInfotrygdhistorikk() {}
+    fun preVisitInfotrygdhistorikkElement(
+        id: UUID,
+        tidsstempel: LocalDateTime,
+        oppdatert: LocalDateTime,
+        hendelseId: UUID?
+    ) {
+    }
+
+    fun preVisitInfotrygdhistorikkPerioder() {}
     fun postVisitInfotrygdhistorikkPerioder() {}
     fun preVisitInfotrygdhistorikkInntektsopplysninger() {}
     fun visitInfotrygdhistorikkInntektsopplysning(

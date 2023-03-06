@@ -641,14 +641,17 @@ internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkEtterInfotrygdendr
     vararg utbetalinger: Infotrygdperiode,
     inntektshistorikk: List<Inntektsopplysning> = emptyList(),
     arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
-    besvart: LocalDateTime = LocalDateTime.now()
-) {
+    besvart: LocalDateTime = LocalDateTime.now(),
+    meldingsreferanseId : UUID = UUID.randomUUID()
+): UUID {
     utbetalingshistorikkEtterInfotrygdEndring(
+        meldingsreferanseId = meldingsreferanseId,
         utbetalinger = utbetalinger.toList(),
         inntektshistorikk = inntektshistorikk,
         arbeidskategorikoder = arbeidskategorikoder,
         besvart = besvart
     ).håndter(Person::håndter)
+    return meldingsreferanseId
 }
 
 internal fun Inntekt.repeat(antall: Int) = (0.until(antall)).map { this }
