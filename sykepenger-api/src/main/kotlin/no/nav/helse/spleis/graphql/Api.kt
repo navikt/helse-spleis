@@ -45,15 +45,9 @@ private object ApiMetrikker {
     fun målByggSnapshot(block: () -> PersonDTO): PersonDTO = responstid.labels("bygg_snapshot").time(block)
 }
 
-internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: HendelseDao) {
+internal fun SchemaBuilder.personSchema(personResolver: (fnr: String) -> GraphQLPerson?) {
     query("person") {
-        resolver { fnr: String ->
-            ApiMetrikker.målDatabase { personDao.hentPersonFraFnr(fnr.toLong()) }?.let { serialisertPerson ->
-                ApiMetrikker.målDeserialisering { serialisertPerson.deserialize(MaskinellJurist()) { hendelseDao.hentAlleHendelser(fnr.toLong()) } }
-                    .let { ApiMetrikker.målByggSnapshot { håndterPerson(fnr.toLong(), it, hendelseDao) } }
-                    .let { person -> mapTilDto(person) }
-            }
-        }
+        resolver { fnr: String -> personResolver(fnr) }
     }
 
     personTypes()
@@ -121,6 +115,13 @@ private fun mapTilDto(person: PersonDTO) =
 fun Application.installGraphQLApi(dataSource: DataSource, authProviderName: String) {
     val personDao = PersonDao(dataSource)
     val hendelseDao = HendelseDao(dataSource)
+    val personResolver: (fnr: String) -> GraphQLPerson? = { fnr ->
+        ApiMetrikker.målDatabase { personDao.hentPersonFraFnr(fnr.toLong()) }?.let { serialisertPerson ->
+            ApiMetrikker.målDeserialisering { serialisertPerson.deserialize(MaskinellJurist()) { hendelseDao.hentAlleHendelser(fnr.toLong()) } }
+                .let { ApiMetrikker.målByggSnapshot { håndterPerson(fnr.toLong(), it, hendelseDao) } }
+                .let { person -> mapTilDto(person) }
+        }
+    }
 
     install(GraphQL) {
         endpoint = "/graphql"
@@ -134,7 +135,7 @@ fun Application.installGraphQLApi(dataSource: DataSource, authProviderName: Stri
         }
 
         schema {
-            personSchema(personDao, hendelseDao)
+            personSchema(personResolver)
         }
     }
 }

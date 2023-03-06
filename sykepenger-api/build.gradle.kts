@@ -4,6 +4,7 @@ val wireMockVersion = "2.35.0"
 val awaitilityVersion = "4.2.0"
 val mockVersion = "1.13.4"
 val kGraphQLVersion = "0.19.0"
+val jsonassertVersion = "1.5.1"
 
 val mainClass = "no.nav.helse.spleis.AppKt"
 
@@ -42,11 +43,14 @@ dependencies {
         exclude("com.fasterxml.jackson.core")
     }
     testImplementation("io.ktor:ktor-client-cio:$ktorVersion")
+    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("org.awaitility:awaitility:$awaitilityVersion")
     testImplementation("com.github.tomakehurst:wiremock-jre8:$wireMockVersion") {
         exclude(group = "junit")
     }
     testImplementation("io.mockk:mockk:$mockVersion")
+    testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
+
 
 }
 
