@@ -37,6 +37,28 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val tom: LocalDate
     )
 
+    data class VedtaksperiodeVenterEvent(
+        val fødselsnummer: String,
+        val aktørId: String,
+        val organisasjonsnummer: String,
+        val vedtaksperiodeId: UUID,
+        val hendelser: Set<UUID>,
+        val ventetSiden: LocalDateTime,
+        val venterTil: LocalDateTime,
+        val venterPå: VenterPå
+    ) {
+        data class VenterPå(
+            val vedtaksperiodeId: UUID,
+            val organisasjonsnummer: String,
+            val venteårsak: Venteårsak
+        )
+
+        data class Venteårsak(
+            val hva : String,
+            val hvorfor: String?
+        )
+    }
+
     data class VedtaksperiodeForkastetEvent(
         val fødselsnummer: String,
         val aktørId: String,
@@ -341,6 +363,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {}
     fun vedtaksperiodeIkkePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, nåværendeTilstand: TilstandType) {}
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {}
+    fun vedtaksperiodeVenter(event: VedtaksperiodeVenterEvent) {}
     fun vedtaksperiodeForkastet(event: VedtaksperiodeForkastetEvent) {}
     fun opprettOppgaveForSpeilsaksbehandlere(event: OpprettOppgaveForSpeilsaksbehandlereEvent) {}
     fun opprettOppgave(event: OpprettOppgaveEvent) {}

@@ -149,11 +149,12 @@ internal class TestPerson(
             andreInntektskilder: Boolean = false,
             sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
             sykmeldingSkrevet: LocalDateTime? = null,
-            orgnummer: String = ""
+            orgnummer: String = "",
+            søknadId: UUID = UUID.randomUUID()
         ) =
             behovsamler.fangInntektsmeldingReplay({
                 vedtaksperiodesamler.fangVedtaksperiode {
-                    arbeidsgiverHendelsefabrikk.lagSøknad(*perioder, andreInntektskilder = andreInntektskilder, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet)
+                    arbeidsgiverHendelsefabrikk.lagSøknad(*perioder, andreInntektskilder = andreInntektskilder, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet, id = søknadId)
                         .håndter(Person::håndter)
                 }?.also {
                     if (behovsamler.harBehov(it, Sykepengehistorikk)){
@@ -426,9 +427,9 @@ internal fun TestPerson.TestArbeidsgiver.nyttVedtak(
     håndterUtbetalt(status)
 }
 
-internal fun TestPerson.TestArbeidsgiver.nyPeriode(periode: Periode, grad: Prosentdel = 100.prosent): UUID {
+internal fun TestPerson.TestArbeidsgiver.nyPeriode(periode: Periode, grad: Prosentdel = 100.prosent, søknadId : UUID = UUID.randomUUID()): UUID {
     håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
-    return håndterSøknad(Sykdom(periode.start, periode.endInclusive, grad)) ?: fail { "Det ble ikke opprettet noen vedtaksperiode." }
+    return håndterSøknad(Sykdom(periode.start, periode.endInclusive, grad), søknadId = søknadId) ?: fail { "Det ble ikke opprettet noen vedtaksperiode." }
 }
 
 internal fun TestPerson.nyPeriode(periode: Periode, vararg orgnummer: String, grad: Prosentdel = 100.prosent) {

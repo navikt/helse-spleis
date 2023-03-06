@@ -21,6 +21,18 @@ internal class VedtaksperiodeVenter private constructor(
         }
     }
 
+    internal fun event(aktørId: String, fødselsnummer: String) =
+        PersonObserver.VedtaksperiodeVenterEvent(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            ventetSiden = ventetSiden,
+            venterTil = venterTil,
+            venterPå = venterPå.event(),
+            hendelser = hendelseIder
+    )
+
     override fun toString() =
         "vedtaksperiode $vedtaksperiodeId for arbeidsgiver $organisasjonsnummer venter på $venterPå. Ventet siden $ventetSiden og venter til $venterTil (${lesbarVentetid()})"
 
@@ -56,6 +68,11 @@ internal class VenterPå(
     private val organisasjonsnummer: String,
     private val venteårsak: Venteårsak
 ) {
+    internal fun event() = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
+        vedtaksperiodeId = vedtaksperiodeId,
+        organisasjonsnummer = organisasjonsnummer,
+        venteårsak = venteårsak.event()
+    )
     override fun toString() =
         "vedtaksperiode $vedtaksperiodeId for arbeidsgiver $organisasjonsnummer som venter på $venteårsak"
 }
@@ -64,8 +81,12 @@ internal class Venteårsak private constructor(
     private val hva: Hva,
     private val hvorfor: Hvorfor?,
 ){
+    internal fun event() = PersonObserver.VedtaksperiodeVenterEvent.Venteårsak(
+        hva = hva.name,
+        hvorfor = hvorfor?.name
+    )
     override fun toString() =
-        hva.name + if(hvorfor == null) "" else "fordi ${hvorfor.name}"
+        hva.name + if(hvorfor == null) "" else " fordi ${hvorfor.name}"
     enum class Hva {
         GODKJENNING,
         SØKNAD,

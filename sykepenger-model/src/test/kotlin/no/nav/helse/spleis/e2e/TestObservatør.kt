@@ -29,6 +29,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val vedtakFattetEvent = mutableMapOf<UUID, PersonObserver.VedtakFattetEvent>()
     val sykefraværstilfelleeventyr = mutableListOf<List<SykefraværstilfelleeventyrObserver.SykefraværstilfelleeventyrObserverEvent>>()
     val overstyringIgangsatt = mutableListOf<PersonObserver.OverstyringIgangsatt>()
+    val vedtaksperiodeVenter = mutableListOf<PersonObserver.VedtaksperiodeVenterEvent>()
     val overlappendeInfotrygdperiodeEtterInfotrygdendring = mutableListOf<PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring>()
 
     val opprettOppgaverTilSpeilsaksbehandlerEventer = mutableListOf<PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent>()
@@ -65,6 +66,11 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     fun kvitterInntektsmeldingReplay(vedtaksperiodeId: UUID) {
         inntektsmeldingReplayEventer.remove(vedtaksperiodeId)
     }
+
+    override fun vedtaksperiodeVenter(event: PersonObserver.VedtaksperiodeVenterEvent) {
+       vedtaksperiodeVenter.add(event)
+    }
+
     fun forkastedePerioder() = forkastedeEventer.size
     fun forkastet(vedtaksperiodeId: UUID) = forkastedeEventer.getValue(vedtaksperiodeId)
     fun opprettOppgaveForSpeilsaksbehandlereEvent() = opprettOppgaverTilSpeilsaksbehandlerEventer.toList()

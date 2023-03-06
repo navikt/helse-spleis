@@ -732,6 +732,12 @@ internal class Vedtaksperiode private constructor(
         person.inntektsmeldingReplay(id, skjæringstidspunkt, organisasjonsnummer, finnArbeidsgiverperiode()?.firstOrNull())
     }
 
+    private fun emitVedtaksperiodeVenter(
+        vedtaksperiodeVenter: VedtaksperiodeVenter
+    ) {
+        person.vedtaksperiodeVenter(vedtaksperiodeVenter.event(aktørId, fødselsnummer))
+    }
+
     private fun emitVedtaksperiodeEndret(
         aktivitetslogg: IAktivitetslogg,
         previousState: Vedtaksperiodetilstand = tilstand
@@ -962,7 +968,9 @@ internal class Vedtaksperiode private constructor(
         builder.venterPå(nestemann.id, nestemann.organisasjonsnummer, venteårsak)
         påminnelse.venter(builder, tilstand::makstid)
         builder.hendelseIder(hendelseIder())
-        sikkerlogg.info("${builder.build()}", keyValue("aktørId", aktørId))
+        val vedtaksperiodeVenter = builder.build()
+        sikkerlogg.info("$vedtaksperiodeVenter", keyValue("aktørId", aktørId))
+        emitVedtaksperiodeVenter(vedtaksperiodeVenter)
     }
 
     internal fun venteårsak(arbeidsgivere: List<Arbeidsgiver>) =
