@@ -864,14 +864,18 @@ internal fun AbstractEndToEndTest.håndterOverstyrTidslinje(
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     meldingsreferanseId: UUID = UUID.randomUUID()
 ): ArbeidstakerHendelse {
-    return OverstyrTidslinje(
+    val hendelse = OverstyrTidslinje(
         meldingsreferanseId = meldingsreferanseId,
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),
         aktørId = AbstractPersonTest.AKTØRID,
         organisasjonsnummer = orgnummer,
         dager = overstyringsdager,
         opprettet = LocalDateTime.now()
-    ).also { it.håndter(Person::håndter) }
+    )
+    håndterOgReplayInntektsmeldinger(orgnummer) {
+        hendelse.also { it.håndter(Person::håndter) }
+    }
+    return hendelse
 }
 
 internal fun AbstractEndToEndTest.håndterOverstyrArbeidsforhold(
