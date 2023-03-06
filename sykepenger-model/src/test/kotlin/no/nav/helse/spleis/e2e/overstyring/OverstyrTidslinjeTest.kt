@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -78,6 +79,24 @@ import org.junit.jupiter.api.fail
 import kotlin.reflect.KClass
 
 internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `overstyre ferie til sykdom`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 31.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterOverstyrTidslinje(
+            (17.januar til 31.januar).map { dagen -> ManuellOverskrivingDag(dagen, Dagtype.Sykedag, 100) }
+        )
+        assertForventetFeil(
+            forklaring = "auu-perioden lagrer ikke inntekt, men markeres som håndtert av perioden, som gjør at perioden ikke har inntekt når vi overstyrer den",
+            nå = {
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            },
+            ønsket = {
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            }
+        )
+    }
 
     @Test
     fun `vedtaksperiode strekker seg tilbake og endrer skjæringstidspunktet`() {
