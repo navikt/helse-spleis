@@ -789,6 +789,6 @@ class Person private constructor(
         observers.forEach { it.nyVedtaksperiodeUtbetaling(personidentifikator, aktørId, organisasjonsnummer, utbetalingId, vedtaksperiodeId) }
     }
 
-    internal fun venteårsak(vedtaksperiode: Vedtaksperiode) = vedtaksperiode.venteårsak(arbeidsgivere)
+    internal fun venteårsak(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) = vedtaksperiode.venteårsak(hendelse, arbeidsgivere)
 }
 
