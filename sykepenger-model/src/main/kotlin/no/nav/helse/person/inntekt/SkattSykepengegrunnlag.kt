@@ -83,7 +83,7 @@ internal class SkattSykepengegrunnlag(
         organisasjonsnummer: String,
         forklaring: String,
         oppfylt: Boolean
-    ) {
+    ) = apply {
         subsumsjonObserver.`§ 8-15`(
             skjæringstidspunkt = dato,
             organisasjonsnummer = organisasjonsnummer,

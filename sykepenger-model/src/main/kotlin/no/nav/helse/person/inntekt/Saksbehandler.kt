@@ -84,7 +84,7 @@ class Saksbehandler internal constructor(
         organisasjonsnummer: String,
         forklaring: String,
         oppfylt: Boolean
-    ) {
+    ) = apply {
         subsumsjonObserver.`§ 8-15`(
             dato,
             organisasjonsnummer,

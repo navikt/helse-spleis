@@ -7,6 +7,7 @@ import no.nav.helse.person.Opptjening
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.VedtakFattetBuilder
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.sjekkMuligeGhostsUtenArbeidsforhold
@@ -46,8 +47,9 @@ class ArbeidsgiverInntektsopplysning(
         inntektsopplysning.subsumerSykepengegrunnlag(subsumsjonObserver, orgnummer, opptjening?.startdatoFor(orgnummer))
     }
 
-    private fun subsummerArbeidsforhold(forklaring: String, oppfylt: Boolean, subsumsjonObserver: SubsumsjonObserver) {
-        inntektsopplysning.subsumerArbeidsforhold(subsumsjonObserver, orgnummer, forklaring, oppfylt)
+    private fun deaktiver(forklaring: String, oppfylt: Boolean, subsumsjonObserver: SubsumsjonObserver): ArbeidsgiverInntektsopplysning? {
+        inntektsopplysning.subsumerArbeidsforhold(subsumsjonObserver, orgnummer, forklaring, oppfylt) ?: return null
+        return this
     }
 
     override fun equals(other: Any?): Boolean {
@@ -76,12 +78,11 @@ class ArbeidsgiverInntektsopplysning(
         // flytter inntekt for *orgnummer* fra *this* til *deaktiverte*
         // aktive.deaktiver(deaktiverte, orgnummer) er direkte motsetning til deaktiverte.deaktiver(aktive, orgnummer)
         private fun List<ArbeidsgiverInntektsopplysning>.fjernInntekt(deaktiverte: List<ArbeidsgiverInntektsopplysning>, orgnummer: String, forklaring: String, oppfylt: Boolean, subsumsjonObserver: SubsumsjonObserver): Pair<List<ArbeidsgiverInntektsopplysning>, List<ArbeidsgiverInntektsopplysning>> {
-            val fjernet = checkNotNull(this.singleOrNull { it.orgnummer == orgnummer }) {
+            val inntektsopplysning = checkNotNull(this.singleOrNull { it.orgnummer == orgnummer }) {
                 "Kan ikke overstyre arbeidsforhold for en arbeidsgiver vi ikke kjenner til"
-            }
-            val aktive = this.filterNot { it.orgnummer == orgnummer }
-            fjernet.subsummerArbeidsforhold(forklaring, oppfylt, subsumsjonObserver)
-            return aktive to (deaktiverte + fjernet)
+            }.deaktiver(forklaring, oppfylt, subsumsjonObserver)
+            val aktive = this.filterNot { it === inntektsopplysning }
+            return aktive to (deaktiverte + listOfNotNull(inntektsopplysning))
         }
 
         // overskriver eksisterende verdier i *this* med verdier fra *other*,

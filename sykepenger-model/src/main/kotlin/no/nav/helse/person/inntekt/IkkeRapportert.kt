@@ -28,7 +28,7 @@ internal class IkkeRapportert(
         organisasjonsnummer: String,
         forklaring: String,
         oppfylt: Boolean
-    ) {
+    ) = apply {
         subsumsjonObserver.`§ 8-15`(
             skjæringstidspunkt = dato,
             organisasjonsnummer = organisasjonsnummer,

@@ -22,15 +22,6 @@ internal class Infotrygd(
 
     override fun omregnetÅrsinntekt(): Inntekt = beløp
 
-    override fun subsumerArbeidsforhold(
-        subsumsjonObserver: SubsumsjonObserver,
-        organisasjonsnummer: String,
-        forklaring: String,
-        oppfylt: Boolean
-    ) {
-        throw IllegalStateException("Kan ikke overstyre arbeidsforhold for en arbeidsgiver som har sykdom")
-    }
-
     override fun erSamme(other: Inntektsopplysning): Boolean {
         if (other !is Infotrygd) return false
         return this.dato == other.dato && this.beløp == other.beløp

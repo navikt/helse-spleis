@@ -36,7 +36,7 @@ abstract class Inntektsopplysning protected constructor(
         organisasjonsnummer: String,
         forklaring: String,
         oppfylt: Boolean
-    ) {}
+    ): Inntektsopplysning? = null
 
     internal companion object {
 

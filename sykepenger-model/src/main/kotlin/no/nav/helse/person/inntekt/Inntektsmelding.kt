@@ -30,15 +30,6 @@ internal class Inntektsmelding(
         return super.overstyres(ny)
     }
 
-    override fun subsumerArbeidsforhold(
-        subsumsjonObserver: SubsumsjonObserver,
-        organisasjonsnummer: String,
-        forklaring: String,
-        oppfylt: Boolean
-    ) {
-        throw IllegalStateException("Kan ikke overstyre arbeidsforhold for en arbeidsgiver som har sykdom")
-    }
-
     override fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): AvklarbarSykepengegrunnlag? {
         if (dato == skjæringstidspunkt) return this
         if (førsteFraværsdag == null || dato != førsteFraværsdag) return null
