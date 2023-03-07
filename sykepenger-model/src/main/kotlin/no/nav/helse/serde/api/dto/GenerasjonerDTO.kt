@@ -197,6 +197,7 @@ data class SpeilOppdrag(
 enum class Utbetalingstatus {
     Annullert,
     Forkastet,
+    Godkjent,
     GodkjentUtenUtbetaling,
     IkkeGodkjent,
     Overført,

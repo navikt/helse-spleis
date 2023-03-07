@@ -138,7 +138,6 @@ enum class GraphQLPeriodetilstand {
 enum class GraphQLUtbetalingstatus {
     Annullert,
     Forkastet,
-    @Deprecated("skal slettes")
     Godkjent,
     GodkjentUtenUtbetaling,
     IkkeGodkjent,
@@ -146,6 +145,7 @@ enum class GraphQLUtbetalingstatus {
     @Deprecated("skal slettes")
     Sendt,
     Ubetalt,
+    @Deprecated("skal slettes")
     UtbetalingFeilet,
     Utbetalt
 }
