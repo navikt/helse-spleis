@@ -76,9 +76,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     internal fun skjæringstidspunkterFraSpleis() = sisteInnlag()?.skjæringstidspunkterFraSpleis() ?: emptySet()
 
-    internal fun erRelevant(organisasjonsnummer: String, skjæringstidspunkter: List<LocalDate>) =
-        sisteInnlag()?.erRelevant(organisasjonsnummer, skjæringstidspunkter) ?: false
-
     internal fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver) =
         sisteInnlag()!!.medInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
 
@@ -133,10 +130,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun skjæringstidspunkterFraSpleis() = vilkårsgrunnlag
             .filterValues { it is Grunnlagsdata }
             .keys
-
-        internal fun erRelevant(organisasjonsnummer: String, skjæringstidspunkter: List<LocalDate>) =
-            skjæringstidspunkter.mapNotNull(vilkårsgrunnlag::get)
-                .any { it.erRelevant(organisasjonsnummer) }
 
         internal fun avvis(tidslinjer: List<Utbetalingstidslinje>) {
             val skjæringstidspunktperioder = skjæringstidspunktperioder(vilkårsgrunnlag.values)

@@ -28,7 +28,9 @@ internal class PersonBuilder(
 
     internal fun build(hendelser: List<HendelseDTO>): PersonDTO {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk).build()
-        val arbeidsgivere = arbeidsgivere.map { it.build(hendelser, alder, vilkårsgrunnlagHistorikk) }
+        val arbeidsgivere = arbeidsgivere
+            .map { it.build(hendelser, alder, vilkårsgrunnlagHistorikk) }
+            .filterNot { it.erTom(vilkårsgrunnlagHistorikk) }
         val vilkårsgrunnlag = arbeidsgivere.vilkårsgrunnlagSomPekesPåAvGhostPerioder() + vilkårsgrunnlagHistorikk.vilkårsgrunnlagSomPekesPåAvBeregnedePerioder()
 
         return PersonDTO(
@@ -51,9 +53,7 @@ internal class PersonBuilder(
         organisasjonsnummer: String
     ) {
         val arbeidsgiverBuilder = ArbeidsgiverBuilder(arbeidsgiver, id, organisasjonsnummer)
-        if (vilkårsgrunnlagHistorikk.erRelevant(organisasjonsnummer, person.skjæringstidspunkter()) || arbeidsgiver.harFerdigstiltPeriode() || arbeidsgiver.harSykdom()) {
-            arbeidsgivere.add(arbeidsgiverBuilder)
-        }
+        arbeidsgivere.add(arbeidsgiverBuilder)
         pushState(arbeidsgiverBuilder)
     }
 

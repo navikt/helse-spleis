@@ -37,6 +37,8 @@ internal class IInnslag(
 ) {
     internal fun toDTO() = innslag.mapValues { (_, vilkårsgrunnlag) -> vilkårsgrunnlag.toDTO() }
     internal fun finn(skjæringstidspunkt: LocalDate) = innslag[skjæringstidspunkt]?.toDTO()
+    internal fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) =
+        innslag.all { (_, vilkårsgrunnlag) -> vilkårsgrunnlag.inngårIkkeISammenligningsgrunnlag(organisasjonsnummer) }
 }
 
 internal class ISykepengegrunnlag(
@@ -63,6 +65,7 @@ internal interface IVilkårsgrunnlag {
     val refusjonsopplysningerPerArbeidsgiver: List<IArbeidsgiverrefusjon>
     val id: UUID
     fun toDTO(): Vilkårsgrunnlag
+    fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) = inntekter.none { it.arbeidsgiver == organisasjonsnummer }
 }
 
 internal class ISpleisGrunnlag(
@@ -149,14 +152,21 @@ internal class InntektBuilder(private val inntekt: Inntekt) {
 }
 
 internal class IVilkårsgrunnlagHistorikk {
+    private var nyesteInnslagId: UUID? = null
     private val historikk = mutableMapOf<VilkårsgrunnlagHistorikkId, IInnslag>()
+    private val nyesteInnslag get() = historikk[nyesteInnslagId]
     private val pekesPåAvEnBeregnetPeriode = mutableMapOf<UUID, Vilkårsgrunnlag>()
 
     internal fun leggTil(vilkårsgrunnlagHistorikkId: UUID, innslag: IInnslag) {
+        if (nyesteInnslagId == null) nyesteInnslagId = vilkårsgrunnlagHistorikkId
         historikk.putIfAbsent(vilkårsgrunnlagHistorikkId, innslag)
     }
 
+    internal fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) =
+        nyesteInnslag?.inngårIkkeISammenligningsgrunnlag(organisasjonsnummer) ?: true
+
     internal fun toDTO() = historikk.mapValues { (_, innslag) -> innslag.toDTO() }.toMap()
+
     internal fun vilkårsgrunnlagSomPekesPåAvBeregnedePerioder(): Map<UUID, Vilkårsgrunnlag> {
         return pekesPåAvEnBeregnetPeriode.toMap()
     }

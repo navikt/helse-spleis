@@ -2,6 +2,7 @@ package no.nav.helse.serde.api.dto
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 
 data class PersonDTO(
@@ -25,7 +26,11 @@ data class ArbeidsgiverDTO(
     val id: UUID,
     val ghostPerioder: List<GhostPeriodeDTO>,
     val generasjoner: List<Generasjon>
-)
+) {
+    internal fun erTom(vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk) = ghostPerioder.isEmpty()
+            && generasjoner.isEmpty()
+            && vilkårsgrunnlagHistorikk.inngårIkkeISammenligningsgrunnlag(organisasjonsnummer)
+}
 
 data class GhostPeriodeDTO(
     val id: UUID,
