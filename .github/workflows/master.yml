@@ -38,7 +38,7 @@ jobs:
           java-version: '17.x'
           cache: 'gradle'
       - name: test and build
-        run: ./gradlew test build
+        run: ./gradlew clean test build
       - name: build docker image
         run: docker build -f Dockerfile sykepenger-mediators --pull -t ${{ needs.set_version.outputs.image }}
       - name: push docker image
