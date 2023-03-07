@@ -3,11 +3,11 @@ package no.nav.helse.sykdomstidslinje
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.nyesteId
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.uhåndtertSykdomstidslinje
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.tournament.Dagturnering
 
 internal class Sykdomshistorikk private constructor(
@@ -32,11 +32,11 @@ internal class Sykdomshistorikk private constructor(
         return sykdomstidslinje()
     }
 
-    internal fun fyllUtPeriodeMedForventedeDager(hendelse: PersonHendelse, periode: Periode) {
+    internal fun fyllUtGhosttidslinje(periode: Periode) {
         val sykdomstidslinje = if (isEmpty()) Sykdomstidslinje() else this.sykdomstidslinje()
         val utvidetTidslinje = sykdomstidslinje.forsøkUtvidelse(periode) ?: return
-        val arbeidsdager = Sykdomstidslinje().forsøkUtvidelse(periode)
-        elementer.add(0, Element.opprett(hendelse, arbeidsdager!!, utvidetTidslinje))
+        val arbeidsdager = Sykdomstidslinje.arbeidsdager(periode, INGEN)
+        elementer.add(0, Element.opprettGhosttidslinje(arbeidsdager, utvidetTidslinje))
     }
 
     internal fun fjernDager(perioder: List<Periode>) {
@@ -115,21 +115,6 @@ internal class Sykdomshistorikk private constructor(
 
             internal fun opprett(
                 historikk: Sykdomshistorikk,
-                hendelse: SykdomstidslinjeHendelse
-            ): Element {
-                val hendelseSykdomstidslinje = hendelse.sykdomstidslinje()
-                return Element(
-                    hendelseId = hendelse.meldingsreferanseId(),
-                    hendelseSykdomstidslinje = hendelseSykdomstidslinje,
-                    beregnetSykdomstidslinje = historikk.sammenslåttTidslinje(
-                        hendelse,
-                        hendelseSykdomstidslinje
-                    )
-                )
-            }
-
-            internal fun opprett(
-                historikk: Sykdomshistorikk,
                 hendelse: IAktivitetslogg,
                 meldingsreferanseId: UUID,
                 uhåndtertSykdomstidslinje: Sykdomstidslinje
@@ -144,8 +129,7 @@ internal class Sykdomshistorikk private constructor(
                 )
             }
 
-            internal fun opprett(hendelse: PersonHendelse, hendelseSykdomstidslinje: Sykdomstidslinje, sykdomstidslinje: Sykdomstidslinje) = Element(
-                hendelseId = hendelse.meldingsreferanseId(),
+            internal fun opprettGhosttidslinje(hendelseSykdomstidslinje: Sykdomstidslinje, sykdomstidslinje: Sykdomstidslinje) = Element(
                 hendelseSykdomstidslinje = hendelseSykdomstidslinje,
                 beregnetSykdomstidslinje = sykdomstidslinje
             )

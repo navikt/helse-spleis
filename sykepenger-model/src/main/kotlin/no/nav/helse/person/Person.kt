@@ -48,6 +48,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.slettUtgåtteSykmeldingsperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.sykefraværstilfelle
+import no.nav.helse.person.Arbeidsgiver.Companion.tidligsteDato
 import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Sykefraværstilfelleeventyr.Companion.varsleObservers
@@ -203,7 +204,7 @@ class Person private constructor(
 
     fun håndter(infotrygdendring: Infotrygdendring) {
         infotrygdendring.kontekst(this)
-        val tidligsteDato = arbeidsgivereMedSykdom().minOfOrNull { it.tidligsteDato() } ?: LocalDate.now()
+        val tidligsteDato = arbeidsgivere.tidligsteDato()
         infotrygdhistorikk.oppfrisk(infotrygdendring, tidligsteDato)
         håndterGjenoppta(infotrygdendring)
     }
@@ -393,7 +394,7 @@ class Person private constructor(
         return ArbeidsgiverUtbetalinger(
             regler = regler,
             alder = alder,
-            arbeidsgivere = arbeidsgivereMedSykdom().associateWith {
+            arbeidsgivere = arbeidsgivere.associateWith {
                 it.builder(regler, vilkårsgrunnlagHistorikk, infotrygdhistorikk, subsumsjonObserver, hendelse)
             },
             infotrygdUtbetalingstidslinje = infotrygdhistorikk.utbetalingstidslinje(),
@@ -524,8 +525,7 @@ class Person private constructor(
     }
 
     private fun trengerHistorikkFraInfotrygd(hendelse: IAktivitetslogg): Boolean {
-        val tidligsteDato = arbeidsgivereMedSykdom().minOf { it.tidligsteDato() }
-        return infotrygdhistorikk.oppfriskNødvendig(hendelse, tidligsteDato)
+        return infotrygdhistorikk.oppfriskNødvendig(hendelse, arbeidsgivere.tidligsteDato())
     }
 
     internal fun periodetype(
@@ -627,8 +627,6 @@ class Person private constructor(
         )
     }
 
-    private fun arbeidsgivereMedSykdom() = arbeidsgivere.filter(Arbeidsgiver::harSykdom)
-
     internal fun sykdomshistorikkEndret(aktivitetslogg: IAktivitetslogg) {
         val skjæringstidspunkter = skjæringstidspunkter()
         arbeidsgivere.fold(skjæringstidspunkter.map { Sykefraværstilfelleeventyr(it) }) { acc, arbeidsgiver ->
@@ -671,18 +669,6 @@ class Person private constructor(
                     hendelse.meldingsreferanseId()
                 )
             )
-        }
-    }
-
-    internal fun fyllUtPeriodeMedForventedeDager(
-        hendelse: PersonHendelse,
-        periode: Periode,
-        skjæringstidspunkt: LocalDate
-    ) {
-        vilkårsgrunnlagFor(skjæringstidspunkt)!!.also { vilkårsgrunnlagElement ->
-            arbeidsgivere
-                .filter { vilkårsgrunnlagElement.erRelevant(it.organisasjonsnummer()) }
-                .forEach { it.fyllUtPeriodeMedForventedeDager(hendelse, skjæringstidspunkt, periode) }
         }
     }
 

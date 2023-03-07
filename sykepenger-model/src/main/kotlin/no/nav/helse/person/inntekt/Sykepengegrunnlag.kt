@@ -1,7 +1,6 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.`2G`
@@ -14,7 +13,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.GhostPeriode
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.SykepengegrunnlagVisitor
@@ -255,9 +253,7 @@ internal class Sykepengegrunnlag(
         else -> Inntektskilde.EN_ARBEIDSGIVER
     }
 
-    internal fun erRelevant(organisasjonsnummer: String) = arbeidsgiverInntektsopplysninger.any {
-        it.gjelder(organisasjonsnummer)
-    }
+    internal fun inngårISykepengegrunnlaget(organisasjonsnummer: String) = arbeidsgiverInntektsopplysninger.any { it.gjelder(organisasjonsnummer) }
 
     internal fun utenInntekt(økonomi: Økonomi): Økonomi {
         return økonomi.inntekt(

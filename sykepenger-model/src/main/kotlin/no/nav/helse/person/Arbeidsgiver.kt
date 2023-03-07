@@ -15,7 +15,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
-import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
@@ -25,14 +24,13 @@ import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.person.ForkastetVedtaksperiode.Companion.harAvsluttedePerioder
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.håndterInntektsmeldingReplay
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
-import no.nav.helse.person.Vedtaksperiode.Companion.ER_ELLER_HAR_VÆRT_AVSLUTTET
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
@@ -124,9 +122,14 @@ internal class Arbeidsgiver private constructor(
     internal companion object {
         internal fun List<Arbeidsgiver>.finn(orgnr: String) = find { it.organisasjonsnummer() == orgnr }
 
+        internal fun List<Arbeidsgiver>.tidligsteDato(): LocalDate {
+            return mapNotNull { it.sykdomstidslinje().periode()?.start }.minOrNull() ?: LocalDate.now()
+        }
+
         internal fun List<Arbeidsgiver>.relevanteArbeidsgivere(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?) =
            filter { arbeidsgiver ->
-               vilkårsgrunnlag?.erRelevant(arbeidsgiver.organisasjonsnummer) == true
+               vilkårsgrunnlag?.inngårISykepengegrunnlaget(arbeidsgiver.organisasjonsnummer) == true
+                       || vilkårsgrunnlag?.inngårISammenligningsgrunnlaget(arbeidsgiver.organisasjonsnummer) == true
                        || arbeidsgiver.vedtaksperioder.nåværendeVedtaksperiode(KLAR_TIL_BEHANDLING) != null
            }.map { it.organisasjonsnummer }
 
@@ -232,8 +235,6 @@ internal class Arbeidsgiver private constructor(
             .trengerInntektsmelding()
             .isNotEmpty()
 
-        internal fun Iterable<Arbeidsgiver>.avventerSøknad(skjæringstidspunkt: LocalDate) = this
-            .any { it.sykmeldingsperioder.avventerSøknad(skjæringstidspunkt) && !it.harSykdomFor(skjæringstidspunkt) }
         internal fun Iterable<Arbeidsgiver>.avventerSøknad(periode: Periode) = this
             .any { it.sykmeldingsperioder.avventerSøknad(periode) }
 
@@ -853,10 +854,6 @@ internal class Arbeidsgiver private constructor(
         return arbeidsgiverperioder.finn(periode)
     }
 
-    internal fun tidligsteDato(): LocalDate {
-        return sykdomstidslinje().førsteDag()
-    }
-
     /**
      * Finner alle vedtaksperioder som tilstøter vedtaksperioden
      * @param vedtaksperiode Perioden vi skal finne alle sammenhengende perioder for. Vi henter alle perioder som
@@ -972,11 +969,6 @@ internal class Arbeidsgiver private constructor(
         sykdomshistorikk.sykdomstidslinje().låsOpp(periode)
     }
 
-    internal fun harSykdom() = sykdomshistorikk.harSykdom()
-
-    private fun harSykdomFor(skjæringstidspunkt: LocalDate) =
-        vedtaksperioder.any(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
-
     private fun finnFørsteFraværsdag(skjæringstidspunkt: LocalDate): LocalDate? {
         val førstePeriodeMedUtbetaling = vedtaksperioder.firstOrNull(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt))
             ?: vedtaksperioder.firstOrNull(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
@@ -996,7 +988,7 @@ internal class Arbeidsgiver private constructor(
         infotrygdhistorikk: Infotrygdhistorikk,
         subsumsjonObserver: SubsumsjonObserver,
         hendelse: IAktivitetslogg
-    ): (Periode) -> Utbetalingstidslinje {
+    ): (LocalDate, Periode) -> Utbetalingstidslinje {
         val inntekter = Inntekter(
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
             regler = regler,
@@ -1004,7 +996,10 @@ internal class Arbeidsgiver private constructor(
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperioder = vedtaksperioder
         )
-        return { periode ->
+        return { skjæringstidspunkt, periode ->
+            if (vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)!!.inngårISykepengegrunnlaget(this.organisasjonsnummer))
+                sykdomshistorikk.fyllUtGhosttidslinje(skjæringstidspunkt til periode.endInclusive)
+
             val sykdomstidslinje = sykdomstidslinje()
             if (sykdomstidslinje.count() == 0) Utbetalingstidslinje()
             else {
@@ -1041,16 +1036,6 @@ internal class Arbeidsgiver private constructor(
             neste += 1
         }
     }
-
-    internal fun fyllUtPeriodeMedForventedeDager(
-        hendelse: PersonHendelse,
-        skjæringstidspunkt: LocalDate,
-        periode: Periode
-    ) {
-        sykdomshistorikk.fyllUtPeriodeMedForventedeDager(hendelse, periode.oppdaterFom(skjæringstidspunkt))
-    }
-
-    internal fun harFerdigstiltPeriode() = vedtaksperioder.any(ER_ELLER_HAR_VÆRT_AVSLUTTET) || forkastede.harAvsluttedePerioder()
 
     internal fun harSykmeldingsperiodeFør(dato: LocalDate) = sykmeldingsperioder.harSykmeldingsperiodeFør(dato)
     internal fun kanForkastes(vedtaksperiodeUtbetalinger: VedtaksperiodeUtbetalinger) =

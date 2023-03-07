@@ -204,12 +204,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal abstract fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
         internal open fun inngårISammenligningsgrunnlaget(organisasjonsnummer: String): Boolean = false
+        internal fun inngårISykepengegrunnlaget(organisasjonsnummer: String) =sykepengegrunnlag.inngårISykepengegrunnlaget(organisasjonsnummer)
+
         internal fun build(builder: VedtakFattetBuilder) {
             sykepengegrunnlag.build(builder)
-        }
-
-        internal fun erRelevant(organisasjonsnummer: String): Boolean {
-            return sykepengegrunnlag.erRelevant(organisasjonsnummer) || inngårISammenligningsgrunnlaget(organisasjonsnummer)
         }
         internal fun inntektskilde() = sykepengegrunnlag.inntektskilde()
 

@@ -4,7 +4,6 @@ import java.time.LocalDate
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.hendelser.til
 
 internal class Sykmeldingsperioder(
     private var perioder: List<Periode> = listOf()
@@ -18,11 +17,6 @@ internal class Sykmeldingsperioder(
 
     internal fun lagre(sykmelding: Sykmelding) {
         perioder = sykmelding.oppdaterSykmeldingsperioder(perioder)
-    }
-
-    internal fun avventerSøknad(skjæringstidspunkt: LocalDate): Boolean {
-        val måned = skjæringstidspunkt.withDayOfMonth(1) til skjæringstidspunkt.withDayOfMonth(skjæringstidspunkt.lengthOfMonth())
-        return perioder.any(måned::overlapperMed)
     }
 
     internal fun avventerSøknad(vedtaksperiode: Periode): Boolean {
