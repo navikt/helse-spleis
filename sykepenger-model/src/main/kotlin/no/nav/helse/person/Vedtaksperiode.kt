@@ -75,8 +75,7 @@ import no.nav.helse.person.Venteårsak.Hva.HJELP
 import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
 import no.nav.helse.person.Venteårsak.Hva.SØKNAD
 import no.nav.helse.person.Venteårsak.Hva.UTBETALING
-import no.nav.helse.person.Venteårsak.Hvorfor.HAR_SYKMELDING_I_SAMME_MÅNED_SOM_SKJÆRINGSTIDSPUNKTET_PÅ_ANDRE_ARBEIDSGIVERE
-import no.nav.helse.person.Venteårsak.Hvorfor.HAR_SYKMELDING_SOM_STARTER_FØR_ELLER_OVERLAPPER_PÅ_ANDRE_ARBEIDSGIVERE
+import no.nav.helse.person.Venteårsak.Hvorfor.HAR_SYKMELDING_SOM_OVERLAPPER_PÅ_ANDRE_ARBEIDSGIVERE
 import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_INNTEKT_FOR_VILKÅRSPRØVING_PÅ_ANDRE_ARBEIDSGIVERE
 import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_REFUSJONSOPPLYSNINGER_PÅ_ANDRE_ARBEIDSGIVERE
 import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE
@@ -1610,7 +1609,6 @@ internal class Vedtaksperiode private constructor(
             arbeidsgivere: Iterable<Arbeidsgiver>,
             hendelse: IAktivitetslogg
         ) = when {
-            arbeidsgivere.avventerSøknad(vedtaksperiode.skjæringstidspunkt) -> AvventerSøknadISammeMånedSomSkjæringstidspunktet
             arbeidsgivere.avventerSøknad(vedtaksperiode.periode) -> AvventerTidligereEllerOverlappendeSøknad
             !vedtaksperiode.forventerInntekt() -> ForventerIkkeInntekt
             vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() -> ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
@@ -1626,14 +1624,8 @@ internal class Vedtaksperiode private constructor(
             fun venteårsak(): Venteårsak? = null
             fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg)
         }
-        private object AvventerSøknadISammeMånedSomSkjæringstidspunktet: Tilstand {
-            override fun venteårsak() = SØKNAD fordi HAR_SYKMELDING_I_SAMME_MÅNED_SOM_SKJÆRINGSTIDSPUNKTET_PÅ_ANDRE_ARBEIDSGIVERE
-            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-                hendelse.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding i samme måned som skjæringstidspunktet")
-            }
-        }
         private object AvventerTidligereEllerOverlappendeSøknad: Tilstand {
-            override fun venteårsak() = SØKNAD fordi HAR_SYKMELDING_SOM_STARTER_FØR_ELLER_OVERLAPPER_PÅ_ANDRE_ARBEIDSGIVERE
+            override fun venteårsak() = SØKNAD fordi HAR_SYKMELDING_SOM_OVERLAPPER_PÅ_ANDRE_ARBEIDSGIVERE
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
                 hendelse.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding som er før eller overlapper med vedtaksperioden")
             }

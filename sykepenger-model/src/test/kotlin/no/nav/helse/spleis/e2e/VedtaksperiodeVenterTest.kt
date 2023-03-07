@@ -6,7 +6,6 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.AKTØRID
 import no.nav.helse.dsl.TestPerson.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.nyPeriode
-import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -56,7 +55,7 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
     }
 
     @Test
-    fun `HAR_SYKMELDING_I_SAMME_MÅNED_SOM_SKJÆRINGSTIDSPUNKTET_PÅ_ANDRE_ARBEIDSGIVERE`(){
+    fun `HAR_SYKMELDING_SOM_OVERLAPPER_PÅ_ANDRE_ARBEIDSGIVERE`(){
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         }
@@ -84,45 +83,7 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
                     organisasjonsnummer = a2,
                     venteårsak = PersonObserver.VedtaksperiodeVenterEvent.Venteårsak(
                         hva = "SØKNAD",
-                        hvorfor = "HAR_SYKMELDING_I_SAMME_MÅNED_SOM_SKJÆRINGSTIDSPUNKTET_PÅ_ANDRE_ARBEIDSGIVERE"
-                    )
-                )
-            )
-            assertEquals(forventet, observatør.vedtaksperiodeVenter.single())
-        }
-    }
-
-    @Test
-    fun `HAR_SYKMELDING_SOM_STARTER_FØR_ELLER_OVERLAPPER_PÅ_ANDRE_ARBEIDSGIVERE`(){
-        a1 {
-           nyttVedtak(1.januar, 31.januar)
-        }
-        a2 {
-            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        }
-        a1 {
-            val søknadId = UUID.randomUUID()
-            nyPeriode(1.februar til 28.februar, søknadId = søknadId)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            val tilstandsendringstidspunkt = LocalDateTime.now()
-            assertEquals(0, observatør.vedtaksperiodeVenter.size)
-            håndterPåminnelse(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, tilstandsendringstidspunkt = tilstandsendringstidspunkt)
-            assertEquals(1, observatør.vedtaksperiodeVenter.size)
-
-            val forventet = PersonObserver.VedtaksperiodeVenterEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = AKTØRID,
-                organisasjonsnummer = a1,
-                vedtaksperiodeId = 2.vedtaksperiode,
-                hendelser = setOf(søknadId),
-                ventetSiden = tilstandsendringstidspunkt,
-                venterTil = LocalDateTime.MAX,
-                venterPå = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
-                    vedtaksperiodeId = 2.vedtaksperiode,
-                    organisasjonsnummer = a1,
-                    venteårsak = PersonObserver.VedtaksperiodeVenterEvent.Venteårsak(
-                        hva = "SØKNAD",
-                        hvorfor = "HAR_SYKMELDING_SOM_STARTER_FØR_ELLER_OVERLAPPER_PÅ_ANDRE_ARBEIDSGIVERE"
+                        hvorfor = "HAR_SYKMELDING_SOM_OVERLAPPER_PÅ_ANDRE_ARBEIDSGIVERE"
                     )
                 )
             )
