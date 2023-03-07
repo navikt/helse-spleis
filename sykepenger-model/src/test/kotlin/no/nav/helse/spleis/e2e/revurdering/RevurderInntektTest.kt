@@ -122,7 +122,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
         val beregning = inspektør.utbetalingstidslinjeberegningData.last()
 
-        assertEquals(beregning.vilkårsgrunnlagHistorikkInnslagId, person.nyesteIdForVilkårsgrunnlagHistorikk())
+        assertEquals(beregning.vilkårsgrunnlagHistorikkInnslagId, person.inspektør.vilkårsgrunnlagHistorikkInnslag().first().inspektør.id)
 
         val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
         val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.sykepengegrunnlag?.inspektør

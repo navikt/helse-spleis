@@ -303,21 +303,6 @@ internal class Sykepengegrunnlag(
 
     internal fun er6GBegrenset() = begrensning == ER_6G_BEGRENSET
 
-    internal fun ghostPeriode(sisteId: UUID, vilkårsgrunnlagId: UUID, organisasjonsnummer: String, periode: Periode): GhostPeriode? {
-        val opplysning = arbeidsgiverInntektsopplysninger.firstOrNull { it.gjelder(organisasjonsnummer) }
-            ?: deaktiverteArbeidsforhold.firstOrNull { it.gjelder(organisasjonsnummer) }
-        if (opplysning == null || opplysning.ikkeGhost()) return null
-        val erDeaktivert = deaktiverteArbeidsforhold.any { it === opplysning }
-        return GhostPeriode(
-            fom = periode.start,
-            tom = periode.endInclusive,
-            skjæringstidspunkt = skjæringstidspunkt,
-            vilkårsgrunnlagHistorikkInnslagId = sisteId,
-            vilkårsgrunnlagId = vilkårsgrunnlagId,
-            deaktivert = erDeaktivert
-        )
-    }
-
     internal fun finnEndringsdato(other: Sykepengegrunnlag): LocalDate {
         check(this.skjæringstidspunkt == other.skjæringstidspunkt) {
             "Skal bare sammenlikne med samme skjæringstidspunkt"

@@ -194,17 +194,6 @@ internal class Arbeidsgiver private constructor(
             vilkårsgrunnlag.valider(aktivitetslogg, organisasjonsnummer, relevanteArbeidsgivere)
         }
 
-        internal fun Iterable<Arbeidsgiver>.ghostPeriode(
-            skjæringstidspunkt: LocalDate,
-            vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
-            arbeidsgiver: Arbeidsgiver
-        ): GhostPeriode? {
-            val perioder = flatMap { it.vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).map { it.periode() } }
-            if (perioder.isEmpty()) return null
-            return vilkårsgrunnlagHistorikk.ghostPeriode(skjæringstidspunkt, arbeidsgiver.organisasjonsnummer, perioder.reduce(
-                Periode::plus))
-        }
-
         internal fun Iterable<Arbeidsgiver>.beregnFeriepengerForAlleArbeidsgivere(
             aktørId: String,
             personidentifikator: Personidentifikator,
@@ -863,10 +852,6 @@ internal class Arbeidsgiver private constructor(
         )
         return arbeidsgiverperioder.finn(periode)
     }
-
-    internal fun ghostPerioder(): List<GhostPeriode> = person.skjæringstidspunkterFraSpleis()
-        .filter { skjæringstidspunkt -> vedtaksperioder.none(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt)) }
-        .mapNotNull { skjæringstidspunkt -> person.ghostPeriode(skjæringstidspunkt, this) }
 
     internal fun tidligsteDato(): LocalDate {
         return sykdomstidslinje().førsteDag()

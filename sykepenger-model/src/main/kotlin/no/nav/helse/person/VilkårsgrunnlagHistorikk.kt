@@ -67,14 +67,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
         sisteInnlag()?.vilkårsgrunnlagFor(skjæringstidspunkt)
 
-    internal fun vilkårsgrunnlagIdFor(skjæringstidspunkt: LocalDate) =
-        sisteInnlag()?.vilkårsgrunnlagIdFor(skjæringstidspunkt)
-
     internal fun avvisInngangsvilkår(tidslinjer: List<Utbetalingstidslinje>) {
         sisteInnlag()?.avvis(tidslinjer)
     }
-
-    internal fun skjæringstidspunkterFraSpleis() = sisteInnlag()?.skjæringstidspunkterFraSpleis() ?: emptySet()
 
     internal fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver) =
         sisteInnlag()!!.medInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
@@ -88,10 +83,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal fun blitt6GBegrensetSidenSist(skjæringstidspunkt: LocalDate): Boolean {
         if (sisteInnlag()?.vilkårsgrunnlagFor(skjæringstidspunkt)?.er6GBegrenset() == false) return false
         return forrigeInnslag()?.vilkårsgrunnlagFor(skjæringstidspunkt)?.er6GBegrenset() == false
-    }
-
-    internal fun ghostPeriode(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, periode: Periode): GhostPeriode? {
-        return vilkårsgrunnlagFor(skjæringstidspunkt)?.ghostPeriode(sisteId(), organisasjonsnummer, periode)
     }
 
     internal class Innslag private constructor(
@@ -123,13 +114,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
             vilkårsgrunnlag[skjæringstidspunkt]
-
-        internal fun vilkårsgrunnlagIdFor(skjæringstidspunkt: LocalDate) =
-            vilkårsgrunnlag[skjæringstidspunkt]?.id()
-
-        internal fun skjæringstidspunkterFraSpleis() = vilkårsgrunnlag
-            .filterValues { it is Grunnlagsdata }
-            .keys
 
         internal fun avvis(tidslinjer: List<Utbetalingstidslinje>) {
             val skjæringstidspunktperioder = skjæringstidspunktperioder(vilkårsgrunnlag.values)
@@ -229,8 +213,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
         internal fun inntektskilde() = sykepengegrunnlag.inntektskilde()
 
-        internal fun id() = vilkårsgrunnlagId
-
         internal open fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode) {}
 
         final override fun toSpesifikkKontekst() = SpesifikkKontekst(
@@ -302,8 +284,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun refusjonsopplysninger(organisasjonsnummer: String) =
             sykepengegrunnlag.refusjonsopplysninger(organisasjonsnummer)
-
-        internal abstract fun ghostPeriode(sisteId: UUID, organisasjonsnummer: String, periode: Periode): GhostPeriode?
 
         internal fun inntekt(organisasjonsnummer: String): Inntekt? =
             sykepengegrunnlag.inntekt(organisasjonsnummer)
@@ -414,10 +394,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
         }
 
-        override fun ghostPeriode(sisteId: UUID, organisasjonsnummer: String, periode: Periode): GhostPeriode? {
-            return sykepengegrunnlag.ghostPeriode(sisteId, vilkårsgrunnlagId, organisasjonsnummer, periode)
-        }
-
         override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
             vilkårsgrunnlagHistorikkVisitor.preVisitGrunnlagsdata(
                 skjæringstidspunkt,
@@ -494,8 +470,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         sykepengegrunnlag: Sykepengegrunnlag,
         vilkårsgrunnlagId: UUID = UUID.randomUUID()
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag, null) {
-
-        override fun ghostPeriode(sisteId: UUID, organisasjonsnummer: String, periode: Periode) = null
 
         override fun overstyrArbeidsforhold(
             hendelse: OverstyrArbeidsforhold,

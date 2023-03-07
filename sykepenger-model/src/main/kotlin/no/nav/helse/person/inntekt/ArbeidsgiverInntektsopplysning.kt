@@ -66,10 +66,6 @@ class ArbeidsgiverInntektsopplysning(
         return result
     }
 
-    internal fun ikkeGhost(): Boolean {
-        return inntektsopplysning is Inntektsmelding
-    }
-
     internal companion object {
         internal fun List<ArbeidsgiverInntektsopplysning>.deaktiver(deaktiverte: List<ArbeidsgiverInntektsopplysning>, orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserver) =
             this.fjernInntekt(deaktiverte, orgnummer, forklaring, true, subsumsjonObserver)

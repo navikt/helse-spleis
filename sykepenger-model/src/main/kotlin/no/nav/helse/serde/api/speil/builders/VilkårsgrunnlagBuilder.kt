@@ -23,6 +23,7 @@ import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
+import no.nav.helse.serde.api.dto.GhostPeriodeDTO
 import no.nav.helse.serde.api.dto.Refusjonselement
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
@@ -37,8 +38,16 @@ internal class IInnslag(
 ) {
     internal fun toDTO() = innslag.mapValues { (_, vilkårsgrunnlag) -> vilkårsgrunnlag.toDTO() }
     internal fun finn(skjæringstidspunkt: LocalDate) = innslag[skjæringstidspunkt]?.toDTO()
+    internal fun finn(id: UUID) = innslag.entries.first { (_, vilkårsgrunnlag) -> vilkårsgrunnlag.id == id }.value.toDTO()
     internal fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) =
         innslag.all { (_, vilkårsgrunnlag) -> vilkårsgrunnlag.inngårIkkeISammenligningsgrunnlag(organisasjonsnummer) }
+
+    internal fun potensielleGhostsperioder(
+        organisasjonsnummer: String,
+        nyesteInnslagId: UUID?,
+        sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>
+    ) = innslag
+        .mapNotNull { (_, innslag) -> innslag.potensiellGhostperiode(organisasjonsnummer, nyesteInnslagId!!, sykefraværstilfeller) }
 }
 
 internal class ISykepengegrunnlag(
@@ -66,6 +75,24 @@ internal interface IVilkårsgrunnlag {
     val id: UUID
     fun toDTO(): Vilkårsgrunnlag
     fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) = inntekter.none { it.arbeidsgiver == organisasjonsnummer }
+    fun potensiellGhostperiode(
+        organisasjonsnummer: String,
+        innslagId: UUID,
+        sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>
+    ): GhostPeriodeDTO? {
+        if (this.skjæringstidspunkt !in sykefraværstilfeller) return null
+        val inntekten = inntekter.firstOrNull { it.arbeidsgiver == organisasjonsnummer }
+        if (inntekten == null || inntekten.omregnetÅrsinntekt?.kilde == null) return null
+        return GhostPeriodeDTO(
+            id = UUID.randomUUID(),
+            fom = skjæringstidspunkt,
+            tom = sykefraværstilfeller.getValue(skjæringstidspunkt).maxOf { it.endInclusive },
+            skjæringstidspunkt = skjæringstidspunkt,
+            vilkårsgrunnlagHistorikkInnslagId = innslagId,
+            vilkårsgrunnlagId = this.id,
+            deaktivert = inntekten.deaktivert
+        )
+    }
 }
 
 internal class ISpleisGrunnlag(
@@ -141,6 +168,12 @@ internal class IInfotrygdGrunnlag(
             arbeidsgiverrefusjoner = refusjonsopplysningerPerArbeidsgiver.map { it.toDTO() },
         )
     }
+
+    override fun potensiellGhostperiode(
+        organisasjonsnummer: String,
+        innslagId: UUID,
+        sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>
+    ) = null
 }
 
 internal class InntektBuilder(private val inntekt: Inntekt) {
@@ -155,7 +188,7 @@ internal class IVilkårsgrunnlagHistorikk {
     private var nyesteInnslagId: UUID? = null
     private val historikk = mutableMapOf<VilkårsgrunnlagHistorikkId, IInnslag>()
     private val nyesteInnslag get() = historikk[nyesteInnslagId]
-    private val pekesPåAvEnBeregnetPeriode = mutableMapOf<UUID, Vilkårsgrunnlag>()
+    private val vilkårsgrunnlagIBruk = mutableMapOf<UUID, Vilkårsgrunnlag>()
 
     internal fun leggTil(vilkårsgrunnlagHistorikkId: UUID, innslag: IInnslag) {
         if (nyesteInnslagId == null) nyesteInnslagId = vilkårsgrunnlagHistorikkId
@@ -167,13 +200,23 @@ internal class IVilkårsgrunnlagHistorikk {
 
     internal fun toDTO() = historikk.mapValues { (_, innslag) -> innslag.toDTO() }.toMap()
 
-    internal fun vilkårsgrunnlagSomPekesPåAvBeregnedePerioder(): Map<UUID, Vilkårsgrunnlag> {
-        return pekesPåAvEnBeregnetPeriode.toMap()
+    internal fun potensielleGhostsperioder(
+        organisasjonsnummer: String,
+        sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>
+    ) =
+        nyesteInnslag?.potensielleGhostsperioder(organisasjonsnummer, nyesteInnslagId, sykefraværstilfeller) ?: emptyList()
+
+    internal fun vilkårsgrunnlagSomBlirPektPå(): Map<UUID, Vilkårsgrunnlag> {
+        return vilkårsgrunnlagIBruk.toMap()
     }
 
     internal fun leggIBøtta(vilkårsgrunnlag: IVilkårsgrunnlag?) {
         if (vilkårsgrunnlag == null) return
-        pekesPåAvEnBeregnetPeriode[vilkårsgrunnlag.id] = vilkårsgrunnlag.toDTO()
+        vilkårsgrunnlagIBruk[vilkårsgrunnlag.id] = vilkårsgrunnlag.toDTO()
+    }
+    internal fun leggIBøtta(innslagId: UUID?, vilkårsgrunnlagId: UUID?) {
+        if (innslagId == null || vilkårsgrunnlagId == null) return
+        vilkårsgrunnlagIBruk[vilkårsgrunnlagId] = historikk.getValue(innslagId).finn(vilkårsgrunnlagId)
     }
 
     internal fun finn(vilkårsgrunnlagHistorikkInnslagId: UUID?, vilkårsgrunnlagId: UUID?, skjæringstidspunkt: LocalDate,): Vilkårsgrunnlag? {

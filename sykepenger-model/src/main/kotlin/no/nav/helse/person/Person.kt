@@ -37,7 +37,6 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Arbeidsgiver.Companion.avklarSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
-import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyrArbeidsgiveropplysninger
@@ -518,8 +517,6 @@ class Person private constructor(
     internal fun skjæringstidspunkter() =
         Arbeidsgiver.skjæringstidspunkter(arbeidsgivere, infotrygdhistorikk)
 
-    internal fun skjæringstidspunkterFraSpleis() = vilkårsgrunnlagHistorikk.skjæringstidspunkterFraSpleis()
-
     internal fun trengerHistorikkFraInfotrygd(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode) {
         if (trengerHistorikkFraInfotrygd(hendelse)) return hendelse.info("Må oppfriske Infotrygdhistorikken")
         hendelse.info("Trenger ikke oppfriske Infotrygdhistorikken, bruker lagret historikk")
@@ -583,13 +580,6 @@ class Person private constructor(
 
     internal fun vedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.vedtaksperioder(filter).sorted()
 
-    internal fun ghostPeriode(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver) =
-        arbeidsgivere.ghostPeriode(
-            skjæringstidspunkt = skjæringstidspunkt,
-            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
-            arbeidsgiver = arbeidsgiver
-        )
-
     private fun harNærliggendeUtbetaling(periode: Periode): Boolean {
         if (infotrygdhistorikk.harBetaltRettFør(periode)) return false
         return arbeidsgivere.any { it.harNærliggendeUtbetaling(periode.oppdaterTom(periode.endInclusive.plusYears(3))) }
@@ -619,9 +609,6 @@ class Person private constructor(
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
         vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
-
-    internal fun vilkårsgrunnlagIdFor(skjæringstidspunkt: LocalDate) =
-        vilkårsgrunnlagHistorikk.vilkårsgrunnlagIdFor(skjæringstidspunkt)
 
     internal fun blitt6GBegrensetSidenSist(skjæringstidspunkt: LocalDate) =
         vilkårsgrunnlagHistorikk.blitt6GBegrensetSidenSist(skjæringstidspunkt)

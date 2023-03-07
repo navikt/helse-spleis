@@ -15,30 +15,10 @@ internal class ArbeidsgiverBuilder(
     private val organisasjonsnummer: String
 ) : BuilderState() {
 
-    companion object {
-        internal fun List<ArbeidsgiverDTO>.vilkårsgrunnlagSomPekesPåAvGhostPerioder(): Map<UUID, Vilkårsgrunnlag> {
-            return flatMap { it.ghostPerioder }
-                .filter { it.vilkårsgrunnlagId != null && it.vilkårsgrunnlag != null }
-                .associate { it.vilkårsgrunnlagId!! to it.vilkårsgrunnlag!! }
-        }
-    }
-
     internal fun build(hendelser: List<HendelseDTO>, alder: Alder, vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk): ArbeidsgiverDTO {
         return ArbeidsgiverDTO(
             organisasjonsnummer = organisasjonsnummer,
             id = id,
-            ghostPerioder = arbeidsgiver.ghostPerioder().map {
-                GhostPeriodeDTO(
-                    id = UUID.randomUUID(),
-                    fom = it.fom.coerceAtLeast(it.skjæringstidspunkt),
-                    tom = it.tom,
-                    skjæringstidspunkt = it.skjæringstidspunkt,
-                    vilkårsgrunnlagHistorikkInnslagId = it.vilkårsgrunnlagHistorikkInnslagId,
-                    vilkårsgrunnlagId = it.vilkårsgrunnlagId,
-                    vilkårsgrunnlag = vilkårsgrunnlagHistorikk.finn(it.vilkårsgrunnlagHistorikkInnslagId, it.vilkårsgrunnlagId, it.skjæringstidspunkt),
-                    deaktivert = it.deaktivert
-                )
-            },
             generasjoner = GenerasjonerBuilder(hendelser, alder, arbeidsgiver, vilkårsgrunnlagHistorikk).build()
         )
     }

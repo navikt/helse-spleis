@@ -11,7 +11,6 @@ import no.nav.helse.serde.AbstractBuilder
 import no.nav.helse.serde.api.BuilderState
 import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.PersonDTO
-import no.nav.helse.serde.api.speil.builders.ArbeidsgiverBuilder.Companion.vilkårsgrunnlagSomPekesPåAvGhostPerioder
 import no.nav.helse.Alder
 
 internal class PersonBuilder(
@@ -30,8 +29,10 @@ internal class PersonBuilder(
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk).build()
         val arbeidsgivere = arbeidsgivere
             .map { it.build(hendelser, alder, vilkårsgrunnlagHistorikk) }
+            .let { arbeidsgivere ->
+                arbeidsgivere.map { it.medGhostperioder(vilkårsgrunnlagHistorikk, arbeidsgivere) }
+            }
             .filterNot { it.erTom(vilkårsgrunnlagHistorikk) }
-        val vilkårsgrunnlag = arbeidsgivere.vilkårsgrunnlagSomPekesPåAvGhostPerioder() + vilkårsgrunnlagHistorikk.vilkårsgrunnlagSomPekesPåAvBeregnedePerioder()
 
         return PersonDTO(
             fødselsnummer = personidentifikator.toString(),
@@ -39,7 +40,7 @@ internal class PersonBuilder(
             arbeidsgivere = arbeidsgivere,
             dødsdato = dødsdato,
             versjon = versjon,
-            vilkårsgrunnlag = vilkårsgrunnlag
+            vilkårsgrunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagSomBlirPektPå()
         )
     }
 
