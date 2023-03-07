@@ -65,7 +65,7 @@ internal class VilkårsgrunnlagBuilderNyTest : AbstractEndToEndTest() {
             person.arbeidsgiver(organisasjonsnummer),
             vilkårsgrunnlagHistorikkBuilderResult
         ).build()
-        return vilkårsgrunnlagHistorikkBuilderResult.vilkårsgrunnlagSomPekesPåAvBeregnedePerioder()
+        return vilkårsgrunnlagHistorikkBuilderResult.vilkårsgrunnlagSomBlirPektPå()
     }
 
     private val primitivInntekt = 40000.0

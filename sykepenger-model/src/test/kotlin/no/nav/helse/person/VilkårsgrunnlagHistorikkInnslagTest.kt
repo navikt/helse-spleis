@@ -168,8 +168,6 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
             override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {}
             override fun vilkårsgrunnlagtype() = "testgrunnlag"
 
-            override fun ghostPeriode(sisteId: UUID, organisasjonsnummer: String, periode: Periode) = null
-
             override fun overstyrArbeidsforhold(
                 hendelse: OverstyrArbeidsforhold,
                 subsumsjonObserver: SubsumsjonObserver
