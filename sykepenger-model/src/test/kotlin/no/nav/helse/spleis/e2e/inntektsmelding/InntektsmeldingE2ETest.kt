@@ -9,6 +9,7 @@ import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Dagtype.Permisjonsdag
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -36,6 +37,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
@@ -2083,5 +2085,52 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     }
 
+    @Test
+    fun `inntektsmelding korrigerer periode til godkjenning`() {
+        tilGodkjenning(1.januar, 31.januar, ORGNUMMER, beregnetInntekt = INNTEKT)
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(
+            1.januar til 10.januar,
+            14.januar til 19.januar
+        ))
+        assertForventetFeil(
+            forklaring = "inntektsmeldingen endrer skjæringstidspunktet, men perioden har ingen tilstandsendring",
+            nå = {
+                assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
+                assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+            },
+            ønsket = {
+                // 'ønsket' er litt avhengig om vi ønsker å ta endringene inn eller ikke
+                assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+                assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            }
+        )
+
+    }
+
+    @Test
+    fun `inntektsmelding korrigerer periode til godkjenning revurdering`() {
+        nyttVedtak(1.januar, 31.januar, beregnetInntekt = INNTEKT)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Feriedag)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(
+            1.januar til 10.januar,
+            14.januar til 19.januar
+        ))
+        assertForventetFeil(
+            forklaring = "inntektsmeldingen endrer skjæringstidspunktet, men perioden har ingen tilstandsendring",
+            nå = {
+                assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+                assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+            },
+            ønsket = {
+                // 'ønsket' er litt avhengig om vi ønsker å ta endringene inn eller ikke
+                assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+                assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+            }
+        )
+    }
 
 }
