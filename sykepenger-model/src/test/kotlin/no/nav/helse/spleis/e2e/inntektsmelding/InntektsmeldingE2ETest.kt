@@ -2109,6 +2109,18 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `inntektsmelding korrigerer periode til godkjenning - starter før perioden`() {
+        tilGodkjenning(2.januar, 31.januar, ORGNUMMER, beregnetInntekt = INNTEKT)
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(
+            1.januar til 16.januar
+        ))
+        assertEquals(2.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(Dag.UkjentDag::class, inspektør.sykdomstidslinje[1.januar]::class)
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+    }
+
+    @Test
     fun `inntektsmelding korrigerer periode til godkjenning revurdering`() {
         nyttVedtak(1.januar, 31.januar, beregnetInntekt = INNTEKT)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Feriedag)))
