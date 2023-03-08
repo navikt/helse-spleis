@@ -10,6 +10,6 @@ class Opplæringspenger(
             aktivitetslogg.info("Bruker har ingen opplæringspengeytelser")
             return false
         }
-        return perioder.any { ytelse -> ytelse.overlapperMed(sykdomsperiode) }
+        return perioder.any { ytelse -> ytelse.overlapperMed(sykdomsperiode.oppdaterFom(sykdomsperiode.start.minusWeeks(4))) }
     }
 }

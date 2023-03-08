@@ -6,9 +6,11 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertActivities
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -63,5 +65,85 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(3.februar til 5.februar))
         assertIngenVarsel(Varselkode.RV_AY_3, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `Foreldrepenger starter mindre enn 4 uker før sykefraværstilfellet`() {
+        håndterSykmelding(Sykmeldingsperiode(3.mars, 19.mars))
+        håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))
+        håndterInntektsmelding(listOf(3.mars til 18.mars))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = 3.februar til 20.februar)
+        assertFunksjonellFeil(Varselkode.RV_AY_5)
+    }
+
+    @Test
+    fun `Foreldrepenger starter mer enn 4 uker før sykefraværstilfellet`() {
+        håndterSykmelding(Sykmeldingsperiode(3.mars, 19.mars))
+        håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))
+        håndterInntektsmelding(listOf(3.mars til 18.mars))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = 3.januar til 20.januar)
+        assertIngenFunksjonelleFeil()
+    }
+
+    @Test
+    fun `Pleiepenger starter mindre enn 4 uker før sykefraværstilfellet`() {
+        håndterSykmelding(Sykmeldingsperiode(3.mars, 19.mars))
+        håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))
+        håndterInntektsmelding(listOf(3.mars til 18.mars))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, pleiepenger = listOf(3.februar til 20.februar))
+        assertFunksjonellFeil(Varselkode.RV_AY_6)
+    }
+
+    @Test
+    fun `Pleiepenger starter mer enn 4 uker før sykefraværstilfellet`() {
+        håndterSykmelding(Sykmeldingsperiode(3.mars, 19.mars))
+        håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))
+        håndterInntektsmelding(listOf(3.mars til 18.mars))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, pleiepenger = listOf(3.januar til 20.januar))
+        assertIngenFunksjonelleFeil()
+    }
+
+    @Test
+    fun `Omsorgspenger starter mindre enn 4 uker før sykefraværstilfellet`() {
+        håndterSykmelding(Sykmeldingsperiode(3.mars, 19.mars))
+        håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))
+        håndterInntektsmelding(listOf(3.mars til 18.mars))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, omsorgspenger = listOf(3.februar til 20.februar))
+        assertFunksjonellFeil(Varselkode.RV_AY_7)
+    }
+
+    @Test
+    fun `Omsorgspenger starter mer enn 4 uker før sykefraværstilfellet`() {
+        håndterSykmelding(Sykmeldingsperiode(3.mars, 19.mars))
+        håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))
+        håndterInntektsmelding(listOf(3.mars til 18.mars))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, omsorgspenger = listOf(3.januar til 20.januar))
+        assertIngenFunksjonelleFeil()
+    }
+
+    @Test
+    fun `Opplæringspenger starter mindre enn 4 uker før sykefraværstilfellet`() {
+        håndterSykmelding(Sykmeldingsperiode(3.mars, 19.mars))
+        håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))
+        håndterInntektsmelding(listOf(3.mars til 18.mars))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(3.februar til 20.februar))
+        assertFunksjonellFeil(Varselkode.RV_AY_8)
+    }
+
+    @Test
+    fun `Opplæringspenger starter mer enn 4 uker før sykefraværstilfellet`() {
+        håndterSykmelding(Sykmeldingsperiode(3.mars, 19.mars))
+        håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))
+        håndterInntektsmelding(listOf(3.mars til 18.mars))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(3.januar til 20.januar))
+        assertIngenFunksjonelleFeil()
     }
 }

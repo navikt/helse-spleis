@@ -10,6 +10,6 @@ class Pleiepenger(
             aktivitetslogg.info("Bruker har ingen pleiepengeytelser")
             return false
         }
-        return perioder.any { ytelse -> ytelse.overlapperMed(sykdomsperiode) }
+        return perioder.any { ytelse -> ytelse.overlapperMed(sykdomsperiode.oppdaterFom(sykdomsperiode.start.minusWeeks(4))) }
     }
 }

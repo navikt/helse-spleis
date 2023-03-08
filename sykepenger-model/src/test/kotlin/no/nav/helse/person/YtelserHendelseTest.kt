@@ -80,13 +80,6 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `fordrepengeytelse før periode`() {
-        ferdigstill(håndterYtelser(foreldrepengeytelse = Periode(førsteSykedag.minusDays(10), førsteSykedag.minusDays(1))))
-
-        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
-    }
-
-    @Test
     fun `fordrepengeytelse i periode`() {
         håndterYtelser(foreldrepengeytelse = Periode(førsteSykedag.minusDays(2), førsteSykedag))
         assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -96,13 +89,6 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
     @Test
     fun `fordrepengeytelse etter periode`() {
         ferdigstill(håndterYtelser(foreldrepengeytelse = Periode(sisteSykedag.plusDays(1), sisteSykedag.plusDays(10))))
-
-        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
-    }
-
-    @Test
-    fun `svangerskapsytelse før periode`() {
-        ferdigstill(håndterYtelser(svangerskapsytelse = Periode(førsteSykedag.minusDays(10), førsteSykedag.minusDays(1))))
 
         assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
     }

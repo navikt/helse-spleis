@@ -634,10 +634,11 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerYtelser(hendelse: IAktivitetslogg, periode: Periode = periode()) {
-        foreldrepenger(hendelse, periode)
-        pleiepenger(hendelse, periode)
-        omsorgspenger(hendelse, periode)
-        opplæringspenger(hendelse, periode)
+        val søkevinduFamilieytelser = periode.oppdaterFom(periode.start.minusWeeks(4))
+        foreldrepenger(hendelse, søkevinduFamilieytelser)
+        pleiepenger(hendelse, søkevinduFamilieytelser)
+        omsorgspenger(hendelse, søkevinduFamilieytelser)
+        opplæringspenger(hendelse, søkevinduFamilieytelser)
         institusjonsopphold(hendelse, periode)
         arbeidsavklaringspenger(hendelse, periode.start.minusMonths(6), periode.endInclusive)
         dagpenger(hendelse, periode.start.minusMonths(6), periode.endInclusive)

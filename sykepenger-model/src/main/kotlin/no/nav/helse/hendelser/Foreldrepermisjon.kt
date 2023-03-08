@@ -13,7 +13,7 @@ class Foreldrepermisjon(
             return false
         }
         return listOfNotNull(foreldrepengeytelse, svangerskapsytelse)
-                .any { ytelse -> ytelse.overlapperMed(sykdomsperiode) }
+                .any { ytelse -> ytelse.overlapperMed(sykdomsperiode.oppdaterFom(sykdomsperiode.start.minusWeeks(4))) }
     }
 
 }
