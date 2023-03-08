@@ -310,9 +310,9 @@ internal class Vedtaksperiode private constructor(
         val alleredeHensyntatt = erAlleredeHensyntatt(inntektOgRefusjon.meldingsreferanseId())
         kontekst(inntektOgRefusjon)
         inntektOgRefusjon.leggTil(hendelseIder)
-        inntektOgRefusjon.nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt, person, jurist())
         inntektsmeldingInfo = inntektOgRefusjon.addInntektsmelding(skjæringstidspunkt, arbeidsgiver, jurist)
         if (alleredeHensyntatt) return
+        inntektOgRefusjon.nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt, person, jurist())
         tilstand.håndter(this, inntektOgRefusjon)
     }
 

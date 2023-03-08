@@ -1178,30 +1178,23 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
 
-        assertForventetFeil(
-            forklaring = "søknaden forkastes fordi den bare delvis overlapper med perioden 2.januar - 20.januar. " +
-                    "Ved beregning av arbeidsgiverperiode så hensyntas (enn så lenge) forkastede vedtaksperioder, slik at agp beregnes til å være " +
-                    "1.januar - 16.januar, og vi mener det er utbetaling fom 17.januar. Dette vil nok rettes opp i den dagen vi ikke hensyntar forkastede " +
-                    "perioder ved beregning av AGP mer (rundt juni 2023)",
-            nå = {
-                assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-                assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING)
-            },
-            ønsket = {
-                assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-                assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-                assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
-                assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
-                håndterYtelser(2.vedtaksperiode)
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+        // søknaden forkastes fordi den bare delvis overlapper med perioden 2.januar - 20.januar
+        // Ved beregning av arbeidsgiverperiode så hensyntas (enn så lenge) forkastede vedtaksperioder, slik at agp beregnes til å være
+        // 1.januar - 16.januar, og vi mener det er utbetaling fom 17.januar.
+        // Dette vil nok rettes opp i den dagen vi ikke hensyntar forkastede perioder ved beregning av AGP mer (rundt juni 2023)"
 
-                assertEquals(5.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-                assertEquals(5.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-                assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
-                assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            }
-        )
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
+        assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
+        håndterYtelser(2.vedtaksperiode)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+
+        assertEquals(5.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(5.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
+        assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
