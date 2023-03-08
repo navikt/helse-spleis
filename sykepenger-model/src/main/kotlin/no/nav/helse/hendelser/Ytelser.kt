@@ -3,8 +3,8 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.Person
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_7
@@ -36,7 +36,7 @@ class Ytelser(
     }
 
     internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
-        arbeidsavklaringspenger.valider(this, skjæringstidspunkt)
+        arbeidsavklaringspenger.valider(this, skjæringstidspunkt, periode)
         dagpenger.valider(this, skjæringstidspunkt)
         if (foreldrepermisjon.overlapper(this, periode)) funksjonellFeil(RV_AY_5)
         if (pleiepenger.overlapper(this, periode)) funksjonellFeil(RV_AY_6)

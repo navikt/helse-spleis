@@ -12,6 +12,7 @@ internal class ArbeidsavklaringspengerTest {
 
     private companion object {
         private val skjæringstidspunkt = 3.mars
+        private val periode = skjæringstidspunkt til skjæringstidspunkt.plusDays(31)
     }
 
     @Test
@@ -33,18 +34,20 @@ internal class ArbeidsavklaringspengerTest {
 
     @Test
     fun `AAP innenfor 6 måneder`() {
-        assertFalse(undersøke(
-            Periode(
-            fom = skjæringstidspunkt.minusMonths(8),
-            tom = skjæringstidspunkt.minusMonths(6)
+        assertFalse(
+            undersøke(
+                Periode(
+                    fom = skjæringstidspunkt.minusMonths(8),
+                    tom = skjæringstidspunkt.minusMonths(6)
+                )
+            )
         )
-        ))
         assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
-    private fun undersøke(vararg perioder: Periode): Boolean {
+    private fun undersøke(vararg AAPperioder: Periode): Boolean {
         aktivitetslogg = Aktivitetslogg()
-        val aap = Arbeidsavklaringspenger(perioder.toList())
-        return aap.valider(aktivitetslogg, skjæringstidspunkt).harFunksjonelleFeilEllerVerre()
+        val aap = Arbeidsavklaringspenger(AAPperioder.toList())
+        return aap.valider(aktivitetslogg, skjæringstidspunkt, periode).harFunksjonelleFeilEllerVerre()
     }
 }

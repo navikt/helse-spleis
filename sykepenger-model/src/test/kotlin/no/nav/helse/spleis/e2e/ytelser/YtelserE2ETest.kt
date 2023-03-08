@@ -1,15 +1,21 @@
 package no.nav.helse.spleis.e2e.ytelser
 
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertActivities
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
+import no.nav.helse.spleis.e2e.assertIngenVarsel
+import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterInntektsmeldingMedValidering
 import no.nav.helse.spleis.e2e.håndterSykmelding
+import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterSøknadMedValidering
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
@@ -44,8 +50,18 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         assertFalse(hendelselogg.harFunksjonelleFeilEllerVerre())
         assertFalse(person.aktivitetslogg.logg(inspektør.vedtaksperioder(1.vedtaksperiode)).harVarslerEllerVerre())
         håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60)))
-        assertTrue(person.aktivitetslogg.logg(inspektør.vedtaksperioder(1.vedtaksperiode)).harVarslerEllerVerre())
+        assertVarsel(Varselkode.RV_AY_3, 1.vedtaksperiode.filter())
         assertIngenFunksjonelleFeil()
         assertActivities(person)
+    }
+
+    @Test
+    fun `AAP starter senere enn sykefraværstilfellet`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 19.januar))
+        håndterSøknad(Sykdom(3.januar, 19.januar, 100.prosent))
+        håndterInntektsmelding(listOf(3.januar til 18.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(3.februar til 5.februar))
+        assertIngenVarsel(Varselkode.RV_AY_3, 1.vedtaksperiode.filter())
     }
 }
