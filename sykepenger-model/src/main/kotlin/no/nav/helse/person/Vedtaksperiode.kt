@@ -641,7 +641,7 @@ internal class Vedtaksperiode private constructor(
         opplæringspenger(hendelse, søkevinduFamilieytelser)
         institusjonsopphold(hendelse, periode)
         arbeidsavklaringspenger(hendelse, periode.start.minusMonths(6), periode.endInclusive)
-        dagpenger(hendelse, periode.start.minusMonths(6), periode.endInclusive)
+        dagpenger(hendelse, periode.start.minusMonths(2), periode.endInclusive)
         dødsinformasjon(hendelse)
     }
 

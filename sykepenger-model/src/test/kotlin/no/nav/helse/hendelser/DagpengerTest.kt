@@ -12,6 +12,7 @@ class DagpengerTest {
 
     private companion object {
         private val førsteFraværsdag = 3.mars
+        private val periode = førsteFraværsdag til førsteFraværsdag.plusDays(30)
     }
 
     @Test
@@ -45,6 +46,6 @@ class DagpengerTest {
     private fun undersøke(vararg perioder: Periode): Boolean {
         aktivitetslogg = Aktivitetslogg()
         val dagpenger = Dagpenger(perioder.toList())
-        return dagpenger.valider(aktivitetslogg, førsteFraværsdag).harFunksjonelleFeilEllerVerre()
+        return dagpenger.valider(aktivitetslogg, førsteFraværsdag, periode).harFunksjonelleFeilEllerVerre()
     }
 }

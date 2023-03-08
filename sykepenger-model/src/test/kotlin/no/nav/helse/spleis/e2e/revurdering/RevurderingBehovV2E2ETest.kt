@@ -104,7 +104,7 @@ internal class RevurderingBehovV2E2ETest : AbstractEndToEndTest() {
 
     private fun assertYtelser(periode: Periode) {
         assertArbeidsavklaringspengerdetaljer(periode.start.minusMonths(6), periode.endInclusive)
-        assertDagpengerdetaljer(periode.start.minusMonths(6), periode.endInclusive)
+        assertDagpengerdetaljer(periode.start.minusMonths(2), periode.endInclusive)
         assertInstitusjonsoppholddetaljer(periode.start, periode.endInclusive)
         assertOmsorgspengerdetaljer(periode.start.minusWeeks(4), periode.endInclusive)
         assertOpplæringspengerdetaljer(periode.start.minusWeeks(4), periode.endInclusive)

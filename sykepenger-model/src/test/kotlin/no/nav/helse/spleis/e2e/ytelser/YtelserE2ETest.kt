@@ -68,6 +68,16 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Dagpenger starter senere enn sykefraværstilfellet`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 19.januar))
+        håndterSøknad(Sykdom(3.januar, 19.januar, 100.prosent))
+        håndterInntektsmelding(listOf(3.januar til 18.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, dagpenger = listOf(3.februar til 5.februar))
+        assertIngenVarsel(Varselkode.RV_AY_4, 1.vedtaksperiode.filter())
+    }
+
+    @Test
     fun `Foreldrepenger starter mindre enn 4 uker før sykefraværstilfellet`() {
         håndterSykmelding(Sykmeldingsperiode(3.mars, 19.mars))
         håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))

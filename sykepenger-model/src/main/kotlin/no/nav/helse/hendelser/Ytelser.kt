@@ -37,7 +37,7 @@ class Ytelser(
 
     internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
         arbeidsavklaringspenger.valider(this, skjæringstidspunkt, periode)
-        dagpenger.valider(this, skjæringstidspunkt)
+        dagpenger.valider(this, skjæringstidspunkt, periode)
         if (foreldrepermisjon.overlapper(this, periode)) funksjonellFeil(RV_AY_5)
         if (pleiepenger.overlapper(this, periode)) funksjonellFeil(RV_AY_6)
         if (omsorgspenger.overlapper(this, periode)) funksjonellFeil(RV_AY_7)
