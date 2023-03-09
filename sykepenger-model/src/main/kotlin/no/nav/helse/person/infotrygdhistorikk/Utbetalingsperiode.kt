@@ -55,7 +55,7 @@ abstract class Utbetalingsperiode(
     private fun validerNyereOpplysninger(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, periode: Periode) {
         if (!gjelder(organisasjonsnummer)) return
         if (this.periode.start <= periode.endInclusive) return
-        aktivitetslogg.funksjonellFeil(RV_IT_1)
+        aktivitetslogg.varsel(RV_IT_1)
     }
 
     override fun gjelder(orgnummer: String) = orgnummer == this.orgnr

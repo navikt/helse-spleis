@@ -12,10 +12,12 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElementTest.Companion.eksisterendeInfotrygdHistorikkelement
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.opphold
@@ -227,8 +229,9 @@ internal class InfotrygdhistorikkTest {
             Friperiode(15.mars,  20.mars)
         ), inntekter = listOf(Inntektsopplysning("ag1", 1.februar, 1000.daglig, true))))
         aktivitetslogg.barn().also {
-            assertFalse(historikk.valider(it, 1.januar til 31.januar, 1.januar, "ag1"))
-            assertTrue(it.harFunksjonelleFeilEllerVerre())
+            assertTrue(historikk.valider(it, 1.januar til 31.januar, 1.januar, "ag1"))
+            assertFalse(it.harFunksjonelleFeilEllerVerre())
+            it.assertVarsel(Varselkode.RV_IT_1)
         }
         aktivitetslogg.barn().also {
             assertTrue(historikk.valider(it, 20.februar til 28.februar, 20.februar, "ag1"))
