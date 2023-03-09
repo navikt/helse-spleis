@@ -99,6 +99,49 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `endre arbeidsgiverperiode til å starte tidligere`() {
+        håndterSøknad(Sykdom(20.januar, 15.februar, 100.prosent))
+        håndterInntektsmelding(listOf(
+            17.januar til 31.januar,
+            2.februar til 2.februar
+        ))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        nullstillTilstandsendringer()
+        assertEquals(17.januar til 15.februar, inspektør.periode(1.vedtaksperiode))
+        // drar agp tilbake to dager, men glemmer å omgjøre 1. februar til sykdom
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(15.januar, Dagtype.Sykedag, 100),
+            ManuellOverskrivingDag(16.januar, Dagtype.Sykedag, 100)
+        ))
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.februar, Dagtype.Sykedag, 100)))
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        val utbetalinger = inspektør.utbetalinger
+        assertEquals(2, utbetalinger.size)
+        utbetalinger.last().inspektør.also { revurderingen ->
+            assertEquals(0, revurderingen.personOppdrag.size)
+            assertEquals(1, revurderingen.arbeidsgiverOppdrag.size)
+            revurderingen.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+                assertEquals(31.januar til 15.februar, linje.fom til linje.tom)
+                assertEquals(1431, linje.beløp)
+            }
+        }
+    }
+
+    @Test
     fun `vedtaksperiode strekker seg tilbake og endrer skjæringstidspunktet`() {
         tilGodkjenning(10.januar, 31.januar, a1)
         val vilkårsgrunnlagFørEndring = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!

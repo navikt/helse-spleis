@@ -1302,6 +1302,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.revurderTidslinje(hendelse)
+            vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
