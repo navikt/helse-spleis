@@ -567,7 +567,6 @@ internal class Arbeidsgiver private constructor(
         }
         val overlappendeSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(inntektsmelding)
         if (overlappendeSykmeldingsperioder.isNotEmpty()) {
-            person.emitUtsettOppgaveEvent(inntektsmelding)
             person.emitInntektsmeldingFørSøknadEvent(inntektsmelding, overlappendeSykmeldingsperioder, organisasjonsnummer)
             return inntektsmelding.info("Inntektsmelding overlapper med sykmeldingsperioder $overlappendeSykmeldingsperioder")
         }
