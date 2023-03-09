@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.forrigeDag
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -83,10 +82,6 @@ class OverstyrTidslinje(
     override fun sykdomstidslinje() = sykdomstidslinje
 
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver) = this
-
-    override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
-        arbeidsgiver.håndter(this)
-    }
 
     override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
         hendelseIder.add(Dokumentsporing.overstyrTidslinje(meldingsreferanseId()))

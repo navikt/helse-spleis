@@ -46,7 +46,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.nekterOpprettelseAvPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsgivere
-import no.nav.helse.person.Arbeidsgiver.Companion.slettUtgåtteSykmeldingsperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.sykefraværstilfelle
 import no.nav.helse.person.Arbeidsgiver.Companion.tidligsteDato
 import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
@@ -156,9 +155,12 @@ class Person private constructor(
         håndterGjenoppta(sykmelding)
     }
 
-    fun håndter(søknad: Søknad) = håndter(søknad, "søknad") { søknad.forUng(alder) }
+    fun håndter(søknad: Søknad) = håndter(søknad, "søknad") { arbeidsgiver, _ ->
+        søknad.forUng(alder)
+        arbeidsgiver.håndter(søknad, arbeidsgivere.toList())
+    }
 
-    fun håndter(inntektsmelding: Inntektsmelding) = håndter(inntektsmelding, "inntektsmelding")
+    fun håndter(inntektsmelding: Inntektsmelding) = håndter(inntektsmelding, "inntektsmelding", Arbeidsgiver::håndter)
 
     fun håndter(inntektsmelding: InntektsmeldingReplay) {
         registrer(inntektsmelding, "Behandler replay av inntektsmelding")
@@ -172,16 +174,11 @@ class Person private constructor(
         håndterGjenoppta(inntektsmeldingReplayUtført)
     }
 
-    private fun håndter(
-        hendelse: SykdomstidslinjeHendelse,
-        hendelsesmelding: String,
-        before: () -> Any = { }
-    ) {
+    private fun <Hendelse: SykdomstidslinjeHendelse> håndter(hendelse: Hendelse, hendelsesmelding: String, handle: (Arbeidsgiver, Hendelse) -> Unit) {
         registrer(hendelse, "Behandler $hendelsesmelding")
         tidligereBehandlinger(hendelse, hendelse.periode())
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
-        before()
-        hendelse.fortsettÅBehandle(arbeidsgiver)
+        handle(arbeidsgiver, hendelse)
         håndterGjenoppta(hendelse)
     }
 
@@ -733,10 +730,6 @@ class Person private constructor(
     }
 
     internal fun nestemann() = arbeidsgivere.nestemann()
-
-    internal fun slettUtgåtteSykmeldingsperioder(tom: LocalDate) {
-        arbeidsgivere.slettUtgåtteSykmeldingsperioder(tom)
-    }
 
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,

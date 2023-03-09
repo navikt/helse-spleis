@@ -254,10 +254,6 @@ internal class Arbeidsgiver private constructor(
         }
         private fun Iterable<Arbeidsgiver>.førsteIkkeFerdigBehandletPeriode() = nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET)
 
-        internal fun Iterable<Arbeidsgiver>.slettUtgåtteSykmeldingsperioder(tom: LocalDate) = forEach {
-            it.sykmeldingsperioder.fjern(tom.minusDays(1))
-        }
-
         internal fun søppelbøtte(
             arbeidsgivere: List<Arbeidsgiver>,
             hendelse: IAktivitetslogg,
@@ -487,9 +483,9 @@ internal class Arbeidsgiver private constructor(
         return hendelse.harFunksjonelleFeilEllerVerre()
     }
 
-    internal fun håndter(søknad: Søknad) {
+    internal fun håndter(søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
         søknad.kontekst(this)
-        søknad.slettSykmeldingsperioderSomDekkes(sykmeldingsperioder, person)
+        søknad.slettSykmeldingsperioderSomDekkes(sykmeldingsperioder, arbeidsgivere.map { it.sykmeldingsperioder })
         opprettVedtaksperiodeOgHåndter(søknad)
     }
 

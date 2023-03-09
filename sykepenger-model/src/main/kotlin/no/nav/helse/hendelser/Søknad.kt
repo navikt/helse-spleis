@@ -61,10 +61,6 @@ class Søknad(
             .subset(sykdomsperiode)
     }
 
-    override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
-        arbeidsgiver.håndter(this)
-    }
-
     internal fun erRelevant(other: Periode) = other.overlapperMed(sykdomsperiode)
 
     override fun sykdomstidslinje() = sykdomstidslinje
@@ -130,10 +126,12 @@ class Søknad(
         )
     }
 
-    internal fun slettSykmeldingsperioderSomDekkes(sykmeldingsperioder: Sykmeldingsperioder, person: Person) {
+    internal fun slettSykmeldingsperioderSomDekkes(arbeidsgiveren: Sykmeldingsperioder, sykmeldingsperioder: List<Sykmeldingsperioder>) {
         val sisteDag = sykdomsperiode.endInclusive
-        sykmeldingsperioder.fjern(sisteDag)
-        person.slettUtgåtteSykmeldingsperioder(sisteDag)
+        // fjerner nesten alt for alle arbeidsgiverne
+        sykmeldingsperioder.forEach { it.fjern(sisteDag.minusDays(1)) }
+        // fjerner hele perioden for den arbeidsgiveren søknaden gjelder for
+        arbeidsgiveren.fjern(sisteDag)
     }
 
     class Merknad(private val type: String) {

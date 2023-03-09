@@ -87,8 +87,6 @@ abstract class SykdomstidslinjeHendelse(
 
     internal abstract fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg
 
-    internal abstract fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver)
-
     internal open fun padLeft(dato: LocalDate) {}
 
     override fun equals(other: Any?): Boolean = other is SykdomstidslinjeHendelse

@@ -7,7 +7,6 @@ import java.util.stream.Collectors
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.januar
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag
@@ -123,6 +122,5 @@ private const val ORGNUMMER = "987654321"
 internal class TestHendelse(private val tidslinje: Sykdomstidslinje = Sykdomstidslinje(), meldingsreferanseId: UUID = UUID.randomUUID()) : SykdomstidslinjeHendelse(meldingsreferanseId, UNG_PERSON_FNR_2018, AKTØRID, ORGNUMMER, LocalDateTime.now()) {
     override fun sykdomstidslinje() = tidslinje
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver) = Aktivitetslogg()
-    override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = Unit
     override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {}
 }

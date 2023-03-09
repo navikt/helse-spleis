@@ -13,7 +13,6 @@ import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding
 import no.nav.helse.nesteDag
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -41,7 +40,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.slf4j.LoggerFactory
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
-import kotlin.system.measureTimeMillis
 
 class Inntektsmelding(
     meldingsreferanseId: UUID,
@@ -169,12 +167,6 @@ class Inntektsmelding(
         varsel(RV_IM_3)
     }
 
-    override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
-        val time = measureTimeMillis {
-            arbeidsgiver.håndter(this)
-        }
-        log.info("brukte $time millis på å behandle inntektsmelding")
-    }
     private var inntektLagret = false
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, førsteFraværsdagFraSpleis: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
