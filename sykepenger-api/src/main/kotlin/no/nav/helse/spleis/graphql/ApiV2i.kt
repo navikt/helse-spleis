@@ -17,11 +17,12 @@ import no.nav.helse.spleis.objectMapper
 
 internal object ApiV2i {
     private val schema = ApiV2i::class.java.getResource("/graphql-schema.json")!!.readText()
-    private val regex = "person\\(fnr:\"(\\d+)\"\\)".toRegex()
-    private val String.fnr get() = objectMapper.readTree(this.replace(" ", "").replace("\n", "")).path("query").asText().let { query ->
-        regex.find(query)?.groupValues?.lastOrNull()
+    private val fraQueryRegex = "person\\(fnr:\"(\\d+)\"\\)".toRegex()
+    private val sifferRegex = "\\d+".toRegex()
+    private val String.fnr get() = objectMapper.readTree(this.replace(" ", "").replace("\n", "")).let { body ->
+        val fraVariables = body.path("variables").fields().asSequence().singleOrNull { (_, value) -> value.asText().matches(sifferRegex) }?.value?.asText()
+        fraVariables ?: fraQueryRegex.find(body.path("query").asText())?.groupValues?.lastOrNull()
     }
-
     private data class Response(val data: Data)
     private data class Data(val person: GraphQLPerson?)
 
