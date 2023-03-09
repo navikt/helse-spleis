@@ -80,7 +80,7 @@ internal interface IVilkårsgrunnlag {
         innslagId: UUID,
         sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>
     ): GhostPeriodeDTO? {
-        if (this.skjæringstidspunkt !in sykefraværstilfeller) return null
+        if (this.inntekter.size < 2 || this.skjæringstidspunkt !in sykefraværstilfeller) return null
         val inntekten = inntekter.firstOrNull { it.arbeidsgiver == organisasjonsnummer }
         if (inntekten == null || inntekten.omregnetÅrsinntekt?.kilde == null) return null
         return GhostPeriodeDTO(

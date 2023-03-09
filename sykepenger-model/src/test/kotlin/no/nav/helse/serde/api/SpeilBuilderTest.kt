@@ -1,6 +1,7 @@
 package no.nav.helse.serde.api
 
 import java.time.LocalDate
+import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -13,9 +14,11 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
+import no.nav.helse.oktober
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SI_3
 import no.nav.helse.serde.api.dto.BeregnetPeriode
+import no.nav.helse.serde.api.dto.GhostPeriodeDTO
 import no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
@@ -39,6 +42,8 @@ import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.speilApi
 import no.nav.helse.spleis.e2e.standardSimuleringsresultat
 import no.nav.helse.testhelpers.assertNotNull
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -59,6 +64,19 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, dødsdato = 1.januar)
 
         assertEquals(1.januar, serializePersonForSpeil(person).dødsdato)
+    }
+
+    @Test
+    fun `lager ikke hvit pølse i helg`() {
+        håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent))
+        håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        val speilJson = serializePersonForSpeil(person)
+        assertEquals(emptyList<GhostPeriodeDTO>(), speilJson.arbeidsgivere.single().ghostPerioder)
     }
 
     @Test

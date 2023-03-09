@@ -2,7 +2,9 @@ package no.nav.helse.serde.api.dto
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.erHelg
 import no.nav.helse.forrigeDag
+import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -59,13 +61,20 @@ data class ArbeidsgiverDTO(
             .perioder
             .filter { it.skjæringstidspunkt == skjæringstidspunkt }
 
-        return tidslinjeperioderFraNyesteGenerasjon.fold(listOf(ghostperiode)) { resultat, vedtaksperiode ->
+        val oppslittetPølser = tidslinjeperioderFraNyesteGenerasjon.fold(listOf(ghostperiode)) { resultat, vedtaksperiode ->
             val tidligereGhostperioder = resultat.dropLast(1)
             val sisteGhostperiode = resultat.lastOrNull()
             val tidslinjeperiode = vedtaksperiode.fom..vedtaksperiode.tom
             tidligereGhostperioder + (sisteGhostperiode?.brytOpp(tidslinjeperiode) ?: emptyList())
         }
+        return fjernHelgepølser(oppslittetPølser)
     }
+
+    private fun fjernHelgepølser(ghostPerioder: List<GhostPeriodeDTO>) = ghostPerioder
+        .filterNot { ghostperiode ->
+            val periode = ghostperiode.fom til ghostperiode.tom
+            periode.count() <= 2 && periode.start.erHelg() && periode.endInclusive.erHelg()
+        }
 }
 
 data class GhostPeriodeDTO(
