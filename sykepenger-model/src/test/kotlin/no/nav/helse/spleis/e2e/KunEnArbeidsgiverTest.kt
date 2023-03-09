@@ -294,7 +294,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             assertNull(it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
             assertEquals(0, it.utbetalinger(1.vedtaksperiode).size)
-            assertThrows<IllegalStateException> { it.arbeidsgiver.nåværendeTidslinje() }
+            assertTrue(inspektør.utbetalingstidslinjeBeregninger.isEmpty())
         }
         assertTilstander(
             1.vedtaksperiode,

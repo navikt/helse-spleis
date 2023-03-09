@@ -452,9 +452,6 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun nåværendeTidslinje() =
-        beregnetUtbetalingstidslinjer.lastOrNull()?.utbetalingstidslinje() ?: throw IllegalStateException("mangler utbetalinger")
-
     private fun lagreUtbetalingstidslinjeberegning(
         organisasjonsnummer: String,
         utbetalingstidslinje: Utbetalingstidslinje,
