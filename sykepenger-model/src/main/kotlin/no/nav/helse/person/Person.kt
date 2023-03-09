@@ -744,10 +744,6 @@ class Person private constructor(
     internal fun sykefraværstilfelle(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.sykefraværstilfelle(skjæringstidspunkt)
 
-    internal fun nekterOpprettelseAvPeriode(vedtaksperiode: Vedtaksperiode, søknad: Søknad): Boolean {
-        return arbeidsgivere.nekterOpprettelseAvPeriode(vedtaksperiode, søknad)
-    }
-
     internal fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt)
 

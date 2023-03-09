@@ -126,12 +126,8 @@ class Søknad(
         )
     }
 
-    internal fun slettSykmeldingsperioderSomDekkes(arbeidsgiveren: Sykmeldingsperioder, sykmeldingsperioder: List<Sykmeldingsperioder>) {
-        val sisteDag = sykdomsperiode.endInclusive
-        // fjerner nesten alt for alle arbeidsgiverne
-        sykmeldingsperioder.forEach { it.fjern(sisteDag.minusDays(1)) }
-        // fjerner hele perioden for den arbeidsgiveren søknaden gjelder for
-        arbeidsgiveren.fjern(sisteDag)
+    internal fun slettSykmeldingsperioderSomDekkes(arbeidsgiveren: Sykmeldingsperioder) {
+        arbeidsgiveren.fjern(sykdomsperiode)
     }
 
     class Merknad(private val type: String) {

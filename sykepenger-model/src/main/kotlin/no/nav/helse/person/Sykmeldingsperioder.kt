@@ -20,12 +20,11 @@ internal class Sykmeldingsperioder(
     }
 
     internal fun avventerSøknad(vedtaksperiode: Periode): Boolean {
-        val lavesteDato = perioder.minOfOrNull { it.start } ?: return false
-        return lavesteDato <= vedtaksperiode.endInclusive
+        return perioder.any { other -> vedtaksperiode.overlapperMed(other) }
     }
 
-    internal fun fjern(tom: LocalDate) {
-        perioder = perioder.mapNotNull { it.beholdDagerEtter(tom) }
+    internal fun fjern(søknad: Periode) {
+        perioder = perioder.flatMap { it.trim(søknad.oppdaterFom(LocalDate.MIN)) }
     }
 
     internal fun blirTruffetAv(inntektsmelding: Inntektsmelding) = perioder.any { periode ->
