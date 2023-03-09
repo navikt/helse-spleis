@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import no.nav.helse.erRettFør
+import no.nav.helse.forrigeDag
 import no.nav.helse.nesteDag
 
 // Understands beginning and end of a time interval
@@ -35,6 +36,11 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
         )
         fun List<Periode>.grupperSammenhengendePerioder() = merge(mergeKantIKant)
         fun List<Periode>.grupperSammenhengendePerioderMedHensynTilHelg() = merge(mergeOverHelg)
+
+        fun Iterable<Periode>.merge(nyPeriode: Periode) = this
+            .flatMap { it.trim(nyPeriode) }
+            .plusElement(nyPeriode)
+            .sortedBy { it.start }
 
         fun List<Periode>.sammenhengende(dato: LocalDate) = this
             .grupperSammenhengendePerioderMedHensynTilHelg()
@@ -121,6 +127,18 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
         start > cutoff -> this
         else -> cutoff.plusDays(1) til endInclusive
     }
+
+    fun trim(other: Periode): List<Periode> {
+        val felles = this.overlappendePeriode(other) ?: return listOf(this)
+        return when {
+            felles == this -> emptyList()
+            felles.start == this.start -> listOf(this.beholdDagerEtter(felles))
+            felles.endInclusive == this.endInclusive -> listOf(this.beholdDagerFør(felles))
+            else -> listOf(this.beholdDagerFør(felles), this.beholdDagerEtter(felles))
+        }
+    }
+    private fun beholdDagerFør(other: Periode) = this.start til other.start.forrigeDag
+    private fun beholdDagerEtter(other: Periode) = other.endInclusive.nesteDag til this.endInclusive
 
     override fun equals(other: Any?) =
         other is Periode && this.equals(other)
