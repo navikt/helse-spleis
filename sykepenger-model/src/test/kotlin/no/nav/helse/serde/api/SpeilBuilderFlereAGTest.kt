@@ -155,35 +155,11 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         val vilkårsgrunnlagId = person.vilkårsgrunnlagFor(1.januar)?.inspektør?.vilkårsgrunnlagId
 
         speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder.also { ghostPerioder ->
-            assertEquals(1, ghostPerioder.size)
-            ghostPerioder[0].also { actual ->
-                val expected = GhostPeriodeDTO(
-                    id = actual.id,
-                    fom = 21.januar,
-                    tom = 31.januar,
-                    skjæringstidspunkt = 1.januar,
-                    vilkårsgrunnlagHistorikkInnslagId = nyesteId,
-                    vilkårsgrunnlagId = vilkårsgrunnlagId,
-                    deaktivert = false
-                )
-                assertEquals(expected, actual)
-            }
+            assertEquals(0, ghostPerioder.size)
         }
 
         speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder.also { ghostPerioder ->
-            assertEquals(1, ghostPerioder.size)
-            ghostPerioder[0].also { actual ->
-                val expected = GhostPeriodeDTO(
-                    id = actual.id,
-                    fom = 1.januar,
-                    tom = 3.januar,
-                    skjæringstidspunkt = 1.januar,
-                    vilkårsgrunnlagHistorikkInnslagId = nyesteId,
-                    vilkårsgrunnlagId = vilkårsgrunnlagId,
-                    deaktivert = false
-                )
-                assertEquals(expected, actual)
-            }
+            assertEquals(0, ghostPerioder.size)
         }
 
         speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a3 }.ghostPerioder.also { perioder ->
@@ -905,35 +881,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
 
         val speilJson = serializePersonForSpeil(person)
         val perioder = speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder
-
-        assertEquals(2, perioder.size)
-        val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
-        val nyesteId = person.inspektør.vilkårsgrunnlagHistorikkInnslag().first().inspektør.id
-        val vilkårsgrunnlagId = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inspektør?.vilkårsgrunnlagId
-        perioder[0].also { actual ->
-            val expected = GhostPeriodeDTO(
-                id = actual.id,
-                fom = 1.januar,
-                tom = 31.januar,
-                skjæringstidspunkt = skjæringstidspunkt,
-                vilkårsgrunnlagHistorikkInnslagId = nyesteId,
-                vilkårsgrunnlagId = vilkårsgrunnlagId,
-                deaktivert = false
-            )
-            assertEquals(expected, actual)
-        }
-        perioder[1].also { actual ->
-            val expected = GhostPeriodeDTO(
-                id = actual.id,
-                fom = 1.mars,
-                tom = 31.mars,
-                skjæringstidspunkt = skjæringstidspunkt,
-                vilkårsgrunnlagHistorikkInnslagId = nyesteId,
-                vilkårsgrunnlagId = vilkårsgrunnlagId,
-                deaktivert = false
-            )
-            assertEquals(expected, actual)
-        }
+        assertEquals(0, perioder.size)
     }
 
     @Test

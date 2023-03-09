@@ -61,6 +61,8 @@ data class ArbeidsgiverDTO(
             .perioder
             .filter { it.skjæringstidspunkt == skjæringstidspunkt }
 
+        if (tidslinjeperioderFraNyesteGenerasjon.isNotEmpty()) return emptyList() // ingen hvit pølse så lenge det er sykdom
+
         val oppslittetPølser = tidslinjeperioderFraNyesteGenerasjon.fold(listOf(ghostperiode)) { resultat, vedtaksperiode ->
             val tidligereGhostperioder = resultat.dropLast(1)
             val sisteGhostperiode = resultat.lastOrNull()
