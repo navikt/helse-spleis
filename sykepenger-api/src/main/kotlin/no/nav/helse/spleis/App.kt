@@ -22,6 +22,7 @@ import no.nav.helse.spleis.config.ApplicationConfiguration
 import no.nav.helse.spleis.config.AzureAdAppConfig
 import no.nav.helse.spleis.config.DataSourceConfiguration
 import no.nav.helse.spleis.config.KtorConfig
+import no.nav.helse.spleis.graphql.ApiV2i.installGraphQLApiV2
 import no.nav.helse.spleis.graphql.installGraphQLApi
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
@@ -69,6 +70,7 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, da
                 spannerApi(dataSource, API_SERVICE)
                 sporingApi(dataSource, API_SERVICE)
                 installGraphQLApi(dataSource, API_SERVICE)
+                installGraphQLApiV2(dataSource, API_SERVICE)
             }
         },
         configure = {

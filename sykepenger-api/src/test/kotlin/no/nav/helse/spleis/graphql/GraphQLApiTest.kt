@@ -7,9 +7,11 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.AbstractObservableTest
+import no.nav.helse.spleis.graphql.SchemaGenerator.Companion.IntrospectionQuery
 import no.nav.helse.spleis.objectMapper
 import no.nav.helse.spleis.testhelpers.ApiTestServer
 import no.nav.helse.spleis.testhelpers.TestObservatør
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -17,6 +19,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
+import org.skyscreamer.jsonassert.JSONAssert
+import org.skyscreamer.jsonassert.JSONCompareMode.STRICT
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class GraphQLApiTest : AbstractObservableTest() {
@@ -183,14 +187,20 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             }
         """.trimIndent()
 
-        testServer.httpPost(
-            path = "/graphql",
-            body = """{"query": "$query"}"""
-        ) {
-            objectMapper.readTree(this).get("data").get("person").let { person ->
-                assertEquals(5, person.size())
+        requestBådeV1ogV2(
+            body = """{"query": "$query"}""",
+            testBlock = {
+                objectMapper.readTree(this).get("data").get("person").let { person ->
+                    assertEquals(5, person.size())
+                }
+            },
+            v2TestBlock = {
+                // For V2 vil man alltid få hele personen
+                objectMapper.readTree(this).get("data").get("person").let { person ->
+                    assertEquals(6, person.size())
+                }
             }
-        }
+        )
     }
 
     @Test
@@ -209,15 +219,22 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             }
         """.trimIndent()
 
-        testServer.httpPost(
-            path = "/graphql",
-            body = """{"query": "$query"}"""
-        ) {
-            objectMapper.readTree(this).get("data").get("person").get("arbeidsgivere").let { arbeidsgivere ->
-                assertEquals(1, arbeidsgivere.size())
-                assertEquals(3, arbeidsgivere.get(0).size())
+        requestBådeV1ogV2(
+            body = """{"query": "$query"}""",
+            testBlock = {
+                objectMapper.readTree(this).get("data").get("person").get("arbeidsgivere").let { arbeidsgivere ->
+                    assertEquals(1, arbeidsgivere.size())
+                    assertEquals(3, arbeidsgivere.get(0).size())
+                }
+            },
+            v2TestBlock = {
+                objectMapper.readTree(this).get("data").get("person").get("arbeidsgivere").let { arbeidsgivere ->
+                    assertEquals(1, arbeidsgivere.size())
+                    // For V2 vil man alltid få hele personen
+                    assertEquals(4, arbeidsgivere.get(0).size())
+                }
             }
-        }
+        )
     }
 
     @Test
@@ -395,8 +412,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             }
         """.trimIndent()
 
-        testServer.httpPost(
-            path = "/graphql",
+        requestBådeV1ogV2(
             body = """{"query": "$query"}"""
         ) {
             objectMapper.readTree(this).get("data").get("person").get("arbeidsgivere").get(0).get("generasjoner").get(0).let { generasjon ->
@@ -440,8 +456,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             }
         """.trimIndent()
 
-        testServer.httpPost(
-            path = "/graphql",
+        requestBådeV1ogV2(
             body = """{"query": "$query"}"""
         ) {
             objectMapper.readTree(this).get("data").get("person").let { person ->
@@ -485,13 +500,18 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             }
         """.trimIndent()
 
-        testServer.httpPost(
-            path = "/graphql",
-            body = """{"query": "$query"}"""
-        ) {
-            val organisasjonsnummer = objectMapper.readTree(this).get("data").get("person").get("arbeidsgiver").get("organisasjonsnummer").asText()
-            assertEquals(ORGNUMMER, organisasjonsnummer)
-        }
+        requestBådeV1ogV2(
+            body = """{"query": "$query"}""",
+            testBlock = {
+                val organisasjonsnummer = objectMapper.readTree(this).get("data").get("person").get("arbeidsgiver").get("organisasjonsnummer").asText()
+                assertEquals(ORGNUMMER, organisasjonsnummer)
+            },
+            v2TestBlock = {
+                // For V2 vil man alltid få hele personen
+                val organisasjonsnummer = objectMapper.readTree(this).get("data").get("person").get("arbeidsgivere").single().get("organisasjonsnummer").asText()
+                assertEquals(ORGNUMMER, organisasjonsnummer)
+            }
+        )
     }
 
     @Test
@@ -516,13 +536,18 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             }
         """.trimIndent()
 
-        testServer.httpPost(
-            path = "/graphql",
-            body = """{"query": "$query"}"""
-        ) {
-            val organisasjonsnummer = objectMapper.readTree(this).get("data").get("person").get("arbeidsgiver").get("organisasjonsnummer").asText()
-            assertEquals(ORGNUMMER, organisasjonsnummer)
-        }
+        requestBådeV1ogV2(
+            body = """{"query": "$query"}""",
+            testBlock = {
+                val organisasjonsnummer = objectMapper.readTree(this).get("data").get("person").get("arbeidsgiver").get("organisasjonsnummer").asText()
+                assertEquals(ORGNUMMER, organisasjonsnummer)
+            },
+            v2TestBlock = {
+                // For V2 vil man alltid få hele personen
+                val organisasjonsnummer = objectMapper.readTree(this).get("data").get("person").get("arbeidsgivere").single().get("organisasjonsnummer").asText()
+                assertEquals(ORGNUMMER, organisasjonsnummer)
+            }
+        )
     }
 
     @Test
@@ -553,8 +578,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             }
         """.trimIndent()
 
-        testServer.httpPost(
-            path = "/graphql",
+        requestBådeV1ogV2(
             body = """{"query": "$query"}"""
         ) {
             objectMapper.readTree(this).get("data").get("person").let { person ->
@@ -570,4 +594,71 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         }
     }
 
+    @Test
+    fun `hente person som ikke finnes`() {
+        val query = """
+            {
+                person(fnr: \"40440440440\") {
+                    arbeidsgivere {
+                        organisasjonsnummer,
+                        id,
+                        generasjoner {
+                            id,
+                        }
+                    }
+                }
+            }
+        """.trimIndent()
+
+        requestBådeV1ogV2(
+            body = """{"query": "$query"}"""
+        ) {
+            @Language("JSON")
+            val forventet = """
+                {
+                  "data": {
+                    "person": null
+                  }
+                }
+            """
+            JSONAssert.assertEquals(forventet, this, STRICT)
+        }
+    }
+
+    @Test
+    fun `response på introspection fra API og API V2 skal være like`() {
+        val (v1Response, v2Response) = requestBådeV1ogV2(
+            v1Path = "/graphql",
+            v2Path = "/v2/graphql/introspection",
+            body = IntrospectionQuery
+        )
+
+        JSONAssert.assertEquals(v1Response, v2Response, STRICT)
+    }
+
+    private fun requestBådeV1ogV2(
+        v1Path: String = "/graphql",
+        v2Path: String = "/v2/graphql",
+        body: String,
+        testBlock: String.() -> Unit = {},
+        v2TestBlock: String.() -> Unit = testBlock,
+    ): Pair<String, String> {
+        lateinit var v1Response: String
+        lateinit var v2Response: String
+
+        testServer.httpPost(
+            path = v1Path,
+            body = body
+        ) { v1Response = this }
+
+        testServer.httpPost(
+            path = v2Path,
+            body = body
+        ) { v2Response = this }
+
+        testBlock(v1Response)
+        v2TestBlock(v2Response)
+
+        return v1Response to v2Response
+    }
 }
