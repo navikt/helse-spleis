@@ -264,11 +264,6 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val personOppdrag: Map<String, Any?> = mapOf("linjer" to emptyList<String>())
     )
 
-    data class HendelseIkkeHåndtertEvent(
-        val hendelseId: UUID,
-        val årsaker: List<String>,
-    )
-
     data class OverlappendeInfotrygdperiodeEtterInfotrygdendring(
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
