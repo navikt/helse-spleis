@@ -23,13 +23,6 @@ import org.junit.jupiter.api.Test
 internal class RutingAvInntektsmeldingOppgaverTest : AbstractEndToEndTest() {
 
     @Test
-    fun `dersom vi mottar inntektsmelding før søknad skal det sendes et utsett_oppgave-event`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
-        assertEquals(listOf(inntektsmeldingId), observatør.utsettOppgaveEventer().map { it.hendelse })
-    }
-
-    @Test
     fun `dersom inntektsmeldingen ikke treffer noen sykmeldinger skal det ikke sendes ut et utsett_oppgave-event`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterInntektsmelding(listOf(1.februar til 16.februar))

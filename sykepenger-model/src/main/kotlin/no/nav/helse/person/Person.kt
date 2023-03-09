@@ -669,6 +669,22 @@ class Person private constructor(
         }
     }
 
+    internal fun emitInntektsmeldingFørSøknadEvent(
+        hendelse: Inntektsmelding,
+        overlappendeSykmeldingsperioder: List<Periode>,
+        organisasjonsnummer: String
+    ) {
+        observers.forEach {
+            it.inntektsmeldingFørSøknad(
+                PersonObserver.InntektsmeldingFørSøknadEvent(
+                    hendelse.kilde.meldingsreferanseId(),
+                    overlappendeSykmeldingsperioder,
+                    organisasjonsnummer
+                )
+            )
+        }
+    }
+
     internal fun relevanteArbeidsgivere(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.relevanteArbeidsgivere(vilkårsgrunnlagFor(skjæringstidspunkt))
 

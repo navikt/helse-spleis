@@ -183,14 +183,14 @@ internal class SykmeldingsperioderTest {
     }
 
     @Test
-    fun `sykmeldingsperioder blir truffet eller ikke truffet riktig av inntektsmelding`() {
+    fun `sykmeldingsperioder som overlapper med inntektsmelding`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
         sykmeldingsperioder.lagre(1.januar til 15.januar)
         sykmeldingsperioder.lagre(1.mars til 28.mars)
 
-        assertTrue(sykmeldingsperioder.blirTruffetAv(inntektsmelding(listOf(1.januar til 16.januar), 1.januar)))
-        assertFalse(sykmeldingsperioder.blirTruffetAv(inntektsmelding(listOf(1.februar til 16.februar), 1.februar)))
-        assertTrue(sykmeldingsperioder.blirTruffetAv(inntektsmelding(listOf(1.mars til 16.mars), 1.mars)))
+        assertEquals(listOf(1.januar til 15.januar), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.januar til 16.januar), 1.januar)))
+        assertEquals(emptyList<Periode>(), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.februar til 16.februar), 1.februar)))
+        assertEquals(listOf(1.mars til 16.mars), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.mars til 16.mars), 1.mars)))
     }
 
     @Test
@@ -198,7 +198,7 @@ internal class SykmeldingsperioderTest {
         val sykmeldingsperioder = Sykmeldingsperioder()
         sykmeldingsperioder.lagre(1.januar til 31.januar)
 
-        assertFalse(sykmeldingsperioder.blirTruffetAv(inntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.februar)))
+        assertEquals(emptyList<Periode>(), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.februar)))
     }
 
     @Test
@@ -207,7 +207,15 @@ internal class SykmeldingsperioderTest {
         sykmeldingsperioder.lagre(1.januar til 31.januar)
         sykmeldingsperioder.lagre(10.februar til 28.februar)
 
-        assertTrue(sykmeldingsperioder.blirTruffetAv(inntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 10.februar)))
+        assertEquals(
+            listOf(10.februar til 10.februar),
+            sykmeldingsperioder.overlappendePerioder(
+                inntektsmelding(
+                    listOf(1.januar til 16.januar),
+                    førsteFraværsdag = 10.februar
+                )
+            )
+        )
     }
 
     private fun inntektsmelding(

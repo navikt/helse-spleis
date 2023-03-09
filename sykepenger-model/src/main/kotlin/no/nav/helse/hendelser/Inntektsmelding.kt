@@ -306,4 +306,9 @@ class Inntektsmelding(
             dagerFraInntektsmelding
         )
     }
+
+    internal fun overlappendeSykmeldingsperioder(perioder: List<Periode>): List<Periode> {
+        if (overlappsperiode == null) return emptyList()
+        return perioder.mapNotNull { periode -> periode.overlappendePeriode(overlappsperiode) }
+    }
 }

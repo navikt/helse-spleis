@@ -82,16 +82,11 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val hendelse: UUID
     )
 
-    data class RevurderingAvvistEvent(
-        val fødselsnummer: String,
-        val errors: List<String>
-    ) {
-        fun toJsonMap(): Map<String, Any> =
-            mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "errors" to errors
-            )
-    }
+    data class InntektsmeldingFørSøknadEvent(
+        val inntektsmeldingId: UUID,
+        val overlappendeSykmeldingsperioder: List<Periode>,
+        val organisasjonsnummer: String
+    )
 
     data class ManglendeInntektsmeldingEvent(
         val fødselsnummer: String,
@@ -391,4 +386,5 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     fun overstyringIgangsatt(event: OverstyringIgangsatt) {}
 
     fun overlappendeInfotrygdperiodeEtterInfotrygdendring(event: OverlappendeInfotrygdperiodeEtterInfotrygdendring) {}
+    fun inntektsmeldingFørSøknad(inntektsmeldingFørSøknadEvent: InntektsmeldingFørSøknadEvent) {}
 }

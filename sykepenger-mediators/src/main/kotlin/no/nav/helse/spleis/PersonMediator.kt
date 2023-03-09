@@ -121,6 +121,19 @@ internal class PersonMediator(
         )))
     }
 
+    override fun inntektsmeldingFørSøknad(event: PersonObserver.InntektsmeldingFørSøknadEvent) {
+        queueMessage(JsonMessage.newMessage("inntektsmelding_før_søknad", mapOf(
+            "inntektsmeldingId" to event.inntektsmeldingId,
+            "overlappende_sykmeldingsperioder" to event.overlappendeSykmeldingsperioder.map { periode ->
+                mapOf(
+                    "fom" to periode.start,
+                    "tom" to periode.endInclusive
+                )
+            },
+            "organisasjonsnummer" to event.organisasjonsnummer
+        )))
+    }
+
     override fun overlappendeInfotrygdperiodeEtterInfotrygdendring(event: PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring) {
         queueMessage(JsonMessage.newMessage("overlappende_infotrygdperiode_etter_infotrygdendring", mapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,

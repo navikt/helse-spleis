@@ -31,6 +31,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val overstyringIgangsatt = mutableListOf<PersonObserver.OverstyringIgangsatt>()
     val vedtaksperiodeVenter = mutableListOf<PersonObserver.VedtaksperiodeVenterEvent>()
     val overlappendeInfotrygdperiodeEtterInfotrygdendring = mutableListOf<PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring>()
+    val inntektsmeldingFørSøknad = mutableListOf<PersonObserver.InntektsmeldingFørSøknadEvent>()
 
     val opprettOppgaverTilSpeilsaksbehandlerEventer = mutableListOf<PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent>()
     val opprettOppgaverEventer = mutableListOf<PersonObserver.OpprettOppgaveEvent>()
@@ -169,5 +170,9 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     override fun overlappendeInfotrygdperiodeEtterInfotrygdendring(event: PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring) {
         overlappendeInfotrygdperiodeEtterInfotrygdendring.add(event)
+    }
+
+    override fun inntektsmeldingFørSøknad(event: PersonObserver.InntektsmeldingFørSøknadEvent) {
+        inntektsmeldingFørSøknad.add(event)
     }
 }

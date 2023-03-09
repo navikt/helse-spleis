@@ -27,11 +27,10 @@ internal class Sykmeldingsperioder(
         perioder = perioder.flatMap { it.trim(søknad.oppdaterFom(LocalDate.MIN)) }
     }
 
-    internal fun blirTruffetAv(inntektsmelding: Inntektsmelding) = perioder.any { periode ->
-        inntektsmelding.overlapperMed(periode)
-    }
-    internal fun harSykmeldingsperiodeFør(dato: LocalDate) = perioder.any { it.start < dato }
+    internal fun overlappendePerioder(inntektsmelding: Inntektsmelding) =
+        inntektsmelding.overlappendeSykmeldingsperioder(perioder)
 }
+
 internal interface SykmeldingsperioderVisitor {
     fun preVisitSykmeldingsperioder(sykmeldingsperioder: Sykmeldingsperioder) {}
     fun visitSykmeldingsperiode(periode: Periode) {}

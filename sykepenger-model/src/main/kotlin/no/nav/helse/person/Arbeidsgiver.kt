@@ -565,8 +565,11 @@ internal class Arbeidsgiver private constructor(
             }
             return
         }
-        if (sykmeldingsperioder.blirTruffetAv(inntektsmelding)) {
+        val overlappendeSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(inntektsmelding)
+        if (overlappendeSykmeldingsperioder.isNotEmpty()) {
             person.emitUtsettOppgaveEvent(inntektsmelding)
+            person.emitInntektsmeldingFørSøknadEvent(inntektsmelding, overlappendeSykmeldingsperioder, organisasjonsnummer)
+            return inntektsmelding.info("Inntektsmelding overlapper med sykmeldingsperioder $overlappendeSykmeldingsperioder")
         }
         if (ForkastetVedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede, inntektsmelding)) {
             person.opprettOppgave(
@@ -1030,7 +1033,6 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun harSykmeldingsperiodeFør(dato: LocalDate) = sykmeldingsperioder.harSykmeldingsperiodeFør(dato)
     internal fun kanForkastes(vedtaksperiodeUtbetalinger: VedtaksperiodeUtbetalinger) =
         vedtaksperiodeUtbetalinger.kanForkastes(utbetalinger)
 

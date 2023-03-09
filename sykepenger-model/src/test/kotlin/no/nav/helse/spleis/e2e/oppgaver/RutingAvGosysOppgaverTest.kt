@@ -460,7 +460,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.februar til 16.februar))
-        assertEquals(inntektsmeldingId, observatør.utsettOppgaveEventer().single().hendelse)
+        assertEquals(inntektsmeldingId, observatør.inntektsmeldingFørSøknad.single().inntektsmeldingId)
         assertEquals(1, observatør.opprettOppgaverEventer.size)
 
         val søknadIdFebruar = håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
