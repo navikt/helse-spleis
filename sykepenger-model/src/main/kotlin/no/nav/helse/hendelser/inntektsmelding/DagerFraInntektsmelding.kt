@@ -117,7 +117,7 @@ internal class DagerFraInntektsmelding(
         gjenståendeDager.removeAll(hale)
     }
 
-    internal fun ferdigstilt() = gjenståendeDager.isEmpty()
+    internal fun noenDagerHåndtert() = håndterteDager.isNotEmpty()
     internal fun utsettOppgave(person: Person) {
         person.emitUtsettOppgaveEvent(inntektsmelding)
     }

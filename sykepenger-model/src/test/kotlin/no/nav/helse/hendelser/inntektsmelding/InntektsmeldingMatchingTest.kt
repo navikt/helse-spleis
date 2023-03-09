@@ -488,7 +488,7 @@ internal class InntektsmeldingMatchingTest {
         assertEquals(11.januar til 12.januar, dager.håndter(vedtaksperiode3))
 
         assertEquals(setOf(1.januar, 4.januar, 5.januar, 6.januar, 7.januar, 10.januar), dager.inspektør.gjenståendeDager)
-        assertFalse(dager.ferdigstilt())
+        assertTrue(dager.noenDagerHåndtert())
     }
 
     @Test
