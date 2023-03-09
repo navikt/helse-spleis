@@ -42,7 +42,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
-import no.nav.helse.person.Arbeidsgiver.Companion.nekterOpprettelseAvPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsgivere
@@ -209,7 +208,8 @@ class Person private constructor(
     fun håndter(utbetalingshistorikk: UtbetalingshistorikkEtterInfotrygdendring) {
         utbetalingshistorikk.kontekst(this)
         if(!utbetalingshistorikk.oppdaterHistorikk(infotrygdhistorikk)) return
-        arbeidsgivere.håndter(utbetalingshistorikk, infotrygdhistorikk) // diff
+        arbeidsgivere.håndter(utbetalingshistorikk, infotrygdhistorikk)
+        gjenopptaBehandling(utbetalingshistorikk)
         håndterGjenoppta(utbetalingshistorikk)
     }
 
