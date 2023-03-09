@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.graphql.dto
 
 import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -22,6 +23,7 @@ enum class GraphQLHendelsetype {
     Ukjent
 }
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "__typename")
 interface GraphQLHendelse {
     val id: String
     val type: GraphQLHendelsetype

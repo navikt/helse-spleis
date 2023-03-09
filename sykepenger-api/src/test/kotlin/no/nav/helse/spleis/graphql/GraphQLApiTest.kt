@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.skyscreamer.jsonassert.JSONAssert
+import org.skyscreamer.jsonassert.JSONCompare
 import org.skyscreamer.jsonassert.JSONCompareMode.STRICT
 
 @TestInstance(Lifecycle.PER_CLASS)
@@ -651,11 +652,21 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             }
         """
 
-        val (v1response, _) = requestBådeV1ogV2(
+        val (v1response, v2response) = requestBådeV1ogV2(
             body = requestBody
         ).let { it.first.utenVariableVerdier to it.second.utenVariableVerdier }
 
         JSONAssert.assertEquals(detSpesialistFaktiskForventer, v1response, STRICT)
+        val jsonCompareResult = JSONCompare.compareJSON(detSpesialistFaktiskForventer, v2response, STRICT)
+        assertEquals(0, jsonCompareResult.fieldFailures.size)
+        assertEquals(0, jsonCompareResult.fieldMissing.size)
+        // Tre ting Spesialist ikke spør etter
+        assertEquals(3, jsonCompareResult.fieldUnexpected.size)
+        assertEquals(setOf(
+            "data.person.arbeidsgivere[0].id",
+            "data.person.arbeidsgivere[0].generasjoner[0].perioder[0].utbetaling.status",
+            "data.person.arbeidsgivere[0].generasjoner[0].perioder[0].utbetaling.type"
+        ), jsonCompareResult.fieldUnexpected.map { "${it.field}.${it.actual}" }.toSet())
     }
 
     private fun requestBådeV1ogV2(
@@ -689,6 +700,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         private val UUIDRegex = "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b".toRegex()
         private val NullUUID = "00000000-0000-0000-0000-000000000000"
         private val LocalDateTimeRegex = "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}".toRegex()
+        private val LocalDateTimePrecisionRegex = "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+".toRegex()
         private val LocalDateTimeMandagsfrø = "2018-01-01T00:00:00"
         private val TidsstempelRegex = "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3}".toRegex()
         private val TidsstempelMandagsfrø = "2018-01-01 00:00:00.000"
@@ -696,6 +708,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         private val FagsystemId = "ZZZZZZZZZZZZZZZZZZZZZZZZZZ"
         private val String.utenVariableVerdier get() = replace(UUIDRegex, NullUUID)
             .replace(LocalDateTimeRegex, LocalDateTimeMandagsfrø)
+            .replace(LocalDateTimePrecisionRegex, LocalDateTimeMandagsfrø)
             .replace(TidsstempelRegex, TidsstempelMandagsfrø)
             .replace(FagsystemIdRegex, FagsystemId)
 

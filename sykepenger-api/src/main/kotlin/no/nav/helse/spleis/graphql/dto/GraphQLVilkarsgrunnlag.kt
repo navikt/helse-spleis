@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.graphql.dto
 
 import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
 import java.util.UUID
 
@@ -19,6 +20,7 @@ enum class GraphQLVilkarsgrunnlagtype {
     Ukjent
 }
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "__typename")
 interface GraphQLVilkarsgrunnlag {
     val id: UUID
     val skjaeringstidspunkt: LocalDate

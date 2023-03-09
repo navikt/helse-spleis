@@ -27,7 +27,7 @@ import no.nav.helse.spleis.graphql.installGraphQLApi
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 
-internal val objectMapper = jacksonObjectMapper()
+internal val nyObjectmapper get() = jacksonObjectMapper()
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     .registerModule(JavaTimeModule())
     .setDefaultPrettyPrinter(DefaultPrettyPrinter().apply {
@@ -35,6 +35,7 @@ internal val objectMapper = jacksonObjectMapper()
         indentObjectsWith(DefaultIndenter("  ", "\n"))
     })
 
+internal val objectMapper = nyObjectmapper
 private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
 
 fun main() {

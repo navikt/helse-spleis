@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.graphql.dto
 
 import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -210,6 +211,7 @@ data class GraphQLDag(
     val begrunnelser: List<GraphQLBegrunnelse>?
 )
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "__typename")
 interface GraphQLTidslinjeperiode {
     val id: UUID
     val fom: LocalDate
