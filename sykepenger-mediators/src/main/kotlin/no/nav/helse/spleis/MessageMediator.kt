@@ -100,9 +100,9 @@ internal class MessageMediator(
 
             hendelseMediator.behandle(message, context)
             hendelseRepository.markerSomBehandlet(message.id)
-        } catch (err: JsonMigrationException) {
-            severeErrorHandler(err, message)
         } catch (err: DeserializationException) {
+            severeErrorHandler(err, message)
+        } catch (err: JsonMigrationException) {
             severeErrorHandler(err, message)
         } catch (err: SQLException) {
             severeErrorHandler(err, message)
