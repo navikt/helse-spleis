@@ -1,5 +1,5 @@
 val jsonassertVersion = "1.5.0"
-val jacksonVersion = "2.14.0"
+val jacksonVersion = "2.14.12"
 
 dependencies {
     implementation(project(":sykepenger-primitiver"))
