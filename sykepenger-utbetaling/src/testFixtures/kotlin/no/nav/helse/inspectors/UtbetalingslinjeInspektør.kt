@@ -8,36 +8,36 @@ import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import kotlin.properties.Delegates
 
-internal val Utbetalingslinje.inspektør get() = UtbetalingslinjeInspektør(this)
+val Utbetalingslinje.inspektør get() = UtbetalingslinjeInspektør(this)
 
-internal class UtbetalingslinjeInspektør(utbetalingslinje: Utbetalingslinje) : OppdragVisitor {
-    internal lateinit var endringskode: Endringskode
+class UtbetalingslinjeInspektør(utbetalingslinje: Utbetalingslinje) : OppdragVisitor {
+    lateinit var endringskode: Endringskode
         private set
-    internal lateinit var fom: LocalDate
-        private set
-
-    internal lateinit var tom: LocalDate
+    lateinit var fom: LocalDate
         private set
 
-    internal var beløp: Int? = null
+    lateinit var tom: LocalDate
         private set
 
-    internal var grad: Int? = null
+    var beløp: Int? = null
         private set
 
-    internal var delytelseId by Delegates.notNull<Int>()
+    var grad: Int? = null
         private set
 
-    internal var refDelytelseId : Int? = null
+    var delytelseId by Delegates.notNull<Int>()
         private set
 
-    internal var refFagsystemId: String? = null
+    var refDelytelseId : Int? = null
         private set
 
-    internal var datoStatusFom: LocalDate? = null
+    var refFagsystemId: String? = null
         private set
 
-    internal var statuskode: String? = null
+    var datoStatusFom: LocalDate? = null
+        private set
+
+    var statuskode: String? = null
         private set
 
     init {

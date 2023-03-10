@@ -17,7 +17,6 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.nullstillTilstandsendringer

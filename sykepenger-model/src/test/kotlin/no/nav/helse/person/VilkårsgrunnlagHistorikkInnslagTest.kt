@@ -7,7 +7,6 @@ import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg

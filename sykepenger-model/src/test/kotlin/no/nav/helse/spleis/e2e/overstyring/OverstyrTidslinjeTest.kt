@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype

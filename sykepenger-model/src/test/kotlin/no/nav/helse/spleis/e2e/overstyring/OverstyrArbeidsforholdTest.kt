@@ -15,7 +15,6 @@ import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.person.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.Inntektskilde.FLERE_ARBEIDSGIVERE
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2

@@ -8,7 +8,6 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
