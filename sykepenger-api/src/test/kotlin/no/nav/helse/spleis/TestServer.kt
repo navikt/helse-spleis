@@ -6,14 +6,11 @@ import java.net.HttpURLConnection
 import java.net.ServerSocket
 import java.net.URL
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.Toggle
 import no.nav.helse.spleis.testhelpers.ApiTestServer
 
 fun main() = runBlocking {
-    Toggle.GraphQLPlayground.enable {
-        val server = ApiTestServer(4321)
-        server.start()
-    }
+    val server = ApiTestServer(4321)
+    server.start()
 }
 
 fun randomPort(): Int = ServerSocket(0).use {

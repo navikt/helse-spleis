@@ -139,12 +139,12 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
         expectedStatus: HttpStatusCode = HttpStatusCode.OK,
         headers: Map<String, String> = emptyMap(),
         body: String = "",
+        medAccessToken: Boolean = true,
         testBlock: String.() -> Unit = {}
     ) {
-        val token = createToken()
         val connection = appBaseUrl.handleRequest(HttpMethod.Get, path) {
             doOutput = true
-            setRequestProperty(HttpHeaders.Authorization, "Bearer $token")
+            if (medAccessToken) setRequestProperty(HttpHeaders.Authorization, "Bearer ${createToken()}")
             setRequestProperty("Content-Type", "application/json")
             setRequestProperty("Accept", "application/json")
             headers.forEach { (key, value) ->

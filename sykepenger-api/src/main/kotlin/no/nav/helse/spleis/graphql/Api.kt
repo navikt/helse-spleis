@@ -5,7 +5,6 @@ import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.auth.authenticate
 import javax.sql.DataSource
-import no.nav.helse.Toggle
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 
@@ -16,12 +15,8 @@ fun Application.installGraphQLApi(dataSource: DataSource, authProviderName: Stri
     install(GraphQL) {
         endpoint = "/graphql"
 
-        if (Toggle.GraphQLPlayground.enabled) {
-            playground = true
-        } else {
-            wrap {
-                authenticate(authProviderName, build = it)
-            }
+        wrap {
+            authenticate(authProviderName, build = it)
         }
 
         schema {

@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.graphql
 
+import io.ktor.http.HttpStatusCode
 import java.net.URL
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
@@ -628,6 +629,28 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     }
 
     @Test
+    fun `request uten access token`() {
+        val query = """
+            {
+                person(fnr: \"40440440440\") {
+                    arbeidsgivere {
+                        organisasjonsnummer,
+                        id,
+                        generasjoner {
+                            id,
+                        }
+                    }
+                }
+            }
+        """
+
+        requestBådeV1ogV2(
+            body = """{"query": "$query"}""",
+            medAccessToken = false
+        )
+    }
+
+    @Test
     fun `response på introspection fra API og API V2 skal være like`() {
         val (v1Response, v2Response) = requestBådeV1ogV2(
             v1Path = "/graphql",
@@ -673,20 +696,27 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         v1Path: String = "/graphql",
         v2Path: String = "/v2/graphql",
         body: String,
+        medAccessToken: Boolean = true,
         assertBlock: String.() -> Unit = {},
         v2AssertBlock: String.() -> Unit = assertBlock,
     ): Pair<String, String> {
         lateinit var v1Response: String
         lateinit var v2Response: String
 
+        val forventetHttpStatusCode = if (medAccessToken) HttpStatusCode.OK else HttpStatusCode.Unauthorized
+
         testServer.httpPost(
             path = v1Path,
-            body = body
+            body = body,
+            medAccessToken = medAccessToken,
+            expectedStatus = forventetHttpStatusCode
         ) { v1Response = this }
 
         testServer.httpPost(
             path = v2Path,
-            body = body
+            body = body,
+            medAccessToken = medAccessToken,
+            expectedStatus = forventetHttpStatusCode
         ) { v2Response = this }
 
         assertBlock(v1Response)
