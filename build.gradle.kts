@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm") version "1.7.0"
 }
 
-val junitJupiterVersion = "5.9.0"
+val junitJupiterVersion = "5.9.2"
 val jvmTargetVersion = "17"
 
 allprojects {
