@@ -3,7 +3,7 @@ package no.nav.helse
 /**
  * Teller teller telleting
  */
-internal class Teller(private val grense: Int) {
+class Teller(private val grense: Int) {
     private var observer: Observer = Observer.nullObserver
     private var rest = grense
     private val initiell = if (grense == 0) Ferdig else Initiell
@@ -57,7 +57,7 @@ internal class Teller(private val grense: Int) {
         override fun inc(teller: Teller) {}
     }
 
-    internal interface Observer {
+    interface Observer {
         companion object {
             val nullObserver = object : Observer {}
         }
