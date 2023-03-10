@@ -9,7 +9,7 @@ spec:
   image: {{image}}
   port: 8080
   ingresses:
-   - https://spleis-api.dev.intern.nav.no
+   - https://spleis-api.intern.dev.nav.no
   liveness:
     path: /isalive
     initialDelay: 5
