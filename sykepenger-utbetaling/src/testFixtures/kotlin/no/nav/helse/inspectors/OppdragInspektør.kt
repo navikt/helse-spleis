@@ -15,20 +15,20 @@ import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import kotlin.properties.Delegates
 
-internal val Oppdrag.inspektør get() = OppdragInspektør(this)
+val Oppdrag.inspektør get() = OppdragInspektør(this)
 
-internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
+class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
     private var linjeteller = 0
     private val endringskoder = mutableListOf<Endringskode>()
     private lateinit var fagsystemId: String
-    internal lateinit var fagområde: Fagområde
+    lateinit var fagområde: Fagområde
         private set
-    internal lateinit var endringskode: Endringskode
+    lateinit var endringskode: Endringskode
         private set
-    internal lateinit var mottaker: String
+    lateinit var mottaker: String
         private set
     private val totalBeløp = mutableListOf<Int>()
-    internal var nettoBeløp by Delegates.notNull<Int>()
+    var nettoBeløp by Delegates.notNull<Int>()
         private set
     private val fom = mutableListOf<LocalDate>()
     private val tom = mutableListOf<LocalDate>()
@@ -38,12 +38,12 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
     private val delytelseIder = mutableListOf<Int>()
     private val refDelytelseIder = mutableListOf<Int?>()
     private val refFagsystemIder = mutableListOf<String?>()
-    internal var sisteArbeidsgiverdag: LocalDate? = null
-    internal var overføringstidspunkt: LocalDateTime? = null
-    internal var avstemmingsnøkkel: Long? = null
+    var sisteArbeidsgiverdag: LocalDate? = null
+    var overføringstidspunkt: LocalDateTime? = null
+    var avstemmingsnøkkel: Long? = null
     private var status: Oppdragstatus? = null
     private var simuleringsResultat: SimuleringResultat? = null
-    internal var periode: Periode = LocalDate.MIN.somPeriode()
+    var periode: Periode = LocalDate.MIN.somPeriode()
         private set
 
     init {
