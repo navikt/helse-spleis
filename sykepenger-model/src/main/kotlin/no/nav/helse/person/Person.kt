@@ -685,6 +685,12 @@ class Person private constructor(
         }
     }
 
+    internal fun emitInntektsmeldingIkkeHåndter(hendelse: Inntektsmelding, organisasjonsnummer: String) {
+        observers.forEach {
+            it.inntektsmeldingIkkeHåndtert(hendelse.meldingsreferanseId(), organisasjonsnummer)
+        }
+    }
+
     internal fun relevanteArbeidsgivere(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.relevanteArbeidsgivere(vilkårsgrunnlagFor(skjæringstidspunkt))
 

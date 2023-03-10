@@ -382,4 +382,5 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
 
     fun overlappendeInfotrygdperiodeEtterInfotrygdendring(event: OverlappendeInfotrygdperiodeEtterInfotrygdendring) {}
     fun inntektsmeldingFørSøknad(inntektsmeldingFørSøknadEvent: InntektsmeldingFørSøknadEvent) {}
+    fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String) {}
 }

@@ -134,6 +134,13 @@ internal class PersonMediator(
         )))
     }
 
+    override fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String) {
+        queueMessage(JsonMessage.newMessage("inntektsmelding_ikke_håndtert", mapOf(
+            "inntektsmeldingId" to inntektsmeldingId,
+            "organisasjonsnummer" to organisasjonsnummer
+        )))
+    }
+
     override fun overlappendeInfotrygdperiodeEtterInfotrygdendring(event: PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring) {
         queueMessage(JsonMessage.newMessage("overlappende_infotrygdperiode_etter_infotrygdendring", mapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,

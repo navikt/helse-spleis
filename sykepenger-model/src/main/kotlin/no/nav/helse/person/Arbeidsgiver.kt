@@ -570,6 +570,9 @@ internal class Arbeidsgiver private constructor(
             person.emitInntektsmeldingFørSøknadEvent(inntektsmelding, overlappendeSykmeldingsperioder, organisasjonsnummer)
             return inntektsmelding.info("Inntektsmelding overlapper med sykmeldingsperioder $overlappendeSykmeldingsperioder")
         }
+
+        person.emitInntektsmeldingIkkeHåndter(inntektsmelding, organisasjonsnummer)
+
         if (ForkastetVedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede, inntektsmelding)) {
             person.opprettOppgave(
                 PersonObserver.OpprettOppgaveEvent(
