@@ -1,5 +1,8 @@
 package no.nav.helse
 
+/**
+ * Teller teller telleting
+ */
 internal class Teller(private val grense: Int) {
     private var observer: Observer = Observer.nullObserver
     private var rest = grense
