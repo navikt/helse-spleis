@@ -8,11 +8,13 @@ import no.nav.helse.Alder
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode.Companion.delvisOverlappMed
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerEtter
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.subsumsjonsFormat
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
+import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -25,6 +27,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Økonomi
 
 class Søknad(
     meldingsreferanseId: UUID,
@@ -73,7 +76,11 @@ class Søknad(
         perioder.forEach { it.valider(this) }
         if (permittert) varsel(RV_SØ_1)
         merknaderFraSykmelding.forEach { it.valider(this) }
-        if (sykdomstidslinje.any { it is Dag.ForeldetSykedag }) varsel(RV_SØ_2)
+        val foreldedeDager = ForeldetSubsumsjonsgrunnlag(sykdomstidslinje).build()
+        if (foreldedeDager.isNotEmpty()) {
+            subsumsjonObserver.`§ 22-13 ledd 3`(avskjæringsdato(), foreldedeDager)
+            varsel(RV_SØ_2)
+        }
         if (utenlandskSykmelding) funksjonellFeil(RV_SØ_29)
         if (sendTilGosys) funksjonellFeil(RV_SØ_30)
         return this
@@ -247,6 +254,19 @@ class Søknad(
                 val feriePerioder = søknad.perioder.filterIsInstance<Ferie>()
                 return this.periode.all { utlandsdag -> feriePerioder.any { ferie -> ferie.periode.contains(utlandsdag)} }
             }
+        }
+    }
+
+    private class ForeldetSubsumsjonsgrunnlag(sykdomstidslinje: Sykdomstidslinje) : SykdomstidslinjeVisitor {
+        private val foreldedeDager = mutableListOf<LocalDate>()
+        init {
+            sykdomstidslinje.accept(this)
+        }
+
+        fun build() = foreldedeDager.grupperSammenhengendePerioder()
+
+        override fun visitDag(dag: Dag.ForeldetSykedag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
+            foreldedeDager.add(dato)
         }
     }
 }

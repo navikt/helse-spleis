@@ -13,6 +13,7 @@ import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.etterlevelse.Ledd.LEDD_1
 import no.nav.helse.etterlevelse.Ledd.LEDD_2
 import no.nav.helse.etterlevelse.Ledd.LEDD_3
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_22_13
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_10
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_11
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_12
@@ -2716,6 +2717,36 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "maksdato" to 26.april
             ),
             vedtaksperiodeId = 4.vedtaksperiode
+        )
+    }
+
+    @Test
+    fun `§ 22-13 - foreldelse`() {
+        håndterSøknad(Sykdom(15.januar, 15.februar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
+        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+            paragraf = PARAGRAF_22_13,
+            ledd = LEDD_3,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "avskjæringsdato" to 1.februar
+            ),
+            output = mapOf(
+                "perioder" to listOf(
+                    mapOf(
+                        "fom" to 15.januar,
+                        "tom" to 19.januar
+                    ),
+                    mapOf(
+                        "fom" to 22.januar,
+                        "tom" to 26.januar
+                    ),
+                    mapOf(
+                        "fom" to 29.januar,
+                        "tom" to 31.januar
+                    )
+                )
+            ),
+            vedtaksperiodeId = 1.vedtaksperiode
         )
     }
 }

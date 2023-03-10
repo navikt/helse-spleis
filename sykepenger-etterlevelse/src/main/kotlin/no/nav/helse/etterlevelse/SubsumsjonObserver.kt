@@ -463,6 +463,13 @@ interface SubsumsjonObserver: InntektSubsumsjonobserver, ProsentdelSubsumsjonObs
         startdatoSykepengerettighet: LocalDate
     ) {}
 
+    /**
+     * Vurdering av foreldelse
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/§22-13)
+     */
+    fun `§ 22-13 ledd 3`(avskjæringsdato: LocalDate, perioder: List<Periode>) {}
+
     class SammenligningsgrunnlagDTO(
         val sammenligningsgrunnlag: Double,
         val inntekterFraAOrdningen: Map<String, List<Map<String, Any>>>

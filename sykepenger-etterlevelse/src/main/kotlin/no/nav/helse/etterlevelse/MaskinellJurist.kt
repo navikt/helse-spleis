@@ -800,6 +800,27 @@ class MaskinellJurist private constructor(
         if (dagerIkkeOppfylt.isNotEmpty()) logg(VILKAR_IKKE_OPPFYLT, dagerIkkeOppfylt.first(), dagerIkkeOppfylt.last())
     }
 
+    override fun `§ 22-13 ledd 3`(avskjæringsdato: LocalDate, perioder: List<Periode>) {
+        leggTil(EnkelSubsumsjon(
+            utfall = VILKAR_IKKE_OPPFYLT,
+            versjon = LocalDate.of(2011, 12, 16),
+            paragraf = Paragraf.PARAGRAF_22_13,
+            ledd = LEDD_3,
+            input = mapOf(
+                "avskjæringsdato" to avskjæringsdato
+            ),
+            output = mapOf(
+                "perioder" to perioder.map {
+                    mapOf(
+                        "fom" to it.start,
+                        "tom" to it.endInclusive
+                    )
+                }
+            ),
+            kontekster = kontekster()
+        ))
+    }
+
     fun subsumsjoner() = subsumsjoner.toList()
 
     fun events() = subsumsjoner.map(SubsumsjonEvent.Companion::fraSubsumsjon)
