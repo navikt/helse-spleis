@@ -2,6 +2,7 @@ package no.nav.helse
 
 import java.time.LocalDate
 import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -178,4 +179,20 @@ internal class GrunnbeløpTest {
         Alder(skjæringstidspunkt.minusYears(67).minusDays(1))
     private fun akkurat67(skjæringstidspunkt: LocalDate) =
         Alder(skjæringstidspunkt.minusYears(67))
+
+    private fun Grunnbeløp.oppfyllerMinsteInntekt(dato: LocalDate, inntekt: Inntekt) =
+        inntekt >= minsteinntekt(dato)
+    private fun Grunnbeløp.Companion.validerMinsteInntekt(skjæringstidspunkt: LocalDate, inntekt: Inntekt, alder: Alder, subsumsjonObserver: SubsumsjonObserver): Begrunnelse? {
+        val gjeldendeGrense = if(alder.forhøyetInntektskrav(skjæringstidspunkt)) `2G` else halvG
+        val oppfylt = gjeldendeGrense.oppfyllerMinsteInntekt(skjæringstidspunkt, inntekt)
+
+        if (alder.forhøyetInntektskrav(skjæringstidspunkt)) {
+            subsumsjonObserver.`§ 8-51 ledd 2`(oppfylt, skjæringstidspunkt, alder.alderPåDato(skjæringstidspunkt), inntekt, gjeldendeGrense.minsteinntekt(skjæringstidspunkt))
+            if (oppfylt) return null
+            return Begrunnelse.MinimumInntektOver67
+        }
+        subsumsjonObserver.`§ 8-3 ledd 2 punktum 1`(oppfylt, skjæringstidspunkt, inntekt, gjeldendeGrense.minsteinntekt(skjæringstidspunkt))
+        if (oppfylt) return null
+        return Begrunnelse.MinimumInntekt
+    }
 }

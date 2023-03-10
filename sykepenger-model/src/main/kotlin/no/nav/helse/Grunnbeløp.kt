@@ -1,8 +1,6 @@
 package no.nav.helse
 
 import java.time.LocalDate
-import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 
@@ -91,9 +89,6 @@ internal class Grunnbeløp private constructor(private val multiplier: Double) {
     private fun gjeldende(dato: LocalDate, virkningFra: LocalDate? = null) =
         HistoriskGrunnbeløp.gjeldendeGrunnbeløp(grunnbeløp, dato, virkningFra ?: dato)
 
-    private fun oppfyllerMinsteInntekt(dato: LocalDate, inntekt: Inntekt) =
-        inntekt >= minsteinntekt(dato)
-
     /*
      * Virkningstidspunktet for regulering av kravet til minsteinntekt for rett til ytelser etter folketrygdloven
      * kan settes til et tidspunkt etter virkningstidspunktet for for grunnbeløpet øvrig.
@@ -108,20 +103,6 @@ internal class Grunnbeløp private constructor(private val multiplier: Double) {
         val `1G` = Grunnbeløp(1.0)
 
         private fun Inntekt.gyldigFra(gyldigFra: LocalDate, virkningsdato: LocalDate = gyldigFra, gyldigSomMinsteinntektKrav: LocalDate = gyldigFra) = HistoriskGrunnbeløp(this, gyldigFra, virkningsdato, gyldigSomMinsteinntektKrav)
-
-        fun validerMinsteInntekt(skjæringstidspunkt: LocalDate, inntekt: Inntekt, alder: Alder, subsumsjonObserver: SubsumsjonObserver): Begrunnelse? {
-            val gjeldendeGrense = if(alder.forhøyetInntektskrav(skjæringstidspunkt)) `2G` else halvG
-            val oppfylt = gjeldendeGrense.oppfyllerMinsteInntekt(skjæringstidspunkt, inntekt)
-
-            if (alder.forhøyetInntektskrav(skjæringstidspunkt)) {
-                subsumsjonObserver.`§ 8-51 ledd 2`(oppfylt, skjæringstidspunkt, alder.alderPåDato(skjæringstidspunkt), inntekt, gjeldendeGrense.minsteinntekt(skjæringstidspunkt))
-                if (oppfylt) return null
-                return Begrunnelse.MinimumInntektOver67
-            }
-            subsumsjonObserver.`§ 8-3 ledd 2 punktum 1`(oppfylt, skjæringstidspunkt, inntekt, gjeldendeGrense.minsteinntekt(skjæringstidspunkt))
-            if (oppfylt) return null
-            return Begrunnelse.MinimumInntekt
-        }
 
         fun virkningstidspunktFor(beløp: Inntekt): LocalDate {
             return `1G`.grunnbeløp.find { it.beløp(1.0) == beløp }?.virkningstidspunkt() ?: throw IllegalArgumentException("$beløp er ikke et Grunnbeløp")
