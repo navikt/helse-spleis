@@ -189,9 +189,8 @@ class Inntektsmelding(
 
     internal fun inntektsmeldingsinfo() = InntektsmeldingInfo(id = meldingsreferanseId(), arbeidsforholdId = arbeidsforholdId)
 
-    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
+    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) =
         hendelseIder.add(Dokumentsporing.inntektsmelding(meldingsreferanseId()))
-    }
 
     internal fun nyeArbeidsgiverInntektsopplysninger(builder: ArbeidsgiverInntektsopplysningerOverstyringer) {
         val inntektsdato = if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) førsteFraværsdag else arbeidsgiverperioder.maxOf { it.start }

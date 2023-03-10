@@ -685,9 +685,20 @@ class Person private constructor(
         }
     }
 
-    internal fun emitInntektsmeldingIkkeHåndter(hendelse: Inntektsmelding, organisasjonsnummer: String) {
+    internal fun emitInntektsmeldingIkkeHåndtert(hendelse: Inntektsmelding, organisasjonsnummer: String) {
         observers.forEach {
             it.inntektsmeldingIkkeHåndtert(hendelse.meldingsreferanseId(), organisasjonsnummer)
+        }
+    }
+
+    internal fun emitInntektsmeldingMottatt(meldingsreferanseId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
+        observers.forEach {
+            it.inntektsmeldingMottatt(meldingsreferanseId, vedtaksperiodeId, organisasjonsnummer)
+        }
+    }
+    internal fun emitSøknadMottatt(meldingsreferanseId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
+        observers.forEach {
+            it.søknadMottatt(meldingsreferanseId, vedtaksperiodeId, organisasjonsnummer)
         }
     }
 

@@ -81,6 +81,6 @@ internal class TurneringsnøkkelTest {
 
         override fun sykdomstidslinje(): Sykdomstidslinje = throw RuntimeException("Brukes ikke i testene")
         override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): Aktivitetslogg = throw RuntimeException("Brukes ikke i testene")
-        override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {}
+        override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = true
     }
 }

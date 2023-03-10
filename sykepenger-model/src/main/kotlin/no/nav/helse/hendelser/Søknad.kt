@@ -113,9 +113,9 @@ class Søknad(
     private fun avskjæringsdato(): LocalDate =
         (opprinneligSendt ?: sendtTilNAVEllerArbeidsgiver).toLocalDate().minusMonths(3).withDayOfMonth(1)
 
-    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
+    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) =
         hendelseIder.add(Dokumentsporing.søknad(meldingsreferanseId()))
-    }
+
 
     internal fun lagVedtaksperiode(person: Person, arbeidsgiver: Arbeidsgiver, jurist: MaskinellJurist): Vedtaksperiode {
         val periode = requireNotNull(sykdomstidslinje.periode()) { "ugyldig søknad: tidslinjen er tom" }

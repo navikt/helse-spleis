@@ -260,9 +260,27 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(søknad: Søknad) {
         if (!søknad.erRelevant(this.periode)) return
         kontekst(søknad)
-        søknad.leggTil(hendelseIder)
+        søknadMottatt(søknad)
         tilstand.håndter(this, søknad)
         søknad.trimLeft(periode.endInclusive)
+    }
+
+    private fun inntektsmeldingMottatt(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
+        if (!inntektOgRefusjon.leggTil(hendelseIder)) return
+        person.emitInntektsmeldingMottatt(inntektOgRefusjon.meldingsreferanseId(), id, organisasjonsnummer)
+    }
+    private fun inntektsmeldingMottatt(hendelse: SykdomstidslinjeHendelse) {
+        if (!hendelse.leggTil(hendelseIder)) return
+        person.emitInntektsmeldingMottatt(hendelse.meldingsreferanseId(), id, organisasjonsnummer)
+    }
+    private fun inntektsmeldingMottatt(dager: DagerFraInntektsmelding) {
+        if (!dager.leggTil(hendelseIder)) return
+        person.emitInntektsmeldingMottatt(dager.meldingsreferanseId(), id, organisasjonsnummer)
+    }
+
+    private fun søknadMottatt(søknad: Søknad) {
+        søknad.leggTil(hendelseIder)
+        person.emitSøknadMottatt(søknad.meldingsreferanseId(), id, organisasjonsnummer)
     }
 
     internal fun håndter(inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
@@ -294,7 +312,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun postHåndter(dager: DagerFraInntektsmelding) {
         if (dager.harBlittHåndtertAv(periode) || dager.skalHåndteresAv(periode)) {
-            dager.leggTil(hendelseIder)
+            inntektsmeldingMottatt(dager)
             if (tilstand == AvsluttetUtenUtbetaling) {
                 // Kun for å beholde dagens funksjonelle oppførsel
                 // Hvis en periode i AUU overlapper med noen arbeidgsiveperiodedager, men har ikke håndtert inntekt
@@ -310,7 +328,7 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
         val alleredeHensyntatt = erAlleredeHensyntatt(inntektOgRefusjon.meldingsreferanseId())
         kontekst(inntektOgRefusjon)
-        inntektOgRefusjon.leggTil(hendelseIder)
+        inntektsmeldingMottatt(inntektOgRefusjon)
         inntektsmeldingInfo = inntektOgRefusjon.addInntektsmelding(skjæringstidspunkt, arbeidsgiver, jurist)
         if (alleredeHensyntatt) return
         inntektOgRefusjon.nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt, person, jurist())
@@ -970,7 +988,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndtertInntektPåSkjæringstidspunktet(hendelse: SykdomstidslinjeHendelse) {
-        hendelse.leggTil(hendelseIder)
+        inntektsmeldingMottatt(hendelse)
         tilstand.håndtertInntektPåSkjæringstidspunktet(this, hendelse)
     }
 

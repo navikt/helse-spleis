@@ -7,6 +7,8 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -40,14 +42,64 @@ internal class InntektsmeldingFørSøknadTest : AbstractEndToEndTest() {
     fun `Inntektsmelding bare håndtert inntekt`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 10.februar)
+        val im = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 10.februar)
         assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
+        assertEquals(3, observatør.inntektsmeldingMottatt.size)
+        assertEquals(listOf(
+            im to 2.vedtaksperiode.id(ORGNUMMER),
+            im to 1.vedtaksperiode.id(ORGNUMMER) // todo: vedtaksperiode 1 håndterer tydligvis dagene
+        ), observatør.inntektsmeldingMottatt.takeLast(2))
     }
 
     @Test
     fun `Inntektsmelding noen dager håndtert`() {
-        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        val søknad = håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
+        val im = håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
+        assertEquals(listOf(søknad to 1.vedtaksperiode.id(ORGNUMMER)), observatør.søknadMottatt)
+        assertEquals(listOf(im to 1.vedtaksperiode.id(ORGNUMMER)), observatør.inntektsmeldingMottatt)
+    }
+
+    @Test
+    fun `Inntektsmelding håndteres av flere`() {
+        val søknad1 = håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
+        val søknad2 = håndterSøknad(Sykdom(11.januar, 16.januar, 100.prosent))
+        val søknad3 = håndterSøknad(Sykdom(17.januar, 20.januar, 100.prosent))
+        val søknad4 = håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent))
+        val im = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
+        assertEquals(listOf(
+            søknad1 to 1.vedtaksperiode.id(ORGNUMMER),
+            søknad2 to 2.vedtaksperiode.id(ORGNUMMER),
+            søknad3 to 3.vedtaksperiode.id(ORGNUMMER),
+            søknad4 to 4.vedtaksperiode.id(ORGNUMMER)
+        ), observatør.søknadMottatt)
+        assertEquals(listOf(
+            im to 3.vedtaksperiode.id(ORGNUMMER),
+            im to 1.vedtaksperiode.id(ORGNUMMER),
+            im to 2.vedtaksperiode.id(ORGNUMMER),
+            im to 4.vedtaksperiode.id(ORGNUMMER)
+        ), observatør.inntektsmeldingMottatt)
+    }
+    @Test
+    fun `delvis overlappende søknad`() {
+        val søknad1 = håndterSøknad(Sykdom(11.januar, 16.januar, 100.prosent))
+        val søknad2 = håndterSøknad(Sykdom(10.januar, 15.januar, 100.prosent))
+        assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
+        assertEquals(listOf(
+            søknad1 to 1.vedtaksperiode.id(ORGNUMMER),
+            søknad2 to 1.vedtaksperiode.id(ORGNUMMER)
+        ), observatør.søknadMottatt)
+        assertEquals(
+            PersonObserver.VedtaksperiodeForkastetEvent(
+                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+                aktørId = AKTØRID,
+                organisasjonsnummer = ORGNUMMER,
+                vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
+                gjeldendeTilstand = TilstandType.START,
+                hendelser = setOf(søknad2),
+                fom = 10.januar,
+                tom = 15.januar
+            ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
     }
 }

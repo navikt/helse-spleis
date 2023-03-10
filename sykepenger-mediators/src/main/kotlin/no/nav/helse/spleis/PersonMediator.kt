@@ -141,6 +141,29 @@ internal class PersonMediator(
         )))
     }
 
+    override fun håndtertInntektsmelding(event: PersonObserver.HåndtertInntektsmeldingEvent) {
+        // TODO: slå sammen denne og "inntektsmeldingMottatt()"
+        queueMessage(JsonMessage.newMessage("håndtert_inntektsmelding", mapOf(
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "inntektsmeldingId" to event.inntektsmeldingId
+        )))
+    }
+
+    override fun inntektsmeldingMottatt(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
+        queueMessage(JsonMessage.newMessage("inntektsmelding_mottatt", mapOf(
+            "inntektsmeldingId" to inntektsmeldingId,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "vedtaksperiodeId" to vedtaksperiodeId
+        )))
+    }
+    override fun søknadMottatt(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
+        queueMessage(JsonMessage.newMessage("søknad_mottatt", mapOf(
+            "søknadId" to søknadId,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "vedtaksperiodeId" to vedtaksperiodeId
+        )))
+    }
+
     override fun overlappendeInfotrygdperiodeEtterInfotrygdendring(event: PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring) {
         queueMessage(JsonMessage.newMessage("overlappende_infotrygdperiode_etter_infotrygdendring", mapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
@@ -399,13 +422,6 @@ internal class PersonMediator(
 
     override fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
         queueMessage(JsonMessage.newMessage("trenger_opplysninger_fra_arbeidsgiver", event.toJsonMap()))
-    }
-
-    override fun håndtertInntektsmelding(event: PersonObserver.HåndtertInntektsmeldingEvent) {
-        queueMessage(JsonMessage.newMessage("håndtert_inntektsmelding", mapOf(
-            "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "inntektsmeldingId" to event.inntektsmeldingId
-        )))
     }
 
     private fun leggPåStandardfelter(outgoingMessage: JsonMessage) = outgoingMessage.apply {
