@@ -992,11 +992,11 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndtertInntektPåSkjæringstidspunktet(this, hendelse)
     }
 
-    private fun vedtaksperiodeVenter(påminnelse: Påminnelse) {
-        val nestemann = person.nestemann() ?: return sikkerlogg.warn("Hvordan kan det ha seg at {} for {} ikke er nestemann?", keyValue("vedtaksperiodeId", id), keyValue("aktørId", aktørId))
+    private fun vedtaksperiodeVenter(påminnelse: Påminnelse, venterPå: Vedtaksperiode? = person.nestemann()) {
+        if (venterPå == null) return sikkerlogg.warn("Hvordan kan det ha seg at {} for {} ikke er nestemann?", keyValue("vedtaksperiodeId", id), keyValue("aktørId", aktørId))
         val builder = VedtaksperiodeVenter.Builder()
-        val venteårsak = person.venteårsak(nestemann, påminnelse) ?: return
-        builder.venterPå(nestemann.id, nestemann.organisasjonsnummer, venteårsak)
+        val venteårsak = person.venteårsak(venterPå, påminnelse) ?: return
+        builder.venterPå(venterPå.id, venterPå.organisasjonsnummer, venteårsak)
         påminnelse.venter(builder, tilstand::makstid)
         builder.hendelseIder(hendelseIder())
         val vedtaksperiodeVenter = builder.build()
@@ -1397,11 +1397,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, arbeidsgivere: List<Arbeidsgiver>) =
-            BEREGNING.utenBegrunnelse
+            BEREGNING fordi OVERSTYRING_IGANGSATT
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (påminnelse.skalReberegnes())
                 return vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.reberegning(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
+            vedtaksperiode.vedtaksperiodeVenter(påminnelse, vedtaksperiode)
             val periode = vedtaksperiode.sykefraværstilfelle()
             vedtaksperiode.trengerYtelser(påminnelse, periode)
         }
@@ -1568,6 +1569,9 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vurderOmKanGåVidere(vedtaksperiode, påminnelse)
+            if (vedtaksperiode.tilstand == AvventerInntektsmelding) {
+                vedtaksperiode.vedtaksperiodeVenter(påminnelse, vedtaksperiode)
+            }
         }
 
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, arbeidsgivere: Iterable<Arbeidsgiver>, hendelse: IAktivitetslogg) {
@@ -1752,6 +1756,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.vedtaksperiodeVenter(påminnelse, vedtaksperiode)
             vedtaksperiode.trengerYtelser(påminnelse)
         }
 
@@ -1865,6 +1870,7 @@ internal class Vedtaksperiode private constructor(
             if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode) {
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
             }
+            vedtaksperiode.vedtaksperiodeVenter(påminnelse, vedtaksperiode)
             trengerSimulering(vedtaksperiode, påminnelse)
         }
 
@@ -1886,7 +1892,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.utbetalinger.simuler(hendelse)
         }
 
-        override fun venteårsak(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, arbeidsgivere: List<Arbeidsgiver>) = UTBETALING.utenBegrunnelse
+        override fun venteårsak(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, arbeidsgivere: List<Arbeidsgiver>) =
+            UTBETALING fordi OVERSTYRING_IGANGSATT
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             if (vedtaksperiode.utbetalinger.erKlarForGodkjenning()) return
@@ -1899,6 +1906,7 @@ internal class Vedtaksperiode private constructor(
             if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerHistorikkRevurdering) {
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
             }
+            vedtaksperiode.vedtaksperiodeVenter(påminnelse, vedtaksperiode)
             vedtaksperiode.utbetalinger.simuler(påminnelse)
         }
 
@@ -1962,6 +1970,7 @@ internal class Vedtaksperiode private constructor(
             if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode) {
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
             }
+            vedtaksperiode.vedtaksperiodeVenter(påminnelse, vedtaksperiode)
             vedtaksperiode.trengerGodkjenning(påminnelse)
         }
 
@@ -2000,6 +2009,7 @@ internal class Vedtaksperiode private constructor(
             if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerHistorikkRevurdering) {
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
             }
+            vedtaksperiode.vedtaksperiodeVenter(påminnelse, vedtaksperiode)
             vedtaksperiode.trengerGodkjenning(påminnelse)
         }
 
@@ -2072,6 +2082,7 @@ internal class Vedtaksperiode private constructor(
             when {
                 vedtaksperiode.utbetalinger.erUbetalt() -> vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode)
                 vedtaksperiode.utbetalinger.erUtbetalt() -> vedtaksperiode.tilstand(påminnelse, Avsluttet)
+                else -> vedtaksperiode.vedtaksperiodeVenter(påminnelse, vedtaksperiode)
             }
         }
     }

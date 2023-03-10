@@ -90,4 +90,34 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
             assertEquals(forventet, observatør.vedtaksperiodeVenter.single())
         }
     }
+
+    @Test
+    fun `Periode i avventer innteksmelding blir påminnet`() {
+        a1 {
+            val søknadId = UUID.randomUUID()
+            nyPeriode(1.januar til 31.januar, søknadId = søknadId)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            val tilstandsendringstidspunkt = LocalDateTime.now()
+            assertEquals(0, observatør.vedtaksperiodeVenter.size)
+            håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = tilstandsendringstidspunkt)
+            val forventet = PersonObserver.VedtaksperiodeVenterEvent(
+                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+                aktørId = AKTØRID,
+                organisasjonsnummer = a1,
+                vedtaksperiodeId = 1.vedtaksperiode,
+                hendelser = setOf(søknadId),
+                ventetSiden = tilstandsendringstidspunkt,
+                venterTil = tilstandsendringstidspunkt.plusDays(180),
+                venterPå = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    organisasjonsnummer = a1,
+                    venteårsak = PersonObserver.VedtaksperiodeVenterEvent.Venteårsak(
+                        hva = "INNTEKTSMELDING",
+                        hvorfor = null
+                    )
+                )
+            )
+            assertEquals(forventet, observatør.vedtaksperiodeVenter.single())
+        }
+    }
 }
