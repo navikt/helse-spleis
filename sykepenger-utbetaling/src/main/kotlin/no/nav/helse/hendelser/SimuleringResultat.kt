@@ -2,6 +2,9 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 
+/**
+ * Legger på en kommentar for å trigge en mulig feil et sted i bygget vårt
+ */
 class SimuleringResultat(
     val totalbeløp: Int,
     val perioder: List<SimulertPeriode>
