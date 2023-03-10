@@ -4,7 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 
-internal class Grunnbeløp private constructor(private val multiplier: Double) {
+class Grunnbeløp private constructor(private val multiplier: Double) {
     private val grunnbeløp = listOf(
         111477.årlig.gyldigFra(1.mai(2022), gyldigSomMinsteinntektKrav = 23.mai(2022)),
         106399.årlig.gyldigFra(1.mai(2021), gyldigSomMinsteinntektKrav = 24.mai(2021) ),
@@ -77,14 +77,14 @@ internal class Grunnbeløp private constructor(private val multiplier: Double) {
         5400.årlig.gyldigFra(1.januar(1967)),
     )
 
-    internal fun beløp(dato: LocalDate) =
+    fun beløp(dato: LocalDate) =
         gjeldende(dato).beløp(multiplier)
 
-    internal fun beløp(dato: LocalDate, virkningFra: LocalDate?) =
+    fun beløp(dato: LocalDate, virkningFra: LocalDate?) =
         gjeldende(dato, virkningFra).beløp(multiplier)
 
-    internal fun dagsats(dato: LocalDate) = beløp(dato).rundTilDaglig()
-    internal fun dagsats(dato: LocalDate, virkningFra: LocalDate) = beløp(dato, virkningFra).rundTilDaglig()
+    fun dagsats(dato: LocalDate) = beløp(dato).rundTilDaglig()
+    fun dagsats(dato: LocalDate, virkningFra: LocalDate) = beløp(dato, virkningFra).rundTilDaglig()
 
     private fun gjeldende(dato: LocalDate, virkningFra: LocalDate? = null) =
         HistoriskGrunnbeløp.gjeldendeGrunnbeløp(grunnbeløp, dato, virkningFra ?: dato)
@@ -94,7 +94,8 @@ internal class Grunnbeløp private constructor(private val multiplier: Double) {
      * kan settes til et tidspunkt etter virkningstidspunktet for for grunnbeløpet øvrig.
      * https://lovdata.no/forskrift/2021-05-21-1568/§6
     **/
-    internal fun minsteinntekt(dato: LocalDate) = HistoriskGrunnbeløp.gjeldendeMinsteinntektGrunnbeløp(grunnbeløp, dato).beløp(multiplier)
+    fun minsteinntekt(dato: LocalDate) = HistoriskGrunnbeløp.gjeldendeMinsteinntektGrunnbeløp(grunnbeløp, dato)
+        .beløp(multiplier)
 
     companion object {
         val `6G` = Grunnbeløp(6.0)
