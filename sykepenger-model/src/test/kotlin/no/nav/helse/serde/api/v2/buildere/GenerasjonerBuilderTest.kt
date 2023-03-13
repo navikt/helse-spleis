@@ -1731,7 +1731,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             uberegnetPeriode(2) medTilstand IngenUtbetaling
         }
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode,
             AVSLUTTET_UTEN_UTBETALING,
             AVVENTER_INNTEKTSMELDING,

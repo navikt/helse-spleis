@@ -106,7 +106,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(2, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
         }
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
@@ -136,7 +136,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
-            AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(
@@ -144,7 +143,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
-            AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(
@@ -186,7 +184,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
-            AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(
@@ -194,7 +191,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
-            AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(
@@ -546,7 +542,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertIngenFunksjonelleFeil()
         assertActivities()
         assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(
             2.vedtaksperiode,
             START,

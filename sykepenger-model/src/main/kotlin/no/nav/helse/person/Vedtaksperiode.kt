@@ -2127,9 +2127,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             søknad.info("Prøver å igangsette revurdering grunnet korrigerende søknad")
             vedtaksperiode.håndterLåstOverlappendeSøknadRevurdering(søknad)
-            if (!søknad.harFunksjonelleFeilEllerVerre() && !vedtaksperiode.forventerInntekt()) {
-                vedtaksperiode.emitVedtaksperiodeEndret(søknad) // TODO: for å unngå at flex oppretter oppgaver
-            }
         }
         override fun håndterDagerFør(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
             dager.leggTilArbeidsdagerFør(vedtaksperiode.periode.start)
@@ -2138,15 +2135,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
-            if (!skalHensyntaInntektsmelding(vedtaksperiode, dager)) {
-                vedtaksperiode.emitVedtaksperiodeEndret(dager)
-                return false
-            }
+            if (!skalHensyntaInntektsmelding(vedtaksperiode, dager)) return false
             vedtaksperiode.låsOpp()
             vedtaksperiode.håndterDager(dager)
             vedtaksperiode.lås()
             if (!vedtaksperiode.forventerInntekt() || Toggle.AuuHåndtererIkkeInntekt.enabled) {
-                vedtaksperiode.emitVedtaksperiodeEndret(dager)
                 vedtaksperiode.person.igangsettOverstyring(
                     dager,
                     Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)

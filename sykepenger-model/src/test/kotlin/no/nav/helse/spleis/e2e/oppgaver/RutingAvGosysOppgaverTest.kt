@@ -482,6 +482,6 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         assertEquals(hendelseId, observatør.utsettOppgaveEventer().single().hendelse)
 
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
     }
 }

@@ -93,7 +93,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(8.mars, 26.mars))
         håndterInntektsmelding(listOf(Periode(3.mars, 18.mars)))
 
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
 
         håndterSøknad(Sykdom(8.mars, 26.mars, 100.prosent))
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
