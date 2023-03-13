@@ -6,6 +6,8 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeData
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
@@ -18,6 +20,7 @@ import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
@@ -75,25 +78,87 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
         håndterSimulering(3.vedtaksperiode, orgnummer = a1)
 
-        håndterInntektsmelding(listOf(1.februar til 16.februar), begrunnelseForReduksjonEllerIkkeUtbetalt = "TidligereVirksomhet", orgnummer = a2)
+        håndterInntektsmelding(listOf(1.mars til 16.mars), begrunnelseForReduksjonEllerIkkeUtbetalt = "TidligereVirksomhet", orgnummer = a2)
         nullstillTilstandsendringer()
-        nyPeriode(1.februar til 20.februar, a2)
+        nyPeriode(1.mars til 20.mars, a2)
+
+        assertTrue(inspektør(a2).periodeErForkastet(1.vedtaksperiode)) {
+            "Om dette ikke lengre stemmer så kan testen slettes. Det finnes en tilsvarende test som sjekker 'ikke forkaster'-scenario."
+        }
 
         assertForventetFeil(
             forklaring = "1.vedtaksperiode er i feil tilstand. Revurderingen blir sittende fast",
             nå = {
                 assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
-                assertTilstander(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, orgnummer = a1)
+                assertTilstander(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
                 assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, orgnummer = a1)
                 assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD, orgnummer = a2)
             },
             ønsket = {
+                val overstyringerIgangsatt = observatør.overstyringIgangsatt
+                assertEquals(2, overstyringerIgangsatt.size)
+
+                overstyringerIgangsatt.last().also { event ->
+                    assertEquals(PersonObserver.OverstyringIgangsatt(
+                        årsak = "NY_PERIODE",
+                        skjæringstidspunkt = 1.januar,
+                        periodeForEndring = 1.mars til 20.mars,
+                        berørtePerioder = listOf(
+                            VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
+                        )
+                    ), event)
+                }
+
                 assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
                 assertTilstander(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
                 assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
                 assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD, orgnummer = a2)
             }
         )
+    }
 
+    @Test
+    fun `én arbeidsgiver blir to - førstegangsbehandlingen hos ag2 forkastes ikke`() {
+        nyttVedtak(1.januar, 31.januar, orgnummer = a1)
+        forlengVedtak(1.februar, 28.februar, orgnummer = a1)
+        forlengVedtak(1.mars, 31.mars, orgnummer = a1)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT + 500.daglig, orgnummer = a1)
+        håndterYtelser(3.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(3.vedtaksperiode, orgnummer = a1)
+
+        håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a2)
+        nullstillTilstandsendringer()
+        nyPeriode(1.mars til 20.mars, a2)
+
+        assertForventetFeil(
+            forklaring = "1.vedtaksperiode er i feil tilstand. Revurderingen blir sittende fast",
+            nå = {
+                assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
+                assertTilstander(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
+                assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, orgnummer = a1)
+                assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+            },
+            ønsket = {
+                val overstyringerIgangsatt = observatør.overstyringIgangsatt
+                assertEquals(2, overstyringerIgangsatt.size)
+
+                overstyringerIgangsatt.last().also { event ->
+                    assertEquals(PersonObserver.OverstyringIgangsatt(
+                        årsak = "NY_PERIODE",
+                        skjæringstidspunkt = 1.januar,
+                        periodeForEndring = 1.mars til 20.mars,
+                        berørtePerioder = listOf(
+                            VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
+                        )
+                    ), event)
+                }
+
+                assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
+                assertTilstander(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
+                assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+                assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+            }
+        )
     }
 }
