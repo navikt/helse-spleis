@@ -141,23 +141,15 @@ internal class PersonMediator(
         )))
     }
 
-    override fun håndtertInntektsmelding(event: PersonObserver.HåndtertInntektsmeldingEvent) {
-        // TODO: slå sammen denne og "inntektsmeldingMottatt()"
-        queueMessage(JsonMessage.newMessage("håndtert_inntektsmelding", mapOf(
-            "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "inntektsmeldingId" to event.inntektsmeldingId
-        )))
-    }
-
-    override fun inntektsmeldingMottatt(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
-        queueMessage(JsonMessage.newMessage("inntektsmelding_mottatt", mapOf(
+    override fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
+        queueMessage(JsonMessage.newMessage("inntektsmelding_håndtert", mapOf(
             "inntektsmeldingId" to inntektsmeldingId,
             "organisasjonsnummer" to organisasjonsnummer,
             "vedtaksperiodeId" to vedtaksperiodeId
         )))
     }
-    override fun søknadMottatt(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
-        queueMessage(JsonMessage.newMessage("søknad_mottatt", mapOf(
+    override fun søknadHåndtert(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
+        queueMessage(JsonMessage.newMessage("søknad_håndtert", mapOf(
             "søknadId" to søknadId,
             "organisasjonsnummer" to organisasjonsnummer,
             "vedtaksperiodeId" to vedtaksperiodeId

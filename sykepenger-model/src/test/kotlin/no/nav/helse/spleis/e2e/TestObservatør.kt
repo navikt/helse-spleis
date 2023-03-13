@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
@@ -22,7 +21,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val manglendeInntektsmeldingVedtaksperioder = mutableListOf<PersonObserver.ManglendeInntektsmeldingEvent>()
     val trengerIkkeInntektsmeldingVedtaksperioder = mutableListOf<PersonObserver.TrengerIkkeInntektsmeldingEvent>()
     val trengerArbeidsgiveropplysningerVedtaksperioder = mutableListOf<PersonObserver.TrengerArbeidsgiveropplysningerEvent>()
-    val håndtertInntektsmeldingVedtaksperioder = mutableListOf<PersonObserver.HåndtertInntektsmeldingEvent>()
     val utbetalingUtenUtbetalingEventer = mutableListOf<PersonObserver.UtbetalingUtbetaltEvent>()
     val utbetalingMedUtbetalingEventer = mutableListOf<PersonObserver.UtbetalingUtbetaltEvent>()
     val feriepengerUtbetaltEventer = mutableListOf<PersonObserver.FeriepengerUtbetaltEvent>()
@@ -34,8 +32,8 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val overlappendeInfotrygdperiodeEtterInfotrygdendring = mutableListOf<PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring>()
     val inntektsmeldingFørSøknad = mutableListOf<PersonObserver.InntektsmeldingFørSøknadEvent>()
     val inntektsmeldingIkkeHåndtert = mutableListOf<UUID>()
-    val inntektsmeldingMottatt = mutableListOf<Pair<UUID, UUID>>()
-    val søknadMottatt = mutableListOf<Pair<UUID, UUID>>()
+    val inntektsmeldingHåndtert = mutableListOf<Pair<UUID, UUID>>()
+    val søknadHåndtert = mutableListOf<Pair<UUID, UUID>>()
 
     val opprettOppgaverTilSpeilsaksbehandlerEventer = mutableListOf<PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent>()
     val opprettOppgaverEventer = mutableListOf<PersonObserver.OpprettOppgaveEvent>()
@@ -134,10 +132,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         trengerArbeidsgiveropplysningerVedtaksperioder.add(event)
     }
 
-    override fun håndtertInntektsmelding(event: PersonObserver.HåndtertInntektsmeldingEvent) {
-        håndtertInntektsmeldingVedtaksperioder.add(event)
-    }
-
     override fun inntektsmeldingReplay(personidentifikator: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, førsteDagIArbeidsgiverperioden: LocalDate?) {
         inntektsmeldingReplayEventer.add(vedtaksperiodeId)
     }
@@ -184,11 +178,11 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         inntektsmeldingIkkeHåndtert.add(inntektsmeldingId)
     }
 
-    override fun inntektsmeldingMottatt(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
-        inntektsmeldingMottatt.add(inntektsmeldingId to vedtaksperiodeId)
+    override fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
+        inntektsmeldingHåndtert.add(inntektsmeldingId to vedtaksperiodeId)
     }
 
-    override fun søknadMottatt(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
-        søknadMottatt.add(søknadId to vedtaksperiodeId)
+    override fun søknadHåndtert(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
+        søknadHåndtert.add(søknadId to vedtaksperiodeId)
     }
 }

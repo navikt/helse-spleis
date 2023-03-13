@@ -8,10 +8,8 @@ import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.TestMessageFactory
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
-import no.nav.inntektsmeldingkontrakt.Periode
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -69,29 +67,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             )
 
             JSONAssert.assertEquals(forventetResultatFastsattInntekt, faktiskResultat, JSONCompareMode.STRICT)
-        }
-
-    @Test
-    fun `Sender ut HåndtertInntekstmeldingEvent når en vedtaksperiode har håndtert en inntektsmelding`() =
-        Toggle.Splarbeidsbros.enable {
-            sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
-            sendSøknad(
-                perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
-            )
-            val (inntektsmeldingId, _) = sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
-            val vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(0)
-
-            Assertions.assertEquals(1, testRapid.inspektør.meldinger("håndtert_inntektsmelding").size)
-            val trengerOpplysningerEvent = testRapid.inspektør.siste("håndtert_inntektsmelding")
-            Assertions.assertEquals(
-                inntektsmeldingId.toString(),
-                trengerOpplysningerEvent["inntektsmeldingId"].asText()
-            )
-            Assertions.assertEquals(
-                vedtaksperiodeId.toString(),
-                trengerOpplysningerEvent["vedtaksperiodeId"].asText()
-            )
-            Assertions.assertNotNull(trengerOpplysningerEvent["@opprettet"].asLocalDateTime())
         }
 
     private fun forlengMedFebruar(a1: String) {

@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.oppgaver
 import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -18,7 +17,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class InntektsmeldingFørSøknadTest : AbstractEndToEndTest() {
+internal class DokumentHåndteringTest : AbstractEndToEndTest() {
 
     @Test
     fun `Inntektsmelding før søknad`() {
@@ -44,11 +43,11 @@ internal class InntektsmeldingFørSøknadTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
         val im = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 10.februar)
         assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
-        assertEquals(3, observatør.inntektsmeldingMottatt.size)
+        assertEquals(3, observatør.inntektsmeldingHåndtert.size)
         assertEquals(listOf(
             im to 2.vedtaksperiode.id(ORGNUMMER),
             im to 1.vedtaksperiode.id(ORGNUMMER) // todo: vedtaksperiode 1 håndterer tydligvis dagene
-        ), observatør.inntektsmeldingMottatt.takeLast(2))
+        ), observatør.inntektsmeldingHåndtert.takeLast(2))
     }
 
     @Test
@@ -56,8 +55,8 @@ internal class InntektsmeldingFørSøknadTest : AbstractEndToEndTest() {
         val søknad = håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
         val im = håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
-        assertEquals(listOf(søknad to 1.vedtaksperiode.id(ORGNUMMER)), observatør.søknadMottatt)
-        assertEquals(listOf(im to 1.vedtaksperiode.id(ORGNUMMER)), observatør.inntektsmeldingMottatt)
+        assertEquals(listOf(søknad to 1.vedtaksperiode.id(ORGNUMMER)), observatør.søknadHåndtert)
+        assertEquals(listOf(im to 1.vedtaksperiode.id(ORGNUMMER)), observatør.inntektsmeldingHåndtert)
     }
 
     @Test
@@ -73,13 +72,13 @@ internal class InntektsmeldingFørSøknadTest : AbstractEndToEndTest() {
             søknad2 to 2.vedtaksperiode.id(ORGNUMMER),
             søknad3 to 3.vedtaksperiode.id(ORGNUMMER),
             søknad4 to 4.vedtaksperiode.id(ORGNUMMER)
-        ), observatør.søknadMottatt)
+        ), observatør.søknadHåndtert)
         assertEquals(listOf(
             im to 3.vedtaksperiode.id(ORGNUMMER),
             im to 1.vedtaksperiode.id(ORGNUMMER),
             im to 2.vedtaksperiode.id(ORGNUMMER),
             im to 4.vedtaksperiode.id(ORGNUMMER)
-        ), observatør.inntektsmeldingMottatt)
+        ), observatør.inntektsmeldingHåndtert)
     }
     @Test
     fun `delvis overlappende søknad`() {
@@ -89,7 +88,7 @@ internal class InntektsmeldingFørSøknadTest : AbstractEndToEndTest() {
         assertEquals(listOf(
             søknad1 to 1.vedtaksperiode.id(ORGNUMMER),
             søknad2 to 1.vedtaksperiode.id(ORGNUMMER)
-        ), observatør.søknadMottatt)
+        ), observatør.søknadHåndtert)
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),

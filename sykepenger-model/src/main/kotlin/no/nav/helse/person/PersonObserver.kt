@@ -362,7 +362,6 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     fun manglerInntektsmelding(event: ManglendeInntektsmeldingEvent) {}
     fun trengerIkkeInntektsmelding(event: TrengerIkkeInntektsmeldingEvent) {}
     fun trengerArbeidsgiveropplysninger(event: TrengerArbeidsgiveropplysningerEvent) {}
-    fun håndtertInntektsmelding(event: HåndtertInntektsmeldingEvent) {}
     fun utbetalingEndret(event: UtbetalingEndretEvent) {}
     fun utbetalingUtbetalt(event: UtbetalingUtbetaltEvent) {}
     fun utbetalingUtenUtbetaling(event: UtbetalingUtbetaltEvent) {}
@@ -379,10 +378,9 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     ) {}
 
     fun overstyringIgangsatt(event: OverstyringIgangsatt) {}
-
     fun overlappendeInfotrygdperiodeEtterInfotrygdendring(event: OverlappendeInfotrygdperiodeEtterInfotrygdendring) {}
     fun inntektsmeldingFørSøknad(inntektsmeldingFørSøknadEvent: InntektsmeldingFørSøknadEvent) {}
     fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String) {}
-    fun inntektsmeldingMottatt(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {}
-    fun søknadMottatt(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {}
+    fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {}
+    fun søknadHåndtert(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {}
 }

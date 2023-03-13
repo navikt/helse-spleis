@@ -448,10 +448,6 @@ class Person private constructor(
         observers.forEach { it.trengerIkkeInntektsmelding(event) }
     }
 
-    internal fun håndtertInntektsmelding(event: PersonObserver.HåndtertInntektsmeldingEvent) {
-        observers.forEach { it.håndtertInntektsmelding(event) }
-    }
-
     internal fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
         observers.forEach { it.trengerArbeidsgiveropplysninger(event) }
     }
@@ -691,14 +687,14 @@ class Person private constructor(
         }
     }
 
-    internal fun emitInntektsmeldingMottatt(meldingsreferanseId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
+    internal fun emitInntektsmeldingHåndtert(meldingsreferanseId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
         observers.forEach {
-            it.inntektsmeldingMottatt(meldingsreferanseId, vedtaksperiodeId, organisasjonsnummer)
+            it.inntektsmeldingHåndtert(meldingsreferanseId, vedtaksperiodeId, organisasjonsnummer)
         }
     }
-    internal fun emitSøknadMottatt(meldingsreferanseId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
+    internal fun emitSøknadHåndtert(meldingsreferanseId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
         observers.forEach {
-            it.søknadMottatt(meldingsreferanseId, vedtaksperiodeId, organisasjonsnummer)
+            it.søknadHåndtert(meldingsreferanseId, vedtaksperiodeId, organisasjonsnummer)
         }
     }
 
