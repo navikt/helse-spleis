@@ -972,6 +972,17 @@ internal class Vedtaksperiode private constructor(
         tilstand.igangsettOverstyring(this, hendelse, revurdering)
     }
 
+    private fun varsleForrigePeriodeRevurderingOmgjort(hendelse: IAktivitetslogg) {
+        arbeidsgiver.finnVedtaksperiodeFør(this)?.revurderingOmgjort(hendelse.barn(), skjæringstidspunkt)
+    }
+
+    private fun revurderingOmgjort(hendelse: IAktivitetslogg, skjæringstidspunkt: LocalDate) {
+        if (this.skjæringstidspunkt != skjæringstidspunkt) return
+        varsleForrigePeriodeRevurderingOmgjort(hendelse)
+        kontekst(hendelse)
+        tilstand.revurderingOmgjort(this, hendelse)
+    }
+
     internal fun inngåIRevurderingseventyret(
         vedtaksperioder: MutableList<PersonObserver.OverstyringIgangsatt.VedtaksperiodeData>,
         typeEndring: String
@@ -1172,8 +1183,11 @@ internal class Vedtaksperiode private constructor(
 
         fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             if (!revurdering.inngåSomRevurdering(hendelse, vedtaksperiode)) return
+            vedtaksperiode.varsleForrigePeriodeRevurderingOmgjort(hendelse)
             vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
         }
+
+        fun revurderingOmgjort(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
         fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {}
     }
@@ -1360,6 +1374,10 @@ internal class Vedtaksperiode private constructor(
             hendelse: IAktivitetslogg
         ) {
             hendelse.info("Gjenopptar ikke behandling fordi perioden avventer på at revurderingen ferdigstilles.")
+        }
+
+        override fun revurderingOmgjort(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
         }
 
         override fun ferdigstillRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
