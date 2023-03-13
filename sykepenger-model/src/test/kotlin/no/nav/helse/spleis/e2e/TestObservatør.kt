@@ -37,7 +37,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     val opprettOppgaverTilSpeilsaksbehandlerEventer = mutableListOf<PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent>()
     val opprettOppgaverEventer = mutableListOf<PersonObserver.OpprettOppgaveEvent>()
-    private val utsettOppgaveEventer = mutableListOf<PersonObserver.UtsettOppgaveEvent>()
 
     private lateinit var sisteVedtaksperiode: UUID
     private val vedtaksperioder = person?.inspektør?.vedtaksperioder()?.mapValues { (_, perioder) ->
@@ -78,7 +77,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     fun forkastet(vedtaksperiodeId: UUID) = forkastedeEventer.getValue(vedtaksperiodeId)
     fun opprettOppgaveForSpeilsaksbehandlereEvent() = opprettOppgaverTilSpeilsaksbehandlerEventer.toList()
     fun opprettOppgaveEventer() = opprettOppgaverEventer.toList()
-    fun utsettOppgaveEventer() = utsettOppgaveEventer.toList()
 
     override fun sykefraværstilfelle(sykefraværstilfeller: List<SykefraværstilfelleeventyrObserver.SykefraværstilfelleeventyrObserverEvent>) {
         this.sykefraværstilfelleeventyr.add(sykefraværstilfeller)
@@ -154,10 +152,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     override fun opprettOppgave(event: PersonObserver.OpprettOppgaveEvent) {
         opprettOppgaverEventer.add(event)
-    }
-
-    override fun utsettOppgave(event: PersonObserver.UtsettOppgaveEvent) {
-        utsettOppgaveEventer.add(event)
     }
 
     override fun overstyringIgangsatt(

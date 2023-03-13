@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.tilOrNull
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -118,9 +117,6 @@ internal class DagerFraInntektsmelding(
     }
 
     internal fun noenDagerHåndtert() = håndterteDager.isNotEmpty()
-    internal fun utsettOppgave(person: Person) {
-        person.emitUtsettOppgaveEvent(inntektsmelding)
-    }
 
     private class BitAvInntektsmelding(
         private val inntektsmelding: Inntektsmelding,

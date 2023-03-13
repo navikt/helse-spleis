@@ -353,7 +353,6 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     fun vedtaksperiodeForkastet(event: VedtaksperiodeForkastetEvent) {}
     fun opprettOppgaveForSpeilsaksbehandlere(event: OpprettOppgaveForSpeilsaksbehandlereEvent) {}
     fun opprettOppgave(event: OpprettOppgaveEvent) {}
-    fun utsettOppgave(event: UtsettOppgaveEvent) {}
     fun vedtaksperiodeIkkeFunnet(event: VedtaksperiodeIkkeFunnetEvent) {}
     fun manglerInntektsmelding(event: ManglendeInntektsmeldingEvent) {}
     fun trengerIkkeInntektsmelding(event: TrengerIkkeInntektsmeldingEvent) {}

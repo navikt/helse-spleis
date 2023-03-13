@@ -17,10 +17,7 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
-import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_19
@@ -32,7 +29,6 @@ import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
 import no.nav.helse.spleis.e2e.assertSisteTilstand
-import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forkastAlle
 import no.nav.helse.spleis.e2e.håndterAnnullerUtbetaling
@@ -469,19 +465,5 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         assertEquals(3, observatør.opprettOppgaverEventer.size)
         assertTrue(søknadIdFebruar in observatør.opprettOppgaverEventer[1].hendelser)
         assertTrue(inntektsmeldingId in observatør.opprettOppgaverEventer.last().hendelser)
-    }
-
-    @Test
-    fun `utsetter oppgave når inntektsmelidng kommer i AVSLUTTET_UTEN_UTBETALING`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 1.januar))
-        håndterSøknad(Sykdom(1.januar, 1.januar, 100.prosent))
-
-        assertEquals(1, observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)).size)
-
-        val hendelseId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
-
-        assertEquals(hendelseId, observatør.utsettOppgaveEventer().single().hendelse)
-
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
     }
 }

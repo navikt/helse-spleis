@@ -655,16 +655,6 @@ class Person private constructor(
         }
     }
 
-    internal fun emitUtsettOppgaveEvent(hendelse: SykdomstidslinjeHendelse) {
-        observers.forEach {
-            it.utsettOppgave(
-                PersonObserver.UtsettOppgaveEvent(
-                    hendelse.meldingsreferanseId()
-                )
-            )
-        }
-    }
-
     internal fun emitInntektsmeldingFørSøknadEvent(
         hendelse: Inntektsmelding,
         overlappendeSykmeldingsperioder: List<Periode>,

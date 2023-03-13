@@ -345,12 +345,6 @@ internal class PersonMediator(
         )))
     }
 
-    override fun utsettOppgave(event: PersonObserver.UtsettOppgaveEvent) {
-        queueMessage(JsonMessage.newMessage("utsett_oppgave", mapOf(
-            "hendelse" to event.hendelse
-        )))
-    }
-
     override fun vedtaksperiodeForkastet(event: PersonObserver.VedtaksperiodeForkastetEvent) {
         queueMessage(JsonMessage.newMessage("vedtaksperiode_forkastet", mapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
