@@ -6,6 +6,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.mars
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
@@ -27,8 +28,10 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
         assertEquals(2, vedtaksperiodeForkastet.size)
         assertEquals(3.januar, LocalDate.parse(vedtaksperiodeForkastet.first().path("fom").asText()))
         assertEquals(26.januar, LocalDate.parse(vedtaksperiodeForkastet.first().path("tom").asText()))
+        assertTrue(vedtaksperiodeForkastet.first().path("harOverlappendeVedtaksperiode").isBoolean)
         assertEquals(3.januar, LocalDate.parse(vedtaksperiodeForkastet.last().path("fom").asText()))
         assertEquals(27.januar, LocalDate.parse(vedtaksperiodeForkastet.last().path("tom").asText()))
+        assertTrue(vedtaksperiodeForkastet.last().path("harOverlappendeVedtaksperiode").isBoolean)
         assertEquals(
             listOf(søknadId, søknadId2),
             vedtaksperiodeForkastet.flatMap { it.path("hendelser").map { UUID.fromString(it.asText()) } }.distinct()
