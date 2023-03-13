@@ -108,11 +108,6 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val søknadIder: Set<UUID>
     )
 
-    data class HåndtertInntektsmeldingEvent(
-        val vedtaksperiodeId: UUID,
-        val inntektsmeldingId: UUID
-    )
-
     class TrengerArbeidsgiveropplysningerEvent(
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
