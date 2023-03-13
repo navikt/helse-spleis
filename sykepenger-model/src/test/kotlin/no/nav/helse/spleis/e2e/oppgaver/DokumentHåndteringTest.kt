@@ -12,7 +12,9 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
+import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
 import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -80,6 +82,67 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             im to 4.vedtaksperiode.id(ORGNUMMER)
         ), observatør.inntektsmeldingHåndtert)
     }
+
+    @Test
+    fun `har overlappende avslutta vedtaksperiode på annen arbeidsgiver`() {
+        nyttVedtak(1.januar, 31.januar, orgnummer = a2)
+        val søknad2 = håndterSøknad(Sykdom(28.januar, 28.februar, 100.prosent))
+        val im = håndterInntektsmelding(listOf(28.januar til 12.februar ), begrunnelseForReduksjonEllerIkkeUtbetalt = "bjeff")
+        assertEquals(
+            PersonObserver.VedtaksperiodeForkastetEvent(
+                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+                aktørId = AKTØRID,
+                organisasjonsnummer = ORGNUMMER,
+                vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
+                gjeldendeTilstand = TilstandType.AVVENTER_INNTEKTSMELDING,
+                hendelser = setOf(søknad2, im),
+                fom = 28.januar,
+                tom = 28.februar,
+                harOverlappendeVedtaksperiode = true
+            ), observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER))
+        )
+    }
+
+    @Test
+    fun `har ikke overlappende vedtaksperioder`() {
+        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
+
+        val søknad2 = håndterSøknad(Sykdom(28.januar, 28.februar, 100.prosent))
+        assertEquals(
+            PersonObserver.VedtaksperiodeForkastetEvent(
+                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+                aktørId = AKTØRID,
+                organisasjonsnummer = ORGNUMMER,
+                vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
+                gjeldendeTilstand = TilstandType.START,
+                hendelser = setOf(søknad2),
+                fom = 28.januar,
+                tom = 28.februar,
+                harOverlappendeVedtaksperiode = false
+            ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
+    }
+
+    @Test
+    fun `har ikke overlappende vedtaksperiode - god avstand`() {
+        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
+
+        val søknad2 = håndterSøknad(Sykdom(15.februar, 28.februar, 100.prosent))
+        assertEquals(
+            PersonObserver.VedtaksperiodeForkastetEvent(
+                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+                aktørId = AKTØRID,
+                organisasjonsnummer = ORGNUMMER,
+                vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
+                gjeldendeTilstand = TilstandType.START,
+                hendelser = setOf(søknad2),
+                fom = 15.februar,
+                tom = 28.februar,
+                harOverlappendeVedtaksperiode = false
+            ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
+    }
+
     @Test
     fun `delvis overlappende søknad`() {
         val søknad1 = håndterSøknad(Sykdom(11.januar, 16.januar, 100.prosent))
@@ -98,7 +161,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 gjeldendeTilstand = TilstandType.START,
                 hendelser = setOf(søknad2),
                 fom = 10.januar,
-                tom = 15.januar
+                tom = 15.januar,
+                harOverlappendeVedtaksperiode = true
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
     }
 }

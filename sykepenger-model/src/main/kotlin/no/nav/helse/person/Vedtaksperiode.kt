@@ -501,9 +501,11 @@ internal class Vedtaksperiode private constructor(
                 gjeldendeTilstand = tilstand.type,
                 hendelser = hendelseIder(),
                 fom = periode.start,
-                tom = periode.endInclusive
+                tom = periode.endInclusive,
+                harOverlappendeVedtaksperiode = person.nåværendeVedtaksperioder { it.periode.overlapperMed(this.periode) }.isNotEmpty()
             )
         )
+        // TODO: Speilbuilder må støtte å vise røde pølser dersom perioden er TIL_INFOTRYGD og utbetalingen er annullert, og ignorerer infotrygdpølser uten utbetaling
         if (this.tilstand !in AVSLUTTET_OG_SENERE) tilstand(hendelse, TilInfotrygd)
         return true
     }

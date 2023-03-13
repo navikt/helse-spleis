@@ -67,7 +67,8 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val gjeldendeTilstand: TilstandType,
         val hendelser: Set<UUID>,
         val fom: LocalDate,
-        val tom: LocalDate
+        val tom: LocalDate,
+        val harOverlappendeVedtaksperiode: Boolean
     )
 
     data class OpprettOppgaveForSpeilsaksbehandlereEvent(
