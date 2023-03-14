@@ -140,11 +140,11 @@ internal abstract class AbstractEndToEndMediatorTest {
             historiskeFolkeregisteridenter = historiskeFolkeregisteridenter,
         )
 
-        val perioderFør = testRapid.inspektør.vedtaksperiodeteller
+        val antallVedtaksperioderFørSøknad = testRapid.inspektør.vedtaksperiodeteller
         testRapid.sendTestMessage(message)
-        val perioderEtter = testRapid.inspektør.vedtaksperiodeteller
-        if (perioderFør < perioderEtter) {
-            val vedtaksperiodeIndeks = perioderEtter - perioderFør - 1
+        val antallVedtaksperioderEtterSøknad = testRapid.inspektør.vedtaksperiodeteller
+        if (antallVedtaksperioderFørSøknad < antallVedtaksperioderEtterSøknad) {
+            val vedtaksperiodeIndeks = antallVedtaksperioderEtterSøknad - 1
             if (testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk)) {
                 sendUtbetalingshistorikk(vedtaksperiodeIndeks, orgnummer = orgnummer)
             }

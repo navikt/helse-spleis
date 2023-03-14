@@ -8,6 +8,7 @@ import no.nav.helse.dsl.TestPerson.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver
@@ -21,25 +22,42 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
     @Test
     fun `Venter på tidligere periode som ikke har fått inntektsmelding`(){
         a1 {
-            nyPeriode(1.januar til 31.januar)
+            val søknadIdJanuar = UUID.randomUUID()
+            nyPeriode(1.januar til 31.januar, søknadId = søknadIdJanuar)
 
+            assertEquals(1, observatør.vedtaksperiodeVenter.size)
             val søknadIdMars = UUID.randomUUID()
             nyPeriode(1.mars til 31.mars, søknadId = søknadIdMars)
+            assertEquals(3, observatør.vedtaksperiodeVenter.size)
 
             val inntektsmeldingIdMars = håndterInntektsmelding(listOf(1.mars til 16.mars))
+            assertEquals(5, observatør.vedtaksperiodeVenter.size)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            assertEquals(0, observatør.vedtaksperiodeVenter.size)
-            val tilstandsendringstidspunkt = LocalDateTime.now()
-            håndterPåminnelse(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, tilstandsendringstidspunkt = tilstandsendringstidspunkt)
-            assertEquals(1, observatør.vedtaksperiodeVenter.size)
-            val forventet = PersonObserver.VedtaksperiodeVenterEvent(
+            val forventetVedtaksperiode1 = PersonObserver.VedtaksperiodeVenterEvent(
+                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+                aktørId = AKTØRID,
+                organisasjonsnummer = a1,
+                vedtaksperiodeId = 1.vedtaksperiode,
+                hendelser = setOf(søknadIdJanuar),
+                ventetSiden = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert,
+                venterTil = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert.plusDays(180),
+                venterPå = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    organisasjonsnummer = a1,
+                    venteårsak = PersonObserver.VedtaksperiodeVenterEvent.Venteårsak(
+                        hva = "INNTEKTSMELDING",
+                        hvorfor = null
+                    )
+                )
+            )
+            val forventetVedtaksperiode2 = PersonObserver.VedtaksperiodeVenterEvent(
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),
                 aktørId = AKTØRID,
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 2.vedtaksperiode,
                 hendelser = setOf(søknadIdMars, inntektsmeldingIdMars),
-                ventetSiden = tilstandsendringstidspunkt,
+                ventetSiden = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.oppdatert,
                 venterTil = LocalDateTime.MAX,
                 venterPå = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
                     vedtaksperiodeId = 1.vedtaksperiode,
@@ -50,7 +68,12 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
                     )
                 )
             )
-            assertEquals(forventet, observatør.vedtaksperiodeVenter.single())
+            assertEquals(forventetVedtaksperiode1, observatør.vedtaksperiodeVenter.last{
+                it.vedtaksperiodeId == 1.vedtaksperiode
+            })
+            assertEquals(forventetVedtaksperiode2, observatør.vedtaksperiodeVenter.last {
+                it.vedtaksperiodeId == 2.vedtaksperiode
+            })
         }
     }
 
@@ -65,10 +88,7 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            val tilstandsendringstidspunkt = LocalDateTime.now()
-            assertEquals(0, observatør.vedtaksperiodeVenter.size)
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, tilstandsendringstidspunkt = tilstandsendringstidspunkt)
-            assertEquals(1, observatør.vedtaksperiodeVenter.size)
+            assertEquals(2, observatør.vedtaksperiodeVenter.size)
 
             val forventet = PersonObserver.VedtaksperiodeVenterEvent(
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),
@@ -76,7 +96,7 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
                 organisasjonsnummer = a2,
                 vedtaksperiodeId = 1.vedtaksperiode,
                 hendelser = setOf(søknadId, inntektsmeldingId),
-                ventetSiden = tilstandsendringstidspunkt,
+                ventetSiden = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert,
                 venterTil = LocalDateTime.MAX,
                 venterPå = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
                     vedtaksperiodeId = 1.vedtaksperiode,
@@ -87,27 +107,24 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
                     )
                 )
             )
-            assertEquals(forventet, observatør.vedtaksperiodeVenter.single())
+            assertEquals(forventet, observatør.vedtaksperiodeVenter.last())
         }
     }
 
     @Test
-    fun `Periode i avventer innteksmelding blir påminnet`() {
+    fun `Periode i avventer innteksmelding`() {
         a1 {
             val søknadId = UUID.randomUUID()
             nyPeriode(1.januar til 31.januar, søknadId = søknadId)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            val tilstandsendringstidspunkt = LocalDateTime.now()
-            assertEquals(0, observatør.vedtaksperiodeVenter.size)
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = tilstandsendringstidspunkt)
             val forventet = PersonObserver.VedtaksperiodeVenterEvent(
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),
                 aktørId = AKTØRID,
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
                 hendelser = setOf(søknadId),
-                ventetSiden = tilstandsendringstidspunkt,
-                venterTil = tilstandsendringstidspunkt.plusDays(180),
+                ventetSiden = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert,
+                venterTil = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert.plusDays(180),
                 venterPå = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
                     vedtaksperiodeId = 1.vedtaksperiode,
                     organisasjonsnummer = a1,

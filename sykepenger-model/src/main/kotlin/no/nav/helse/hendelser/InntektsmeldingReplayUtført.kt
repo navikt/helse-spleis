@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import java.util.UUID
+import no.nav.helse.person.Arbeidsgiver
 
 class InntektsmeldingReplayUtført(
     meldingsreferanseId: UUID,
@@ -11,4 +12,5 @@ class InntektsmeldingReplayUtført(
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer) {
 
     internal fun erRelevant(other: UUID) = other == vedtaksperiode
+    override fun venter(arbeidsgivere: List<Arbeidsgiver>) {}
 }

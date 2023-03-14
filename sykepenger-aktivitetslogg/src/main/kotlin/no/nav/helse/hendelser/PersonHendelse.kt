@@ -1,6 +1,9 @@
 package no.nav.helse.hendelser
 
 import java.util.UUID
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
+import no.nav.helse.person.Arbeidsgiver.Companion.venter
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggMappingPort
@@ -76,5 +79,10 @@ abstract class PersonHendelse protected constructor(
 
     override fun register(observer: AktivitetsloggObserver) {
         aktivitetslogg.register(observer)
+    }
+
+    internal open fun venter(arbeidsgivere: List<Arbeidsgiver>) {
+        val nestemann = arbeidsgivere.nestemann() ?: return
+        arbeidsgivere.venter(nestemann)
     }
 }

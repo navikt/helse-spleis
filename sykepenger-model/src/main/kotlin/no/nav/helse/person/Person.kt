@@ -42,7 +42,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
-import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.sykefraværstilfelle
@@ -693,19 +692,18 @@ class Person private constructor(
         gjenopptaBehandlingNy = true
     }
 
-    private fun håndterGjenoppta(hendelse: IAktivitetslogg) {
+    private fun håndterGjenoppta(hendelse: PersonHendelse) {
         while (gjenopptaBehandlingNy) {
             gjenopptaBehandlingNy = false
             arbeidsgivere.gjenopptaBehandling(hendelse)
         }
+        hendelse.venter(arbeidsgivere)
     }
 
     internal fun igangsettOverstyring(hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
         arbeidsgivere.igangsettOverstyring(hendelse, revurdering)
         revurdering.sendOverstyringIgangsattEvent(this)
     }
-
-    internal fun nestemann() = arbeidsgivere.nestemann()
 
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,

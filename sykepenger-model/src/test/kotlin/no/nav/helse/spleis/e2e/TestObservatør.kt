@@ -67,7 +67,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     }
 
     override fun vedtaksperiodeVenter(event: PersonObserver.VedtaksperiodeVenterEvent) {
-       vedtaksperiodeVenter.add(event)
+        vedtaksperiodeVenter.add(event)
     }
 
     fun forkastedePerioder() = forkastedeEventer.size

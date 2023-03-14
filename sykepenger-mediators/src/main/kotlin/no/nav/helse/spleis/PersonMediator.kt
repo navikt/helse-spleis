@@ -20,6 +20,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
+import no.nav.helse.spleis.PersonMediator.Pakke.Companion.loggAntallVedtaksperioderVenter
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.asPeriode
@@ -47,6 +48,7 @@ internal class PersonMediator(
 
     private fun sendUtgåendeMeldinger(context: MessageContext) {
         if (meldinger.isEmpty()) return
+        meldinger.loggAntallVedtaksperioderVenter()
         message.logOutgoingMessages(sikkerLogg, meldinger.size)
         meldinger.forEach { pakke -> pakke.publish(context) }
     }
@@ -323,8 +325,8 @@ internal class PersonMediator(
             "ventetSiden" to event.ventetSiden,
             "venterTil" to event.venterTil,
             "venterPå" to mapOf(
-              "vedtaksperiodeId" to event.venterPå.vedtaksperiodeId,
-              "organisasjonsnummer" to event.venterPå.organisasjonsnummer,
+                "vedtaksperiodeId" to event.venterPå.vedtaksperiodeId,
+                "organisasjonsnummer" to event.venterPå.organisasjonsnummer,
                 "venteårsak" to mapOf(
                     "hva" to event.venterPå.venteårsak.hva,
                     "hvorfor" to event.venterPå.venteårsak.hvorfor
@@ -425,6 +427,13 @@ internal class PersonMediator(
     ) {
         fun publish(context: MessageContext) {
             context.publish(fødselsnummer, blob.also { sikkerLogg.info("sender $eventName: $it") })
+        }
+
+        companion object {
+            fun List<Pakke>.loggAntallVedtaksperioderVenter() {
+                val antall = filter { it.eventName == "vedtaksperiode_venter" }.takeUnless { it.isEmpty() }?.size ?: return
+                sikkerLogg.info("Sender $antall vedtaksperiode_venter eventer")
+            }
         }
     }
 
