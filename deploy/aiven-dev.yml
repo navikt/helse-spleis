@@ -227,6 +227,9 @@ spec:
           application: speaker-kafka
           access: readwrite
         - team: tbd
+          application: speaker-backend
+          access: readwrite
+        - team: tbd
           application: sondre-halvorsen
           access: read
         - team: flex
