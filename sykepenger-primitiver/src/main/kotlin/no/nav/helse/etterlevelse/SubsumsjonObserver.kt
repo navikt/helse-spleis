@@ -5,11 +5,9 @@ import java.time.LocalDate
 import java.time.Year
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.InntektSubsumsjonobserver
 import no.nav.helse.økonomi.Prosent
-import no.nav.helse.økonomi.ProsentdelSubsumsjonObserver
 
-interface SubsumsjonObserver: InntektSubsumsjonobserver, ProsentdelSubsumsjonObserver {
+interface SubsumsjonObserver {
 
     /**
      * Vurdering av opptjeningstid
@@ -178,7 +176,7 @@ interface SubsumsjonObserver: InntektSubsumsjonobserver, ProsentdelSubsumsjonObs
      * @param grense grense brukt til å vurdere [dagerUnderGrensen]
      * @param dagerUnderGrensen dager som befinner seg under tilstrekkelig uføregrad, gitt av [grense]
      */
-    override fun `§ 8-13 ledd 2`(periode: Periode, tidslinjer: List<List<Tidslinjedag>>, grense: Double, dagerUnderGrensen: Set<LocalDate>) {}
+    fun `§ 8-13 ledd 2`(periode: Periode, tidslinjer: List<List<Tidslinjedag>>, grense: Double, dagerUnderGrensen: Set<LocalDate>) {}
 
     /**
      * Retten til sykepenger etter dette kapitlet faller bort når arbeidsforholdet midlertidig avbrytes i mer enn 14 dager
@@ -203,7 +201,7 @@ interface SubsumsjonObserver: InntektSubsumsjonobserver, ProsentdelSubsumsjonObs
      * @param inntekt inntekt for aktuell arbeidsgiver
      * @param dekningsgrunnlag maks dagsats før reduksjon til 6G og reduksjon for sykmeldingsgrad
      */
-    override fun `§ 8-16 ledd 1`(dato: LocalDate, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) {}
+    fun `§ 8-16 ledd 1`(dato: LocalDate, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) {}
 
     /**
      * Vurdering av når utbetaling av sykepenger tidligst skal starte

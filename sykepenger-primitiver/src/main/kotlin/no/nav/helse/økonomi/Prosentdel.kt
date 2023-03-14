@@ -4,9 +4,7 @@ import java.math.BigDecimal
 import java.math.BigDecimal.ONE
 import java.math.BigDecimal.ZERO
 import java.math.MathContext
-import java.time.LocalDate
-import no.nav.helse.etterlevelse.Tidslinjedag
-import no.nav.helse.hendelser.Periode
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import kotlin.math.roundToInt
 
 class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparable<Prosentdel> {
@@ -23,7 +21,7 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
         fun fraRatio(ratio: Double) = Prosentdel(ratio.toBigDecimal(mc))
         fun fraRatio(ratio: String) = Prosentdel(ratio.toBigDecimal(mc))
 
-        fun subsumsjon(subsumsjonObserver: ProsentdelSubsumsjonObserver, block: ProsentdelSubsumsjonObserver.(Double) -> Unit) {
+        fun subsumsjon(subsumsjonObserver: SubsumsjonObserver, block: SubsumsjonObserver.(Double) -> Unit) {
             subsumsjonObserver.block(GRENSE.toDouble())
         }
 
@@ -63,13 +61,4 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
     fun roundToInt() = toDouble().roundToInt()
 
     fun erUnderGrensen() = this < GRENSE
-}
-
-interface ProsentdelSubsumsjonObserver {
-    fun `§ 8-13 ledd 2`(
-        periode: Periode,
-        tidslinjerForSubsumsjon: List<List<Tidslinjedag>>,
-        grense: Double,
-        dagerUnderGrensen: Set<LocalDate>
-    )
 }
