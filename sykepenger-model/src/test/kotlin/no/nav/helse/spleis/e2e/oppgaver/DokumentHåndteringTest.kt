@@ -9,10 +9,12 @@ import no.nav.helse.januar
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -105,6 +107,29 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `har periode rett før men det er en AUU`() {
+        nyPeriode(1.januar til 16.januar)
+        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
+
+        val søknad2 = håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
+        val im = håndterInntektsmelding(listOf(10.januar til 26.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "bjeff")
+        assertEquals(
+            PersonObserver.VedtaksperiodeForkastetEvent(
+                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+                aktørId = AKTØRID,
+                organisasjonsnummer = ORGNUMMER,
+                vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
+                gjeldendeTilstand = TilstandType.AVVENTER_INNTEKTSMELDING,
+                hendelser = setOf(søknad2, im),
+                fom = 17.januar,
+                tom = 31.januar,
+                forlengerPeriode = false,
+                harPeriodeInnenfor16Dager = false
+            ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER))
+        )
+    }
+
+    @Test
     fun `har en periode rett før på annen arbeidsgiver`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a2)
         val søknad2 = håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
@@ -186,7 +211,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 hendelser = setOf(søknad2),
                 fom = 10.januar,
                 tom = 15.januar,
-                forlengerPeriode = true,
+                forlengerPeriode = false,
                 harPeriodeInnenfor16Dager = false
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
     }

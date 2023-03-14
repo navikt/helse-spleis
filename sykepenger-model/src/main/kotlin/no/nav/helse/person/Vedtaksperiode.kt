@@ -45,7 +45,6 @@ import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.Dokumentsporing.Companion.toMap
 import no.nav.helse.person.ForlengelseFraInfotrygd.IKKE_ETTERSPURT
-import no.nav.helse.person.InntektsmeldingInfo.Companion.ider
 import no.nav.helse.person.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.person.Sykefraværstilfelleeventyr.Companion.bliMed
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -495,8 +494,8 @@ internal class Vedtaksperiode private constructor(
                 hendelser = hendelseIder(),
                 fom = periode.start,
                 tom = periode.endInclusive,
-                forlengerPeriode = person.nåværendeVedtaksperioder { it.periode.overlapperMed(this.periode) || it.periode.erRettFør(this.periode) }.isNotEmpty(),
-                harPeriodeInnenfor16Dager = person.nåværendeVedtaksperioder { påvirkerArbeidsgiverperioden(it) }.isNotEmpty()
+                forlengerPeriode = person.nåværendeVedtaksperioder { it !== this && it.tilstand !== AvsluttetUtenUtbetaling && (it.periode.overlapperMed(this.periode) || it.periode.erRettFør(this.periode)) }.isNotEmpty(),
+                harPeriodeInnenfor16Dager = person.nåværendeVedtaksperioder { it !== this && it.tilstand !== AvsluttetUtenUtbetaling && påvirkerArbeidsgiverperioden(it) }.isNotEmpty()
             )
         )
         // TODO: Speilbuilder må støtte å vise røde pølser dersom perioden er TIL_INFOTRYGD og utbetalingen er annullert, og ignorerer infotrygdpølser uten utbetaling
