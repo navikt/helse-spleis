@@ -500,7 +500,7 @@ internal class Vedtaksperiode private constructor(
             )
         )
         // TODO: Speilbuilder må støtte å vise røde pølser dersom perioden er TIL_INFOTRYGD og utbetalingen er annullert, og ignorerer infotrygdpølser uten utbetaling
-        if (this.tilstand !in AVSLUTTET_OG_SENERE) tilstand(hendelse, TilInfotrygd)
+        if (!this.utbetalinger.harAvsluttede()) tilstand(hendelse, TilInfotrygd)
         return true
     }
 
@@ -2286,17 +2286,6 @@ internal class Vedtaksperiode private constructor(
     internal companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-        private val AVSLUTTET_OG_SENERE = listOf(
-            Avsluttet,
-            AvventerRevurdering,
-            AvventerGjennomførtRevurdering,
-            AvventerHistorikkRevurdering,
-            AvventerVilkårsprøvingRevurdering,
-            AvventerSimuleringRevurdering,
-            AvventerGodkjenningRevurdering,
-            RevurderingFeilet
-        )
-
         // Fredet funksjonsnavn
         internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
             // forkaster perioder som er før/overlapper med oppgitt periode, eller som er sammenhengende med
@@ -2322,9 +2311,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal val IKKE_FERDIG_BEHANDLET: VedtaksperiodeFilter = { !it.tilstand.erFerdigBehandlet }
-
-        internal val ER_ELLER_HAR_VÆRT_AVSLUTTET: VedtaksperiodeFilter =
-            { it.tilstand is AvsluttetUtenUtbetaling || it.utbetalinger.harAvsluttede() }
 
         internal val MED_SKJÆRINGSTIDSPUNKT = { skjæringstidspunkt: LocalDate ->
             { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.skjæringstidspunkt == skjæringstidspunkt }
