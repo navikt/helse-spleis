@@ -67,7 +67,11 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     }
 
     override fun vedtaksperiodeVenter(event: PersonObserver.VedtaksperiodeVenterEvent) {
-       vedtaksperiodeVenter.add(event)
+        // fjerner forrige ventetilstand før vi legger til ny for å få samme oppførsel som i VedtaksperioderVenterMediator
+        vedtaksperiodeVenter.removeIf {
+            it.vedtaksperiodeId == event.vedtaksperiodeId
+        }
+        vedtaksperiodeVenter.add(event)
     }
 
     fun forkastedePerioder() = forkastedeEventer.size

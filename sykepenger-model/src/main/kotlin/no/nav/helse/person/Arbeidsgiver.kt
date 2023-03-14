@@ -46,6 +46,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.skalHåndtere
 import no.nav.helse.person.Vedtaksperiode.Companion.sykefraværstilfelle
 import no.nav.helse.person.Vedtaksperiode.Companion.trengerInntektsmelding
+import no.nav.helse.person.Vedtaksperiode.Companion.venter
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -135,6 +136,12 @@ internal class Arbeidsgiver private constructor(
                 arbeidsgiver.vedtaksperioder.forEach { vedtaksperiode ->
                     vedtaksperiode.igangsettOverstyring(hendelse, revurdering)
                 }
+            }
+        }
+
+        internal fun List<Arbeidsgiver>.venter(nestemann: Vedtaksperiode) {
+            forEach { arbeidsgiver ->
+                arbeidsgiver.vedtaksperioder.venter(nestemann)
             }
         }
 

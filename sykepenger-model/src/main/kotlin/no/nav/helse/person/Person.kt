@@ -49,6 +49,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.sykefraværstilfelle
 import no.nav.helse.person.Arbeidsgiver.Companion.tidligsteDato
 import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
+import no.nav.helse.person.Arbeidsgiver.Companion.venter
 import no.nav.helse.person.Sykefraværstilfelleeventyr.Companion.varsleObservers
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -698,14 +699,14 @@ class Person private constructor(
             gjenopptaBehandlingNy = false
             arbeidsgivere.gjenopptaBehandling(hendelse)
         }
+        val nestemann = arbeidsgivere.nestemann() ?: return
+        arbeidsgivere.venter(nestemann)
     }
 
     internal fun igangsettOverstyring(hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
         arbeidsgivere.igangsettOverstyring(hendelse, revurdering)
         revurdering.sendOverstyringIgangsattEvent(this)
     }
-
-    internal fun nestemann() = arbeidsgivere.nestemann()
 
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,

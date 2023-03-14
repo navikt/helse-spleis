@@ -25,6 +25,8 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         private set
     internal lateinit var periode: Periode
         private set
+    internal lateinit var oppdatert: LocalDateTime
+        private set
     internal lateinit var skjæringstidspunkt: LocalDate
     internal lateinit var utbetalingIdTilVilkårsgrunnlagId: Pair<UUID, UUID?>
 
@@ -45,6 +47,7 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
     ) {
         this.id = id
         this.periode = periode
+        this.oppdatert = oppdatert
         this.skjæringstidspunkt = skjæringstidspunkt()
     }
 

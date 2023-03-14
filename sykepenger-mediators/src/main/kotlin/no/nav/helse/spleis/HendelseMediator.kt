@@ -321,12 +321,14 @@ internal class HendelseMediator(
         val personMediator = PersonMediator(message, hendelse, hendelseRepository)
         val datadelingMediator = DatadelingMediator(hendelse)
         val subsumsjonMediator = SubsumsjonMediator(jurist, hendelse.fødselsnummer(), message, versjonAvKode)
+        val vedtaksperioderVenterMediator = VedtaksperioderVenterMediator()
         person(message, hendelse, historiskeFolkeregisteridenter, jurist, personopplysninger) { person  ->
             person.addObserver(personMediator)
             person.addObserver(VedtaksperiodeProbe)
+            person.addObserver(vedtaksperioderVenterMediator)
             handler(person)
         }
-        finalize(context, personMediator, subsumsjonMediator, datadelingMediator, hendelse)
+        finalize(context, personMediator, subsumsjonMediator, datadelingMediator, hendelse, vedtaksperioderVenterMediator)
     }
 
     private fun person(message: HendelseMessage, hendelse: PersonHendelse, historiskeFolkeregisteridenter: List<String>, jurist: MaskinellJurist, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
@@ -346,11 +348,13 @@ internal class HendelseMediator(
         personMediator: PersonMediator,
         subsumsjonMediator: SubsumsjonMediator,
         datadelingMediator: DatadelingMediator,
-        hendelse: PersonHendelse
+        hendelse: PersonHendelse,
+        vedtaksperiodeVenterMediator: VedtaksperioderVenterMediator
     ) {
         personMediator.finalize(rapidsConnection, context)
         subsumsjonMediator.finalize(context)
         datadelingMediator.finalize(context)
+        vedtaksperiodeVenterMediator.finalize(context)
         if (!hendelse.harAktiviteter()) return
         if (hendelse.harFunksjonelleFeilEllerVerre()) sikkerLogg.info("aktivitetslogg inneholder errors:\n${hendelse.toLogString()}")
         else sikkerLogg.info("aktivitetslogg inneholder meldinger:\n${hendelse.toLogString()}")
