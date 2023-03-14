@@ -98,7 +98,27 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 hendelser = setOf(søknad2, im),
                 fom = 28.januar,
                 tom = 28.februar,
-                harOverlappendeVedtaksperiode = true
+                forlengerPeriode = true
+            ), observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER))
+        )
+    }
+
+    @Test
+    fun `har en periode rett før på annen arbeidsgiver`() {
+        nyttVedtak(1.januar, 31.januar, orgnummer = a2)
+        val søknad2 = håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        val im = håndterInntektsmelding(listOf(1.februar til 16.februar ), begrunnelseForReduksjonEllerIkkeUtbetalt = "bjeff")
+        assertEquals(
+            PersonObserver.VedtaksperiodeForkastetEvent(
+                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+                aktørId = AKTØRID,
+                organisasjonsnummer = ORGNUMMER,
+                vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
+                gjeldendeTilstand = TilstandType.AVVENTER_INNTEKTSMELDING,
+                hendelser = setOf(søknad2, im),
+                fom = 1.februar,
+                tom = 28.februar,
+                forlengerPeriode = true
             ), observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER))
         )
     }
@@ -119,12 +139,12 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 hendelser = setOf(søknad2),
                 fom = 28.januar,
                 tom = 28.februar,
-                harOverlappendeVedtaksperiode = false
+                forlengerPeriode = false
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
     }
 
     @Test
-    fun `har ikke overlappende vedtaksperiode - god avstand`() {
+    fun `har ikke overlappende vedtaksperiode`() {
         tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
 
@@ -139,7 +159,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 hendelser = setOf(søknad2),
                 fom = 15.februar,
                 tom = 28.februar,
-                harOverlappendeVedtaksperiode = false
+                forlengerPeriode = false
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
     }
 
@@ -162,7 +182,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 hendelser = setOf(søknad2),
                 fom = 10.januar,
                 tom = 15.januar,
-                harOverlappendeVedtaksperiode = true
+                forlengerPeriode = true
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
     }
 }

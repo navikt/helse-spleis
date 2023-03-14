@@ -353,7 +353,7 @@ internal class PersonMediator(
             "hendelser" to event.hendelser,
             "fom" to event.fom,
             "tom" to event.tom,
-            "harOverlappendeVedtaksperiode" to event.harOverlappendeVedtaksperiode
+            "forlengerPeriode" to event.forlengerPeriode
         )))
     }
 
