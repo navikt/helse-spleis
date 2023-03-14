@@ -68,7 +68,8 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val hendelser: Set<UUID>,
         val fom: LocalDate,
         val tom: LocalDate,
-        val forlengerPeriode: Boolean
+        val forlengerPeriode: Boolean,
+        val harPeriodeInnenfor16Dager: Boolean
     )
 
     data class OpprettOppgaveForSpeilsaksbehandlereEvent(

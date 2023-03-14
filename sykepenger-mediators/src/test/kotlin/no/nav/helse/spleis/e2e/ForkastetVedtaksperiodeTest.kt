@@ -29,9 +29,11 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
         assertEquals(3.januar, LocalDate.parse(vedtaksperiodeForkastet.first().path("fom").asText()))
         assertEquals(26.januar, LocalDate.parse(vedtaksperiodeForkastet.first().path("tom").asText()))
         assertTrue(vedtaksperiodeForkastet.first().path("forlengerPeriode").isBoolean)
+        assertTrue(vedtaksperiodeForkastet.first().path("harPeriodeInnenfor16Dager").isBoolean)
         assertEquals(3.januar, LocalDate.parse(vedtaksperiodeForkastet.last().path("fom").asText()))
         assertEquals(27.januar, LocalDate.parse(vedtaksperiodeForkastet.last().path("tom").asText()))
         assertTrue(vedtaksperiodeForkastet.last().path("forlengerPeriode").isBoolean)
+        assertTrue(vedtaksperiodeForkastet.last().path("harPeriodeInnenfor16Dager").isBoolean)
         assertEquals(
             listOf(søknadId, søknadId2),
             vedtaksperiodeForkastet.flatMap { it.path("hendelser").map { UUID.fromString(it.asText()) } }.distinct()

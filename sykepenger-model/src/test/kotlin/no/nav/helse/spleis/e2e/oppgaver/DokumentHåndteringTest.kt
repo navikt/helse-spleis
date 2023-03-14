@@ -98,7 +98,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 hendelser = setOf(søknad2, im),
                 fom = 28.januar,
                 tom = 28.februar,
-                forlengerPeriode = true
+                forlengerPeriode = true,
+                harPeriodeInnenfor16Dager = false
             ), observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER))
         )
     }
@@ -118,7 +119,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 hendelser = setOf(søknad2, im),
                 fom = 1.februar,
                 tom = 28.februar,
-                forlengerPeriode = true
+                forlengerPeriode = true,
+                harPeriodeInnenfor16Dager = false
             ), observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER))
         )
     }
@@ -139,7 +141,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 hendelser = setOf(søknad2),
                 fom = 28.januar,
                 tom = 28.februar,
-                forlengerPeriode = false
+                forlengerPeriode = false,
+                harPeriodeInnenfor16Dager = false
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
     }
 
@@ -159,7 +162,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 hendelser = setOf(søknad2),
                 fom = 15.februar,
                 tom = 28.februar,
-                forlengerPeriode = false
+                forlengerPeriode = false,
+                harPeriodeInnenfor16Dager = false
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
     }
 
@@ -182,7 +186,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 hendelser = setOf(søknad2),
                 fom = 10.januar,
                 tom = 15.januar,
-                forlengerPeriode = true
+                forlengerPeriode = true,
+                harPeriodeInnenfor16Dager = false
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
     }
 }
