@@ -4,15 +4,18 @@ import java.util.UUID
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
+import org.slf4j.LoggerFactory
 
-class VedtaksperioderVenterMediator: PersonObserver {
+internal class VedtaksperioderVenterMediator: PersonObserver {
+
     private val vedtaksperioderVenter = mutableMapOf<UUID, PersonObserver.VedtaksperiodeVenterEvent>()
     override fun vedtaksperiodeVenter(event: PersonObserver.VedtaksperiodeVenterEvent) {
         vedtaksperioderVenter[event.vedtaksperiodeId] = event
     }
-    fun finalize(context: MessageContext) {
+
+    internal fun finalize(context: MessageContext) {
         vedtaksperioderVenter.values.forEach { event ->
-            val melding = JsonMessage.newMessage(
+            val json = JsonMessage.newMessage(
                 "vedtaksperiode_venter", mapOf(
                     "fødselsnummer" to event.fødselsnummer,
                     "aktørId" to event.aktørId,
@@ -30,8 +33,13 @@ class VedtaksperioderVenterMediator: PersonObserver {
                         )
                     )
                 )
-            )
-            context.publish(event.fødselsnummer, melding.toJson())
+            ).toJson()
+            sikkerLogg.info("sender vedtaksperiode_venter:\n\t$json")
+            context.publish(event.fødselsnummer, json)
         }
+    }
+
+    private companion object {
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 }
