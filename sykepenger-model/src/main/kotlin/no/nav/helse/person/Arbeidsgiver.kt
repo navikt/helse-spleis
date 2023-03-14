@@ -256,7 +256,7 @@ internal class Arbeidsgiver private constructor(
             hendelse: IAktivitetslogg,
             filter: VedtaksperiodeFilter
         ) {
-            arbeidsgivere.forEach { it.søppelbøtte(hendelse, filter) }
+            arbeidsgivere.flatMap { it.søppelbøtte(hendelse, filter) }.forEach { it.buildAndEmit() }
         }
 
         internal fun List<Arbeidsgiver>.sykefraværstilfelle(skjæringstidspunkt: LocalDate) =
@@ -880,14 +880,16 @@ internal class Arbeidsgiver private constructor(
         refusjonsopplysninger.lagreTidsnær(nyFørsteFraværsdag, refusjonshistorikk)
     }
 
-    private fun søppelbøtte(hendelse: IAktivitetslogg, filter: VedtaksperiodeFilter) {
+    private fun søppelbøtte(hendelse: IAktivitetslogg, filter: VedtaksperiodeFilter): List<Vedtaksperiode.VedtaksperiodeForkastetEventBuilder> {
         hendelse.kontekst(this)
-        val perioder = vedtaksperioder
+        val perioder: List<Pair<Vedtaksperiode, Vedtaksperiode.VedtaksperiodeForkastetEventBuilder>> = vedtaksperioder
             .filter(filter)
-            .filter { it.forkast(hendelse, utbetalinger) }
-        vedtaksperioder.removeAll(perioder)
-        forkastede.addAll(perioder.map { ForkastetVedtaksperiode(it) })
-        sykdomshistorikk.fjernDager(perioder.map { it.periode() })
+            .mapNotNull { vedtaksperiode -> vedtaksperiode.forkast(hendelse, utbetalinger)?.let { vedtaksperiode to it } }
+
+        vedtaksperioder.removeAll(perioder.map { it.first })
+        forkastede.addAll(perioder.map { ForkastetVedtaksperiode(it.first) })
+        sykdomshistorikk.fjernDager(perioder.map { it.first.periode() })
+        return perioder.map { it.second }
     }
 
     private fun registrerNyVedtaksperiode(vedtaksperiode: Vedtaksperiode) {
@@ -897,7 +899,8 @@ internal class Arbeidsgiver private constructor(
 
     private fun registrerForkastetVedtaksperiode(vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) {
         hendelse.info("Oppretter forkastet vedtaksperiode ettersom Søknad inneholder errors")
-        vedtaksperiode.forkast(hendelse, utbetalinger)
+        val vedtaksperiodeForkastetEventBuilder = vedtaksperiode.forkast(hendelse, utbetalinger)
+        vedtaksperiodeForkastetEventBuilder!!.buildAndEmit()
         forkastede.add(ForkastetVedtaksperiode(vedtaksperiode))
     }
 

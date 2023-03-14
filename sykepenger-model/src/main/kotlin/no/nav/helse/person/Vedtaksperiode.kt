@@ -479,28 +479,34 @@ internal class Vedtaksperiode private constructor(
     private fun låsOpp() = arbeidsgiver.låsOpp(periode)
     private fun lås() = arbeidsgiver.lås(periode)
 
-    internal fun forkast(hendelse: IAktivitetslogg, utbetalinger: List<Utbetaling>): Boolean {
-        if (!this.utbetalinger.kanForkastes(utbetalinger) || this.tilstand == AvsluttetUtenUtbetaling) return false
+    internal fun forkast(hendelse: IAktivitetslogg, utbetalinger: List<Utbetaling>): VedtaksperiodeForkastetEventBuilder? {
+        if (!this.utbetalinger.kanForkastes(utbetalinger) || this.tilstand == AvsluttetUtenUtbetaling) return null
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
         this.utbetalinger.forkast(hendelse)
-        person.vedtaksperiodeForkastet(
-            PersonObserver.VedtaksperiodeForkastetEvent(
-                fødselsnummer = fødselsnummer,
-                aktørId = aktørId,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = id,
-                gjeldendeTilstand = tilstand.type,
-                hendelser = hendelseIder(),
-                fom = periode.start,
-                tom = periode.endInclusive,
-                forlengerPeriode = person.nåværendeVedtaksperioder { it !== this && it.tilstand !== AvsluttetUtenUtbetaling && (it.periode.overlapperMed(this.periode) || it.periode.erRettFør(this.periode)) }.isNotEmpty(),
-                harPeriodeInnenfor16Dager = person.nåværendeVedtaksperioder { it !== this && it.tilstand !== AvsluttetUtenUtbetaling && påvirkerArbeidsgiverperioden(it) }.isNotEmpty()
-            )
-        )
+        val vedtaksperiodeForkastetEventBuilder = VedtaksperiodeForkastetEventBuilder(tilstand.type)
         // TODO: Speilbuilder må støtte å vise røde pølser dersom perioden er TIL_INFOTRYGD og utbetalingen er annullert, og ignorerer infotrygdpølser uten utbetaling
         if (!this.utbetalinger.harAvsluttede()) tilstand(hendelse, TilInfotrygd)
-        return true
+        return vedtaksperiodeForkastetEventBuilder
+    }
+
+    internal inner class VedtaksperiodeForkastetEventBuilder(private val gjeldendeTilstand: TilstandType) {
+        internal fun buildAndEmit() {
+            person.vedtaksperiodeForkastet(
+                PersonObserver.VedtaksperiodeForkastetEvent(
+                    fødselsnummer = fødselsnummer,
+                    aktørId = aktørId,
+                    organisasjonsnummer = organisasjonsnummer,
+                    vedtaksperiodeId = id,
+                    gjeldendeTilstand = gjeldendeTilstand,
+                    hendelser = hendelseIder(),
+                    fom = periode.start,
+                    tom = periode.endInclusive,
+                    forlengerPeriode = person.nåværendeVedtaksperioder { it.tilstand !== AvsluttetUtenUtbetaling && (it.periode.overlapperMed(periode) || it.periode.erRettFør(periode)) }.isNotEmpty(),
+                    harPeriodeInnenfor16Dager = person.nåværendeVedtaksperioder { it.tilstand !== AvsluttetUtenUtbetaling && påvirkerArbeidsgiverperioden(it) }.isNotEmpty()
+                )
+            )
+        }
     }
 
     private fun forkast(hendelse: IAktivitetslogg) {

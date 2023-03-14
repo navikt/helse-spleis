@@ -154,7 +154,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     fun `har ikke overlappende vedtaksperioder`() {
         tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
-
         val søknad2 = håndterSøknad(Sykdom(28.januar, 28.februar, 100.prosent))
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
@@ -165,6 +164,26 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 gjeldendeTilstand = TilstandType.START,
                 hendelser = setOf(søknad2),
                 fom = 28.januar,
+                tom = 28.februar,
+                forlengerPeriode = false,
+                harPeriodeInnenfor16Dager = false
+            ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
+    }
+    @Test
+    fun `har vedtaksperiode som påvirker arbeidsgiverperioden`() {
+        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+
+        val søknad2 = håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
+        håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
+        assertEquals(
+            PersonObserver.VedtaksperiodeForkastetEvent(
+                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+                aktørId = AKTØRID,
+                organisasjonsnummer = ORGNUMMER,
+                vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
+                gjeldendeTilstand = TilstandType.AVVENTER_INNTEKTSMELDING,
+                hendelser = setOf(søknad2),
+                fom = 10.februar,
                 tom = 28.februar,
                 forlengerPeriode = false,
                 harPeriodeInnenfor16Dager = false

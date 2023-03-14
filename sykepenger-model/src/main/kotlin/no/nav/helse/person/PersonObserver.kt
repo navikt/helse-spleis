@@ -71,7 +71,6 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val forlengerPeriode: Boolean,
         val harPeriodeInnenfor16Dager: Boolean
     )
-
     data class InntektsmeldingFørSøknadEvent(
         val inntektsmeldingId: UUID,
         val overlappendeSykmeldingsperioder: List<Periode>,
