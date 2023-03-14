@@ -628,28 +628,6 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 
-    @Disabled
-    @Test
-    fun `forlengelse av sykdom hos AG2 hvor sykdom startet hos AG1 en annen mnd enn skjæringstidspunkt, vedtaksperiode 2 for AG2 skal ikke vente på IM`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), orgnummer = a2)
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a2)
-
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
-
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a2)
-
-        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
-        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
-    }
-
     @Test
     fun `kort periode hos annen arbeidsgiver skal ikke blokkere videre behandling pga manglende IM`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar), orgnummer = a1)

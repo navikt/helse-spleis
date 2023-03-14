@@ -325,18 +325,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled
-    fun `varsel - Fant ikke refusjonsgrad for perioden - Undersøk oppgitt refusjon før du utbetaler`() {
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 25.februar)
-        nyPeriode(1.januar til 10.januar)
-        nyPeriode(11.januar til 31.januar)
-        nyPeriode(1.februar til 28.februar)
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        assertVarsel(RV_RE_1, 2.vedtaksperiode.filter())
-    }
-
-    @Test
     fun `varsel - Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå - Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig`() {
         nyttVedtak(1.januar, 31.januar)
 

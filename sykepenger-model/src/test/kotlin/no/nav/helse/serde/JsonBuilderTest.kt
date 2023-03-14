@@ -160,12 +160,6 @@ class JsonBuilderTest {
         testSerialiseringAvPerson(dødPerson)
     }
 
-    @Disabled
-    @Test
-    fun `Person med infotrygdforlengelse`() {
-        testSerialiseringAvPerson(personMedInfotrygdForlengelse())
-    }
-
     @Test
     fun `Serialisering av feriepenger`() {
         Toggle.SendFeriepengeOppdrag.enable {
