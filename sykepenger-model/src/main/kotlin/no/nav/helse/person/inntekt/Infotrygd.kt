@@ -3,7 +3,6 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
 
 internal class Infotrygd(
