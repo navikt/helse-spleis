@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.desember
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.februar
 import no.nav.helse.harBehov
 import no.nav.helse.hendelser.Simulering
@@ -1118,7 +1118,7 @@ internal class UtbetalingTest {
             utbetalingId = utbetalingId
         )
 
-    private fun beregnUtbetalinger(tidslinje: Utbetalingstidslinje) = tidslinje.also { MaksimumUtbetalingFilter().betal(listOf(tidslinje), tidslinje.periode(), aktivitetslogg, MaskinellJurist()) }
+    private fun beregnUtbetalinger(tidslinje: Utbetalingstidslinje) = tidslinje.also { MaksimumUtbetalingFilter().betal(listOf(tidslinje), tidslinje.periode(), aktivitetslogg, SubsumsjonObserver.NullObserver) }
 
     private fun opprettGodkjentUtbetaling(
         tidslinje: Utbetalingstidslinje,
