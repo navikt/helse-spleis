@@ -72,18 +72,6 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val harPeriodeInnenfor16Dager: Boolean
     )
 
-    data class OpprettOppgaveForSpeilsaksbehandlereEvent(
-        val hendelser: Set<UUID>,
-    )
-
-    data class OpprettOppgaveEvent(
-        val hendelser: Set<UUID>,
-    )
-
-    data class UtsettOppgaveEvent(
-        val hendelse: UUID
-    )
-
     data class InntektsmeldingFørSøknadEvent(
         val inntektsmeldingId: UUID,
         val overlappendeSykmeldingsperioder: List<Periode>,
@@ -352,8 +340,6 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {}
     fun vedtaksperiodeVenter(event: VedtaksperiodeVenterEvent) {}
     fun vedtaksperiodeForkastet(event: VedtaksperiodeForkastetEvent) {}
-    fun opprettOppgaveForSpeilsaksbehandlere(event: OpprettOppgaveForSpeilsaksbehandlereEvent) {}
-    fun opprettOppgave(event: OpprettOppgaveEvent) {}
     fun vedtaksperiodeIkkeFunnet(event: VedtaksperiodeIkkeFunnetEvent) {}
     fun manglerInntektsmelding(event: ManglendeInntektsmeldingEvent) {}
     fun trengerIkkeInntektsmelding(event: TrengerIkkeInntektsmeldingEvent) {}
@@ -375,7 +361,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
 
     fun overstyringIgangsatt(event: OverstyringIgangsatt) {}
     fun overlappendeInfotrygdperiodeEtterInfotrygdendring(event: OverlappendeInfotrygdperiodeEtterInfotrygdendring) {}
-    fun inntektsmeldingFørSøknad(inntektsmeldingFørSøknadEvent: InntektsmeldingFørSøknadEvent) {}
+    fun inntektsmeldingFørSøknad(event: InntektsmeldingFørSøknadEvent) {}
     fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String) {}
     fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {}
     fun søknadHåndtert(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {}

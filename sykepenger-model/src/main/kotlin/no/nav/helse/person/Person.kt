@@ -412,10 +412,6 @@ class Person private constructor(
         observers.forEach { it.vedtaksperiodeIkkePåminnet(vedtaksperiodeId, organisasjonsnummer, tilstandType) }
     }
 
-    internal fun opprettOppgave(event: PersonObserver.OpprettOppgaveEvent) {
-        observers.forEach { it.opprettOppgave(event) }
-    }
-
     internal fun vedtaksperiodeForkastet(event: PersonObserver.VedtaksperiodeForkastetEvent) {
         observers.forEach { it.vedtaksperiodeForkastet(event) }
     }
@@ -573,25 +569,6 @@ class Person private constructor(
 
     internal fun vedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.vedtaksperioder(filter).sorted()
 
-    private fun harNærliggendeUtbetaling(periode: Periode): Boolean {
-        if (infotrygdhistorikk.harBetaltRettFør(periode)) return false
-        return arbeidsgivere.any { it.harNærliggendeUtbetaling(periode.oppdaterTom(periode.endInclusive.plusYears(3))) }
-    }
-
-    internal fun sendOppgaveEvent(hendelse: SykdomstidslinjeHendelse) {
-        sendOppgaveEvent(hendelse.sykdomstidslinje().periode(), setOf(hendelse.meldingsreferanseId()))
-    }
-
-    internal fun sendOppgaveEvent(periode: Periode?, hendelseIder: Set<UUID>) {
-        val harNærliggendeUtbetaling = periode?.let { harNærliggendeUtbetaling(it) } ?: false
-        if (harNærliggendeUtbetaling) {
-            emitOpprettOppgaveForSpeilsaksbehandlereEvent(hendelseIder)
-        } else {
-            emitOpprettOppgaveEvent(hendelseIder)
-        }
-    }
-
-
     internal fun lagreDødsdato(dødsdato: LocalDate) {
         this.dødsdato = dødsdato
     }
@@ -633,26 +610,6 @@ class Person private constructor(
         Arbeidsgiver.søppelbøtte(arbeidsgivere, hendelse, filter)
         sykdomshistorikkEndret(hendelse)
         gjenopptaBehandling(hendelse)
-    }
-
-    private fun emitOpprettOppgaveForSpeilsaksbehandlereEvent(hendelseIder: Set<UUID>) {
-        observers.forEach {
-            it.opprettOppgaveForSpeilsaksbehandlere(
-                PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent(
-                    hendelseIder
-                )
-            )
-        }
-    }
-
-    private fun emitOpprettOppgaveEvent(hendelseIder: Set<UUID>) {
-        observers.forEach {
-            it.opprettOppgave(
-                PersonObserver.OpprettOppgaveEvent(
-                    hendelseIder
-                )
-            )
-        }
     }
 
     internal fun emitInntektsmeldingFørSøknadEvent(

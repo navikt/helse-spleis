@@ -881,23 +881,6 @@ internal class Vedtaksperiode private constructor(
         return Arbeidsgiverperiode.forventerInntekt(finnArbeidsgiverperiode(), periode, sykdomstidslinje, jurist())
     }
 
-    private fun sendOppgaveEvent() {
-        if (!skalOppretteOppgave()) return
-        val inntektsmeldingIds =
-            arbeidsgiver.finnSammenhengendePeriode(skjæringstidspunkt)
-                .mapNotNull { it.inntektsmeldingInfo }.ider()
-        person.sendOppgaveEvent(
-            periode = periode(),
-            hendelseIder = hendelseIder() + inntektsmeldingIds
-        )
-    }
-
-    private fun skalOppretteOppgave() =
-        inntektsmeldingInfo != null ||
-                arbeidsgiver.finnSammenhengendePeriode(skjæringstidspunkt)
-                    .any { it.inntektsmeldingInfo != null } ||
-                sykdomstidslinje.any { it.kommerFra(Søknad::class) }
-
     private fun loggInnenforArbeidsgiverperiode() {
         if (forventerInntekt()) return
         sikkerlogg.info(
@@ -2235,7 +2218,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.arbeidsgiver.ferdigstillRevurdering(hendelse, vedtaksperiode)
             vedtaksperiode.kontekst(hendelse) // 'ferdigstillRevurdering'  påvirker hendelsekontekst
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
-            vedtaksperiode.sendOppgaveEvent()
         }
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
             if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode.utbetalinger)) return null
@@ -2265,7 +2247,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             hendelse.info("Sykdom for denne personen kan ikke behandles automatisk.")
-            vedtaksperiode.sendOppgaveEvent()
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, arbeidsgivere: List<Arbeidsgiver>) = HJELP.utenBegrunnelse
@@ -2369,9 +2350,6 @@ internal class Vedtaksperiode private constructor(
         }.filter {
             it.forventerInntekt()
         }
-
-        internal fun List<Vedtaksperiode>.medSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
-            this.filter { it.skjæringstidspunkt == skjæringstidspunkt }
 
         internal fun List<Vedtaksperiode>.skalHåndtere(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding): Vedtaksperiode? {
             inntektOgRefusjon.strategier.forEach { strategy ->

@@ -137,7 +137,7 @@ class InfotrygdhistorikkElement private constructor(
             .map { it.utbetalingstidslinje() }
             .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
 
-    internal fun harBetaltRettFør(periode: Periode) = perioder.harBetaltRettFør(periode)
+    private fun harBetaltRettFør(periode: Periode) = perioder.harBetaltRettFør(periode)
 
     internal fun accept(visitor: InfotrygdhistorikkVisitor) {
         visitor.preVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId)

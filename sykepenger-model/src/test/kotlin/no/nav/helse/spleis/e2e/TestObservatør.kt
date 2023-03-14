@@ -35,9 +35,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val inntektsmeldingHåndtert = mutableListOf<Pair<UUID, UUID>>()
     val søknadHåndtert = mutableListOf<Pair<UUID, UUID>>()
 
-    val opprettOppgaverTilSpeilsaksbehandlerEventer = mutableListOf<PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent>()
-    val opprettOppgaverEventer = mutableListOf<PersonObserver.OpprettOppgaveEvent>()
-
     private lateinit var sisteVedtaksperiode: UUID
     private val vedtaksperioder = person?.inspektør?.vedtaksperioder()?.mapValues { (_, perioder) ->
         perioder.map { it.inspektør.id }.toMutableSet()
@@ -75,8 +72,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     fun forkastedePerioder() = forkastedeEventer.size
     fun forkastet(vedtaksperiodeId: UUID) = forkastedeEventer.getValue(vedtaksperiodeId)
-    fun opprettOppgaveForSpeilsaksbehandlereEvent() = opprettOppgaverTilSpeilsaksbehandlerEventer.toList()
-    fun opprettOppgaveEventer() = opprettOppgaverEventer.toList()
 
     override fun sykefraværstilfelle(sykefraværstilfeller: List<SykefraværstilfelleeventyrObserver.SykefraværstilfelleeventyrObserverEvent>) {
         this.sykefraværstilfelleeventyr.add(sykefraværstilfeller)
@@ -144,14 +139,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     override fun vedtaksperiodeForkastet(event: PersonObserver.VedtaksperiodeForkastetEvent) {
         forkastedeEventer[event.vedtaksperiodeId] = event
-    }
-
-    override fun opprettOppgaveForSpeilsaksbehandlere(event: PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent) {
-        opprettOppgaverTilSpeilsaksbehandlerEventer.add(event)
-    }
-
-    override fun opprettOppgave(event: PersonObserver.OpprettOppgaveEvent) {
-        opprettOppgaverEventer.add(event)
     }
 
     override fun overstyringIgangsatt(

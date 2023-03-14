@@ -29,7 +29,6 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.person.ForkastetVedtaksperiode.Companion.håndterInntektsmeldingReplay
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
@@ -43,7 +42,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_REFUSJONSOPPLYSNINGE
 import no.nav.helse.person.Vedtaksperiode.Companion.feiletRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.håndterHale
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
-import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.skalHåndtere
 import no.nav.helse.person.Vedtaksperiode.Companion.sykefraværstilfelle
@@ -66,7 +64,6 @@ import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling.Companion.gjelderFeriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harNærliggendeUtbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -546,7 +543,7 @@ internal class Arbeidsgiver private constructor(
         håndter(dager) { postHåndter(dager) }
 
         if (dager.noenDagerHåndtert() || inntektOgRefusjonHåndteres) return
-        inntektsmeldingIkkeHåndtert(inntektsmelding, vedtaksperiodeId)
+        inntektsmeldingIkkeHåndtert(inntektsmelding)
     }
 
     private fun håndtertInntektPåSkjæringstidspunkt(vedtaksperiode: Vedtaksperiode, inntektsmelding: SykdomstidslinjeHendelse) {
@@ -555,31 +552,14 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    private fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID?) {
+    private fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {
         inntektsmelding.info("Inntektsmelding ikke håndtert")
-        if (vedtaksperiodeId != null) {
-            if (!forkastede.håndterInntektsmeldingReplay(person, inntektsmelding, vedtaksperiodeId)) {
-                inntektsmelding.info("Vedtaksperiode overlapper ikke med replayet Inntektsmelding")
-            }
-            return
-        }
         val overlappendeSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(inntektsmelding)
         if (overlappendeSykmeldingsperioder.isNotEmpty()) {
             person.emitInntektsmeldingFørSøknadEvent(inntektsmelding, overlappendeSykmeldingsperioder, organisasjonsnummer)
             return inntektsmelding.info("Inntektsmelding overlapper med sykmeldingsperioder $overlappendeSykmeldingsperioder")
         }
-
         person.emitInntektsmeldingIkkeHåndtert(inntektsmelding, organisasjonsnummer)
-
-        if (ForkastetVedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede, inntektsmelding)) {
-            person.opprettOppgave(
-                PersonObserver.OpprettOppgaveEvent(
-                    hendelser = setOf(inntektsmelding.meldingsreferanseId()),
-                )
-            )
-            inntektsmelding.info("Forkastet vedtaksperiode overlapper med uforventet inntektsmelding")
-        } else
-            inntektsmelding.info("Ingen forkastede vedtaksperioder overlapper med uforventet inntektsmelding")
     }
 
     private fun håndter(
@@ -873,8 +853,6 @@ internal class Arbeidsgiver private constructor(
         return vedtaksperioder.map { it.periode() }.grupperSammenhengendePerioderMedHensynTilHelg()
     }
 
-    internal fun finnSammenhengendePeriode(skjæringstidspunkt: LocalDate) = vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt)
-
     internal fun finnTidligereInntektsmeldinginfo(skjæringstidspunkt: LocalDate) = inntektsmeldingInfo.finn(skjæringstidspunkt)
 
     internal fun addInntektsmelding(
@@ -949,9 +927,6 @@ internal class Arbeidsgiver private constructor(
         }
         return perioderFør
     }
-
-    internal fun harNærliggendeUtbetaling(periode: Periode) =
-        utbetalinger.harNærliggendeUtbetaling(periode)
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return SpesifikkKontekst("Arbeidsgiver", mapOf("organisasjonsnummer" to organisasjonsnummer))

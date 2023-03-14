@@ -455,26 +455,6 @@ internal class UtbetalingTest {
     }
 
     @Test
-    fun `nærliggende utbetaling`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
-        beregnUtbetalinger(tidslinje)
-        val utbetaling = opprettUtbetaling(tidslinje)
-        assertTrue(utbetaling.harNærliggendeUtbetaling(31.januar til 15.februar))
-        assertTrue(utbetaling.harNærliggendeUtbetaling(1.desember(2017) til 20.januar))
-        assertTrue(utbetaling.harNærliggendeUtbetaling(1.februar til 15.februar))
-        assertTrue(utbetaling.harNærliggendeUtbetaling(15.februar til 5.mars))
-        assertFalse(utbetaling.harNærliggendeUtbetaling(1.desember(2017) til 31.desember(2017)))
-    }
-
-    @Test
-    fun `nærliggende utbetaling til ferie`() {
-        val tidslinje = tidslinjeOf(16.AP, 17.NAV, 28.FRI)
-        beregnUtbetalinger(tidslinje)
-        val utbetaling = opprettUtbetaling(tidslinje)
-        assertTrue(utbetaling.harNærliggendeUtbetaling(1.februar til 15.februar))
-    }
-
-    @Test
     fun `utbetalinger med ulik korrelasjonsId kan ikke overlappe`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV)
         beregnUtbetalinger(tidslinje)
@@ -501,16 +481,6 @@ internal class UtbetalingTest {
         beregnUtbetalinger(tidslinje2)
         val utbetaling2 = opprettUtbetaling(tidslinje2, tidligere = utbetaling)
         assertTrue(listOf(utbetaling).tillaterOpprettelseAvUtbetaling(utbetaling2))
-    }
-    @Test
-    fun `ikke nærliggende utbetaling til tomme oppdrag`() {
-        val tidslinje = tidslinjeOf(31.FRI)
-        beregnUtbetalinger(tidslinje)
-        val utbetaling = opprettUtbetaling(tidslinje)
-        assertFalse(utbetaling.harNærliggendeUtbetaling(31.januar til 15.februar))
-        assertFalse(utbetaling.harNærliggendeUtbetaling(1.desember(2017) til 20.januar))
-        assertFalse(utbetaling.harNærliggendeUtbetaling(1.februar til 15.februar))
-        assertFalse(utbetaling.harNærliggendeUtbetaling(1.januar til 15.januar))
     }
 
     @Test

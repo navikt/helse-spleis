@@ -333,18 +333,6 @@ internal class PersonMediator(
         )))
     }
 
-    override fun opprettOppgaveForSpeilsaksbehandlere(event: PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent) {
-        queueMessage(JsonMessage.newMessage("opprett_oppgave_for_speilsaksbehandlere", mapOf(
-            "hendelser" to event.hendelser,
-        )))
-    }
-
-    override fun opprettOppgave(event: PersonObserver.OpprettOppgaveEvent) {
-        queueMessage(JsonMessage.newMessage("opprett_oppgave", mapOf(
-            "hendelser" to event.hendelser,
-        )))
-    }
-
     override fun vedtaksperiodeForkastet(event: PersonObserver.VedtaksperiodeForkastetEvent) {
         queueMessage(JsonMessage.newMessage("vedtaksperiode_forkastet", mapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,

@@ -105,10 +105,6 @@ class Utbetaling private constructor(
     fun erAvvist() = tilstand == IkkeGodkjent
     private fun erAnnullering() = type == ANNULLERING
 
-    fun harNærliggendeUtbetaling(other: Periode): Boolean {
-        if (arbeidsgiverOppdrag.isEmpty() && personOppdrag.isEmpty()) return false
-        return periode.overlapperMed(other.oppdaterFom(other.start.minusDays(16)))
-    }
     fun trekkerTilbakePenger() = listOf(arbeidsgiverOppdrag, personOppdrag).trekkerTilbakePenger()
 
     // this kan revurdere other gitt at fagsystemId == other.fagsystemId,
@@ -361,9 +357,6 @@ class Utbetaling private constructor(
                 .filter { it.periode.overlapperMed(other.periode) }
                 .map { it.periode }
         }
-
-        fun List<Utbetaling>.harNærliggendeUtbetaling(periode: Periode) =
-            aktiveMedUbetalte().any { it.harNærliggendeUtbetaling(periode) }
 
         fun List<Utbetaling>.harId(id: UUID) = any { it.id == id }
         fun ferdigUtbetaling(
