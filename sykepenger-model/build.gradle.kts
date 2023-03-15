@@ -2,18 +2,18 @@ val jsonassertVersion = "1.5.0"
 val jacksonVersion = "2.14.12"
 
 dependencies {
-    implementation(project(":sykepenger-primitiver"))
-    implementation(project(":sykepenger-utbetaling"))
-    testImplementation(testFixtures(project(":sykepenger-utbetaling")))
-    testImplementation(testFixtures(project(":sykepenger-primitiver")))
-    implementation(project(":sykepenger-aktivitetslogg"))
-    implementation(project(":sykepenger-etterlevelse"))
+    api(project(":sykepenger-primitiver"))
+    api(project(":sykepenger-utbetaling"))
+    api(project(":sykepenger-aktivitetslogg"))
+    api(project(":sykepenger-etterlevelse"))
     implementation(project(":sykepenger-inntekt"))
     implementation(libs.bundles.jackson)
     implementation(libs.bundles.logging) {
         exclude("com.fasterxml.jackson.core")
         exclude("com.fasterxml.jackson.dataformat")
     }
+    testImplementation(testFixtures(project(":sykepenger-utbetaling")))
+    testImplementation(testFixtures(project(":sykepenger-primitiver")))
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
 }
 

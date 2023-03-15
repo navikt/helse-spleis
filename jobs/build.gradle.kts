@@ -11,8 +11,6 @@ tasks.withType<Test> {
 dependencies {
     implementation("com.github.navikt:rapids-and-rivers-cli:$rapidsAndRiversCliVersion")
     implementation(project(":sykepenger-model"))
-    implementation(project(":sykepenger-etterlevelse"))
-    implementation(project(":sykepenger-aktivitetslogg"))
     implementation(libs.bundles.database)
     implementation(libs.cloudsql)
 }
