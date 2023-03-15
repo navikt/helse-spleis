@@ -58,4 +58,4 @@ spec:
   - name: ANNULLERE_OG_UTBETALE
     value: "true"
   - name: FLERE_HVITE_POLSER
-    value: "true""
+    value: "true"
