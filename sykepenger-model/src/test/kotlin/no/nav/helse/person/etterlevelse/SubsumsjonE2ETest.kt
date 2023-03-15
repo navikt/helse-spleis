@@ -13,6 +13,7 @@ import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.etterlevelse.Ledd.LEDD_1
 import no.nav.helse.etterlevelse.Ledd.LEDD_2
 import no.nav.helse.etterlevelse.Ledd.LEDD_3
+import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_22_13
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_10
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_11
@@ -2746,6 +2747,20 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                     )
                 )
             ),
+            vedtaksperiodeId = 1.vedtaksperiode
+        )
+    }
+
+    @Test
+    fun `§ forvaltningsloven 35 - omgjøring av vedtak uten klage`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 90.prosent))
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = Paragraf.PARAGRAF_6_35,
+            ledd = LEDD_1,
+            versjon = 1.juni(2021),
+            input = emptyMap(),
+            output = emptyMap(),
             vedtaksperiodeId = 1.vedtaksperiode
         )
     }

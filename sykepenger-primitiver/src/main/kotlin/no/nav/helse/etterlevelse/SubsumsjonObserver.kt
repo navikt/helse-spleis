@@ -468,6 +468,13 @@ interface SubsumsjonObserver {
      */
     fun `§ 22-13 ledd 3`(avskjæringsdato: LocalDate, perioder: List<Periode>) {}
 
+    /**
+     * Omgjøring av vedtak uten klage
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/§22-13)
+     */
+    fun `fvl § 35 ledd 1`() {}
+
     class SammenligningsgrunnlagDTO(
         val sammenligningsgrunnlag: Double,
         val inntekterFraAOrdningen: Map<String, List<Map<String, Any>>>

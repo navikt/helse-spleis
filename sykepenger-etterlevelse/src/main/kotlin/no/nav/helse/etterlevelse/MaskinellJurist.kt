@@ -821,6 +821,18 @@ class MaskinellJurist private constructor(
         ))
     }
 
+    override fun `fvl § 35 ledd 1`() {
+        leggTil(EnkelSubsumsjon(
+            utfall = VILKAR_OPPFYLT,
+            versjon = LocalDate.of(2021, 6, 1),
+            paragraf = Paragraf.PARAGRAF_6_35,
+            ledd = LEDD_1,
+            input = emptyMap(),
+            output = emptyMap(),
+            kontekster = kontekster()
+        ))
+    }
+
     fun subsumsjoner() = subsumsjoner.toList()
 
     fun events() = subsumsjoner.map(SubsumsjonEvent.Companion::fraSubsumsjon)

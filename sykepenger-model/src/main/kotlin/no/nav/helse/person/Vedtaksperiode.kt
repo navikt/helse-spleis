@@ -2197,6 +2197,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             if (!revurdering.inngåSomRevurdering(hendelse, vedtaksperiode, vedtaksperiode.periode)) return
+            vedtaksperiode.jurist.`fvl § 35 ledd 1`()
             vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
         }
 
