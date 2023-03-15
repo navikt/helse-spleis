@@ -42,9 +42,11 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
@@ -94,6 +96,8 @@ import no.nav.helse.spleis.e2e.lønnsinntekt
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
+import no.nav.helse.spleis.e2e.tilSimulering
+import no.nav.helse.spleis.e2e.tilYtelser
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
@@ -2088,19 +2092,46 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             1.januar til 10.januar,
             14.januar til 19.januar
         ))
-        assertForventetFeil(
-            forklaring = "inntektsmeldingen endrer skjæringstidspunktet, men perioden har ingen tilstandsendring",
-            nå = {
-                assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
-                assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-            },
-            ønsket = {
-                // 'ønsket' er litt avhengig om vi ønsker å ta endringene inn eller ikke
-                assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-                assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            }
-        )
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+    }
 
+    @Test
+    fun `inntektsmelding korrigerer periode til simulering`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(
+            1.januar til 10.januar,
+            14.januar til 19.januar
+        ))
+        assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+    }
+
+    @Test
+    fun `inntektsmelding korrigerer periode til historikk`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(
+            1.januar til 10.januar,
+            14.januar til 19.januar
+        ))
+        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+    }
+
+    @Test
+    fun `inntektsmelding korrigerer periode til vilkårsprøving`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(
+            1.januar til 10.januar,
+            14.januar til 19.januar
+        ))
+        assertTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
     }
 
     @Test
@@ -2126,18 +2157,22 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             1.januar til 10.januar,
             14.januar til 19.januar
         ))
-        assertForventetFeil(
-            forklaring = "inntektsmeldingen endrer skjæringstidspunktet, men perioden har ingen tilstandsendring",
-            nå = {
-                assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-                assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-            },
-            ønsket = {
-                // 'ønsket' er litt avhengig om vi ønsker å ta endringene inn eller ikke
-                assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-                assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-            }
-        )
+        håndterYtelser(1.vedtaksperiode)
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+    }
+
+    @Test
+    fun `inntektsmelding korrigerer periode til simulering revurdering`() {
+        nyttVedtak(1.januar, 31.januar, beregnetInntekt = INNTEKT)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Feriedag)))
+        håndterYtelser(1.vedtaksperiode)
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(
+            1.januar til 10.januar,
+            14.januar til 19.januar
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING)
     }
 
 }

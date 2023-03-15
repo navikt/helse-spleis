@@ -1412,6 +1412,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.trengerYtelser(påminnelse, periode)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
+            super.håndter(vedtaksperiode, inntektOgRefusjon)
+            vedtaksperiode.person.igangsettOverstyring(inntektOgRefusjon, Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
+        }
+
         override fun håndter(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
@@ -1490,6 +1495,11 @@ internal class Vedtaksperiode private constructor(
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) { }
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vedtaksperiode.trengerVilkårsgrunnlag(påminnelse)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
+            super.håndter(vedtaksperiode, inntektOgRefusjon)
+            vedtaksperiode.person.igangsettOverstyring(inntektOgRefusjon, Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
@@ -1769,6 +1779,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterOverlappendeSøknad(søknad, AvventerBlokkerendePeriode)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
+            super.håndter(vedtaksperiode, inntektOgRefusjon)
+            vedtaksperiode.håndterInntektOgRefusjon(inntektOgRefusjon, AvventerBlokkerendePeriode)
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vedtaksperiode.trengerYtelser(påminnelse)
         }
@@ -1878,6 +1893,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.utbetalinger.forkast(aktivitetslogg)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
+            super.håndter(vedtaksperiode, inntektOgRefusjon)
+            vedtaksperiode.håndterInntektOgRefusjon(inntektOgRefusjon, AvventerBlokkerendePeriode)
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad, AvventerBlokkerendePeriode)
         }
@@ -1927,6 +1947,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.utbetalinger.simuler(påminnelse)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
+            super.håndter(vedtaksperiode, inntektOgRefusjon)
+            vedtaksperiode.person.igangsettOverstyring(inntektOgRefusjon, Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
             FunksjonelleFeilTilVarsler.wrap(simulering) {
                 vedtaksperiode.utbetalinger.valider(simulering)
@@ -1964,6 +1989,10 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad, AvventerBlokkerendePeriode)
             if (søknad.harFunksjonelleFeilEllerVerre()) return
+        }
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
+            super.håndter(vedtaksperiode, inntektOgRefusjon)
+            vedtaksperiode.håndterInntektOgRefusjon(inntektOgRefusjon, AvventerBlokkerendePeriode)
         }
 
         override fun håndter(
@@ -2033,6 +2062,11 @@ internal class Vedtaksperiode private constructor(
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
             }
             vedtaksperiode.trengerGodkjenning(påminnelse)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
+            super.håndter(vedtaksperiode, inntektOgRefusjon)
+            vedtaksperiode.person.igangsettOverstyring(inntektOgRefusjon, Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
