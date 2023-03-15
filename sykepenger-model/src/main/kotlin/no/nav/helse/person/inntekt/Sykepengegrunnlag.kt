@@ -194,7 +194,11 @@ internal class Sykepengegrunnlag(
     internal fun nyeArbeidsgiverInntektsopplysninger(inntektsmelding: Inntektsmelding, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag? {
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(arbeidsgiverInntektsopplysninger, null, subsumsjonObserver)
         inntektsmelding.nyeArbeidsgiverInntektsopplysninger(builder)
-        val resultat = builder.resultat() ?: return  null // ingen endring
+        val resultat = builder.resultat()
+        if (resultat == null) {
+            inntektsmelding.info("Gjør ingen korrigering av sykepengegrunnlaget siden korrigert inntektsmelding er funksjonelt lik sykepengegrunnlaget.")
+            return null // ingen endring
+        }
         return kopierSykepengegrunnlag(resultat, deaktiverteArbeidsforhold)
     }
 
