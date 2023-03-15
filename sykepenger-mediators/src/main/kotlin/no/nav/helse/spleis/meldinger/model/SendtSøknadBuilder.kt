@@ -2,7 +2,6 @@ package no.nav.helse.spleis.meldinger.model
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Merknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
@@ -36,6 +35,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         sykmeldingSkrevet = sykmeldingSkrevet,
         opprinneligSendt = opprinneligSendt,
         utenlandskSykmelding = utenlandskSykmelding,
+        arbeidUtenforNorge = arbeidUtenforNorge,
         sendTilGosys = sendTilGosys
     )
 

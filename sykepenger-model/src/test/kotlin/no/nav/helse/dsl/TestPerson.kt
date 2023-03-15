@@ -147,6 +147,7 @@ internal class TestPerson(
         internal fun håndterSøknad(
             vararg perioder: Søknad.Søknadsperiode,
             andreInntektskilder: Boolean = false,
+            arbeidUtenforNorge: Boolean = false,
             sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
             sykmeldingSkrevet: LocalDateTime? = null,
             orgnummer: String = "",
@@ -154,7 +155,7 @@ internal class TestPerson(
         ) =
             behovsamler.fangInntektsmeldingReplay({
                 vedtaksperiodesamler.fangVedtaksperiode {
-                    arbeidsgiverHendelsefabrikk.lagSøknad(*perioder, andreInntektskilder = andreInntektskilder, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet, id = søknadId)
+                    arbeidsgiverHendelsefabrikk.lagSøknad(*perioder, andreInntektskilder = andreInntektskilder, arbeidUtenforNorge = arbeidUtenforNorge, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet, id = søknadId)
                         .håndter(Person::håndter)
                 }?.also {
                     if (behovsamler.harBehov(it, Sykepengehistorikk)){

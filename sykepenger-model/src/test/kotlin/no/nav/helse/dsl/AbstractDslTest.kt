@@ -194,10 +194,11 @@ internal abstract class AbstractDslTest {
     protected fun String.håndterSøknad(
         vararg perioder: Søknad.Søknadsperiode,
         andreInntektskilder: Boolean = false,
+        arbeidUtenforNorge: Boolean = false,
         sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
         sykmeldingSkrevet: LocalDateTime? = null,
     ) =
-        this { håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet) }
+        this { håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, arbeidUtenforNorge = arbeidUtenforNorge, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet) }
     protected fun String.håndterInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,
@@ -289,11 +290,12 @@ internal abstract class AbstractDslTest {
     protected fun håndterSøknad(
         vararg perioder: Søknad.Søknadsperiode,
         andreInntektskilder: Boolean = false,
+        arbeidUtenforNorge: Boolean = false,
         sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
         sykmeldingSkrevet: LocalDateTime? = null,
         orgnummer: String = a1
     ) =
-        bareÈnArbeidsgiver(a1).håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet)
+        bareÈnArbeidsgiver(a1).håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, arbeidUtenforNorge = arbeidUtenforNorge, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet)
     protected fun håndterInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,

@@ -38,6 +38,7 @@ internal abstract class SøknadMessage(private val packet: JsonMessage, private 
             .organisasjonsnummer(packet["arbeidsgiver.orgnummer"].asText())
             .fom(packet["fom"].asLocalDate())
             .tom(packet["tom"].asLocalDate())
+            .arbeidUtenforNorge(packet["arbeidUtenforNorge"].asBoolean())
 
         packet["soknadsperioder"].forEach {
             val arbeidshelse = it.path("faktiskGrad")

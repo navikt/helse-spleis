@@ -96,6 +96,7 @@ abstract class AbstractObservableTest {
         sykmeldingSkrevet = sykmeldingSkrevet,
         opprinneligSendt = null,
         utenlandskSykmelding = false,
+        arbeidUtenforNorge = false,
         sendTilGosys = false,
     )
 

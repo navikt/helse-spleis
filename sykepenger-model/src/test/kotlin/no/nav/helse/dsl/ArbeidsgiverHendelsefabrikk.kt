@@ -83,6 +83,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         permittert: Boolean = false,
         korrigerer: UUID? = null,
         utenlandskSykmelding: Boolean = false,
+        arbeidUtenforNorge: Boolean = false,
         sendTilGosys: Boolean = false,
         opprinneligSendt: LocalDate? = null,
         aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
@@ -101,6 +102,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             sykmeldingSkrevet = sykmeldingSkrevet ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay(),
             opprinneligSendt = opprinneligSendt?.atStartOfDay(),
             utenlandskSykmelding = utenlandskSykmelding,
+            arbeidUtenforNorge = arbeidUtenforNorge,
             sendTilGosys = sendTilGosys,
             aktivitetslogg = aktivitetslogg
         ).apply {

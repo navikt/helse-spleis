@@ -42,6 +42,7 @@ class Søknad(
     sykmeldingSkrevet: LocalDateTime,
     private val opprinneligSendt: LocalDateTime?,
     private val utenlandskSykmelding: Boolean,
+    private val arbeidUtenforNorge: Boolean,
     private val sendTilGosys: Boolean,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class, aktivitetslogg) {
@@ -80,6 +81,10 @@ class Søknad(
         if (foreldedeDager.isNotEmpty()) {
             subsumsjonObserver.`§ 22-13 ledd 3`(avskjæringsdato(), foreldedeDager)
             varsel(RV_SØ_2)
+        }
+        if (arbeidUtenforNorge) {
+            // TODO: varsel
+            info("Bruker har oppgitt arbeid utenfor Norge.")
         }
         if (utenlandskSykmelding) funksjonellFeil(RV_SØ_29)
         if (sendTilGosys) funksjonellFeil(RV_SØ_30)
