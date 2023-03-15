@@ -127,5 +127,6 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object AuuHåndtererIkkeInntekt: Toggle(false)
     object OutOfOrderInnenfor18Dager: Toggle(false)
     object OutOfOrderPåvirkerSkjæringstidspunkt: Toggle(false)
+    object Pølsefest: Toggle("FLERE_HVITE_POLSER", false)
     object AnnullereOgUtbetale: Toggle("ANNULLERE_OG_UTBETALE", false)
 }

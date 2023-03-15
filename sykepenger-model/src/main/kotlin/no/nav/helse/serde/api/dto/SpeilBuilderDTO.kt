@@ -2,6 +2,7 @@ package no.nav.helse.serde.api.dto
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.erHelg
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.til
@@ -61,7 +62,7 @@ data class ArbeidsgiverDTO(
             .perioder
             .filter { it.skjæringstidspunkt == skjæringstidspunkt }
 
-        if (tidslinjeperioderFraNyesteGenerasjon.isNotEmpty()) return emptyList() // ingen hvit pølse så lenge det er sykdom
+        if (Toggle.Pølsefest.disabled && tidslinjeperioderFraNyesteGenerasjon.isNotEmpty()) return emptyList() // ingen hvit pølse så lenge det er sykdom
 
         val oppslittetPølser = tidslinjeperioderFraNyesteGenerasjon.fold(listOf(ghostperiode)) { resultat, vedtaksperiode ->
             val tidligereGhostperioder = resultat.dropLast(1)
