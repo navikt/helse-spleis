@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.hendelser.Periode.Companion.periode
-import no.nav.helse.person.Arbeidsgiver
 
 class Sykmelding(
     meldingsreferanseId: UUID,
@@ -22,7 +21,7 @@ class Sykmelding(
         sykmeldingsperiode = sykmeldingsperiode?.beholdDagerEtter(dato)
     }
 
-    override fun venter(arbeidsgivere: List<Arbeidsgiver>) {}
+    override fun venter(block: () -> Unit) {}
 
     internal fun oppdaterSykmeldingsperioder(perioder: List<Periode>): List<Periode> {
         val periode = sykmeldingsperiode

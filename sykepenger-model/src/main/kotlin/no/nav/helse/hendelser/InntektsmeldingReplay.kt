@@ -12,5 +12,5 @@ class InntektsmeldingReplay(
         info("Replayer inntektsmelding for vedtaksperiode $vedtaksperiodeId og påfølgende som overlapper")
         arbeidsgiver.håndter(wrapped, vedtaksperiodeId)
     }
-    override fun venter(arbeidsgivere: List<Arbeidsgiver>) {}
+    override fun venter(block: () -> Unit) {}
 }
