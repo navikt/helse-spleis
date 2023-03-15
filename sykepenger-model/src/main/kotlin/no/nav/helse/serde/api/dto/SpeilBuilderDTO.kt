@@ -61,6 +61,7 @@ data class ArbeidsgiverDTO(
             .first()
             .perioder
             .filter { it.skjæringstidspunkt == skjæringstidspunkt }
+            .sortedBy { it.fom }
 
         if (Toggle.Pølsefest.disabled && tidslinjeperioderFraNyesteGenerasjon.isNotEmpty()) return emptyList() // ingen hvit pølse så lenge det er sykdom
 

@@ -3,6 +3,7 @@ package no.nav.helse.serde.api
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
+import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -901,6 +902,106 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         assertEquals(1.januar, refusjonsopplysningerForAG2.fom)
         assertEquals(null, refusjonsopplysningerForAG2.tom)
         assertEquals(20000.månedlig,refusjonsopplysningerForAG2.beløp.månedlig)
+    }
+
+    @Test
+    fun `flere førstegangsaker for begge arbeidsgivere med samme skjæringstidspunkt`() = Toggle.Pølsefest.enable {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(12.februar, 12.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(17.januar, 26.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(13.mars, 31.mars, 100.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 12.februar, orgnummer = a1)
+
+        håndterInntektsmelding(listOf(17.januar til 26.januar, 1.februar til 6.februar), førsteFraværsdag = 1.februar, orgnummer = a2)
+        håndterInntektsmelding(listOf(17.januar til 26.januar, 1.februar til 6.februar), førsteFraværsdag = 13.mars, orgnummer = a2)
+
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt INNTEKT
+                }
+            }),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt INNTEKT
+                }
+            }, emptyList()),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null),
+            ),
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        val speilJson = serializePersonForSpeil(person)
+        val skjæringstidspunkt = inspektør(a1).skjæringstidspunkt(1.vedtaksperiode)
+        val vilkårsgrunnlagHistorikkInnslagId = person.inspektør.vilkårsgrunnlagHistorikkInnslag().first().inspektør.id
+        val vilkårsgrunnlagId = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inspektør?.vilkårsgrunnlagId
+
+        speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder.also { perioder ->
+            assertEquals(2, perioder.size)
+
+            perioder[0].also { actual ->
+                val expected = GhostPeriodeDTO(
+                    id = actual.id,
+                    fom = 1.februar,
+                    tom = 11.februar,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikkInnslagId,
+                    vilkårsgrunnlagId = vilkårsgrunnlagId,
+                    deaktivert = false
+                )
+                assertEquals(expected, actual)
+            }
+            perioder[1].also { actual ->
+                val expected = GhostPeriodeDTO(
+                    id = actual.id,
+                    fom = 13.mars,
+                    tom = 31.mars,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikkInnslagId,
+                    vilkårsgrunnlagId = vilkårsgrunnlagId,
+                    deaktivert = false
+                )
+                assertEquals(expected, actual)
+            }
+        }
+        speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder.also { perioder ->
+            assertEquals(2, perioder.size)
+
+            perioder[0].also { actual ->
+                val expected = GhostPeriodeDTO(
+                    id = actual.id,
+                    fom = 1.januar,
+                    tom = 16.januar,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikkInnslagId,
+                    vilkårsgrunnlagId = vilkårsgrunnlagId,
+                    deaktivert = false
+                )
+                assertEquals(expected, actual)
+            }
+            perioder[1].also { actual ->
+                val expected = GhostPeriodeDTO(
+                    id = actual.id,
+                    fom = 1.mars,
+                    tom = 12.mars,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikkInnslagId,
+                    vilkårsgrunnlagId = vilkårsgrunnlagId,
+                    deaktivert = false
+                )
+                assertEquals(expected, actual)
+            }
+        }
     }
 }
 
