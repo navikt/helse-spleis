@@ -191,6 +191,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
 
     override fun preVisitSubsumsjon(
         utfall: Utfall,
+        lovverk: String,
         versjon: LocalDate,
         paragraf: Paragraf,
         ledd: Ledd?,

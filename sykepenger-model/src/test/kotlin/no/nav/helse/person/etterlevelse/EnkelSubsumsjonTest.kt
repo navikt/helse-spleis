@@ -52,6 +52,7 @@ internal class EnkelSubsumsjonTest {
     @Test
     fun equality() {
         val utfall = VILKAR_OPPFYLT
+        val lovverk = "folketrygdloven"
         val versjon = LocalDate.MAX
         val paragraf = Paragraf.PARAGRAF_8_2
         val ledd  = 1.ledd
@@ -61,9 +62,9 @@ internal class EnkelSubsumsjonTest {
         val output = mapOf("bar" to "baz")
         val kontekster = emptyMap<String, KontekstType>()
 
-        val enkel = EnkelSubsumsjon(utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
-        val enkelKopi = EnkelSubsumsjon(utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
-        val betinget = BetingetSubsumsjon(true, utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
+        val enkel = EnkelSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
+        val enkelKopi = EnkelSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
+        val betinget = BetingetSubsumsjon(true, lovverk, utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
 
         assertEquals(enkel, enkel)
         assertEquals(enkel, enkelKopi)
@@ -72,6 +73,7 @@ internal class EnkelSubsumsjonTest {
 
     private fun nyVurdering(
         utfall: Utfall = VILKAR_OPPFYLT,
+        lovverk: String = "folketrygdloven",
         versjon: LocalDate = LocalDate.MAX,
         paragraf: Paragraf = Paragraf.PARAGRAF_8_2,
         ledd: Ledd = 1.ledd,
@@ -81,6 +83,6 @@ internal class EnkelSubsumsjonTest {
         output: Map<String, Any> = emptyMap(),
         kontekster: Map<String, KontekstType> = emptyMap()
     ) {
-        vurderinger = EnkelSubsumsjon(utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster).sammenstill(vurderinger)
+        vurderinger = EnkelSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster).sammenstill(vurderinger)
     }
 }

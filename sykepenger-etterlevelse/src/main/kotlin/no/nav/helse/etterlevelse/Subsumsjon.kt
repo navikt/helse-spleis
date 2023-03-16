@@ -11,6 +11,7 @@ abstract class Subsumsjon {
         VILKAR_OPPFYLT, VILKAR_IKKE_OPPFYLT, VILKAR_UAVKLART, VILKAR_BEREGNET
     }
 
+    abstract val lovverk: String
     abstract val utfall: Utfall
     abstract val versjon: LocalDate
     abstract val paragraf: Paragraf
@@ -23,9 +24,9 @@ abstract class Subsumsjon {
     protected abstract val kontekster: Map<String, KontekstType>
 
     fun accept(visitor: SubsumsjonVisitor) {
-        visitor.preVisitSubsumsjon(utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
+        visitor.preVisitSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
         acceptSpesifikk(visitor)
-        visitor.postVisitSubsumsjon(utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
+        visitor.postVisitSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
     }
 
     protected abstract fun acceptSpesifikk(visitor: SubsumsjonVisitor)
@@ -77,6 +78,7 @@ abstract class Subsumsjon {
 
 class EnkelSubsumsjon(
     override val utfall: Utfall,
+    override val lovverk: String,
     override val versjon: LocalDate,
     override val paragraf: Paragraf,
     override val ledd: Ledd?,
@@ -91,6 +93,7 @@ class EnkelSubsumsjon(
 
 class GrupperbarSubsumsjon private constructor(
     private val perioder: List<Periode>,
+    override val lovverk: String,
     override val utfall: Utfall,
     override val versjon: LocalDate,
     override val paragraf: Paragraf,
@@ -103,6 +106,7 @@ class GrupperbarSubsumsjon private constructor(
 ) : Subsumsjon() {
     constructor(
         dato: LocalDate,
+        lovverk: String,
         input: Map<String, Any>,
         output: Map<String, Any>,
         utfall: Utfall,
@@ -112,7 +116,7 @@ class GrupperbarSubsumsjon private constructor(
         punktum: Punktum? = null,
         bokstav: Bokstav? = null,
         kontekster: Map<String, KontekstType>
-    ) : this(listOf(dato til dato), utfall, versjon, paragraf, ledd, punktum, bokstav, output, input, kontekster)
+    ) : this(listOf(dato til dato), lovverk, utfall, versjon, paragraf, ledd, punktum, bokstav, output, input, kontekster)
 
     override val output: Map<String, Any> = originalOutput.toMutableMap().apply {
         this["perioder"] = perioder.map {
@@ -137,12 +141,13 @@ class GrupperbarSubsumsjon private constructor(
             .flatMap { (it as GrupperbarSubsumsjon).perioder }
             .grupperSammenhengendePerioderMedHensynTilHelg()
 
-        return GrupperbarSubsumsjon(sammenstiltePerioder, utfall, versjon, paragraf, ledd, punktum, bokstav, originalOutput, input, kontekster)
+        return GrupperbarSubsumsjon(sammenstiltePerioder, lovverk, utfall, versjon, paragraf, ledd, punktum, bokstav, originalOutput, input, kontekster)
     }
 }
 
 class BetingetSubsumsjon(
     private val funnetRelevant: Boolean,
+    override val lovverk: String,
     override val utfall: Utfall,
     override val versjon: LocalDate,
     override val paragraf: Paragraf,

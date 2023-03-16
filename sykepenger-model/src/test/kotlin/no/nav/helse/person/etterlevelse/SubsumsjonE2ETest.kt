@@ -2756,7 +2756,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 90.prosent))
         SubsumsjonInspektør(jurist).assertOppfylt(
-            paragraf = Paragraf.PARAGRAF_6_35,
+            paragraf = Paragraf.PARAGRAF_35,
             ledd = LEDD_1,
             versjon = 1.juni(2021),
             input = emptyMap(),

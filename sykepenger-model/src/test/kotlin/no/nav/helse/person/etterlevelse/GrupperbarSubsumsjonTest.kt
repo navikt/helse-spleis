@@ -194,9 +194,10 @@ internal class GrupperbarSubsumsjonTest {
         observatør.assertVurdering(vurderinger[1], 1.januar til 1.januar)
     }
 
-    private fun nyVurdering(dato: LocalDate, input: Map<String, Any> = emptyMap(), output: Map<String, Any> = emptyMap()) {
+    private fun nyVurdering(dato: LocalDate, lovverk: String = "folketrygdloven", input: Map<String, Any> = emptyMap(), output: Map<String, Any> = emptyMap()) {
         vurderinger = GrupperbarSubsumsjon(
             dato = dato,
+            lovverk = lovverk,
             input = input,
             output = output,
             utfall = VILKAR_OPPFYLT,
@@ -228,6 +229,7 @@ internal class GrupperbarSubsumsjonTest {
 
         override fun preVisitSubsumsjon(
             utfall: Subsumsjon.Utfall,
+            lovverk: String,
             versjon: LocalDate,
             paragraf: Paragraf,
             ledd: Ledd?,

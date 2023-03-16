@@ -67,6 +67,7 @@ internal class MaskinellJuristTest {
 
             override fun preVisitSubsumsjon(
                 utfall: Subsumsjon.Utfall,
+                lovverk: String,
                 versjon: LocalDate,
                 paragraf: Paragraf,
                 ledd: Ledd?,

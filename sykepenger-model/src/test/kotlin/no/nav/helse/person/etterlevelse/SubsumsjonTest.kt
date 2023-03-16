@@ -28,6 +28,7 @@ internal class SubsumsjonTest {
     fun testEquals() {
         val paragraf1 = testParagraf(
             VILKAR_OPPFYLT,
+            "folketrygdloven",
             LocalDate.MIN,
             paragraf = PARAGRAF_2,
             ledd = 1.ledd,
@@ -38,6 +39,7 @@ internal class SubsumsjonTest {
         )
         val paragraf2 = testParagraf(
             VILKAR_OPPFYLT,
+            "folketrygdloven",
             LocalDate.MIN,
             paragraf = PARAGRAF_2,
             ledd = 1.ledd,
@@ -51,68 +53,69 @@ internal class SubsumsjonTest {
 
     @Test
     fun testEqualsByRef() {
-        val paragraf1 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd)
+        val paragraf1 = testParagraf(VILKAR_OPPFYLT, "folketrygdloven", LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd)
         assertEquals(paragraf1, paragraf1)
     }
 
     @Test
     fun `ulik når input varierer`() {
-        val paragraf1 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, input = mapOf("a" to "a"))
-        val paragraf2 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, input = mapOf("b" to "b"))
+        val paragraf1 = testParagraf(VILKAR_OPPFYLT, "folketrygdloven", LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, input = mapOf("a" to "a"))
+        val paragraf2 = testParagraf(VILKAR_OPPFYLT, "folketrygdloven", LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, input = mapOf("b" to "b"))
         assertNotEquals(paragraf1, paragraf2)
     }
 
     @Test
     fun `ulik når output varierer`() {
-        val paragraf1 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, output = mapOf("a" to "a"))
-        val paragraf2 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, output = mapOf("b" to "b"))
+        val paragraf1 = testParagraf(VILKAR_OPPFYLT, "folketrygdloven", LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, output = mapOf("a" to "a"))
+        val paragraf2 = testParagraf(VILKAR_OPPFYLT, "folketrygdloven", LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, output = mapOf("b" to "b"))
         assertNotEquals(paragraf1, paragraf2)
     }
 
     @Test
     fun `ulik når oppfylt varierer`() {
-        val paragraf1 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd)
-        val paragraf2 = testParagraf(VILKAR_IKKE_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd)
+        val paragraf1 = testParagraf(VILKAR_OPPFYLT, "folketrygdloven", LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd)
+        val paragraf2 = testParagraf(VILKAR_IKKE_OPPFYLT, "folketrygdloven", LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd)
         assertNotEquals(paragraf1, paragraf2)
     }
 
     @Test
     fun `ulik når versjon varierer`() {
-        val paragraf1 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd)
-        val paragraf2 = testParagraf(VILKAR_OPPFYLT, LocalDate.MAX, paragraf = PARAGRAF_2, ledd = 1.ledd)
+        val paragraf1 = testParagraf(VILKAR_OPPFYLT, "folketrygdloven", LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd)
+        val paragraf2 = testParagraf(VILKAR_OPPFYLT, "folketrygdloven", LocalDate.MAX, paragraf = PARAGRAF_2, ledd = 1.ledd)
         assertNotEquals(paragraf1, paragraf2)
     }
 
     @Test
     fun `ulik når paragraf varierer`() {
-        val paragraf1 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd)
-        val paragraf2 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_8_16, ledd = 1.ledd)
+        val paragraf1 = testParagraf(VILKAR_OPPFYLT, "folketrygdloven", LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd)
+        val paragraf2 = testParagraf(VILKAR_OPPFYLT, "folketrygdloven", LocalDate.MIN, paragraf = PARAGRAF_8_16, ledd = 1.ledd)
         assertNotEquals(paragraf1, paragraf2)
     }
 
     @Test
     fun `ulik når ledd varierer`() {
-        val paragraf1 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd)
-        val paragraf2 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 2.ledd)
+        val paragraf1 = testParagraf(VILKAR_OPPFYLT, "folketrygdloven", LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd)
+        val paragraf2 = testParagraf(VILKAR_OPPFYLT, "folketrygdloven", LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 2.ledd)
         assertNotEquals(paragraf1, paragraf2)
     }
 
     @Test
     fun `ulik når bokstav varierer`() {
-        val paragraf1 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, bokstav = BOKSTAV_A)
-        val paragraf2 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, bokstav = BOKSTAV_B)
+        val paragraf1 = testParagraf(VILKAR_OPPFYLT, "folketrygdloven", LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, bokstav = BOKSTAV_A)
+        val paragraf2 = testParagraf(VILKAR_OPPFYLT, "folketrygdloven", LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, bokstav = BOKSTAV_B)
         assertNotEquals(paragraf1, paragraf2)
     }
 
     @Test
     fun `ulik når punktum varierer`() {
-        val paragraf1 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, punktum = PUNKTUM_1)
-        val paragraf2 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, punktum = PUNKTUM_2)
+        val paragraf1 = testParagraf(VILKAR_OPPFYLT, "folketrygdloven", LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, punktum = PUNKTUM_1)
+        val paragraf2 = testParagraf(VILKAR_OPPFYLT, "folketrygdloven", LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, punktum = PUNKTUM_2)
         assertNotEquals(paragraf1, paragraf2)
     }
 
     private fun testParagraf(
         utfall: Utfall,
+        lovverk: String,
         versjon: LocalDate,
         paragraf: Paragraf,
         ledd: Ledd,
@@ -122,6 +125,7 @@ internal class SubsumsjonTest {
         output: Map<String, Any> = mapOf(),
         kontekster: Map<String, KontekstType> = mapOf()
     ) = object : Subsumsjon() {
+        override val lovverk = lovverk
         override val utfall = utfall
         override val versjon = versjon
         override val paragraf = paragraf

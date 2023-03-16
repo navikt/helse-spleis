@@ -20,7 +20,7 @@ enum class Paragraf(val ref: String) {
     PARAGRAF_8_30("8-30"),
     PARAGRAF_8_51("8-51"),
     PARAGRAF_22_13("22-13"),
-    PARAGRAF_6_35("fvl. 35");
+    PARAGRAF_35("35");
 
     override fun toString(): String {
         return "§$ref"

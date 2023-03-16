@@ -6,6 +6,7 @@ import java.time.LocalDate
 interface SubsumsjonVisitor {
     fun preVisitSubsumsjon(
         utfall: Subsumsjon.Utfall,
+        lovverk: String,
         versjon: LocalDate,
         paragraf: Paragraf,
         ledd: Ledd?,
@@ -21,6 +22,7 @@ interface SubsumsjonVisitor {
 
     fun postVisitSubsumsjon(
         utfall: Subsumsjon.Utfall,
+        lovverk: String,
         versjon: LocalDate,
         paragraf: Paragraf,
         ledd: Ledd?,

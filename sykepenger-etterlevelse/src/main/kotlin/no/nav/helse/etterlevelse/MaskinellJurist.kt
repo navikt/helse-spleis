@@ -91,6 +91,7 @@ class MaskinellJurist private constructor(
     ) {
         leggTil(
             EnkelSubsumsjon(
+                lovverk = "fol",
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 versjon = LocalDate.of(2020, 6, 12),
                 paragraf = PARAGRAF_8_2,
@@ -118,6 +119,7 @@ class MaskinellJurist private constructor(
         leggTil(
             EnkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+                lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2011, 12, 16),
                 paragraf = PARAGRAF_8_3,
                 ledd = 1.ledd,
@@ -139,6 +141,7 @@ class MaskinellJurist private constructor(
         leggTil(
             EnkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+                lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2011, 12, 16),
                 paragraf = PARAGRAF_8_3,
                 ledd = 2.ledd,
@@ -159,6 +162,7 @@ class MaskinellJurist private constructor(
             leggTil(
                 GrupperbarSubsumsjon(
                     dato = it,
+                    lovverk = "folketrygdloven",
                     utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                     versjon = 1.juni(2021),
                     paragraf = PARAGRAF_8_9,
@@ -180,6 +184,7 @@ class MaskinellJurist private constructor(
         leggTil(
             EnkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
+                lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2020, 1, 1),
                 paragraf = PARAGRAF_8_10,
                 ledd = 2.ledd,
@@ -201,6 +206,7 @@ class MaskinellJurist private constructor(
         leggTil(
             EnkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
+                lovverk = "folketrygdloven",
                 versjon = 1.januar(2020),
                 paragraf = PARAGRAF_8_10,
                 ledd = 3.ledd,
@@ -215,6 +221,7 @@ class MaskinellJurist private constructor(
         leggTil(
             GrupperbarSubsumsjon(
                 dato = dato,
+                lovverk = "folketrygdloven",
                 paragraf = PARAGRAF_8_11,
                 ledd = 1.ledd,
                 utfall = VILKAR_IKKE_OPPFYLT,
@@ -245,6 +252,7 @@ class MaskinellJurist private constructor(
             leggTil(
                 EnkelSubsumsjon(
                     utfall = utfall,
+                    lovverk = "folketrygdloven",
                     versjon = LocalDate.of(2021, 5, 21),
                     paragraf = PARAGRAF_8_12,
                     ledd = 1.ledd,
@@ -282,6 +290,7 @@ class MaskinellJurist private constructor(
         leggTil(
             BetingetSubsumsjon(
                 funnetRelevant = oppfylt || gjenståendeSykepengedager == 0, // Bare relevant om det er ny rett på sykepenger eller om vilkåret ikke er oppfylt
+                lovverk = "folketrygdloven",
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 versjon = LocalDate.of(2021, 5, 21),
                 paragraf = PARAGRAF_8_12,
@@ -308,6 +317,7 @@ class MaskinellJurist private constructor(
                 leggTil(
                     GrupperbarSubsumsjon(
                         dato = dagen,
+                        lovverk = "folketrygdloven",
                         utfall = utfall,
                         paragraf = PARAGRAF_8_13,
                         ledd = LEDD_1,
@@ -338,6 +348,7 @@ class MaskinellJurist private constructor(
             leggTil(
                 GrupperbarSubsumsjon(
                     dato = dagen,
+                    lovverk = "folketrygdloven",
                     utfall = VILKAR_BEREGNET,
                     paragraf = PARAGRAF_8_13,
                     ledd = LEDD_2,
@@ -370,6 +381,7 @@ class MaskinellJurist private constructor(
         leggTil(
             EnkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+                lovverk = "folketrygdloven",
                 versjon = LocalDate.of(1998, 12, 18),
                 paragraf = PARAGRAF_8_15,
                 ledd = null,
@@ -395,6 +407,7 @@ class MaskinellJurist private constructor(
         leggTil(
             GrupperbarSubsumsjon(
                 dato = dato,
+                lovverk = "folketrygdloven",
                 input = mapOf("dekningsgrad" to dekningsgrad, "inntekt" to inntekt),
                 output = mapOf("dekningsgrunnlag" to dekningsgrunnlag),
                 utfall = VILKAR_BEREGNET,
@@ -414,6 +427,7 @@ class MaskinellJurist private constructor(
         leggTil(
             GrupperbarSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+                lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2018, 1, 1),
                 dato = dagen,
                 paragraf = PARAGRAF_8_17,
@@ -439,6 +453,7 @@ class MaskinellJurist private constructor(
         leggTil(
             GrupperbarSubsumsjon(
                 dato = dato,
+                lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2018, 1, 1),
                 utfall = VILKAR_IKKE_OPPFYLT,
                 paragraf = PARAGRAF_8_17,
@@ -456,6 +471,7 @@ class MaskinellJurist private constructor(
         leggTil(
             EnkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
+                lovverk = "folketrygdloven",
                 versjon = 1.januar(2001),
                 paragraf = PARAGRAF_8_19,
                 ledd = 1.ledd,
@@ -474,6 +490,7 @@ class MaskinellJurist private constructor(
         leggTil(
             GrupperbarSubsumsjon(
                 dato = dato,
+                lovverk = "folketrygdloven",
                 utfall = VILKAR_BEREGNET,
                 versjon = 1.januar(2001),
                 paragraf = PARAGRAF_8_19,
@@ -491,6 +508,7 @@ class MaskinellJurist private constructor(
         leggTil(
             GrupperbarSubsumsjon(
                 dato = dato,
+                lovverk = "folketrygdloven",
                 utfall = VILKAR_BEREGNET,
                 versjon = 1.januar(2001),
                 paragraf = PARAGRAF_8_19,
@@ -508,6 +526,7 @@ class MaskinellJurist private constructor(
         leggTil(
             GrupperbarSubsumsjon(
                 dato = dato,
+                lovverk = "folketrygdloven",
                 utfall = VILKAR_BEREGNET,
                 versjon = 1.januar(2001),
                 paragraf = PARAGRAF_8_19,
@@ -530,6 +549,7 @@ class MaskinellJurist private constructor(
         leggTil(
             EnkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
+                lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2019, 1, 1),
                 paragraf = PARAGRAF_8_28,
                 ledd = LEDD_3,
@@ -559,6 +579,7 @@ class MaskinellJurist private constructor(
         leggTil(
             EnkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
+                lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2019, 1, 1),
                 paragraf = PARAGRAF_8_28,
                 ledd = LEDD_3,
@@ -589,6 +610,7 @@ class MaskinellJurist private constructor(
         leggTil(
             EnkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
+                lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2019, 1, 1),
                 paragraf = PARAGRAF_8_28,
                 ledd = LEDD_3,
@@ -618,6 +640,7 @@ class MaskinellJurist private constructor(
         leggTil(
             EnkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
+                lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2019, 1, 1),
                 paragraf = PARAGRAF_8_28,
                 ledd = LEDD_5,
@@ -645,6 +668,7 @@ class MaskinellJurist private constructor(
         leggTil(
             EnkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
+                lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2019, 1, 1),
                 paragraf = PARAGRAF_8_29,
                 ledd = null,
@@ -667,6 +691,7 @@ class MaskinellJurist private constructor(
         leggTil(
             EnkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
+                lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2019, 1, 1),
                 paragraf = PARAGRAF_8_30,
                 ledd = LEDD_1,
@@ -690,6 +715,7 @@ class MaskinellJurist private constructor(
         leggTil(
             EnkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
+                lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2017, 4, 5),
                 paragraf = PARAGRAF_8_30,
                 ledd = 2.ledd,
@@ -709,6 +735,7 @@ class MaskinellJurist private constructor(
         leggTil(
             EnkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
+                lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2019, 1, 1),
                 paragraf = PARAGRAF_8_30,
                 ledd = LEDD_2,
@@ -742,6 +769,7 @@ class MaskinellJurist private constructor(
         leggTil(
             EnkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+                lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2011, 12, 16),
                 paragraf = PARAGRAF_8_51,
                 ledd = LEDD_2,
@@ -777,6 +805,7 @@ class MaskinellJurist private constructor(
                 EnkelSubsumsjon(
                     utfall = utfall,
                     versjon = LocalDate.of(2011, 12, 16),
+                    lovverk = "folketrygdloven",
                     paragraf = PARAGRAF_8_51,
                     ledd = LEDD_3,
                     input = mapOf(
@@ -803,6 +832,7 @@ class MaskinellJurist private constructor(
     override fun `§ 22-13 ledd 3`(avskjæringsdato: LocalDate, perioder: List<Periode>) {
         leggTil(EnkelSubsumsjon(
             utfall = VILKAR_IKKE_OPPFYLT,
+            lovverk = "folketrygdloven",
             versjon = LocalDate.of(2011, 12, 16),
             paragraf = Paragraf.PARAGRAF_22_13,
             ledd = LEDD_3,
@@ -824,8 +854,9 @@ class MaskinellJurist private constructor(
     override fun `fvl § 35 ledd 1`() {
         leggTil(EnkelSubsumsjon(
             utfall = VILKAR_OPPFYLT,
+            lovverk = "forvaltningsloven",
             versjon = LocalDate.of(2021, 6, 1),
-            paragraf = Paragraf.PARAGRAF_6_35,
+            paragraf = Paragraf.PARAGRAF_35,
             ledd = LEDD_1,
             input = emptyMap(),
             output = emptyMap(),
@@ -865,6 +896,7 @@ class MaskinellJurist private constructor(
 
                     override fun preVisitSubsumsjon(
                         utfall: Utfall,
+                        lovverk: String,
                         versjon: LocalDate,
                         paragraf: Paragraf,
                         ledd: Ledd?,
@@ -886,7 +918,7 @@ class MaskinellJurist private constructor(
                                     }
                                     acc
                                 },
-                            lovverk = "folketrygdloven",
+                            lovverk = lovverk,
                             ikrafttredelse = paragrafVersjonFormaterer.format(versjon),
                             paragraf = paragraf.ref,
                             ledd = ledd?.nummer,

@@ -48,6 +48,7 @@ internal class BetingetSubsumsjonTest {
 
     private fun nyVurdering(
         funnetRelevant: Boolean = true,
+        lovverk: String = "folketrygdloven",
         utfall: Utfall = Utfall.VILKAR_OPPFYLT,
         versjon: LocalDate = LocalDate.MAX,
         paragraf: Paragraf = Paragraf.PARAGRAF_8_2,
@@ -58,7 +59,7 @@ internal class BetingetSubsumsjonTest {
         output: Map<String, Any> = emptyMap(),
         kontekster: Map<String, KontekstType> = emptyMap()
     ) {
-        vurderinger = BetingetSubsumsjon(funnetRelevant, utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster).sammenstill(vurderinger)
+        vurderinger = BetingetSubsumsjon(funnetRelevant, lovverk, utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster).sammenstill(vurderinger)
     }
 
     private class SubsumsjonObservatør : SubsumsjonVisitor {
