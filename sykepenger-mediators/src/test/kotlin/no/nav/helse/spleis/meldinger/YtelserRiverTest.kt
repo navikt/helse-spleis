@@ -1,10 +1,10 @@
 package no.nav.helse.spleis.meldinger
 
+import java.util.UUID
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
-import java.util.*
 
 internal class YtelserRiverTest : RiverTest() {
     override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
@@ -95,7 +95,17 @@ private val json = """
       "vedtaksperiodeId": "${UUID.randomUUID()}",
       "@løsning": {
         "Foreldrepenger": {
-          "Foreldrepengeytelse": null,
+          "Foreldrepengeytelse": {
+              "fom": "2019-03-13",
+              "tom": "2019-04-21",
+              "vedtatt": "2023-03-13T06:49:01.570",
+              "perioder": [
+                {
+                  "fom": "2019-03-13",
+                  "tom": "2019-04-21"
+                }
+              ]
+            },
           "Svangerskapsytelse": null
         },
         "Sykepengehistorikk": [

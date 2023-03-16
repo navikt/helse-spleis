@@ -40,13 +40,13 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val ugyldigeDagpengeperioder: List<Pair<LocalDate, LocalDate>>
 
     private val foreldrepenger = packet["@løsning.${Foreldrepenger.name}.Foreldrepengeytelse"]
-        .takeIf(JsonNode::isObject)?.let(::asPeriode)
+        .takeIf(JsonNode::isObject)?.path("perioder")?.map(::asPeriode) ?: emptyList()
     private val svangerskapsytelse = packet["@løsning.${Foreldrepenger.name}.Svangerskapsytelse"]
-        .takeIf(JsonNode::isObject)?.let(::asPeriode)
+        .takeIf(JsonNode::isObject)?.path("perioder")?.map(::asPeriode) ?: emptyList()
 
     private val foreldrepermisjon = Foreldrepermisjon(
-        foreldrepengeytelse = listOfNotNull(foreldrepenger),
-        svangerskapsytelse = listOfNotNull(svangerskapsytelse)
+        foreldrepengeytelse = foreldrepenger,
+        svangerskapsytelse = svangerskapsytelse
     )
 
     private val pleiepenger =
