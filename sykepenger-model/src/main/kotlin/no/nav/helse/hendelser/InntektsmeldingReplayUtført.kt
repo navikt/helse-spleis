@@ -11,5 +11,4 @@ class InntektsmeldingReplayUtført(
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer) {
 
     internal fun erRelevant(other: UUID) = other == vedtaksperiode
-    override fun venter(block: () -> Unit) {}
 }

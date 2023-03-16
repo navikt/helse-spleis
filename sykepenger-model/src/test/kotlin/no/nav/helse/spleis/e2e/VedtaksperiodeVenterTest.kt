@@ -25,13 +25,13 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
             val søknadIdJanuar = UUID.randomUUID()
             nyPeriode(1.januar til 31.januar, søknadId = søknadIdJanuar)
 
-            assertEquals(1, observatør.vedtaksperiodeVenter.size)
+            assertEquals(2, observatør.vedtaksperiodeVenter.size)
             val søknadIdMars = UUID.randomUUID()
             nyPeriode(1.mars til 31.mars, søknadId = søknadIdMars)
-            assertEquals(3, observatør.vedtaksperiodeVenter.size)
+            assertEquals(6, observatør.vedtaksperiodeVenter.size)
 
             val inntektsmeldingIdMars = håndterInntektsmelding(listOf(1.mars til 16.mars))
-            assertEquals(5, observatør.vedtaksperiodeVenter.size)
+            assertEquals(8, observatør.vedtaksperiodeVenter.size)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             val forventetVedtaksperiode1 = PersonObserver.VedtaksperiodeVenterEvent(
@@ -85,10 +85,11 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
         a2 {
             val søknadId = UUID.randomUUID()
             nyPeriode(1.januar til 31.januar, søknadId = søknadId)
+            assertEquals(2, observatør.vedtaksperiodeVenter.size)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            assertEquals(2, observatør.vedtaksperiodeVenter.size)
+            assertEquals(3, observatør.vedtaksperiodeVenter.size)
 
             val forventet = PersonObserver.VedtaksperiodeVenterEvent(
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),
@@ -134,7 +135,7 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
                     )
                 )
             )
-            assertEquals(forventet, observatør.vedtaksperiodeVenter.single())
+            assertEquals(forventet, observatør.vedtaksperiodeVenter.last())
         }
     }
 }

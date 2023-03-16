@@ -12,5 +12,8 @@ class InntektsmeldingReplay(
         info("Replayer inntektsmelding for vedtaksperiode $vedtaksperiodeId og påfølgende som overlapper")
         arbeidsgiver.håndter(wrapped, vedtaksperiodeId)
     }
-    override fun venter(block: () -> Unit) {}
+    override fun venter(block: () -> Unit) {
+        // Kan potensielt replayes veldig mange inntektsmeldinger. Ønsker ikke å sende ut
+        // vedtaksperiode_venter etter hver enkelt. Gjøres heller for InntektsmeldingReplayUtført
+    }
 }

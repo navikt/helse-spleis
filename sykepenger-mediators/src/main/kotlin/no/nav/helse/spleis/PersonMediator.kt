@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDate
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.PersonHendelse
@@ -20,6 +21,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
+import no.nav.helse.spleis.PersonMediator.Pakke.Companion.fjernVedtaksperiodeVenter
 import no.nav.helse.spleis.PersonMediator.Pakke.Companion.loggAntallVedtaksperioderVenter
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
@@ -41,7 +43,16 @@ internal class PersonMediator(
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
+    private fun fjernUnødvendigeVedtaksperiodeVenter() {
+        if (replays.isEmpty()) return
+        // Ettersom det kommer til å bli replayet inntektsmelding(er)
+        // fjernes eventene vedtaksperiode_venter som er køet opp
+        // ettersom vi vil sende ut ferskere eventer etter InntektsmeldingReplayUtført
+        meldinger.fjernVedtaksperiodeVenter()
+    }
+
     fun finalize(rapidsConnection: RapidsConnection, context: MessageContext) {
+        fjernUnødvendigeVedtaksperiodeVenter()
         sendUtgåendeMeldinger(context)
         sendReplays(rapidsConnection)
     }
@@ -430,9 +441,14 @@ internal class PersonMediator(
         }
 
         companion object {
+            private const val VedtaksperiodeVenter = "vedtaksperiode_venter"
+
+            fun MutableList<Pakke>.fjernVedtaksperiodeVenter() {
+                removeIf { it.eventName == VedtaksperiodeVenter }
+            }
             fun List<Pakke>.loggAntallVedtaksperioderVenter() {
-                val antall = filter { it.eventName == "vedtaksperiode_venter" }.takeUnless { it.isEmpty() }?.size ?: return
-                sikkerLogg.info("Sender $antall vedtaksperiode_venter eventer")
+                val antall = filter { it.eventName == VedtaksperiodeVenter }.takeUnless { it.isEmpty() }?.size ?: return
+                sikkerLogg.info("Sender $antall vedtaksperiode_venter eventer", keyValue("fødselsnummer", first().fødselsnummer))
             }
         }
     }

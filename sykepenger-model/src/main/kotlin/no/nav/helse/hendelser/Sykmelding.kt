@@ -21,7 +21,9 @@ class Sykmelding(
         sykmeldingsperiode = sykmeldingsperiode?.beholdDagerEtter(dato)
     }
 
-    override fun venter(block: () -> Unit) {}
+    override fun venter(block: () -> Unit) {
+        // Sykmelding fører ikke til endringer i tiltander, så sender ikke signal etter håndtering av den
+    }
 
     internal fun oppdaterSykmeldingsperioder(perioder: List<Periode>): List<Periode> {
         val periode = sykmeldingsperiode
