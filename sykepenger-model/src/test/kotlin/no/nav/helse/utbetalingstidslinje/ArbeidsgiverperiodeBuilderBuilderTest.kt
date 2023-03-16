@@ -10,6 +10,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.S
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -132,12 +133,12 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
     }
 
     private fun assertEquals(expected: Iterable<LocalDate>, actual: Arbeidsgiverperiode?) {
-        no.nav.helse.testhelpers.assertNotNull(actual)
+        assertNotNull(actual)
         assertEquals(expected.toList(), actual.toList())
     }
 
     private fun assertEquals(expected: List<Iterable<LocalDate>>, actual: Arbeidsgiverperiode?) {
-        no.nav.helse.testhelpers.assertNotNull(actual)
+        assertNotNull(actual)
         assertEquals(expected.flatMap { it.toList() }, actual.toList())
     }
 }

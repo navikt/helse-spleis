@@ -19,6 +19,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sisteBehov
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
@@ -248,7 +249,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         )
 
         val annullering = observatør.annulleringer.lastOrNull()
-        no.nav.helse.testhelpers.assertNotNull(annullering)
+        assertNotNull(annullering)
 
         val utbetalingInspektør = inspektør.utbetaling(0).inspektør
         assertEquals(utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), annullering.arbeidsgiverFagsystemId)
@@ -282,7 +283,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         val annulleringer = observatør.annulleringer
         assertEquals(1, annulleringer.size)
         val annullering = annulleringer.lastOrNull()
-        no.nav.helse.testhelpers.assertNotNull(annullering)
+        assertNotNull(annullering)
 
         val utbetalingInspektør = inspektør.utbetaling(0).inspektør
         assertEquals(utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), annullering.arbeidsgiverFagsystemId)

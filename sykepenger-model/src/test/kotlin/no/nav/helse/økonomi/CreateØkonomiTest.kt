@@ -10,6 +10,7 @@ import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -35,7 +36,7 @@ internal class CreateØkonomiTest {
                 assertEquals(0.0, aktuellDagsinntekt)
                 assertEquals(0.0, arbeidsgiverbeløp)
                 assertEquals(0.0, personbeløp)
-                no.nav.helse.testhelpers.assertNotNull(begrenset)
+                assertNotNull(begrenset)
                 assertFalse(begrenset)
             }
         }

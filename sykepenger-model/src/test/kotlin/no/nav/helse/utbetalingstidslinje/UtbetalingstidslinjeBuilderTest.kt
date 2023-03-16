@@ -24,6 +24,7 @@ import no.nav.helse.testhelpers.PROBLEM
 import no.nav.helse.testhelpers.R
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.U
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
@@ -577,12 +578,12 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     private fun assertEquals(expected: Iterable<LocalDate>, actual: Arbeidsgiverperiode?) {
-        no.nav.helse.testhelpers.assertNotNull(actual)
+        assertNotNull(actual)
         assertEquals(expected.toList(), actual.toList())
     }
 
     private fun assertEquals(expected: List<Iterable<LocalDate>>, actual: Arbeidsgiverperiode?) {
-        no.nav.helse.testhelpers.assertNotNull(actual)
+        assertNotNull(actual)
         assertEquals(expected.flatMap { it.toList() }, actual.toList())
     }
 }
