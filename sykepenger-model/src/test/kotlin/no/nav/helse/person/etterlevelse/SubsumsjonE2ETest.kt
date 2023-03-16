@@ -2,6 +2,7 @@ package no.nav.helse.person.etterlevelse
 
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -9,6 +10,7 @@ import no.nav.helse.desember
 import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_A
 import no.nav.helse.etterlevelse.FOLKETRYGDLOVENS_OPPRINNELSESDATO
+import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.etterlevelse.Ledd.LEDD_1
 import no.nav.helse.etterlevelse.Ledd.LEDD_2
@@ -56,6 +58,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.september
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.forlengVedtak
@@ -63,6 +66,7 @@ import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterInntektsmeldingMedValidering
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsforhold
+import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -78,6 +82,7 @@ import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -1999,6 +2004,89 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 )
             ),
             output = mapOf("grunnlagForSykepengegrunnlag" to 1440000.0)
+        )
+    }
+
+    @Test
+    fun `§ 8-30 ledd 1 - sporer hendelsen`() {
+        nyttVedtak(1.januar, 31.januar)
+        val nyInntekt = INNTEKT + 500.daglig
+        val hendelseId = UUID.randomUUID()
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
+            OverstyrtArbeidsgiveropplysning(
+                orgnummer = ORGNUMMER,
+                inntekt = nyInntekt,
+                forklaring = "forklaring",
+                subsumsjon = null,
+                refusjonsopplysninger = listOf(
+                    Triple(1.januar, null, nyInntekt)
+                )
+            )
+        ), meldingsreferanseId = hendelseId)
+        SubsumsjonInspektør(jurist).assertBeregnet(
+            index = 1,
+            forventetAntall = 2,
+            paragraf = PARAGRAF_8_30,
+            ledd = 1.ledd,
+            versjon = 1.januar(2019),
+            input = mapOf(
+                "beregnetMånedsinntektPerArbeidsgiver" to mapOf(
+                    ORGNUMMER to nyInntekt.reflection { _, månedlig, _, _ -> månedlig }
+                )
+            ),
+            output = mapOf("grunnlagForSykepengegrunnlag" to nyInntekt.reflection { årlig, _, _, _ -> årlig }),
+            sporing = mapOf(
+                "$hendelseId" to KontekstType.OverstyrArbeidsgiveropplysninger
+            )
+        )
+    }
+
+    @Test
+    fun `§ 8-30 ledd 1 - sporer hendelsen dersom perioden er i revurderingsporet`() {
+        nyttVedtak(1.januar, 31.januar)
+        val nyInntekt1 = INNTEKT + 500.daglig
+        val hendelseId2 = UUID.randomUUID()
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
+            OverstyrtArbeidsgiveropplysning(
+                orgnummer = ORGNUMMER,
+                inntekt = nyInntekt1,
+                forklaring = "forklaring",
+                subsumsjon = null,
+                refusjonsopplysninger = listOf(
+                    Triple(1.januar, null, nyInntekt1)
+                )
+            )
+        ), meldingsreferanseId = hendelseId2)
+
+        val nyInntekt = INNTEKT + 500.daglig
+        val hendelseId = UUID.randomUUID()
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
+            OverstyrtArbeidsgiveropplysning(
+                orgnummer = ORGNUMMER,
+                inntekt = nyInntekt,
+                forklaring = "forklaring",
+                subsumsjon = null,
+                refusjonsopplysninger = listOf(
+                    Triple(1.januar, null, nyInntekt)
+                )
+            )
+        ), meldingsreferanseId = hendelseId)
+        SubsumsjonInspektør(jurist).assertBeregnet(
+            index = 2,
+            forventetAntall = 3,
+            paragraf = PARAGRAF_8_30,
+            ledd = 1.ledd,
+            versjon = 1.januar(2019),
+            input = mapOf(
+                "beregnetMånedsinntektPerArbeidsgiver" to mapOf(
+                    ORGNUMMER to nyInntekt.reflection { _, månedlig, _, _ -> månedlig }
+                )
+            ),
+            output = mapOf("grunnlagForSykepengegrunnlag" to nyInntekt.reflection { årlig, _, _, _ -> årlig }),
+            sporing = mapOf(
+                "$hendelseId2" to KontekstType.OverstyrArbeidsgiveropplysninger,
+                "$hendelseId" to KontekstType.OverstyrArbeidsgiveropplysninger
+            )
         )
     }
 

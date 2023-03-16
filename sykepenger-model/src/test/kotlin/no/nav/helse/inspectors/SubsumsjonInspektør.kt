@@ -77,12 +77,39 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         bokstav: Bokstav? = null,
         input: Map<String, Any>,
         output: Map<String, Any>,
+        sporing: Map<String, KontekstType>? = null,
+        vedtaksperiodeId: IdInnhenter? = null,
+        organisasjonsnummer: String = ORGNUMMER
+    ) {
+        assertBeregnet(0, 1, paragraf, versjon, ledd, punktum, bokstav, input, output, sporing, vedtaksperiodeId, organisasjonsnummer)
+    }
+
+    internal fun assertBeregnet(
+        index: Int,
+        forventetAntall: Int,
+        paragraf: Paragraf,
+        versjon: LocalDate,
+        ledd: Ledd?,
+        punktum: Punktum? = null,
+        bokstav: Bokstav? = null,
+        input: Map<String, Any>,
+        output: Map<String, Any>,
+        sporing: Map<String, KontekstType>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = ORGNUMMER
     ) {
         val resultat = finnSubsumsjoner(paragraf, versjon, ledd, punktum, bokstav, VILKAR_BEREGNET, vedtaksperiodeId?.id(organisasjonsnummer))
-        assertEquals(1, resultat.size, "Forventer kun en subsumsjon. Subsumsjoner funnet: $resultat")
-        val subsumsjon = resultat.first()
+        assertEquals(forventetAntall, resultat.size, "Forventer kun en subsumsjon. Subsumsjoner funnet: $resultat")
+        val subsumsjon = resultat[index]
+        sporing?.also { forventet ->
+            forventet.forEach { (key, value) ->
+                assertEquals(value, subsumsjon.sporing[key]) {
+                    "Fant ikke forventet sporing. Har dette:\n${subsumsjon.sporing.entries.joinToString(separator = "\n") { (key, value) ->
+                        "$key: $value"
+                    }}\n"
+                }
+            }
+        }
         assertEquals(VILKAR_BEREGNET, subsumsjon.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
         assertResultat(input, output, subsumsjon)
     }

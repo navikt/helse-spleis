@@ -416,7 +416,7 @@ internal class Vedtaksperiode private constructor(
         vedtaksperioder.filter(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt)).forEach {
             overstyrArbeidsforhold.leggTil(it.hendelseIder)
         }
-        person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(overstyrArbeidsforhold, this.skjæringstidspunkt, jurist)
+        person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(overstyrArbeidsforhold, this.skjæringstidspunkt, jurist())
         return true
     }
 
@@ -429,7 +429,7 @@ internal class Vedtaksperiode private constructor(
         person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
             overstyrArbeidsgiveropplysninger,
             this.skjæringstidspunkt,
-            jurist
+            jurist()
         )
         return true
     }
