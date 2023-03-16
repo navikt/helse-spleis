@@ -10,9 +10,8 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_16
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_17
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_ST_1
@@ -21,7 +20,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_12
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_14
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_15
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_16
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_17
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_20
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_22
@@ -77,7 +75,7 @@ internal class VarselkodeTest {
             RV_UT_9, RV_UT_11, RV_UT_12, RV_UT_13,
             RV_UT_15, RV_UT_16, RV_UT_18, RV_UT_19,
             RV_AG_1, RV_RE_2, RV_SØ_27, RV_AN_5, RV_SØ_29, RV_SØ_30,
-            RV_IV_3, RV_RV_2, RV_UT_21, RV_IM_22
+            RV_IV_3, RV_RV_2, RV_UT_21, RV_IM_22, RV_RE_1
         )
 
         val varselkoderSomNåManglerTest = ikkeTestedeVarselkoder.minus(varselkoderSomKjentManglerTest.toSet())
