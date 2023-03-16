@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import java.time.Duration
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -10,16 +9,7 @@ internal class VedtaksperiodeVenter private constructor(
     private val venterTil: LocalDateTime,
     private val venterPå: VenterPå,
     private val organisasjonsnummer: String,
-    private val hendelseIder: Set<UUID>
-    ) {
-    private fun lesbarVentetid(): String {
-        if (venterTil == LocalDateTime.MAX) return "venter for alltid"
-        return Duration.between(ventetSiden, venterTil).abs().let { duration ->
-            if (duration.toDays() > 0) "venter i ${duration.toDays()} dag(er) til"
-            else if (duration.toMinutes() > 0) "venter i ${duration.toMinutes()} minutt(er) til"
-            else "venter i ${duration.toSeconds()} sekund(er) til"
-        }
-    }
+    private val hendelseIder: Set<UUID>) {
 
     internal fun event(aktørId: String, fødselsnummer: String) =
         PersonObserver.VedtaksperiodeVenterEvent(
@@ -32,9 +22,6 @@ internal class VedtaksperiodeVenter private constructor(
             venterPå = venterPå.event(),
             hendelser = hendelseIder
     )
-
-    override fun toString() =
-        "vedtaksperiode $vedtaksperiodeId for arbeidsgiver $organisasjonsnummer venter på $venterPå. Ventet siden $ventetSiden og venter til $venterTil (${lesbarVentetid()})"
 
     internal class Builder {
         private lateinit var vedtaksperiodeId: UUID
