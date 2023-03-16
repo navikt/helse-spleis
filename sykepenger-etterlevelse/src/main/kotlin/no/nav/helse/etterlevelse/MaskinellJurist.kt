@@ -91,7 +91,7 @@ class MaskinellJurist private constructor(
     ) {
         leggTil(
             EnkelSubsumsjon(
-                lovverk = "fol",
+                lovverk = "folketrygdloven",
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 versjon = LocalDate.of(2020, 6, 12),
                 paragraf = PARAGRAF_8_2,
