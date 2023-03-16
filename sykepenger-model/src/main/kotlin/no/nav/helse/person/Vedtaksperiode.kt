@@ -1430,12 +1430,6 @@ internal class Vedtaksperiode private constructor(
                 // beregningsperioder brukes for å lage varsel
                 val utvalg = beregningsperioder(person, vedtaksperiode)
 
-                utvalg.forEach {
-                    infotrygdhistorikk.valider(it.aktivitetsloggkopi(ytelser), it.periode, it.skjæringstidspunkt, it.organisasjonsnummer)
-                    it.kontekst(ytelser) // overskriver kontekst for ytelser-hendelsen
-                    ytelser.valider(it.periode, it.skjæringstidspunkt)
-                    vedtaksperiode.kontekst(ytelser) // endre kontekst tilbake for ytelser-hendelsen
-                }
                 person.valider(ytelser, vilkårsgrunnlag, vedtaksperiode.organisasjonsnummer, vedtaksperiode.skjæringstidspunkt)
 
                 val beregningsperiode = utvalg.periode()
@@ -1459,7 +1453,12 @@ internal class Vedtaksperiode private constructor(
                     utbetalingsperioder,
                     Vedtaksperiode::lagRevurdering
                 )
-
+                utvalg.forEach {
+                    infotrygdhistorikk.valider(it.aktivitetsloggkopi(ytelser), it.periode, it.skjæringstidspunkt, it.organisasjonsnummer)
+                    it.kontekst(ytelser) // overskriver kontekst for ytelser-hendelsen
+                    ytelser.valider(it.periode, it.skjæringstidspunkt, arbeidsgiverUtbetalinger.maksimumSykepenger.sisteDag())
+                    vedtaksperiode.kontekst(ytelser) // endre kontekst tilbake for ytelser-hendelsen
+                }
                 vedtaksperiode.høstingsresultater(ytelser, AvventerSimuleringRevurdering, AvventerGodkjenningRevurdering)
             }
         }
@@ -1798,7 +1797,6 @@ internal class Vedtaksperiode private constructor(
                         vedtaksperiode.organisasjonsnummer
                     )
                 }
-                valider { ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
 
                 // skal ikke mangle vilkårsgrunnlag her med mindre skjæringstidspunktet har endret seg som følge
                 // av historikk fra IT
@@ -1840,6 +1838,7 @@ internal class Vedtaksperiode private constructor(
                         Vedtaksperiode::lagUtbetaling
                     )
                 }
+                valider { ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, arbeidsgiverUtbetalinger.maksimumSykepenger.sisteDag()) }
                 onSuccess {
                     vedtaksperiode.høstingsresultater(ytelser, AvventerSimulering, AvventerGodkjenning)
                 }

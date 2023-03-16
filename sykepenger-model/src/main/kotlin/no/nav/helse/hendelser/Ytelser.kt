@@ -5,11 +5,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_5
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_6
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_7
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_8
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_9
+import no.nav.helse.person.aktivitetslogg.Varselkode
 
 class Ytelser(
     meldingsreferanseId: UUID,
@@ -39,14 +35,17 @@ class Ytelser(
         person.lagreDødsdato(dødsinfo.dødsdato)
     }
 
-    internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
-        arbeidsavklaringspenger.valider(this, skjæringstidspunkt, periode)
-        dagpenger.valider(this, skjæringstidspunkt, periode)
-        if (foreldrepermisjon.overlapper(this, periode)) funksjonellFeil(RV_AY_5)
-        if (pleiepenger.overlapper(this, periode)) funksjonellFeil(RV_AY_6)
-        if (omsorgspenger.overlapper(this, periode)) funksjonellFeil(RV_AY_7)
-        if (opplæringspenger.overlapper(this, periode)) funksjonellFeil(RV_AY_8)
-        if (institusjonsopphold.overlapper(this, periode)) funksjonellFeil(RV_AY_9)
+    internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate, maksdato: LocalDate): Boolean {
+        if (periode.start > maksdato) return true
+
+        val periodeForOverlappsjekk = periode.start til minOf(periode.endInclusive, maksdato)
+        arbeidsavklaringspenger.valider(this, skjæringstidspunkt, periodeForOverlappsjekk)
+        dagpenger.valider(this, skjæringstidspunkt, periodeForOverlappsjekk)
+        if (foreldrepermisjon.overlapper(this, periodeForOverlappsjekk)) funksjonellFeil(Varselkode.`Overlapper med foreldrepenger eller svangerskapspenger`)
+        if (pleiepenger.overlapper(this, periodeForOverlappsjekk)) funksjonellFeil(Varselkode.`Overlapper med pleiepenger`)
+        if (omsorgspenger.overlapper(this, periodeForOverlappsjekk)) funksjonellFeil(Varselkode.`Overlapper med omsorgspenger`)
+        if (opplæringspenger.overlapper(this, periodeForOverlappsjekk)) funksjonellFeil(Varselkode.`Overlapper med opplæringspenger`)
+        if (institusjonsopphold.overlapper(this, periodeForOverlappsjekk)) funksjonellFeil(Varselkode.`Overlapper med institusjonsopphold`)
 
         return !harFunksjonelleFeilEllerVerre()
     }

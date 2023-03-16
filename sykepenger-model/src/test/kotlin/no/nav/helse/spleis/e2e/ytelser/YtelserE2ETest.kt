@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.ytelser
 
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Periode
@@ -25,6 +24,7 @@ import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterInntektsmeldingMedValidering
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -204,16 +204,8 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
             arbeidsavklaringspenger = listOf(1.februar til 28.februar),
             dagpenger = listOf(1.februar til 28.februar),
         )
-        assertForventetFeil(
-            forklaring = "Når perioden har nådd maksdato kan de avslås automatisk og trenger ikke gå til manuell behandling",
-            nå = {
-                 assertVarsel(Varselkode.`Overlapper med arbeidsavklaringspenger`)
-                 assertVarsel(Varselkode.`Overlapper med dagpenger`)
-            },
-            ønsket = {
-                assertIngenVarsler()
-            }
-        )
+
+        assertIngenVarsler()
     }
 
     @Test
@@ -234,20 +226,29 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
             svangerskapspenger = listOf(1.februar til 28.februar)
         )
 
-        assertForventetFeil(
-            forklaring = "Når perioden har nådd maksdato kan de avslås automatisk og trenger ikke gå til infotrygd",
-            nå = {
-                assertFunksjonellFeil(Varselkode.`Overlapper med foreldrepenger eller svangerskapspenger`)
-                assertFunksjonellFeil(Varselkode.`Overlapper med pleiepenger`)
-                assertFunksjonellFeil(Varselkode.`Overlapper med omsorgspenger`)
-                assertFunksjonellFeil(Varselkode.`Overlapper med opplæringspenger`)
-                assertFunksjonellFeil(Varselkode.`Overlapper med institusjonsopphold`)
+        assertIngenFunksjonelleFeil()
+        assertTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
+    }
 
-            },
-            ønsket = {
-                assertIngenFunksjonelleFeil()
-                assertTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
-            }
+    @Test
+    fun `skal ikke ha varsler om andre ytelser for revurdering ved sammenhengende sykdom etter nådd maksdato`() {
+        createKorttidsPerson(UNG_PERSON_FNR_2018, 1.januar(1992), maksSykedager = 11)
+
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+
+        håndterSøknad(Sykdom(1.februar, 28.februar, 95.prosent))
+        håndterYtelser(
+            2.vedtaksperiode,
+            arbeidsavklaringspenger = listOf(1.februar til 28.februar),
+            dagpenger = listOf(1.februar til 28.februar),
+            foreldrepenger = listOf(1.februar til 28.februar),
+            pleiepenger = listOf(1.februar til 28.februar),
+            omsorgspenger = listOf(1.februar til 28.februar),
+            opplæringspenger = listOf(1.februar til 28.februar),
+            institusjonsoppholdsperioder = listOf(Institusjonsopphold.Institusjonsoppholdsperiode(1.februar, 28.februar)),
+            svangerskapspenger = listOf(1.februar til 28.februar)
         )
+        assertIngenVarsler()
     }
 }
