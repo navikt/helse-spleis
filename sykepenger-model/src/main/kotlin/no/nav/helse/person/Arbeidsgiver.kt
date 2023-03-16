@@ -69,7 +69,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAv
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
-import no.nav.helse.utbetalingslinjer.utbetalingport
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -627,7 +626,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun håndterUtbetaling(utbetaling: UtbetalingHendelse) {
-        utbetalinger.forEach { it.håndter(utbetaling.utbetalingport()) }
+        utbetalinger.forEach { it.håndter(utbetaling) }
         håndter(utbetaling, Vedtaksperiode::håndter)
     }
 
@@ -644,7 +643,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(påminnelse: Utbetalingpåminnelse) {
         påminnelse.kontekst(this)
-        utbetalinger.forEach { it.håndter(påminnelse.utbetalingport()) }
+        utbetalinger.forEach { it.håndter(påminnelse) }
     }
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {

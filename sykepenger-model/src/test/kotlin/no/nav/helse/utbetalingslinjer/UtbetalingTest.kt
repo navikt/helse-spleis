@@ -1171,7 +1171,7 @@ internal class UtbetalingTest {
         fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(),
         status: Oppdragstatus = AKSEPTERT,
         utbetalingmottaker: Utbetaling = utbetaling
-    ): UtbetalingHendelsePort {
+    ): UtbetalingHendelse {
         val hendelsen = UtbetalingHendelse(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = "ignore",
@@ -1183,7 +1183,7 @@ internal class UtbetalingTest {
             melding = "hei",
             avstemmingsnøkkel = 123456L,
             overføringstidspunkt = LocalDateTime.now()
-        ).utbetalingport()
+        )
         utbetalingmottaker.håndter(hendelsen)
         return hendelsen
     }

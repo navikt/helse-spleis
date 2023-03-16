@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.nesteDag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
@@ -379,7 +380,7 @@ class Oppdrag private constructor(
         "simuleringsResultat" to simuleringsResultat?.toMap()
     )
 
-    fun lagreOverføringsinformasjon(hendelse: UtbetalingHendelsePort) {
+    fun lagreOverføringsinformasjon(hendelse: UtbetalingHendelse) {
         if (!hendelse.erRelevant(fagsystemId)) return
         if (this.avstemmingsnøkkel == null) this.avstemmingsnøkkel = hendelse.avstemmingsnøkkel
         if (this.overføringstidspunkt == null) this.overføringstidspunkt = hendelse.overføringstidspunkt

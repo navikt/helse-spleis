@@ -7,6 +7,8 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
+import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
+import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
@@ -138,14 +140,14 @@ class Utbetaling private constructor(
         godkjenn(hendelse, Vurdering.automatiskGodkjent)
     }
 
-    fun håndter(utbetaling: UtbetalingHendelsePort) {
+    fun håndter(utbetaling: UtbetalingHendelse) {
         if (!utbetaling.erRelevant(arbeidsgiverOppdrag.fagsystemId(), personOppdrag.fagsystemId(), id)) return håndterKvitteringForAnnullering(utbetaling)
         if (harHåndtert(utbetaling)) return
         utbetaling.kontekst(this)
         tilstand.kvittér(this, utbetaling)
     }
 
-    private fun håndterKvitteringForAnnullering(hendelse: UtbetalingHendelsePort) {
+    private fun håndterKvitteringForAnnullering(hendelse: UtbetalingHendelse) {
         if (annulleringer.none { hendelse.erRelevant(it.arbeidsgiverOppdrag.fagsystemId(), it.personOppdrag.fagsystemId(), it.id) }) return
         hendelse.kontekst(this)
         tilstand.kvittérAnnullering(this, hendelse)
@@ -184,14 +186,14 @@ class Utbetaling private constructor(
         )
     }
 
-    fun håndter(påminnelse: UtbetalingpåminnelsePort) {
+    fun håndter(påminnelse: Utbetalingpåminnelse) {
         if (!påminnelse.erRelevant(id)) return
         påminnelse.kontekst(this)
         if (!påminnelse.gjelderStatus(tilstand.status)) return
         tilstand.håndter(this, påminnelse)
     }
 
-    fun gjelderFor(hendelse: UtbetalingHendelsePort) =
+    fun gjelderFor(hendelse: UtbetalingHendelse) =
         hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId(), personOppdrag.fagsystemId(), id)
 
     fun gjelderFor(hendelse: Utbetalingsgodkjenning) =
@@ -481,7 +483,7 @@ class Utbetaling private constructor(
         vurdering?.overfør(hendelse, personOppdrag, maksdato.takeUnless { type == ANNULLERING })
     }
 
-    private fun håndterKvittering(hendelse: UtbetalingHendelsePort) {
+    private fun håndterKvittering(hendelse: UtbetalingHendelse) {
         hendelse.valider()
         val nesteTilstand = when {
             hendelse.skalForsøkesIgjen() || Oppdrag.harFeil(arbeidsgiverOppdrag, personOppdrag) -> return // utbetaling gjør retry ved neste påminnelse
@@ -534,16 +536,16 @@ class Utbetaling private constructor(
             return null
         }
 
-        fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelsePort) {
+        fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
             hendelse.info("Forventet ikke kvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
             hendelse.funksjonellFeil(RV_UT_11)
         }
-        fun kvittérAnnullering(utbetaling: Utbetaling, hendelse: UtbetalingHendelsePort) {
+        fun kvittérAnnullering(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
             hendelse.info("Forventet ikke kvittering for annullering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
             hendelse.funksjonellFeil(RV_UT_11)
         }
 
-        fun håndter(utbetaling: Utbetaling, påminnelse: UtbetalingpåminnelsePort) {
+        fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
             påminnelse.info("Utbetaling ble påminnet, men gjør ingenting")
         }
 
@@ -631,11 +633,11 @@ class Utbetaling private constructor(
             check(utbetaling.annulleringer.isNotEmpty())
         }
 
-        override fun håndter(utbetaling: Utbetaling, påminnelse: UtbetalingpåminnelsePort) {
+        override fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
             vurderNesteTilstand(utbetaling, påminnelse)
         }
 
-        override fun kvittérAnnullering(utbetaling: Utbetaling, hendelse: UtbetalingHendelsePort) {
+        override fun kvittérAnnullering(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
             vurderNesteTilstand(utbetaling, hendelse)
         }
 
@@ -676,11 +678,11 @@ class Utbetaling private constructor(
             utbetaling.overførBegge(hendelse)
         }
 
-        override fun håndter(utbetaling: Utbetaling, påminnelse: UtbetalingpåminnelsePort) {
+        override fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
             utbetaling.overførBegge(påminnelse)
         }
 
-        override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelsePort) {
+        override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
             utbetaling.lagreOverføringsinformasjon(hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
             utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
             utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
