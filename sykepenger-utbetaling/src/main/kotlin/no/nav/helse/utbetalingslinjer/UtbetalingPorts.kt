@@ -27,11 +27,6 @@ interface UtbetalingpåminnelsePort: IAktivitetslogg {
     fun gjelderStatus(tilstand: Utbetalingstatus): Boolean
 }
 
-interface AnnullerUtbetalingPort: IAktivitetslogg {
-    fun vurdering(): Utbetaling.Vurdering
-    fun erRelevant(fagsystemId: String): Boolean
-}
-
 interface UtbetalingsgodkjenningPort: IAktivitetslogg {
     fun erRelevant(id: UUID): Boolean
     fun valider()

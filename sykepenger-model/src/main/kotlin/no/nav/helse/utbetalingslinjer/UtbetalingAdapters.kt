@@ -3,17 +3,10 @@ package no.nav.helse.utbetalingslinjer
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-
-internal fun AnnullerUtbetaling.utbetalingport() = AnnullerUtbetalingAdapter(this)
-class AnnullerUtbetalingAdapter(private val original: AnnullerUtbetaling): AnnullerUtbetalingPort, IAktivitetslogg by original {
-    override fun vurdering(): Utbetaling.Vurdering = original.vurdering()
-    override fun erRelevant(fagsystemId: String): Boolean = original.erRelevant(fagsystemId)
-}
 
 internal fun Utbetalingpåminnelse.utbetalingport() = UtbetalingpåminnelseAdapter(this)
 class UtbetalingpåminnelseAdapter(private val utbetalingpåminnelse: Utbetalingpåminnelse): UtbetalingpåminnelsePort, IAktivitetslogg by utbetalingpåminnelse {

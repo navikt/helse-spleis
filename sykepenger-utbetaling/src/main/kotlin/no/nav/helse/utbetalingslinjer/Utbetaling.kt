@@ -6,6 +6,7 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -205,11 +206,11 @@ class Utbetaling private constructor(
         vurdering?.build(builder)
     }
 
-    fun håndter(hendelse: AnnullerUtbetalingPort) {
+    fun håndter(hendelse: AnnullerUtbetaling) {
         godkjenn(hendelse, hendelse.vurdering())
     }
 
-    fun annuller(hendelse: AnnullerUtbetalingPort): Utbetaling? {
+    fun annuller(hendelse: AnnullerUtbetaling): Utbetaling? {
         if (!hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId())) {
             hendelse.info("Kan ikke annullere: hendelsen er ikke relevant for ${arbeidsgiverOppdrag.fagsystemId()}.")
             hendelse.funksjonellFeil(RV_UT_15)
@@ -317,7 +318,7 @@ class Utbetaling private constructor(
             return utbetalingen to annulleringer
         }
 
-        fun finnUtbetalingForAnnullering(utbetalinger: List<Utbetaling>, hendelse: AnnullerUtbetalingPort): Utbetaling? {
+        fun finnUtbetalingForAnnullering(utbetalinger: List<Utbetaling>, hendelse: AnnullerUtbetaling): Utbetaling? {
             return utbetalinger.aktive().lastOrNull() ?: run {
                 hendelse.funksjonellFeil(RV_UT_4)
                 return null

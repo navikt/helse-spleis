@@ -635,10 +635,10 @@ internal class Arbeidsgiver private constructor(
         hendelse.kontekst(this)
         hendelse.info("Håndterer annullering")
 
-        val sisteUtbetalte = Utbetaling.finnUtbetalingForAnnullering(utbetalinger, hendelse.utbetalingport()) ?: return
-        val annullering = sisteUtbetalte.annuller(hendelse.utbetalingport()) ?: return
+        val sisteUtbetalte = Utbetaling.finnUtbetalingForAnnullering(utbetalinger, hendelse) ?: return
+        val annullering = sisteUtbetalte.annuller(hendelse) ?: return
         nyUtbetaling(hendelse, annullering)
-        annullering.håndter(hendelse.utbetalingport())
+        annullering.håndter(hendelse)
         håndter(hendelse) { håndter(it, annullering) }
     }
 
