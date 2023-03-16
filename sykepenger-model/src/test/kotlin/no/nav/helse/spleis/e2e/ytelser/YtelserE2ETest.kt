@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.ytelser
 
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -11,7 +10,6 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_5
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -19,7 +17,6 @@ import no.nav.helse.spleis.e2e.assertActivities
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
-import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -172,17 +169,8 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.april til 16.april))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(1.februar til 28.februar, 1.mai til 31.mai ))
-        assertForventetFeil(
-            forklaring = "Nå sjekker vi første fom til siste tom ",
-            nå = {
-                assertFunksjonellFeil(RV_AY_5)
-                assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
-            },
-            ønsket = {
-                assertIngenFunksjonelleFeil()
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
-            }
-        )
+        assertIngenFunksjonelleFeil()
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
     }
 
     @Test
@@ -192,16 +180,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.april til 16.april))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, svangerskapspenger = listOf(1.februar til 28.februar, 1.mai til 31.mai ))
-        assertForventetFeil(
-            forklaring = "Nå sjekker vi første fom til siste tom ",
-            nå = {
-                assertFunksjonellFeil(RV_AY_5)
-                assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
-            },
-            ønsket = {
-                assertIngenFunksjonelleFeil()
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
-            }
-        )
+        assertIngenFunksjonelleFeil()
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
     }
 }

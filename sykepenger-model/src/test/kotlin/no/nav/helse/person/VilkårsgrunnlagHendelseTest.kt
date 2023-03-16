@@ -224,7 +224,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),
         organisasjonsnummer = ORGNUMMER,
         vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
-        foreldrepermisjon = Foreldrepermisjon(null, null),
+        foreldrepermisjon = Foreldrepermisjon(emptyList(), emptyList()),
         pleiepenger = Pleiepenger(emptyList()),
         omsorgspenger = Omsorgspenger(emptyList()),
         opplæringspenger = Opplæringspenger(emptyList()),

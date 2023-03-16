@@ -221,8 +221,8 @@ internal abstract class AbstractDslTest {
         this { håndterVilkårsgrunnlag(vedtaksperiodeId, inntekt, medlemskapstatus, inntektsvurdering, inntektsvurderingForSykepengegrunnlag, arbeidsforhold) }
     protected fun String.håndterYtelser(
         vedtaksperiodeId: UUID,
-        foreldrepenger: Periode? = null,
-        svangerskapspenger: Periode? = null,
+        foreldrepenger: List<Periode> = emptyList(),
+        svangerskapspenger: List<Periode> = emptyList(),
         pleiepenger: List<Periode> = emptyList(),
         omsorgspenger: List<Periode> = emptyList(),
         opplæringspenger: List<Periode> = emptyList(),
@@ -321,8 +321,8 @@ internal abstract class AbstractDslTest {
         bareÈnArbeidsgiver(a1).håndterVilkårsgrunnlag(vedtaksperiodeId, inntekt, medlemskapstatus, inntektsvurdering, inntektsvurderingForSykepengegrunnlag, arbeidsforhold)
     internal fun håndterYtelser(
         vedtaksperiodeId: UUID,
-        foreldrepenger: Periode? = null,
-        svangerskapspenger: Periode? = null,
+        foreldrepenger: List<Periode> = emptyList(),
+        svangerskapspenger: List<Periode> = emptyList(),
         pleiepenger: List<Periode> = emptyList(),
         omsorgspenger: List<Periode> = emptyList(),
         opplæringspenger: List<Periode> = emptyList(),

@@ -366,8 +366,8 @@ internal fun AbstractEndToEndTest.ytelser(
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         foreldrepermisjon = Foreldrepermisjon(
-            foreldrepengeytelse = foreldrepenger.takeUnless { it.isEmpty() }?.let { perioder -> perioder.minOf { it.start } til perioder.maxOf { it.endInclusive } },
-            svangerskapsytelse = svangerskapspenger.takeUnless { it.isEmpty() }?.let { perioder -> perioder.minOf { it.start } til perioder.maxOf { it.endInclusive } },
+            foreldrepengeytelse = foreldrepenger,
+            svangerskapsytelse = svangerskapspenger,
         ),
         pleiepenger = Pleiepenger(
             perioder = pleiepenger

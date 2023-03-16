@@ -676,14 +676,14 @@ class JsonBuilderTest {
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeId,
         foreldrepermisjon = Foreldrepermisjon(
-            foreldrepengeytelse = Periode(
+            foreldrepengeytelse = listOf(Periode(
                 fom = 1.januar.minusYears(2),
                 tom = 31.januar.minusYears(2)
-            ),
-            svangerskapsytelse = Periode(
+            )),
+            svangerskapsytelse = listOf(Periode(
                 fom = 1.juli.minusYears(2),
                 tom = 31.juli.minusYears(2)
-            )
+            ))
         ),
         pleiepenger = Pleiepenger(
             perioder = emptyList()

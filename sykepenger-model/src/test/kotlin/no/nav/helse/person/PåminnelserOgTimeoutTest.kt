@@ -315,8 +315,8 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
             foreldrepermisjon = Foreldrepermisjon(
-                foreldrepengeytelse = null,
-                svangerskapsytelse = null
+                foreldrepengeytelse = emptyList(),
+                svangerskapsytelse = emptyList()
             ),
             pleiepenger = Pleiepenger(
                 perioder = emptyList()

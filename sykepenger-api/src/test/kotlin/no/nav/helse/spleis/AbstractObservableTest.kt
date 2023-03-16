@@ -174,8 +174,8 @@ abstract class AbstractObservableTest {
 
     protected fun ytelser(
         vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
-        foreldrepenger: Periode? = null,
-        svangerskapspenger: Periode? = null,
+        foreldrepenger: List<Periode> = emptyList(),
+        svangerskapspenger: List<Periode> = emptyList(),
         pleiepenger: List<Periode> = emptyList(),
         omsorgspenger: List<Periode> = emptyList(),
         opplæringspenger: List<Periode> = emptyList(),

@@ -228,8 +228,8 @@ internal class TestPerson(
 
         internal fun håndterYtelser(
             vedtaksperiodeId: UUID,
-            foreldrepenger: Periode? = null,
-            svangerskapspenger: Periode? = null,
+            foreldrepenger: List<Periode> = emptyList(),
+            svangerskapspenger: List<Periode> = emptyList(),
             pleiepenger: List<Periode> = emptyList(),
             omsorgspenger: List<Periode> = emptyList(),
             opplæringspenger: List<Periode> = emptyList(),

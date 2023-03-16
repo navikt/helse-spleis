@@ -119,8 +119,8 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     }
 
     private fun ytelser(
-        foreldrepengeYtelse: Periode? = null,
-        svangerskapYtelse: Periode? = null
+        foreldrepengeYtelse: List<Periode> = emptyList(),
+        svangerskapYtelse: List<Periode> = emptyList()
     ) = Aktivitetslogg().let {
         val meldingsreferanseId = UUID.randomUUID()
         Ytelser(

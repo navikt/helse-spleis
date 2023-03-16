@@ -81,28 +81,28 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
 
     @Test
     fun `fordrepengeytelse i periode`() {
-        håndterYtelser(foreldrepengeytelse = Periode(førsteSykedag.minusDays(2), førsteSykedag))
+        håndterYtelser(foreldrepengeytelse = listOf(Periode(førsteSykedag.minusDays(2), førsteSykedag)))
         assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
     }
 
     @Test
     fun `fordrepengeytelse etter periode`() {
-        ferdigstill(håndterYtelser(foreldrepengeytelse = Periode(sisteSykedag.plusDays(1), sisteSykedag.plusDays(10))))
+        ferdigstill(håndterYtelser(foreldrepengeytelse = listOf(Periode(sisteSykedag.plusDays(1), sisteSykedag.plusDays(10)))))
 
         assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     @Test
     fun `svangerskapsytelse i periode`() {
-        håndterYtelser(svangerskapsytelse = Periode(førsteSykedag.minusDays(2), førsteSykedag))
+        håndterYtelser(svangerskapsytelse = listOf(Periode(førsteSykedag.minusDays(2), førsteSykedag)))
         assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
     }
 
     @Test
     fun `svangerskapsytelse etter periode`() {
-        ferdigstill(håndterYtelser(svangerskapsytelse = Periode(sisteSykedag.plusDays(1), sisteSykedag.plusDays(10))))
+        ferdigstill(håndterYtelser(svangerskapsytelse = listOf(Periode(sisteSykedag.plusDays(1), sisteSykedag.plusDays(10)))))
 
         assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
     }
@@ -110,8 +110,8 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
     private fun håndterYtelser(
         utbetalinger: List<Infotrygdperiode> = emptyList(),
         inntektshistorikk: List<Inntektsopplysning> = emptyList(),
-        foreldrepengeytelse: Periode? = null,
-        svangerskapsytelse: Periode? = null
+        foreldrepengeytelse: List<Periode> = emptyList(),
+        svangerskapsytelse: List<Periode> = emptyList()
     ) : Ytelser {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -133,8 +133,8 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
 
     private fun ytelser(
         vedtaksperiodeIdInnhenter: IdInnhenter,
-        foreldrepengeYtelse: Periode? = null,
-        svangerskapYtelse: Periode? = null
+        foreldrepengeYtelse: List<Periode> = emptyList(),
+        svangerskapYtelse: List<Periode> = emptyList()
     ) = Aktivitetslogg().let {
         val meldingsreferanseId = UUID.randomUUID()
         Ytelser(

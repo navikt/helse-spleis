@@ -14,10 +14,9 @@ import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -46,8 +45,8 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
         .takeIf(JsonNode::isObject)?.let(::asPeriode)
 
     private val foreldrepermisjon = Foreldrepermisjon(
-        foreldrepengeytelse = foreldrepenger,
-        svangerskapsytelse = svangerskapsytelse
+        foreldrepengeytelse = listOfNotNull(foreldrepenger),
+        svangerskapsytelse = listOfNotNull(svangerskapsytelse)
     )
 
     private val pleiepenger =
