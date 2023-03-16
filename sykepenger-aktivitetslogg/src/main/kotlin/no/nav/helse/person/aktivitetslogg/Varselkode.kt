@@ -250,6 +250,15 @@ enum class Varselkode(
         val `Mottatt søknad som overlapper` = RV_SØ_12
         val `Mottatt søknad som delvis overlapper` = RV_SØ_13
 
+        val `Overlapper med arbeidsavklaringspenger` = RV_AY_3
+        val `Overlapper med dagpenger` = RV_AY_4
+
+        val `Overlapper med foreldrepenger eller svangerskapspenger` = RV_AY_5
+        val `Overlapper med pleiepenger` = RV_AY_6
+        val `Overlapper med omsorgspenger` = RV_AY_7
+        val `Overlapper med opplæringspenger` = RV_AY_8
+        val `Overlapper med institusjonsopphold` = RV_AY_9
+
         fun IAktivitetslogg.varsel(varselkode: Varselkode, detaljer: String) {
             varsel(varselkode)
             info("${varselkode.name} detaljer: $detaljer")

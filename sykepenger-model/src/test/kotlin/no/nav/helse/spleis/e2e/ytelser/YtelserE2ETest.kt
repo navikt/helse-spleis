@@ -1,7 +1,9 @@
 package no.nav.helse.spleis.e2e.ytelser
 
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -9,15 +11,19 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_5
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertActivities
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
+import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterInntektsmeldingMedValidering
@@ -26,6 +32,7 @@ import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterSøknadMedValidering
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
+import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -79,7 +86,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(3.januar til 18.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, dagpenger = listOf(3.februar til 5.februar))
-        assertIngenVarsel(Varselkode.RV_AY_4, 1.vedtaksperiode.filter())
+        assertIngenVarsel(RV_AY_4, 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -182,5 +189,65 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, svangerskapspenger = listOf(1.februar til 28.februar, 1.mai til 31.mai ))
         assertIngenFunksjonelleFeil()
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
+    }
+
+    @Test
+    fun `skal ikke ha varsler om andre ytelser ved sammenhengende sykdom etter nådd maksdato`() {
+        createKorttidsPerson(UNG_PERSON_FNR_2018, 1.januar(1992), maksSykedager = 11)
+
+        nyttVedtak(1.januar, 31.januar)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterYtelser(
+            2.vedtaksperiode,
+            arbeidsavklaringspenger = listOf(1.februar til 28.februar),
+            dagpenger = listOf(1.februar til 28.februar),
+        )
+        assertForventetFeil(
+            forklaring = "Når perioden har nådd maksdato kan de avslås automatisk og trenger ikke gå til manuell behandling",
+            nå = {
+                 assertVarsel(Varselkode.`Overlapper med arbeidsavklaringspenger`)
+                 assertVarsel(Varselkode.`Overlapper med dagpenger`)
+            },
+            ønsket = {
+                assertIngenVarsler()
+            }
+        )
+    }
+
+    @Test
+    fun `skal ikke ha funksjonelle feil om andre ytelser ved sammenhengende sykdom etter nådd maksdato`() {
+        createKorttidsPerson(UNG_PERSON_FNR_2018, 1.januar(1992), maksSykedager = 11)
+
+        nyttVedtak(1.januar, 31.januar)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterYtelser(
+            2.vedtaksperiode,
+            foreldrepenger = listOf(1.februar til 28.februar),
+            pleiepenger = listOf(1.februar til 28.februar),
+            omsorgspenger = listOf(1.februar til 28.februar),
+            opplæringspenger = listOf(1.februar til 28.februar),
+            institusjonsoppholdsperioder = listOf(Institusjonsopphold.Institusjonsoppholdsperiode(1.februar, 28.februar)),
+            svangerskapspenger = listOf(1.februar til 28.februar)
+        )
+
+        assertForventetFeil(
+            forklaring = "Når perioden har nådd maksdato kan de avslås automatisk og trenger ikke gå til infotrygd",
+            nå = {
+                assertFunksjonellFeil(Varselkode.`Overlapper med foreldrepenger eller svangerskapspenger`)
+                assertFunksjonellFeil(Varselkode.`Overlapper med pleiepenger`)
+                assertFunksjonellFeil(Varselkode.`Overlapper med omsorgspenger`)
+                assertFunksjonellFeil(Varselkode.`Overlapper med opplæringspenger`)
+                assertFunksjonellFeil(Varselkode.`Overlapper med institusjonsopphold`)
+
+            },
+            ønsket = {
+                assertIngenFunksjonelleFeil()
+                assertTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
+            }
+        )
     }
 }
