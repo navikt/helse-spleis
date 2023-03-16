@@ -6,7 +6,6 @@ import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.februar
-import no.nav.helse.harBehov
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.somPeriode
@@ -19,7 +18,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.sisteBehov
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.FRI
@@ -1209,4 +1208,10 @@ internal class UtbetalingTest {
         utbetaling.annuller(AnnullerUtbetaling(UUID.randomUUID(), "aktør", "fnr", "orgnr", fagsystemId, "Z123456", "tbd@nav.no", LocalDateTime.now()))?.also {
             it.opprett(aktivitetslogg)
         }
+
+    private fun IAktivitetslogg.sisteBehov(type: Behovtype) =
+        behov().last { it.type == type }
+
+    private fun IAktivitetslogg.harBehov(behov: Behovtype) =
+        this.behov().any { it.type == behov }
 }
