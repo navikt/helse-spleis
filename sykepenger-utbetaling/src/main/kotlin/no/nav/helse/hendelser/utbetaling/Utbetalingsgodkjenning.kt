@@ -22,11 +22,11 @@ class Utbetalingsgodkjenning(
     private val automatiskBehandling: Boolean
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer) {
 
-    internal fun erRelevant(vedtaksperiodeId: String) = vedtaksperiodeId == this.vedtaksperiodeId
-    internal fun erRelevant(utbetalingId: UUID) = utbetalingId == this.utbetalingId
+    fun erRelevant(vedtaksperiodeId: String) = vedtaksperiodeId == this.vedtaksperiodeId
+    fun erRelevant(utbetalingId: UUID) = utbetalingId == this.utbetalingId
 
-    internal fun automatiskBehandling() = automatiskBehandling
-    internal fun vurdering() = Utbetaling.Vurdering(
+    fun automatiskBehandling() = automatiskBehandling
+    fun vurdering() = Utbetaling.Vurdering(
         utbetalingGodkjent,
         saksbehandler,
         saksbehandlerEpost,
@@ -34,7 +34,7 @@ class Utbetalingsgodkjenning(
         automatiskBehandling
     )
 
-    internal fun valider(): IAktivitetslogg {
+    fun valider(): IAktivitetslogg {
         when {
             !utbetalingGodkjent && !automatiskBehandling -> {
                 funksjonellFeil(RV_UT_19)

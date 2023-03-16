@@ -533,7 +533,8 @@ internal class OppdragTest {
         val avstemmingsnøkkel: Long = 1235
         val overføringstidspunkt = LocalDateTime.now()
 
-        oppdrag.lagreOverføringsinformasjon(UtbetalingHendelseAdapter(UtbetalingHendelse(
+        oppdrag.lagreOverføringsinformasjon(UtbetalingHendelseAdapter(
+            UtbetalingHendelse(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = "1234",
             fødselsnummer = "1234",
@@ -544,7 +545,8 @@ internal class OppdragTest {
             overføringstidspunkt = overføringstidspunkt,
             melding = "foo",
             status = Oppdragstatus.AKSEPTERT
-        )))
+        )
+        ))
 
         assertEquals(avstemmingsnøkkel, oppdrag.inspektør.avstemmingsnøkkel)
         assertEquals(overføringstidspunkt, oppdrag.inspektør.overføringstidspunkt)
@@ -581,10 +583,12 @@ internal class OppdragTest {
             overføringstidspunkt = overføringstidspunkt,
             melding = "foo",
             status = Oppdragstatus.AKSEPTERT
-        )))
+        )
+        ))
 
         val aksepteringstidspunkt = overføringstidspunkt.plusSeconds(3)
-        oppdrag.lagreOverføringsinformasjon(UtbetalingHendelseAdapter(UtbetalingHendelse(
+        oppdrag.lagreOverføringsinformasjon(UtbetalingHendelseAdapter(
+            UtbetalingHendelse(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = "1234",
             fødselsnummer = "1234",
@@ -595,7 +599,8 @@ internal class OppdragTest {
             overføringstidspunkt = aksepteringstidspunkt,
             melding = "foo",
             status = Oppdragstatus.AKSEPTERT
-        )))
+        )
+        ))
 
         assertEquals(avstemmingsnøkkel, oppdrag.inspektør.avstemmingsnøkkel)
         assertEquals(overføringstidspunkt, oppdrag.inspektør.overføringstidspunkt)
@@ -618,7 +623,8 @@ internal class OppdragTest {
             ), sisteArbeidsgiverdag = 16.januar
         )
 
-        oppdrag.lagreOverføringsinformasjon(UtbetalingHendelseAdapter(UtbetalingHendelse(
+        oppdrag.lagreOverføringsinformasjon(UtbetalingHendelseAdapter(
+            UtbetalingHendelse(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = "1234",
             fødselsnummer = "1234",
@@ -629,9 +635,11 @@ internal class OppdragTest {
             overføringstidspunkt = LocalDateTime.now(),
             melding = "foo",
             status = Oppdragstatus.AKSEPTERT
-        )))
+        )
+        ))
 
-        oppdrag.lagreOverføringsinformasjon(UtbetalingHendelseAdapter(UtbetalingHendelse(
+        oppdrag.lagreOverføringsinformasjon(UtbetalingHendelseAdapter(
+            UtbetalingHendelse(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = "1234",
             fødselsnummer = "1234",
@@ -642,7 +650,8 @@ internal class OppdragTest {
             overføringstidspunkt = LocalDateTime.now(),
             melding = "foo",
             status = Oppdragstatus.AKSEPTERT
-        )))
+        )
+        ))
 
         assertNull(oppdrag.inspektør.avstemmingsnøkkel)
         assertNull(oppdrag.inspektør.overføringstidspunkt)

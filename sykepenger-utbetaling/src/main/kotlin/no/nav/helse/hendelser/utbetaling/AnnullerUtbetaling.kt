@@ -18,9 +18,9 @@ class AnnullerUtbetaling(
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg) {
 
-    internal fun erRelevant(fagsystemId: String) = this.fagsystemId == fagsystemId
+    fun erRelevant(fagsystemId: String) = this.fagsystemId == fagsystemId
 
-    internal fun vurdering() = Utbetaling.Vurdering(
+    fun vurdering() = Utbetaling.Vurdering(
         true,
         saksbehandlerIdent,
         saksbehandlerEpost,

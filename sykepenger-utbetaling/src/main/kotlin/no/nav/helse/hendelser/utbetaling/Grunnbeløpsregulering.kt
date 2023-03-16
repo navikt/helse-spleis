@@ -15,5 +15,5 @@ class Grunnbeløpsregulering(
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg) {
 
-    internal fun erRelevant(fagsystemId: String) = this.fagsystemId == fagsystemId
+    fun erRelevant(fagsystemId: String) = this.fagsystemId == fagsystemId
 }

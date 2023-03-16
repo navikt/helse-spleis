@@ -19,9 +19,9 @@ class Utbetalingpåminnelse(
     private val påminnelsestidspunkt: LocalDateTime
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, Aktivitetslogg()) {
 
-    internal fun erRelevant(utbetalingId: UUID) = utbetalingId == this.utbetalingId
+    fun erRelevant(utbetalingId: UUID) = utbetalingId == this.utbetalingId
 
-    internal fun gjelderStatus(status: Utbetalingstatus) = (status == this.status).also {
+    fun gjelderStatus(status: Utbetalingstatus) = (status == this.status).also {
         if (!it) {
             info("Utbetalingpåminnelse var ikke aktuell i status: ${status.name} da påminnelsen gjaldt for: ${this.status.name}")
         } else {
@@ -29,6 +29,6 @@ class Utbetalingpåminnelse(
         }
     }
 
-    internal fun harOversteget(makstid: Duration) =
+    fun harOversteget(makstid: Duration) =
         LocalDateTime.now() >= endringstidspunkt.plus(makstid)
 }
