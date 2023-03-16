@@ -56,7 +56,7 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Pair<Vilkårsgrunnl
         forrige.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver)
     }
 
-    internal fun gjelderIkkeFor(hendelse: Utbetalingsgodkjenning) = siste?.gjelderFor(hendelse.utbetalingport()) != true
+    internal fun gjelderIkkeFor(hendelse: Utbetalingsgodkjenning) = siste?.gjelderFor(hendelse) != true
 
     internal fun erHistorikkEndretSidenBeregning(infotrygdhistorikk: Infotrygdhistorikk) =
         infotrygdhistorikk.harEndretHistorikk(siste!!)

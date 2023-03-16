@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
-import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 internal fun Utbetalingpåminnelse.utbetalingport() = UtbetalingpåminnelseAdapter(this)
@@ -14,13 +13,6 @@ class UtbetalingpåminnelseAdapter(private val utbetalingpåminnelse: Utbetaling
     override fun harOversteget(makstid: Duration): Boolean = utbetalingpåminnelse.harOversteget(makstid)
     override fun gjelderStatus(tilstand: Utbetalingstatus): Boolean = utbetalingpåminnelse.gjelderStatus(tilstand)
 
-}
-
-internal fun Utbetalingsgodkjenning.utbetalingport() = UtbetalingsgodkjenningAdapter(this)
-class UtbetalingsgodkjenningAdapter(private val utbetalingsgodkjenning: Utbetalingsgodkjenning): UtbetalingsgodkjenningPort, IAktivitetslogg by utbetalingsgodkjenning {
-    override fun erRelevant(id: UUID): Boolean = utbetalingsgodkjenning.erRelevant(id)
-    override fun valider() { utbetalingsgodkjenning.valider() }
-    override fun vurdering(): Utbetaling.Vurdering = utbetalingsgodkjenning.vurdering()
 }
 
 internal fun UtbetalingHendelse.utbetalingport() = UtbetalingHendelseAdapter(this)

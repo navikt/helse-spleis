@@ -601,7 +601,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
         utbetalingsgodkjenning.kontekst(this)
-        utbetalinger.forEach { it.håndter(utbetalingsgodkjenning.utbetalingport()) }
+        utbetalinger.forEach { it.håndter(utbetalingsgodkjenning) }
         håndter(utbetalingsgodkjenning, Vedtaksperiode::håndter)
     }
 

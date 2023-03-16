@@ -7,6 +7,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
+import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -127,7 +128,7 @@ class Utbetaling private constructor(
         tilstand.opprett(this, hendelse)
     }
 
-    fun håndter(hendelse: UtbetalingsgodkjenningPort) {
+    fun håndter(hendelse: Utbetalingsgodkjenning) {
         if (!hendelse.erRelevant(id)) return
         hendelse.valider()
         godkjenn(hendelse, hendelse.vurdering())
@@ -193,7 +194,7 @@ class Utbetaling private constructor(
     fun gjelderFor(hendelse: UtbetalingHendelsePort) =
         hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId(), personOppdrag.fagsystemId(), id)
 
-    fun gjelderFor(hendelse: UtbetalingsgodkjenningPort) =
+    fun gjelderFor(hendelse: Utbetalingsgodkjenning) =
         hendelse.erRelevant(id)
 
     fun valider(simulering: Simulering) {
