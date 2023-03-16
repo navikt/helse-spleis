@@ -964,8 +964,8 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(
             1.vedtaksperiode,
-            foreldrepenger = 1.januar til 10.januar
-        )
+            foreldrepenger = listOf(1.januar til 10.januar
+            )        )
 
         assertVarsel(RV_AY_5)
         assertIngenFunksjonelleFeil()
@@ -978,7 +978,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         forlengVedtak(1.mars, 31.mars)
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(2.februar, Feriedag)))
-        håndterYtelser(3.vedtaksperiode, foreldrepenger = 20.januar til 31.januar)
+        håndterYtelser(3.vedtaksperiode, foreldrepenger = listOf(20.januar til 31.januar))
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
         assertTilstand(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)

@@ -345,8 +345,8 @@ internal fun AbstractEndToEndTest.utbetalingshistorikkForFeriepenger(
 
 internal fun AbstractEndToEndTest.ytelser(
     vedtaksperiodeIdInnhenter: IdInnhenter,
-    foreldrepenger: Periode? = null,
-    svangerskapspenger: Periode? = null,
+    foreldrepenger: List<Periode> = emptyList(),
+    svangerskapspenger: List<Periode> = emptyList(),
     pleiepenger: List<Periode> = emptyList(),
     omsorgspenger: List<Periode> = emptyList(),
     opplæringspenger: List<Periode> = emptyList(),
@@ -366,8 +366,8 @@ internal fun AbstractEndToEndTest.ytelser(
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         foreldrepermisjon = Foreldrepermisjon(
-            foreldrepengeytelse = foreldrepenger,
-            svangerskapsytelse = svangerskapspenger
+            foreldrepengeytelse = foreldrepenger.takeUnless { it.isEmpty() }?.let { perioder -> perioder.minOf { it.start } til perioder.maxOf { it.endInclusive } },
+            svangerskapsytelse = svangerskapspenger.takeUnless { it.isEmpty() }?.let { perioder -> perioder.minOf { it.start } til perioder.maxOf { it.endInclusive } },
         ),
         pleiepenger = Pleiepenger(
             perioder = pleiepenger

@@ -662,7 +662,8 @@ internal fun AbstractEndToEndTest.håndterYtelser(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     vararg utbetalinger: Infotrygdperiode,
     inntektshistorikk: List<Inntektsopplysning> = emptyList(),
-    foreldrepenger: Periode? = null,
+    foreldrepenger: List<Periode> = emptyList(),
+    svangerskapspenger: List<Periode> = emptyList(),
     pleiepenger: List<Periode> = emptyList(),
     omsorgspenger: List<Periode> = emptyList(),
     opplæringspenger: List<Periode> = emptyList(),
@@ -691,6 +692,7 @@ internal fun AbstractEndToEndTest.håndterYtelser(
     ytelser(
         vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
         foreldrepenger = foreldrepenger,
+        svangerskapspenger = svangerskapspenger,
         pleiepenger = pleiepenger,
         omsorgspenger = omsorgspenger,
         opplæringspenger = opplæringspenger,

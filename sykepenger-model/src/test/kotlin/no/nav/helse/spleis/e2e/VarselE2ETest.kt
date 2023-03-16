@@ -48,7 +48,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SI_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
@@ -75,7 +74,6 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class VarselE2ETest: AbstractEndToEndTest() {
@@ -565,7 +563,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     fun `varsel - Det er mottatt foreldrepenger i samme periode`() {
         nyttVedtak(1.januar, 31.januar)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
-        håndterYtelser(1.vedtaksperiode, foreldrepenger = 1.januar til 31.januar)
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(1.januar til 31.januar))
 
         assertVarsel(RV_AY_5)
     }

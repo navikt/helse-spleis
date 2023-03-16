@@ -753,7 +753,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(manuellFeriedag(18.januar)))
         håndterYtelser(
             1.vedtaksperiode,
-            foreldrepenger = 16.januar til 28.januar
+            foreldrepenger = listOf(16.januar til 28.januar)
         )
 
         håndterAnnullerUtbetaling()
@@ -1255,7 +1255,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje((20.januar til 26.januar).map { manuellFeriedag(it) })
 
-        håndterYtelser(3.vedtaksperiode, foreldrepenger = 17.januar til 31.januar)
+        håndterYtelser(3.vedtaksperiode, foreldrepenger = listOf(17.januar til 31.januar))
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
