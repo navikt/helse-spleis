@@ -3,8 +3,6 @@ package no.nav.helse.utbetalingslinjer
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
@@ -15,14 +13,6 @@ internal fun AnnullerUtbetaling.utbetalingport() = AnnullerUtbetalingAdapter(thi
 class AnnullerUtbetalingAdapter(private val original: AnnullerUtbetaling): AnnullerUtbetalingPort, IAktivitetslogg by original {
     override fun vurdering(): Utbetaling.Vurdering = original.vurdering()
     override fun erRelevant(fagsystemId: String): Boolean = original.erRelevant(fagsystemId)
-}
-
-internal fun Simulering.utbetalingport() = SimuleringAdapter(this)
-class SimuleringAdapter(private val simulering: Simulering): SimuleringPort, IAktivitetslogg by simulering {
-    override val simuleringResultat: SimuleringResultat? = simulering.simuleringResultat
-    override fun valider(oppdrag: Oppdrag): SimuleringPort = this.apply { simulering.valider(oppdrag) }
-    override fun erSimulert(fagområde: Fagområde, fagsystemId: String): Boolean = simulering.erSimulert(fagområde, fagsystemId)
-    override fun erRelevantForUtbetaling(id: UUID): Boolean = simulering.erRelevantForUtbetaling(id)
 }
 
 internal fun Utbetalingpåminnelse.utbetalingport() = UtbetalingpåminnelseAdapter(this)

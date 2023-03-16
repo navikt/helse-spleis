@@ -5,11 +5,11 @@ import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_12
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_13
@@ -149,7 +149,7 @@ class Utbetaling private constructor(
         tilstand.kvittérAnnullering(this, hendelse)
     }
 
-    fun håndter(simulering: SimuleringPort) {
+    fun håndter(simulering: Simulering) {
         if (!simulering.erRelevantForUtbetaling(id)) return
         personOppdrag.håndter(simulering)
         arbeidsgiverOppdrag.håndter(simulering)
@@ -195,7 +195,7 @@ class Utbetaling private constructor(
     fun gjelderFor(hendelse: UtbetalingsgodkjenningPort) =
         hendelse.erRelevant(id)
 
-    fun valider(simulering: SimuleringPort) {
+    fun valider(simulering: Simulering) {
         arbeidsgiverOppdrag.valider(simulering)
         personOppdrag.valider(simulering)
     }

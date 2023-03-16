@@ -1057,7 +1057,7 @@ internal class UtbetalingTest {
                 perioder = emptyList()
             )
         )
-        utbetaling.håndter(simulering.utbetalingport())
+        utbetaling.håndter(simulering)
         assertNotNull(utbetaling.inspektør.personOppdrag.inspektør.simuleringsResultat())
         assertNull(utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.simuleringsResultat())
     }
@@ -1073,7 +1073,7 @@ internal class UtbetalingTest {
                 perioder = emptyList()
             )
         )
-        utbetaling.håndter(simulering.utbetalingport())
+        utbetaling.håndter(simulering)
         assertNotNull(utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.simuleringsResultat())
         assertNull(utbetaling.inspektør.personOppdrag.inspektør.simuleringsResultat())
     }
@@ -1096,8 +1096,8 @@ internal class UtbetalingTest {
                 perioder = emptyList()
             )
         )
-        utbetaling.håndter(simuleringArbeidsgiver.utbetalingport())
-        utbetaling.håndter(simuleringPerson.utbetalingport())
+        utbetaling.håndter(simuleringArbeidsgiver)
+        utbetaling.håndter(simuleringPerson)
 
         assertNotNull(utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.simuleringsResultat())
         assertNotNull(utbetaling.inspektør.personOppdrag.inspektør.simuleringsResultat())

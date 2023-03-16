@@ -5,6 +5,7 @@ import java.time.LocalDate.MIN
 import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -212,7 +213,7 @@ class Oppdrag private constructor(
     fun erRelevant(fagsystemId: String, fagområde: Fagområde) =
         this.fagsystemId == fagsystemId && this.fagområde == fagområde
 
-    fun valider(simulering: SimuleringPort) =
+    fun valider(simulering: Simulering) =
         simulering.valider(this)
 
     private fun kopierKunLinjerMedEndring() = kopierMed(filter(Utbetalingslinje::erForskjell))
@@ -384,7 +385,7 @@ class Oppdrag private constructor(
         if (this.overføringstidspunkt == null) this.overføringstidspunkt = hendelse.overføringstidspunkt
         this.status = hendelse.status
     }
-    fun håndter(simulering: SimuleringPort) {
+    fun håndter(simulering: Simulering) {
         if (!simulering.erSimulert(fagområde, fagsystemId)) return
         this.erSimulert = true
         this.simuleringsResultat = simulering.simuleringResultat

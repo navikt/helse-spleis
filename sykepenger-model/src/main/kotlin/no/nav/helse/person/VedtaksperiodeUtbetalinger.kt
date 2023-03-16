@@ -87,7 +87,7 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Pair<Vilkårsgrunnl
     }
 
     internal fun valider(simulering: Simulering) {
-        siste!!.valider(simulering.utbetalingport())
+        siste!!.valider(simulering)
     }
 
     internal fun erKlarForGodkjenning() = siste!!.erKlarForGodkjenning()

@@ -3,7 +3,6 @@ package no.nav.helse.utbetalingslinjer
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 interface UtbetalingHendelsePort: IAktivitetslogg {
@@ -20,13 +19,6 @@ interface GrunnbeløpsreguleringPort: IAktivitetslogg {
     fun erRelevant(fagsystemId: String): Boolean
     fun fødselsnummer(): String
     fun organisasjonsnummer(): String
-}
-
-interface SimuleringPort: IAktivitetslogg {
-    val simuleringResultat: SimuleringResultat?
-    fun valider(oppdrag: Oppdrag): SimuleringPort
-    fun erSimulert(fagområde: Fagområde, fagsystemId: String): Boolean
-    fun erRelevantForUtbetaling(id: UUID): Boolean
 }
 
 interface UtbetalingpåminnelsePort: IAktivitetslogg {
