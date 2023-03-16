@@ -8,7 +8,7 @@ dependencies {
     testFixturesImplementation(project(":sykepenger-aktivitetslogg"))
     testFixturesImplementation(project(":sykepenger-primitiver"))
     testImplementation(testFixtures(project(":sykepenger-primitiver")))
-
+    implementation(libs.bundles.jackson)
     implementation(libs.bundles.logging) {
         exclude("com.fasterxml.jackson.core")
         exclude("com.fasterxml.jackson.dataformat")

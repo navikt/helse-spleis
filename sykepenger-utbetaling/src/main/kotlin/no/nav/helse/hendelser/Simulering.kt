@@ -17,7 +17,7 @@ class Simulering(
     fagområde: String,
     private val simuleringOK: Boolean,
     private val melding: String,
-    internal val simuleringResultat: SimuleringResultat?,
+    val simuleringResultat: SimuleringResultat?,
     private val utbetalingId: UUID
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, orgnummer) {
 
@@ -34,18 +34,18 @@ class Simulering(
 
     private val fagområde = Fagområde.from(fagområde)
 
-    internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
-    internal fun erRelevantForUtbetaling(utbetalingId: UUID) = this.utbetalingId == utbetalingId
-    internal fun erSimulert(fagområde: Fagområde, fagsystemId: String) =
+    fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
+    fun erRelevantForUtbetaling(utbetalingId: UUID) = this.utbetalingId == utbetalingId
+    fun erSimulert(fagområde: Fagområde, fagsystemId: String) =
         this.fagområde == fagområde && this.fagsystemId == fagsystemId && simuleringOK
 
-    internal fun valider(oppdrag: Oppdrag) = this.apply {
+    fun valider(oppdrag: Oppdrag) = this.apply {
         if (!oppdrag.erRelevant(fagsystemId, fagområde)) return@apply
         if (!simuleringOK) return@apply info("Feil under simulering: $melding")
         if (harNegativtTotalbeløp()) varsel(Varselkode.RV_SI_3)
         if (simuleringResultat == null) info("Ingenting ble simulert")
     }
 
-    internal fun harNegativtTotalbeløp() = simuleringResultat?.let { it.totalbeløp < 0  } ?: false
+    private fun harNegativtTotalbeløp() = simuleringResultat?.let { it.totalbeløp < 0  } ?: false
 
 }

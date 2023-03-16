@@ -56,7 +56,6 @@ import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -73,7 +72,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class JsonBuilderTest {
@@ -415,27 +413,6 @@ class JsonBuilderTest {
             fangeVedtaksperiode()
             håndter(inntektsmelding(fom = 1.januar, refusjon = Inntektsmelding.Refusjon(31000.månedlig, 4.januar, emptyList())))
         }
-
-    private fun personMedInfotrygdForlengelse(søknadhendelseId: UUID = UUID.randomUUID()): Person {
-        val refusjoner = listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, 1.desember(2017), 31.desember(2017), 100.prosent, 31000.månedlig))
-        val inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), 31000.månedlig, true))
-        return person.apply {
-            håndter(sykmelding(fom = 1.januar, tom = 31.januar))
-            håndter(søknad(fom = 1.januar, tom = 31.januar, hendelseId = søknadhendelseId))
-            fangeVedtaksperiode()
-            håndter(utbetalingshistorikk(refusjoner, inntektshistorikk))
-            håndter(
-                ytelser(
-                    hendelseId = søknadhendelseId,
-                    vedtaksperiodeId = vedtaksperiodeId
-                )
-            )
-            håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-            håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
-            fangeUtbetalinger()
-            håndter(utbetalt())
-        }
-    }
 
     private fun personMedFeriepenger(
         fom: LocalDate = 1.januar,

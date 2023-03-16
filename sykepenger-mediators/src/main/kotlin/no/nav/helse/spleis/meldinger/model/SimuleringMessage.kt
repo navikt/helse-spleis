@@ -2,7 +2,6 @@ package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
@@ -12,12 +11,8 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spleis.IHendelseMediator
-import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.FUNKSJONELL_FEIL
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.OK
-import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.OPPDRAG_UR_ER_STENGT
-import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.TEKNISK_FEIL
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.valueOf
-import org.slf4j.LoggerFactory
 
 internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
