@@ -28,6 +28,10 @@ class Ytelser(
     aktivitetslogg: Aktivitetslogg
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg) {
 
+    companion object {
+        internal val Periode.familieYtelserPeriode get() = oppdaterFom(start.minusWeeks(4))
+    }
+
     internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
 
     internal fun lagreDødsdato(person: Person) {

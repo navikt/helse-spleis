@@ -28,6 +28,7 @@ import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding
 import no.nav.helse.hendelser.til
@@ -646,7 +647,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerYtelser(hendelse: IAktivitetslogg, periode: Periode = periode()) {
-        val søkevinduFamilieytelser = periode.oppdaterFom(periode.start.minusWeeks(4))
+        val søkevinduFamilieytelser = periode.familieYtelserPeriode
         foreldrepenger(hendelse, søkevinduFamilieytelser)
         pleiepenger(hendelse, søkevinduFamilieytelser)
         omsorgspenger(hendelse, søkevinduFamilieytelser)
