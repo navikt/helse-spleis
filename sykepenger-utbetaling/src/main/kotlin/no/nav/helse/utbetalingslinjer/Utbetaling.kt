@@ -7,6 +7,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
+import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
@@ -136,7 +137,7 @@ class Utbetaling private constructor(
         godkjenn(hendelse, hendelse.vurdering())
     }
 
-    fun håndter(hendelse: GrunnbeløpsreguleringPort) {
+    fun håndter(hendelse: Grunnbeløpsregulering) {
         godkjenn(hendelse, Vurdering.automatiskGodkjent)
     }
 
