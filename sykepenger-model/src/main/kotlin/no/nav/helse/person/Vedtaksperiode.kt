@@ -980,7 +980,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun vedtaksperiodeVenter(venterPå: Vedtaksperiode) {
-        val venteårsak = person.venteårsak(venterPå) ?: return sikkerlogg.info("Vedtaksperiode=$id venter på Vedtaksperiode=${venterPå.id} som ikke har noen ventårsak. Er ikke det sprøtt?", keyValue("fødselsnummer", fødselsnummer))
+        val venteårsak = person.venteårsak(venterPå) ?: return
         val builder = VedtaksperiodeVenter.Builder()
         builder.venterPå(venterPå.id, venterPå.organisasjonsnummer, venteårsak)
         builder.venter(
