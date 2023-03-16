@@ -7,6 +7,7 @@ import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
+import no.nav.helse.spleis.TestMessageFactory
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -37,7 +38,24 @@ internal class RevurderingseventyrkontraktTest : AbstractEndToEndMediatorTest() 
         sendUtbetalingsgodkjenning(1, true)
         sendUtbetaling(utbetalingOK = true)
 
-        sendOverstyringInntekt(20000.0, 1.januar, subsumsjon = null)
+        sendOverstyrArbeidsgiveropplysninger(
+            skjæringstidspunkt = 1.januar,
+            arbeidsgiveropplysninger = listOf(
+                TestMessageFactory.Arbeidsgiveropplysning(
+                    organisasjonsnummer = ORGNUMMER,
+                    månedligInntekt = 20000.0,
+                    forklaring = "forklaring",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(
+                        TestMessageFactory.Refusjonsopplysning(
+                            fom = 1.januar,
+                            tom = null,
+                            beløp = 20000.0
+                        )
+                    )
+                )
+            )
+        )
 
         val eventyr = testRapid.inspektør.siste("overstyring_igangsatt")
         assertRevurderingIgangsatt(eventyr)

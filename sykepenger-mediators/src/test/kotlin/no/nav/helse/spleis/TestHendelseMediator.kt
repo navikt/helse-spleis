@@ -37,7 +37,6 @@ import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsforholdMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsgiveropplysningerMessage
-import no.nav.helse.spleis.meldinger.model.OverstyrInntektMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrTidslinjeMessage
 import no.nav.helse.spleis.meldinger.model.PersonPåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.PåminnelseMessage
@@ -235,10 +234,6 @@ internal class TestHendelseMediator : IHendelseMediator {
 
     override fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje, context: MessageContext) {
         lestOverstyrTidslinje = true
-    }
-
-    override fun behandle(message: OverstyrInntektMessage, overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, context: MessageContext) {
-        lestOverstyrInntekt = true
     }
 
     override fun behandle(message: OverstyrArbeidsgiveropplysningerMessage, overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, context: MessageContext) {

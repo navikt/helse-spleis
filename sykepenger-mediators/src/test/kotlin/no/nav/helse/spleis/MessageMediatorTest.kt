@@ -151,12 +151,6 @@ internal class MessageMediatorTest {
         assertTrue(hendelseMediator.lestMigrate)
     }
 
-    @Test
-    fun `Håndterer overstyr_inntekt`() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagOverstyringInntekt(30000.0, 1.januar, null, forklaring = "forklaring"))
-        assertTrue(hendelseMediator.lestOverstyrInntekt)
-    }
-
     @BeforeEach
     internal fun reset() {
         testRapid.reset()

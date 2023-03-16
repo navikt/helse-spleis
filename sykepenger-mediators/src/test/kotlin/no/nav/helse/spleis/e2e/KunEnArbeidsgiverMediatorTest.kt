@@ -20,6 +20,7 @@ import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.toUUID
 import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.TestHendelseMediator
+import no.nav.helse.spleis.TestMessageFactory
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Naturalytelse
@@ -265,7 +266,24 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         )
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
-        sendOverstyringInntekt(33000.0, 1.januar, null)
+        sendOverstyrArbeidsgiveropplysninger(
+            skjæringstidspunkt = 1.januar,
+            arbeidsgiveropplysninger = listOf(
+                TestMessageFactory.Arbeidsgiveropplysning(
+                    organisasjonsnummer = ORGNUMMER,
+                    månedligInntekt = 33000.0,
+                    forklaring = "forklaring",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(
+                        TestMessageFactory.Refusjonsopplysning(
+                            fom = 1.januar,
+                            tom = null,
+                            beløp = 33000.0
+                        )
+                    )
+                )
+            )
+        )
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0, true)

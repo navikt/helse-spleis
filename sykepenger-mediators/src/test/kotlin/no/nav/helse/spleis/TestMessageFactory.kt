@@ -915,28 +915,6 @@ internal class TestMessageFactory(
     }
 
 
-    fun lagOverstyringInntekt(
-        inntekt: Double,
-        skjæringstidspunkt: LocalDate,
-        subsumsjon: Subsumsjon?,
-        orgnummer: String = organisasjonsnummer,
-        forklaring: String
-    ): Pair<String, String> {
-        return nyHendelse(
-            "overstyr_inntekt", mutableMapOf<String, Any>(
-                "aktørId" to aktørId,
-                "fødselsnummer" to fødselsnummer,
-                "organisasjonsnummer" to orgnummer,
-                "månedligInntekt" to inntekt,
-                "skjæringstidspunkt" to skjæringstidspunkt,
-                "forklaring" to forklaring
-            ).apply {
-                subsumsjon?.let {
-                    this["subsumsjon"] = subsumsjon.toMap
-                }
-            })
-    }
-
     fun lagOverstyrArbeidsforhold(
         skjæringstidspunkt: LocalDate,
         overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>
@@ -958,23 +936,6 @@ internal class TestMessageFactory(
                 })
         )
     }
-
-    fun lagOverstyrInntekt(
-        skjæringstidspunkt: LocalDate,
-        orgnummer: String = organisasjonsnummer,
-        månedligInntekt: Double = 31000.0,
-        subsumsjonsMap: Map<String, Any>,
-        forklaringMap: Map<String, String> = emptyMap()
-    ): Pair<String, String> =
-        nyHendelse(
-            "overstyr_inntekt", mutableMapOf<String, Any>(
-                "aktørId" to aktørId,
-                "fødselsnummer" to fødselsnummer,
-                "organisasjonsnummer" to orgnummer,
-                "skjæringstidspunkt" to skjæringstidspunkt,
-                "månedligInntekt" to månedligInntekt,
-            ) + forklaringMap + subsumsjonsMap
-        )
 
     fun lagOverstyrArbeidsgiveropplysninger(
         skjæringstidspunkt: LocalDate,

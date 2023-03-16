@@ -115,7 +115,25 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
         val a2 = "ag2"
 
         tilGodkjenningMedGhost(a2 = a2)
-        sendOverstyringInntekt(1100.0, 1.januar, Subsumsjon("8-28", "3", "b"), a2, "Jeg, en saksbehandler, overstyrte pga 8-28 b")
+        sendOverstyrArbeidsgiveropplysninger(
+            skjæringstidspunkt = 1.januar,
+            arbeidsgiveropplysninger = listOf(
+                TestMessageFactory.Arbeidsgiveropplysning(
+                    organisasjonsnummer = a2,
+                    månedligInntekt = 1100.0,
+                    forklaring = "Jeg, en saksbehandler, overstyrte pga 8-28 b",
+                    subsumsjon = Subsumsjon("8-28", "3", "b"),
+                    refusjonsopplysninger = listOf(
+                        TestMessageFactory.Refusjonsopplysning(
+                            fom = 1.januar,
+                            tom = null,
+                            beløp = 1100.0
+                        )
+                    )
+                )
+            )
+        )
+
         val subsumsjon = testRapid.inspektør.meldinger("subsumsjon")
             .map { it["subsumsjon"] }
             .first { it["paragraf"].asText() == "8-28" && it["bokstav"].asText() == "b" }
@@ -137,7 +155,24 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
         val a2 = "ag2"
 
         tilGodkjenningMedGhost(a2 = a2)
-        sendOverstyringInntekt(1100.0, 1.januar, Subsumsjon("8-28", "3", "c"), a2, "Jeg, en saksbehandler, overstyrte pga 8-28 c")
+        sendOverstyrArbeidsgiveropplysninger(
+            skjæringstidspunkt = 1.januar,
+            arbeidsgiveropplysninger = listOf(
+                TestMessageFactory.Arbeidsgiveropplysning(
+                    organisasjonsnummer = a2,
+                    månedligInntekt = 1100.0,
+                    forklaring = "Jeg, en saksbehandler, overstyrte pga 8-28 c",
+                    subsumsjon = Subsumsjon("8-28", "3", "c"),
+                    refusjonsopplysninger = listOf(
+                        TestMessageFactory.Refusjonsopplysning(
+                            fom = 1.januar,
+                            tom = null,
+                            beløp = 1100.0
+                        )
+                    )
+                )
+            )
+        )
         val subsumsjon = testRapid.inspektør.meldinger("subsumsjon")
             .map { it["subsumsjon"] }
             .first { it["paragraf"].asText() == "8-28" && it["bokstav"].asText() == "c" }
@@ -160,7 +195,25 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
         val a2 = "ag2"
 
         tilGodkjenningMedGhost(a2 = a2)
-        sendOverstyringInntekt(1100.0, 1.januar, Subsumsjon("8-28", "5", null), a2, "Jeg, en saksbehandler, overstyrte pga 8-28 (5)")
+        sendOverstyrArbeidsgiveropplysninger(
+            skjæringstidspunkt = 1.januar,
+            arbeidsgiveropplysninger = listOf(
+                TestMessageFactory.Arbeidsgiveropplysning(
+                    organisasjonsnummer = a2,
+                    månedligInntekt = 1100.0,
+                    forklaring = "Jeg, en saksbehandler, overstyrte pga 8-28 (5)",
+                    subsumsjon = Subsumsjon("8-28", "5", null),
+                    refusjonsopplysninger = listOf(
+                        TestMessageFactory.Refusjonsopplysning(
+                            fom = 1.januar,
+                            tom = null,
+                            beløp = 1100.0
+                        )
+                    )
+                )
+            )
+        )
+
         val subsumsjon = testRapid.inspektør.meldinger("subsumsjon")
             .map { it["subsumsjon"] }
             .first { it["paragraf"].asText() == "8-28" && it["ledd"].asText() == "5" }
