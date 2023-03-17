@@ -6,7 +6,7 @@ import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.betal
 import no.nav.helse.økonomi.er6GBegrenset
 
-class MaksimumUtbetalingFilter : UtbetalingstidslinjerFilter {
+internal class MaksimumUtbetalingFilter : UtbetalingstidslinjerFilter {
     private var harRedusertUtbetaling = false
 
     override fun filter(
@@ -32,7 +32,7 @@ class MaksimumUtbetalingFilter : UtbetalingstidslinjerFilter {
         return tidslinjer
     }
 
-    fun betal(
+    internal fun betal(
         tidslinjer: List<Utbetalingstidslinje>,
         periode: Periode,
         aktivitetslogg: IAktivitetslogg,

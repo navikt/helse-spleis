@@ -4,7 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 
-interface UtbetalingstidslinjerFilter {
+internal interface UtbetalingstidslinjerFilter {
     fun filter(
         tidslinjer: List<Utbetalingstidslinje>,
         periode: Periode,
