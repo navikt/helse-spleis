@@ -11,10 +11,10 @@ import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.SykdomstidslinjeBuilder
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.contains
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_ST_1
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
@@ -28,6 +28,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
 import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
+import no.nav.helse.sykdomstidslinje.Dag.SykedagNavAnsvar
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
@@ -244,6 +245,7 @@ internal class Sykdomstidslinje private constructor(
                     is Permisjonsdag -> "P"
                     is FriskHelgedag -> "R"
                     is ForeldetSykedag -> "K"
+                    is SykedagNavAnsvar -> "N"
                 }
         }?.trim() ?: "Tom tidslinje"
     }
@@ -286,6 +288,25 @@ internal class Sykdomstidslinje private constructor(
                                     if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else Sykedag(it, økonomi, kilde)
                                 }
 
+                            }
+                        )
+                    ))
+
+        internal fun sykedagerNav(
+            førsteDato: LocalDate,
+            sisteDato: LocalDate,
+            grad: Prosentdel,
+            kilde: Hendelseskilde
+        ) =
+            Sykdomstidslinje(
+                førsteDato.datesUntil(sisteDato.plusDays(1))
+                    .collect(
+                        toMap(
+                            { it },
+                            {
+                                Økonomi.sykdomsgrad(grad).let { økonomi ->
+                                    if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else SykedagNavAnsvar(it, økonomi, kilde)
+                                }
                             }
                         )
                     ))

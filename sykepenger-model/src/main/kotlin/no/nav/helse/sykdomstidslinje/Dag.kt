@@ -149,6 +149,15 @@ internal sealed class Dag(
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
     }
 
+    internal class SykedagNavAnsvar(
+        dato: LocalDate,
+        private val økonomi: Økonomi,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) : Dag(dato, kilde) {
+
+        override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+    }
+
     internal class Permisjonsdag(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
@@ -211,6 +220,14 @@ internal interface SykdomstidslinjeDagVisitor {
 
     fun visitDag(
         dag: Dag.SykHelgedag,
+        dato: LocalDate,
+        økonomi: Økonomi,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) {
+    }
+
+    fun visitDag(
+        dag: Dag.SykedagNavAnsvar,
         dato: LocalDate,
         økonomi: Økonomi,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde

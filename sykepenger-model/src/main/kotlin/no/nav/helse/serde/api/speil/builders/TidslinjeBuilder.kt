@@ -9,7 +9,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
 import no.nav.helse.serde.api.dto.AvvistDag
@@ -27,6 +26,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Økonomi
 
@@ -156,6 +156,7 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
         is Dag.SykHelgedag -> SykdomstidslinjedagType.SYK_HELGEDAG
         is Dag.Permisjonsdag -> SykdomstidslinjedagType.PERMISJONSDAG
         is Dag.ProblemDag -> SykdomstidslinjedagType.UBESTEMTDAG
+        is Dag.SykedagNavAnsvar -> SykdomstidslinjedagType.SYKEDAG
     }
 }
 
