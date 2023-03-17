@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.desember
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
@@ -32,8 +31,8 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.*
-import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.betal
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -1117,7 +1116,13 @@ internal class UtbetalingTest {
             utbetalingId = utbetalingId
         )
 
-    private fun beregnUtbetalinger(tidslinje: Utbetalingstidslinje) = tidslinje.also { MaksimumUtbetalingFilter().betal(listOf(tidslinje), tidslinje.periode(), aktivitetslogg, SubsumsjonObserver.NullObserver) }
+    private fun beregnUtbetalinger(tidslinje: Utbetalingstidslinje) = tidslinje.also {
+        Utbetalingstidslinje.periode(listOf(tidslinje)).forEach { dato ->
+            listOf(tidslinje).map { it[dato].økonomi }.also { økonomiList ->
+                økonomiList.betal()
+            }
+        }
+    }
 
     private fun opprettGodkjentUtbetaling(
         tidslinje: Utbetalingstidslinje,
