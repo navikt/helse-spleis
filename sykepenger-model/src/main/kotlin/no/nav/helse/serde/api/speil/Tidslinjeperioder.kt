@@ -370,9 +370,7 @@ internal class IUtbetaling(
 ) {
     private var erTilGodkjenning = false
     fun erSammeSom(other: IUtbetaling) = id == other.id
-    fun fagsystemId() = arbeidsgiverFagsystemId
     fun hørerSammen(other: IUtbetaling) = korrelasjonsId == other.korrelasjonsId
-    fun forkastet() = tilstand == "Forkastet"
 
     fun settTilGodkjenning(vedtaksperioder: List<IVedtaksperiode>) {
         erTilGodkjenning = vedtaksperioder.tilGodkjenning(this)

@@ -94,7 +94,7 @@ internal class GenerasjonerBuilder(
         inntektskilde: Inntektskilde
     ) {
         val sykdomstidslinje = VedtaksperiodeSykdomstidslinjeBuilder(vedtaksperiode).build()
-        val utbetalinger = UtbetalingerBuilder(vedtaksperiode, tilstand).build(vedtaksperiodeId)
+        val utbetalinger = UtbetalingerBuilder(vedtaksperiode).build(vedtaksperiodeId)
         val aktivetsloggForPeriode = Vedtaksperiode.aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode)
         vedtaksperiodeAkkumulator.leggTil(
             IVedtaksperiode(

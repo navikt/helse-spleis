@@ -33,10 +33,7 @@ import org.slf4j.LoggerFactory
 import no.nav.helse.utbetalingslinjer.Utbetaling as InternUtbetaling
 
 // Besøker hele vedtaksperiode-treet
-internal class UtbetalingerBuilder(
-    vedtaksperiode: Vedtaksperiode,
-    private val vedtaksperiodetilstand: Vedtaksperiode.Vedtaksperiodetilstand
-) : VedtaksperiodeVisitor {
+internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode) : VedtaksperiodeVisitor {
     val utbetalinger = mutableMapOf<UUID, IUtbetaling>()
     val vilkårsgrunnlag = mutableMapOf<UUID, IVilkårsgrunnlag>()
 
@@ -191,8 +188,7 @@ internal class UtbetalingerBuilder(
         avstemmingsnøkkel: Long?,
         annulleringer: Set<UUID>
     ) {
-        if (utbetalingstatus == FORKASTET && vedtaksperiodetilstand != Vedtaksperiode.RevurderingFeilet) return
-        utbetalinger.entries.find { it.value.forkastet() }?.let { utbetalinger.remove(it.key) }
+        if (utbetalingstatus == FORKASTET) return
         utbetalinger.putIfAbsent(id, UtbetalingBuilder(utbetaling).build())
     }
 }
