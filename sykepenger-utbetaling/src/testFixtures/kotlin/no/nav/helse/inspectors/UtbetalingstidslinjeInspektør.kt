@@ -1,12 +1,20 @@
 package no.nav.helse.inspectors
 
-import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
-import no.nav.helse.utbetalingstidslinje.Begrunnelse
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.*
-import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDagNavAnsvar
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ForeldetDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Fridag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
+import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Økonomi
 import kotlin.reflect.KClass
 
 val Utbetalingstidslinje.inspektør get() = UtbetalingstidslinjeInspektør(this)
@@ -21,6 +29,7 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
 
     var arbeidsdagTeller = 0
     var arbeidsgiverperiodeDagTeller = 0
+    var arbeidsgiverperiodedagNavAnsvarTeller = 0
     var avvistDagTeller = 0
     var fridagTeller = 0
     var navDagTeller = 0
@@ -34,6 +43,7 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
     val navHelgdager = mutableListOf<NavHelgDag>()
     val arbeidsdager = mutableListOf<Arbeidsdag>()
     val arbeidsgiverdager = mutableListOf<ArbeidsgiverperiodeDag>()
+    val arbeidsgiverperiodedagerNavAnsvar = mutableListOf<ArbeidsgiverperiodeDagNavAnsvar>()
     val fridager = mutableListOf<Fridag>()
     val avvistedatoer = mutableListOf<LocalDate>()
     val avvistedager = mutableListOf<AvvistDag>()
@@ -50,7 +60,8 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
             navDagTeller +
             navHelgDagTeller +
             foreldetDagTeller +
-            ukjentDagTeller
+            ukjentDagTeller +
+                arbeidsgiverperiodedagNavAnsvarTeller
 
     init {
         arbeidsdagTeller = 0
@@ -96,6 +107,12 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
     ) {
         arbeidsdagTeller += 1
         arbeidsdager.add(dag)
+        collect(dag, dato, økonomi)
+    }
+
+    override fun visit(dag: ArbeidsgiverperiodeDagNavAnsvar, dato: LocalDate, økonomi: Økonomi) {
+        arbeidsgiverperiodedagNavAnsvarTeller += 1
+        arbeidsgiverperiodedagerNavAnsvar.add(dag)
         collect(dag, dato, økonomi)
     }
 

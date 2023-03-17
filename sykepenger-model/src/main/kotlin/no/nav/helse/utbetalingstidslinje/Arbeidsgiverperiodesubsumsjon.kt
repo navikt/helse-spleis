@@ -57,6 +57,15 @@ internal class Arbeidsgiverperiodesubsumsjon(
         other.arbeidsgiverperiodedag(dato, økonomi, kilde)
     }
 
+    override fun arbeidsgiverperiodedagNavAnsvar(
+        dato: LocalDate,
+        økonomi: Økonomi,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) {
+        subsumsjonObserver?.also { it.`§ 8-17 ledd 1`(dato) }
+        other.arbeidsgiverperiodedagNavAnsvar(dato, økonomi, kilde)
+    }
+
     override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
         // på første navdag etter fullført agp
         if (dato.erHelg()) subsumsjonObserver?.also { it.`§ 8-11 ledd 1`(dato) }

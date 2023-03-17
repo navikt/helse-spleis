@@ -1,11 +1,11 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
+import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.A
@@ -248,6 +248,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         var fridager = 0
         var arbeidsdager = 0
         var arbeidsgiverperiodedager = 0
+        var arbeidsgiverperiodedagerNavAnsvar = 0
         var utbetalingsdager = 0
         var foreldetdager = 0
         var avvistdager = 0
@@ -270,6 +271,14 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
         ) {
             arbeidsgiverperiodedager += 1
+        }
+
+        override fun arbeidsgiverperiodedagNavAnsvar(
+            dato: LocalDate,
+            økonomi: Økonomi,
+            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+        ) {
+            arbeidsgiverperiodedagerNavAnsvar += 1
         }
 
         override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {

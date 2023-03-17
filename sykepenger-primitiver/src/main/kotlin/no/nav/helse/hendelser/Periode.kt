@@ -137,6 +137,9 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
             else -> listOf(this.beholdDagerFør(felles), this.beholdDagerEtter(felles))
         }
     }
+
+    fun trimDagerFør(other: Periode) = this.trim(other.oppdaterTom(LocalDate.MAX)).periode()
+
     private fun beholdDagerFør(other: Periode) = this.start til other.start.forrigeDag
     private fun beholdDagerEtter(other: Periode) = other.endInclusive.nesteDag til this.endInclusive
 

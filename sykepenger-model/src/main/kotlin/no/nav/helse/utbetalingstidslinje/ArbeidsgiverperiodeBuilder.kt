@@ -2,9 +2,9 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 import no.nav.helse.erHelg
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
@@ -78,6 +78,12 @@ internal class ArbeidsgiverperiodeBuilder(
         fridager.somSykedager(kilde)
         arbeidsgiverperiodeteller.inc()
         tilstand.sykdomsdag(this, dato, økonomi, kilde)
+    }
+
+    override fun visitDag(dag: Dag.SykedagNavAnsvar, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
+        fridager.somSykedager(kilde)
+        arbeidsgiverperiodeteller.inc()
+        tilstand.sykdomsdagNav(this, dato, økonomi, kilde)
     }
 
     override fun visitDag(dag: Dag.SykHelgedag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
@@ -156,6 +162,14 @@ internal class ArbeidsgiverperiodeBuilder(
         ) {
             builder.mediator.utbetalingsdag(dato, økonomi, kilde)
         }
+        fun sykdomsdagNav(
+            builder: ArbeidsgiverperiodeBuilder,
+            dato: LocalDate,
+            økonomi: Økonomi,
+            kilde: Hendelseskilde
+        ) {
+            builder.mediator.utbetalingsdag(dato, økonomi, kilde)
+        }
         fun egenmeldingsdag(
             builder: ArbeidsgiverperiodeBuilder,
             dato: LocalDate,
@@ -188,6 +202,15 @@ internal class ArbeidsgiverperiodeBuilder(
         }
     }
     private object Arbeidsgiverperiode : Tilstand {
+        override fun sykdomsdagNav(
+            builder: ArbeidsgiverperiodeBuilder,
+            dato: LocalDate,
+            økonomi: Økonomi,
+            kilde: Hendelseskilde
+        ) {
+            builder.mediator.arbeidsgiverperiodedagNavAnsvar(dato, økonomi, kilde)
+        }
+
         override fun sykdomsdag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
             builder.mediator.arbeidsgiverperiodedag(dato, økonomi, kilde)
         }
@@ -207,6 +230,16 @@ internal class ArbeidsgiverperiodeBuilder(
     private object ArbeidsgiverperiodeSisteDag : Tilstand {
         override fun entering(builder: ArbeidsgiverperiodeBuilder) {
             builder.mediator.arbeidsgiverperiodeSistedag()
+        }
+
+        override fun sykdomsdagNav(
+            builder: ArbeidsgiverperiodeBuilder,
+            dato: LocalDate,
+            økonomi: Økonomi,
+            kilde: Hendelseskilde
+        ) {
+            builder.mediator.arbeidsgiverperiodedagNavAnsvar(dato, økonomi, kilde)
+            builder.tilstand(Utbetaling)
         }
 
         override fun sykdomsdag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {

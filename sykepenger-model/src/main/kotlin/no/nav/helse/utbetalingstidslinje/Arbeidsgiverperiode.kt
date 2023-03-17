@@ -4,12 +4,13 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Periodetype
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -55,15 +56,21 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         sykdomstidslinje: Sykdomstidslinje,
         subsumsjonObserver: SubsumsjonObserver
     ): Boolean {
-        if (!dekker(periode)) return erFørsteUtbetalingsdagFørEllerLik(periode)
+        if (!dekkesAvArbeidsgiver(periode)) return erFørsteUtbetalingsdagFørEllerLik(periode)
         subsumsjonObserver.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(this, sykdomstidslinje.subsumsjonsformat())
         return false
     }
 
-    internal fun dekker(periode: Periode): Boolean {
+    internal fun dekkesAvArbeidsgiver(periode: Periode): Boolean {
         if (fiktiv()) return false
+        val arbeidsgiversAnsvar = dagerSomarbeidsgiverUtbetaler() ?: return false
+        return (periode.overlapperMed(arbeidsgiversAnsvar) && arbeidsgiversAnsvar.slutterEtter(periode.endInclusive))
+    }
+
+    private fun dagerSomarbeidsgiverUtbetaler(): Periode? {
         val heleInklHelg = arbeidsgiverperioden.justerForHelg()
-        return (periode.overlapperMed(heleInklHelg) && heleInklHelg.slutterEtter(periode.endInclusive))
+        val utbetalingsperiode = utbetalingsdager.periode() ?: return heleInklHelg
+        return heleInklHelg.trimDagerFør(utbetalingsperiode)
     }
 
     internal fun hørerTil(periode: Periode, sisteKjente: LocalDate = this.sisteKjente) =

@@ -15,6 +15,9 @@ internal class InfotrygdUtbetalingstidslinjedekoratør(
 
     private val ukjenteDager = utbetaltIInfotrygd.filter { it.overlapperMed(spleisPeriode) }.map { it.subset(spleisPeriode) }.flatten().toSet()
     private var forrigeIkkeUkjenteDag: LocalDate? = null
+    override fun arbeidsgiverperiodedagNavAnsvar(dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
+        leggTil(dato) { other.arbeidsgiverperiodedagNavAnsvar(dato, økonomi, kilde) }
+    }
 
     override fun fridag(dato: LocalDate) {
         leggTil(dato) { other.fridag(dato) }

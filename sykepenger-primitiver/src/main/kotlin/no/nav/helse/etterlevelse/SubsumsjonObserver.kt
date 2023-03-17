@@ -226,6 +226,17 @@ interface SubsumsjonObserver {
     ) {}
 
     /**
+     * Vurdering av når utbetaling av sykepenger tidligst skal starte
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-17)
+     *
+     * @param dato Nav utbetaler første 16 dager
+     */
+    fun `§ 8-17 ledd 1`(
+        dato: LocalDate
+    ) {}
+
+    /**
      * Trygden yter ikke sykepenger for lovpålagt ferie og permisjon
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-17)

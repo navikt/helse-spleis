@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDagNavAnsvar
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ForeldetDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Fridag
@@ -162,6 +163,10 @@ class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Collection<
 
         fun addArbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi) {
             add(ArbeidsgiverperiodeDag(dato, økonomi))
+        }
+
+        fun addArbeidsgiverperiodedagNavAnsvar(dato: LocalDate, økonomi: Økonomi) {
+            add(ArbeidsgiverperiodeDagNavAnsvar(dato, økonomi))
         }
 
         fun addNAVdag(dato: LocalDate, økonomi: Økonomi) {

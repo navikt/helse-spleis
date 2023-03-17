@@ -15,6 +15,12 @@ interface UtbetalingsdagVisitor {
         økonomi: Økonomi
     ) {
     }
+    fun visit(
+        dag: Utbetalingsdag.ArbeidsgiverperiodeDagNavAnsvar,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
+    }
 
     fun visit(
         dag: Utbetalingsdag.NavDag,

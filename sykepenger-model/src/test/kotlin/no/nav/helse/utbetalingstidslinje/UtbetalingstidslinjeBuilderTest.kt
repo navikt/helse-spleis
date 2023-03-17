@@ -19,6 +19,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.K
+import no.nav.helse.testhelpers.N
 import no.nav.helse.testhelpers.P
 import no.nav.helse.testhelpers.PROBLEM
 import no.nav.helse.testhelpers.R
@@ -51,6 +52,18 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(15, inspektør.size)
         assertEquals(15, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(1, perioder.size)
+        assertEquals(1.januar til 15.januar, perioder.first())
+    }
+
+    @Test
+    fun `kort - skal utbetales`() {
+        undersøke(15.N)
+        assertEquals(15, inspektør.size)
+        assertEquals(4, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(11, inspektør.arbeidsgiverperiodedagNavAnsvarTeller)
+        assertEquals(1, perioder.size)
+        val arbeidsgiverperiode = perioder.first()
+        assertTrue(arbeidsgiverperiode.forventerInntekt(1.januar til 15.januar, Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
         assertEquals(1.januar til 15.januar, perioder.first())
     }
 
@@ -554,6 +567,14 @@ internal class UtbetalingstidslinjeBuilderTest {
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
         ) {
             mediators.forEach { it.arbeidsgiverperiodedag(dato, økonomi, kilde) }
+        }
+
+        override fun arbeidsgiverperiodedagNavAnsvar(
+            dato: LocalDate,
+            økonomi: Økonomi,
+            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+        ) {
+            mediators.forEach { it.arbeidsgiverperiodedagNavAnsvar(dato, økonomi, kilde) }
         }
 
         override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {

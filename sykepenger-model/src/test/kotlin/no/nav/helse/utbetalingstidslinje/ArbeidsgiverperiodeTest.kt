@@ -1,11 +1,11 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.desember
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -29,6 +29,12 @@ internal class ArbeidsgiverperiodeTest {
     fun `arbeidsgiverperiode er den samme hvis første dag er lik`() {
         assertEquals(agp(1.januar til 5.januar), agp(1.januar til 16.januar))
         assertNotEquals(agp(1.januar til 5.januar), agp(2.januar til 17.januar))
+    }
+
+    @Test
+    fun `Nav betaler arbeidsgiverperioden`() {
+        val agp = agp(1.januar til 16.januar).utbetalingsdag(1.januar)
+        assertTrue(agp.forventerInntekt(1.januar til 16.januar, Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
     }
 
     @Test
@@ -101,22 +107,22 @@ internal class ArbeidsgiverperiodeTest {
     fun `dekker hele perioden`() {
         val periode = 2.januar til 5.januar
         val arbeidsgiverperiode = agp(periode)
-        assertTrue(arbeidsgiverperiode.dekker(periode))
-        assertTrue(arbeidsgiverperiode.dekker(3.januar til 4.januar))
-        assertTrue(arbeidsgiverperiode.dekker(2.januar til 6.januar))
-        assertFalse(arbeidsgiverperiode.dekker(2.januar til 8.januar))
-        assertTrue(arbeidsgiverperiode.dekker(1.januar til 5.januar))
-        assertTrue(arbeidsgiverperiode.dekker(6.januar til 7.januar))
-        assertTrue(arbeidsgiverperiode.dekker(1.januar til 6.januar))
-        assertFalse(arbeidsgiverperiode.dekker(1.januar til 8.januar))
-        assertFalse(arbeidsgiverperiode.dekker(1.januar til 1.januar))
+        assertTrue(arbeidsgiverperiode.dekkesAvArbeidsgiver(periode))
+        assertTrue(arbeidsgiverperiode.dekkesAvArbeidsgiver(3.januar til 4.januar))
+        assertTrue(arbeidsgiverperiode.dekkesAvArbeidsgiver(2.januar til 6.januar))
+        assertFalse(arbeidsgiverperiode.dekkesAvArbeidsgiver(2.januar til 8.januar))
+        assertTrue(arbeidsgiverperiode.dekkesAvArbeidsgiver(1.januar til 5.januar))
+        assertTrue(arbeidsgiverperiode.dekkesAvArbeidsgiver(6.januar til 7.januar))
+        assertTrue(arbeidsgiverperiode.dekkesAvArbeidsgiver(1.januar til 6.januar))
+        assertFalse(arbeidsgiverperiode.dekkesAvArbeidsgiver(1.januar til 8.januar))
+        assertFalse(arbeidsgiverperiode.dekkesAvArbeidsgiver(1.januar til 1.januar))
     }
 
     @Test
     fun `fiktiv periode dekker ingenting fordi arbeidsgiverperioden er ukjent`() {
         val arbeidsgiverperiode = Arbeidsgiverperiode.fiktiv(2.januar)
-        assertFalse(arbeidsgiverperiode.dekker(2.januar til 2.januar))
-        assertFalse(arbeidsgiverperiode.dekker(1.januar til 1.januar))
+        assertFalse(arbeidsgiverperiode.dekkesAvArbeidsgiver(2.januar til 2.januar))
+        assertFalse(arbeidsgiverperiode.dekkesAvArbeidsgiver(1.januar til 1.januar))
     }
 
     @Test
