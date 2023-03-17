@@ -51,7 +51,6 @@ import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlag
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.speil.builders.PeriodeVarslerBuilder
 import no.nav.helse.Alder
-import kotlin.properties.Delegates
 
 internal class Generasjoner(perioder: Tidslinjeperioder) {
     private val generasjoner: List<Generasjon> = perioder.toGenerasjoner()
@@ -224,6 +223,7 @@ internal class Tidslinjeperioder(
         vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
     ): BeregnetPeriode {
         val utbetaling = vilkårsgrunnlagTilutbetaling.second
+        val avgrensetUtbetalingstidslinje = utbetaling.utbetalingstidslinje.filter { periode.fom <= it.dato && it.dato <= periode.tom }
         val sammenslåttTidslinje =
             tidslinjeberegning.sammenslåttTidslinje(utbetaling.utbetalingstidslinje, periode.fom, periode.tom)
         val varsler = PeriodeVarslerBuilder(
@@ -246,7 +246,7 @@ internal class Tidslinjeperioder(
             hendelser = periode.hendelser,
             maksdato = utbetaling.maksdato,
             opprettet = utbetaling.opprettet,
-            periodevilkår = periodevilkår(periode, utbetaling, sammenslåttTidslinje, periode.hendelser),
+            periodevilkår = periodevilkår(periode, utbetaling, avgrensetUtbetalingstidslinje, periode.hendelser),
             sammenslåttTidslinje = sammenslåttTidslinje,
             gjenståendeSykedager = utbetaling.gjenståendeSykedager,
             forbrukteSykedager = utbetaling.forbrukteSykedager,
@@ -262,7 +262,10 @@ internal class Tidslinjeperioder(
                 utbetalingDTO.kanUtbetales() -> when {
                     utbetalingDTO.venterPåRevurdering(periode.tilstand) && utbetalingDTO.ikkeBetalt() -> VenterPåAnnenPeriode
                     utbetalingDTO.venterPåRevurdering(periode.tilstand) && !utbetalingDTO.utbetales() -> UtbetaltVenterPåAnnenPeriode
-                    utbetalingDTO.utbetalt() -> if (sammenslåttTidslinje.inneholderSykepengedager()) Utbetalt else IngenUtbetaling
+                    utbetalingDTO.utbetalt() -> when {
+                        avgrensetUtbetalingstidslinje.any { it.type == UtbetalingstidslinjedagType.NavDag  } -> Utbetalt
+                        else -> IngenUtbetaling
+                    }
                     utbetalingDTO.utbetales() -> Periodetilstand.TilUtbetaling
                     utbetalingDTO.tilGodkjenning() -> TilGodkjenning
                     !iVentetilstand(periode.tilstand) -> ForberederGodkjenning
@@ -279,16 +282,16 @@ internal class Tidslinjeperioder(
         AvventerRevurdering
     )
 
-    private fun List<SammenslåttDag>.sisteNavDag() =
-        lastOrNull { it.utbetalingstidslinjedagtype == UtbetalingstidslinjedagType.NavDag }
+    private fun List<Utbetalingstidslinjedag>.sisteNavDag() =
+        lastOrNull { it.type == UtbetalingstidslinjedagType.NavDag }
 
     private fun periodevilkår(
         periode: IVedtaksperiode,
         utbetaling: IUtbetaling,
-        sammenslåttTidslinje: List<SammenslåttDag>,
+        avgrensetUtbetalingstidslinje: List<Utbetalingstidslinjedag>,
         hendelser: List<HendelseDTO>
     ): BeregnetPeriode.Vilkår {
-        val sisteSykepengedag = sammenslåttTidslinje.sisteNavDag()?.dagen ?: periode.tom
+        val sisteSykepengedag = avgrensetUtbetalingstidslinje.sisteNavDag()?.dato ?: periode.tom
         val sykepengedager = BeregnetPeriode.Sykepengedager(
             periode.skjæringstidspunkt,
             utbetaling.maksdato,
@@ -396,6 +399,3 @@ internal class IUtbetaling(
         }
     }
 }
-
-private fun List<SammenslåttDag>.inneholderSykepengedager(): Boolean =
-    any { it.utbetalingstidslinjedagtype == UtbetalingstidslinjedagType.NavDag }
