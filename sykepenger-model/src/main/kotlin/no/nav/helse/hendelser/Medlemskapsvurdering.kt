@@ -1,7 +1,6 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_2
 
 class Medlemskapsvurdering(
@@ -14,7 +13,7 @@ class Medlemskapsvurdering(
                 true
             }
             Medlemskapstatus.VetIkke -> {
-                aktivitetslogg.varsel(RV_MV_1)
+                aktivitetslogg.info("Bruker er VetIkke-medlem av Folketrygden")
                 true
             }
             Medlemskapstatus.Nei -> {

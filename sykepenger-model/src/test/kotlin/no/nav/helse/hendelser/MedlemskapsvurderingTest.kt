@@ -27,7 +27,7 @@ internal class MedlemskapsvurderingTest {
     fun `bruker er kanskje medlem`() {
         Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.VetIkke)
             .valider(aktivitetslogg).also {
-                assertTrue(aktivitetslogg.harVarslerEllerVerre())
+                assertFalse(aktivitetslogg.harVarslerEllerVerre())
                 assertTrue(it)
             }
     }

@@ -139,7 +139,7 @@ enum class Varselkode(
     RV_OV_2("Opptjeningsvurdering må gjøres manuelt fordi opplysningene fra AA-registeret er ufullstendige", avviklet = true),
 
     // MV: Medlemskapsvurdering
-    RV_MV_1("Vurder lovvalg og medlemskap"),
+    RV_MV_1("Vurder lovvalg og medlemskap", avviklet = true),
     RV_MV_2("Perioden er avslått på grunn av at den sykmeldte ikke er medlem av Folketrygden"),
     RV_MV_3("Arbeid utenfor Norge oppgitt i søknaden"),
 
