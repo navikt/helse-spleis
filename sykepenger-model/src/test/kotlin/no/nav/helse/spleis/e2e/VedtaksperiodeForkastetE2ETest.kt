@@ -53,6 +53,6 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         assertEquals(AVSLUTTET, observatør.forkastet(3.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
     }
 }
