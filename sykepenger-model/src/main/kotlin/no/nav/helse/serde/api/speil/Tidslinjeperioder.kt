@@ -51,6 +51,7 @@ import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlag
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.speil.builders.PeriodeVarslerBuilder
 import no.nav.helse.Alder
+import no.nav.helse.person.Vedtaksperiode
 
 internal class Generasjoner(perioder: Tidslinjeperioder) {
     private val generasjoner: List<Generasjon> = perioder.toGenerasjoner()
@@ -176,7 +177,6 @@ internal class Tidslinjeperioder(
                     beregnetPeriode(
                         periode = periode,
                         vilkårsgrunnlagTilutbetaling = vilkårsgrunnlag to utbetaling,
-                        utbetalinger = periode.utbetalinger.map { it.second },
                         tidslinjeberegning = tidslinjeberegning,
                         erForkastet = erForkastet(periode.vedtaksperiodeId),
                         vilkårsgrunnlaghistorikk = vilkårsgrunnlaghistorikk
@@ -217,7 +217,6 @@ internal class Tidslinjeperioder(
     private fun beregnetPeriode(
         periode: IVedtaksperiode,
         vilkårsgrunnlagTilutbetaling: Pair<IVilkårsgrunnlag?, IUtbetaling>,
-        utbetalinger: List<IUtbetaling>,
         tidslinjeberegning: ITidslinjeberegning,
         erForkastet: Boolean,
         vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
@@ -255,10 +254,7 @@ internal class Tidslinjeperioder(
             aktivitetslogg = varsler,
             periodetilstand = when {
                 utbetalingDTO.erAnnullering() -> if (utbetalingDTO.status != Utbetalingstatus.Annullert) TilAnnullering else Annullert
-                utbetalingDTO.revurderingFeilet(periode.tilstand) -> when {
-                    utbetalinger.all { it.toDTO().revurderingFeilet(periode.tilstand) } && erForkastet -> Annullert
-                    else -> Periodetilstand.RevurderingFeilet
-                }
+                utbetalingDTO.revurderingFeilet(periode.tilstand) -> Periodetilstand.RevurderingFeilet
                 utbetalingDTO.kanUtbetales() -> when {
                     utbetalingDTO.venterPåRevurdering(periode.tilstand) && utbetalingDTO.ikkeBetalt() -> VenterPåAnnenPeriode
                     utbetalingDTO.venterPåRevurdering(periode.tilstand) && !utbetalingDTO.utbetales() -> UtbetaltVenterPåAnnenPeriode

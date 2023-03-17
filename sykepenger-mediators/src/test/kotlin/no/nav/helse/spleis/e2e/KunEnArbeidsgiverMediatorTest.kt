@@ -185,7 +185,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
             "TIL_UTBETALING",
-            "AVSLUTTET"
+            "AVSLUTTET",
+            "TIL_INFOTRYGD"
         )
     }
 

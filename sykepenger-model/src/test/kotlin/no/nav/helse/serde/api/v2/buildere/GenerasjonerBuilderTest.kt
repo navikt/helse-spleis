@@ -1280,7 +1280,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling()
         håndterUtbetalt()
 
-        assertTilstand(1.vedtaksperiode, REVURDERING_FEILET)
+        assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
 
         assertEquals(3, generasjoner.size)
         0.generasjon {
