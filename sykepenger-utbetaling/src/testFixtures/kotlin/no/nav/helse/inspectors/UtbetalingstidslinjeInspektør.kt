@@ -5,7 +5,7 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDagNavAnsvar
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodedagNav
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ForeldetDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Fridag
@@ -43,7 +43,7 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
     val navHelgdager = mutableListOf<NavHelgDag>()
     val arbeidsdager = mutableListOf<Arbeidsdag>()
     val arbeidsgiverdager = mutableListOf<ArbeidsgiverperiodeDag>()
-    val arbeidsgiverperiodedagerNavAnsvar = mutableListOf<ArbeidsgiverperiodeDagNavAnsvar>()
+    val arbeidsgiverperiodedagerNavAnsvar = mutableListOf<ArbeidsgiverperiodedagNav>()
     val fridager = mutableListOf<Fridag>()
     val avvistedatoer = mutableListOf<LocalDate>()
     val avvistedager = mutableListOf<AvvistDag>()
@@ -110,7 +110,7 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
         collect(dag, dato, økonomi)
     }
 
-    override fun visit(dag: ArbeidsgiverperiodeDagNavAnsvar, dato: LocalDate, økonomi: Økonomi) {
+    override fun visit(dag: ArbeidsgiverperiodedagNav, dato: LocalDate, økonomi: Økonomi) {
         arbeidsgiverperiodedagNavAnsvarTeller += 1
         arbeidsgiverperiodedagerNavAnsvar.add(dag)
         collect(dag, dato, økonomi)

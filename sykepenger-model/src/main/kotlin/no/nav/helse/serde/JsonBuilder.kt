@@ -49,6 +49,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonD
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PERMISJONSDAG
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PROBLEMDAG
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG_NAV_ANSVAR
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.api.BuilderState
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
@@ -65,11 +66,12 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
@@ -1544,6 +1546,10 @@ internal class JsonBuilder : AbstractBuilder() {
             dager.plus(dato, builder.build())
         }
 
+        override fun visit(dag: Utbetalingsdag.ArbeidsgiverperiodedagNav, dato: LocalDate, økonomi: Økonomi) {
+            leggTilDag(dato, UtbetalingsdagJsonBuilder(TypeData.ArbeidsgiverperiodedagNav).økonomi(økonomi))
+        }
+
         override fun visit(dag: ArbeidsgiverperiodeDag, dato: LocalDate, økonomi: Økonomi) {
             leggTilDag(dato, UtbetalingsdagJsonBuilder(TypeData.ArbeidsgiverperiodeDag).økonomi(økonomi))
         }
@@ -1685,6 +1691,9 @@ internal class JsonBuilder : AbstractBuilder() {
             økonomi: Økonomi,
             kilde: Hendelseskilde
         ) = leggTilDag(dato, DagJsonBuilder(SYKEDAG, kilde).økonomi(økonomi))
+
+        override fun visitDag(dag: Dag.SykedagNavAnsvar, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) =
+            leggTilDag(dato, DagJsonBuilder(SYKEDAG_NAV_ANSVAR, kilde).økonomi(økonomi))
 
         override fun visitDag(
             dag: Dag.ForeldetSykedag,

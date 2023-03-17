@@ -785,7 +785,12 @@ internal data class PersonData(
                     } else {
                         Dag.Sykedag(dato, økonomi, hendelseskilde)
                     }
-                    else -> throw IllegalStateException("Deserialisering av $type er ikke støttet")
+                    JsonDagType.SYKEDAG_NAV_ANSVAR -> Dag.SykedagNavAnsvar(
+                        dato,
+                        økonomi,
+                        hendelseskilde
+                    )
+                    JsonDagType.UKJENT_DAG -> throw IllegalStateException("Deserialisering av $type er ikke støttet")
                 }
             }
 
@@ -799,6 +804,7 @@ internal data class PersonData(
                 PERMISJONSDAG,
                 PROBLEMDAG,
                 SYKEDAG,
+                SYKEDAG_NAV_ANSVAR,
 
                 UKJENT_DAG
             }
@@ -1318,7 +1324,8 @@ internal data class PersonData(
             Fridag,
             AvvistDag,
             UkjentDag,
-            ForeldetDag
+            ForeldetDag,
+            ArbeidsgiverperiodedagNav
         }
 
         data class UtbetalingsdagData(
@@ -1394,6 +1401,9 @@ internal data class PersonData(
                     }
                     TypeData.ForeldetDag -> {
                         Utbetalingsdag.ForeldetDag(dato = dato, økonomi = økonomi)
+                    }
+                    TypeData.ArbeidsgiverperiodedagNav -> {
+                        Utbetalingsdag.ArbeidsgiverperiodedagNav(dato = dato, økonomi = økonomi)
                     }
                 }
         }

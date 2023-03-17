@@ -37,10 +37,10 @@ sealed class Utbetalingsdag(
         override fun kopierMed(økonomi: Økonomi) = ArbeidsgiverperiodeDag(dato, økonomi)
     }
 
-    class ArbeidsgiverperiodeDagNavAnsvar(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
+    class ArbeidsgiverperiodedagNav(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
         override val prioritet = 45
         override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
-        override fun kopierMed(økonomi: Økonomi) = ArbeidsgiverperiodeDagNavAnsvar(dato, økonomi)
+        override fun kopierMed(økonomi: Økonomi) = ArbeidsgiverperiodedagNav(dato, økonomi)
     }
 
     class NavDag(
