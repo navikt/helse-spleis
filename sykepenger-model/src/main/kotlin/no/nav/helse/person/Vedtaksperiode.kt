@@ -482,8 +482,7 @@ internal class Vedtaksperiode private constructor(
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
         this.utbetalinger.forkast(hendelse)
         val vedtaksperiodeForkastetEventBuilder = VedtaksperiodeForkastetEventBuilder(tilstand.type)
-        // TODO: Speilbuilder må støtte å vise røde pølser dersom perioden er TIL_INFOTRYGD og utbetalingen er annullert, og ignorerer infotrygdpølser uten utbetaling
-        if (!this.utbetalinger.harAvsluttede()) tilstand(hendelse, TilInfotrygd)
+        tilstand(hendelse, TilInfotrygd)
         return vedtaksperiodeForkastetEventBuilder
     }
 
