@@ -25,11 +25,10 @@ internal class VedtaksperiodeAkkumulator {
         vedtaksperioder.add(vedtaksperiode)
     }
 
-    internal fun supplerMedAnnulleringer(annulleringer: AnnulleringerAkkumulator) {
-        vedtaksperioder.forEach { periode ->
-            periode.håndterAnnullering(annulleringer)
+    internal fun beholdAktiveOgAnnullerte(annulleringer: AnnulleringerAkkumulator) =
+        vedtaksperioder.filter { periode ->
+            periode.beholdAktivOgAnnullert(annulleringer)
         }
-    }
 
     internal fun toList() = vedtaksperioder.toList()
 }

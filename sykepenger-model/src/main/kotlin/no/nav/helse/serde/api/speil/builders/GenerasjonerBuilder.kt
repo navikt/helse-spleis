@@ -70,12 +70,12 @@ internal class GenerasjonerBuilder(
         arbeidsgiver.periodetype(periode)
 
     fun build(): List<Generasjon> {
-        vedtaksperiodeAkkumulator.supplerMedAnnulleringer(annulleringer)
+        val vedtaksperioder = vedtaksperiodeAkkumulator.beholdAktiveOgAnnullerte(annulleringer)
         val tidslinjeberegninger = Tidslinjeberegninger(generasjonIderAkkumulator.toList(), sykdomshistorikkAkkumulator)
         val tidslinjeperioder = Tidslinjeperioder(
             alder = alder,
             forkastetVedtaksperiodeIder = forkastetVedtaksperiodeAkkumulator.toList(),
-            vedtaksperioder = vedtaksperiodeAkkumulator.toList(),
+            vedtaksperioder = vedtaksperioder,
             tidslinjeberegninger = tidslinjeberegninger,
             vilkårsgrunnlaghistorikk = vilkårsgrunnlaghistorikk
         )
@@ -84,6 +84,7 @@ internal class GenerasjonerBuilder(
 
     private fun byggVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
+        forkastet: Boolean,
         vedtaksperiodeId: UUID,
         tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
         oppdatert: LocalDateTime,
@@ -98,6 +99,7 @@ internal class GenerasjonerBuilder(
         vedtaksperiodeAkkumulator.leggTil(
             IVedtaksperiode(
                 vedtaksperiodeId,
+                forkastet,
                 periode.start,
                 periode.endInclusive,
                 inntektskilde = inntektskilde,
@@ -230,7 +232,7 @@ internal class GenerasjonerBuilder(
                 hendelseIder: Set<Dokumentsporing>,
                 inntektskilde: Inntektskilde
             ) {
-                builder.byggVedtaksperiode(vedtaksperiode, vedtaksperiodeId, tilstand, oppdatert, periode, skjæringstidspunkt, hendelseIder, inntektskilde)
+                builder.byggVedtaksperiode(vedtaksperiode, false, vedtaksperiodeId, tilstand, oppdatert, periode, skjæringstidspunkt, hendelseIder, inntektskilde)
             }
         }
         object ForkastedePerioder : Byggetilstand {
@@ -246,15 +248,7 @@ internal class GenerasjonerBuilder(
                 inntektskilde: Inntektskilde
             ) {
                 builder.forkastetVedtaksperiodeAkkumulator.leggTil(vedtaksperiodeId)
-
-                if (!skalForkastetPeriodeFåPølse(tilstand)) return
-                builder.byggVedtaksperiode(vedtaksperiode, vedtaksperiodeId, tilstand, oppdatert, periode, skjæringstidspunkt, hendelseIder, inntektskilde)
-            }
-
-            private fun skalForkastetPeriodeFåPølse(tilstand: Vedtaksperiode.Vedtaksperiodetilstand): Boolean {
-                // todo: speil vil lage pølser for annullerte (forkastede) perioder,
-                // derfor bør vi heller sjekke utbetalingene til vedtaksperioden fremfor tilstanden
-                return tilstand != Vedtaksperiode.TilInfotrygd
+                builder.byggVedtaksperiode(vedtaksperiode, true, vedtaksperiodeId, tilstand, oppdatert, periode, skjæringstidspunkt, hendelseIder, inntektskilde)
             }
         }
     }
