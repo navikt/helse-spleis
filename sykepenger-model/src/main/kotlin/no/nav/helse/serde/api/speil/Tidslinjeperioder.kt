@@ -19,17 +19,6 @@ import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.Generasjon
 import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.HendelseDTO.Companion.finn
-import no.nav.helse.serde.api.dto.Periodetilstand
-import no.nav.helse.serde.api.dto.Periodetilstand.Annullert
-import no.nav.helse.serde.api.dto.Periodetilstand.ForberederGodkjenning
-import no.nav.helse.serde.api.dto.Periodetilstand.IngenUtbetaling
-import no.nav.helse.serde.api.dto.Periodetilstand.ManglerInformasjon
-import no.nav.helse.serde.api.dto.Periodetilstand.TilAnnullering
-import no.nav.helse.serde.api.dto.Periodetilstand.TilGodkjenning
-import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
-import no.nav.helse.serde.api.dto.Periodetilstand.UtbetaltVenterPåAnnenPeriode
-import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
-import no.nav.helse.serde.api.dto.SammenslåttDag
 import no.nav.helse.serde.api.dto.SpeilOppdrag
 import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
 import no.nav.helse.serde.api.dto.SøknadNavDTO
@@ -51,6 +40,7 @@ import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlag
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.speil.builders.PeriodeVarslerBuilder
 import no.nav.helse.Alder
+import no.nav.helse.serde.api.dto.Periodetilstand.*
 
 internal class Generasjoner(perioder: Tidslinjeperioder) {
     private val generasjoner: List<Generasjon> = perioder.toGenerasjoner()
@@ -176,7 +166,6 @@ internal class Tidslinjeperioder(
                     beregnetPeriode(
                         periode = periode,
                         vilkårsgrunnlagTilutbetaling = vilkårsgrunnlag to utbetaling,
-                        utbetalinger = periode.utbetalinger.map { it.second },
                         tidslinjeberegning = tidslinjeberegning,
                         erForkastet = erForkastet(periode.vedtaksperiodeId),
                         vilkårsgrunnlaghistorikk = vilkårsgrunnlaghistorikk
@@ -217,7 +206,6 @@ internal class Tidslinjeperioder(
     private fun beregnetPeriode(
         periode: IVedtaksperiode,
         vilkårsgrunnlagTilutbetaling: Pair<IVilkårsgrunnlag?, IUtbetaling>,
-        utbetalinger: List<IUtbetaling>,
         tidslinjeberegning: ITidslinjeberegning,
         erForkastet: Boolean,
         vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
@@ -254,24 +242,18 @@ internal class Tidslinjeperioder(
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             aktivitetslogg = varsler,
             periodetilstand = when {
-                utbetalingDTO.erAnnullering() -> if (utbetalingDTO.status != Utbetalingstatus.Annullert) TilAnnullering else Annullert
-                utbetalingDTO.revurderingFeilet(periode.tilstand) -> when {
-                    utbetalinger.all { it.toDTO().revurderingFeilet(periode.tilstand) } && erForkastet -> Annullert
-                    else -> Periodetilstand.RevurderingFeilet
-                }
-                utbetalingDTO.kanUtbetales() -> when {
-                    utbetalingDTO.venterPåRevurdering(periode.tilstand) && utbetalingDTO.ikkeBetalt() -> VenterPåAnnenPeriode
-                    utbetalingDTO.venterPåRevurdering(periode.tilstand) && !utbetalingDTO.utbetales() -> UtbetaltVenterPåAnnenPeriode
-                    utbetalingDTO.utbetalt() -> when {
-                        avgrensetUtbetalingstidslinje.any { it.type == UtbetalingstidslinjedagType.NavDag  } -> Utbetalt
-                        else -> IngenUtbetaling
-                    }
-                    utbetalingDTO.utbetales() -> Periodetilstand.TilUtbetaling
-                    utbetalingDTO.tilGodkjenning() -> TilGodkjenning
-                    !iVentetilstand(periode.tilstand) -> ForberederGodkjenning
-                    else -> VenterPåAnnenPeriode
-                }
-                else -> ManglerInformasjon
+                utbetalingDTO.status == Utbetalingstatus.Annullert -> Annullert
+                utbetalingDTO.type == Utbetalingtype.ANNULLERING -> TilAnnullering
+                utbetalingDTO.status == Utbetalingstatus.IkkeGodkjent && utbetalingDTO.type == Utbetalingtype.REVURDERING -> RevurderingFeilet
+                utbetalingDTO.status == Utbetalingstatus.Utbetalt && periode.tilstand == AvventerRevurdering -> UtbetaltVenterPåAnnenPeriode
+                utbetalingDTO.status == Utbetalingstatus.Ubetalt && periode.tilstand == AvventerRevurdering -> VenterPåAnnenPeriode
+                utbetalingDTO.status == Utbetalingstatus.GodkjentUtenUtbetaling || avgrensetUtbetalingstidslinje.none { it.type == UtbetalingstidslinjedagType.NavDag }-> IngenUtbetaling
+                utbetalingDTO.status == Utbetalingstatus.Utbetalt -> Utbetalt
+                utbetalingDTO.status == Utbetalingstatus.Godkjent -> TilUtbetaling
+                utbetalingDTO.status == Utbetalingstatus.Overført -> TilUtbetaling
+                utbetalingDTO.tilGodkjenning() -> TilGodkjenning
+                !iVentetilstand(periode.tilstand) -> ForberederGodkjenning
+                else -> VenterPåAnnenPeriode
             },
         )
     }

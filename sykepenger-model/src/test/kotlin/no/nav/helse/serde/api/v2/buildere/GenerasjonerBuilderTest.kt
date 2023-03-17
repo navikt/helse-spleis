@@ -1410,7 +1410,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `revurdering til kun ferie`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterOverstyrTidslinje(List(16) { ManuellOverskrivingDag(16.januar.plusDays(it.toLong()), Dagtype.Feriedag) })
+        håndterOverstyrTidslinje((17.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Feriedag) })
         håndterYtelser()
         håndterSimulering()
         håndterUtbetalingsgodkjenning()

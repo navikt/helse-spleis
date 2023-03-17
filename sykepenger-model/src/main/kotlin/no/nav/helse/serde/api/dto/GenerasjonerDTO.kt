@@ -6,7 +6,6 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
-import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.api.dto.Periodetilstand.ForberederGodkjenning
 import no.nav.helse.serde.api.dto.Periodetilstand.ManglerInformasjon
 import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
@@ -226,18 +225,9 @@ class Utbetaling(
     val tilGodkjenning: Boolean,
     private val korrelasjonsId: KorrelasjonsId
 ) {
-    fun erAnnullering() = type == Utbetalingtype.ANNULLERING
-    private fun erForkastetRevurdering() = status == Utbetalingstatus.Forkastet && type == Utbetalingtype.REVURDERING
-    fun utbetales() = status in listOf(Utbetalingstatus.Overført)
-    fun ikkeBetalt() = status == Utbetalingstatus.Ubetalt
-    fun utbetalt() = status in listOf(Utbetalingstatus.Utbetalt, Utbetalingstatus.GodkjentUtenUtbetaling)
-    fun kanUtbetales() = !erForkastetRevurdering()
     fun tilGodkjenning() = tilGodkjenning
 
     fun hørerSammen(other: Utbetaling) = korrelasjonsId == other.korrelasjonsId
-
-    internal fun revurderingFeilet(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) = (erForkastetRevurdering() || status in setOf(Utbetalingstatus.IkkeGodkjent, Utbetalingstatus.Ubetalt)) && tilstand == Vedtaksperiode.RevurderingFeilet
-    internal fun venterPåRevurdering(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) = tilstand == Vedtaksperiode.AvventerRevurdering
 
     data class Vurdering(
         val godkjent: Boolean,
