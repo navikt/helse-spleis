@@ -317,6 +317,7 @@ internal class Tidslinjeperioder(
 
 internal class IVedtaksperiode(
     val vedtaksperiodeId: UUID,
+    private val forkastet: Boolean,
     val fom: LocalDate,
     val tom: LocalDate,
     val inntektskilde: Inntektskilde,
@@ -331,12 +332,14 @@ internal class IVedtaksperiode(
 ) {
     val utbetalinger = utbetalinger.toMutableList()
 
-    fun håndterAnnullering(annulleringer: AnnulleringerAkkumulator) {
-        utbetalinger.firstOrNull()?.also {
-            annulleringer.finnAnnullering(it.second)?.let { annullering ->
-                utbetalinger.add(null to annullering)
-            }
-        }
+    fun beholdAktivOgAnnullert(annulleringer: AnnulleringerAkkumulator): Boolean {
+        val annulleringerForVedtaksperioden = utbetalinger
+            .mapNotNull { (_, utbetaling) -> annulleringer.finnAnnullering(utbetaling) }
+            .distinctBy { it.korrelasjonsId }
+            .map { null to it }
+        this.utbetalinger.addAll(annulleringerForVedtaksperioden)
+
+        return !forkastet || annulleringerForVedtaksperioden.isNotEmpty()
     }
 
     fun tilGodkjenning() = tilstand in listOf(AvventerGodkjenning, AvventerGodkjenningRevurdering)
@@ -349,7 +352,7 @@ internal class IVedtaksperiode(
 
 internal class IUtbetaling(
     val id: UUID,
-    private val korrelasjonsId: UUID,
+    val korrelasjonsId: UUID,
     val beregningId: BeregningId,
     val opprettet: LocalDateTime,
     val utbetalingstidslinje: List<Utbetalingstidslinjedag>,
