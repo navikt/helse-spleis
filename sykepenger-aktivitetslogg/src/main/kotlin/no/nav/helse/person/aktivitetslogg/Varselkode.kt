@@ -141,6 +141,7 @@ enum class Varselkode(
     // MV: Medlemskapsvurdering
     RV_MV_1("Vurder lovvalg og medlemskap"),
     RV_MV_2("Perioden er avslått på grunn av at den sykmeldte ikke er medlem av Folketrygden"),
+    RV_MV_3("Arbeid utenfor Norge oppgitt i søknaden"),
 
     // IV: Inntektsvurdering
     RV_IV_1("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret."),

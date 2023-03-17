@@ -83,8 +83,7 @@ class Søknad(
             varsel(RV_SØ_2)
         }
         if (arbeidUtenforNorge) {
-            // TODO: varsel
-            info("Bruker har oppgitt arbeid utenfor Norge.")
+            varsel(RV_MV_3)
         }
         if (utenlandskSykmelding) funksjonellFeil(RV_SØ_29)
         if (sendTilGosys) funksjonellFeil(RV_SØ_30)
