@@ -83,6 +83,7 @@ import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.forkastAlle
+import no.nav.helse.spleis.e2e.forlengTilGodkjenning
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterAnnullerUtbetaling
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -1450,6 +1451,29 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(2, perioder.size)
             beregnetPeriode(0) medTilstand Annullert
             beregnetPeriode(1) medTilstand Utbetalt
+        }
+        1.generasjon {
+            assertEquals(2, perioder.size)
+            beregnetPeriode(0) medTilstand Utbetalt
+            beregnetPeriode(1) medTilstand Utbetalt
+        }
+    }
+
+    @Test
+    fun `annullering etter utbetaling underkjent`() {
+        nyttVedtak(1.mars, 31.mars)
+        forlengVedtak(1.april, 30.april)
+        forlengTilGodkjenning(1.mai, 31.mai)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode, utbetalingGodkjent = false)
+
+        håndterAnnullerUtbetaling()
+        håndterUtbetalt()
+
+        assertEquals(2, generasjoner.size)
+        0.generasjon {
+            assertEquals(2, perioder.size)
+            beregnetPeriode(0) medTilstand Annullert
+            beregnetPeriode(1) medTilstand Annullert
         }
         1.generasjon {
             assertEquals(2, perioder.size)

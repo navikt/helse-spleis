@@ -315,13 +315,16 @@ internal class IVedtaksperiode(
     val utbetalinger = utbetalinger.toMutableList()
 
     fun beholdAktivOgAnnullert(annulleringer: AnnulleringerAkkumulator): Boolean {
+        val harVærtUtbetalt = utbetalinger.any { (_, utbetaling) ->
+            utbetaling.toDTO().status != Utbetalingstatus.IkkeGodkjent && utbetaling.toDTO().type != Utbetalingtype.REVURDERING
+        }
         val annulleringerForVedtaksperioden = utbetalinger
             .mapNotNull { (_, utbetaling) -> annulleringer.finnAnnullering(utbetaling) }
             .distinctBy { it.korrelasjonsId }
             .map { null to it }
         this.utbetalinger.addAll(annulleringerForVedtaksperioden)
 
-        return !forkastet || annulleringerForVedtaksperioden.isNotEmpty()
+        return !forkastet || (annulleringerForVedtaksperioden.isNotEmpty() && harVærtUtbetalt)
     }
 
     fun tilGodkjenning() = tilstand in listOf(AvventerGodkjenning, AvventerGodkjenningRevurdering)
