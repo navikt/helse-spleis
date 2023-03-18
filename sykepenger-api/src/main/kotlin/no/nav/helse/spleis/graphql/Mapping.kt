@@ -182,7 +182,6 @@ private fun mapUtbetaling(utbetaling: Utbetaling) = GraphQLUtbetaling(
     status = utbetaling.status.toString(),
     statusEnum = when (utbetaling.status) {
         Utbetalingstatus.Annullert -> GraphQLUtbetalingstatus.Annullert
-        Utbetalingstatus.Forkastet -> GraphQLUtbetalingstatus.Forkastet
         Utbetalingstatus.Godkjent -> GraphQLUtbetalingstatus.Godkjent
         Utbetalingstatus.GodkjentUtenUtbetaling -> GraphQLUtbetalingstatus.GodkjentUtenUtbetaling
         Utbetalingstatus.IkkeGodkjent -> GraphQLUtbetalingstatus.IkkeGodkjent

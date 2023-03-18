@@ -28,6 +28,7 @@ import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.FORKASTET
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_GODKJENT
 import no.nav.helse.økonomi.Prosent
 import org.slf4j.LoggerFactory
 import no.nav.helse.utbetalingslinjer.Utbetaling as InternUtbetaling
@@ -188,7 +189,7 @@ internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode) : Vedtaksperi
         avstemmingsnøkkel: Long?,
         annulleringer: Set<UUID>
     ) {
-        if (utbetalingstatus == FORKASTET) return
+        if (utbetalingstatus == FORKASTET || (type == Utbetalingtype.UTBETALING && utbetalingstatus == IKKE_GODKJENT)) return
         utbetalinger.putIfAbsent(id, UtbetalingBuilder(utbetaling).build())
     }
 }

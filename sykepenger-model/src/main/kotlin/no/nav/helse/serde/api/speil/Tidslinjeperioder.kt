@@ -3,15 +3,17 @@ package no.nav.helse.serde.api.speil
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Alder
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Vedtaksperiode.AvsluttetUtenUtbetaling
 import no.nav.helse.person.Vedtaksperiode.AvventerBlokkerendePeriode
-import no.nav.helse.person.Vedtaksperiode.AvventerGjennomførtRevurdering
 import no.nav.helse.person.Vedtaksperiode.AvventerGodkjenning
 import no.nav.helse.person.Vedtaksperiode.AvventerGodkjenningRevurdering
 import no.nav.helse.person.Vedtaksperiode.AvventerHistorikk
 import no.nav.helse.person.Vedtaksperiode.AvventerRevurdering
+import no.nav.helse.person.Vedtaksperiode.AvventerSimulering
+import no.nav.helse.person.Vedtaksperiode.AvventerSimuleringRevurdering
 import no.nav.helse.person.Vedtaksperiode.AvventerVilkårsprøving
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -19,6 +21,17 @@ import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.Generasjon
 import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.HendelseDTO.Companion.finn
+import no.nav.helse.serde.api.dto.Periodetilstand.Annullert
+import no.nav.helse.serde.api.dto.Periodetilstand.ForberederGodkjenning
+import no.nav.helse.serde.api.dto.Periodetilstand.IngenUtbetaling
+import no.nav.helse.serde.api.dto.Periodetilstand.ManglerInformasjon
+import no.nav.helse.serde.api.dto.Periodetilstand.RevurderingFeilet
+import no.nav.helse.serde.api.dto.Periodetilstand.TilAnnullering
+import no.nav.helse.serde.api.dto.Periodetilstand.TilGodkjenning
+import no.nav.helse.serde.api.dto.Periodetilstand.TilUtbetaling
+import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
+import no.nav.helse.serde.api.dto.Periodetilstand.UtbetaltVenterPåAnnenPeriode
+import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
 import no.nav.helse.serde.api.dto.SpeilOppdrag
 import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
 import no.nav.helse.serde.api.dto.SøknadNavDTO
@@ -39,8 +52,6 @@ import no.nav.helse.serde.api.speil.builders.BeregningId
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlag
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.speil.builders.PeriodeVarslerBuilder
-import no.nav.helse.Alder
-import no.nav.helse.serde.api.dto.Periodetilstand.*
 
 internal class Generasjoner(perioder: Tidslinjeperioder) {
     private val generasjoner: List<Generasjon> = perioder.toGenerasjoner()
@@ -241,28 +252,32 @@ internal class Tidslinjeperioder(
             utbetaling = utbetalingDTO,
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             aktivitetslogg = varsler,
-            periodetilstand = when {
-                utbetalingDTO.status == Utbetalingstatus.Annullert -> Annullert
-                utbetalingDTO.type == Utbetalingtype.ANNULLERING -> TilAnnullering
-                utbetalingDTO.status == Utbetalingstatus.IkkeGodkjent && utbetalingDTO.type == Utbetalingtype.REVURDERING -> RevurderingFeilet
-                utbetalingDTO.status == Utbetalingstatus.Utbetalt && periode.tilstand == AvventerRevurdering -> UtbetaltVenterPåAnnenPeriode
-                utbetalingDTO.status == Utbetalingstatus.Ubetalt && periode.tilstand == AvventerRevurdering -> VenterPåAnnenPeriode
-                utbetalingDTO.status == Utbetalingstatus.GodkjentUtenUtbetaling || avgrensetUtbetalingstidslinje.none { it.type == UtbetalingstidslinjedagType.NavDag }-> IngenUtbetaling
-                utbetalingDTO.status == Utbetalingstatus.Utbetalt -> Utbetalt
-                utbetalingDTO.status == Utbetalingstatus.Godkjent -> TilUtbetaling
-                utbetalingDTO.status == Utbetalingstatus.Overført -> TilUtbetaling
-                utbetalingDTO.tilGodkjenning() -> TilGodkjenning
-                !iVentetilstand(periode.tilstand) -> ForberederGodkjenning
-                else -> VenterPåAnnenPeriode
-            },
+            periodetilstand = utledePeriodetilstand(utbetalingDTO, periode.tilstand, avgrensetUtbetalingstidslinje),
         )
     }
 
-    private fun iVentetilstand(tilstand: Vedtaksperiodetilstand) = tilstand in listOf(
-        AvventerBlokkerendePeriode,
-        AvventerGjennomførtRevurdering,
-        AvventerRevurdering
-    )
+    private fun utledePeriodetilstand(utbetalingDTO: Utbetaling, periodetilstand: Vedtaksperiodetilstand, avgrensetUtbetalingstidslinje: List<Utbetalingstidslinjedag>) =
+        when (utbetalingDTO.status) {
+            Utbetalingstatus.Annullert -> Annullert
+            Utbetalingstatus.IkkeGodkjent -> RevurderingFeilet
+            Utbetalingstatus.Utbetalt -> when {
+                periodetilstand == AvventerRevurdering -> UtbetaltVenterPåAnnenPeriode
+                avgrensetUtbetalingstidslinje.none { it.type == UtbetalingstidslinjedagType.NavDag } -> IngenUtbetaling
+                else -> Utbetalt
+            }
+            Utbetalingstatus.Ubetalt -> when {
+                utbetalingDTO.type == Utbetalingtype.ANNULLERING -> TilAnnullering
+                utbetalingDTO.tilGodkjenning() -> TilGodkjenning
+                periodetilstand in setOf(AvventerSimulering, AvventerSimuleringRevurdering) -> ForberederGodkjenning
+                else -> VenterPåAnnenPeriode
+            }
+            Utbetalingstatus.GodkjentUtenUtbetaling -> IngenUtbetaling
+            Utbetalingstatus.Godkjent,
+            Utbetalingstatus.Overført -> when {
+                utbetalingDTO.type == Utbetalingtype.ANNULLERING -> TilAnnullering
+                else -> TilUtbetaling
+            }
+        }
 
     private fun List<Utbetalingstidslinjedag>.sisteNavDag() =
         lastOrNull { it.type == UtbetalingstidslinjedagType.NavDag }
@@ -315,16 +330,13 @@ internal class IVedtaksperiode(
     val utbetalinger = utbetalinger.toMutableList()
 
     fun beholdAktivOgAnnullert(annulleringer: AnnulleringerAkkumulator): Boolean {
-        val harVærtUtbetalt = utbetalinger.any { (_, utbetaling) ->
-            utbetaling.toDTO().status != Utbetalingstatus.IkkeGodkjent && utbetaling.toDTO().type != Utbetalingtype.REVURDERING
-        }
         val annulleringerForVedtaksperioden = utbetalinger
             .mapNotNull { (_, utbetaling) -> annulleringer.finnAnnullering(utbetaling) }
             .distinctBy { it.korrelasjonsId }
             .map { null to it }
         this.utbetalinger.addAll(annulleringerForVedtaksperioden)
 
-        return !forkastet || (annulleringerForVedtaksperioden.isNotEmpty() && harVærtUtbetalt)
+        return !forkastet || annulleringerForVedtaksperioden.isNotEmpty()
     }
 
     fun tilGodkjenning() = tilstand in listOf(AvventerGodkjenning, AvventerGodkjenningRevurdering)
@@ -344,8 +356,8 @@ internal class IUtbetaling(
     val maksdato: LocalDate,
     val gjenståendeSykedager: Int?,
     val forbrukteSykedager: Int?,
-    private val type: String,
-    private val tilstand: String,
+    type: String,
+    tilstand: String,
     private val arbeidsgiverNettoBeløp: Int,
     private val personNettoBeløp: Int,
     private val arbeidsgiverFagsystemId: String,
@@ -354,6 +366,9 @@ internal class IUtbetaling(
     private val oppdrag: Map<String, SpeilOppdrag>
 ) {
     private var erTilGodkjenning = false
+    private val type: Utbetalingtype = utledType(type)
+    private val status: Utbetalingstatus = utledStatus(this.type, tilstand)
+
     fun erSammeSom(other: IUtbetaling) = id == other.id
     fun hørerSammen(other: IUtbetaling) = korrelasjonsId == other.korrelasjonsId
 
@@ -363,8 +378,8 @@ internal class IUtbetaling(
 
     fun toDTO(): Utbetaling {
         return Utbetaling(
-            type = Utbetalingtype.valueOf(type),
-            status = Utbetalingstatus.valueOf(tilstand),
+            type = type,
+            status = status,
             arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
             personNettoBeløp = personNettoBeløp,
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
@@ -381,6 +396,30 @@ internal class IUtbetaling(
         internal fun Map<UUID, IUtbetaling>.leggTil(utbetaling: IUtbetaling): Map<UUID, IUtbetaling> {
             return this.toMutableMap().also {
                 it.putIfAbsent(utbetaling.korrelasjonsId, utbetaling)
+            }
+        }
+
+        private fun utledType(type: String) = when (type) {
+            "UTBETALING" -> Utbetalingtype.UTBETALING
+            "ETTERUTBETALING" -> Utbetalingtype.ETTERUTBETALING
+            "ANNULLERING" -> Utbetalingtype.ANNULLERING
+            "REVURDERING" -> Utbetalingtype.REVURDERING
+            else -> error("har ingen mappingregel for $type")
+        }
+
+        private fun utledStatus(type: Utbetalingtype, tilstand: String): Utbetalingstatus {
+            return when (tilstand) {
+                "Annullert" -> Utbetalingstatus.Annullert
+                "Godkjent" -> Utbetalingstatus.Godkjent
+                "GodkjentUtenUtbetaling" -> Utbetalingstatus.GodkjentUtenUtbetaling
+                "IkkeGodkjent" -> when (type) {
+                    Utbetalingtype.REVURDERING -> Utbetalingstatus.IkkeGodkjent
+                    else -> error("forsøker å mappe en IKKE_GODKJENT-utbetaling til Speil, som ikke er revurdering")
+                }
+                "Overført" -> Utbetalingstatus.Overført
+                "Ubetalt" -> Utbetalingstatus.Ubetalt
+                "Utbetalt" -> Utbetalingstatus.Utbetalt
+                else -> error("har ingen mappingregel for $tilstand")
             }
         }
     }
