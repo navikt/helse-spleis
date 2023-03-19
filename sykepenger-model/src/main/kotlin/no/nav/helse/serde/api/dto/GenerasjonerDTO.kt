@@ -10,6 +10,7 @@ import no.nav.helse.serde.api.dto.Periodetilstand.ForberederGodkjenning
 import no.nav.helse.serde.api.dto.Periodetilstand.ManglerInformasjon
 import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
 import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
+import no.nav.helse.serde.api.speil.Generasjoner
 import no.nav.helse.serde.api.speil.builders.BeregningId
 import no.nav.helse.serde.api.speil.builders.KorrelasjonsId
 
@@ -52,12 +53,23 @@ abstract class Tidslinjeperiode : Comparable<Tidslinjeperiode> {
     abstract val inntektskilde: Inntektskilde
     abstract val erForkastet: Boolean
     abstract val opprettet: LocalDateTime
+    abstract val oppdatert: LocalDateTime
     abstract val periodetilstand: Periodetilstand
     abstract val skjæringstidspunkt: LocalDate
+    protected abstract val sorteringstidspunkt: LocalDateTime
 
     internal fun erSammeVedtaksperiode(other: Tidslinjeperiode) = vedtaksperiodeId == other.vedtaksperiodeId
     internal open fun venter() = periodetilstand in setOf(VenterPåAnnenPeriode, ForberederGodkjenning, ManglerInformasjon)
+    internal abstract fun tilGenerasjon(generasjoner: Generasjoner)
+
     override fun compareTo(other: Tidslinjeperiode) = tom.compareTo(other.tom)
+
+    internal companion object {
+        fun List<Tidslinjeperiode>.sorterEtterHendelse() = this
+            .sortedBy { it.sorteringstidspunkt }
+        fun List<Tidslinjeperiode>.sorterEtterPeriode() = this
+            .sortedByDescending { it.fom }
+    }
 }
 
 private val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
@@ -72,11 +84,17 @@ data class UberegnetPeriode(
     override val inntektskilde: Inntektskilde,
     override val erForkastet: Boolean,
     override val opprettet: LocalDateTime,
+    override val oppdatert: LocalDateTime,
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate
 ) : Tidslinjeperiode() {
+    override val sorteringstidspunkt = opprettet
     override fun toString(): String {
         return "${fom.format()}-${tom.format()} - $periodetilstand"
+    }
+
+    override fun tilGenerasjon(generasjoner: Generasjoner) {
+        generasjoner.uberegnetPeriode(this)
     }
 }
 
@@ -90,6 +108,8 @@ data class BeregnetPeriode(
     override val periodetype: Periodetype,
     override val inntektskilde: Inntektskilde,
     override val opprettet: LocalDateTime,
+    val beregnet: LocalDateTime,
+    override val oppdatert: LocalDateTime,
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate,
     val beregningId: BeregningId,
@@ -102,14 +122,22 @@ data class BeregnetPeriode(
     val aktivitetslogg: List<AktivitetDTO>,
     val vilkårsgrunnlagId: UUID?
 ) : Tidslinjeperiode() {
+    override val sorteringstidspunkt = beregnet
 
     override fun venter(): Boolean = super.venter() && periodetilstand != Utbetalt
 
-    internal fun erAnnullering() = utbetaling.type == Utbetalingtype.ANNULLERING
-    internal fun erRevurdering() = utbetaling.type == Utbetalingtype.REVURDERING
-    internal fun hørerSammen(other: Tidslinjeperiode) = other is BeregnetPeriode && utbetaling.hørerSammen(other.utbetaling)
+    internal fun sammeUtbetaling(other: BeregnetPeriode) = this.utbetaling.id == other.utbetaling.id
+
     override fun toString(): String {
         return "${fom.format()}-${tom.format()} - $periodetilstand - ${utbetaling.type}"
+    }
+
+    override fun tilGenerasjon(generasjoner: Generasjoner) {
+        when (utbetaling.type) {
+            Utbetalingtype.REVURDERING -> generasjoner.revurdertPeriode(this)
+            Utbetalingtype.ANNULLERING -> generasjoner.annullertPeriode(this)
+            else -> generasjoner.utbetaltPeriode(this)
+        }
     }
 
     data class Vilkår(

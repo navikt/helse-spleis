@@ -79,7 +79,7 @@ internal class GenerasjonerBuilder(
             tidslinjeberegninger = tidslinjeberegninger,
             vilkårsgrunnlaghistorikk = vilkårsgrunnlaghistorikk
         )
-        return Generasjoner(tidslinjeperioder).build()
+        return tidslinjeperioder.tilGenerasjoner()
     }
 
     private fun byggVedtaksperiode(
@@ -87,6 +87,7 @@ internal class GenerasjonerBuilder(
         forkastet: Boolean,
         vedtaksperiodeId: UUID,
         tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+        opprettet: LocalDateTime,
         oppdatert: LocalDateTime,
         periode: Periode,
         skjæringstidspunkt: LocalDate,
@@ -107,6 +108,7 @@ internal class GenerasjonerBuilder(
                 utbetalinger = utbetalinger,
                 periodetype = periodetype(periode),
                 sykdomstidslinje = sykdomstidslinje,
+                opprettet = opprettet,
                 oppdatert = oppdatert,
                 tilstand = tilstand,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -146,7 +148,7 @@ internal class GenerasjonerBuilder(
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: () -> Inntektskilde
     ) {
-        this.tilstand.besøkVedtaksperiode(this, vedtaksperiode, id, tilstand, oppdatert, periode, skjæringstidspunkt(), hendelseIder, inntektskilde())
+        this.tilstand.besøkVedtaksperiode(this, vedtaksperiode, id, tilstand, opprettet, oppdatert, periode, skjæringstidspunkt(), hendelseIder, inntektskilde())
     }
 
     override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
@@ -204,6 +206,7 @@ internal class GenerasjonerBuilder(
             vedtaksperiode: Vedtaksperiode,
             vedtaksperiodeId: UUID,
             tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+            opprettet: LocalDateTime,
             oppdatert: LocalDateTime,
             periode: Periode,
             skjæringstidspunkt: LocalDate,
@@ -226,13 +229,14 @@ internal class GenerasjonerBuilder(
                 vedtaksperiode: Vedtaksperiode,
                 vedtaksperiodeId: UUID,
                 tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+                opprettet: LocalDateTime,
                 oppdatert: LocalDateTime,
                 periode: Periode,
                 skjæringstidspunkt: LocalDate,
                 hendelseIder: Set<Dokumentsporing>,
                 inntektskilde: Inntektskilde
             ) {
-                builder.byggVedtaksperiode(vedtaksperiode, false, vedtaksperiodeId, tilstand, oppdatert, periode, skjæringstidspunkt, hendelseIder, inntektskilde)
+                builder.byggVedtaksperiode(vedtaksperiode, false, vedtaksperiodeId, tilstand, opprettet, oppdatert, periode, skjæringstidspunkt, hendelseIder, inntektskilde)
             }
         }
         object ForkastedePerioder : Byggetilstand {
@@ -241,6 +245,7 @@ internal class GenerasjonerBuilder(
                 vedtaksperiode: Vedtaksperiode,
                 vedtaksperiodeId: UUID,
                 tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+                opprettet: LocalDateTime,
                 oppdatert: LocalDateTime,
                 periode: Periode,
                 skjæringstidspunkt: LocalDate,
@@ -248,7 +253,7 @@ internal class GenerasjonerBuilder(
                 inntektskilde: Inntektskilde
             ) {
                 builder.forkastetVedtaksperiodeAkkumulator.leggTil(vedtaksperiodeId)
-                builder.byggVedtaksperiode(vedtaksperiode, true, vedtaksperiodeId, tilstand, oppdatert, periode, skjæringstidspunkt, hendelseIder, inntektskilde)
+                builder.byggVedtaksperiode(vedtaksperiode, true, vedtaksperiodeId, tilstand, opprettet, oppdatert, periode, skjæringstidspunkt, hendelseIder, inntektskilde)
             }
         }
     }

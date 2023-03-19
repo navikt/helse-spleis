@@ -36,16 +36,14 @@ import no.nav.helse.serde.api.dto.SpeilOppdrag
 import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
 import no.nav.helse.serde.api.dto.SøknadNavDTO
 import no.nav.helse.serde.api.dto.Tidslinjeperiode
+import no.nav.helse.serde.api.dto.Tidslinjeperiode.Companion.sorterEtterHendelse
+import no.nav.helse.serde.api.dto.Tidslinjeperiode.Companion.sorterEtterPeriode
 import no.nav.helse.serde.api.dto.UberegnetPeriode
 import no.nav.helse.serde.api.dto.Utbetaling
 import no.nav.helse.serde.api.dto.Utbetalingstatus
 import no.nav.helse.serde.api.dto.Utbetalingstidslinjedag
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
 import no.nav.helse.serde.api.dto.Utbetalingtype
-import no.nav.helse.serde.api.speil.Generasjoner.Generasjon.Companion.fjernErstattede
-import no.nav.helse.serde.api.speil.Generasjoner.Generasjon.Companion.flyttPerioder
-import no.nav.helse.serde.api.speil.Generasjoner.Generasjon.Companion.sorterGenerasjoner
-import no.nav.helse.serde.api.speil.Generasjoner.Generasjon.Companion.toDTO
 import no.nav.helse.serde.api.speil.IVedtaksperiode.Companion.tilGodkjenning
 import no.nav.helse.serde.api.speil.Tidslinjeberegninger.ITidslinjeberegning
 import no.nav.helse.serde.api.speil.builders.BeregningId
@@ -53,99 +51,103 @@ import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlag
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.speil.builders.PeriodeVarslerBuilder
 
-internal class Generasjoner(perioder: Tidslinjeperioder) {
-    private val generasjoner: List<Generasjon> = perioder.toGenerasjoner()
+class Generasjoner {
+    private val nåværendeGenerasjon = mutableListOf<Tidslinjeperiode>()
+    private val generasjoner = mutableListOf<GenerasjonDTO>()
+    private var tilstand: Byggetilstand = Byggetilstand.Initiell
 
-    internal fun build(): List<no.nav.helse.serde.api.dto.GenerasjonDTO> {
-        return generasjoner
-            .flyttPerioder()
-            .fjernErstattede()
-            .sorterGenerasjoner()
-            .toDTO()
-            .reversed()
+    internal fun build(): List<GenerasjonDTO> {
+        byggGenerasjon(nåværendeGenerasjon)
+        return this.generasjoner.toList()
     }
 
-    internal class Generasjon(perioder: List<Tidslinjeperiode>) {
-        private val perioder = perioder.toMutableList()
-        private var erstattet: Boolean = false
+    internal fun revurdertPeriode(periode: BeregnetPeriode) {
+        tilstand.revurdertPeriode(this, periode)
+    }
 
-        private val tidslinjeperioder = perioder.filterIsInstance<BeregnetPeriode>()
+    internal fun annullertPeriode(periode: BeregnetPeriode) {
+        tilstand.annullertPeriode(this, periode)
+    }
 
-        private fun finnPeriode(periode: Tidslinjeperiode) = perioder.find { it.erSammeVedtaksperiode(periode) }
-        private fun inneholderPeriode(periode: Tidslinjeperiode) = finnPeriode(periode) != null
-        private fun harAnnullert(periode: BeregnetPeriode): Boolean =
-            tidslinjeperioder.any { it.hørerSammen(periode) && it.erAnnullering() }
+    internal fun uberegnetPeriode(uberegnetPeriode: UberegnetPeriode) {
+        tilstand.uberegnetPeriode(this, uberegnetPeriode)
+    }
 
-        private fun senereUtbetalingAnnullert(periode: BeregnetPeriode): Boolean {
-            return perioder.any { it is BeregnetPeriode && it > periode && it.erAnnullering() && !it.hørerSammen(periode) }
+    internal fun utbetaltPeriode(beregnetPeriode: BeregnetPeriode) {
+        tilstand.utbetaltPeriode(this, beregnetPeriode)
+    }
+
+    private fun byggGenerasjon(periodene: List<Tidslinjeperiode>) {
+        if (periodene.isEmpty()) return
+        generasjoner.add(0, GenerasjonDTO(UUID.randomUUID(), periodene.sorterEtterPeriode()))
+    }
+
+    private fun leggTilNyRad() {
+        byggGenerasjon(nåværendeGenerasjon.filterNot { it.venter() })
+    }
+
+    private fun leggTilNyRadOgPeriode(periode: Tidslinjeperiode, nesteTilstand: Byggetilstand) {
+        leggTilNyRad()
+        leggTilNyPeriode(periode, nesteTilstand)
+    }
+
+    private fun leggTilNyPeriode(periode: Tidslinjeperiode, nesteTilstand: Byggetilstand? = null) {
+        val index = nåværendeGenerasjon.indexOfFirst { other -> periode.erSammeVedtaksperiode(other) }
+        if (index >= 0) nåværendeGenerasjon[index] = periode
+        else nåværendeGenerasjon.add(periode)
+        nesteTilstand?.also { this.tilstand = nesteTilstand }
+    }
+
+    private interface Byggetilstand {
+
+        fun uberegnetPeriode(generasjoner: Generasjoner, periode: UberegnetPeriode) {
+            generasjoner.leggTilNyPeriode(periode)
+        }
+        fun utbetaltPeriode(generasjoner: Generasjoner, periode: BeregnetPeriode) {
+            generasjoner.leggTilNyPeriode(periode, AktivGenerasjon(periode))
+        }
+        fun annullertPeriode(generasjoner: Generasjoner, periode: BeregnetPeriode) {
+            generasjoner.leggTilNyRadOgPeriode(periode, AnnullertGenerasjon)
+        }
+        fun revurdertPeriode(generasjoner: Generasjoner, periode: BeregnetPeriode) {
+            generasjoner.leggTilNyRadOgPeriode(periode, RevurdertGenerasjon(periode))
         }
 
-        private fun harMinstÉnRevurdertPeriodeTidligereEnn(tidslinjeperiode: Tidslinjeperiode): Boolean =
-            tidslinjeperioder.any { it.erRevurdering() && it.fom < tidslinjeperiode.fom && it.hørerSammen(tidslinjeperiode) }
+        object Initiell : Byggetilstand {
+            override fun annullertPeriode(generasjoner: Generasjoner, periode: BeregnetPeriode) =
+                error("forventet ikke en annullert periode i tilstand ${this::class.simpleName}!")
+            override fun revurdertPeriode(generasjoner: Generasjoner, periode: BeregnetPeriode) =
+                error("forventet ikke en revurdert periode i tilstand ${this::class.simpleName}!")
+        }
 
-        private fun kandidaterSomSkalFlyttesTilNesteGenerasjon(nesteGenerasjon: Generasjon, alle: List<Generasjon>): Pair<List<Tidslinjeperiode>, List<Tidslinjeperiode>> {
-            return perioder.partition { periode ->
-                if (periode !is BeregnetPeriode) return@partition FLYTTES
-                if (!periode.erAnnullering()) {
-                    if (nesteGenerasjon.harAnnullert(periode)) return@partition FLYTTES_IKKE
-
-                    // Dersom det har forekommet to annulleringer på rad rett etter denne versjonen av perioden,
-                    // der perioden inngår, ønsker vi ikke å flytte denne versjonen til neste generasjon fordi vi ønsker
-                    // å sammenstille de to annulleringene
-                    val nesteEtterNeste = alle.getOrNull(alle.indexOf(nesteGenerasjon) + 1)
-                    if (nesteGenerasjon.senereUtbetalingAnnullert(periode) && nesteEtterNeste?.harAnnullert(periode) == true) return@partition FLYTTES_IKKE
-                    if (nesteGenerasjon.harMinstÉnRevurdertPeriodeTidligereEnn(periode)) return@partition FLYTTES_IKKE
-                }
-                if (nesteGenerasjon.harMinstÉnRevurdertPeriodeTidligereEnn(periode)) return@partition FLYTTES
-                !nesteGenerasjon.inneholderPeriode(periode)
+        class AktivGenerasjon(private val forrigeBeregnet: BeregnetPeriode) : Byggetilstand {
+            override fun utbetaltPeriode(generasjoner: Generasjoner, periode: BeregnetPeriode) {
+                // en tidligere utbetalt periode vil bety at en tidligere uberegnet periode er omgjort/eller er out of order
+                if (periode < forrigeBeregnet) return generasjoner.leggTilNyPeriode(periode, EndringITidligerePeriodeGenerasjon(periode))
+                generasjoner.leggTilNyPeriode(periode, AktivGenerasjon(periode))
             }
         }
 
-        private fun sorterFallende(): Generasjon {
-            perioder.sortByDescending { it.fom }
-            return this
-        }
-
-        private fun fjernPerioderSomVenter(perioder: List<Tidslinjeperiode>) {
-            this.perioder.removeAll(perioder.filter { it.venter() })
-        }
-
-        private fun fjernOutOfOrder(skalFlyttes: List<Tidslinjeperiode>) {
-            val sortertePerioder = perioder.sortedByDescending { it.fom }
-            val skalFjernes = skalFlyttes.filter { sortertePerioder.indexOf(it) != 0 && it.opprettet > sortertePerioder[0].opprettet }
-            this.perioder.removeAll(skalFjernes)
-        }
-
-        private fun utvidMed(perioder: List<Tidslinjeperiode>) {
-            this.perioder.addAll(perioder)
-        }
-
-        internal companion object {
-            private const val FLYTTES_IKKE: Boolean = false
-            private const val FLYTTES: Boolean = true
-
-            internal fun List<Generasjon>.flyttPerioder(): List<Generasjon> {
-                forEachIndexed { index, generasjon ->
-                    if (index == size - 1) return@forEachIndexed // siste generasjon skal ikke gjøres noe med
-                    val nesteGenerasjon = this[index + 1]
-                    val (skalFlyttes, skalIkkeFlyttes) =
-                        generasjon.kandidaterSomSkalFlyttesTilNesteGenerasjon(nesteGenerasjon, this)
-                    nesteGenerasjon.utvidMed(skalFlyttes)
-                    generasjon.fjernOutOfOrder(skalFlyttes)
-                    generasjon.fjernPerioderSomVenter(skalFlyttes)
-                    generasjon.erstattet = skalIkkeFlyttes.isEmpty()
-                }
-                return this
+        class EndringITidligerePeriodeGenerasjon(private val outOfOrderPeriode: BeregnetPeriode) : Byggetilstand {
+            override fun revurdertPeriode(generasjoner: Generasjoner, periode: BeregnetPeriode) {
+                val perioder = generasjoner.nåværendeGenerasjon.filter { it >= outOfOrderPeriode && it < periode }
+                generasjoner.nåværendeGenerasjon.removeAll(perioder)
+                generasjoner.leggTilNyRad()
+                perioder.forEach { generasjoner.leggTilNyPeriode(it) }
+                generasjoner.leggTilNyPeriode(periode, RevurdertGenerasjon(periode))
             }
+        }
 
-            internal fun List<Generasjon>.fjernErstattede() = filterNot { it.erstattet }
+        object AnnullertGenerasjon : Byggetilstand {
+            override fun annullertPeriode(generasjoner: Generasjoner, periode: BeregnetPeriode) {
+                generasjoner.leggTilNyPeriode(periode)
+            }
+        }
 
-            internal fun List<Generasjon>.sorterGenerasjoner() = map { it.sorterFallende() }
-
-            internal fun List<Generasjon>.toDTO(): List<no.nav.helse.serde.api.dto.GenerasjonDTO> {
-                return map {
-                    GenerasjonDTO(UUID.randomUUID(), it.perioder)
-                }
+        class RevurdertGenerasjon(private val revurderingen: BeregnetPeriode) : Byggetilstand {
+            override fun revurdertPeriode(generasjoner: Generasjoner, periode: BeregnetPeriode) {
+                if (periode.sammeUtbetaling(revurderingen)) return generasjoner.leggTilNyPeriode(periode)
+                generasjoner.leggTilNyRadOgPeriode(periode, RevurdertGenerasjon(periode))
             }
         }
     }
@@ -163,14 +165,9 @@ internal class Tidslinjeperioder(
     private fun erForkastet(vedtaksperiodeId: UUID) = vedtaksperiodeId in forkastetVedtaksperiodeIder
 
     init {
-        perioder = vedtaksperioder.toMutableList().flatMap { periode ->
+        perioder = vedtaksperioder.flatMap { periode ->
             when {
-                periode.utbetalinger.isEmpty() -> listOf(
-                    uberegnetPeriode(
-                        periode,
-                        erForkastet(periode.vedtaksperiodeId)
-                    )
-                )
+                periode.utbetalinger.isEmpty() -> listOf(uberegnetPeriode(periode, erForkastet(periode.vedtaksperiodeId)))
                 else -> periode.utbetalinger.map { (vilkårsgrunnlag, utbetaling) ->
                     val tidslinjeberegning = tidslinjeberegninger.finn(utbetaling.beregningId)
                     utbetaling.settTilGodkjenning(vedtaksperioder)
@@ -183,15 +180,14 @@ internal class Tidslinjeperioder(
                     )
                 }
             }
-        }.sortedBy { it.opprettet }
+        }.sorterEtterHendelse()
     }
 
-    internal fun toGenerasjoner() = perioder.map {
-        Generasjoner.Generasjon(listOf(it))
-    }
+    internal fun tilGenerasjoner() = Generasjoner().apply {
+        perioder.forEach { periode -> periode.tilGenerasjon(this) }
+    }.build()
 
     private fun uberegnetPeriode(periode: IVedtaksperiode, erForkastet: Boolean): UberegnetPeriode {
-
         val tidslinje = periode.sykdomstidslinje.merge(emptyList())
         return UberegnetPeriode(
             vedtaksperiodeId = periode.vedtaksperiodeId,
@@ -201,7 +197,8 @@ internal class Tidslinjeperioder(
             periodetype = periode.periodetype,
             inntektskilde = periode.inntektskilde,
             erForkastet = erForkastet,
-            opprettet = periode.oppdatert,
+            opprettet = periode.opprettet,
+            oppdatert = periode.oppdatert,
             skjæringstidspunkt = periode.skjæringstidspunkt,
             periodetilstand = when (periode.tilstand) {
                 is AvsluttetUtenUtbetaling -> IngenUtbetaling
@@ -244,7 +241,9 @@ internal class Tidslinjeperioder(
             skjæringstidspunkt = periode.skjæringstidspunkt,
             hendelser = periode.hendelser,
             maksdato = utbetaling.maksdato,
-            opprettet = utbetaling.opprettet,
+            beregnet = utbetaling.opprettet,
+            opprettet = periode.opprettet,
+            oppdatert = periode.oppdatert,
             periodevilkår = periodevilkår(periode, utbetaling, avgrensetUtbetalingstidslinje, periode.hendelser),
             sammenslåttTidslinje = sammenslåttTidslinje,
             gjenståendeSykedager = utbetaling.gjenståendeSykedager,
@@ -325,6 +324,7 @@ internal class IVedtaksperiode(
     utbetalinger: List<Pair<IVilkårsgrunnlag?, IUtbetaling>>,
     val periodetype: Periodetype,
     val sykdomstidslinje: List<Sykdomstidslinjedag>,
+    val opprettet: LocalDateTime,
     val oppdatert: LocalDateTime,
     val tilstand: Vedtaksperiodetilstand,
     val skjæringstidspunkt: LocalDate,

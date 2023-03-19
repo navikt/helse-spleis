@@ -1323,18 +1323,9 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING medTilstand Utbetalt fra (1.januar til 31.januar)
         }
         1.generasjon {
-            assertForventetFeil(
-                forklaring = "revurdering av januar forsvinner",
-                nå = {
-                    assertEquals(1, perioder.size)
-                    beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt fra (1.mai til 31.mai)
-                },
-                ønsket = {
-                    assertEquals(2, perioder.size)
-                    beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt fra (1.mai til 31.mai)
-                    beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING medTilstand Utbetalt fra (1.januar til 31.januar)
-                }
-            )
+            assertEquals(2, perioder.size)
+            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt fra (1.mai til 31.mai)
+            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING medTilstand Utbetalt fra (1.januar til 31.januar)
         }
         2.generasjon {
             assertEquals(2, perioder.size)
@@ -2031,8 +2022,9 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
         }
         1.generasjon {
-            assertEquals(1, perioder.size)
+            assertEquals(2, perioder.size)
             beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+            uberegnetPeriode(1) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
         }
     }
 
@@ -2104,20 +2096,9 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             beregnetPeriode(2) er GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
         }
         1.generasjon {
-            assertForventetFeil(
-                forklaring = "1.februar til 28.februar forsvinner fra generasjonen. Burde vist en periode med IngenUtbetaling",
-                nå = {
-                    assertEquals(2, perioder.size)
-                    beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
-                    beregnetPeriode(1) er GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
-                },
-                ønsket = {
-                    assertEquals(3, perioder.size)
-                    beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
-                    uberegnetPeriode(1) fra (1.februar til 28.februar) medTilstand IngenUtbetaling
-                    beregnetPeriode(2) er Utbetalingstatus.GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
-                }
-            )
+            assertEquals(2, perioder.size)
+            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+            beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
         }
     }
 
