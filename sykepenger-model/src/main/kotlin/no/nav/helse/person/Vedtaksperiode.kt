@@ -139,7 +139,6 @@ import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
 import no.nav.helse.utbetalingslinjer.UtbetalingPeriodetype
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.sammenlign
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException
 import no.nav.helse.økonomi.Inntekt
@@ -1074,14 +1073,8 @@ internal class Vedtaksperiode private constructor(
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {}
         fun håndterDagerFør(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {}
         fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
-            val arbeidsgiverperiodeFør = vedtaksperiode.finnArbeidsgiverperiode()
-            vedtaksperiode.håndterDager(dager)
-            val arbeidsgiverperiodeEtter = vedtaksperiode.finnArbeidsgiverperiode()
-            if (!arbeidsgiverperiodeFør.sammenlign(arbeidsgiverperiodeEtter)) {
-                // Hvis AGP er uendret så legger vi ikke til varsel om at det er mottatt flere inntektsmeldinger
-                // Det kan derimot være at inntekt- og refusjon legger på varselet
-                dager.varsel(RV_IM_4, "Endrer arbeidsgiverperiode etter håndtering av dager fra inntektsmelding i ${type.name} ")
-            }
+            if (!dager.påvirker(vedtaksperiode.sykdomstidslinje)) return true
+            dager.varsel(RV_IM_4, "Inntektsmeldingen ville påvirket sykdomstidslinjen i ${type.name}")
             return true
         }
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
@@ -2255,11 +2248,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterLåstOverlappendeSøknadRevurdering(søknad)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
-            vedtaksperiode.håndterDager(dager)
-            return true
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) { }

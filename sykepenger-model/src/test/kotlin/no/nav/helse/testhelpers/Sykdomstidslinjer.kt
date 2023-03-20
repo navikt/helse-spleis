@@ -66,6 +66,13 @@ internal val Int.U
         SykdomstidslinjeHendelse.Hendelseskilde.INGEN
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
+internal fun Int.U(melding: Melding) = Sykdomstidslinje.arbeidsgiverdager(
+    dagensDato,
+    dagensDato.plusDays(this.toLong() - 1),
+    100.prosent,
+    SykdomstidslinjeHendelse.Hendelseskilde(melding, UUID.randomUUID(), LocalDateTime.now())
+).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+
 internal val Int.K
     get() = Sykdomstidslinje.sykedager(
         dagensDato,
@@ -81,6 +88,12 @@ internal val Int.A
         dagensDato.plusDays(this.toLong() - 1),
         SykdomstidslinjeHendelse.Hendelseskilde.INGEN
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+
+internal fun Int.A(melding: Melding) = Sykdomstidslinje.arbeidsdager(
+    dagensDato,
+    dagensDato.plusDays(this.toLong() - 1),
+    SykdomstidslinjeHendelse.Hendelseskilde(melding, UUID.randomUUID(), LocalDateTime.now())
+).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.opphold
     get() = Sykdomstidslinje(

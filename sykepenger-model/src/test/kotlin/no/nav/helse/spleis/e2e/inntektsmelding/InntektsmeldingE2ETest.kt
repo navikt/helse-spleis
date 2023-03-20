@@ -2101,19 +2101,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(
             1.januar til 10.januar,
             14.januar til 19.januar
-        ))
-        assertForventetFeil(
-            forklaring = "inntektsmeldingen endrer skjæringstidspunktet, men perioden har ingen tilstandsendring",
-            nå = {
-                assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
-                assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-            },
-            ønsket = {
-                // 'ønsket' er litt avhengig om vi ønsker å ta endringene inn eller ikke
-                assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-                assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            }
-        )
+        ), førsteFraværsdag = 1.mars)
+        assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
     }
 
@@ -2123,10 +2114,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(
             1.januar til 16.januar
-        ))
+        ), førsteFraværsdag = 1.mars)
         assertEquals(2.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(Dag.UkjentDag::class, inspektør.sykdomstidslinje[1.januar]::class)
-        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
     }
 
     @Test
@@ -2139,19 +2130,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(
             1.januar til 10.januar,
             14.januar til 19.januar
-        ))
-        assertForventetFeil(
-            forklaring = "inntektsmeldingen endrer skjæringstidspunktet, men perioden har ingen tilstandsendring",
-            nå = {
-                assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-                assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-            },
-            ønsket = {
-                // 'ønsket' er litt avhengig om vi ønsker å ta endringene inn eller ikke
-                assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-                assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-            }
-        )
+        ), førsteFraværsdag = 1.mars)
+        assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
     }
 
 }
