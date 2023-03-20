@@ -88,6 +88,9 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(4, inspektør.navHelgDagTeller)
         assertEquals(1, perioder.size)
         assertEquals(1.januar til 16.januar, perioder.first())
+        utbetalingstidslinje[1.januar].økonomi.inspektør.also {
+            assertEquals(31000.månedlig, it.aktuellDagsinntekt)
+        }
     }
 
     @Test
