@@ -8,6 +8,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
@@ -53,6 +54,9 @@ internal class UtbetalingkladderBuilderTest {
         result[1].also { kladd ->
             val utbetaling = kladd.lagUtbetaling(Utbetalingtype.UTBETALING, null, UUID.randomUUID(), tidslinje, LocalDate.MAX, 0, 0)
             assertEquals(17.februar til 3.april, utbetaling.inspektør.periode)
+            val arbeidsgiverOppdrag = utbetaling.inspektør.arbeidsgiverOppdrag
+            assertEquals(1, arbeidsgiverOppdrag.size)
+            assertEquals(5.mars til 3.april, arbeidsgiverOppdrag.single().periode)
         }
     }
 
