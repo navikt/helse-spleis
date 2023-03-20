@@ -32,6 +32,7 @@ import no.nav.helse.sykdomstidslinje.Dag.SykedagNav
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
+import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 
@@ -222,6 +223,16 @@ internal class Sykdomstidslinje private constructor(
     override fun equals(other: Any?): Boolean {
         if (other !is Sykdomstidslinje) return false
         return dager == other.dager && periode == other.periode && låstePerioder == other.låstePerioder
+    }
+
+    private fun sammeDagtyper(other: Sykdomstidslinje) = dager.mapValues { it.value::class } == other.dager.mapValues { it.value::class }
+
+    internal fun påvirkesAv(other: Sykdomstidslinje): Boolean {
+        if (other.dager.isEmpty()) return false
+        val utenLåser = Sykdomstidslinje(dager, periode).subset(other.periode!!)
+        if (utenLåser.dager.isEmpty()) return false
+        val merget = utenLåser.merge(other, Dagturnering.TURNERING::beste)
+        return !utenLåser.sammeDagtyper(merget)
     }
 
     override fun hashCode() = Objects.hash(dager, periode, låstePerioder)

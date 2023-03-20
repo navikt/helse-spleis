@@ -118,6 +118,11 @@ internal class DagerFraInntektsmelding(
 
     internal fun noenDagerHåndtert() = håndterteDager.isNotEmpty()
 
+    internal fun påvirker(sykdomstidslinje: Sykdomstidslinje): Boolean {
+        val periode = sykdomstidslinje.periode() ?: return false
+        return sykdomstidslinje.påvirkesAv(BitAvInntektsmelding(inntektsmelding, periode).sykdomstidslinje())
+    }
+
     private class BitAvInntektsmelding(
         private val inntektsmelding: Inntektsmelding,
         private val periode: Periode
