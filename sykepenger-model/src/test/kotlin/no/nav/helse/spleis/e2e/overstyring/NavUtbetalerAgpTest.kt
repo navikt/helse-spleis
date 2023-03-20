@@ -51,6 +51,30 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Overstyrer egenmeldingsdager til SykedagNav`() {
+        håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null, emptyList()))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterOverstyrTidslinje((1.januar til 16.januar).map { dagen -> ManuellOverskrivingDag(dagen, Dagtype.SykedagNav, 100) })
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        val utbetalinger = inspektør.utbetalinger
+        Assertions.assertEquals(2, utbetalinger.size)
+        utbetalinger.last().inspektør.also { overstyringen ->
+            Assertions.assertEquals(1, overstyringen.personOppdrag.size)
+            Assertions.assertEquals(0, overstyringen.arbeidsgiverOppdrag.size)
+            overstyringen.personOppdrag[0].inspektør.also { linje ->
+                Assertions.assertEquals(1.januar til 31.januar, linje.fom til linje.tom)
+                Assertions.assertEquals(1431, linje.beløp)
+            }
+        }
+    }
+
+    @Test
     fun `Overstyrer agp til sykedagNav - refusjon`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
