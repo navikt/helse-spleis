@@ -1,7 +1,7 @@
 package no.nav.helse.serde.api.dto
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 data class SammenslåttDag(
     val dagen: LocalDate,
@@ -47,6 +47,7 @@ data class Sykdomstidslinjedag(
 
 enum class UtbetalingstidslinjedagType {
     ArbeidsgiverperiodeDag,
+    ArbeidsgiverperiodeDagNav,
     NavDag,
     NavHelgDag,
     Helgedag,   // SpeilBuilder only code breakout of Fridag
@@ -66,6 +67,20 @@ interface Utbetalingstidslinjedag {
 }
 
 data class NavDag(
+    override val type: UtbetalingstidslinjedagType = UtbetalingstidslinjedagType.NavDag,
+    override val inntekt: Int,
+    override val dato: LocalDate,
+    val utbetaling: Int,
+    val personbeløp: Int,
+    val arbeidsgiverbeløp: Int,
+    val refusjonsbeløp: Int?,
+    val grad: Double,
+    val totalGrad: Double?
+) : Utbetalingstidslinjedag {
+    override fun utbetalingsinfo() = Utbetalingsinfo(inntekt, utbetaling, personbeløp, arbeidsgiverbeløp, refusjonsbeløp, totalGrad)
+}
+
+data class ArbeidsgiverperiodedagNav(
     override val type: UtbetalingstidslinjedagType = UtbetalingstidslinjedagType.NavDag,
     override val inntekt: Int,
     override val dato: LocalDate,

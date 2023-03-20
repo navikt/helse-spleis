@@ -95,7 +95,8 @@ enum class GraphQLUtbetalingsdagType {
     Feriedag,
     AvvistDag,
     UkjentDag,
-    ForeldetDag
+    ForeldetDag,
+    ArbeidsgiverperiodeDagNav
 }
 
 enum class GraphQLSykdomsdagkildetype {

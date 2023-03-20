@@ -11,6 +11,7 @@ import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
+import no.nav.helse.serde.api.dto.ArbeidsgiverperiodedagNav
 import no.nav.helse.serde.api.dto.AvvistDag
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.serde.api.dto.NavDag
@@ -202,12 +203,30 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         }
     }
 
+    override fun visit(dag: Utbetalingsdag.ArbeidsgiverperiodedagNav, dato: LocalDate, økonomi: Økonomi) {
+        val (grad, totalGrad) = økonomi.medData { grad, totalGrad, _ -> grad to totalGrad }
+        økonomi.medAvrundetData { _, refusjonsbeløp, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, _ ->
+            utbetalingstidslinje.add(
+                ArbeidsgiverperiodedagNav(
+                    type = UtbetalingstidslinjedagType.ArbeidsgiverperiodeDagNav,
+                    inntekt = aktuellDagsinntekt,
+                    dato = dato,
+                    utbetaling = arbeidsgiverbeløp!!,
+                    arbeidsgiverbeløp = arbeidsgiverbeløp,
+                    personbeløp = personbeløp!!,
+                    refusjonsbeløp = refusjonsbeløp,
+                    grad = grad,
+                    totalGrad = totalGrad
+                )
+            )
+        }
+    }
+
     override fun visit(
         dag: Utbetalingsdag.NavDag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        // TODO: Trenger speil _egentlig_ doubles?
         val (grad, totalGrad) = økonomi.medData { grad, totalGrad, _ -> grad to totalGrad }
         økonomi.medAvrundetData { _, refusjonsbeløp, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, _ ->
             utbetalingstidslinje.add(
