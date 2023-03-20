@@ -1,12 +1,16 @@
 package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
-import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
-import no.nav.helse.hendelser.til
-import no.nav.helse.nesteDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodedagNav
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ForeldetDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Fridag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -35,6 +39,9 @@ class UtbetalingkladderBuilder(
     }
 
     override fun visit(dag: ArbeidsgiverperiodeDag, dato: LocalDate, økonomi: Økonomi) {
+        håndterArbeidsgiverperiode(dato)
+    }
+    private fun håndterArbeidsgiverperiode(dato: LocalDate) {
         val forrige = arbeidsgiverdager
         val gapFraForrige = forrige?.periodeMellom(dato)
         val dagerMellomForrige = forrige?.let { gapFraForrige?.count() ?: 0 }
@@ -48,8 +55,8 @@ class UtbetalingkladderBuilder(
         }
         ferdigstill(dato)
     }
-
     private fun builder(dato: LocalDate) = kladdBuilder ?: resettBuilder(dato)
+
     private fun resettBuilder(førsteDag: LocalDate) =
         UtbetalingkladdBuilder(arbeidsgiverdager ?: førsteDag.somPeriode(), mottakerRefusjon, mottakerBruker).also {
             kladdBuilder = it
@@ -62,6 +69,11 @@ class UtbetalingkladderBuilder(
         kladdBuilder = null
         arbeidsgiverdager = dato?.somPeriode()
         return oppdrag.toList()
+    }
+
+    override fun visit(dag: ArbeidsgiverperiodedagNav, dato: LocalDate, økonomi: Økonomi) {
+        håndterArbeidsgiverperiode(dato)
+        builder(dato).betalingsdag(beløpkilde = dag.beløpkilde(), dato = dato, økonomi = økonomi)
     }
 
     override fun visit(dag: NavDag, dato: LocalDate, økonomi: Økonomi) {

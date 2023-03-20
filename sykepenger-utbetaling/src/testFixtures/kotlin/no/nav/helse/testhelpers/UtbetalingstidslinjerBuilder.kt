@@ -47,11 +47,12 @@ fun Int.AP(dekningsgrunnlag: Int) = Utbetalingsdager(
 )
 
 val Int.NAP get() = this.NAP(1200)
-fun Int.NAP(dekningsgrunnlag: Int) = Utbetalingsdager(
+fun Int.NAP(dekningsgrunnlag: Int, grad: Number = 100.0) = Utbetalingsdager(
     antallDager = { this },
     addDagFun = Utbetalingstidslinje.Builder::addArbeidsgiverperiodedagNav,
     addHelgFun = Utbetalingstidslinje.Builder::addArbeidsgiverperiodedag,
-    dekningsgrunnlag = dekningsgrunnlag.daglig
+    dekningsgrunnlag = dekningsgrunnlag.daglig,
+    grad = grad
 )
 
 val Int.NAV get() = this.NAV(1200)
