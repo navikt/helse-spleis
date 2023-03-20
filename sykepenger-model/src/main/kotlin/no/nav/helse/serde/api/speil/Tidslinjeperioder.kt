@@ -271,7 +271,10 @@ internal class Tidslinjeperioder(
                 periodetilstand in setOf(AvventerSimulering, AvventerSimuleringRevurdering) -> ForberederGodkjenning
                 else -> VenterPåAnnenPeriode
             }
-            Utbetalingstatus.GodkjentUtenUtbetaling -> IngenUtbetaling
+            Utbetalingstatus.GodkjentUtenUtbetaling -> when (utbetalingDTO.type) {
+                Utbetalingtype.REVURDERING -> Utbetalt
+                else -> IngenUtbetaling
+            }
             Utbetalingstatus.Godkjent,
             Utbetalingstatus.Overført -> when {
                 utbetalingDTO.type == Utbetalingtype.ANNULLERING -> TilAnnullering
