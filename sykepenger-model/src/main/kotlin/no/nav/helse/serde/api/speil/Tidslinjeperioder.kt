@@ -18,7 +18,7 @@ import no.nav.helse.person.Vedtaksperiode.AvventerVilkårsprøving
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.serde.api.dto.BeregnetPeriode
-import no.nav.helse.serde.api.dto.Generasjon
+import no.nav.helse.serde.api.dto.GenerasjonDTO
 import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.HendelseDTO.Companion.finn
 import no.nav.helse.serde.api.dto.Periodetilstand.Annullert
@@ -56,7 +56,7 @@ import no.nav.helse.serde.api.speil.builders.PeriodeVarslerBuilder
 internal class Generasjoner(perioder: Tidslinjeperioder) {
     private val generasjoner: List<Generasjon> = perioder.toGenerasjoner()
 
-    internal fun build(): List<no.nav.helse.serde.api.dto.Generasjon> {
+    internal fun build(): List<no.nav.helse.serde.api.dto.GenerasjonDTO> {
         return generasjoner
             .flyttPerioder()
             .fjernErstattede()
@@ -142,9 +142,9 @@ internal class Generasjoner(perioder: Tidslinjeperioder) {
 
             internal fun List<Generasjon>.sorterGenerasjoner() = map { it.sorterFallende() }
 
-            internal fun List<Generasjon>.toDTO(): List<no.nav.helse.serde.api.dto.Generasjon> {
+            internal fun List<Generasjon>.toDTO(): List<no.nav.helse.serde.api.dto.GenerasjonDTO> {
                 return map {
-                    Generasjon(UUID.randomUUID(), it.perioder)
+                    GenerasjonDTO(UUID.randomUUID(), it.perioder)
                 }
             }
         }

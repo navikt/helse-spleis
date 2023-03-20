@@ -29,7 +29,7 @@ data class AktivitetDTO(
 data class ArbeidsgiverDTO(
     val organisasjonsnummer: String,
     val id: UUID,
-    val generasjoner: List<Generasjon>,
+    val generasjoner: List<GenerasjonDTO>,
     val ghostPerioder: List<GhostPeriodeDTO> = emptyList()
 ) {
     private companion object {

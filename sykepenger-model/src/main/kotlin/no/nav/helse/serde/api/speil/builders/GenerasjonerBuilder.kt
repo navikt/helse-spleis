@@ -14,7 +14,7 @@ import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.serde.api.dto.Generasjon
+import no.nav.helse.serde.api.dto.GenerasjonDTO
 import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.speil.AnnulleringerAkkumulator
 import no.nav.helse.serde.api.speil.ForkastetVedtaksperiodeAkkumulator
@@ -69,7 +69,7 @@ internal class GenerasjonerBuilder(
     private fun periodetype(periode: Periode) =
         arbeidsgiver.periodetype(periode)
 
-    fun build(): List<Generasjon> {
+    fun build(): List<GenerasjonDTO> {
         val vedtaksperioder = vedtaksperiodeAkkumulator.beholdAktiveOgAnnullerte(annulleringer)
         val tidslinjeberegninger = Tidslinjeberegninger(generasjonIderAkkumulator.toList(), sykdomshistorikkAkkumulator)
         val tidslinjeperioder = Tidslinjeperioder(

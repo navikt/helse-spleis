@@ -13,7 +13,7 @@ import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
 import no.nav.helse.serde.api.speil.builders.BeregningId
 import no.nav.helse.serde.api.speil.builders.KorrelasjonsId
 
-data class Generasjon(
+data class GenerasjonDTO(
     val id: UUID, // Runtime
     val perioder: List<Tidslinjeperiode>
 )

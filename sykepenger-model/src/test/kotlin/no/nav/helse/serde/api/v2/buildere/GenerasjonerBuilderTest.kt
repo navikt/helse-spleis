@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Toggle
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.erHelg
 import no.nav.helse.februar
@@ -49,7 +50,7 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.serde.api.dto.BeregnetPeriode
-import no.nav.helse.serde.api.dto.Generasjon
+import no.nav.helse.serde.api.dto.GenerasjonDTO
 import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.serde.api.dto.OmregnetÅrsinntekt
 import no.nav.helse.serde.api.dto.Periodetilstand
@@ -97,6 +98,7 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.manuellFeriedag
 import no.nav.helse.spleis.e2e.manuellSykedag
+import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.søknadDTOer
@@ -911,7 +913,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), fnr = fyller18November2018)
 
         assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-        assertEquals(emptyList<Generasjon>(), generasjoner)
+        assertEquals(emptyList<GenerasjonDTO>(), generasjoner)
     }
 
     @Test
@@ -1874,6 +1876,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
 
+        assertEquals(2, generasjoner.size)
         0.generasjon {
             assertEquals(2, perioder.size)
             beregnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
@@ -1889,6 +1892,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
 
+        assertEquals(1, generasjoner.size)
         0.generasjon {
             assertEquals(2, perioder.size)
             beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand UtbetaltVenterPåAnnenPeriode
@@ -1902,6 +1906,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
+        assertEquals(2, generasjoner.size)
         0.generasjon {
             assertEquals(2, perioder.size)
             beregnetPeriode(0) er Utbetalingstatus.Ubetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand TilGodkjenning
@@ -1914,7 +1919,121 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `tidligere periode med ferie får samme arbeidsgiverperiode som nyere periode`() = Toggle.AnnullereOgUtbetale.enable {
+    fun `omgjøring av eldre kort periode`() {
+        nyPeriode(5.januar til 19.januar, orgnummer = a1)
+        nyttVedtak(1.mars, 31.mars, orgnummer = a1)
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+
+        assertEquals(1, generasjoner.size)
+        0.generasjon {
+            assertEquals(2, perioder.size)
+            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+            uberegnetPeriode(1) fra (5.januar til 19.januar) medTilstand IngenUtbetaling
+        }
+
+        håndterOverstyrTidslinje((1.januar til 4.januar).map {
+            ManuellOverskrivingDag(it, Dagtype.Sykedag, 100)
+        }, orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+
+        assertEquals(2, generasjoner.size)
+        0.generasjon {
+            assertEquals(2, perioder.size)
+            beregnetPeriode(0) er Utbetalingstatus.Ubetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand TilGodkjenning
+            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 19.januar) medTilstand Utbetalt
+        }
+        1.generasjon {
+            assertEquals(1, perioder.size)
+            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+        }
+    }
+
+    @Test
+    fun `out of order som er innenfor agp så utbetales`() {
+        nyttVedtak(1.mars, 31.mars, orgnummer = a1)
+        nyPeriode(1.januar til 15.januar, orgnummer = a1)
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        assertEquals(1, generasjoner.size)
+        0.generasjon {
+            assertEquals(2, perioder.size)
+            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+            uberegnetPeriode(1) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
+        }
+
+        nyPeriode(16.januar til 31.januar, orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterVilkårsgrunnlag(3.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(3.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(3.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        assertEquals(2, generasjoner.size)
+        0.generasjon {
+            assertEquals(3, perioder.size)
+            beregnetPeriode(0) er Utbetalingstatus.Ubetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand TilGodkjenning
+            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (16.januar til 31.januar) medTilstand Utbetalt
+            uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
+        }
+        1.generasjon {
+            assertEquals(1, perioder.size)
+            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+        }
+    }
+
+    @Test
+    fun `out of order som er innenfor agp - så nyere perioder`() {
+        nyttVedtak(1.mars, 31.mars, orgnummer = a1)
+        nyPeriode(1.januar til 15.januar, orgnummer = a1)
+        forlengVedtak(1.april, 10.april, orgnummer = a1)
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
+
+        assertEquals(1, generasjoner.size)
+        0.generasjon {
+            assertEquals(3, perioder.size)
+            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.april til 10.april) medTilstand Utbetalt
+            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+            uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
+        }
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(10.april, Dagtype.Feriedag)))
+        håndterYtelser(3.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(3.vedtaksperiode, orgnummer = a1)
+
+        assertEquals(2, generasjoner.size)
+        0.generasjon {
+            assertEquals(3, perioder.size)
+            beregnetPeriode(0) er Utbetalingstatus.Ubetalt avType REVURDERING fra (1.april til 10.april) medTilstand TilGodkjenning
+            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+            uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
+        }
+        1.generasjon {
+            assertEquals(3, perioder.size)
+            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.april til 10.april) medTilstand Utbetalt
+            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+            uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
+        }
+    }
+
+    @Test
+    fun `tidligere periode med arbeid får samme arbeidsgiverperiode som nyere periode`() = Toggle.AnnullereOgUtbetale.enable {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -1936,19 +2055,28 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
 
-        generasjoner(ORGNUMMER).also { generasjoner ->
-            assertEquals(2, generasjoner.size)
-            0.generasjon {
-                assertEquals(3, perioder.size)
-                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand Utbetalt
-                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medTilstand Utbetalt
-                beregnetPeriode(2) er Utbetalingstatus.GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
-            }
-            1.generasjon {
-                assertEquals(2, perioder.size)
-                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
-                beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
-            }
+        assertEquals(2, generasjoner.size)
+        0.generasjon {
+            assertEquals(3, perioder.size)
+            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand Utbetalt
+            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medTilstand Utbetalt
+            beregnetPeriode(2) er Utbetalingstatus.GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
+        }
+        1.generasjon {
+            assertForventetFeil(
+                forklaring = "1.februar til 28.februar forsvinner fra generasjonen. Burde vist en periode med IngenUtbetaling",
+                nå = {
+                    assertEquals(2, perioder.size)
+                    beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+                    beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
+                },
+                ønsket = {
+                    assertEquals(3, perioder.size)
+                    beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+                    uberegnetPeriode(1) fra (1.februar til 28.februar) medTilstand IngenUtbetaling
+                    beregnetPeriode(2) er Utbetalingstatus.GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
+                }
+            )
         }
     }
 
@@ -1989,7 +2117,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     // dette er vilkårsgrunnlag som pekes på av beregnede perioder
     private lateinit var vilkårsgrunnlag: Map<UUID, Vilkårsgrunnlag>
 
-    private fun generasjoner(organisasjonsnummer: String): List<Generasjon> {
+    private fun generasjoner(organisasjonsnummer: String): List<GenerasjonDTO> {
         val vilkårsgrunnlagHistorikkBuilderResult = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk).build()
         vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikkBuilderResult.toDTO()
 
@@ -2004,7 +2132,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         return generasjoner
     }
 
-    private fun Int.generasjon(organisasjonsnummer: String = ORGNUMMER, assertBlock: Generasjon.() -> Unit) {
+    private fun Int.generasjon(organisasjonsnummer: String = ORGNUMMER, assertBlock: GenerasjonDTO.() -> Unit) {
         require(this >= 0) { "Kan ikke være et negativt tall!" }
         generasjoner(organisasjonsnummer)[this].run(assertBlock)
     }
@@ -2062,13 +2190,13 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         return this
     }
 
-    private fun Generasjon.beregnetPeriode(index: Int): BeregnetPeriode {
+    private fun GenerasjonDTO.beregnetPeriode(index: Int): BeregnetPeriode {
         val periode = this.perioder[index]
         require(periode is BeregnetPeriode) { "Perioden er ikke en tidslinjeperiode!" }
         return periode
     }
 
-    private fun Generasjon.uberegnetPeriode(index: Int): UberegnetPeriode {
+    private fun GenerasjonDTO.uberegnetPeriode(index: Int): UberegnetPeriode {
         val periode = this.perioder[index]
         require(periode is UberegnetPeriode) { "Perioden er ikke en kort periode!" }
         return periode
