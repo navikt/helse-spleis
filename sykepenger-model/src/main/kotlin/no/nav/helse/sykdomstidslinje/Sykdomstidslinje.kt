@@ -28,7 +28,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
 import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
-import no.nav.helse.sykdomstidslinje.Dag.SykedagNavAnsvar
+import no.nav.helse.sykdomstidslinje.Dag.SykedagNav
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
@@ -211,7 +211,7 @@ internal class Sykdomstidslinje private constructor(
     private fun førsteSykedag() = dager.entries.firstOrNull { erEnSykedag(it.value) }?.key
 
     private fun erEnSykedag(it: Dag) =
-        it is Sykedag || it is SykHelgedag || it is Arbeidsgiverdag || it is ArbeidsgiverHelgedag || it is ForeldetSykedag || it is SykedagNavAnsvar
+        it is Sykedag || it is SykHelgedag || it is Arbeidsgiverdag || it is ArbeidsgiverHelgedag || it is ForeldetSykedag || it is SykedagNav
 
     internal fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.preVisitSykdomstidslinje(this, låstePerioder)
@@ -243,7 +243,7 @@ internal class Sykdomstidslinje private constructor(
                     is Permisjonsdag -> "P"
                     is FriskHelgedag -> "R"
                     is ForeldetSykedag -> "K"
-                    is SykedagNavAnsvar -> "N"
+                    is SykedagNav -> "N"
                 }
         }?.trim() ?: "Tom tidslinje"
     }
@@ -303,7 +303,7 @@ internal class Sykdomstidslinje private constructor(
                             { it },
                             {
                                 Økonomi.sykdomsgrad(grad).let { økonomi ->
-                                    if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else SykedagNavAnsvar(it, økonomi, kilde)
+                                    if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else SykedagNav(it, økonomi, kilde)
                                 }
                             }
                         )

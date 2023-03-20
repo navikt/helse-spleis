@@ -80,7 +80,7 @@ internal class ArbeidsgiverperiodeBuilder(
         tilstand.sykdomsdag(this, dato, økonomi, kilde)
     }
 
-    override fun visitDag(dag: Dag.SykedagNavAnsvar, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
+    override fun visitDag(dag: Dag.SykedagNav, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
         fridager.somSykedager(kilde)
         arbeidsgiverperiodeteller.inc()
         tilstand.sykdomsdagNav(this, dato, økonomi, kilde)

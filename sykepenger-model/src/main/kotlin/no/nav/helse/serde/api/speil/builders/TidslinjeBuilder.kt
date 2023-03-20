@@ -156,7 +156,7 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
         is Dag.SykHelgedag -> SykdomstidslinjedagType.SYK_HELGEDAG
         is Dag.Permisjonsdag -> SykdomstidslinjedagType.PERMISJONSDAG
         is Dag.ProblemDag -> SykdomstidslinjedagType.UBESTEMTDAG
-        is Dag.SykedagNavAnsvar -> SykdomstidslinjedagType.SYKEDAG
+        is Dag.SykedagNav -> SykdomstidslinjedagType.SYKEDAG
     }
 }
 

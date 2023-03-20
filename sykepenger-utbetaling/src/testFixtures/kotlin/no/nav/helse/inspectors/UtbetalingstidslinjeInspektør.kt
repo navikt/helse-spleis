@@ -29,7 +29,7 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
 
     var arbeidsdagTeller = 0
     var arbeidsgiverperiodeDagTeller = 0
-    var arbeidsgiverperiodedagNavAnsvarTeller = 0
+    var arbeidsgiverperiodedagNavTeller = 0
     var avvistDagTeller = 0
     var fridagTeller = 0
     var navDagTeller = 0
@@ -61,7 +61,7 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
             navHelgDagTeller +
             foreldetDagTeller +
             ukjentDagTeller +
-                arbeidsgiverperiodedagNavAnsvarTeller
+                arbeidsgiverperiodedagNavTeller
 
     init {
         arbeidsdagTeller = 0
@@ -111,7 +111,7 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
     }
 
     override fun visit(dag: ArbeidsgiverperiodedagNav, dato: LocalDate, økonomi: Økonomi) {
-        arbeidsgiverperiodedagNavAnsvarTeller += 1
+        arbeidsgiverperiodedagNavTeller += 1
         arbeidsgiverperiodedagerNavAnsvar.add(dag)
         collect(dag, dato, økonomi)
     }

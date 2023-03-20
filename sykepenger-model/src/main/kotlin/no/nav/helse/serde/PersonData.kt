@@ -785,7 +785,7 @@ internal data class PersonData(
                     } else {
                         Dag.Sykedag(dato, økonomi, hendelseskilde)
                     }
-                    JsonDagType.SYKEDAG_NAV_ANSVAR -> Dag.SykedagNavAnsvar(
+                    JsonDagType.SYKEDAG_NAV_ANSVAR -> Dag.SykedagNav(
                         dato,
                         økonomi,
                         hendelseskilde

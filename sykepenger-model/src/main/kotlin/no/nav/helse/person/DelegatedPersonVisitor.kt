@@ -870,7 +870,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
     }
 
     override fun visitDag(
-        dag: Dag.SykedagNavAnsvar,
+        dag: Dag.SykedagNav,
         dato: LocalDate,
         økonomi: Økonomi,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde

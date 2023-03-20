@@ -1692,7 +1692,7 @@ internal class JsonBuilder : AbstractBuilder() {
             kilde: Hendelseskilde
         ) = leggTilDag(dato, DagJsonBuilder(SYKEDAG, kilde).økonomi(økonomi))
 
-        override fun visitDag(dag: Dag.SykedagNavAnsvar, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) =
+        override fun visitDag(dag: Dag.SykedagNav, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) =
             leggTilDag(dato, DagJsonBuilder(SYKEDAG_NAV_ANSVAR, kilde).økonomi(økonomi))
 
         override fun visitDag(

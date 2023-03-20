@@ -60,7 +60,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         undersøke(15.N)
         assertEquals(15, inspektør.size)
         assertEquals(4, inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(11, inspektør.arbeidsgiverperiodedagNavAnsvarTeller)
+        assertEquals(11, inspektør.arbeidsgiverperiodedagNavTeller)
         assertEquals(1, perioder.size)
         val arbeidsgiverperiode = perioder.first()
         assertTrue(arbeidsgiverperiode.forventerInntekt(1.januar til 15.januar, Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
@@ -72,6 +72,18 @@ internal class UtbetalingstidslinjeBuilderTest {
         undersøke(31.S)
         assertEquals(31, inspektør.size)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(11, inspektør.navDagTeller)
+        assertEquals(4, inspektør.navHelgDagTeller)
+        assertEquals(1, perioder.size)
+        assertEquals(1.januar til 16.januar, perioder.first())
+    }
+
+    @Test
+    fun `enkel - SykedagNav`() {
+        undersøke(31.N)
+        assertEquals(31, inspektør.size)
+        assertEquals(12, inspektør.arbeidsgiverperiodedagNavTeller)
+        assertEquals(4, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(11, inspektør.navDagTeller)
         assertEquals(4, inspektør.navHelgDagTeller)
         assertEquals(1, perioder.size)
