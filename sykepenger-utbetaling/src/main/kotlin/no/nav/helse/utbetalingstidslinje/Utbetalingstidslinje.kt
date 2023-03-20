@@ -165,7 +165,7 @@ class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Collection<
             add(ArbeidsgiverperiodeDag(dato, økonomi))
         }
 
-        fun addArbeidsgiverperiodedagNavAnsvar(dato: LocalDate, økonomi: Økonomi) {
+        fun addArbeidsgiverperiodedagNav(dato: LocalDate, økonomi: Økonomi) {
             add(ArbeidsgiverperiodedagNav(dato, økonomi))
         }
 

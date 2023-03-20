@@ -49,7 +49,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonD
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PERMISJONSDAG
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PROBLEMDAG
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG_NAV_ANSVAR
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG_NAV
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.api.BuilderState
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
@@ -1693,7 +1693,7 @@ internal class JsonBuilder : AbstractBuilder() {
         ) = leggTilDag(dato, DagJsonBuilder(SYKEDAG, kilde).økonomi(økonomi))
 
         override fun visitDag(dag: Dag.SykedagNav, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) =
-            leggTilDag(dato, DagJsonBuilder(SYKEDAG_NAV_ANSVAR, kilde).økonomi(økonomi))
+            leggTilDag(dato, DagJsonBuilder(SYKEDAG_NAV, kilde).økonomi(økonomi))
 
         override fun visitDag(
             dag: Dag.ForeldetSykedag,
