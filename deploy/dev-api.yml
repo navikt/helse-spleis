@@ -46,8 +46,9 @@ spec:
         extra:
           - "NAVident"
         groups:
-          - id: "611669fa-de5c-4dc2-a0e8-6041a019992a"
-          - id: "f787f900-6697-440d-a086-d5bb56e26a9c"
+          - id: "611669fa-de5c-4dc2-a0e8-6041a019992a" # speil-brukere
+          - id: "f787f900-6697-440d-a086-d5bb56e26a9c" # tbd
+          - id: "317665ad-1402-458e-b8e6-9cb50afc1252" # speil-brukere-dev
   accessPolicy:
     inbound:
       rules:
