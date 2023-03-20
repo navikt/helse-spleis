@@ -98,6 +98,7 @@ abstract class AbstractObservableTest {
         utenlandskSykmelding = false,
         arbeidUtenforNorge = false,
         sendTilGosys = false,
+        yrkesskade = false
     )
 
     protected fun utbetalinghistorikk() = UtbetalingshistorikkEtterInfotrygdendring(

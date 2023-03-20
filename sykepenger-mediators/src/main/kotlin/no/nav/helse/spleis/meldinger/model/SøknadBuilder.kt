@@ -17,6 +17,7 @@ internal abstract class SøknadBuilder {
     private lateinit var tom: LocalDate
     protected var permittert = false
     protected var arbeidUtenforNorge by Delegates.notNull<Boolean>()
+    protected var yrkesskade by Delegates.notNull<Boolean>()
     protected var innsendt: LocalDateTime? = null
 
     internal fun meldingsreferanseId(meldingsreferanseId: UUID) = apply { this.meldingsreferanseId = meldingsreferanseId }
@@ -31,6 +32,7 @@ internal abstract class SøknadBuilder {
     internal fun sendt(tidspunkt: LocalDateTime) = apply { this.innsendt = tidspunkt }
     internal fun permittert(permittert: Boolean) = apply { this.permittert = permittert }
     internal fun arbeidUtenforNorge(arbeidUtenforNorge: Boolean) = apply { this.arbeidUtenforNorge = arbeidUtenforNorge }
+    internal fun yrkesskade(yrkesskade: Boolean) = apply { this.yrkesskade = yrkesskade }
     internal fun fravær(type: String, fom: LocalDate, tom: LocalDate?) {
         when (type) {
             "UTDANNING_FULLTID", "UTDANNING_DELTID" -> utdanning(fom, this.tom)

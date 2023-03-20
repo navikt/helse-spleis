@@ -44,6 +44,7 @@ class Søknad(
     private val utenlandskSykmelding: Boolean,
     private val arbeidUtenforNorge: Boolean,
     private val sendTilGosys: Boolean,
+    private val yrkesskade: Boolean,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class, aktivitetslogg) {
 
@@ -87,6 +88,7 @@ class Søknad(
         }
         if (utenlandskSykmelding) funksjonellFeil(RV_SØ_29)
         if (sendTilGosys) funksjonellFeil(RV_SØ_30)
+        if (yrkesskade) varsel(RV_YS_1)
         return this
     }
 

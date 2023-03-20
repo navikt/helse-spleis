@@ -86,6 +86,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         arbeidUtenforNorge: Boolean = false,
         sendTilGosys: Boolean = false,
         opprinneligSendt: LocalDate? = null,
+        yrkesskade: Boolean = false,
         aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
     ): Søknad {
         val innsendt = sendtTilNAVEllerArbeidsgiver ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive
@@ -104,7 +105,8 @@ internal class ArbeidsgiverHendelsefabrikk(
             utenlandskSykmelding = utenlandskSykmelding,
             arbeidUtenforNorge = arbeidUtenforNorge,
             sendTilGosys = sendTilGosys,
-            aktivitetslogg = aktivitetslogg
+            aktivitetslogg = aktivitetslogg,
+            yrkesskade = yrkesskade
         ).apply {
             søknader.add(this)
         }
