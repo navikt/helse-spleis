@@ -16,14 +16,14 @@ data class ManuellOverskrivingDag(
     val grad: Int? = null
 ) {
     init {
-        check(type != Dagtype.Sykedag || grad != null) {
+        check(type !in setOf(Dagtype.Sykedag, Dagtype.SykedagNav) || grad != null) {
             "👉 Sykedager må ha grad altså 👈"
         }
     }
 }
 
 enum class Dagtype {
-    Sykedag, Feriedag, Egenmeldingsdag, Permisjonsdag, Arbeidsdag
+    Sykedag, Feriedag, Egenmeldingsdag, Permisjonsdag, Arbeidsdag, SykedagNav
 }
 
 class OverstyrTidslinje(
@@ -63,6 +63,12 @@ class OverstyrTidslinje(
                     kilde = kilde
                 )
                 Dagtype.Egenmeldingsdag -> Sykdomstidslinje.arbeidsgiverdager(
+                    førsteDato = it.dato,
+                    sisteDato = it.dato,
+                    grad = 100.prosent,
+                    kilde = kilde
+                )
+                Dagtype.SykedagNav -> Sykdomstidslinje.sykedagerNav(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     grad = 100.prosent,
