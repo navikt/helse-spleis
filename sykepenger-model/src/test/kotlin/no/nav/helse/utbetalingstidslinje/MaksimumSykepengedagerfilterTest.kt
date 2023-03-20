@@ -4,6 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.Alder
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
@@ -24,6 +25,7 @@ import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.AVV
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.HELG
+import no.nav.helse.testhelpers.NAP
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.NAVDAGER
 import no.nav.helse.testhelpers.UTELATE
@@ -52,6 +54,42 @@ internal class MaksimumSykepengedagerfilterTest {
     @BeforeEach
     internal fun setup() {
         aktivitetslogg = Aktivitetslogg()
+    }
+
+    @Test
+    fun `riktig antall dager - nav utbetaler arbeidsgiverperioden`() {
+        val tidslinje = tidslinjeOf(16.NAP, 10.NAV)
+        assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+        assertEquals(28.desember, maksimumSykepenger.sisteDag())
+    }
+
+    @Test
+    fun `stopper betaling etter 260 dager dersom nav utbetaler arbeidsgiverperioden`() {
+        val tidslinje = tidslinjeOf(16.NAP, 249.NAVDAGER)
+        assertEquals(listOf(31.desember), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+        assertEquals(28.desember, maksimumSykepenger.sisteDag())
+        aktivitetslogg.assertInfo("Maks antall sykepengedager er nådd i perioden")
+    }
+
+    @Test
+    fun `ikke ny maksdato dersom mindre enn 182 dager frisk - nav utbetaler arbeidsgiverperioden`() {
+        val tidslinje = tidslinjeOf(248.NAVDAGER, 180.ARB, 16.NAP, 10.NAV)
+        assertForventetFeil(
+            forklaring = "må hensynta arbeidsgiverperiodedag nav, men vi må avklare om hvorvidt dagene skal avvises eller ikke",
+            nå = {
+                assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+            },
+            ønsket = {
+                assertEquals(listOf(
+                    11.juni(2019) til 14.juni(2019),
+                    17.juni(2019) til 21.juni(2019),
+                    24.juni(2019) til 28.juni(2019),
+                    1.juli(2019) til 5.juli(2019),
+                ).flatten(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+                assertEquals(11.desember, maksimumSykepenger.sisteDag())
+                aktivitetslogg.assertInfo("Maks antall sykepengedager er nådd i perioden")
+            }
+        )
     }
 
     @Test
