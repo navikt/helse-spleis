@@ -4,7 +4,6 @@ import java.time.LocalDate
 import no.nav.helse.Alder
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
@@ -80,27 +79,12 @@ internal class MaksimumSykepengedagerfilterTest {
     @Test
     fun `ikke ny maksdato dersom mindre enn 182 dager frisk - nav utbetaler arbeidsgiverperioden`() {
         val tidslinje = tidslinjeOf(248.NAVDAGER, 100.ARB, 16.NAP, 10.NAV)
-        assertForventetFeil(
-            forklaring = "må hensynta arbeidsgiverperiodedag nav, men vi må avklare om hvorvidt dagene skal avvises eller ikke",
-            nå = {
-                assertEquals(listOf(
-                    8.april(2019) til 12.april(2019),
-                    15.april(2019) til 17.april(2019),
-                ).flatten(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
-                assertEquals(12.desember, maksimumSykepenger.sisteDag())
-                aktivitetslogg.assertInfo("Maks antall sykepengedager er nådd i perioden")
-            },
-            ønsket = {
-                assertEquals(listOf(
-                    25.mars(2019) til 29.mars(2019),
-                    1.april(2019) til 5.april(2019),
-                    8.april(2019) til 12.april(2019),
-                    15.april(2019) til 17.april(2019),
-                ).flatten(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
-                assertEquals(12.desember, maksimumSykepenger.sisteDag())
-                aktivitetslogg.assertInfo("Maks antall sykepengedager er nådd i perioden")
-            }
-        )
+        assertEquals(listOf(
+            8.april(2019) til 12.april(2019),
+            15.april(2019) til 17.april(2019),
+        ).flatten(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+        assertEquals(12.desember, maksimumSykepenger.sisteDag())
+        aktivitetslogg.assertInfo("Maks antall sykepengedager er nådd i perioden")
     }
 
     @Test
