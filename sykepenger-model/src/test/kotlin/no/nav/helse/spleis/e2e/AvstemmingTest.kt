@@ -1,9 +1,9 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.februar
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
 import no.nav.helse.juni
-import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.reflection.castAsList
@@ -58,6 +57,9 @@ internal class AvstemmingTest : AbstractEndToEndTest() {
         assertEquals(3, aktive.size)
         assertEquals(4, utbetalinger.size)
         assertEquals(1.vedtaksperiode.id(ORGNUMMER), forkastede[0]["id"])
+        assertEquals(1.januar, forkastede[0]["fom"] as LocalDate)
+        assertEquals(17.januar, forkastede[0]["tom"] as LocalDate)
+        assertEquals(1.januar, forkastede[0]["skjæringstidspunkt"] as LocalDate)
         assertEquals(TilstandType.TIL_INFOTRYGD, forkastede[0]["tilstand"])
         assertTrue(forkastede[0]["opprettet"] is LocalDateTime)
         assertTrue(forkastede[0]["oppdatert"] is LocalDateTime)
@@ -69,6 +71,9 @@ internal class AvstemmingTest : AbstractEndToEndTest() {
         assertEquals(0, forkastede[1]["utbetalinger"].castAsList<String>().size)
 
         assertEquals(3.vedtaksperiode.id(ORGNUMMER), aktive[0]["id"])
+        assertEquals(1.mars, aktive[0]["fom"] as LocalDate)
+        assertEquals(20.mars, aktive[0]["tom"] as LocalDate)
+        assertEquals(1.mars, aktive[0]["skjæringstidspunkt"] as LocalDate)
         assertEquals(TilstandType.AVSLUTTET, aktive[0]["tilstand"])
         assertTrue(aktive[0]["opprettet"] is LocalDateTime)
         assertTrue(aktive[0]["oppdatert"] is LocalDateTime)

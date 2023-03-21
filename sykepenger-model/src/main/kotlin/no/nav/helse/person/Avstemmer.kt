@@ -185,6 +185,9 @@ internal class Avstemmer(person: Person) {
                     "tilstand" to tilstand.type,
                     "opprettet" to opprettet,
                     "oppdatert" to oppdatert,
+                    "fom" to periode.start,
+                    "tom" to periode.endInclusive,
+                    "skjæringstidspunkt" to skjæringstidspunkt(),
                     "utbetalinger" to (utbetalinger[id]?.toList() ?: emptyList())
                 )
             )
