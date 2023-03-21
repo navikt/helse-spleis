@@ -682,6 +682,20 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `korrigerer agp langt tilbake i tid`() {
+        nyPeriode(5.januar til 16.januar)
+        nyttVedtak(17.januar, 31.januar, arbeidsgiverperiode = listOf(5.januar til 20.januar), førsteFraværsdag = 5.januar)
+        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(1.mars, 31.mars)
+        nyPeriode(10.april til 30.april)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 10.april)
+        assertNotNull(inspektør.vilkårsgrunnlag(5.januar))
+        assertNull(inspektør.vilkårsgrunnlag(1.januar))
+        assertInfo("Hensyntar ikke inntektsmelding fordi dette eller nyere skjæringstidspunkt har vært utbetalt")
+        assertIngenVarsler()
+    }
+
+    @Test
     fun `En periode som opprinnelig var en forlengelse oppdager at den er fortsatt en en forlengelse uten utbetaling ved inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(25.november(2020), 30.november(2020)))
         håndterSøknad(Sykdom(25.november(2020), 30.november(2020), 100.prosent))
