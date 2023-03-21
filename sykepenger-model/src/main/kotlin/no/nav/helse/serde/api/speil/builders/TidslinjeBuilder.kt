@@ -11,13 +11,12 @@ import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
-import no.nav.helse.serde.api.dto.ArbeidsgiverperiodedagNav
 import no.nav.helse.serde.api.dto.AvvistDag
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
-import no.nav.helse.serde.api.dto.NavDag
 import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagKildetype
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
+import no.nav.helse.serde.api.dto.UtbetalingsdagDTO
 import no.nav.helse.serde.api.dto.Utbetalingstidslinjedag
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagMedGrad
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
@@ -203,12 +202,12 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         }
     }
 
-    override fun visit(dag: Utbetalingsdag.ArbeidsgiverperiodedagNav, dato: LocalDate, økonomi: Økonomi) {
+    private fun leggTilUtbetalingsdag(dato: LocalDate, økonomi: Økonomi, type: UtbetalingstidslinjedagType){
         val (grad, totalGrad) = økonomi.medData { grad, totalGrad, _ -> grad to totalGrad }
         økonomi.medAvrundetData { _, refusjonsbeløp, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, _ ->
             utbetalingstidslinje.add(
-                ArbeidsgiverperiodedagNav(
-                    type = UtbetalingstidslinjedagType.ArbeidsgiverperiodeDagNav,
+                UtbetalingsdagDTO(
+                    type = type,
                     inntekt = aktuellDagsinntekt,
                     dato = dato,
                     utbetaling = arbeidsgiverbeløp!!,
@@ -222,27 +221,12 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         }
     }
 
-    override fun visit(
-        dag: Utbetalingsdag.NavDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        val (grad, totalGrad) = økonomi.medData { grad, totalGrad, _ -> grad to totalGrad }
-        økonomi.medAvrundetData { _, refusjonsbeløp, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, _ ->
-            utbetalingstidslinje.add(
-                NavDag(
-                    type = UtbetalingstidslinjedagType.NavDag,
-                    inntekt = aktuellDagsinntekt,
-                    dato = dato,
-                    utbetaling = arbeidsgiverbeløp!!,
-                    arbeidsgiverbeløp = arbeidsgiverbeløp,
-                    personbeløp = personbeløp!!,
-                    refusjonsbeløp = refusjonsbeløp,
-                    grad = grad,
-                    totalGrad = totalGrad
-                )
-            )
-        }
+    override fun visit(dag: Utbetalingsdag.ArbeidsgiverperiodedagNav, dato: LocalDate, økonomi: Økonomi) {
+        leggTilUtbetalingsdag(dato, økonomi, UtbetalingstidslinjedagType.ArbeidsgiverperiodeDagNav)
+    }
+
+    override fun visit(dag: Utbetalingsdag.NavDag, dato: LocalDate, økonomi: Økonomi) {
+        leggTilUtbetalingsdag(dato, økonomi, UtbetalingstidslinjedagType.NavDag)
     }
 
     override fun visit(

@@ -66,21 +66,7 @@ interface Utbetalingstidslinjedag {
     fun utbetalingsinfo(): Utbetalingsinfo? = null
 }
 
-data class NavDag(
-    override val type: UtbetalingstidslinjedagType = UtbetalingstidslinjedagType.NavDag,
-    override val inntekt: Int,
-    override val dato: LocalDate,
-    val utbetaling: Int,
-    val personbeløp: Int,
-    val arbeidsgiverbeløp: Int,
-    val refusjonsbeløp: Int?,
-    val grad: Double,
-    val totalGrad: Double?
-) : Utbetalingstidslinjedag {
-    override fun utbetalingsinfo() = Utbetalingsinfo(inntekt, utbetaling, personbeløp, arbeidsgiverbeløp, refusjonsbeløp, totalGrad)
-}
-
-data class ArbeidsgiverperiodedagNav(
+data class UtbetalingsdagDTO(
     override val type: UtbetalingstidslinjedagType = UtbetalingstidslinjedagType.NavDag,
     override val inntekt: Int,
     override val dato: LocalDate,
