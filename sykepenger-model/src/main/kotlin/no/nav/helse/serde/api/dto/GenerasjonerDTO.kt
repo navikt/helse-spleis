@@ -43,23 +43,25 @@ data class Utbetalingsinfo(
     val totalGrad: Double? = null
 )
 
-interface Tidslinjeperiode {
-    // Brukes i Speil for å kunne korrelere tidslinje-komponenten og saksbildet. Trenger ikke være persistent på tvers av snapshots.
-    val tidslinjeperiodeId: UUID
-    val vedtaksperiodeId: UUID
-    val fom: LocalDate
-    val tom: LocalDate
-    val sammenslåttTidslinje: List<SammenslåttDag>
-    val periodetype: Periodetype
-    val inntektskilde: Inntektskilde
-    val erForkastet: Boolean
-    val opprettet: LocalDateTime
-    val periodetilstand: Periodetilstand
-    val skjæringstidspunkt: LocalDate
+abstract class Tidslinjeperiode : Comparable<Tidslinjeperiode> {
+    abstract val vedtaksperiodeId: UUID
+    abstract val fom: LocalDate
+    abstract val tom: LocalDate
+    abstract val sammenslåttTidslinje: List<SammenslåttDag>
+    abstract val periodetype: Periodetype
+    abstract val inntektskilde: Inntektskilde
+    abstract val erForkastet: Boolean
+    abstract val opprettet: LocalDateTime
+    abstract val periodetilstand: Periodetilstand
+    abstract val skjæringstidspunkt: LocalDate
 
-    fun erSammeVedtaksperiode(other: Tidslinjeperiode) = vedtaksperiodeId == other.vedtaksperiodeId
-    fun venter() = periodetilstand in setOf(VenterPåAnnenPeriode, ForberederGodkjenning, ManglerInformasjon)
+    internal fun erSammeVedtaksperiode(other: Tidslinjeperiode) = vedtaksperiodeId == other.vedtaksperiodeId
+    internal open fun venter() = periodetilstand in setOf(VenterPåAnnenPeriode, ForberederGodkjenning, ManglerInformasjon)
+    override fun compareTo(other: Tidslinjeperiode) = tom.compareTo(other.tom)
 }
+
+private val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+private fun LocalDate.format() = format(formatter)
 
 data class UberegnetPeriode(
     override val vedtaksperiodeId: UUID,
@@ -72,12 +74,10 @@ data class UberegnetPeriode(
     override val opprettet: LocalDateTime,
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate
-) : Tidslinjeperiode {
-    override val tidslinjeperiodeId: UUID = UUID.randomUUID()
+) : Tidslinjeperiode() {
     override fun toString(): String {
         return "${fom.format()}-${tom.format()} - $periodetilstand"
     }
-    private fun LocalDate.format() = format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
 }
 
 // Dekker datagrunnlaget vi trenger for å populere både pølsen og _hele_ saksbildet
@@ -101,20 +101,16 @@ data class BeregnetPeriode(
     val periodevilkår: Vilkår,
     val aktivitetslogg: List<AktivitetDTO>,
     val vilkårsgrunnlagId: UUID?
-) : Tidslinjeperiode, Comparable<BeregnetPeriode> {
-    override val tidslinjeperiodeId: UUID = UUID.randomUUID()
+) : Tidslinjeperiode() {
 
     override fun venter(): Boolean = super.venter() && periodetilstand != Utbetalt
 
     internal fun erAnnullering() = utbetaling.type == Utbetalingtype.ANNULLERING
     internal fun erRevurdering() = utbetaling.type == Utbetalingtype.REVURDERING
     internal fun hørerSammen(other: Tidslinjeperiode) = other is BeregnetPeriode && utbetaling.hørerSammen(other.utbetaling)
-
-    override fun compareTo(other: BeregnetPeriode) = tom.compareTo(other.tom)
     override fun toString(): String {
         return "${fom.format()}-${tom.format()} - $periodetilstand - ${utbetaling.type}"
     }
-    private fun LocalDate.format() = format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
 
     data class Vilkår(
         val sykepengedager: Sykepengedager,
