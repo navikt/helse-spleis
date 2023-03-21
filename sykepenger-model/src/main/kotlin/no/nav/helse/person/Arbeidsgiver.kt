@@ -242,15 +242,15 @@ internal class Arbeidsgiver private constructor(
             .any { it.sykmeldingsperioder.avventerSøknad(periode) }
 
         private fun Iterable<Arbeidsgiver>.periodeSomSkalGjenopptas() = (pågåendeRevurderingsperiode().takeUnless { it.isEmpty() } ?: førsteIkkeFerdigBehandletPeriode()).minOrNull()
-        private fun Iterable<Arbeidsgiver>.førstePeriodeSomHarPågåendeUtbetaling() = nåværendeVedtaksperioder(HAR_PÅGÅENDE_UTBETALINGER).minOrNull()
+        private fun Iterable<Arbeidsgiver>.sistePeriodeSomHarPågåendeUtbetaling() = vedtaksperioder(HAR_PÅGÅENDE_UTBETALINGER).maxOrNull()
 
         internal fun Iterable<Arbeidsgiver>.gjenopptaBehandling(aktivitetslogg: IAktivitetslogg) {
-            if (førstePeriodeSomHarPågåendeUtbetaling() != null) return aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående utbetaling")
+            if (sistePeriodeSomHarPågåendeUtbetaling() != null) return aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående utbetaling")
             val periodeSomSkalGjenopptas = periodeSomSkalGjenopptas() ?: return
             periodeSomSkalGjenopptas.gjenopptaBehandling(aktivitetslogg, this)
         }
 
-        internal fun Iterable<Arbeidsgiver>.nestemann() = førstePeriodeSomHarPågåendeUtbetaling() ?: periodeSomSkalGjenopptas()
+        internal fun Iterable<Arbeidsgiver>.nestemann() = sistePeriodeSomHarPågåendeUtbetaling() ?: periodeSomSkalGjenopptas()
 
         private fun Iterable<Arbeidsgiver>.pågåendeRevurderingsperiode(): List<Vedtaksperiode> {
             return nåværendeVedtaksperioder(PÅGÅENDE_REVURDERING).takeUnless { it.isEmpty() } ?: nåværendeVedtaksperioder(IKKE_FERDIG_REVURDERT)
