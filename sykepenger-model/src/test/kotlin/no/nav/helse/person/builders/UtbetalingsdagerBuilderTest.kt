@@ -4,6 +4,7 @@ import no.nav.helse.januar
 import no.nav.helse.person.PersonObserver.Utbetalingsdag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.Arbeidsdag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDagNav
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.AvvistDag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.Feriedag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.ForeldetDag
@@ -20,8 +21,10 @@ import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.FOR
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.HELG
+import no.nav.helse.testhelpers.NAP
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.P
+import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.UK
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.tidslinjeOf
@@ -67,6 +70,23 @@ internal class UtbetalingsdagerBuilderTest {
                 Utbetalingsdag(4.januar, Feriedag),
                 Utbetalingsdag(5.januar, Feriedag),
                 Utbetalingsdag(6.januar, Fridag)
+            ), builder.result()
+        )
+    }
+
+    @Test
+    fun `tidslinje med ArbeidsgiverperiodeDagerNav`() {
+        val builder = UtbetalingsdagerBuilder(6.S)
+        val utbetalingstidslinje = tidslinjeOf(6.NAP)
+        utbetalingstidslinje.accept(builder)
+        assertEquals(
+            listOf(
+                Utbetalingsdag(1.januar, ArbeidsgiverperiodeDagNav),
+                Utbetalingsdag(2.januar, ArbeidsgiverperiodeDagNav),
+                Utbetalingsdag(3.januar, ArbeidsgiverperiodeDagNav),
+                Utbetalingsdag(4.januar, ArbeidsgiverperiodeDagNav),
+                Utbetalingsdag(5.januar, ArbeidsgiverperiodeDagNav),
+                Utbetalingsdag(6.januar, ArbeidsgiverperiodeDag)
             ), builder.result()
         )
     }

@@ -230,6 +230,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     ) {
         enum class Dagtype {
             ArbeidsgiverperiodeDag,
+            ArbeidsgiverperiodeDagNav,
             NavDag,
             NavHelgDag,
             Arbeidsdag,

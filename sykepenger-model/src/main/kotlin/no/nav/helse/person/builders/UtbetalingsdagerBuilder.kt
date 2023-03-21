@@ -1,13 +1,13 @@
 package no.nav.helse.person.builders
 
+import java.time.LocalDate
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.økonomi.Økonomi
-import java.time.LocalDate
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
+import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
+import no.nav.helse.økonomi.Økonomi
 
 internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstidslinje) : UtbetalingsdagVisitor {
 
@@ -23,6 +23,10 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
 
     override fun visit(dag: Utbetalingsdag.NavDag, dato: LocalDate, økonomi: Økonomi) {
         utbetalingsdager.add(PersonObserver.Utbetalingsdag(dato, PersonObserver.Utbetalingsdag.Dagtype.NavDag))
+    }
+
+    override fun visit(dag: Utbetalingsdag.ArbeidsgiverperiodedagNav, dato: LocalDate, økonomi: Økonomi) {
+        utbetalingsdager.add(PersonObserver.Utbetalingsdag(dato, PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDagNav))
     }
 
     override fun visit(dag: Utbetalingsdag.NavHelgDag, dato: LocalDate, økonomi: Økonomi) {
