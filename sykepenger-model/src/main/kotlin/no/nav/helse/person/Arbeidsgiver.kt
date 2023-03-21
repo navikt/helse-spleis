@@ -523,20 +523,13 @@ internal class Arbeidsgiver private constructor(
             */
             vedtaksperioder.håndterHale(it)
         }
-        val noenHarHåndtertDager = noenHarHåndtert(inntektsmelding) { håndter(dager) }
+        håndter(inntektsmelding) { håndter(dager) }
 
         val vedtaksperiodeSomSkalHåndtereInntektOgRefusjon =
             vedtaksperioder.skalHåndtere(inntektsmelding.inntektOgRefusjon(dager))
         val inntektOgRefusjonHåndteres = vedtaksperiodeSomSkalHåndtereInntektOgRefusjon != null
 
-        if (!noenHarHåndtertDager && inntektOgRefusjonHåndteres) {
-            // Om vi ikke har håndterte noen dager, men allikevel skal håndtere inntekt og refusjon
-            // legger vi til alle dagene på arbeidsgiver som "hjemløse dager" (dekkes ikke av noen vedtaksperioder)
-            // Dette kun for å beholde dagens oppførsel.
-            dager.håndterGjenstående(this@Arbeidsgiver)
-        }
-
-        dager.valider(this@Arbeidsgiver)
+        dager.valider(this@Arbeidsgiver, vedtaksperiodeSomSkalHåndtereInntektOgRefusjon)
 
         vedtaksperiodeSomSkalHåndtereInntektOgRefusjon?.håndter(inntektsmelding.inntektOgRefusjon(dager))?.also {
             // En av vedtaksperiodene har håndtert inntekt og refusjon

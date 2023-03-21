@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.tilOrNull
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -72,30 +73,26 @@ internal class DagerFraInntektsmelding(
         arbeidsgiver.oppdaterSykdom(it)
     }
 
-    private var forrigePeriodeSomHåndterte: Periode? = null
+    private var forrigePeriodeSomHåndterteDager: Periode? = null
 
     internal fun håndter(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Sykdomstidslinje): Sykdomstidslinje? {
         val overlappendeDager = overlappendeDager(periode).takeUnless { it.isEmpty() } ?: return null
         val arbeidsgiverSykedomstidslinje = oppdaterSykdom(BitAvInntektsmelding(inntektsmelding, overlappendeDager.omsluttendePeriode!!))
         gjenståendeDager.removeAll(overlappendeDager)
-        forrigePeriodeSomHåndterte = periode
+        forrigePeriodeSomHåndterteDager = periode
         return arbeidsgiverSykedomstidslinje.subset(periode)
     }
 
-    internal fun håndterGjenstående(oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit) {
-        val gjenståendePeriode = gjenståendeDager.omsluttendePeriode ?: return
-        oppdaterSykdom(BitAvInntektsmelding(inntektsmelding, gjenståendePeriode))
-        gjenståendeDager.removeAll(gjenståendePeriode)
-    }
-
-    internal fun håndterGjenstående(arbeidsgiver: Arbeidsgiver) {
-        håndterGjenstående {
-            arbeidsgiver.oppdaterSykdom(it)
+    internal fun valider(arbeidsgiver: Arbeidsgiver, periodeSomHåndtereInntekt: Vedtaksperiode?) {
+        // Hvis ingen vedtaksperioder håndterte dagene kan det likevel hende vi behøver varsel
+        if (forrigePeriodeSomHåndterteDager == null) {
+            periodeSomHåndtereInntekt?.let {
+                kontekst(periodeSomHåndtereInntekt)
+                valider(arbeidsgiver.arbeidsgiverperiode(it.periode()))
+                return
+            }
         }
-    }
-
-    internal fun valider(arbeidsgiver: Arbeidsgiver) {
-        forrigePeriodeSomHåndterte?.let {
+        forrigePeriodeSomHåndterteDager?.let {
             // Vi ønsker kun å validere arbeidsgiverperioden en gang, og dette til slutt
             // Dette for å unngå uenighet om agp hvis kun deler av historikken er lagt til
             valider(arbeidsgiver.arbeidsgiverperiode(it))

@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -41,6 +40,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
@@ -91,7 +91,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndTest() {
 
@@ -1198,28 +1197,17 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    fun `Inntektsmelding oppgir tidligere egenmeldingsdager før kort periode - omgjøring?`() {
+    fun `Inntektsmelding oppgir tidligere egenmeldingsdager før kort periode - lar oss ikke vippe av pinnen`() {
         nyPeriode(4.desember(2022) til 11.desember(2022))
 
         nyPeriode(14.desember(2022) til 8.januar(2023))
         håndterInntektsmelding(listOf(4.november(2022) til 19.november(2022)), førsteFraværsdag = 14.desember(2022))
 
-        assertEquals("UGG UUUUUGG UUUUUG? ??????? ??????H SSSSSHH ??SSSHH SSSSSHH SSSSSHH SSSSSHH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-
-        assertForventetFeil(
-            forklaring = "1.vedtaksperiode burde omgjøres her pga de implisitte egenemeldingsdagene 4.november til 19.november, som er 15 dager før den korte perioden",
-            nå = {
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-                håndterVilkårsgrunnlag(2.vedtaksperiode)
-                assertThrows<IllegalStateException>("Fant ikke vilkårsgrunnlag for 2022-12-05. Må ha et vilkårsgrunnlag for å legge til utbetalingsopplysninger. Har vilkårsgrunnlag på skjæringstidspunktene [2022-12-14]") {
-                    håndterYtelser(2.vedtaksperiode)
-                }
-            },
-            ønsket = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            }
-        )
+        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+        assertEquals("H SSSSSHH ??SSSHH SSSSSHH SSSSSHH SSSSSHH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
     }
 }

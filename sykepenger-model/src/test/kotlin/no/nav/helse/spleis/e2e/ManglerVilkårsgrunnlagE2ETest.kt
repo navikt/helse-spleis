@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -89,28 +88,15 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(16.desember(2017) til 31.desember(2017)),
             førsteFraværsdag = 5.mars
         )
+        assertInfo("Inntektsmelding ikke håndtert")
         assertTilstandFørInnteksmeldingHensyntas()
 
         // Når søknaden kommer replayes Inntektsmelding og nå puttes plutselig info fra Inntektsmlding på
         // arbeidsgiver, også lengre tilbake i tid enn vedtaksperioden som blir truffet.
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.mars, 31.mars, 100.prosent))
-
-        assertForventetFeil(
-            forklaring = "Inntektsmeldingen flytter skjæringstidspunkt på tidligere periode på arbeidsgiverperiode og sletter vilkårsgrunnlag",
-            nå = {
-                assertEquals(16.desember(2017), inspektør.skjæringstidspunkt(1.vedtaksperiode))
-                assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-                assertTrue(inspektør.vilkårsgrunnlagHistorikkInnslag().first().inspektør.elementer.isEmpty())
-            },
-            ønsket = {
-                assertTilstandFørInnteksmeldingHensyntas()
-            }
-        )
-
+        assertTilstandFørInnteksmeldingHensyntas()
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        assertIllegalStateException("Fant ikke vilkårsgrunnlag for 2018-02-01. Må ha et vilkårsgrunnlag for å legge til utbetalingsopplysninger. Har vilkårsgrunnlag på skjæringstidspunktene [2018-03-05]") {
-            håndterYtelser(2.vedtaksperiode)
-        }
+        håndterYtelser(2.vedtaksperiode)
     }
 
     @Test

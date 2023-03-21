@@ -476,7 +476,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `vi sammenligner ikke arbeidsgiverperiodeinformasjon dersom inntektsmelding har oppgitt første fraværsdag`() {
+    fun `vi sammenligner arbeidsgiverperiodeinformasjon også dersom inntektsmelding har oppgitt en senere første fraværsdag`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.februar, 28.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(
@@ -484,7 +484,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             listOf(Periode(1.januar, 16.januar)),
             førsteFraværsdag = 1.februar
         )
-        assertIngenVarsler(1.vedtaksperiode.filter())
+        assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -692,7 +692,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertNotNull(inspektør.vilkårsgrunnlag(5.januar))
         assertNull(inspektør.vilkårsgrunnlag(1.januar))
         assertInfo("Hensyntar ikke inntektsmelding fordi dette eller nyere skjæringstidspunkt har vært utbetalt")
-        assertIngenVarsler()
+        assertVarsel(RV_IM_3)
     }
 
     @Test
@@ -2044,7 +2044,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             førsteFraværsdag = 6.februar
         )
         assertEquals(6.februar til 28.februar, inspektør.periode(1.vedtaksperiode))
-        assertEquals("GG UUUUUGG UUUUUGG ?SSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
+        assertEquals("SSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertEquals(1, inspektør.inntektInspektør.size)
         assertIngenInfo("Inntektsmelding ikke håndtert")
     }

@@ -1073,9 +1073,9 @@ internal class Vedtaksperiode private constructor(
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {}
         fun håndterDagerFør(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {}
         fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
-            if (!dager.påvirker(vedtaksperiode.sykdomstidslinje)) return true
+            if (!dager.påvirker(vedtaksperiode.sykdomstidslinje)) return false
             dager.varsel(RV_IM_4, "Inntektsmeldingen ville påvirket sykdomstidslinjen i ${type.name}")
-            return true
+            return false
         }
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
             inntektOgRefusjon.varsel(RV_IM_4, "Håndterer inntekt og refusjon fra inntektsmelding i ${type.name}")
