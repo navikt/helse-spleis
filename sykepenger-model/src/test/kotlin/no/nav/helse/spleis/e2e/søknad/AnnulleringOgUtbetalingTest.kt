@@ -40,7 +40,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
-@EnableToggle(Toggle.AnnullereOgUtbetale::class)
 internal class AnnulleringOgUtbetalingTest : AbstractEndToEndTest() {
 
     @Test

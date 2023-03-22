@@ -55,5 +55,3 @@ spec:
     value: earliest
   - name: Splarbeidsbros
     value: "true"
-  - name: ANNULLERE_OG_UTBETALE
-    value: "true"

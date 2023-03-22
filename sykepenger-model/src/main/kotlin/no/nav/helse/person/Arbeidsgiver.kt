@@ -421,9 +421,6 @@ internal class Arbeidsgiver private constructor(
 
     private fun nyUtbetaling(aktivitetslogg: IAktivitetslogg, utbetalingen: Utbetaling, annulleringer: List<Utbetaling> = emptyList()) {
         utbetalinger.lastOrNull()?.forkast(aktivitetslogg)
-        check (Toggle.AnnullereOgUtbetale.enabled || annulleringer.isEmpty()) {
-            "Dette støtter vi ikke helt enda: må annullere/opphøre ${annulleringer.size} oppdrag for å kunne kjøre frem igjen ett."
-        }
         annulleringer.plus(utbetalingen).forEach { utbetaling ->
             check(utbetalinger.tillaterOpprettelseAvUtbetaling(utbetaling)) { "Har laget en overlappende utbetaling" }
             utbetalinger.add(utbetaling)

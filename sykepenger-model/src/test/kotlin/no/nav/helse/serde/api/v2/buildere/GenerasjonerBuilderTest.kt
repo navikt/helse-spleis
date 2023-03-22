@@ -2074,7 +2074,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `tidligere periode med arbeid får samme arbeidsgiverperiode som nyere periode`() = Toggle.AnnullereOgUtbetale.enable {
+    fun `tidligere periode med arbeid får samme arbeidsgiverperiode som nyere periode`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)

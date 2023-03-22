@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.antallEtterspurteBehov
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -88,11 +87,10 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 
 internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
@@ -665,28 +663,62 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje((3.mars til 20.mars).map { manuellFeriedag(it) } + (21.mars til 26.mars).map { manuellPermisjonsdag(it) })
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        assertForventetFeil(
-            forklaring = "Har laget en overlappende utbetaling fordi det ikke er noen ArbeidsgiverperiodeDag før januar." +
-                    "OppdragBuilder stopper først ved ArbeidsgiverperiodeDag eller UkjentDag",
-            nå = {
-                assertThrows<IllegalStateException>("Har laget en overlappende utbetaling") {
-                    håndterYtelser(2.vedtaksperiode)
-                }
-            },
-            ønsket = {
-                assertDoesNotThrow { håndterYtelser(2.vedtaksperiode) }
-                val andreUtbetaling = inspektør.utbetaling(1).inspektør
-                val tredjeUtbetaling = inspektør.utbetaling(2).inspektør
-                assertEquals(andreUtbetaling.korrelasjonsId, tredjeUtbetaling.korrelasjonsId)
-                assertEquals(1, tredjeUtbetaling.arbeidsgiverOppdrag.size)
-                tredjeUtbetaling.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-                    assertEquals(18.mars, linje.fom)
-                    assertEquals(26.mars, linje.tom)
-                    assertEquals(18.mars, linje.datoStatusFom)
-                    assertEquals("OPPH", linje.statuskode)
-                }
-            }
-        )
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterOverstyrTidslinje((3.mars til 20.mars).map { manuellSykedag(it) })
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+
+        assertEquals(6, inspektør.utbetalinger.size)
+        val førsteUtbetaling = inspektør.utbetaling(0).inspektør
+        val andreUtbetaling = inspektør.utbetaling(1).inspektør
+        val annulleringen = inspektør.utbetaling(2).inspektør
+        val revurderingen = inspektør.utbetaling(3).inspektør
+
+        val revurderingenAvJanuar = inspektør.utbetaling(4).inspektør
+        val revurderingenAvMars = inspektør.utbetaling(5).inspektør
+
+        assertEquals(andreUtbetaling.korrelasjonsId, annulleringen.korrelasjonsId)
+        assertNotEquals(førsteUtbetaling.korrelasjonsId, andreUtbetaling.korrelasjonsId)
+        assertEquals(førsteUtbetaling.korrelasjonsId, revurderingen.korrelasjonsId)
+
+        assertEquals(revurderingenAvJanuar.korrelasjonsId, førsteUtbetaling.korrelasjonsId)
+        assertNotEquals(revurderingenAvMars.korrelasjonsId, revurderingen.korrelasjonsId)
+
+        assertEquals(1, annulleringen.arbeidsgiverOppdrag.size)
+        annulleringen.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(19.mars, linje.fom)
+            assertEquals(26.mars, linje.tom)
+            assertEquals(19.mars, linje.datoStatusFom)
+            assertEquals("OPPH", linje.statuskode)
+        }
+
+        assertEquals(1, revurderingen.arbeidsgiverOppdrag.size)
+        assertEquals(Endringskode.UEND, revurderingen.arbeidsgiverOppdrag.inspektør.endringskode)
+        assertEquals(3.januar til 26.mars, revurderingen.periode)
+        revurderingen.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(19.januar til 26.januar, linje.fom til linje.tom)
+        }
+
+        assertEquals(1, revurderingenAvJanuar.arbeidsgiverOppdrag.size)
+        assertEquals(Endringskode.UEND, revurderingenAvJanuar.arbeidsgiverOppdrag.inspektør.endringskode)
+        assertEquals(3.januar til 26.januar, revurderingenAvJanuar.periode)
+        revurderingenAvJanuar.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(19.januar til 26.januar, linje.fom til linje.tom)
+        }
+        assertEquals(1, revurderingenAvMars.arbeidsgiverOppdrag.size)
+        assertEquals(Endringskode.NY, revurderingenAvMars.arbeidsgiverOppdrag.inspektør.endringskode)
+        assertEquals(3.mars til 26.mars, revurderingenAvMars.periode)
+        revurderingenAvMars.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(19.mars til 20.mars, linje.fom til linje.tom)
+        }
     }
 
     @Test
