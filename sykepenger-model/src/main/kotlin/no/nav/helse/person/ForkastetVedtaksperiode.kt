@@ -16,6 +16,10 @@ internal class ForkastetVedtaksperiode(
         vedtaksperiode.accept(visitor)
         visitor.postVisitForkastetPeriode(vedtaksperiode)
     }
+    internal fun erVedtaksperiodeFør(other: Vedtaksperiode): Vedtaksperiode? {
+        if (!vedtaksperiode.før(other)) return null
+        return vedtaksperiode
+    }
 
     internal companion object {
         private fun Iterable<ForkastetVedtaksperiode>.perioder() = map { it.vedtaksperiode }
