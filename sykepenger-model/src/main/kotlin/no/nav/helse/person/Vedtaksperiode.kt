@@ -82,6 +82,7 @@ import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_REFUSJONSOPPLYSNINGER_PÅ
 import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE
 import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
 import no.nav.helse.person.Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT
+import no.nav.helse.person.Venteårsak.Hvorfor.VIL_UTBETALES
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
@@ -2132,9 +2133,15 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.låsOpp()
         }
 
-        override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) = HJELP.utenBegrunnelse
+        override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak {
+            if (!vedtaksperiode.forventerInntekt()) return HJELP.utenBegrunnelse
+            return HJELP fordi VIL_UTBETALES
+        }
 
-        override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {}
+        override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {
+            if (!vedtaksperiode.forventerInntekt()) return
+            vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
+        }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             if (!vedtaksperiode.forventerInntekt()) return
