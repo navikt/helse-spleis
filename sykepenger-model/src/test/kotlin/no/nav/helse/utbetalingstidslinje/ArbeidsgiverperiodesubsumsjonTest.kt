@@ -273,7 +273,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
             arbeidsgiverperiodedager += 1
         }
 
-        override fun arbeidsgiverperiodedagNavAnsvar(
+        override fun arbeidsgiverperiodedagNav(
             dato: LocalDate,
             økonomi: Økonomi,
             kilde: SykdomstidslinjeHendelse.Hendelseskilde

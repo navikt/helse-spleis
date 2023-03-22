@@ -14,7 +14,7 @@ internal interface ArbeidsgiverperiodeMediator {
     fun fridagOppholdsdag(dato: LocalDate)
     fun arbeidsdag(dato: LocalDate)
     fun arbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde)
-    fun arbeidsgiverperiodedagNavAnsvar(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde)
+    fun arbeidsgiverperiodedagNav(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde)
     fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde)
     fun ukjentDag(dato: LocalDate) {}
     fun foreldetDag(dato: LocalDate, økonomi: Økonomi)

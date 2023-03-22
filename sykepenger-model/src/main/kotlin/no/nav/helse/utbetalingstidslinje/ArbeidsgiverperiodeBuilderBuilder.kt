@@ -26,7 +26,7 @@ internal class ArbeidsgiverperiodeBuilderBuilder : ArbeidsgiverperiodeMediator {
         nyDag(dato)
     }
 
-    override fun arbeidsgiverperiodedagNavAnsvar(
+    override fun arbeidsgiverperiodedagNav(
         dato: LocalDate,
         økonomi: Økonomi,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde

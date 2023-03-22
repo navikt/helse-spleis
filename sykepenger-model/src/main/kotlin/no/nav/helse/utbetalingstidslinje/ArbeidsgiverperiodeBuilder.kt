@@ -208,7 +208,7 @@ internal class ArbeidsgiverperiodeBuilder(
             økonomi: Økonomi,
             kilde: Hendelseskilde
         ) {
-            builder.mediator.arbeidsgiverperiodedagNavAnsvar(dato, økonomi, kilde)
+            builder.mediator.arbeidsgiverperiodedagNav(dato, økonomi, kilde)
         }
 
         override fun sykdomsdag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
@@ -238,7 +238,7 @@ internal class ArbeidsgiverperiodeBuilder(
             økonomi: Økonomi,
             kilde: Hendelseskilde
         ) {
-            builder.mediator.arbeidsgiverperiodedagNavAnsvar(dato, økonomi, kilde)
+            builder.mediator.arbeidsgiverperiodedagNav(dato, økonomi, kilde)
             builder.tilstand(Utbetaling)
         }
 

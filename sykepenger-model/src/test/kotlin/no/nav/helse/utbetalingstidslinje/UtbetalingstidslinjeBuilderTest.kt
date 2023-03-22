@@ -584,12 +584,12 @@ internal class UtbetalingstidslinjeBuilderTest {
             mediators.forEach { it.arbeidsgiverperiodedag(dato, økonomi, kilde) }
         }
 
-        override fun arbeidsgiverperiodedagNavAnsvar(
+        override fun arbeidsgiverperiodedagNav(
             dato: LocalDate,
             økonomi: Økonomi,
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
         ) {
-            mediators.forEach { it.arbeidsgiverperiodedagNavAnsvar(dato, økonomi, kilde) }
+            mediators.forEach { it.arbeidsgiverperiodedagNav(dato, økonomi, kilde) }
         }
 
         override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {

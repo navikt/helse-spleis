@@ -70,7 +70,7 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
         builder.addArbeidsgiverperiodedag(dato, inntekter.medInntekt(dato, nåværendeArbeidsgiverperiode, økonomi.ikkeBetalt()))
     }
 
-    override fun arbeidsgiverperiodedagNavAnsvar(
+    override fun arbeidsgiverperiodedagNav(
         dato: LocalDate,
         økonomi: Økonomi,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde

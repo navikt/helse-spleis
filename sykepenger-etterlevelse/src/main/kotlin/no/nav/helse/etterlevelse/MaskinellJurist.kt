@@ -6,10 +6,6 @@ import java.time.Year
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.januar
-import no.nav.helse.juni
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_A
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_B
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_C
@@ -39,6 +35,10 @@ import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_BEREGNET
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.etterlevelse.Tidslinjedag.Companion.dager
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.januar
+import no.nav.helse.juni
 import no.nav.helse.person.DokumentType
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
@@ -434,6 +434,22 @@ class MaskinellJurist private constructor(
                 ledd = 1.ledd,
                 bokstav = BOKSTAV_A,
                 input = mapOf("sykdomstidslinje" to sykdomstidslinje.dager(periode())),
+                output = emptyMap(),
+                kontekster = kontekster()
+            )
+        )
+    }
+
+    override fun `§ 8-17 ledd 1`(dato: LocalDate) {
+        leggTil(
+            GrupperbarSubsumsjon(
+                dato = dato,
+                lovverk = "folketrygdloven",
+                versjon = LocalDate.of(2018, 1, 1),
+                utfall = VILKAR_OPPFYLT,
+                paragraf = PARAGRAF_8_17,
+                ledd = LEDD_1,
+                input = emptyMap(),
                 output = emptyMap(),
                 kontekster = kontekster()
             )
