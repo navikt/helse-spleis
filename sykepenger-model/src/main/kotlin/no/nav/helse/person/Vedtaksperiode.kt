@@ -445,12 +445,11 @@ internal class Vedtaksperiode private constructor(
         if (!this.utbetalinger.harAvsluttede() && !this.utbetalinger.utbetales()) return
         // Vi er litt strengere etter perioden er utbetalt
 
-        if (this.påvirkerArbeidsgiverperioden(ny)) return hendelse.funksjonellFeil(`Mottatt søknad out of order innenfor 18 dager`)
+        if (Toggle.OutOfOrderInnenfor18Dager.disabled && this.påvirkerArbeidsgiverperioden(ny)) return hendelse.funksjonellFeil(`Mottatt søknad out of order innenfor 18 dager`)
         if (Toggle.OutOfOrderPåvirkerSkjæringstidspunkt.disabled && ny.periode.erRettFør(this.periode)) return hendelse.funksjonellFeil(`Mottatt søknad out of order`)
     }
 
     private fun påvirkerArbeidsgiverperioden(ny: Vedtaksperiode): Boolean {
-        if (Toggle.OutOfOrderInnenfor18Dager.enabled) return false
         val dagerMellom = ny.periode.periodeMellom(this.periode.start)?.count() ?: return false
         // dersom "ny" slutter på en fredag, så starter ikke oppholdstelling før påfølgende mandag.
         // det kan derfor være mer enn 16 dager avstand mellom periodene, og arbeidsgiverperioden kan være den samme
