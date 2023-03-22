@@ -507,9 +507,25 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun håndter(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID? = null) {
+    internal fun håndterReplay(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID) {
+        inntektsmelding.info("Replayer inntektsmelding.")
+        val vedtaksperiode = vedtaksperioder.singleOrNull { it.harId(vedtaksperiodeId) } ?: return
+        val dager = inntektsmelding.dager(listOf(vedtaksperiode.periode()))
+        dager.vurdertTilOgMed(vedtaksperiode.periode().start.minusDays(1))
+        val harHåndtertDager = vedtaksperiode.håndter(dager)
+        val skalHåndtereInntektOgRefusjon = listOf(vedtaksperiode).skalHåndtere(inntektsmelding.inntektOgRefusjon(dager)) != null
+        if (skalHåndtereInntektOgRefusjon) {
+            vedtaksperiode.håndter(inntektsmelding.inntektOgRefusjon(dager))
+            håndtertInntektPåSkjæringstidspunkt(vedtaksperiode, inntektsmelding)
+        }
+        vedtaksperiode.postHåndter(dager)
+
+        if (harHåndtertDager || skalHåndtereInntektOgRefusjon) return
+        inntektsmeldingIkkeHåndtert(inntektsmelding)
+    }
+
+    internal fun håndter(inntektsmelding: Inntektsmelding) {
         inntektsmelding.kontekst(this)
-        if (vedtaksperiodeId != null) inntektsmelding.info("Replayer inntektsmelding.")
         val sammenhengendePerioder = sammenhengendePerioder()
         val dager = inntektsmelding.dager(sammenhengendePerioder).also {
             /* Den eventuelle "halen" som ikke håndteres av noen vedtaksperioder må legges til _først_
