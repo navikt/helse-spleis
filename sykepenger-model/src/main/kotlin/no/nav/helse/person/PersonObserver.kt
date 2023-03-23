@@ -173,7 +173,6 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val personFagsystemId: String,
         val fom: LocalDate,
         val tom: LocalDate,
-        val utbetalingslinjer: List<Utbetalingslinje>,
         val annullertAvSaksbehandler: LocalDateTime,
         val saksbehandlerEpost: String,
         val saksbehandlerIdent: String
@@ -183,12 +182,6 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
                 "Enten arbeidsgiverFagsystemId eller personfagsystemId må være satt"
             }
         }
-        data class Utbetalingslinje(
-            val fom: LocalDate,
-            val tom: LocalDate,
-            val beløp: Int,
-            val grad: Double
-        )
     }
 
     data class UtbetalingEndretEvent(

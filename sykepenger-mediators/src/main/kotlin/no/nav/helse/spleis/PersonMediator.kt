@@ -207,22 +207,11 @@ internal class PersonMediator(
             "korrelasjonsId" to event.korrelasjonsId,
             "fom" to event.fom,
             "tom" to event.tom,
-            "annullertAvSaksbehandler" to event.annullertAvSaksbehandler,
             "tidspunkt" to event.annullertAvSaksbehandler,
-            "saksbehandlerEpost" to event.saksbehandlerEpost,
             "epost" to event.saksbehandlerEpost,
-            "saksbehandlerIdent" to event.saksbehandlerIdent,
             "ident" to event.saksbehandlerIdent,
-            "fagsystemId" to event.arbeidsgiverFagsystemId,
             "arbeidsgiverFagsystemId" to event.arbeidsgiverFagsystemId,
-            "personFagsystemId" to event.personFagsystemId,
-            // TODO: disse linjene er egentlig deprecated. Må finne ut om konsumenter leser dem inn før vi kan fjerne dem trygt
-            "utbetalingslinjer" to event.utbetalingslinjer.map { mapOf(
-                "fom" to it.fom,
-                "tom" to it.tom,
-                "grad" to it.grad,
-                "beløp" to it.beløp
-            )}
+            "personFagsystemId" to event.personFagsystemId
         )))
     }
 

@@ -774,15 +774,6 @@ internal class Arbeidsgiver private constructor(
                 utbetalingId = id,
                 fom = periode.start,
                 tom = periode.endInclusive,
-                // TODO: gå bort fra å sende linje ettersom det er bare perioden som er interessant for konsumenter
-                utbetalingslinjer = listOf(
-                    PersonObserver.UtbetalingAnnullertEvent.Utbetalingslinje(
-                        fom = periode.start,
-                        tom = periode.endInclusive,
-                        beløp = 0,
-                        grad = 0.0
-                    )
-                ),
                 annullertAvSaksbehandler = godkjenttidspunkt,
                 saksbehandlerEpost = saksbehandlerEpost,
                 saksbehandlerIdent = saksbehandlerIdent

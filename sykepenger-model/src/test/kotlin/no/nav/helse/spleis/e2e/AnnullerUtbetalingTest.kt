@@ -255,14 +255,9 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertEquals(utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), annullering.arbeidsgiverFagsystemId)
         assertEquals(utbetalingInspektør.personOppdrag.inspektør.fagsystemId(), annullering.personFagsystemId)
 
-        val utbetalingslinje = annullering.utbetalingslinjer.first()
         assertEquals("tbd@nav.no", annullering.saksbehandlerEpost)
         assertEquals(3.januar, annullering.fom)
         assertEquals(26.januar, annullering.tom)
-        assertEquals(3.januar, utbetalingslinje.fom)
-        assertEquals(26.januar, utbetalingslinje.tom)
-        assertEquals(0, utbetalingslinje.beløp)
-        assertEquals(0.0, utbetalingslinje.grad)
     }
 
     @Test
@@ -291,12 +286,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertEquals(3.januar, annullering.fom)
         assertEquals(20.februar, annullering.tom)
 
-        val utbetalingslinje = annullering.utbetalingslinjer.first()
         assertEquals("tbd@nav.no", annullering.saksbehandlerEpost)
-        assertEquals(3.januar, utbetalingslinje.fom)
-        assertEquals(20.februar, utbetalingslinje.tom)
-        assertEquals(0, utbetalingslinje.beløp)
-        assertEquals(0.0, utbetalingslinje.grad)
     }
 
     @Test
@@ -314,9 +304,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         val annulleringer = observatør.annulleringer
         assertEquals(1, annulleringer.size)
         val annullering = annulleringer.last()
-
-        val utbetalingslinje = annullering.utbetalingslinjer.first()
-        assertEquals(3.januar, utbetalingslinje.fom)
+        assertEquals(3.januar, annullering.fom)
     }
 
     @Test

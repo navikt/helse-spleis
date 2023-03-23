@@ -72,7 +72,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
-        assertEquals(26.januar, observatør.annulleringer[0].utbetalingslinjer.last().tom)
+        assertEquals(26.januar, observatør.annulleringer[0].tom)
         assertEquals(20.mars, observatør.utbetalingMedUtbetalingEventer.last().tom)
     }
 
