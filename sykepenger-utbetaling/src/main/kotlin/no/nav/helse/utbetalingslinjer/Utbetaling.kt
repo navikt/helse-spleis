@@ -479,9 +479,6 @@ class Utbetaling private constructor(
         )
     }
 
-    // FIXME: Only test
-    fun utbetalingstidslinje() = utbetalingstidslinje
-
     fun utbetalingstidslinje(periode: Periode) = utbetalingstidslinje.subset(periode)
 
     private fun overførBegge(hendelse: IAktivitetslogg) {
