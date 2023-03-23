@@ -479,8 +479,6 @@ class Utbetaling private constructor(
         )
     }
 
-    fun utbetalingstidslinje(periode: Periode) = utbetalingstidslinje.subset(periode)
-
     private fun overførBegge(hendelse: IAktivitetslogg) {
         vurdering?.overfør(hendelse, arbeidsgiverOppdrag, maksdato.takeUnless { type == ANNULLERING })
         vurdering?.overfør(hendelse, personOppdrag, maksdato.takeUnless { type == ANNULLERING })

@@ -68,12 +68,13 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Pair<Vilkårsgrunnl
         vedtaksperiodeId: UUID,
         grunnlagsdata: VilkårsgrunnlagElement,
         periode: Periode,
-        utbetaling: Utbetaling
+        utbetaling: Utbetaling,
+        utbetalingstidslinje: Utbetalingstidslinje
     ): Utbetalingstidslinje {
         check(utbetaling !== siste) { "kan ikke legge til lik utbetaling som forrige" }
         utbetaling.nyVedtaksperiodeUtbetaling(vedtaksperiodeId)
         utbetalinger.add(grunnlagsdata to utbetaling)
-        return utbetaling.utbetalingstidslinje(periode)
+        return utbetalingstidslinje.subset(periode)
     }
 
     internal fun build(builder: VedtakFattetBuilder) {

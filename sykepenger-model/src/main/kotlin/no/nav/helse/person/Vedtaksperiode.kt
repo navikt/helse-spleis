@@ -810,11 +810,11 @@ internal class Vedtaksperiode private constructor(
             gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
             periode = periode
         )
-        nyUtbetaling(grunnlagsdata, utbetaling)
+        nyUtbetaling(grunnlagsdata, utbetaling, utbetalingstidslinje)
     }
 
-    private fun nyUtbetaling(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetaling: Utbetaling) {
-        utbetalingstidslinje = utbetalinger.nyUtbetaling(id, grunnlagsdata, periode, utbetaling)
+    private fun nyUtbetaling(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetaling: Utbetaling, utbetalingstidslinjeKilde: Utbetalingstidslinje) {
+        utbetalingstidslinje = utbetalinger.nyUtbetaling(id, grunnlagsdata, periode, utbetaling, utbetalingstidslinjeKilde)
     }
 
     private fun høstingsresultater(hendelse: ArbeidstakerHendelse, simuleringtilstand: Vedtaksperiodetilstand, godkjenningtilstand: Vedtaksperiodetilstand) = when {
@@ -853,7 +853,7 @@ internal class Vedtaksperiode private constructor(
             .plus(this)
             .forEach {
                 it.aktivitetsloggkopi(aktivitetslogg).info("Mottar revurdert utbetaling fra $this som følge av at $vedtaksperiodeSomBeregner for ${vedtaksperiodeSomBeregner.organisasjonsnummer} beregner")
-                it.nyUtbetaling(grunnlagsdata, utbetaling)
+                it.nyUtbetaling(grunnlagsdata, utbetaling, utbetalingstidslinje)
             }
         loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(vedtaksperiodeSomBeregner.organisasjonsnummer, aktivitetslogg)
     }
