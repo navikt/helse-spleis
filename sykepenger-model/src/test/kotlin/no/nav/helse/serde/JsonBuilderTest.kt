@@ -87,7 +87,7 @@ class JsonBuilderTest {
         )
     }
 
-    private val person get() = Person(aktørId, fnr, fødselsdato.alder, MaskinellJurist())
+    private val person get() = Person(aktørId, fnr, fødselsdato.alder, null, MaskinellJurist())
 
     @Test
     fun `gjenoppbygd Person skal være lik opprinnelig Person - The Jackson Way`() {

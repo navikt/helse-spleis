@@ -127,7 +127,7 @@ internal abstract class AbstractPersonTest {
         Person(AKTØRID, personidentifikator, fødseldato.alder, jurist, regler(maksSykedager))
     }
     protected fun createTestPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate) = createTestPerson { jurist ->
-        Person(AKTØRID, personidentifikator, fødseldato.alder, jurist)
+        Person(AKTØRID, personidentifikator, fødseldato.alder, null, jurist)
     }
     protected fun createPingPongPerson() = createTestPerson { jurist -> pingPongPerson(jurist) }
     protected fun createOvergangFraInfotrygdPerson() = createTestPerson { jurist -> overgangFraInfotrygdPerson(jurist) }

@@ -32,6 +32,7 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
     private val orgnummer = packet["virksomhetsnummer"].asText()
     private val aktørId = packet["arbeidstakerAktorId"].asText()
     private val fødselsdato = packet["fødselsdato"].asOptionalLocalDate() ?: tilFødselsnummer(fødselsnummer).fødselsdato
+    private val dødsdato = packet["dødsdato"].asOptionalLocalDate()
     private val mottatt = packet["mottattDato"].asLocalDateTime()
     private val førsteFraværsdag = packet["foersteFravaersdag"].asOptionalLocalDate()
     private val beregnetInntekt = packet["beregnetInntekt"].asDouble()
@@ -40,7 +41,7 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
         packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val harOpphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].size() > 0
     private val harFlereInntektsmeldinger = packet["harFlereInntektsmeldinger"].asBoolean(false)
-    private val personopplysninger = Personopplysninger(fødselsnummer.somPersonidentifikator(), aktørId, fødselsdato)
+    private val personopplysninger = Personopplysninger(fødselsnummer.somPersonidentifikator(), aktørId, fødselsdato, dødsdato)
 
     protected val inntektsmelding
         get() = Inntektsmelding(

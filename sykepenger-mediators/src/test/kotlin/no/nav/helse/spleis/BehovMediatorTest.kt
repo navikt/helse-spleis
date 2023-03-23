@@ -226,7 +226,7 @@ class BehovMediatorTest {
     private class TestHendelse(
         val logg: Aktivitetslogg
     ) : ArbeidstakerHendelse(UUID.randomUUID(), fødselsnummer, aktørId, "not_relevant", logg), Aktivitetskontekst {
-        private val person = Personopplysninger(fødselsnummer.somPersonidentifikator(), aktørId, LocalDate.EPOCH).person(MaskinellJurist())
+        private val person = Personopplysninger(fødselsnummer.somPersonidentifikator(), aktørId, LocalDate.EPOCH, null).person(MaskinellJurist())
         init {
             kontekst(person)
         }

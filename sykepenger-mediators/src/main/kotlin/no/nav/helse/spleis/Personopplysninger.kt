@@ -10,13 +10,15 @@ import no.nav.helse.person.Person
 internal class Personopplysninger internal constructor(
     private val personidentifikator: Personidentifikator,
     private val aktørId: String,
-    private val alder: Alder
+    private val alder: Alder,
+    private val dødsdato: LocalDate?
 ) {
     constructor(
         personidentifikator: Personidentifikator,
         aktørId: String,
-        fødselsdato: LocalDate
-    ) : this(personidentifikator, aktørId, fødselsdato.alder)
+        fødselsdato: LocalDate,
+        dødsdato: LocalDate?
+    ) : this(personidentifikator, aktørId, fødselsdato.alder, dødsdato)
 
-    fun person(jurist: MaskinellJurist) = Person(aktørId, personidentifikator, alder, jurist)
+    fun person(jurist: MaskinellJurist) = Person(aktørId, personidentifikator, alder, dødsdato, jurist)
 }

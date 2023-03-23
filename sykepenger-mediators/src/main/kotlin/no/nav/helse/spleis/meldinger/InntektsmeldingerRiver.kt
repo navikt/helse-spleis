@@ -36,6 +36,7 @@ internal open class InntektsmeldingerRiver(
         }
         message.require("mottattDato", JsonNode::asLocalDateTime)
         message.interestedIn("fødselsdato", JsonNode::asLocalDate)
+        message.interestedIn("dødsdato", JsonNode::asLocalDate)
         message.interestedIn("foersteFravaersdag", JsonNode::asLocalDate)
         message.interestedIn("refusjon.opphoersdato", JsonNode::asLocalDate)
         message.interestedIn(

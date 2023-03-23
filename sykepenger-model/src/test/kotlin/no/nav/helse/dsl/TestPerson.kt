@@ -86,7 +86,7 @@ internal class TestPerson(
     private val behovsamler = Behovsamler(deferredLog)
     private val vedtaksperiodesamler = Vedtaksperiodesamler()
     private val personHendelsefabrikk = PersonHendelsefabrikk(aktørId, personidentifikator)
-    private val person = Person(aktørId, personidentifikator, fødselsdato.alder, jurist).also {
+    private val person = Person(aktørId, personidentifikator, fødselsdato.alder, null, jurist).also {
         it.addObserver(vedtaksperiodesamler)
         it.addObserver(behovsamler)
         it.addObserver(observatør)

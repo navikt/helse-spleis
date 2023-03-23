@@ -124,7 +124,8 @@ class Person private constructor(
         personidentifikator: Personidentifikator,
         alder: Alder,
         jurist: MaskinellJurist,
-        regler: ArbeidsgiverRegler
+        regler: ArbeidsgiverRegler,
+        dødsdato: LocalDate? = null
     ) : this(
         aktørId,
         personidentifikator,
@@ -134,7 +135,7 @@ class Person private constructor(
         LocalDateTime.now(),
         Infotrygdhistorikk(),
         VilkårsgrunnlagHistorikk(),
-        null,
+        dødsdato,
         jurist.medFødselsnummer(personidentifikator),
         emptyList<Person>(),
         regler = regler
@@ -143,8 +144,9 @@ class Person private constructor(
         aktørId: String,
         personidentifikator: Personidentifikator,
         alder: Alder,
+        dødsdato: LocalDate?,
         jurist: MaskinellJurist
-    ) : this(aktørId, personidentifikator, alder, jurist, NormalArbeidstaker)
+    ) : this(aktørId, personidentifikator, alder, jurist, NormalArbeidstaker, dødsdato)
 
     private val observers = mutableListOf<PersonObserver>()
 

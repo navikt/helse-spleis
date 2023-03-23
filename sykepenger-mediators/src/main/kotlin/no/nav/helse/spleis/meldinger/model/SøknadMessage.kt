@@ -5,6 +5,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Personopplysninger
@@ -20,7 +21,8 @@ internal abstract class SøknadMessage(private val packet: JsonMessage, private 
         val personopplysninger = Personopplysninger(
             personidentifikator = fødselsnummer.somPersonidentifikator(),
             aktørId = packet["aktorId"].asText(),
-            fødselsdato = packet["fødselsdato"].asLocalDate()
+            fødselsdato = packet["fødselsdato"].asLocalDate(),
+            dødsdato = packet["dødsdato"].asOptionalLocalDate()
         )
         bygg()
         _behandle(mediator, personopplysninger, packet, context)

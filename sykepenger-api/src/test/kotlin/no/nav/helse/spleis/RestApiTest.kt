@@ -160,7 +160,7 @@ internal class RestApiTest {
             harFlereInntektsmeldinger = false,
             mottatt = LocalDateTime.now()
         )
-        val person = Person(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), UNG_PERSON_FØDSELSDATO.alder, MaskinellJurist())
+        val person = Person(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), UNG_PERSON_FØDSELSDATO.alder, null, MaskinellJurist())
         person.håndter(sykmelding)
         person.håndter(inntektsmelding)
         dataSource.lagrePerson(AKTØRID, UNG_PERSON_FNR, person)

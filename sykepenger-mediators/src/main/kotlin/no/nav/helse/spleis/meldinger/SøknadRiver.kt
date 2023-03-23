@@ -22,6 +22,7 @@ internal abstract class SøknadRiver(
         packet.require("fom", JsonNode::asLocalDate)
         packet.require("tom", JsonNode::asLocalDate)
         packet.require("fødselsdato", JsonNode::asLocalDate)
+        packet.interestedIn("dødsdato", JsonNode::asLocalDate)
         packet.requireArray("soknadsperioder") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)

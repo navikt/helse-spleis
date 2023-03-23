@@ -64,7 +64,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
     internal fun setup() {
         aktivitetslogg = Aktivitetslogg()
 
-        person = Person(aktørId, fnr.somPersonidentifikator(), EPOCH.alder, MaskinellJurist()).apply {
+        person = Person(aktørId, fnr.somPersonidentifikator(), EPOCH.alder, null, MaskinellJurist()).apply {
             håndter(sykmelding)
             håndter(søknad)
         }
