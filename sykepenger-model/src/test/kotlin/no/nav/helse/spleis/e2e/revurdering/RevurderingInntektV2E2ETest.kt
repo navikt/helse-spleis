@@ -514,7 +514,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         assertVarsel(RV_IV_2, AktivitetsloggFilter.person())
         assertVarsel(RV_SV_1, AktivitetsloggFilter.person())
-        assertFalse(utbetalingTilRevurdering.utbetalingstidslinje().harUtbetalinger())
+        assertFalse(utbetalingTilRevurdering.utbetalingstidslinje().harUtbetalingsdager())
     }
 
     @Test
@@ -541,7 +541,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         assertVarsel(RV_IV_2, AktivitetsloggFilter.person())
         assertVarsel(RV_SV_1, AktivitetsloggFilter.person())
-        assertFalse(utbetalingTilRevurdering.utbetalingstidslinje().harUtbetalinger())
+        assertFalse(utbetalingTilRevurdering.utbetalingstidslinje().harUtbetalingsdager())
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 

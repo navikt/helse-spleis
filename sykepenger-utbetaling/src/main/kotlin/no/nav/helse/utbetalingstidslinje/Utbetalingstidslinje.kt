@@ -87,7 +87,7 @@ class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Collection<
         return this.utvide(tidligsteDato, sisteDato).binde(other.utvide(tidligsteDato, sisteDato))
     }
 
-    fun harUtbetalinger() = sykepengeperiode() != null
+    fun harUtbetalingsdager() = sykepengeperiode() != null
 
     override fun iterator() = this.utbetalingsdager.iterator()
 
