@@ -48,6 +48,8 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.lagInntektperioder
 import no.nav.helse.testhelpers.Inntektperioder
@@ -307,6 +309,14 @@ internal class TestPerson(
             hendelseId: UUID = UUID.randomUUID(),
         ) =
             arbeidsgiverHendelsefabrikk.lagOverstyrArbeidsgiveropplysninger(hendelseId, skjæringstidspunkt, overstyringer)
+                .håndter(Person::håndter)
+
+        internal fun håndterUtbetalingshistorikkEtterInfotrygdendring(
+            utbetalinger: List<Infotrygdperiode> = listOf(),
+            inntektshistorikk: List<Inntektsopplysning> = emptyList(),
+            besvart: LocalDateTime = LocalDateTime.now()
+        ) =
+            arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikkEtterInfotrygdendring(utbetalinger, inntektshistorikk, besvart)
                 .håndter(Person::håndter)
 
         operator fun <R> invoke(testblokk: TestArbeidsgiver.() -> R): R {

@@ -2403,6 +2403,10 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
+        internal val AUU_SOM_VIL_UTBETALES: VedtaksperiodeFilter = {
+            it.tilstand == AvsluttetUtenUtbetaling && it.forventerInntekt()
+        }
+
         internal fun aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode: Vedtaksperiode): Aktivitetslogg {
             val tidligereUbetalt =
                 vedtaksperiode.arbeidsgiver.finnSykeperioderAvsluttetUtenUtbetalingRettFør(vedtaksperiode)

@@ -30,6 +30,7 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
+import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
@@ -243,14 +244,14 @@ internal class Arbeidsgiver private constructor(
 
         private fun Iterable<Arbeidsgiver>.periodeSomSkalGjenopptas() = (pågåendeRevurderingsperiode().takeUnless { it.isEmpty() } ?: førsteIkkeFerdigBehandletPeriode()).minOrNull()
         private fun Iterable<Arbeidsgiver>.sistePeriodeSomHarPågåendeUtbetaling() = vedtaksperioder(HAR_PÅGÅENDE_UTBETALINGER).maxOrNull()
-
+        private fun Iterable<Arbeidsgiver>.førsteAuuSomVilUtbetales() = nåværendeVedtaksperioder(AUU_SOM_VIL_UTBETALES).minOrNull()
         internal fun Iterable<Arbeidsgiver>.gjenopptaBehandling(aktivitetslogg: IAktivitetslogg) {
             if (sistePeriodeSomHarPågåendeUtbetaling() != null) return aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående utbetaling")
             val periodeSomSkalGjenopptas = periodeSomSkalGjenopptas() ?: return
             periodeSomSkalGjenopptas.gjenopptaBehandling(aktivitetslogg, this)
         }
 
-        internal fun Iterable<Arbeidsgiver>.nestemann() = sistePeriodeSomHarPågåendeUtbetaling() ?: periodeSomSkalGjenopptas()
+        internal fun Iterable<Arbeidsgiver>.nestemann() = sistePeriodeSomHarPågåendeUtbetaling() ?: periodeSomSkalGjenopptas() ?: førsteAuuSomVilUtbetales()
 
         private fun Iterable<Arbeidsgiver>.pågåendeRevurderingsperiode(): List<Vedtaksperiode> {
             return nåværendeVedtaksperioder(PÅGÅENDE_REVURDERING).takeUnless { it.isEmpty() } ?: nåværendeVedtaksperioder(IKKE_FERDIG_REVURDERT)

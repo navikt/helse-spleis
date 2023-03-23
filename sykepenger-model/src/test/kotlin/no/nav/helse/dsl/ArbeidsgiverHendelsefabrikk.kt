@@ -31,6 +31,7 @@ import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
@@ -170,6 +171,24 @@ internal class ArbeidsgiverHendelsefabrikk(
             fødselsnummer = personidentifikator.toString(),
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
+            element = InfotrygdhistorikkElement.opprett(
+                oppdatert = besvart,
+                hendelseId = UUID.randomUUID(),
+                perioder = utbetalinger,
+                inntekter = inntektshistorikk,
+                arbeidskategorikoder = emptyMap()
+            )
+        )
+
+    internal fun lagUtbetalingshistorikkEtterInfotrygdendring(
+        utbetalinger: List<Infotrygdperiode> = listOf(),
+        inntektshistorikk: List<Inntektsopplysning> = emptyList(),
+        besvart: LocalDateTime = LocalDateTime.now()
+    ) =
+        UtbetalingshistorikkEtterInfotrygdendring(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = aktørId,
+            fødselsnummer = personidentifikator.toString(),
             element = InfotrygdhistorikkElement.opprett(
                 oppdatert = besvart,
                 hendelseId = UUID.randomUUID(),
