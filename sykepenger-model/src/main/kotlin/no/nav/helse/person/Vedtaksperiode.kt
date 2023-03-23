@@ -1585,10 +1585,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             val aktivPeriodeFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeFør(vedtaksperiode)
-            if (aktivPeriodeFør == null || !vedtaksperiode.påvirkerArbeidsgiverperioden(aktivPeriodeFør)) {
+            if (aktivPeriodeFør == null || (!aktivPeriodeFør.periode.erRettFør(vedtaksperiode.periode) && !vedtaksperiode.påvirkerArbeidsgiverperioden(aktivPeriodeFør))) {
                 val forkastedeFør = vedtaksperiode.arbeidsgiver.finnForkastedeVedtaksperioderFør(vedtaksperiode)
                 val påvirkerAgp = forkastedeFør.filter { other ->
-                    vedtaksperiode.påvirkerArbeidsgiverperioden(other)
+                    vedtaksperiode.påvirkerArbeidsgiverperioden(other) || other.periode.erRettFør(vedtaksperiode.periode)
                 }
                 if (påvirkerAgp.isNotEmpty()) {
                     sikkerlogg.info("vedtaksperioden {} for {} kan ha forkastede {} perioder som påvirker agp",
