@@ -20,7 +20,7 @@ internal class DødIPeriodenTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, dødsdato = 18.januar)
-        assertEquals(9, inspektør.utbetalinger.first().utbetalingstidslinje().inspektør.avvistDagTeller)
+        assertEquals(9, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.inspektør.avvistDagTeller)
     }
 
     @Test
@@ -30,7 +30,7 @@ internal class DødIPeriodenTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, dødsdato = 1.februar)
-        assertEquals(0, inspektør.utbetalinger.first().utbetalingstidslinje().inspektør.avvistDagTeller)
+        assertEquals(0, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.inspektør.avvistDagTeller)
     }
 
     @Test
@@ -40,7 +40,7 @@ internal class DødIPeriodenTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, dødsdato = 31.desember(2017))
-        inspektør.utbetalinger.first().utbetalingstidslinje().inspektør.also {
+        inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.inspektør.also {
             assertEquals(11, it.avvistDagTeller)
             assertEquals(16, it.arbeidsgiverperiodeDagTeller)
             assertEquals(4, it.navHelgDagTeller)

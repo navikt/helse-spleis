@@ -477,7 +477,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
 
         val utbetaling = inspektør(a2).utbetalinger.single()
         val linje = utbetaling.inspektør.arbeidsgiverOppdrag.linjerUtenOpphør().single()
-        assertEquals(100.0, utbetaling.utbetalingstidslinje()[20.februar].økonomi.brukTotalGrad { totalGrad -> totalGrad })
+        assertEquals(100.0, inspektør(a2).vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje[20.februar].økonomi.brukTotalGrad { totalGrad -> totalGrad })
         assertEquals(
             2077,
             linje.beløp
