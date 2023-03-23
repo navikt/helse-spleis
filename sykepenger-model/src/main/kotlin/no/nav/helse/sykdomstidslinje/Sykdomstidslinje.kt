@@ -2,7 +2,6 @@ package no.nav.helse.sykdomstidslinje
 
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 import java.util.Objects
 import java.util.SortedMap
 import java.util.stream.Collectors.toMap
@@ -176,7 +175,7 @@ internal class Sykdomstidslinje private constructor(
         return skjæringstidspunkter
     }
 
-    internal fun førsteSykedagEtterEllerLik(dato: LocalDate) =
+    private fun førsteSykedagEtterEllerLik(dato: LocalDate) =
         periode?.firstOrNull { it >= dato && erEnSykedag(this[it]) }
 
     internal fun førsteSykedagEtter(dato: LocalDate) =
@@ -185,8 +184,6 @@ internal class Sykdomstidslinje private constructor(
     internal fun erRettFør(other: Sykdomstidslinje): Boolean {
         return this.sisteDag().erRettFør(other.førsteDag()) && !this.erSisteDagArbeidsdag() && !other.erFørsteDagArbeidsdag()
     }
-    internal fun dagerMellom(other: Sykdomstidslinje) = ChronoUnit.DAYS.between(this.sisteDag(), other.førsteDag())
-
     private fun erFørsteDagArbeidsdag() = this.dager.keys.firstOrNull()?.let(::erArbeidsdag) ?: true
     private fun erSisteDagArbeidsdag() = this.dager.keys.lastOrNull()?.let(::erArbeidsdag) ?: true
 
@@ -416,9 +413,6 @@ internal class Sykdomstidslinje private constructor(
                 førsteDato.datesUntil(sisteDato.plusDays(1))
                     .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { ProblemDag(it, kilde, melding) }))
             )
-
-        internal fun gammelTidslinje(tidslinjer: List<Sykdomstidslinje>) =
-            tidslinjer.map { Sykdomstidslinje(it.dager.filter { (_, dag ) -> dag !is ProblemDag }.toSortedMap(), it.periode) }.merge(sammenhengendeSykdom)
 
         internal fun ferdigSykdomstidslinje(
             dager: Map<LocalDate, Dag>,
