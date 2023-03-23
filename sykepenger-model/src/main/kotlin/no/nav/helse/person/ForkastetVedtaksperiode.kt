@@ -16,10 +16,6 @@ internal class ForkastetVedtaksperiode(
         vedtaksperiode.accept(visitor)
         visitor.postVisitForkastetPeriode(vedtaksperiode)
     }
-    internal fun erVedtaksperiodeFør(other: Vedtaksperiode): Vedtaksperiode? {
-        if (!vedtaksperiode.før(other)) return null
-        return vedtaksperiode
-    }
 
     internal companion object {
         private fun Iterable<ForkastetVedtaksperiode>.perioder() = map { it.vedtaksperiode }
@@ -32,23 +28,6 @@ internal class ForkastetVedtaksperiode(
 
         internal fun harKortGapTilForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode) =
             Vedtaksperiode.harKortGapTilForkastet(forkastede.perioder(), hendelse, vedtaksperiode)
-
-        internal fun arbeidsgiverperiodeFor(
-            person: Person,
-            forkastede: List<ForkastetVedtaksperiode>,
-            organisasjonsnummer: String,
-            sykdomstidslinje: Sykdomstidslinje,
-            subsumsjonObserver: SubsumsjonObserver?
-        ): List<Arbeidsgiverperiode> = Vedtaksperiode.arbeidsgiverperiodeFor(
-            person,
-            forkastede.perioder(),
-            organisasjonsnummer,
-            sykdomstidslinje,
-            subsumsjonObserver
-        )
-
-        internal fun sjekkOmOverlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, inntektsmelding: Inntektsmelding) =
-            Vedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede.perioder(), inntektsmelding)
 
         internal fun List<ForkastetVedtaksperiode>.iderMedUtbetaling(utbetalingId: UUID) =
             map { it.vedtaksperiode }.iderMedUtbetaling(utbetalingId)

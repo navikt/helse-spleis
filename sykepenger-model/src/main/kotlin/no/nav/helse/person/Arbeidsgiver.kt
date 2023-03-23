@@ -817,13 +817,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun arbeidsgiverperiode(periode: Periode): Arbeidsgiverperiode? {
-        val arbeidsgiverperioder = ForkastetVedtaksperiode.arbeidsgiverperiodeFor(
-            person,
-            forkastede,
-            organisasjonsnummer,
-            sykdomstidslinje(),
-            subsumsjonObserver = null
-        )
+        val arbeidsgiverperioder = person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomstidslinje(), null)
         return arbeidsgiverperioder.finn(periode)
     }
 
@@ -909,9 +903,6 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.indexOf(vedtaksperiode)
             .takeIf { index -> index > 0 }
             ?.let { vedtaksperioder[it - 1] }
-
-    internal fun finnForkastedeVedtaksperioderFør(vedtaksperiode: Vedtaksperiode) =
-        forkastede.mapNotNull { it.erVedtaksperiodeFør(vedtaksperiode) }
 
     internal fun finnVedtaksperiodeRettEtter(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.firstOrNull { other ->

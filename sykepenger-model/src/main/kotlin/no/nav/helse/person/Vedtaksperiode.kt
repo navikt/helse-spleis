@@ -12,7 +12,6 @@ import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplayUtført
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -132,7 +131,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_7
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.serde.AktivitetsloggMap
-import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -249,8 +247,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun jurist() = jurist.medVedtaksperiode(id, hendelseIder.toSet().toMap(), sykmeldingsperiode)
-
-    internal fun harId(vedtaksperiodeId: UUID) = id == vedtaksperiodeId
 
     internal fun hendelseIder() = hendelseIder.ider()
 
@@ -1584,20 +1580,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            val aktivPeriodeFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeFør(vedtaksperiode)
-            if (aktivPeriodeFør == null || (!aktivPeriodeFør.periode.erRettFør(vedtaksperiode.periode) && !vedtaksperiode.påvirkerArbeidsgiverperioden(aktivPeriodeFør))) {
-                val forkastedeFør = vedtaksperiode.arbeidsgiver.finnForkastedeVedtaksperioderFør(vedtaksperiode)
-                val påvirkerAgp = forkastedeFør.filter { other ->
-                    vedtaksperiode.påvirkerArbeidsgiverperioden(other) || other.periode.erRettFør(vedtaksperiode.periode)
-                }
-                if (påvirkerAgp.isNotEmpty()) {
-                    sikkerlogg.info("vedtaksperioden {} for {} kan ha forkastede {} perioder som påvirker agp",
-                        keyValue("vedtaksperiodeId", vedtaksperiode.id),
-                        keyValue("aktørId", vedtaksperiode.aktørId),
-                        påvirkerAgp.size
-                    )
-                }
-            }
             vurderOmKanGåVidere(vedtaksperiode, påminnelse)
         }
 
@@ -2473,12 +2455,6 @@ internal class Vedtaksperiode private constructor(
                 }
                 .isNotEmpty()
 
-        internal fun sjekkOmOverlapperMedForkastet(
-            forkastede: Iterable<Vedtaksperiode>,
-            inntektsmelding: Inntektsmelding
-        ) =
-            forkastede.any { it.periode.overlapperMed(inntektsmelding.periode()) }
-
         internal fun List<Vedtaksperiode>.iderMedUtbetaling(utbetalingId: UUID) =
             filter { it.utbetalinger.harId(utbetalingId) }.map { it.id }
 
@@ -2486,22 +2462,6 @@ internal class Vedtaksperiode private constructor(
             val fom = minOf { it.periode.start }
             val tom = maxOf { it.periode.endInclusive }
             return Periode(fom, tom)
-        }
-
-        internal fun arbeidsgiverperiodeFor(
-            person: Person,
-            perioder: List<Vedtaksperiode>,
-            organisasjonsnummer: String,
-            sykdomstidslinje: Sykdomstidslinje,
-            subsumsjonObserver: SubsumsjonObserver?
-        ): List<Arbeidsgiverperiode> {
-            val samletSykdomstidslinje =
-                Sykdomstidslinje.gammelTidslinje(perioder.map { it.sykdomstidslinje }).merge(sykdomstidslinje, replace)
-            return person.arbeidsgiverperiodeFor(
-                organisasjonsnummer,
-                samletSykdomstidslinje,
-                subsumsjonObserver
-            )
         }
 
         internal fun List<Vedtaksperiode>.feiletRevurdering(other: Vedtaksperiode) =
