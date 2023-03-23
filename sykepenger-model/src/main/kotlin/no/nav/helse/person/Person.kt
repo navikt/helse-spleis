@@ -10,6 +10,7 @@ import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Avstemming
+import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
@@ -198,6 +199,15 @@ class Person private constructor(
     }
 
     private fun vedtaksperioderEtter(dato: LocalDate) = arbeidsgivere.flatMap { it.vedtaksperioderEtter(dato) }
+
+    fun håndter(dødsmelding: Dødsmelding) {
+        dødsmelding.kontekst(this)
+        dødsmelding.info("Registrerer dødsdato")
+        // TODO:
+        // alder.håndterDød(dødsmelding)
+        dødsdato = dødsmelding.dødsdato()
+        håndterGjenoppta(dødsmelding)
+    }
 
     fun håndter(infotrygdendring: Infotrygdendring) {
         infotrygdendring.kontekst(this)

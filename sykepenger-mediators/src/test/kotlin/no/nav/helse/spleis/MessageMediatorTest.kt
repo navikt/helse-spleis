@@ -54,6 +54,12 @@ internal class MessageMediatorTest {
     }
 
     @Test
+    fun dødsmelding() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagDødsmelding(1.januar))
+        assertTrue(hendelseMediator.lestDødsmelding)
+    }
+
+    @Test
     fun personpåminnelse() {
         testRapid.sendTestMessage(meldingsfabrikk.lagPersonPåminnelse())
         assertTrue(hendelseMediator.lestPersonpåminnelse)

@@ -1,6 +1,7 @@
 package no.nav.helse.spleis
 
 import no.nav.helse.hendelser.Avstemming
+import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
@@ -27,6 +28,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
+import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.EtterbetalingMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
@@ -63,6 +65,8 @@ internal class TestHendelseMediator : IHendelseMediator {
     internal var lestInntektsmelding = false
         private set
     internal var lestInntektsmeldingReplay = false
+        private set
+    internal var lestDødsmelding = false
         private set
     internal var lestPåminnelse = false
         private set
@@ -172,6 +176,10 @@ internal class TestHendelseMediator : IHendelseMediator {
 
     override fun behandle(message: InntektsmeldingReplayMessage, inntektsmelding: InntektsmeldingReplay, context: MessageContext) {
         lestInntektsmeldingReplay = true
+    }
+
+    override fun behandle(message: DødsmeldingMessage, dødsmelding: Dødsmelding, context: MessageContext) {
+        lestDødsmelding = true
     }
 
     override fun behandle(

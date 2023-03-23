@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -366,6 +367,10 @@ internal abstract class AbstractDslTest {
     protected fun assertActivities() {
         val inspektør = inspiser(personInspektør)
         assertTrue(inspektør.aktivitetslogg.harAktiviteter()) { inspektør.aktivitetslogg.toString() }
+    }
+
+    protected fun håndterDødsmelding(dødsdato: LocalDate) {
+        testperson.håndterDødsmelding(dødsdato)
     }
 
     protected fun nyttVedtak(

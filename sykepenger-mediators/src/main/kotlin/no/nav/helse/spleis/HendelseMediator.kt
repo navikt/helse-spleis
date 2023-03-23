@@ -2,6 +2,7 @@ package no.nav.helse.spleis
 
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.Avstemming
+import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
@@ -36,6 +37,7 @@ import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
+import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.EtterbetalingMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
@@ -259,6 +261,12 @@ internal class HendelseMediator(
         }
     }
 
+    override fun behandle(message: DødsmeldingMessage, dødsmelding: Dødsmelding, context: MessageContext) {
+        hentPersonOgHåndter(message, dødsmelding, context) { person ->
+            person.håndter(dødsmelding)
+        }
+    }
+
     override fun behandle(
         message: InfotrygdendringMessage,
         infotrygdEndring: Infotrygdendring,
@@ -394,5 +402,6 @@ internal interface IHendelseMediator {
     fun behandle(message: OverstyrArbeidsforholdMessage, overstyrArbeidsforhold: OverstyrArbeidsforhold, context: MessageContext)
     fun behandle(message: EtterbetalingMessage, grunnbeløpsregulering: Grunnbeløpsregulering, context: MessageContext)
     fun behandle(message: InfotrygdendringMessage, infotrygdEndring: Infotrygdendring, context: MessageContext)
+    fun behandle(message: DødsmeldingMessage, dødsmelding: Dødsmelding, context: MessageContext)
     fun behandle(message: UtbetalingshistorikkEtterInfotrygdendringMessage, utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring, context: MessageContext)
 }

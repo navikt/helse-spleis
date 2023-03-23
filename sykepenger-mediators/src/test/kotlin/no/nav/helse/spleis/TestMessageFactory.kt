@@ -832,6 +832,17 @@ internal class TestMessageFactory(
         )
     }
 
+
+    fun lagDødsmelding(dødsdato: LocalDate): Pair<String, String> {
+        return nyHendelse(
+            "dødsmelding", mapOf(
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "dødsdato" to "$dødsdato"
+            )
+        )
+    }
+
     fun lagPersonPåminnelse(): Pair<String, String> {
         return nyHendelse(
             "person_påminnelse", mapOf(

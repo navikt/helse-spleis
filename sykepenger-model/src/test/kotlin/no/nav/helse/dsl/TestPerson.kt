@@ -130,6 +130,10 @@ internal class TestPerson(
             .håndter(Person::håndter)
     }
 
+    internal fun håndterDødsmelding(dødsdato: LocalDate) {
+        personHendelsefabrikk.lagDødsmelding(dødsdato).håndter(Person::håndter)
+    }
+
     operator fun <R> invoke(testblokk: TestPerson.() -> R): R {
         return testblokk(this)
     }
