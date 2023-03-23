@@ -27,11 +27,11 @@ internal class ForkastetVedtaksperiode(
         internal fun harNyereForkastetPeriode(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse) =
             Vedtaksperiode.harNyereForkastetPeriode(forkastede.perioder(), hendelse)
 
-        internal fun forlengerForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse) =
-            Vedtaksperiode.forlengerForkastet(forkastede.perioder(), hendelse)
+        internal fun forlengerForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode) =
+            Vedtaksperiode.forlengerForkastet(forkastede.perioder(), hendelse, vedtaksperiode)
 
-        internal fun harKortGapTilForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse) =
-            Vedtaksperiode.harKortGapTilForkastet(forkastede.perioder(), hendelse)
+        internal fun harKortGapTilForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode) =
+            Vedtaksperiode.harKortGapTilForkastet(forkastede.perioder(), hendelse, vedtaksperiode)
 
         internal fun arbeidsgiverperiodeFor(
             person: Person,

@@ -2455,18 +2455,18 @@ internal class Vedtaksperiode private constructor(
                 }
                 .isNotEmpty()
 
-        internal fun harKortGapTilForkastet(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) =
+        internal fun harKortGapTilForkastet(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode) =
             forkastede
-                .filter { it.sykdomstidslinje.dagerMellom(hendelse.sykdomstidslinje()) in 2..20 }
+                .filter { other -> vedtaksperiode.påvirkerArbeidsgiverperioden(other) }
                 .onEach {
                     hendelse.funksjonellFeil(RV_SØ_28)
                     hendelse.info("Søknad har et gap som er kortere enn 20 dager til en forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
                 }
                 .isNotEmpty()
 
-        internal fun forlengerForkastet(forkastede: List<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) =
+        internal fun forlengerForkastet(forkastede: List<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode) =
             forkastede
-                .filter { it.sykdomstidslinje.erRettFør(hendelse.sykdomstidslinje()) }
+                .filter { it.periode.erRettFør(vedtaksperiode.periode) }
                 .onEach {
                     hendelse.funksjonellFeil(RV_SØ_19)
                     hendelse.info("Søknad forlenger forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")

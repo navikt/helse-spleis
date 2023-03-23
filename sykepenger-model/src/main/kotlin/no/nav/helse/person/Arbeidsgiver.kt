@@ -155,11 +155,11 @@ internal class Arbeidsgiver private constructor(
         }
 
         internal fun List<Arbeidsgiver>.nekterOpprettelseAvPeriode(vedtaksperiode: Vedtaksperiode, søknad: Søknad): Boolean {
-            return harForkastetVedtaksperiodeSomBlokkerBehandling(søknad) || harPeriodeSomNekterOpprettelseAvNyPeriode(vedtaksperiode, søknad)
+            return harForkastetVedtaksperiodeSomBlokkerBehandling(søknad, vedtaksperiode) || harPeriodeSomNekterOpprettelseAvNyPeriode(vedtaksperiode, søknad)
         }
 
-        private fun Iterable<Arbeidsgiver>.harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse: SykdomstidslinjeHendelse) =
-            any { it.harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse) }
+        private fun Iterable<Arbeidsgiver>.harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode) =
+            any { it.harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse, vedtaksperiode) }
 
         private fun List<Arbeidsgiver>.harPeriodeSomNekterOpprettelseAvNyPeriode(nyVedtaksperiode: Vedtaksperiode, søknad: Søknad) =
             any { arbeidsgiver ->
@@ -474,10 +474,10 @@ internal class Arbeidsgiver private constructor(
         sykmeldingsperioder.lagre(sykmelding)
     }
 
-    private fun harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse: SykdomstidslinjeHendelse): Boolean {
-        ForkastetVedtaksperiode.forlengerForkastet(forkastede, hendelse) ||
+    private fun harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode): Boolean {
+        ForkastetVedtaksperiode.forlengerForkastet(forkastede, hendelse, vedtaksperiode) ||
                 ForkastetVedtaksperiode.harNyereForkastetPeriode(forkastede, hendelse) ||
-                (organisasjonsnummer() == hendelse.organisasjonsnummer() && ForkastetVedtaksperiode.harKortGapTilForkastet(forkastede, hendelse))
+                (organisasjonsnummer() == hendelse.organisasjonsnummer() && ForkastetVedtaksperiode.harKortGapTilForkastet(forkastede, hendelse, vedtaksperiode))
         return hendelse.harFunksjonelleFeilEllerVerre()
     }
 

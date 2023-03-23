@@ -4,6 +4,8 @@ import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.søppelbøtte
@@ -301,20 +303,29 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `forkaster periode dersom person har vært friskmeldt mindre enn 20 dager`() {
-        nyPeriode(1.januar til 31.januar)
+    fun `forkaster periode dersom forlenger forkastet periode med friskmeldin`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(25.januar, 31.januar))
         person.søppelbøtte(hendelselogg, 1.januar til 31.januar)
 
-        nyPeriode(20.februar til 20.mars)
+        nyPeriode(1.februar til 20.mars)
         assertTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
     }
 
     @Test
-    fun `person som har vært friskmeldt i 21 dager kan fortsatt behandles`() {
+    fun `forkaster periode dersom person har vært friskmeldt mindre enn 18 dager`() {
         nyPeriode(1.januar til 31.januar)
         person.søppelbøtte(hendelselogg, 1.januar til 31.januar)
 
-        nyPeriode(21.februar til 20.mars)
+        nyPeriode(18.februar til 20.mars)
+        assertTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `person som har vært friskmeldt i 18 dager kan fortsatt behandles`() {
+        nyPeriode(1.januar til 31.januar)
+        person.søppelbøtte(hendelselogg, 1.januar til 31.januar)
+
+        nyPeriode(19.februar til 20.mars)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
     }
 
