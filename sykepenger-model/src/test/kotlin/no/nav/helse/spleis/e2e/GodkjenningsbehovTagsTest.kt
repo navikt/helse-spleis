@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.util.UUID
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
@@ -47,6 +48,25 @@ internal class GodkjenningsbehovTagsTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.februar, 28.februar))
         håndterYtelser(2.vedtaksperiode)
         assertEquals(setOf("INGEN_UTBETALING"), tags(vedtaksperiodeId = 2.vedtaksperiode.id(a1)))
+    }
+
+    @Test
+    fun `trekker tilbake penger fra arbeidsgiver og utbetaler til bruker`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            refusjon = Inntektsmelding.Refusjon(beløp = Inntekt.INGEN, opphørsdato = null)
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        assertForventetFeil(
+            forklaring = "negativt nettobeløp på arbeidsgiveroppdraget",
+            nå = {
+                assertEquals(setOf("PERSONUTBETALING"), tags(vedtaksperiodeId = 1.vedtaksperiode.id(a1)))
+            }, ønsket = {
+                assertEquals(setOf("NEGATIV_ARBEIDSGIVERUTBETALING", "PERSONUTBETALING"), tags(vedtaksperiodeId = 1.vedtaksperiode.id(a1)))
+            }
+        )
     }
 
     private fun tags(vedtaksperiodeId: UUID = 1.vedtaksperiode.id(a1)) = hendelselogg.etterspurtBehov<Set<String>>(
