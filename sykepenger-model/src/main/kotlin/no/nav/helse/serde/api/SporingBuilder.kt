@@ -6,7 +6,6 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.AbstractBuilder
 import no.nav.helse.serde.api.sporing.PersonBuilder
 import no.nav.helse.serde.api.sporing.PersonDTO
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 fun serializePersonForSporing(person: Person): PersonDTO {
@@ -25,7 +24,6 @@ internal class SporingBuilder() : AbstractBuilder() {
         opprettet: LocalDateTime,
         aktørId: String,
         personidentifikator: Personidentifikator,
-        dødsdato: LocalDate?,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {
         pushState(personBuilder)

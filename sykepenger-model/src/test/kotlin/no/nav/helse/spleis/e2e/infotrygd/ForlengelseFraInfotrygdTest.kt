@@ -47,18 +47,6 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `førstegangsbehandling skal ikke hoppe videre dersom det kun er inntekt i Infotrygd`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
-        ))
-        assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
-    }
-
-    @Test
     fun `når en periode går Til Infotrygd avsluttes påfølgende, tilstøtende perioder også`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))

@@ -79,13 +79,12 @@ import kotlin.math.roundToInt
 class Person private constructor(
     private val aktørId: String,
     private val personidentifikator: Personidentifikator,
-    private val alder: Alder,
+    private var alder: Alder,
     private val arbeidsgivere: MutableList<Arbeidsgiver>,
     override val aktivitetslogg: Aktivitetslogg,
     private val opprettet: LocalDateTime,
     private val infotrygdhistorikk: Infotrygdhistorikk,
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
-    private var dødsdato: LocalDate?,
     private val jurist: MaskinellJurist,
     private val tidligereBehandlinger: List<Person> = emptyList(),
     private val regler: ArbeidsgiverRegler = NormalArbeidstaker
@@ -101,7 +100,6 @@ class Person private constructor(
             opprettet: LocalDateTime,
             infotrygdhistorikk: Infotrygdhistorikk,
             vilkårsgrunnlaghistorikk: VilkårsgrunnlagHistorikk,
-            dødsdato: LocalDate?,
             tidligereBehandlinger: List<Person> = emptyList(),
             jurist: MaskinellJurist
         ): Person = Person(
@@ -113,7 +111,6 @@ class Person private constructor(
             opprettet = opprettet,
             infotrygdhistorikk = infotrygdhistorikk,
             vilkårsgrunnlagHistorikk = vilkårsgrunnlaghistorikk,
-            dødsdato = dødsdato,
             tidligereBehandlinger = tidligereBehandlinger,
             jurist = jurist
         )
@@ -124,8 +121,7 @@ class Person private constructor(
         personidentifikator: Personidentifikator,
         alder: Alder,
         jurist: MaskinellJurist,
-        regler: ArbeidsgiverRegler,
-        dødsdato: LocalDate? = null
+        regler: ArbeidsgiverRegler
     ) : this(
         aktørId,
         personidentifikator,
@@ -135,7 +131,6 @@ class Person private constructor(
         LocalDateTime.now(),
         Infotrygdhistorikk(),
         VilkårsgrunnlagHistorikk(),
-        dødsdato,
         jurist.medFødselsnummer(personidentifikator),
         emptyList<Person>(),
         regler = regler
@@ -144,9 +139,8 @@ class Person private constructor(
         aktørId: String,
         personidentifikator: Personidentifikator,
         alder: Alder,
-        dødsdato: LocalDate?,
         jurist: MaskinellJurist
-    ) : this(aktørId, personidentifikator, alder, jurist, NormalArbeidstaker, dødsdato)
+    ) : this(aktørId, personidentifikator, alder, jurist, NormalArbeidstaker)
 
     private val observers = mutableListOf<PersonObserver>()
 
@@ -205,9 +199,7 @@ class Person private constructor(
     fun håndter(dødsmelding: Dødsmelding) {
         dødsmelding.kontekst(this)
         dødsmelding.info("Registrerer dødsdato")
-        // TODO:
-        // alder.håndterDød(dødsmelding)
-        dødsdato = dødsmelding.dødsdato()
+        alder = dødsmelding.dødsdato(alder)
         håndterGjenoppta(dødsmelding)
     }
 
@@ -286,8 +278,6 @@ class Person private constructor(
 
     fun håndter(ytelser: Ytelser) {
         registrer(ytelser, "Behandler historiske utbetalinger og inntekter")
-        ytelser.lagreDødsdato(this)
-
         finnArbeidsgiver(ytelser).håndter(ytelser, infotrygdhistorikk) { subsumsjonObserver ->
             arbeidsgiverUtbetalinger(subsumsjonObserver = subsumsjonObserver, hendelse = ytelser)
         }
@@ -408,7 +398,6 @@ class Person private constructor(
                 it.builder(regler, vilkårsgrunnlagHistorikk, infotrygdhistorikk, subsumsjonObserver, hendelse)
             },
             infotrygdUtbetalingstidslinje = infotrygdhistorikk.utbetalingstidslinje(),
-            dødsdato = dødsdato,
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk
         )
     }
@@ -539,7 +528,7 @@ class Person private constructor(
         arbeidsgiverperiode.periodetype(orgnummer, periode, skjæringstidspunkt, infotrygdhistorikk)
 
     internal fun accept(visitor: PersonVisitor) {
-        visitor.preVisitPerson(this, opprettet, aktørId, personidentifikator, dødsdato, vilkårsgrunnlagHistorikk)
+        visitor.preVisitPerson(this, opprettet, aktørId, personidentifikator, vilkårsgrunnlagHistorikk)
         alder.accept(visitor)
         visitor.visitPersonAktivitetslogg(aktivitetslogg)
         aktivitetslogg.accept(visitor)
@@ -548,7 +537,7 @@ class Person private constructor(
         visitor.postVisitArbeidsgivere()
         infotrygdhistorikk.accept(visitor)
         vilkårsgrunnlagHistorikk.accept(visitor)
-        visitor.postVisitPerson(this, opprettet, aktørId, personidentifikator, dødsdato, vilkårsgrunnlagHistorikk)
+        visitor.postVisitPerson(this, opprettet, aktørId, personidentifikator, vilkårsgrunnlagHistorikk)
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
@@ -581,10 +570,6 @@ class Person private constructor(
         arbeidsgivere.nåværendeVedtaksperioder(filter).sorted()
 
     internal fun vedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.vedtaksperioder(filter).sorted()
-
-    internal fun lagreDødsdato(dødsdato: LocalDate) {
-        this.dødsdato = dødsdato
-    }
 
     internal fun build(skjæringstidspunkt: LocalDate, builder: VedtakFattetBuilder) {
         vilkårsgrunnlagHistorikk.build(skjæringstidspunkt, builder)

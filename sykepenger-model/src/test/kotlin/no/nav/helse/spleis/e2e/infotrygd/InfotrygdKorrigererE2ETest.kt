@@ -59,7 +59,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode, besvart = LocalDateTime.now().minusDays(2))
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         nullstillTilstandsendringer()
 
@@ -76,7 +76,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         createDobbelutbetalingPerson()
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Dagtype.Feriedag)))
-        håndterYtelser(2.vedtaksperiode, besvart = LocalDate.EPOCH.atStartOfDay())
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.februar, 28.februar))

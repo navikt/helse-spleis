@@ -66,8 +66,8 @@ internal class RevurderingBehovV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `Sjekker overlapp mot overtrygd`() {
         nyttVedtak(1.januar, 31.januar)
-        forlengVedtak(1.februar, 28.februar, besvart = LocalDate.EPOCH.atStartOfDay())
-        forlengVedtak(1.mars, 31.mars, besvart = LocalDate.EPOCH.atStartOfDay())
+        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(1.mars, 31.mars)
         håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar)
         val utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar,  31.januar, 100.prosent, INNTEKT))
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))

@@ -3,7 +3,6 @@ package no.nav.helse.person
 import java.util.UUID
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
-import no.nav.helse.hendelser.Dødsinfo
 import no.nav.helse.hendelser.Foreldrepermisjon
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Omsorgspenger
@@ -159,7 +158,6 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
             institusjonsopphold = Institusjonsopphold(
                 perioder = emptyList()
             ),
-            dødsinfo = Dødsinfo(null),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
             dagpenger = Dagpenger(emptyList()),
             aktivitetslogg = it

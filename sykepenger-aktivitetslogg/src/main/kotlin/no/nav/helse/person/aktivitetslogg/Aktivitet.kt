@@ -171,13 +171,6 @@ sealed class Aktivitet(
                 )
             }
 
-            fun dødsinformasjon(aktivitetslogg: IAktivitetslogg) {
-                aktivitetslogg.behov(
-                    Behovtype.Dødsinfo,
-                    "Trenger informasjon om dødsdato fra PDL"
-                )
-            }
-
             fun inntekterForSammenligningsgrunnlag(
                 aktivitetslogg: IAktivitetslogg,
                 skjæringstidspunkt: LocalDate,

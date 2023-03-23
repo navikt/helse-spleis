@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import java.time.LocalDate
+import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -174,11 +175,9 @@ internal class GrunnbeløpTest {
         )
     )
 
-    private fun under67() = Alder(LocalDate.now().minusYears(66))
-    private fun over67(skjæringstidspunkt: LocalDate) =
-        Alder(skjæringstidspunkt.minusYears(67).minusDays(1))
-    private fun akkurat67(skjæringstidspunkt: LocalDate) =
-        Alder(skjæringstidspunkt.minusYears(67))
+    private fun under67() = LocalDate.now().minusYears(66).alder
+    private fun over67(skjæringstidspunkt: LocalDate) = skjæringstidspunkt.minusYears(67).minusDays(1).alder
+    private fun akkurat67(skjæringstidspunkt: LocalDate) = skjæringstidspunkt.minusYears(67).alder
 
     private fun Grunnbeløp.oppfyllerMinsteInntekt(dato: LocalDate, inntekt: Inntekt) =
         inntekt >= minsteinntekt(dato)

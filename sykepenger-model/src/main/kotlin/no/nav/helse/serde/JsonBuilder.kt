@@ -116,19 +116,17 @@ internal class JsonBuilder : AbstractBuilder() {
         opprettet: LocalDateTime,
         aktørId: String,
         personidentifikator: Personidentifikator,
-        dødsdato: LocalDate?,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {
-        personBuilder = PersonState(personidentifikator, aktørId, opprettet, dødsdato)
+        personBuilder = PersonState(personidentifikator, aktørId, opprettet)
         pushState(personBuilder)
     }
 
-    private class PersonState(personidentifikator: Personidentifikator, aktørId: String, opprettet: LocalDateTime, dødsdato: LocalDate?) : BuilderState() {
+    private class PersonState(personidentifikator: Personidentifikator, aktørId: String, opprettet: LocalDateTime) : BuilderState() {
         private val personMap = mutableMapOf<String, Any?>(
             "aktørId" to aktørId,
             "fødselsnummer" to personidentifikator.toString(),
-            "opprettet" to opprettet,
-            "dødsdato" to dødsdato
+            "opprettet" to opprettet
         )
         private val vilkårsgrunnlagHistorikk = mutableListOf<Map<String, Any?>>()
 
@@ -136,8 +134,9 @@ internal class JsonBuilder : AbstractBuilder() {
 
         fun build() = SerialisertPerson.medSkjemaversjon(serdeObjectMapper.valueToTree(personMap))
 
-        override fun visitAlder(alder: Alder, fødselsdato: LocalDate) {
+        override fun visitAlder(alder: Alder, fødselsdato: LocalDate, dødsdato: LocalDate?) {
             personMap["fødselsdato"] = fødselsdato
+            personMap["dødsdato"] = dødsdato
         }
 
         override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
@@ -174,7 +173,6 @@ internal class JsonBuilder : AbstractBuilder() {
             opprettet: LocalDateTime,
             aktørId: String,
             personidentifikator: Personidentifikator,
-            dødsdato: LocalDate?,
             vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
         ) {
             popState()

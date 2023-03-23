@@ -60,11 +60,11 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
@@ -89,7 +89,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
-        håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_SIMULERING, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
@@ -102,7 +102,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK, orgnummer = a2)
 
-        håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_SIMULERING, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING, orgnummer = a2)

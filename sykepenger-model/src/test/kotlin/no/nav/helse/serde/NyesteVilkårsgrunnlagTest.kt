@@ -62,7 +62,7 @@ internal class NyesteVilkårsgrunnlagTest {
             )
         )
 
-        val alder = Alder(LocalDate.of(1970, 1, 1))
+        val alder = Alder(LocalDate.of(1970, 1, 1), null)
         val grunnlagMap = vilkårsgrunnlagInnslag.grunnlagMap(alder)
         assertEquals(10.prosent, grunnlagMap.entries.single().value.inspektør.avviksprosent)
     }

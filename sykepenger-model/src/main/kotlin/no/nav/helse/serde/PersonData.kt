@@ -7,7 +7,6 @@ import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Alder
-import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -109,7 +108,7 @@ internal data class PersonData(
     private val arbeidsgivereliste = mutableListOf<Arbeidsgiver>()
     private val modelAktivitetslogg get() = aktivitetslogg?.konverterTilAktivitetslogg() ?: Aktivitetslogg()
     private val fnr by lazy { fødselsnummer.somPersonidentifikator() }
-    private val alder by lazy { fødselsdato.alder }
+    private val alder by lazy { Alder(fødselsdato, dødsdato) }
 
     private fun person(jurist: MaskinellJurist, tidligereBehandlinger: List<Person> = emptyList()) = Person.ferdigPerson(
         aktørId = aktørId,
@@ -120,7 +119,6 @@ internal data class PersonData(
         opprettet = opprettet,
         infotrygdhistorikk = infotrygdhistorikk.tilModellObjekt(),
         vilkårsgrunnlaghistorikk = vilkårsgrunnlagHistorikk.tilModellObjekt(alder),
-        dødsdato = dødsdato,
         tidligereBehandlinger = tidligereBehandlinger,
         jurist = jurist
     )

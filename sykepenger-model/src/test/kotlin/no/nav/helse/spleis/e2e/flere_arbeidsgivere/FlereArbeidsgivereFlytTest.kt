@@ -51,7 +51,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 
@@ -523,7 +522,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
             )
         )
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)

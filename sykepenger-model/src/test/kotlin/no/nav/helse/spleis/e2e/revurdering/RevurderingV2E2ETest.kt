@@ -962,10 +962,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     fun `overlappende ytelser ved revurdering skal gi warning, ikke error`() {
         nyttVedtak(1.januar, 31.januar)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
-        håndterYtelser(
-            1.vedtaksperiode,
-            foreldrepenger = listOf(1.januar til 10.januar
-            )        )
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(1.januar til 10.januar))
 
         assertVarsel(RV_AY_5)
         assertIngenFunksjonelleFeil()

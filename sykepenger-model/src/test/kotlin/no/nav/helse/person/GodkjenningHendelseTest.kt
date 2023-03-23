@@ -6,7 +6,6 @@ import no.nav.helse.desember
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Dagpenger
-import no.nav.helse.hendelser.Dødsinfo
 import no.nav.helse.hendelser.Foreldrepermisjon
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -156,7 +155,6 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             institusjonsopphold = Institusjonsopphold(
                 perioder = emptyList()
             ),
-            dødsinfo = Dødsinfo(null),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
             dagpenger = Dagpenger(emptyList()),
             aktivitetslogg = it

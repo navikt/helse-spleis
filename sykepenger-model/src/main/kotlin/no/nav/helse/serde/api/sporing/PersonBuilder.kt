@@ -6,7 +6,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.AbstractBuilder
 import no.nav.helse.serde.api.BuilderState
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -38,7 +37,6 @@ internal class PersonBuilder(builder: AbstractBuilder) : BuilderState(builder) {
         opprettet: LocalDateTime,
         aktørId: String,
         personidentifikator: Personidentifikator,
-        dødsdato: LocalDate?,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {
         this.personidentifikator = personidentifikator

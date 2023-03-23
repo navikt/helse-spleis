@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 
@@ -18,7 +17,6 @@ class Ytelser(
     private val omsorgspenger: Omsorgspenger,
     private val opplæringspenger: Opplæringspenger,
     private val institusjonsopphold: Institusjonsopphold,
-    private val dødsinfo: Dødsinfo,
     private val arbeidsavklaringspenger: Arbeidsavklaringspenger,
     private val dagpenger: Dagpenger,
     aktivitetslogg: Aktivitetslogg
@@ -29,11 +27,6 @@ class Ytelser(
     }
 
     internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
-
-    internal fun lagreDødsdato(person: Person) {
-        if (dødsinfo.dødsdato == null) return
-        person.lagreDødsdato(dødsinfo.dødsdato)
-    }
 
     internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate, maksdato: LocalDate): Boolean {
         if (periode.start > maksdato) return true

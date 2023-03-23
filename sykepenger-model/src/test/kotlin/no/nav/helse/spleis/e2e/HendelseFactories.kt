@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.Dødsinfo
 import no.nav.helse.hendelser.Foreldrepermisjon
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -352,7 +351,6 @@ internal fun AbstractEndToEndTest.ytelser(
     opplæringspenger: List<Periode> = emptyList(),
     institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    dødsdato: LocalDate? = null,
     arbeidsavklaringspenger: List<Periode> = emptyList(),
     dagpenger: List<Periode> = emptyList(),
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018
@@ -381,7 +379,6 @@ internal fun AbstractEndToEndTest.ytelser(
         institusjonsopphold = Institusjonsopphold(
             perioder = institusjonsoppholdsperioder
         ),
-        dødsinfo = Dødsinfo(dødsdato),
         arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
         dagpenger = Dagpenger(dagpenger),
         aktivitetslogg = aktivitetslogg

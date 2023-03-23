@@ -300,7 +300,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata? = null,
         fødselsdato: LocalDate
     ) {
-        val person = Person("aktørid", fnr, fødselsdato.alder, null, MaskinellJurist())
+        val person = Person("aktørid", fnr, fødselsdato.alder, MaskinellJurist())
         // seed arbeidsgiver med sykdomshistorikk
         val førsteDag = arbeidsgiverTidslinje.periode().start
         val sisteDag = arbeidsgiverTidslinje.periode().endInclusive
@@ -359,7 +359,6 @@ internal class ArbeidsgiverUtbetalingerTest {
             fødselsdato.alder,
             mapOf(person.arbeidsgiver(ORGNUMMER) to { _, _ -> arbeidsgiverTidslinje }),
             historiskTidslinje,
-            null,
             vilkårsgrunnlagHistorikk
         )
         val (maksimumSykepenger, tidslinjerPerArbeidsgiver) = utbetalinger.beregn(

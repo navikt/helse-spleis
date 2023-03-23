@@ -51,15 +51,9 @@ import org.junit.jupiter.api.Test
 internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `Dødsdato ligger på person`() {
-        val fom = 1.januar
-        val tom = 31.januar
-        håndterSykmelding(Sykmeldingsperiode(fom, tom))
-        håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = fom.plusDays(1))
-        håndterInntektsmelding(listOf(fom til fom.plusDays(15)))
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, dødsdato = 1.januar)
-
-        assertEquals(1.januar, serializePersonForSpeil(person).dødsdato)
+        val dødsdato = 1.januar
+        createTestPerson(UNG_PERSON_FNR_2018, UNG_PERSON_FØDSELSDATO, dødsdato)
+        assertEquals(dødsdato, serializePersonForSpeil(person).dødsdato)
     }
 
     @Test

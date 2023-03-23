@@ -895,7 +895,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
 

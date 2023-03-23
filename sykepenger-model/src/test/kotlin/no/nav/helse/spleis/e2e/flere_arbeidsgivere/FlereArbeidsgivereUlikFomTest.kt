@@ -126,7 +126,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
@@ -201,7 +201,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
@@ -270,7 +270,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
@@ -350,7 +350,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(30.mars, a1Linje.tom)
         assertEquals(10000.månedlig.reflection { _, _, _, dagligInt -> dagligInt }, a1Linje.beløp)
 
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
@@ -417,7 +417,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(30.mars, a1Linje2.tom)
         assertEquals(998, a1Linje2.beløp)
 
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
@@ -474,7 +474,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a1)
 
 
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
@@ -535,7 +535,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a1)
 
 
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
@@ -1134,7 +1134,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(30.mars, a1Linje.tom)
         assertEquals(997, a1Linje.beløp)
 
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
@@ -1196,7 +1196,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(30.mars, a1Linje.tom)
         assertEquals(499, a1Linje.beløp)
 
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)

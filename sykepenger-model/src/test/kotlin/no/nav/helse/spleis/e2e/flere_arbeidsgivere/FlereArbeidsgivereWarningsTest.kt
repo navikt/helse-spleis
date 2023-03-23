@@ -65,7 +65,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
@@ -90,7 +90,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
@@ -126,7 +126,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
             )
         )
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         assertVarsel(RV_VV_2, AktivitetsloggFilter.person())

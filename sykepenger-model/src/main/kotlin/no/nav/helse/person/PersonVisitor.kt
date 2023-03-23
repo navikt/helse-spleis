@@ -43,7 +43,6 @@ internal interface PersonVisitor : AlderVisitor, ArbeidsgiverVisitor, Aktivitets
         opprettet: LocalDateTime,
         aktørId: String,
         personidentifikator: Personidentifikator,
-        dødsdato: LocalDate?,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {}
     fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {}
@@ -54,7 +53,6 @@ internal interface PersonVisitor : AlderVisitor, ArbeidsgiverVisitor, Aktivitets
         opprettet: LocalDateTime,
         aktørId: String,
         personidentifikator: Personidentifikator,
-        dødsdato: LocalDate?,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {}
 }

@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -228,11 +227,10 @@ internal abstract class AbstractDslTest {
         omsorgspenger: List<Periode> = emptyList(),
         opplæringspenger: List<Periode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
-        dødsdato: LocalDate? = null,
         arbeidsavklaringspenger: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
     ) =
-        this { håndterYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, dødsdato, arbeidsavklaringspenger, dagpenger) }
+        this { håndterYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspenger, dagpenger) }
     protected fun String.håndterSimulering(vedtaksperiodeId: UUID) =
         this { håndterSimulering(vedtaksperiodeId) }
     protected fun String.håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean = true) =
@@ -328,12 +326,11 @@ internal abstract class AbstractDslTest {
         omsorgspenger: List<Periode> = emptyList(),
         opplæringspenger: List<Periode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
-        dødsdato: LocalDate? = null,
         arbeidsavklaringspenger: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
         orgnummer: String = a1
     ) =
-        bareÈnArbeidsgiver(a1).håndterYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, dødsdato, arbeidsavklaringspenger, dagpenger)
+        bareÈnArbeidsgiver(a1).håndterYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspenger, dagpenger)
     internal fun håndterSimulering(vedtaksperiodeId: UUID, orgnummer: String = a1) =
         bareÈnArbeidsgiver(a1).håndterSimulering(vedtaksperiodeId)
     internal fun håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean = true, orgnummer: String = a1) =

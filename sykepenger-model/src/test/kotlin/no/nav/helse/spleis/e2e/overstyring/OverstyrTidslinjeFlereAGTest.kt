@@ -1,15 +1,12 @@
 package no.nav.helse.spleis.e2e.overstyring
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil

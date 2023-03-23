@@ -14,7 +14,6 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Dagpenger
-import no.nav.helse.hendelser.Dødsinfo
 import no.nav.helse.hendelser.Foreldrepermisjon
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -87,7 +86,7 @@ class JsonBuilderTest {
         )
     }
 
-    private val person get() = Person(aktørId, fnr, fødselsdato.alder, null, MaskinellJurist())
+    private val person get() = Person(aktørId, fnr, fødselsdato.alder, MaskinellJurist())
 
     @Test
     fun `gjenoppbygd Person skal være lik opprinnelig Person - The Jackson Way`() {
@@ -697,7 +696,6 @@ class JsonBuilderTest {
         institusjonsopphold = Institusjonsopphold(
             perioder = emptyList()
         ),
-        dødsinfo = Dødsinfo(dødsdato),
         arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
         dagpenger = Dagpenger(emptyList()),
         aktivitetslogg = Aktivitetslogg()

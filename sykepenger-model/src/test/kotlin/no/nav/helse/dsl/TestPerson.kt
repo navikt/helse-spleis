@@ -34,7 +34,6 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dødsinfo
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSammenligningsgrunnlag
@@ -86,7 +85,7 @@ internal class TestPerson(
     private val behovsamler = Behovsamler(deferredLog)
     private val vedtaksperiodesamler = Vedtaksperiodesamler()
     private val personHendelsefabrikk = PersonHendelsefabrikk(aktørId, personidentifikator)
-    private val person = Person(aktørId, personidentifikator, fødselsdato.alder, null, jurist).also {
+    private val person = Person(aktørId, personidentifikator, fødselsdato.alder, jurist).also {
         it.addObserver(vedtaksperiodesamler)
         it.addObserver(behovsamler)
         it.addObserver(observatør)
@@ -241,13 +240,12 @@ internal class TestPerson(
             omsorgspenger: List<Periode> = emptyList(),
             opplæringspenger: List<Periode> = emptyList(),
             institusjonsoppholdsperioder: List<no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
-            dødsdato: LocalDate? = null,
             arbeidsavklaringspenger: List<Periode> = emptyList(),
             dagpenger: List<Periode> = emptyList(),
             orgnummer: String = "aa"
         ) {
-            behovsamler.bekreftBehov(vedtaksperiodeId, Dagpenger, Arbeidsavklaringspenger, Dødsinfo, Institusjonsopphold, Opplæringspenger, Pleiepenger, Omsorgspenger, Foreldrepenger)
-            arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, dødsdato, arbeidsavklaringspenger, dagpenger)
+            behovsamler.bekreftBehov(vedtaksperiodeId, Dagpenger, Arbeidsavklaringspenger, Institusjonsopphold, Opplæringspenger, Pleiepenger, Omsorgspenger, Foreldrepenger)
+            arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspenger, dagpenger)
                 .håndter(Person::håndter)
         }
 

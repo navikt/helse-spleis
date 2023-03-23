@@ -8,7 +8,6 @@ import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Dagpenger
-import no.nav.helse.hendelser.Dødsinfo
 import no.nav.helse.hendelser.Foreldrepermisjon
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -75,10 +74,10 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(utbetalingshistorikk())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
-        assertEquals(8, hendelse.behov().size)
+        assertEquals(7, hendelse.behov().size)
         person.håndter(påminnelse(AVVENTER_HISTORIKK, 1.vedtaksperiode))
         assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertEquals(8, hendelse.behov().size)
+        assertEquals(7, hendelse.behov().size)
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Foreldrepenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Pleiepenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Omsorgspenger))
@@ -86,7 +85,6 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Arbeidsavklaringspenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Dagpenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Institusjonsopphold))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Dødsinfo))
     }
 
     @Test
@@ -96,10 +94,10 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(utbetalingshistorikk())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
-        assertEquals(8, hendelse.behov().size)
+        assertEquals(7, hendelse.behov().size)
         person.håndter(påminnelse(AVVENTER_HISTORIKK, 1.vedtaksperiode))
         assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertEquals(8, hendelse.behov().size)
+        assertEquals(7, hendelse.behov().size)
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Foreldrepenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Pleiepenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Omsorgspenger))
@@ -107,7 +105,6 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Arbeidsavklaringspenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Dagpenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Institusjonsopphold))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Dødsinfo))
     }
 
     @Test
@@ -330,7 +327,6 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             institusjonsopphold = Institusjonsopphold(
                 perioder = emptyList()
             ),
-            dødsinfo = Dødsinfo(null),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
             dagpenger = Dagpenger(emptyList()),
             aktivitetslogg = Aktivitetslogg()

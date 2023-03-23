@@ -18,6 +18,9 @@ import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.plus
 import no.nav.helse.ukedager
 import no.nav.helse.Alder.Companion.alder
+import no.nav.helse.forrigeDag
+import no.nav.helse.nesteDag
+import no.nav.helse.september
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -39,6 +42,14 @@ internal class AlderTest {
         val alder = 12.februar(1992).alder
         assertEquals(25, alder.alderPåDato(11.februar))
         assertEquals(26, alder.alderPåDato(12.februar))
+    }
+
+    @Test
+    fun `alder etter død`() {
+        val dødsdato = 15.september(2022)
+        val alder = Alder(16.september(1992), dødsdato)
+        assertEquals(29, alder.alderPåDato(dødsdato.forrigeDag))
+        assertEquals(29, alder.alderPåDato(dødsdato.nesteDag))
     }
 
     @Test
@@ -120,7 +131,7 @@ internal class AlderTest {
     @Test
     fun `etterlevelse for periode før fylte 70`() {
         val jurist = MaskinellJurist()
-        Alder(1.januar(2000)).etterlevelse70år(
+        1.januar(2000).alder.etterlevelse70år(
             aktivitetslogg = Aktivitetslogg(),
             periode = 17.mai(2069) til 31.desember(2069),
             avvisteDager = emptySet(),
@@ -182,7 +193,7 @@ internal class AlderTest {
     @Test
     fun `etterlevelse for periode man fyller 70`() {
         val jurist = MaskinellJurist()
-        Alder(1.januar(2000)).etterlevelse70år(
+        1.januar(2000).alder.etterlevelse70år(
             aktivitetslogg = Aktivitetslogg(),
             periode = 17.mai(2069) til 1.januar(2070),
             avvisteDager = setOf(1.januar(2070)),
@@ -195,7 +206,7 @@ internal class AlderTest {
     @Test
     fun `etterlevelse for periode etter fylte 70`() {
         val jurist = MaskinellJurist()
-        Alder(1.januar(2000)).etterlevelse70år(
+        1.januar(2000).alder.etterlevelse70år(
             aktivitetslogg = Aktivitetslogg(),
             periode = 1.januar(2070) til 5.januar(2070),
             avvisteDager = setOf(1.januar(2070), 2.januar(2070), 3.januar(2070), 4.januar(2070), 5.januar(2070)),

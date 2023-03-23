@@ -86,7 +86,6 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dødsinformasjon
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSammenligningsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSykepengegrunnlag
@@ -650,7 +649,6 @@ internal class Vedtaksperiode private constructor(
         institusjonsopphold(hendelse, periode)
         arbeidsavklaringspenger(hendelse, periode.start.minusMonths(6), periode.endInclusive)
         dagpenger(hendelse, periode.start.minusMonths(2), periode.endInclusive)
-        dødsinformasjon(hendelse)
     }
 
     private fun trengerVilkårsgrunnlag(hendelse: IAktivitetslogg) {

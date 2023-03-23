@@ -15,14 +15,13 @@ import no.nav.helse.Alder
 
 internal class PersonBuilder(
     builder: AbstractBuilder,
-    private val person: Person,
     private val personidentifikator: Personidentifikator,
     private val aktørId: String,
-    private val dødsdato: LocalDate?,
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private val versjon: Int
 ) : BuilderState(builder) {
     private lateinit var alder: Alder
+    private var dødsdato: LocalDate? = null
     private val arbeidsgivere = mutableListOf<ArbeidsgiverBuilder>()
 
     internal fun build(hendelser: List<HendelseDTO>): PersonDTO {
@@ -44,8 +43,9 @@ internal class PersonBuilder(
         )
     }
 
-    override fun visitAlder(alder: Alder, fødselsdato: LocalDate) {
+    override fun visitAlder(alder: Alder, fødselsdato: LocalDate, dødsdato: LocalDate?) {
         this.alder = alder
+        this.dødsdato = dødsdato
     }
 
     override fun preVisitArbeidsgiver(
@@ -63,7 +63,6 @@ internal class PersonBuilder(
         opprettet: LocalDateTime,
         aktørId: String,
         personidentifikator: Personidentifikator,
-        dødsdato: LocalDate?,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {
         popState()

@@ -316,7 +316,7 @@ internal fun AbstractEndToEndTest.tilYtelser(
         ),
         inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag
     )
-    håndterYtelser(id, fnr = fnr, orgnummer = orgnummer, besvart = LocalDate.EPOCH.atStartOfDay())
+    håndterYtelser(id, orgnummer = orgnummer, fnr = fnr)
     return id
 }
 
@@ -324,11 +324,10 @@ internal fun AbstractEndToEndTest.forlengTilGodkjentVedtak(
     fom: LocalDate,
     tom: LocalDate,
     grad: Prosentdel = 100.prosent,
-    besvart: LocalDateTime = LocalDateTime.now(),
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER
 ) {
-    forlengTilGodkjenning(fom, tom, grad, besvart, fnr, orgnummer)
+    forlengTilGodkjenning(fom, tom, grad, fnr, orgnummer)
     håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), true, fnr = fnr, orgnummer = orgnummer)
 }
 
@@ -341,7 +340,7 @@ internal fun AbstractEndToEndTest.forlengTilSimulering(
 ) {
     nyPeriode(fom til tom, orgnummer, grad = grad, fnr = fnr)
     val id: IdInnhenter = observatør.sisteVedtaksperiode()
-    håndterYtelser(id, fnr = fnr, orgnummer = orgnummer)
+    håndterYtelser(id, orgnummer = orgnummer, fnr = fnr)
     assertTrue(person.personLogg.etterspurteBehov(id, Behovtype.Simulering, orgnummer)) { "Forventet at simulering er etterspurt" }
 }
 
@@ -349,13 +348,12 @@ internal fun AbstractEndToEndTest.forlengTilGodkjenning(
     fom: LocalDate,
     tom: LocalDate,
     grad: Prosentdel = 100.prosent,
-    besvart: LocalDateTime = LocalDateTime.now(),
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER
 ) {
     nyPeriode(fom til tom, orgnummer, grad = grad, fnr = fnr)
     val id: IdInnhenter = observatør.sisteVedtaksperiode()
-    håndterYtelser(id, fnr = fnr, orgnummer = orgnummer, besvart = besvart)
+    håndterYtelser(id, orgnummer = orgnummer, fnr = fnr)
     if (person.personLogg.etterspurteBehov(id, Behovtype.Simulering, orgnummer)) håndterSimulering(id, fnr = fnr, orgnummer = orgnummer)
 }
 
@@ -363,11 +361,10 @@ internal fun AbstractEndToEndTest.forlengVedtak(
     fom: LocalDate,
     tom: LocalDate,
     grad: Prosentdel = 100.prosent,
-    besvart: LocalDateTime = LocalDateTime.now(),
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER
 ) {
-    forlengTilGodkjentVedtak(fom, tom, grad, besvart, fnr, orgnummer)
+    forlengTilGodkjentVedtak(fom, tom, grad, fnr, orgnummer)
     håndterUtbetalt(status = Oppdragstatus.AKSEPTERT, fnr = fnr, orgnummer = orgnummer)
 }
 
@@ -623,7 +620,6 @@ private fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
     vararg utbetalinger: Infotrygdperiode,
     inntektshistorikk: List<Inntektsopplysning> = emptyList(),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    statslønn: Boolean = false,
     besvart: LocalDateTime = LocalDateTime.now()
 ) {
     val bedtOmSykepengehistorikk = person.personLogg.etterspurteBehov(vedtaksperiodeIdInnhenter, Behovtype.Sykepengehistorikk, orgnummer)
@@ -660,8 +656,6 @@ private fun AbstractPersonTest.finnArbeidsgivere() = person.inspektør.arbeidsgi
 
 internal fun AbstractEndToEndTest.håndterYtelser(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
-    vararg utbetalinger: Infotrygdperiode,
-    inntektshistorikk: List<Inntektsopplysning> = emptyList(),
     foreldrepenger: List<Periode> = emptyList(),
     svangerskapspenger: List<Periode> = emptyList(),
     pleiepenger: List<Periode> = emptyList(),
@@ -669,12 +663,8 @@ internal fun AbstractEndToEndTest.håndterYtelser(
     opplæringspenger: List<Periode> = emptyList(),
     institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    dødsdato: LocalDate? = null,
-    statslønn: Boolean = false,
-    arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
     arbeidsavklaringspenger: List<Periode> = emptyList(),
     dagpenger: List<Periode> = emptyList(),
-    besvart: LocalDateTime = LocalDateTime.now(),
     fnr: Personidentifikator = UNG_PERSON_FNR_2018
 ) {
     fun assertEtterspurt(behovtype: Behovtype) =
@@ -687,7 +677,6 @@ internal fun AbstractEndToEndTest.håndterYtelser(
     assertEtterspurt(Behovtype.Arbeidsavklaringspenger)
     assertEtterspurt(Behovtype.Dagpenger)
     assertEtterspurt(Behovtype.Institusjonsopphold)
-    assertEtterspurt(Behovtype.Dødsinfo)
 
     ytelser(
         vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
@@ -698,7 +687,6 @@ internal fun AbstractEndToEndTest.håndterYtelser(
         opplæringspenger = opplæringspenger,
         institusjonsoppholdsperioder = institusjonsoppholdsperioder,
         orgnummer = orgnummer,
-        dødsdato = dødsdato,
         arbeidsavklaringspenger = arbeidsavklaringspenger,
         dagpenger = dagpenger,
         fnr = fnr

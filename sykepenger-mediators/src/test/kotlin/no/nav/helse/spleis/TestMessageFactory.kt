@@ -505,7 +505,6 @@ internal class TestMessageFactory(
             "Opplæringspenger",
             "Institusjonsopphold",
             "Arbeidsavklaringspenger",
-            "Dødsinfo",
             "Dagpenger"
         )
         return lagBehovMedLøsning(
@@ -536,9 +535,6 @@ internal class TestMessageFactory(
                         "grad" to data.grad
                     )
                 },
-                "Dødsinfo" to mapOf(
-                    "dødsdato" to null
-                ),
                 "Institusjonsopphold" to institusjonsoppholdsperioder.map { data ->
                     mapOf(
                         "startdato" to data.startdato,

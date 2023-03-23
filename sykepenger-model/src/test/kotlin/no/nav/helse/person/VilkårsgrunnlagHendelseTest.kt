@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Dagpenger
-import no.nav.helse.hendelser.Dødsinfo
 import no.nav.helse.hendelser.Foreldrepermisjon
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -229,7 +228,6 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         omsorgspenger = Omsorgspenger(emptyList()),
         opplæringspenger = Opplæringspenger(emptyList()),
         institusjonsopphold = Institusjonsopphold(emptyList()),
-        dødsinfo = Dødsinfo(null),
         arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
         dagpenger = Dagpenger(emptyList()),
         aktivitetslogg = Aktivitetslogg()

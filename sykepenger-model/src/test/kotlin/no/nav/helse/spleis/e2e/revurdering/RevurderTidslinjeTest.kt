@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.antallEtterspurteBehov
@@ -19,7 +18,6 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -712,7 +710,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(Periode(1.januar, 17.januar)), førsteFraværsdag = 1.januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt()
@@ -1204,7 +1202,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusYears(1))
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -1244,7 +1242,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusYears(1))
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -1350,7 +1348,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode, besvart = 31.januar.atStartOfDay())
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt()
@@ -1453,7 +1451,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, besvart = LocalDate.EPOCH.atStartOfDay())
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -1476,7 +1474,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger))
         assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Dagpenger))
         assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Institusjonsopphold))
-        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Dødsinfo))
     }
 
 

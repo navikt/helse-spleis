@@ -219,11 +219,11 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterYtelser(
             2.vedtaksperiode,
             foreldrepenger = listOf(1.februar til 28.februar),
+            svangerskapspenger = listOf(1.februar til 28.februar),
             pleiepenger = listOf(1.februar til 28.februar),
             omsorgspenger = listOf(1.februar til 28.februar),
             opplæringspenger = listOf(1.februar til 28.februar),
-            institusjonsoppholdsperioder = listOf(Institusjonsopphold.Institusjonsoppholdsperiode(1.februar, 28.februar)),
-            svangerskapspenger = listOf(1.februar til 28.februar)
+            institusjonsoppholdsperioder = listOf(Institusjonsopphold.Institusjonsoppholdsperiode(1.februar, 28.februar))
         )
 
         assertIngenFunksjonelleFeil()
@@ -240,14 +240,14 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 95.prosent))
         håndterYtelser(
             2.vedtaksperiode,
-            arbeidsavklaringspenger = listOf(1.februar til 28.februar),
-            dagpenger = listOf(1.februar til 28.februar),
             foreldrepenger = listOf(1.februar til 28.februar),
+            svangerskapspenger = listOf(1.februar til 28.februar),
             pleiepenger = listOf(1.februar til 28.februar),
             omsorgspenger = listOf(1.februar til 28.februar),
             opplæringspenger = listOf(1.februar til 28.februar),
             institusjonsoppholdsperioder = listOf(Institusjonsopphold.Institusjonsoppholdsperiode(1.februar, 28.februar)),
-            svangerskapspenger = listOf(1.februar til 28.februar)
+            arbeidsavklaringspenger = listOf(1.februar til 28.februar),
+            dagpenger = listOf(1.februar til 28.februar)
         )
         assertIngenVarsler()
     }

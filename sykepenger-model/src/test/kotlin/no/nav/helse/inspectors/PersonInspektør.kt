@@ -34,7 +34,6 @@ internal class PersonInspektør(person: Person): PersonVisitor {
     internal lateinit var aktørId: String
     internal lateinit var fødselsdato: LocalDate
     internal var dødsdato: LocalDate? = null
-    internal lateinit var alder: Alder
     private val arbeidsgivere = mutableMapOf<String, Arbeidsgiver>()
     private val vilkårsgrunnlagHistorikkInnslag: MutableList<VilkårsgrunnlagHistorikk.Innslag> = mutableListOf()
 
@@ -62,18 +61,16 @@ internal class PersonInspektør(person: Person): PersonVisitor {
         opprettet: LocalDateTime,
         aktørId: String,
         personidentifikator: Personidentifikator,
-        dødsdato: LocalDate?,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {
         this.personidentifikator = personidentifikator
         this.aktørId = aktørId
-        this.dødsdato = dødsdato
         this.vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk
     }
 
-    override fun visitAlder(alder: Alder, fødselsdato: LocalDate) {
-        this.alder = alder
+    override fun visitAlder(alder: Alder, fødselsdato: LocalDate, dødsdato: LocalDate?) {
         this.fødselsdato = fødselsdato
+        this.dødsdato = dødsdato
     }
 
     override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {

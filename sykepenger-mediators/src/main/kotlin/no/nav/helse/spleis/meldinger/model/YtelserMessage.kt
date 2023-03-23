@@ -5,7 +5,6 @@ import java.time.LocalDate
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
-import no.nav.helse.hendelser.Dødsinfo
 import no.nav.helse.hendelser.Foreldrepermisjon
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode
@@ -65,9 +64,6 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
         )
     })
 
-    private val dødsinfo =
-        Dødsinfo(packet["@løsning.${Behovtype.Dødsinfo.name}"].path("dødsdato").asOptionalLocalDate())
-
     init {
         packet["@løsning.${Behovtype.Arbeidsavklaringspenger.name}.meldekortperioder"].map(::asDatePair)
             .partition { it.first <= it.second }
@@ -97,7 +93,6 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
             omsorgspenger = omsorgspenger,
             opplæringspenger = opplæringspenger,
             institusjonsopphold = institusjonsopphold,
-            dødsinfo = dødsinfo,
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger.map { Periode(it.first, it.second) }),
             dagpenger = Dagpenger(dagpenger.map { Periode(it.first, it.second) }),
             aktivitetslogg = Aktivitetslogg()

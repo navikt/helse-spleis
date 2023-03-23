@@ -13,13 +13,12 @@ internal class ArbeidsgiverUtbetalinger(
     alder: Alder,
     private val arbeidsgivere: Map<Arbeidsgiver, (LocalDate, Periode) -> Utbetalingstidslinje>,
     infotrygdUtbetalingstidslinje: Utbetalingstidslinje,
-    dødsdato: LocalDate?,
     vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
 ) {
     private val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(alder, regler, infotrygdUtbetalingstidslinje)
     private val filtere = listOf(
         Sykdomsgradfilter,
-        AvvisDagerEtterDødsdatofilter(dødsdato),
+        AvvisDagerEtterDødsdatofilter(alder),
         AvvisInngangsvilkårfilter(vilkårsgrunnlagHistorikk),
         maksimumSykepengedagerfilter,
         MaksimumUtbetalingFilter(),

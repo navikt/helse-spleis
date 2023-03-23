@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Alder
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
@@ -126,8 +127,8 @@ internal abstract class AbstractPersonTest {
     protected fun createKorttidsPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate, maksSykedager: Int) = createTestPerson { jurist ->
         Person(AKTØRID, personidentifikator, fødseldato.alder, jurist, regler(maksSykedager))
     }
-    protected fun createTestPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate) = createTestPerson { jurist ->
-        Person(AKTØRID, personidentifikator, fødseldato.alder, null, jurist)
+    protected fun createTestPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate, dødsdato: LocalDate? = null) = createTestPerson { jurist ->
+        Person(AKTØRID, personidentifikator, Alder(fødseldato, dødsdato), jurist)
     }
     protected fun createPingPongPerson() = createTestPerson { jurist -> pingPongPerson(jurist) }
     protected fun createOvergangFraInfotrygdPerson() = createTestPerson { jurist -> overgangFraInfotrygdPerson(jurist) }

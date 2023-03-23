@@ -7,11 +7,12 @@ import java.time.Year
 import java.time.temporal.ChronoUnit.YEARS
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
-// TODO: alder bør ha dødsdato for å regne alder riktig i tilfelle død
-class Alder(private val fødselsdato: LocalDate) {
+class Alder(private val fødselsdato: LocalDate, private val dødsdato: LocalDate?) {
     private val syttiårsdagen: LocalDate = fødselsdato.plusYears(70)
     private val sisteVirkedagFørFylte70år: LocalDate = syttiårsdagen.sisteVirkedagFør()
     private val redusertYtelseAlder: LocalDate = fødselsdato.plusYears(67)
@@ -22,7 +23,7 @@ class Alder(private val fødselsdato: LocalDate) {
         private const val ALDER_FOR_FORHØYET_FERIEPENGESATS = 59
         private const val MINSTEALDER_UTEN_FULLMAKT_FRA_VERGE = 18
 
-        val LocalDate.alder get() = Alder(this)
+        val LocalDate.alder get() = Alder(this, null)
 
         private fun LocalDate.sisteVirkedagFør(): LocalDate = this.minusDays(
             when (this.dayOfWeek) {
@@ -33,16 +34,24 @@ class Alder(private val fødselsdato: LocalDate) {
         )
     }
 
-    internal fun accept(visitor: AlderVisitor) {
-        visitor.visitAlder(this, fødselsdato)
+    internal fun medDød(dødsdato: LocalDate): Alder {
+        if (this.dødsdato != null) return this
+        return Alder(this.fødselsdato, dødsdato)
     }
 
+    internal fun accept(visitor: AlderVisitor) {
+        visitor.visitAlder(this, fødselsdato, dødsdato)
+    }
     internal fun innenfor67årsgrense(dato: LocalDate) = dato <= redusertYtelseAlder
     internal fun innenfor70årsgrense(dato: LocalDate) = dato <= sisteVirkedagFørFylte70år
     internal fun harNådd70årsgrense(dato: LocalDate) = dato >= sisteVirkedagFørFylte70år
+
     internal fun mistetSykepengerett(dato: LocalDate) = dato >= syttiårsdagen
 
-    internal fun alderPåDato(dato: LocalDate) = YEARS.between(fødselsdato, dato).toInt()
+    internal fun alderPåDato(dato: LocalDate): Int {
+        val dagen = if (dødsdato != null) minOf(dødsdato, dato) else dato
+        return YEARS.between(fødselsdato, dagen).toInt()
+    }
 
     private fun alderVedSluttenAvÅret(year: Year) = YEARS.between(Year.from(fødselsdato), year).toInt()
 
@@ -108,6 +117,12 @@ class Alder(private val fødselsdato: LocalDate) {
         val absoluttSisteDagMedSykepenger =
             MaksimumSykepenger.absoluttSisteDagMedSykepenger(dato, forbrukteDager, sisteVirkedagFørFylte70år)
         return MaksimumSykepenger.minsteAv(maksdatoOrdinærRett, maksdatoBegrensetRett, absoluttSisteDagMedSykepenger)
+    }
+
+    internal fun avvisDager(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
+        if (dødsdato == null) return tidslinjer
+        Utbetalingstidslinje.avvis(tidslinjer, listOf(dødsdato.nesteDag til LocalDate.MAX), listOf(Begrunnelse.EtterDødsdato))
+        return tidslinjer
     }
 
     internal class MaksimumSykepenger private constructor(

@@ -54,7 +54,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             behov,
             Arbeidsavklaringspenger,
             Dagpenger,
-            Dødsinfo,
             Foreldrepenger,
             Institusjonsopphold,
             Omsorgspenger,
@@ -63,7 +62,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         )
         assertArbeidsavklaringspengerdetaljer(behov)
         assertDagpengerdetaljer(behov)
-        assertDødsinfodetaljer(behov)
         assertForeldrepengerdetaljer(behov)
         assertInstitusjonsoppholddetaljer(behov)
         assertOmsorgspengerdetaljer(behov)
@@ -188,10 +186,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
 
     private fun assertArbeidsforholdV2detaljer(behov: JsonNode) {
         assertDato(behov.path(ArbeidsforholdV2.name).path("skjæringstidspunkt").asText())
-    }
-
-    private fun assertDødsinfodetaljer(behov: JsonNode) {
-        assertTrue(behov.path(Dødsinfo.name).isEmpty)
     }
 
     private fun assertForeldrepengerdetaljer(behov: JsonNode) {

@@ -18,7 +18,6 @@ internal class YtelserRiver(
         Omsorgspenger,
         Opplæringspenger,
         Institusjonsopphold,
-        Dødsinfo,
         Arbeidsavklaringspenger,
         Dagpenger
     )
@@ -31,7 +30,6 @@ internal class YtelserRiver(
         message.requireKey("@løsning.${Omsorgspenger.name}")
         message.requireKey("@løsning.${Opplæringspenger.name}")
         message.requireKey("@løsning.${Institusjonsopphold.name}")
-        message.requireKey("@løsning.${Dødsinfo.name}")
         message.interestedIn("@løsning.${Foreldrepenger.name}.Foreldrepengeytelse")
         message.interestedIn("@løsning.${Foreldrepenger.name}.Svangerskapsytelse")
         message.requireArray("@løsning.${Pleiepenger.name}") {

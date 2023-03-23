@@ -7,7 +7,6 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning.Companion.tilOverstyrt
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
-import no.nav.helse.hendelser.Dødsinfo
 import no.nav.helse.hendelser.Foreldrepermisjon
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -229,7 +228,6 @@ internal class ArbeidsgiverHendelsefabrikk(
         omsorgspenger: List<Periode> = emptyList(),
         opplæringspenger: List<Periode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
-        dødsdato: LocalDate? = null,
         arbeidsavklaringspenger: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList()
     ): Ytelser {
@@ -256,7 +254,6 @@ internal class ArbeidsgiverHendelsefabrikk(
             institusjonsopphold = Institusjonsopphold(
                 perioder = institusjonsoppholdsperioder
             ),
-            dødsinfo = Dødsinfo(dødsdato),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
             dagpenger = Dagpenger(dagpenger),
             aktivitetslogg = Aktivitetslogg()

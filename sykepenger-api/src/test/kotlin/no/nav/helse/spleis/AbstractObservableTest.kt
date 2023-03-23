@@ -6,7 +6,6 @@ import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
-import no.nav.helse.hendelser.Dødsinfo
 import no.nav.helse.hendelser.Foreldrepermisjon
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -182,7 +181,6 @@ abstract class AbstractObservableTest {
         opplæringspenger: List<Periode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
         orgnummer: String = ORGNUMMER,
-        dødsdato: LocalDate? = null,
         arbeidsavklaringspenger: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
         fnr: String = UNG_PERSON_FNR
@@ -211,7 +209,6 @@ abstract class AbstractObservableTest {
             institusjonsopphold = Institusjonsopphold(
                 perioder = institusjonsoppholdsperioder
             ),
-            dødsinfo = Dødsinfo(dødsdato),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
             dagpenger = Dagpenger(dagpenger),
             aktivitetslogg = aktivitetslogg

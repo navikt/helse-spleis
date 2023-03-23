@@ -2,18 +2,13 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
-import no.nav.helse.AlderVisitor
-import no.nav.helse.Alder
 
 internal class V168Fødselsdato: JsonMigration(168) {
     override val description = "Fødselsdato fra fnr/dnr"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
-        jsonNode.path("fødselsnummer").asText().somFødselsnummer().alder().accept(object : AlderVisitor {
-            override fun visitAlder(alder: Alder, fødselsdato: LocalDate) {
-                jsonNode.put("fødselsdato", fødselsdato.toString())
-            }
-        })
+        val fødselsdato = jsonNode.path("fødselsnummer").asText().somFødselsnummer().fødselsdato
+        jsonNode.put("fødselsdato", fødselsdato.toString())
     }
 
     private class Fødselsnummer private constructor(private val value: String) {
@@ -27,8 +22,6 @@ internal class V168Fødselsdato: JsonMigration(168) {
         override fun toString() = value
         override fun hashCode(): Int = value.hashCode()
         override fun equals(other: Any?) = other is Fødselsnummer && this.value == other.value
-
-        fun alder() = Alder(this.fødselsdato)
 
         private fun Int.toDay() = if (this > 40) this - 40 else this
         private fun Int.toYear(individnummer: Int): Int {

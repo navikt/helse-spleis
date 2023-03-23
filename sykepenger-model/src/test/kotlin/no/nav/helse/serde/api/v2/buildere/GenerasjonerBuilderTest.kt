@@ -4,9 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
-import no.nav.helse.Toggle
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.erHelg
 import no.nav.helse.februar
@@ -44,7 +42,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.arbeidsgiver
