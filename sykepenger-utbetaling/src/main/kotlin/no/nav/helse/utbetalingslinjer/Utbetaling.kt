@@ -26,6 +26,9 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_9
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
+import no.nav.helse.utbetalingslinjer.GodkjenningsbehovTag.ARBEIDSGIVERUTBETALING
+import no.nav.helse.utbetalingslinjer.GodkjenningsbehovTag.INGEN_UTBETALING
+import no.nav.helse.utbetalingslinjer.GodkjenningsbehovTag.PERSONUTBETALING
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.trekkerTilbakePenger
 import no.nav.helse.utbetalingslinjer.Utbetalingkladd.Companion.finnKladd
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.ANNULLERING
@@ -622,8 +625,22 @@ class Utbetaling private constructor(
                 førstegangsbehandling = førstegangsbehandling,
                 utbetalingtype = utbetaling.type.name,
                 inntektskilde = inntektskilde.name,
-                orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
+                orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
+                tags = tags(utbetaling).map { it.name }.toSet()
             )
+        }
+
+        private fun tags(utbetaling: Utbetaling): Set<GodkjenningsbehovTag> {
+            val harArbeidsgiverutbetaling = utbetaling.arbeidsgiverOppdrag.nettoBeløp() > 0
+            val harPersonutbetaling = utbetaling.personOppdrag.nettoBeløp() > 0
+            val ingenUtbetaling = !harArbeidsgiverutbetaling && !harPersonutbetaling
+            return when {
+                harArbeidsgiverutbetaling && harPersonutbetaling -> setOf(ARBEIDSGIVERUTBETALING, PERSONUTBETALING)
+                harArbeidsgiverutbetaling -> setOf(ARBEIDSGIVERUTBETALING)
+                harPersonutbetaling -> setOf(PERSONUTBETALING)
+                ingenUtbetaling -> setOf(INGEN_UTBETALING)
+                else -> throw IllegalStateException("Hva slags utbetaling er dette!?")
+            }
         }
     }
 
@@ -851,6 +868,9 @@ enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERIN
 enum class Endringskode { NY, UEND, ENDR }
 /* en enum-port/adapter-greie. Alternativet er en modul som inneholder ... kodeverk */
 enum class UtbetalingInntektskilde { EN_ARBEIDSGIVER, FLERE_ARBEIDSGIVERE }
+
+private enum class GodkjenningsbehovTag { ARBEIDSGIVERUTBETALING, PERSONUTBETALING, INGEN_UTBETALING }
+
 enum class Klassekode(val verdi: String) {
     RefusjonIkkeOpplysningspliktig(verdi = "SPREFAG-IOP"),
     RefusjonFeriepengerIkkeOpplysningspliktig(verdi = "SPREFAGFER-IOP"),
