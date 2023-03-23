@@ -19,7 +19,6 @@ import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.speil.AnnulleringerAkkumulator
 import no.nav.helse.serde.api.speil.ForkastetVedtaksperiodeAkkumulator
 import no.nav.helse.serde.api.speil.GenerasjonIderAkkumulator
-import no.nav.helse.serde.api.speil.Generasjoner
 import no.nav.helse.serde.api.speil.IVedtaksperiode
 import no.nav.helse.serde.api.speil.SykdomshistorikkAkkumulator
 import no.nav.helse.serde.api.speil.Tidslinjeberegninger
@@ -95,7 +94,7 @@ internal class GenerasjonerBuilder(
         inntektskilde: Inntektskilde
     ) {
         val sykdomstidslinje = VedtaksperiodeSykdomstidslinjeBuilder(vedtaksperiode).build()
-        val utbetalinger = UtbetalingerBuilder(vedtaksperiode).build(vedtaksperiodeId)
+        val utbetalinger = UtbetalingerBuilder(vedtaksperiode).build()
         val aktivetsloggForPeriode = Vedtaksperiode.aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode)
         vedtaksperiodeAkkumulator.leggTil(
             IVedtaksperiode(

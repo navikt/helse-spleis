@@ -213,7 +213,7 @@ internal class Tidslinjeperioder(
 
     private fun beregnetPeriode(
         periode: IVedtaksperiode,
-        vilkårsgrunnlagTilutbetaling: Pair<IVilkårsgrunnlag?, IUtbetaling>,
+        vilkårsgrunnlagTilutbetaling: Pair<IVilkårsgrunnlag, IUtbetaling>,
         tidslinjeberegning: ITidslinjeberegning,
         erForkastet: Boolean,
         vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
@@ -226,10 +226,10 @@ internal class Tidslinjeperioder(
             periode.aktivitetsloggForPeriode
         ).build()
         val utbetalingDTO = utbetaling.toDTO()
+        val erAnnullering = utbetalingDTO.type == Utbetalingtype.ANNULLERING
 
         val vilkårsgrunnlag = vilkårsgrunnlagTilutbetaling.first
-        vilkårsgrunnlaghistorikk.leggIBøtta(vilkårsgrunnlag)
-        val vilkårsgrunnlagId = vilkårsgrunnlag?.id
+        if (!erAnnullering) vilkårsgrunnlaghistorikk.leggIBøtta(vilkårsgrunnlag)
         return BeregnetPeriode(
             vedtaksperiodeId = periode.vedtaksperiodeId,
             beregningId = utbetaling.beregningId,
@@ -238,18 +238,19 @@ internal class Tidslinjeperioder(
             erForkastet = erForkastet,
             periodetype = periode.periodetype,
             inntektskilde = periode.inntektskilde,
-            skjæringstidspunkt = periode.skjæringstidspunkt,
+            skjæringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt,
             hendelser = periode.hendelser,
             maksdato = utbetaling.maksdato,
             beregnet = utbetaling.opprettet,
             opprettet = periode.opprettet,
             oppdatert = periode.oppdatert,
-            periodevilkår = periodevilkår(periode, utbetaling, avgrensetUtbetalingstidslinje, periode.hendelser),
+            periodevilkår = periodevilkår(vilkårsgrunnlag.skjæringstidspunkt, periode, utbetaling, avgrensetUtbetalingstidslinje, periode.hendelser),
             sammenslåttTidslinje = sammenslåttTidslinje,
             gjenståendeSykedager = utbetaling.gjenståendeSykedager,
             forbrukteSykedager = utbetaling.forbrukteSykedager,
             utbetaling = utbetalingDTO,
-            vilkårsgrunnlagId = vilkårsgrunnlagId,
+            // todo: vilkårsgrunnlagId er ikke relevant å sende for annulleringer
+            vilkårsgrunnlagId = vilkårsgrunnlag.id.takeUnless { erAnnullering },
             aktivitetslogg = varsler,
             periodetilstand = utledePeriodetilstand(utbetalingDTO, periode.tilstand, avgrensetUtbetalingstidslinje),
         )
@@ -285,6 +286,7 @@ internal class Tidslinjeperioder(
         lastOrNull { it.type == UtbetalingstidslinjedagType.NavDag }
 
     private fun periodevilkår(
+        skjæringstidspunkt: LocalDate,
         periode: IVedtaksperiode,
         utbetaling: IUtbetaling,
         avgrensetUtbetalingstidslinje: List<Utbetalingstidslinjedag>,
@@ -292,7 +294,7 @@ internal class Tidslinjeperioder(
     ): BeregnetPeriode.Vilkår {
         val sisteSykepengedag = avgrensetUtbetalingstidslinje.sisteNavDag()?.dato ?: periode.tom
         val sykepengedager = BeregnetPeriode.Sykepengedager(
-            periode.skjæringstidspunkt,
+            skjæringstidspunkt,
             utbetaling.maksdato,
             utbetaling.forbrukteSykedager,
             utbetaling.gjenståendeSykedager,
@@ -321,7 +323,7 @@ internal class IVedtaksperiode(
     val tom: LocalDate,
     val inntektskilde: Inntektskilde,
     val hendelser: List<HendelseDTO>,
-    utbetalinger: List<Pair<IVilkårsgrunnlag?, IUtbetaling>>,
+    utbetalinger: List<Pair<IVilkårsgrunnlag, IUtbetaling>>,
     val periodetype: Periodetype,
     val sykdomstidslinje: List<Sykdomstidslinjedag>,
     val opprettet: LocalDateTime,
@@ -334,9 +336,14 @@ internal class IVedtaksperiode(
 
     fun beholdAktivOgAnnullert(annulleringer: AnnulleringerAkkumulator): Boolean {
         val annulleringerForVedtaksperioden = utbetalinger
-            .mapNotNull { (_, utbetaling) -> annulleringer.finnAnnullering(utbetaling) }
-            .distinctBy { it.korrelasjonsId }
-            .map { null to it }
+            .groupBy { it.second.korrelasjonsId }
+            .mapNotNull { (_, utbetalinger) ->
+                // mapper annullering til å peke på samme vilkårsgrunnlag som siste utbetaling
+                val sisteVilkårsgrunnlagId = utbetalinger.last().first
+                annulleringer.finnAnnullering(utbetalinger.first().second)?.let {
+                    sisteVilkårsgrunnlagId to it
+                }
+            }
         this.utbetalinger.addAll(annulleringerForVedtaksperioden)
 
         return !forkastet || annulleringerForVedtaksperioden.isNotEmpty()

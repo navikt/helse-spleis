@@ -38,26 +38,14 @@ internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode) : Vedtaksperi
     val utbetalinger = mutableMapOf<UUID, IUtbetaling>()
     val vilkårsgrunnlag = mutableMapOf<UUID, IVilkårsgrunnlag>()
 
-    private companion object {
-        private val sikkerlog = LoggerFactory.getLogger("tjenestekall")
-    }
-
     init {
         vedtaksperiode.accept(this)
     }
 
-    internal fun build(vedtaksperiodeId: UUID): List<Pair<IVilkårsgrunnlag?, IUtbetaling>>{
-        val vilkårsgrunnlagTilUtbetaling = mutableListOf<Pair<IVilkårsgrunnlag?, IUtbetaling>>()
-        utbetalinger.forEach { (utbetalingId, utbetaling) ->
-            if (utbetalingId in vilkårsgrunnlag.keys) {
-                vilkårsgrunnlagTilUtbetaling.add(vilkårsgrunnlag[utbetalingId] to utbetaling)
-            } else {
-                sikkerlog.error("Fant ikke vilkårsgrunnlag for utbetaling med utbetalingId=$utbetalingId for vedtaksperiodeId=$vedtaksperiodeId")
-                vilkårsgrunnlagTilUtbetaling.add(null to utbetaling)
-            }
+    internal fun build() =
+        utbetalinger.map { (utbetalingId, utbetaling) ->
+            vilkårsgrunnlag.getValue(utbetalingId) to utbetaling
         }
-        return vilkårsgrunnlagTilUtbetaling.toList()
-    }
 
     override fun preVisitVedtaksperiodeUtbetaling(
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
