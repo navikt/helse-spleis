@@ -508,13 +508,12 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING_REVURDERING
         )
 
-        val utbetalingTilRevurdering = inspektør.utbetalinger.last()
         assertEquals(2, inspektør.utbetalinger.size)
         assertDiff(-15741)
 
         assertVarsel(RV_IV_2, AktivitetsloggFilter.person())
         assertVarsel(RV_SV_1, AktivitetsloggFilter.person())
-        assertFalse(utbetalingTilRevurdering.utbetalingstidslinje().harUtbetalingsdager())
+        assertFalse(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.harUtbetalingsdager())
     }
 
     @Test
@@ -535,13 +534,12 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING_REVURDERING
         )
 
-        val utbetalingTilRevurdering = inspektør.utbetalinger.last()
         assertEquals(2, inspektør.utbetalinger.size)
         assertDiff(-2541)
 
         assertVarsel(RV_IV_2, AktivitetsloggFilter.person())
         assertVarsel(RV_SV_1, AktivitetsloggFilter.person())
-        assertFalse(utbetalingTilRevurdering.utbetalingstidslinje().harUtbetalingsdager())
+        assertFalse(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.harUtbetalingsdager())
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 

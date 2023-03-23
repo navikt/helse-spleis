@@ -361,7 +361,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertEquals(-15741, utbetalingTilRevurdering.inspektør.arbeidsgiverOppdrag.nettoBeløp())
 
         assertVarsel(RV_IV_2, AktivitetsloggFilter.person())
-        assertFalse(utbetalingTilRevurdering.utbetalingstidslinje().harUtbetalingsdager())
+        assertFalse(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.harUtbetalingsdager())
     }
 
     @Test
