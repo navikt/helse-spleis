@@ -12,6 +12,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.serde.migration.Json
 import no.nav.helse.serde.migration.Navn
 import no.nav.helse.spleis.PostgresProbe
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.DØDSMELDING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.GRUNNBELØPSREGULERING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSMELDING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.KANSELLER_UTBETALING
@@ -26,11 +27,13 @@ import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SIMULERING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGPÅMINNELSE
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSGODKJENNING
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSHISTORIKK_ETTER_IT_ENDRING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSHISTORIKK_FOR_FERIEPENGER
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.VILKÅRSGRUNNLAG
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.YTELSER
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
+import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.EtterbetalingMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
@@ -129,13 +132,14 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is OverstyrArbeidsforholdMessage -> OVERSTYRARBEIDSFORHOLD
         is OverstyrArbeidsgiveropplysningerMessage -> OVERSTYRARBEIDSGIVEROPPLYSNINGER
         is UtbetalingshistorikkForFeriepengerMessage -> UTBETALINGSHISTORIKK_FOR_FERIEPENGER
+        is UtbetalingshistorikkEtterInfotrygdendringMessage -> UTBETALINGSHISTORIKK_ETTER_IT_ENDRING
+        is DødsmeldingMessage -> DØDSMELDING
         is MigrateMessage,
         is AvstemmingMessage,
         is PersonPåminnelseMessage,
         is PåminnelseMessage,
         is UtbetalingshistorikkMessage,
         is InfotrygdendringMessage,
-        is UtbetalingshistorikkEtterInfotrygdendringMessage,
         is InntektsmeldingReplayUtførtMessage -> null // Disse trenger vi ikke å lagre
         else -> null.also { log.warn("ukjent meldingstype ${melding::class.simpleName}: melding lagres ikke") }
     }
@@ -176,6 +180,8 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         KANSELLER_UTBETALING,
         GRUNNBELØPSREGULERING,
         UTBETALINGSHISTORIKK_FOR_FERIEPENGER,
+        UTBETALINGSHISTORIKK_ETTER_IT_ENDRING,
+        DØDSMELDING,
         OVERSTYRARBEIDSGIVEROPPLYSNINGER
     }
 }
