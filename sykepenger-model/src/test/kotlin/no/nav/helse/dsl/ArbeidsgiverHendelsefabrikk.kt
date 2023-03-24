@@ -8,6 +8,7 @@ import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning.Companion.tilOverstyrt
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepermisjon
+import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
@@ -345,6 +346,15 @@ internal class ArbeidsgiverHendelsefabrikk(
             tilstandsendringstidspunkt,
             LocalDateTime.now(),
             LocalDateTime.now()
+        )
+
+    internal fun lagHåndterForkastSykmeldingsperioder(periode: Periode) =
+        ForkastSykmeldingsperioder(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = aktørId,
+            fødselsnummer = personidentifikator.toString(),
+            organisasjonsnummer = organisasjonsnummer,
+            periode = periode
         )
 
     internal fun lagHåndterOverstyrTidslinje(overstyringsdager: List<ManuellOverskrivingDag>) =

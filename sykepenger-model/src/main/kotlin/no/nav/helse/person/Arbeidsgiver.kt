@@ -7,6 +7,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.InntektsmeldingReplayUtført
@@ -472,6 +473,11 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(sykmelding: Sykmelding) {
         håndter(sykmelding, Vedtaksperiode::håndter)
         sykmeldingsperioder.lagre(sykmelding)
+    }
+
+    internal fun håndter(forkastSykmeldingsperioder: ForkastSykmeldingsperioder) {
+        forkastSykmeldingsperioder.kontekst(this)
+        forkastSykmeldingsperioder.forkast(sykmeldingsperioder)
     }
 
     private fun harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode): Boolean {
