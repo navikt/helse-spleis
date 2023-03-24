@@ -157,6 +157,12 @@ internal class MessageMediatorTest {
         assertTrue(hendelseMediator.lestMigrate)
     }
 
+    @Test
+    fun `forkast sykmeldingsperioder`() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagForkastSykmeldingsperioder())
+        assertTrue(hendelseMediator.lestForkastSykmeldingsperioderMessage)
+    }
+
     @BeforeEach
     internal fun reset() {
         testRapid.reset()

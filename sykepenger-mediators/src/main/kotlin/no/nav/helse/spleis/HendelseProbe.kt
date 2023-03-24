@@ -44,10 +44,6 @@ object HendelseProbe {
         tell("Vilkårsgrunnlag")
     }
 
-    internal fun onUtbetalingsgrunnlag() {
-        tell("Utbetalingsgrunnlag")
-    }
-
     fun onSimulering() {
         tell("Simulering")
     }
@@ -80,10 +76,6 @@ object HendelseProbe {
         tell("OverstyrTidslinje")
     }
 
-    fun onOverstyrInntekt() {
-        tell("OverstyrInntekt")
-    }
-
     fun onOverstyrArbeidsgiveropplysninger() {
         tell("OverstyrArbeidsgiveropplysninger")
     }
@@ -98,6 +90,10 @@ object HendelseProbe {
 
     fun onUtbetalingshistorikkEtterInfotrygdendring() {
         tell("UtbetalingshistorikkEtterInfotrygdendring")
+    }
+
+    fun onForkastSykmeldingsperioder() {
+        tell("ForkastSykmeldingsperioder")
     }
 
     private fun tell(navn: String) {

@@ -11,6 +11,7 @@ import no.nav.helse.spleis.meldinger.AnnullerUtbetalingerRiver
 import no.nav.helse.spleis.meldinger.DødsmeldingerRiver
 import no.nav.helse.spleis.meldinger.EtterbetalingerRiver
 import no.nav.helse.spleis.meldinger.EtterbetalingerRiverMedHistorikk
+import no.nav.helse.spleis.meldinger.ForkastSykmeldingsperioderRiver
 import no.nav.helse.spleis.meldinger.InfotrygdendringerRiver
 import no.nav.helse.spleis.meldinger.InntektsmeldingReplayUtførtRiver
 import no.nav.helse.spleis.meldinger.InntektsmeldingerReplayRiver
@@ -76,6 +77,7 @@ internal class MessageMediator(
             InfotrygdendringerRiver(it, this)
             UtbetalingshistorikkEtterInfotrygdendringRiver(it, this)
             DødsmeldingerRiver(it, this)
+            ForkastSykmeldingsperioderRiver(it, this)
         }
     }
 

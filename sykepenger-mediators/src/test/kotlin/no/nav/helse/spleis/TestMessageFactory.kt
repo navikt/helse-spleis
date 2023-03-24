@@ -20,6 +20,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -824,6 +825,22 @@ internal class TestMessageFactory(
                 "tilstandsendringstidspunkt" to tilstandsendringstidspunkt,
                 "påminnelsestidspunkt" to LocalDateTime.now(),
                 "nestePåminnelsestidspunkt" to LocalDateTime.now()
+            )
+        )
+    }
+
+    fun lagForkastSykmeldingsperioder(
+        orgnummer: String = organisasjonsnummer,
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar
+    ): Pair<String, String> {
+        return nyHendelse(
+            "forkast_sykmeldingsperioder", mapOf(
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "organisasjonsnummer" to orgnummer,
+                "fom" to fom.toString(),
+                "tom" to tom.toString()
             )
         )
     }

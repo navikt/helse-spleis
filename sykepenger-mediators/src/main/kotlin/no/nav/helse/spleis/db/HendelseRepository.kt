@@ -13,6 +13,7 @@ import no.nav.helse.serde.migration.Json
 import no.nav.helse.serde.migration.Navn
 import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.DØDSMELDING
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.FORKAST_SYKMELDINGSPERIODER
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.GRUNNBELØPSREGULERING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSMELDING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.KANSELLER_UTBETALING
@@ -35,6 +36,7 @@ import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.EtterbetalingMessage
+import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
@@ -134,6 +136,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is UtbetalingshistorikkForFeriepengerMessage -> UTBETALINGSHISTORIKK_FOR_FERIEPENGER
         is UtbetalingshistorikkEtterInfotrygdendringMessage -> UTBETALINGSHISTORIKK_ETTER_IT_ENDRING
         is DødsmeldingMessage -> DØDSMELDING
+        is ForkastSykmeldingsperioderMessage -> FORKAST_SYKMELDINGSPERIODER
         is MigrateMessage,
         is AvstemmingMessage,
         is PersonPåminnelseMessage,
@@ -182,6 +185,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         UTBETALINGSHISTORIKK_FOR_FERIEPENGER,
         UTBETALINGSHISTORIKK_ETTER_IT_ENDRING,
         DØDSMELDING,
-        OVERSTYRARBEIDSGIVEROPPLYSNINGER
+        OVERSTYRARBEIDSGIVEROPPLYSNINGER,
+        FORKAST_SYKMELDINGSPERIODER
     }
 }
