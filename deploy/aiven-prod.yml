@@ -211,3 +211,7 @@ spec:
         - team: flex
           application: sykepengesoknad-sak-status-metrikk
           access: read
+        - team: tbd
+          application: spout
+          access: write
+
