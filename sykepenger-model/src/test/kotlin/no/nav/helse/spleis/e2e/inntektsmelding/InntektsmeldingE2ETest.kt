@@ -455,8 +455,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
-        val utbetaling = inspektør.utbetaling(0).inspektør
-        assertTrue((1.januar til 16.januar).all { utbetaling.utbetalingstidslinje[it] is Utbetalingsdag.ArbeidsgiverperiodeDag })
+        val vedtaksperiode = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør
+        assertTrue((1.januar til 16.januar).all { vedtaksperiode.utbetalingstidslinje[it] is Utbetalingsdag.ArbeidsgiverperiodeDag })
     }
 
     @Test

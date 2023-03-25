@@ -975,6 +975,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        assertTrue(inspektør.utbetalinger.last().inspektør.utbetalingstidslinje.inspektør.erNavdag(18.oktober(2021)))
+        assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.utbetalingstidslinje.inspektør.erNavdag(18.oktober(2021)))
     }
 }
