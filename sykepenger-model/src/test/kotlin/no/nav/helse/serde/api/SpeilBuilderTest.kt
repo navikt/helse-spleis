@@ -1,10 +1,13 @@
 package no.nav.helse.serde.api
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -19,7 +22,13 @@ import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.GhostPeriodeDTO
 import no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Inntektkilde
+import no.nav.helse.serde.api.dto.SammenslåttDag
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
+import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
+import no.nav.helse.serde.api.dto.SykdomstidslinjedagKildetype
+import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
+import no.nav.helse.serde.api.dto.Utbetalingsinfo
+import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
@@ -27,6 +36,7 @@ import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterAnnullerUtbetaling
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -39,6 +49,7 @@ import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.speilApi
 import no.nav.helse.spleis.e2e.standardSimuleringsresultat
+import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -54,6 +65,35 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val dødsdato = 1.januar
         createTestPerson(UNG_PERSON_FNR_2018, UNG_PERSON_FØDSELSDATO, dødsdato)
         assertEquals(dødsdato, serializePersonForSpeil(person).dødsdato)
+    }
+
+    @Test
+    fun `nav utbetaler agp`() {
+        tilGodkjenning(1.januar, 31.januar, 100.prosent, 1.januar)
+        val id = UUID.randomUUID()
+        håndterOverstyrTidslinje((1.januar til 16.januar).map {
+            ManuellOverskrivingDag(it, Dagtype.SykedagNav, 100)
+        }, meldingsreferanseId = id)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        val speilJson = serializePersonForSpeil(person)
+        val tidslinje = speilJson.arbeidsgivere.single().generasjoner.single().perioder.single().sammenslåttTidslinje
+        val forventetFørstedag = SammenslåttDag(
+            dagen = 1.januar,
+            sykdomstidslinjedagtype = SykdomstidslinjedagType.SYKEDAG,
+            utbetalingstidslinjedagtype = UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag,
+            kilde = Sykdomstidslinjedag.SykdomstidslinjedagKilde(SykdomstidslinjedagKildetype.Saksbehandler, id),
+            grad = 100.0,
+            utbetalingsinfo = Utbetalingsinfo(
+                inntekt = 1431,
+                utbetaling = 1431,
+                personbeløp = 0,
+                arbeidsgiverbeløp = 1431,
+                refusjonsbeløp = 1431,
+                totalGrad = 100.0
+            )
+        )
+        assertEquals(forventetFørstedag, tidslinje.first())
     }
 
     @Test
@@ -190,7 +230,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         val personDto = speilApi()
         val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-        val vilkårsgrunnlag = personDto.vilkårsgrunnlag.get(speilVilkårsgrunnlagId)
+        val vilkårsgrunnlag = personDto.vilkårsgrunnlag[speilVilkårsgrunnlagId]
         assertTrue(vilkårsgrunnlag is SpleisVilkårsgrunnlag)
     }
 
@@ -199,7 +239,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         val personDto = speilApi()
         val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-        val vilkårsgrunnlag = personDto.vilkårsgrunnlag.get(speilVilkårsgrunnlagId) as? SpleisVilkårsgrunnlag
+        val vilkårsgrunnlag = personDto.vilkårsgrunnlag[speilVilkårsgrunnlagId] as? SpleisVilkårsgrunnlag
         assertTrue(vilkårsgrunnlag!!.arbeidsgiverrefusjoner.isNotEmpty())
         val arbeidsgiverrefusjon = vilkårsgrunnlag.arbeidsgiverrefusjoner.single()
         assertEquals(ORGNUMMER, arbeidsgiverrefusjon.arbeidsgiver)
@@ -216,7 +256,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         forlengVedtak(1.mars, 31.mars, 100.prosent)
         val personDto = speilApi()
         val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-        val vilkårsgrunnlag = personDto.vilkårsgrunnlag.get(speilVilkårsgrunnlagId) as? InfotrygdVilkårsgrunnlag
+        val vilkårsgrunnlag = personDto.vilkårsgrunnlag[speilVilkårsgrunnlagId] as? InfotrygdVilkårsgrunnlag
         assertTrue(vilkårsgrunnlag!!.arbeidsgiverrefusjoner.isNotEmpty())
         val arbeidsgiverrefusjon = vilkårsgrunnlag.arbeidsgiverrefusjoner.single()
         assertEquals(ORGNUMMER, arbeidsgiverrefusjon.arbeidsgiver)
@@ -239,7 +279,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
         val personDto = speilApi()
         val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-        val vilkårsgrunnlag = personDto.vilkårsgrunnlag.get(speilVilkårsgrunnlagId) as? SpleisVilkårsgrunnlag
+        val vilkårsgrunnlag = personDto.vilkårsgrunnlag[speilVilkårsgrunnlagId] as? SpleisVilkårsgrunnlag
         assertTrue(vilkårsgrunnlag!!.arbeidsgiverrefusjoner.isNotEmpty())
         val arbeidsgiverrefusjon = vilkårsgrunnlag.arbeidsgiverrefusjoner.single()
         assertEquals(ORGNUMMER, arbeidsgiverrefusjon.arbeidsgiver)
@@ -267,7 +307,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(vilkårsgrunnlagId, vilkårsgrunnlagIdEtterIm)
 
         val speilVilkårsgrunnlagId = (speilApi().arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-        val vilkårsgrunnlag = speilApi().vilkårsgrunnlag.get(speilVilkårsgrunnlagId) as? SpleisVilkårsgrunnlag
+        val vilkårsgrunnlag = speilApi().vilkårsgrunnlag[speilVilkårsgrunnlagId] as? SpleisVilkårsgrunnlag
         assertEquals(INNTEKT, vilkårsgrunnlag!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.single().beløp.månedlig)
     }
 
