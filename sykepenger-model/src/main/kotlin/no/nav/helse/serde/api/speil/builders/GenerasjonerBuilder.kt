@@ -179,6 +179,7 @@ internal class GenerasjonerBuilder(
         avstemmingsnøkkel: Long?,
         annulleringer: Set<UUID>
     ) {
+        if (utbetalingstatus == Utbetalingstatus.FORKASTET) return
         tilstand.besøkUtbetaling(this, utbetaling, type, annulleringer)
     }
 
