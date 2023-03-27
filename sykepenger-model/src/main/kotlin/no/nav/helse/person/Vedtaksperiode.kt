@@ -47,6 +47,8 @@ import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.Dokumentsporing.Companion.toMap
 import no.nav.helse.person.ForlengelseFraInfotrygd.IKKE_ETTERSPURT
 import no.nav.helse.person.Periodetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
+import no.nav.helse.person.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.person.Sykefraværstilfelleeventyr.Companion.bliMed
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -894,15 +896,33 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
-        val periodetype = arbeidsgiver.periodetype(periode)
+        val v = requireNotNull(this.vilkårsgrunnlag)
+        val skjæringstidspunkt1 = this.skjæringstidspunkt
+        val betaltFør = arbeidsgiver.finnVedtaksperiodeFør(this)
+            ?.takeIf { it.skjæringstidspunkt == skjæringstidspunkt1 }
+            ?.takeIf { it.utbetalinger.harUtbetaling() }
+            ?: false
+        val periodetype = when (v) {
+            is VilkårsgrunnlagHistorikk.Grunnlagsdata -> when (betaltFør) {
+                true -> Periodetype.FORLENGELSE
+                else -> FØRSTEGANGSBEHANDLING
+            }
+            is InfotrygdVilkårsgrunnlag -> when (betaltFør) {
+                true -> INFOTRYGDFORLENGELSE
+                else -> OVERGANG_FRA_IT
+            }
+            else -> error("dette blir for dumt!")
+        }
+
+        val vilkårsgrunnlag = person.vilkårsgrunnlagFor(skjæringstidspunkt1)
         utbetalinger.godkjenning(
             hendelse = hendelse,
             periode = periode,
-            skjæringstidspunkt = skjæringstidspunkt,
+            skjæringstidspunkt = skjæringstidspunkt1,
             periodetype = periodetype,
             førstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING,
-            inntektskilde = requireNotNull(person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntektskilde()),
-            orgnummereMedRelevanteArbeidsforhold = person.relevanteArbeidsgivere(skjæringstidspunkt)
+            inntektskilde = requireNotNull(vilkårsgrunnlag?.inntektskilde()),
+            orgnummereMedRelevanteArbeidsforhold = person.relevanteArbeidsgivere(skjæringstidspunkt1)
         )
     }
 
