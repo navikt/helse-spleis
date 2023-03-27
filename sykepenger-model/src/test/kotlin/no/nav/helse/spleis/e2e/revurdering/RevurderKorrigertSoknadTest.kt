@@ -29,7 +29,6 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_15
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_4
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -452,21 +451,24 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Korrigert søknad med friskmelding for avsluttet periode setter ikke i gang revurdering`() {
+    fun `Korrigert søknad med friskmelding for avsluttet periode`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(20.januar, 31.januar))
 
-        assertRevurderingUtenEndring(1.vedtaksperiode) {
-            håndterYtelser(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-            assertVarsel(RV_SØ_15)
-        }
+        håndterYtelser(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
 
-        assertNull(inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Arbeidsdag::class])
+        assertEquals(8, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Arbeidsdag::class])
+        val utbetalingInspektør = inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.inspektør
+        val utbetalingInspektørRevurdering = inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.inspektør
+        assertEquals(utbetalingInspektør.fagsystemId(), utbetalingInspektørRevurdering.fagsystemId())
+        assertEquals(1, utbetalingInspektørRevurdering.antallLinjer())
+        assertEquals(17.januar til 19.januar, utbetalingInspektørRevurdering.fom(0) til utbetalingInspektørRevurdering.tom(0))
+        assertEquals(ENDR, utbetalingInspektørRevurdering.endringskode(0))
     }
 
     @Test
-    fun `Korrigert søknad med friskmelding for periode i AvventerGodkjenningRevurdering - setter ikke i gang revurdering`() {
+    fun `Korrigert søknad med friskmelding for periode i AvventerGodkjenningRevurdering`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent, 20.prosent))
         håndterYtelser(1.vedtaksperiode)
@@ -477,10 +479,9 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(20.januar, 31.januar))
         håndterYtelser(1.vedtaksperiode)
-        assertNull(inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Arbeidsdag::class])
+        assertEquals(8, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Arbeidsdag::class])
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
-        assertVarsel(RV_SØ_15)
     }
 
     @Test

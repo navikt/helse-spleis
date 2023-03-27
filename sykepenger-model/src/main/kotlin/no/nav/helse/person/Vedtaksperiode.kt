@@ -99,8 +99,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad out of order`
-import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad out of order innenfor 18 dager`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad som delvis overlapper`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad som overlapper`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
@@ -111,7 +109,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_15
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_19
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_20
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_28
@@ -434,14 +431,9 @@ internal class Vedtaksperiode private constructor(
     internal fun nekterOpprettelseAvNyPeriode(ny: Vedtaksperiode, hendelse: Søknad) {
         if (ny.periode.starterEtter(this.periode)) return
         if (this.arbeidsgiver !== ny.arbeidsgiver) return
+        if (!this.periode.overlapperMed(ny.periode)) return
         kontekst(hendelse)
-        if (this.periode.overlapperMed(ny.periode)) return hendelse.funksjonellFeil(`Mottatt søknad som overlapper`)
-        // Vi er litt runde i kantene før perioden er utbetalt
-        if (!this.utbetalinger.harAvsluttede() && !this.utbetalinger.utbetales()) return
-        // Vi er litt strengere etter perioden er utbetalt
-
-        if (Toggle.OutOfOrderInnenfor18Dager.disabled && this.påvirkerArbeidsgiverperioden(ny)) return hendelse.funksjonellFeil(`Mottatt søknad out of order innenfor 18 dager`)
-        if (Toggle.OutOfOrderPåvirkerSkjæringstidspunkt.disabled && ny.periode.erRettFør(this.periode)) return hendelse.funksjonellFeil(`Mottatt søknad out of order`)
+        hendelse.funksjonellFeil(`Mottatt søknad som overlapper`)
     }
 
     private fun påvirkerArbeidsgiverperioden(ny: Vedtaksperiode): Boolean {
@@ -607,7 +599,6 @@ internal class Vedtaksperiode private constructor(
         if (søknad.delvisOverlappende(periode)) return søknad.funksjonellFeil(`Mottatt søknad som delvis overlapper`)
         if (søknad.sendtTilGosys()) return søknad.funksjonellFeil(RV_SØ_30)
         if (søknad.utenlandskSykmelding()) return søknad.funksjonellFeil(RV_SØ_29)
-        if (søknad.harArbeidsdager()) søknad.varsel(RV_SØ_15)
         else {
             søknad.valider(periode, jurist())
             søknad.validerInntektskilder(vilkårsgrunnlag == null)

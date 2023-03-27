@@ -25,11 +25,11 @@ enum class Varselkode(
     RV_SØ_8("Utenlandsopphold oppgitt i perioden i søknaden."),
     RV_SØ_9("Det er oppgitt annen inntektskilde i søknaden. Vurder inntekt.", avviklet = true),
     RV_SØ_10("Den sykmeldte har fått et nytt inntektsforhold."),
-    RV_SØ_11("Mottatt søknad out of order"),
+    RV_SØ_11("Mottatt søknad out of order", avviklet = true),
     RV_SØ_12("Mottatt overlappende søknad"),
     RV_SØ_13("Overlappende søknad starter før, eller slutter etter, opprinnelig periode"),
-    RV_SØ_14("Mottatt flere søknader for annen periode enn siste skjæringstidspunkt"),
-    RV_SØ_15("Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag"),
+    RV_SØ_14("Mottatt flere søknader for annen periode enn siste skjæringstidspunkt", avviklet = true),
+    RV_SØ_15("Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag", avviklet = true),
     RV_SØ_16("Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass", avviklet = true),
     RV_SØ_17("Søker er ikke gammel nok på søknadstidspunktet til å søke sykepenger uten fullmakt fra verge"),
     RV_SØ_18("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD", avviklet = true),
@@ -249,8 +249,6 @@ enum class Varselkode(
     companion object {
         val aktiveVarselkoder = values().filterNot { it.avviklet }
 
-        val `Mottatt søknad out of order innenfor 18 dager` = RV_SØ_14
-        val `Mottatt søknad out of order` = RV_SØ_11
         val `Mottatt søknad som overlapper` = RV_SØ_12
         val `Mottatt søknad som delvis overlapper` = RV_SØ_13
 
