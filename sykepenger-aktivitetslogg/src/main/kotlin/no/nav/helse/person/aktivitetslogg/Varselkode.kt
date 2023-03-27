@@ -26,7 +26,7 @@ enum class Varselkode(
     RV_SØ_9("Det er oppgitt annen inntektskilde i søknaden. Vurder inntekt.", avviklet = true),
     RV_SØ_10("Den sykmeldte har fått et nytt inntektsforhold."),
     RV_SØ_11("Mottatt søknad out of order", avviklet = true),
-    RV_SØ_12("Mottatt overlappende søknad"),
+    RV_SØ_12("Mottatt overlappende søknad", avviklet = true),
     RV_SØ_13("Overlappende søknad starter før, eller slutter etter, opprinnelig periode"),
     RV_SØ_14("Mottatt flere søknader for annen periode enn siste skjæringstidspunkt", avviklet = true),
     RV_SØ_15("Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag", avviklet = true),
@@ -249,7 +249,6 @@ enum class Varselkode(
     companion object {
         val aktiveVarselkoder = values().filterNot { it.avviklet }
 
-        val `Mottatt søknad som overlapper` = RV_SØ_12
         val `Mottatt søknad som delvis overlapper` = RV_SØ_13
 
         val `Overlapper med arbeidsavklaringspenger` = RV_AY_3

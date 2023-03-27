@@ -100,7 +100,6 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad som delvis overlapper`
-import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad som overlapper`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
@@ -426,14 +425,6 @@ internal class Vedtaksperiode private constructor(
             jurist()
         )
         return true
-    }
-
-    internal fun nekterOpprettelseAvNyPeriode(ny: Vedtaksperiode, hendelse: Søknad) {
-        if (ny.periode.starterEtter(this.periode)) return
-        if (this.arbeidsgiver !== ny.arbeidsgiver) return
-        if (!this.periode.overlapperMed(ny.periode)) return
-        kontekst(hendelse)
-        hendelse.funksjonellFeil(`Mottatt søknad som overlapper`)
     }
 
     private fun påvirkerArbeidsgiverperioden(ny: Vedtaksperiode): Boolean {
