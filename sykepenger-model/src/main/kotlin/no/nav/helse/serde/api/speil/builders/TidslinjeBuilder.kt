@@ -222,7 +222,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
     }
 
     override fun visit(dag: Utbetalingsdag.ArbeidsgiverperiodedagNav, dato: LocalDate, økonomi: Økonomi) {
-        leggTilUtbetalingsdag(dato, økonomi, UtbetalingstidslinjedagType.ArbeidsgiverperiodeDagNav)
+        leggTilUtbetalingsdag(dato, økonomi, UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag)
     }
 
     override fun visit(dag: Utbetalingsdag.NavDag, dato: LocalDate, økonomi: Økonomi) {

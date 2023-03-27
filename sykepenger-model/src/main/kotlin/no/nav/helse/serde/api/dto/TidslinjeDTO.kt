@@ -47,7 +47,6 @@ data class Sykdomstidslinjedag(
 
 enum class UtbetalingstidslinjedagType {
     ArbeidsgiverperiodeDag,
-    ArbeidsgiverperiodeDagNav,
     NavDag,
     NavHelgDag,
     Helgedag,   // SpeilBuilder only code breakout of Fridag

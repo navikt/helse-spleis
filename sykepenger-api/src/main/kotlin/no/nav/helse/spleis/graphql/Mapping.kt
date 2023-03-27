@@ -86,7 +86,6 @@ private fun mapDag(dag: SammenslåttDag) = GraphQLDag(
     },
     utbetalingsdagtype = when (dag.utbetalingstidslinjedagtype) {
         UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag -> GraphQLUtbetalingsdagType.ArbeidsgiverperiodeDag
-        UtbetalingstidslinjedagType.ArbeidsgiverperiodeDagNav -> GraphQLUtbetalingsdagType.ArbeidsgiverperiodeDagNav
         UtbetalingstidslinjedagType.NavDag -> GraphQLUtbetalingsdagType.NavDag
         UtbetalingstidslinjedagType.NavHelgDag -> GraphQLUtbetalingsdagType.NavHelgDag
         UtbetalingstidslinjedagType.Helgedag -> GraphQLUtbetalingsdagType.Helgedag
