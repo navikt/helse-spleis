@@ -567,9 +567,11 @@ internal class Vedtaksperiode private constructor(
 
     private fun oppdaterHistorikk(hendelse: SykdomstidslinjeHendelse) {
         periode = hendelse.oppdaterFom(this.periode)
+        val rettEtterFørEndring = arbeidsgiver.finnVedtaksperiodeRettEtter(this)
         sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
         lagreTidsnæreopplysninger()
-        arbeidsgiver.finnVedtaksperiodeRettEtter(this)?.lagreTidsnæreopplysninger()
+        val periodeEtter = rettEtterFørEndring ?: arbeidsgiver.finnVedtaksperiodeRettEtter(this)
+        periodeEtter?.lagreTidsnæreopplysninger()
     }
 
     private fun lagreTidsnæreopplysninger() {
