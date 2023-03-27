@@ -25,6 +25,7 @@ internal class BesteDagTest {
         private val sykedagFraSøknad get() = Dag.Sykedag(2.mandag, Økonomi.sykdomsgrad(100.prosent), TestEvent.søknad)
         private val egenmeldingsdagFraSaksbehandler get() = Dag.Arbeidsgiverdag(2.mandag, Økonomi.sykdomsgrad(100.prosent), TestEvent.saksbehandler)
         private val arbeidsdagFraSaksbehandler get() = Dag.Arbeidsdag(2.mandag, TestEvent.saksbehandler)
+        private val sykedagNavFraSaksbehandler get() = Dag.SykedagNav(2.mandag, Økonomi.sykdomsgrad(100.prosent), TestEvent.saksbehandler)
     }
 
     @Test
@@ -60,6 +61,18 @@ internal class BesteDagTest {
         assertWinnerBidirectional(arbeidsdagFraSaksbehandler, permisjonFraSøknad, arbeidsdagFraSaksbehandler)
         assertWinnerBidirectional(arbeidsdagFraSaksbehandler, arbeidsgiverdagFraInntektsmelding, arbeidsdagFraSaksbehandler)
         assertWinnerBidirectional(arbeidsdagFraSaksbehandler, ukjentDag, arbeidsdagFraSaksbehandler)
+    }
+
+    @Test
+    fun `sykedag nav fra saksbehandler`() {
+        assertWinnerBidirectional(sykedagNavFraSaksbehandler, arbeidsdagFraSøknad, sykedagNavFraSaksbehandler)
+        assertWinner(sykedagNavFraSaksbehandler, arbeidsdagFraSaksbehandler, arbeidsdagFraSaksbehandler)
+        assertWinner(arbeidsdagFraSaksbehandler, sykedagNavFraSaksbehandler, sykedagNavFraSaksbehandler)
+        assertWinnerBidirectional(sykedagNavFraSaksbehandler, sykedagFraSøknad, sykedagNavFraSaksbehandler)
+        assertWinnerBidirectional(sykedagNavFraSaksbehandler, ferieFraSøknad, sykedagNavFraSaksbehandler)
+        assertWinnerBidirectional(sykedagNavFraSaksbehandler, permisjonFraSøknad, sykedagNavFraSaksbehandler)
+        assertWinnerBidirectional(sykedagNavFraSaksbehandler, arbeidsgiverdagFraInntektsmelding, sykedagNavFraSaksbehandler)
+        assertWinnerBidirectional(sykedagNavFraSaksbehandler, ukjentDag, sykedagNavFraSaksbehandler)
     }
 
     @Test
