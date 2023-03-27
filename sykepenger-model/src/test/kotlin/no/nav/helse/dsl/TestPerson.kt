@@ -422,6 +422,26 @@ internal fun standardSimuleringsresultat(orgnummer: String) = SimuleringResultat
     )
 )
 
+internal fun TestPerson.TestArbeidsgiver.tilGodkjenning(
+    fom: LocalDate,
+    tom: LocalDate,
+    grad: Prosentdel = 100.prosent,
+    førsteFraværsdag: LocalDate = fom,
+    beregnetInntekt: Inntekt = INNTEKT,
+    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+    arbeidsgiverperiode: List<Periode> = emptyList(),
+    status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
+    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom, beregnetInntekt) }
+): UUID {
+    val vedtaksperiode = nyPeriode(fom til tom, grad)
+    håndterInntektsmelding(arbeidsgiverperiode, beregnetInntekt, førsteFraværsdag, refusjon)
+    håndterVilkårsgrunnlag(vedtaksperiode, beregnetInntekt, inntektsvurdering = Inntektsvurdering(
+        inntekter = inntektperioderForSammenligningsgrunnlag(inntekterBlock)
+    ))
+    håndterYtelser(vedtaksperiode)
+    håndterSimulering(vedtaksperiode)
+    return vedtaksperiode
+}
 internal fun TestPerson.TestArbeidsgiver.nyttVedtak(
     fom: LocalDate,
     tom: LocalDate,
@@ -433,13 +453,7 @@ internal fun TestPerson.TestArbeidsgiver.nyttVedtak(
     status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
     inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom, beregnetInntekt) }
 ) {
-    val vedtaksperiode = nyPeriode(fom til tom, grad)
-    håndterInntektsmelding(arbeidsgiverperiode, beregnetInntekt, førsteFraværsdag, refusjon)
-    håndterVilkårsgrunnlag(vedtaksperiode, beregnetInntekt, inntektsvurdering = Inntektsvurdering(
-        inntekter = inntektperioderForSammenligningsgrunnlag(inntekterBlock)
-    ))
-    håndterYtelser(vedtaksperiode)
-    håndterSimulering(vedtaksperiode)
+    val vedtaksperiode = tilGodkjenning(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, inntekterBlock)
     håndterUtbetalingsgodkjenning(vedtaksperiode)
     håndterUtbetalt(status)
 }

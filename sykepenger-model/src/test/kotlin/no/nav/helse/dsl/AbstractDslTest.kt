@@ -271,6 +271,19 @@ internal abstract class AbstractDslTest {
     ) =
         this { nyttVedtak(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, inntekterBlock) }
 
+    protected fun String.tilGodkjenning(
+        fom: LocalDate,
+        tom: LocalDate,
+        grad: Prosentdel = 100.prosent,
+        førsteFraværsdag: LocalDate = fom,
+        beregnetInntekt: Inntekt = INNTEKT,
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+        arbeidsgiverperiode: List<Periode> = emptyList(),
+        status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
+        inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(this@tilGodkjenning, fom, beregnetInntekt) }
+    ) =
+        this { tilGodkjenning(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, inntekterBlock) }
+
 
     /* dsl for å gå direkte på arbeidsgiver1, eksempelvis i tester for det ikke er andre arbeidsgivere */
     private fun bareÈnArbeidsgiver(orgnr: String): String {
