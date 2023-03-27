@@ -2047,11 +2047,11 @@ internal class Vedtaksperiode private constructor(
             utbetalingsgodkjenning: Utbetalingsgodkjenning
         ) {
             if (vedtaksperiode.utbetalinger.erAvvist()) {
-                utbetalingsgodkjenning.varsel(RV_UT_1)
                 if (utbetalingsgodkjenning.automatiskBehandling()) {
                     utbetalingsgodkjenning.info("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
                     return sikkerlogg.error("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
                 }
+                utbetalingsgodkjenning.varsel(RV_UT_1)
             }
             vedtaksperiode.tilstand(utbetalingsgodkjenning, when {
                 vedtaksperiode.utbetalinger.erAvvist() -> RevurderingFeilet
