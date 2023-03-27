@@ -225,6 +225,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, subsumsjonObserver: SubsumsjonObserver): Pair<VilkårsgrunnlagElement?, Revurderingseventyr> {
             // TODO: gir ikke mening å starte revurdering når sykepengegrunnlaget er lik det forrige
             val sykepengegrunnlag = sykepengegrunnlag.overstyrArbeidsgiveropplysninger(hendelse, opptjening, subsumsjonObserver)
+            if (sykepengegrunnlag == null) hendelse.info("Endringene hensyntas ikke fordi de er funksjonelt lik sykepengegrunnlaget.")
             val endringsdato = sykepengegrunnlag?.finnEndringsdato(this.sykepengegrunnlag)
             val eventyr = Revurderingseventyr.arbeidsgiveropplysninger(skjæringstidspunkt, endringsdato ?: skjæringstidspunkt)
             return sykepengegrunnlag?.let {
