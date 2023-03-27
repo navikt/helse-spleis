@@ -81,11 +81,11 @@ internal class UtbetalingsdagerBuilderTest {
         utbetalingstidslinje.accept(builder)
         assertEquals(
             listOf(
-                Utbetalingsdag(1.januar, ArbeidsgiverperiodeDagNav),
-                Utbetalingsdag(2.januar, ArbeidsgiverperiodeDagNav),
-                Utbetalingsdag(3.januar, ArbeidsgiverperiodeDagNav),
-                Utbetalingsdag(4.januar, ArbeidsgiverperiodeDagNav),
-                Utbetalingsdag(5.januar, ArbeidsgiverperiodeDagNav),
+                Utbetalingsdag(1.januar, ArbeidsgiverperiodeDag),
+                Utbetalingsdag(2.januar, ArbeidsgiverperiodeDag),
+                Utbetalingsdag(3.januar, ArbeidsgiverperiodeDag),
+                Utbetalingsdag(4.januar, ArbeidsgiverperiodeDag),
+                Utbetalingsdag(5.januar, ArbeidsgiverperiodeDag),
                 Utbetalingsdag(6.januar, ArbeidsgiverperiodeDag)
             ), builder.result()
         )
