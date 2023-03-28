@@ -60,6 +60,22 @@ internal class UtbetalingkladderBuilderTest {
         }
     }
 
+    @Test
+    fun `nav utbetaler starten av arbeidsgiverperioden`() {
+        val tidslinje = tidslinjeOf(10.NAP, 6.AP, 9.NAV).betale()
+        val builder = UtbetalingkladderBuilder(tidslinje, "orgnr", "fnr")
+        val result = builder.build()
+        assertEquals(1, result.size)
+        result.single().also { kladd ->
+            val utbetaling = kladd.lagUtbetaling(Utbetalingtype.UTBETALING, null, UUID.randomUUID(), tidslinje, LocalDate.MAX, 0, 0)
+            assertEquals(1.januar til 25.januar, utbetaling.inspektør.periode)
+            val arbeidsgiverOppdrag = utbetaling.inspektør.arbeidsgiverOppdrag
+            assertEquals(2, arbeidsgiverOppdrag.size)
+            assertEquals(1.januar til 10.januar, arbeidsgiverOppdrag[0].inspektør.periode)
+            assertEquals(17.januar til 25.januar, arbeidsgiverOppdrag[1].inspektør.periode)
+        }
+    }
+
     private fun Utbetalingstidslinje.betale(aktivitetslogg: Aktivitetslogg = Aktivitetslogg()) = apply {
         MaksimumUtbetalingFilter().betal(listOf(this), this.periode(), aktivitetslogg, MaskinellJurist())
     }

@@ -4,7 +4,6 @@ import no.nav.helse.januar
 import no.nav.helse.person.PersonObserver.Utbetalingsdag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.Arbeidsdag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag
-import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDagNav
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.AvvistDag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.Feriedag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.ForeldetDag

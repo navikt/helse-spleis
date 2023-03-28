@@ -1,6 +1,7 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDate
+import no.nav.helse.hendelser.til
 import no.nav.helse.utbetalingslinjer.OppdragVisitor
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Klassekode
@@ -18,6 +19,8 @@ class UtbetalingslinjeInspektør(utbetalingslinje: Utbetalingslinje) : OppdragVi
 
     lateinit var tom: LocalDate
         private set
+
+    val periode get() = fom til tom
 
     var beløp: Int? = null
         private set

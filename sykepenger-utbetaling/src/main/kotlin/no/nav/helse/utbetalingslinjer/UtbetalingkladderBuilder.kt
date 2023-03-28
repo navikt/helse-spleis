@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
+import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
@@ -40,7 +41,10 @@ class UtbetalingkladderBuilder(
 
     override fun visit(dag: ArbeidsgiverperiodeDag, dato: LocalDate, økonomi: Økonomi) {
         håndterArbeidsgiverperiode(dato)
+        if (dato.erHelg()) return
+        kladdBuilder?.ikkeBetalingsdag(dato)
     }
+
     private fun håndterArbeidsgiverperiode(dato: LocalDate) {
         val forrige = arbeidsgiverdager
         val gapFraForrige = forrige?.periodeMellom(dato)
