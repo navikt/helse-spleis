@@ -1,6 +1,8 @@
 package no.nav.helse.spleis.e2e.søknad
 
 import java.util.UUID
+import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -17,6 +19,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -38,10 +41,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
-internal class AnnulleringOgUtbetalingTest : AbstractEndToEndTest() {
+internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
     @Test
-    fun `tidligere periode med ferie får samme arbeidsgiverperiode som nyere periode`() {
+    fun `tidligere periode med ferie får samme arbeidsgiverperiode som nyere periode`() = a1 {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -113,11 +116,10 @@ internal class AnnulleringOgUtbetalingTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVSLUTTET)
         assertSisteTilstand(3.vedtaksperiode, TilstandType.AVSLUTTET)
-
     }
 
     @Test
-    fun `reberegne og forkaste utbetaling som inneholder annulleringer`() {
+    fun `reberegne og forkaste utbetaling som inneholder annulleringer`() = a1 {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -131,7 +133,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode("orgnr", 1.mai(2017), 5.mai(2017), 100.prosent, 1000.daglig))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(ArbeidsgiverUtbetalingsperiode("orgnr", 1.mai(2017), 5.mai(2017), 100.prosent, 1000.daglig)))
         håndterYtelser(2.vedtaksperiode)
 
         assertEquals(6, inspektør.utbetalinger.size)
@@ -154,7 +156,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `korrigerer periode med bare ferie`()  {
+    fun `korrigerer periode med bare ferie`() = a1 {
         nyttVedtak(3.januar, 26.januar)
         nyttVedtak(3.mars, 26.mars)
         nullstillTilstandsendringer()
@@ -200,7 +202,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to uavhengige arbeidsgiverperioder blir til en som følge av overstyring`()  {
+    fun `to uavhengige arbeidsgiverperioder blir til en som følge av overstyring`() = a1 {
         nyttVedtak(3.januar, 26.januar)
         håndterSøknad(Sykdom(27.januar, 28.februar, 100.prosent), Arbeid(13.februar, 28.februar))
         håndterYtelser(2.vedtaksperiode)
