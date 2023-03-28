@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -111,12 +110,11 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
-    fun `To inntektsmeldinger samarbeider om å strekke en vedtaksperiode`() = Toggle.AuuHåndtererIkkeInntekt.enable {
+    fun `To inntektsmeldinger samarbeider om å strekke en vedtaksperiode`() {
         val im1Inntekt = INNTEKT
         val im2Inntekt = INNTEKT + 2000.månedlig
         nyPeriode(18.januar til 2.februar)
@@ -139,7 +137,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `To inntektsmeldinger krangler om arbeidsgiverperioden`() = Toggle.AuuHåndtererIkkeInntekt.enable {
+    fun `To inntektsmeldinger krangler om arbeidsgiverperioden`() {
         val inntektsmelding1 = UUID.randomUUID()
         val inntektsmelding2 = UUID.randomUUID()
 
@@ -172,7 +170,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
     }
 
-    private fun setupIntektsmeldingStrekkerAUU() {
+    @Test
+    fun `Inntektsmelding strekker AUU, men treffer ikke med inntekt - går til Avventer Inntektsmelding`() {
         nyPeriode(1.februar til 6.februar)
         nyPeriode(7.februar til 14.februar)
         nyPeriode(20.februar til 6.mars)
@@ -187,23 +186,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(16.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         assertEquals(20.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
         assertEquals(20.februar, inspektør.skjæringstidspunkt(4.vedtaksperiode))
-    }
 
-    @Test
-    fun `Inntektsmelding strekker AUU, men treffer ikke med inntekt - blir stående i AUU og blokkere senere perioder`() {
-        setupIntektsmeldingStrekkerAUU()
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-        assertSisteTilstand(4.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-        håndterVilkårsgrunnlag(3.vedtaksperiode)
-        val feil = assertThrows<IllegalStateException> { håndterYtelser(3.vedtaksperiode) }.message
-        assertEquals("Fant ikke vilkårsgrunnlag for 2018-02-01. Må ha et vilkårsgrunnlag for å legge til utbetalingsopplysninger. Har vilkårsgrunnlag på skjæringstidspunktene [2018-02-20]", feil)
-    }
-
-    @Test
-    fun `Inntektsmelding strekker AUU, men treffer ikke med inntekt - går til Avventer Inntektsmelding`() = Toggle.AuuHåndtererIkkeInntekt.enable {
-        setupIntektsmeldingStrekkerAUU()
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)

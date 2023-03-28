@@ -2151,24 +2151,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.låsOpp()
             vedtaksperiode.håndterDager(dager)
             vedtaksperiode.lås()
-            if (!vedtaksperiode.forventerInntekt() || Toggle.AuuHåndtererIkkeInntekt.enabled) {
-                vedtaksperiode.person.igangsettOverstyring(
-                    dager,
-                    Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
-                )
-            }
-            return true
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
-            if (!vedtaksperiode.forventerInntekt()) return
-            if (!skalHensyntaInntektsmelding(vedtaksperiode, inntektOgRefusjon)) return
-            vedtaksperiode.håndterInntektOgRefusjon(inntektOgRefusjon)
-            inntektOgRefusjon.info("Varsler revurdering i tilfelle inntektsmelding påvirker andre perioder.")
             vedtaksperiode.person.igangsettOverstyring(
-                inntektOgRefusjon,
+                dager,
                 Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
             )
+            return true
         }
 
         private fun skalHensyntaInntektsmelding(

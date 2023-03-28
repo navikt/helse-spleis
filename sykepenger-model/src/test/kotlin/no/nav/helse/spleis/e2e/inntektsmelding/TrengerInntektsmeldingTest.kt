@@ -29,9 +29,9 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndTest() {
 
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
+        assertEquals(2, observatør.manglendeInntektsmeldingVedtaksperioder.size)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar)
-        assertEquals(3, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
+        assertEquals(4, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
     }
 }
