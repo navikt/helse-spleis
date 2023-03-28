@@ -1325,6 +1325,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (påminnelse.skalReberegnes()) {
+                vedtaksperiode.lagreTidsnæreopplysninger()
+            }
+
             if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(påminnelse)) {
                 påminnelse.info("Varsler arbeidsgiver at vi har behov for inntektsmelding.")
                 vedtaksperiode.trengerInntektsmelding()
