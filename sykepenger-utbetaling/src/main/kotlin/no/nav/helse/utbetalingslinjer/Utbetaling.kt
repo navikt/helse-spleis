@@ -346,7 +346,7 @@ class Utbetaling private constructor(
                 .filter { (_, utbetalinger) -> utbetalinger.any(filter) }
                 .map { (_, utbetalinger) -> utbetalinger.sortedBy { it.tidsstempel } }
                 .map { it.last(filter) }
-                .sortedBy { it.tidsstempel }
+                .sortedBy { it.periode.endInclusive }
                 .filterNot(Utbetaling::erAnnullering)
                 .toList()
 

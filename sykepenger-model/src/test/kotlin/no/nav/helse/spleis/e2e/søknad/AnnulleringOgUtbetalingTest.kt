@@ -39,9 +39,33 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
+
+    @Test
+    fun `annullere revurdering til godkjenning etter annen revurdering`() = a1 {
+        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(1.mars, 31.mars)
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterYtelser(2.vedtaksperiode)
+
+        assertEquals(4, inspektør.utbetalinger.size)
+        val marsutbetalingen = inspektør.utbetaling(1).inspektør
+        håndterAnnullering(marsutbetalingen.arbeidsgiverOppdrag.inspektør.fagsystemId())
+
+        assertEquals(5, inspektør.utbetalinger.size)
+        val annulleringen = inspektør.utbetaling(4).inspektør
+        assertTrue(annulleringen.erAnnullering)
+        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
+    }
 
     @Test
     fun `tidligere periode med ferie får samme arbeidsgiverperiode som nyere periode`() = a1 {
