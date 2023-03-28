@@ -111,6 +111,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
@@ -169,6 +170,67 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         // Men inntektsmelding1 sier nå at arbeidsgiverperioden er noe annet og ingenting skal utbetales alikevel 🤷‍
         assertEquals(5.mars til 20.mars, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    private fun setupIntektsmeldingStrekkerAUU() {
+        nyPeriode(1.februar til 6.februar)
+        nyPeriode(7.februar til 14.februar)
+        nyPeriode(20.februar til 6.mars)
+        nyPeriode(7.mars til 22.mars)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        håndterInntektsmelding(listOf(16.januar til 31.januar), førsteFraværsdag = 20.februar)
+        assertEquals(16.januar til 6.februar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(16.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(16.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(20.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+        assertEquals(20.februar, inspektør.skjæringstidspunkt(4.vedtaksperiode))
+    }
+
+    @Test
+    fun `Inntektsmelding strekker AUU, men treffer ikke med inntekt - blir stående i AUU og blokkere senere perioder`() {
+        setupIntektsmeldingStrekkerAUU()
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertSisteTilstand(4.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        val feil = assertThrows<IllegalStateException> { håndterYtelser(3.vedtaksperiode) }.message
+        assertEquals("Fant ikke vilkårsgrunnlag for 2018-02-01. Må ha et vilkårsgrunnlag for å legge til utbetalingsopplysninger. Har vilkårsgrunnlag på skjæringstidspunktene [2018-02-20]", feil)
+    }
+
+    @Test
+    fun `Inntektsmelding strekker AUU, men treffer ikke med inntekt - går til Avventer Inntektsmelding`() = Toggle.AuuHåndtererIkkeInntekt.enable {
+        setupIntektsmeldingStrekkerAUU()
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        assertSisteTilstand(4.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterYtelser(4.vedtaksperiode)
+        håndterSimulering(4.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(4.vedtaksperiode)
+        håndterUtbetalt()
     }
 
     @Test
