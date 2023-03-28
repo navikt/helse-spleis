@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit.DAYS
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
@@ -323,6 +324,15 @@ internal class Vedtaksperiode private constructor(
         dager.håndter(periode, arbeidsgiver)?.let { oppdatertSykdomstidslinje ->
             sykdomstidslinje = oppdatertSykdomstidslinje
         }
+    }
+
+    private fun håndterDagerFør(dager: DagerFraInntektsmelding) {
+        val periodstartFør = periode.start
+        dager.leggTilArbeidsdagerFør(periode.start)
+        periode = dager.oppdatertFom(periode)
+        dager.håndterPeriodeRettFør(periode, arbeidsgiver)
+        if (periode.start == periodstartFør) return
+        dager.info("Perioden ble strukket tilbake fra $periodstartFør til ${periode.start} (${DAYS.between(periode.start, periodstartFør)} dager)")
     }
 
     private fun erAlleredeHensyntatt(meldingsreferanseId: UUID) =
@@ -1512,9 +1522,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndterDagerFør(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
-            dager.leggTilArbeidsdagerFør(vedtaksperiode.periode.start)
-            vedtaksperiode.periode = dager.oppdatertFom(vedtaksperiode.periode)
-            dager.håndterPeriodeRettFør(vedtaksperiode.periode, vedtaksperiode.arbeidsgiver)
+            vedtaksperiode.håndterDagerFør(dager)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
@@ -2135,9 +2143,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterLåstOverlappendeSøknadRevurdering(søknad)
         }
         override fun håndterDagerFør(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
-            dager.leggTilArbeidsdagerFør(vedtaksperiode.periode.start)
-            vedtaksperiode.periode = dager.oppdatertFom(vedtaksperiode.periode)
-            dager.håndterPeriodeRettFør(vedtaksperiode.periode, vedtaksperiode.arbeidsgiver)
+             vedtaksperiode.håndterDagerFør(dager)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
