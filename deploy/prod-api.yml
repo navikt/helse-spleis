@@ -62,6 +62,9 @@ spec:
         - application: sporing
           namespace: tbd
           cluster: prod-gcp
+    outbound:
+      external:
+        - host: "34.88.78.0/32"
   secureLogs:
     enabled: true
   envFrom:
