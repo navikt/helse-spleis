@@ -141,6 +141,7 @@ internal class TestRapid : RapidsConnection() {
 
         fun melding(indeks: Int) = jsonmeldinger.getOrPut(indeks) { objectMapper.readTree(messages[indeks].second) }
         fun antall() = messages.size
+        fun indeksFor(melding: JsonNode) = jsonmeldinger.entries.firstOrNull { (_, other) -> other == melding }?.key ?: -1
 
         fun siste(name: String) = meldinger(name).last()
 

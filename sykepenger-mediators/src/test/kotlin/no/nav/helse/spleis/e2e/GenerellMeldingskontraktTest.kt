@@ -20,7 +20,12 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
         val søknadId = sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
+        val vedtaksperiodeOpprettet = testRapid.inspektør.meldinger("vedtaksperiode_opprettet").single()
         val vedtaksperiodeEndret = testRapid.inspektør.meldinger("vedtaksperiode_endret").first()
+        assertTrue(testRapid.inspektør.indeksFor(vedtaksperiodeOpprettet) < testRapid.inspektør.indeksFor(vedtaksperiodeEndret)) {
+            "vedtaksperiode_opprettet må sendes på rapid før vedtaksperiode_endret"
+        }
+        assertVedtaksperiodeOpprettet(vedtaksperiodeOpprettet, søknadId, "sendt_søknad_nav")
         assertVedtaksperiodeEndret(vedtaksperiodeEndret, søknadId, "sendt_søknad_nav")
     }
 
@@ -37,6 +42,11 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
         assertEquals(2, vedtaksperiodeForkastet.size)
         assertVedtaksperiodeForkastet(vedtaksperiodeForkastet[0], søknadId2, "sendt_søknad_nav")
         assertVedtaksperiodeForkastet(vedtaksperiodeForkastet[1], søknadId2, "sendt_søknad_nav")
+
+        val vedtaksperiodeOpprettet = testRapid.inspektør.meldinger("vedtaksperiode_opprettet").last()
+        assertTrue(testRapid.inspektør.indeksFor(vedtaksperiodeOpprettet) < testRapid.inspektør.indeksFor(vedtaksperiodeForkastet[1])) {
+            "vedtaksperiode_opprettet må sendes på rapid før vedtaksperiode_forkastet"
+        }
     }
 
     @Test
@@ -80,6 +90,18 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
         assertDato(melding.path("tom").asText())
         assertTrue(melding.path("hendelser").isArray)
         assertDatotid(melding.path("makstid").asText())
+    }
+
+    private fun assertVedtaksperiodeOpprettet(melding: JsonNode, originalMeldingId: UUID, originalMeldingtype: String) {
+        assertStandardinformasjon(melding)
+        assertSporingsinformasjon(melding, originalMeldingId, originalMeldingtype)
+        assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
+        assertTrue(melding.path("aktørId").asText().isNotEmpty())
+        assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
+        assertTrue(melding.path("vedtaksperiodeId").asText().isNotEmpty())
+        assertDato(melding.path("skjæringstidspunkt").asText())
+        assertDato(melding.path("fom").asText())
+        assertDato(melding.path("tom").asText())
     }
 
     private fun assertVedtaksperiodeForkastet(melding: JsonNode, originalMeldingId: UUID, originalMeldingtype: String) {

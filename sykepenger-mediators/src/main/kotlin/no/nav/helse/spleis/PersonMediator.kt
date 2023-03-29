@@ -335,6 +335,16 @@ internal class PersonMediator(
         )))
     }
 
+    override fun vedtaksperiodeOpprettet(event: PersonObserver.VedtaksperiodeOpprettet) {
+        queueMessage(JsonMessage.newMessage("vedtaksperiode_opprettet", mapOf(
+            "organisasjonsnummer" to event.organisasjonsnummer,
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "skjæringstidspunkt" to event.skjæringstidspunkt,
+            "fom" to event.periode.start,
+            "tom" to event.periode.endInclusive
+        )))
+    }
+
     override fun vedtaksperiodeForkastet(event: PersonObserver.VedtaksperiodeForkastetEvent) {
         queueMessage(JsonMessage.newMessage("vedtaksperiode_forkastet", mapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,

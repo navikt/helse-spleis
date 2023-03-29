@@ -325,8 +325,17 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         )
     }
 
+    data class VedtaksperiodeOpprettet(
+        val vedtaksperiodeId: UUID,
+        val organisasjonsnummer: String,
+        val periode: Periode,
+        val skjæringstidspunkt: LocalDate,
+        val opprettet: LocalDateTime
+    )
+
     fun inntektsmeldingReplay(personidentifikator: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, førsteDagIArbeidsgiverperioden: LocalDate?) {}
     fun trengerIkkeInntektsmeldingReplay(vedtaksperiodeId: UUID) {}
+    fun vedtaksperiodeOpprettet(event: VedtaksperiodeOpprettet) {}
     fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {}
     fun vedtaksperiodeIkkePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, nåværendeTilstand: TilstandType) {}
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {}
@@ -343,6 +352,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     fun annullering(event: UtbetalingAnnullertEvent) {}
     fun avstemt(result: Map<String, Any>) {}
     fun vedtakFattet(event: VedtakFattetEvent) {}
+
     fun nyVedtaksperiodeUtbetaling(
         personidentifikator: Personidentifikator,
         aktørId: String,
@@ -350,7 +360,6 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         utbetalingId: UUID,
         vedtaksperiodeId: UUID
     ) {}
-
     fun overstyringIgangsatt(event: OverstyringIgangsatt) {}
     fun overlappendeInfotrygdperiodeEtterInfotrygdendring(event: OverlappendeInfotrygdperiodeEtterInfotrygdendring) {}
     fun inntektsmeldingFørSøknad(event: InntektsmeldingFørSøknadEvent) {}

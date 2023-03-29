@@ -197,6 +197,7 @@ internal class Vedtaksperiode private constructor(
         jurist = jurist
     ) {
         kontekst(søknad)
+        person.vedtaksperiodeOpprettet(id, organisasjonsnummer, periode, skjæringstidspunkt, opprettet)
     }
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
