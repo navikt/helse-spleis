@@ -72,5 +72,3 @@ spec:
     value: "helse-spleis"
   - name: DATABASE_DATABASE
     value: "spleis"
-  - name: FLERE_HVITE_POLSER
-    value: "true"
