@@ -27,6 +27,7 @@ import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagKildetype
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
+import no.nav.helse.serde.api.dto.UberegnetPeriode
 import no.nav.helse.serde.api.dto.Utbetalingsinfo
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -337,7 +338,13 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(1.februar, sisteRefusjonsopplysning.fom)
         assertEquals(null, sisteRefusjonsopplysning.tom)
         assertEquals(INGEN, sisteRefusjonsopplysning.beløp.månedlig)
+    }
 
+    @Test
+    fun `hendelser på uberegnet periode`() {
+        val søknadId = håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        val periode = speilApi().arbeidsgivere.single().generasjoner.single().perioder.single() as UberegnetPeriode
+        assertEquals(listOf(søknadId), periode.hendelser.map { UUID.fromString(it.id) })
     }
 
 }

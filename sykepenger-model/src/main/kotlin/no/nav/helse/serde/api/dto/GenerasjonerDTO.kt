@@ -56,6 +56,7 @@ abstract class Tidslinjeperiode : Comparable<Tidslinjeperiode> {
     abstract val oppdatert: LocalDateTime
     abstract val periodetilstand: Periodetilstand
     abstract val skjæringstidspunkt: LocalDate
+    abstract val hendelser: List<HendelseDTO>
     protected abstract val sorteringstidspunkt: LocalDateTime
 
     internal fun erSammeVedtaksperiode(other: Tidslinjeperiode) = vedtaksperiodeId == other.vedtaksperiodeId
@@ -86,7 +87,8 @@ data class UberegnetPeriode(
     override val opprettet: LocalDateTime,
     override val oppdatert: LocalDateTime,
     override val periodetilstand: Periodetilstand,
-    override val skjæringstidspunkt: LocalDate
+    override val skjæringstidspunkt: LocalDate,
+    override val hendelser: List<HendelseDTO>
 ) : Tidslinjeperiode() {
     override val sorteringstidspunkt = opprettet
     override fun toString(): String {
@@ -112,12 +114,12 @@ data class BeregnetPeriode(
     override val oppdatert: LocalDateTime,
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate,
+    override val hendelser: List<HendelseDTO>,
     val beregningId: BeregningId,
     val gjenståendeSykedager: Int?,
     val forbrukteSykedager: Int?,
     val maksdato: LocalDate,
     val utbetaling: Utbetaling,
-    val hendelser: List<HendelseDTO>,
     val periodevilkår: Vilkår,
     val aktivitetslogg: List<AktivitetDTO>,
     val vilkårsgrunnlagId: UUID?

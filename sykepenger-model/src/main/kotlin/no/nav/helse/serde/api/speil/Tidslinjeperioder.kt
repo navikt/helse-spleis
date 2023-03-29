@@ -200,6 +200,7 @@ internal class Tidslinjeperioder(
             opprettet = periode.opprettet,
             oppdatert = periode.oppdatert,
             skjæringstidspunkt = periode.skjæringstidspunkt,
+            hendelser = periode.hendelser,
             periodetilstand = when (periode.tilstand) {
                 is AvsluttetUtenUtbetaling -> IngenUtbetaling
                 is AvventerRevurdering,

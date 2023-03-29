@@ -23,7 +23,8 @@ import no.nav.helse.serde.api.dto.Utbetalingstatus
 import no.nav.helse.serde.api.dto.Utbetalingtype
 import no.nav.helse.serde.api.speil.Generasjoner
 import no.nav.helse.serde.api.speil.builders.KorrelasjonsId
-import no.nav.helse.serde.api.v2.buildere.GenerasjonerTest.Hva.*
+import no.nav.helse.serde.api.v2.buildere.GenerasjonerTest.Hva.beregnet
+import no.nav.helse.serde.api.v2.buildere.GenerasjonerTest.Hva.uberegnet
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import kotlin.reflect.KClass
@@ -296,7 +297,8 @@ internal class GenerasjonerTest {
         opprettet = LocalDateTime.now(),
         oppdatert = LocalDateTime.now(),
         periodetilstand = Periodetilstand.IngenUtbetaling,
-        skjæringstidspunkt = periode.start
+        skjæringstidspunkt = periode.start,
+        hendelser = emptyList()
     )
     private fun beregnetPeriode(periode: Periode, utbetaling: Utbetaling, vedtaksperiodeId: UUID = UUID.randomUUID()) = BeregnetPeriode(
         vedtaksperiodeId = vedtaksperiodeId,

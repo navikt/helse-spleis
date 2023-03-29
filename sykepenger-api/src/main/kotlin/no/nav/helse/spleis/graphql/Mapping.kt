@@ -319,7 +319,8 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
             opprettet = periode.oppdatert,
             vedtaksperiodeId = periode.vedtaksperiodeId,
             periodetilstand = mapTilstand(periode.periodetilstand),
-            skjaeringstidspunkt = periode.skjæringstidspunkt
+            skjaeringstidspunkt = periode.skjæringstidspunkt,
+            hendelser = periode.hendelser.map { mapHendelse(it) }
         )
     }
 

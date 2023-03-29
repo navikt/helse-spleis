@@ -1073,6 +1073,29 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "hendelser",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "LIST",
+              "name" : null,
+              "ofType" : {
+                "kind" : "NON_NULL",
+                "name" : null,
+                "ofType" : {
+                  "kind" : "INTERFACE",
+                  "name" : "GraphQLHendelse",
+                  "ofType" : null
+                }
+              }
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "id",
           "description" : null,
           "args" : [ ],
@@ -1226,6 +1249,61 @@
         }, {
           "kind" : "OBJECT",
           "name" : "GraphQLBeregnetPeriode",
+          "ofType" : null
+        } ]
+      }, {
+        "kind" : "INTERFACE",
+        "name" : "GraphQLHendelse",
+        "description" : "",
+        "fields" : [ {
+          "name" : "id",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "String",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "type",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "ENUM",
+              "name" : "GraphQLHendelsetype",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        } ],
+        "inputFields" : null,
+        "interfaces" : null,
+        "enumValues" : null,
+        "possibleTypes" : [ {
+          "kind" : "OBJECT",
+          "name" : "GraphQLInntektsmelding",
+          "ofType" : null
+        }, {
+          "kind" : "OBJECT",
+          "name" : "GraphQLSoknadNav",
+          "ofType" : null
+        }, {
+          "kind" : "OBJECT",
+          "name" : "GraphQLSoknadArbeidsgiver",
+          "ofType" : null
+        }, {
+          "kind" : "OBJECT",
+          "name" : "GraphQLSykmelding",
           "ofType" : null
         } ]
       }, {
@@ -2050,61 +2128,6 @@
         "interfaces" : [ ],
         "enumValues" : null,
         "possibleTypes" : null
-      }, {
-        "kind" : "INTERFACE",
-        "name" : "GraphQLHendelse",
-        "description" : "",
-        "fields" : [ {
-          "name" : "id",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "SCALAR",
-              "name" : "String",
-              "ofType" : null
-            }
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "type",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "ENUM",
-              "name" : "GraphQLHendelsetype",
-              "ofType" : null
-            }
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        } ],
-        "inputFields" : null,
-        "interfaces" : null,
-        "enumValues" : null,
-        "possibleTypes" : [ {
-          "kind" : "OBJECT",
-          "name" : "GraphQLInntektsmelding",
-          "ofType" : null
-        }, {
-          "kind" : "OBJECT",
-          "name" : "GraphQLSoknadNav",
-          "ofType" : null
-        }, {
-          "kind" : "OBJECT",
-          "name" : "GraphQLSoknadArbeidsgiver",
-          "ofType" : null
-        }, {
-          "kind" : "OBJECT",
-          "name" : "GraphQLSykmelding",
-          "ofType" : null
-        } ]
       }, {
         "kind" : "OBJECT",
         "name" : "GraphQLInntektsmelding",
@@ -3295,6 +3318,29 @@
               "kind" : "SCALAR",
               "name" : "LocalDate",
               "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "hendelser",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "LIST",
+              "name" : null,
+              "ofType" : {
+                "kind" : "NON_NULL",
+                "name" : null,
+                "ofType" : {
+                  "kind" : "INTERFACE",
+                  "name" : "GraphQLHendelse",
+                  "ofType" : null
+                }
+              }
             }
           },
           "isDeprecated" : false,
