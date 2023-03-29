@@ -147,8 +147,14 @@ class Refusjonsopplysning(
         }
         private fun funksjoneltInneholder(other: Refusjonsopplysning) = validerteRefusjonsopplysninger.any { it.funksjoneltLik(other) }
 
+        private fun begrens(other: Refusjonsopplysninger): Refusjonsopplysninger {
+            if (this.validerteRefusjonsopplysninger.isEmpty()) return other
+            val førsteFom = this.validerteRefusjonsopplysninger.minOf { it.fom }
+            return Refusjonsopplysninger(other.validerteRefusjonsopplysninger.mapNotNull { it.oppdatertFom(maxOf(førsteFom, it.fom)) })
+        }
+
         internal operator fun minus(other: Refusjonsopplysninger) =
-            Refusjonsopplysninger(other.validerteRefusjonsopplysninger.filterNot { funksjoneltInneholder(it) })
+            Refusjonsopplysninger(begrens(other).validerteRefusjonsopplysninger.filterNot { funksjoneltInneholder(it) })
 
         override fun equals(other: Any?): Boolean {
             if (other !is Refusjonsopplysninger) return false
@@ -208,7 +214,7 @@ class Refusjonsopplysning(
 
         // finner første dato hvor refusjonsbeløpet for dagen er ulikt beløpet i forrige versjon
         internal fun finnFørsteDatoForEndring(other: Refusjonsopplysninger): LocalDate? {
-            val sorterteOpplysninger = this.validerteRefusjonsopplysninger.sortedBy { it.fom }
+            val sorterteOpplysninger = other.begrens(this).validerteRefusjonsopplysninger.sortedBy { it.fom }
             return førsteDatoMedUliktBeløp(sorterteOpplysninger, other.validerteRefusjonsopplysninger)
                 ?: førsteUlikeFom(sorterteOpplysninger, other.validerteRefusjonsopplysninger)
                 ?: førsteUlikeTom(sorterteOpplysninger, other.validerteRefusjonsopplysninger)

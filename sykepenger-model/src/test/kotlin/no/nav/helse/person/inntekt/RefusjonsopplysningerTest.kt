@@ -89,9 +89,11 @@ internal class RefusjonsopplysningerTest {
         val meldingsreferanseId2 = UUID.randomUUID()
         val nyeRefusjonsopplysninger = listOf(Refusjonsopplysning(meldingsreferanseId2, 1.januar, 31.januar, 1000.daglig)).refusjonsopplysninger()
 
-        assertEquals(1.januar, nyeRefusjonsopplysninger.finnFørsteDatoForEndring(refusjonsopplysninger))
+        val forventet = listOf(Refusjonsopplysning(meldingsreferanseId2, 2.januar, 31.januar, 1000.daglig)).refusjonsopplysninger()
+
+        assertEquals(2.januar, nyeRefusjonsopplysninger.finnFørsteDatoForEndring(refusjonsopplysninger))
         assertEquals(
-            nyeRefusjonsopplysninger.inspektør.refusjonsopplysninger,
+            forventet.inspektør.refusjonsopplysninger,
             refusjonsopplysninger.merge(nyeRefusjonsopplysninger).inspektør.refusjonsopplysninger
         )
     }
@@ -131,8 +133,10 @@ internal class RefusjonsopplysningerTest {
         val meldingsreferanseId2 = UUID.randomUUID()
         val nyeRefusjonsopplysninger = listOf(Refusjonsopplysning(meldingsreferanseId2, 1.januar, null, 1000.daglig)).refusjonsopplysninger()
 
+        val forventet = listOf(Refusjonsopplysning(meldingsreferanseId2, 1.mars, null, 1000.daglig)).refusjonsopplysninger()
+
         assertEquals(
-            nyeRefusjonsopplysninger.inspektør.refusjonsopplysninger,
+            forventet.inspektør.refusjonsopplysninger,
             refusjonsopplysninger.merge(nyeRefusjonsopplysninger).inspektør.refusjonsopplysninger
         )
     }
@@ -238,10 +242,11 @@ internal class RefusjonsopplysningerTest {
         val eksisterendeTidspunkt = LocalDateTime.now()
         val nyttTidspunkt = eksisterendeTidspunkt.plusSeconds(1)
         val eksisterende = Refusjonsopplysning(eksisterendeId, 1.mars, 31.mars, 2000.daglig)
-        val ny = Refusjonsopplysning(UUID.randomUUID(), 1.januar, 1.mars, 1000.daglig)
+        val meldingsreferanseId = UUID.randomUUID()
+        val ny = Refusjonsopplysning(meldingsreferanseId, 1.januar, 1.mars, 1000.daglig)
         val refusjonsopplysning = RefusjonsopplysningerBuilder()
             .leggTil(eksisterende, eksisterendeTidspunkt).leggTil(ny, nyttTidspunkt).build()
-        assertEquals(1.januar, refusjonsopplysning.finnFørsteDatoForEndring(RefusjonsopplysningerBuilder().leggTil(eksisterende).build()))
+        assertEquals(1.mars, refusjonsopplysning.finnFørsteDatoForEndring(RefusjonsopplysningerBuilder().leggTil(eksisterende).build()))
         assertEquals(listOf(ny, Refusjonsopplysning(eksisterendeId, 2.mars, 31.mars, 2000.daglig)), refusjonsopplysning.inspektør.refusjonsopplysninger)
 
     }
