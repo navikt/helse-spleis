@@ -1506,7 +1506,7 @@ internal class Vedtaksperiode private constructor(
             tilstandsendringstidspunkt.plusDays(180)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if(Toggle.Splarbeidsbros.enabled) {
+            if(Toggle.Splarbeidsbros.enabled && vedtaksperiode.forventerInntekt()) {
                 vedtaksperiode.trengerArbeidsgiveropplysninger()
             }
             vedtaksperiode.trengerInntektsmeldingReplay()

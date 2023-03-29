@@ -23,6 +23,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 @EnableToggle(Toggle.Splarbeidsbros::class)
@@ -111,7 +112,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
         assertEquals(expectedSykmeldingsperioder, trengerArbeidsgiveropplysningerEvent.sykmeldingsperioder)
 
-        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
 
     @Test
@@ -162,8 +163,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             16.januar til 21.januar
         )
         assertEquals(expectedSykmeldingsperioder, trengerArbeidsgiveropplysningerEvent.sykmeldingsperioder)
-
-        assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
 
     @Test
@@ -320,7 +320,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
 
         assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
-        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
 
     @Test
@@ -345,7 +345,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
 
         assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
-        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
 
     @Test
@@ -410,6 +410,13 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
 
         assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
+    }
+
+    @Test
+    fun `Skal ikke be om arbeidsgiveropplysninger for perioder innenfor arbeidsgiverperioden`() {
+        nyPeriode(1.januar til 10.januar)
+        assertTrue(observatør.trengerArbeidsgiveropplysningerVedtaksperioder.isEmpty())
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
     }
 
     private fun gapHosÉnArbeidsgiver(refusjon: Inntektsmelding.Refusjon) {
