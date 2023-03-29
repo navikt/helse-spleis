@@ -21,10 +21,6 @@ spec:
           kind: Project
           name: tbd-prod-eacd
         role: roles/cloudsql.client
-  accessPolicy:
-    outbound:
-      external:
-        - host: "34.88.78.0/32"
   env:
     - name: DATABASE_REGION
       value: "europe-north1"

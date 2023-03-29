@@ -33,10 +33,6 @@ spec:
           apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
           kind: Project
         role: roles/cloudsql.client
-  accessPolicy:
-    outbound:
-      external:
-        - host: "35.228.176.0/32"
   prometheus:
     enabled: true
     path: /metrics
