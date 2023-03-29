@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
@@ -169,7 +170,9 @@ class Refusjonsopplysning(
             hendelse: IAktivitetslogg,
             organisasjonsnummer: String
         ): Boolean {
-            val førsteRefusjonsopplysning = førsteRefusjonsopplysning() ?: return false
+            val førsteRefusjonsopplysning = førsteRefusjonsopplysning() ?: return false.also {
+                hendelse.info("Mangler refusjonsopplysninger på orgnummer $organisasjonsnummer for hele perioden (${utbetalingsdager.omsluttendePeriode})")
+            }
             val dekkes = utbetalingsdager.filter { utbetalingsdag -> dekker(utbetalingsdag) }
             val aksepteres = utbetalingsdager.filter { utbetalingsdag -> førsteRefusjonsopplysning.aksepterer(skjæringstidspunkt, utbetalingsdag) }
             val mangler = (utbetalingsdager - dekkes - aksepteres).takeUnless { it.isEmpty() } ?: return true

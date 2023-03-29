@@ -292,8 +292,11 @@ internal class Arbeidsgiver private constructor(
     private fun trengerRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode) =
         vedtaksperioder.any(TRENGER_REFUSJONSOPPLYSNINGER(skjæringstidspunkt, periode))
 
-    internal fun harTilstrekkeligInformasjonTilUtbetaling(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg) =
-        harNødvendigInntektForVilkårsprøving(skjæringstidspunkt) && harNødvendigRefusjonsopplysninger(skjæringstidspunkt, periode, hendelse)
+    internal fun harTilstrekkeligInformasjonTilUtbetaling(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg): Boolean {
+        val harNødvendigInntektForVilkårsprøving = harNødvendigInntektForVilkårsprøving(skjæringstidspunkt)
+        if (!harNødvendigInntektForVilkårsprøving) hendelse.info("Mangler inntekt for vilkårsprøving på $skjæringstidspunkt for $organisasjonsnummer")
+        return harNødvendigInntektForVilkårsprøving && harNødvendigRefusjonsopplysninger(skjæringstidspunkt, periode, hendelse)
+    }
 
     private fun harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
         person.vilkårsgrunnlagFor(skjæringstidspunkt)?.harNødvendigInntektForVilkårsprøving(organisasjonsnummer)

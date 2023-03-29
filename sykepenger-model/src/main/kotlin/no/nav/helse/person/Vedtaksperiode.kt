@@ -1269,9 +1269,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
-            if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(Aktivitetslogg()))
+            if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode))
                 return INNTEKTSMELDING fordi MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
-            if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode, arbeidsgivere, Aktivitetslogg()))
+            if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode, Aktivitetslogg(), arbeidsgivere))
                 return INNTEKTSMELDING fordi MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE
             return uventetManglendeVenteårsak(vedtaksperiode)
         }
@@ -1285,15 +1285,15 @@ internal class Vedtaksperiode private constructor(
             arbeidsgivere: Iterable<Arbeidsgiver>,
             hendelse: IAktivitetslogg
         ) {
-            if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse))
+            if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode, hendelse))
                 return hendelse.info("Mangler nødvendig inntekt for vilkårsprøving eller refusjonsopplysninger og kan derfor ikke gjenoppta revurdering.")
-            if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode, arbeidsgivere, hendelse))
+            if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode, hendelse, arbeidsgivere))
                 return hendelse.info("En annen arbeidsgiver mangler nødvendig inntekt for vilkårsprøving eller refusjonsopplysninger og kan derfor ikke gjenoppta revurdering.")
             vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
             vedtaksperiode.arbeidsgiver.gjenopptaRevurdering(vedtaksperiode, hendelse)
         }
 
-        private fun harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode: Vedtaksperiode, arbeidsgivere: Iterable<Arbeidsgiver>, hendelse: IAktivitetslogg): Boolean {
+        private fun harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg = Aktivitetslogg(), arbeidsgivere: Iterable<Arbeidsgiver> = listOf(vedtaksperiode.arbeidsgiver)): Boolean {
             val skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt
             val periode = arbeidsgivere.vedtaksperioder { other -> other.skjæringstidspunkt == skjæringstidspunkt && other.tilstand == AvventerRevurdering }.periode()
             return arbeidsgivere.harTilstrekkeligInformasjonTilUtbetaling(skjæringstidspunkt, periode, hendelse)
