@@ -129,6 +129,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.serde.AktivitetsloggMap
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.utbetalingslinjer.TagBuilder
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
 import no.nav.helse.utbetalingslinjer.UtbetalingPeriodetype
@@ -890,13 +891,17 @@ internal class Vedtaksperiode private constructor(
 
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
         val periodetype = arbeidsgiver.periodetype(periode)
+        val vilkårsgrunnlag = requireNotNull(person.vilkårsgrunnlagFor(skjæringstidspunkt))
+        val tagBuilder = TagBuilder()
+        vilkårsgrunnlag.tags(tagBuilder)
         utbetalinger.godkjenning(
             hendelse = hendelse,
             periode = periode,
             skjæringstidspunkt = skjæringstidspunkt,
             periodetype = periodetype,
             førstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING,
-            inntektskilde = requireNotNull(person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntektskilde()),
+            inntektskilde = vilkårsgrunnlag.inntektskilde(),
+            tagBuilder = tagBuilder,
             orgnummereMedRelevanteArbeidsforhold = person.relevanteArbeidsgivere(skjæringstidspunkt)
         )
     }

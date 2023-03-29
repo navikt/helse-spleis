@@ -10,6 +10,7 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.utbetalingslinjer.TagBuilder
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -101,7 +102,8 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Pair<Vilkårsgrunnl
         periodetype: Periodetype,
         førstegangsbehandling: Boolean,
         inntektskilde: Inntektskilde,
-        orgnummereMedRelevanteArbeidsforhold: List<String>
+        orgnummereMedRelevanteArbeidsforhold: List<String>,
+        tagBuilder: TagBuilder
     ) {
         siste!!.godkjenning(
             hendelse = hendelse,
@@ -110,7 +112,8 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Pair<Vilkårsgrunnl
             periodetype = periodetype.tilUtbetalingPeriodetype(),
             førstegangsbehandling = førstegangsbehandling,
             inntektskilde = inntektskilde.tilUtbetalingInntektskilde(),
-            orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
+            orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
+            tagBuilder = tagBuilder
         )
     }
 }

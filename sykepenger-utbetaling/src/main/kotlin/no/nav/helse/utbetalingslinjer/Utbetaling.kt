@@ -26,9 +26,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_9
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
-import no.nav.helse.utbetalingslinjer.GodkjenningsbehovTag.ARBEIDSGIVERUTBETALING
-import no.nav.helse.utbetalingslinjer.GodkjenningsbehovTag.INGEN_UTBETALING
-import no.nav.helse.utbetalingslinjer.GodkjenningsbehovTag.PERSONUTBETALING
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.trekkerTilbakePenger
 import no.nav.helse.utbetalingslinjer.Utbetalingkladd.Companion.finnKladd
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.ANNULLERING
@@ -175,7 +172,8 @@ class Utbetaling private constructor(
         periodetype: UtbetalingPeriodetype,
         førstegangsbehandling: Boolean,
         inntektskilde: UtbetalingInntektskilde,
-        orgnummereMedRelevanteArbeidsforhold: List<String>
+        orgnummereMedRelevanteArbeidsforhold: List<String>,
+        tagBuilder: TagBuilder
     ) {
         hendelse.kontekst(this)
         tilstand.godkjenning(
@@ -186,7 +184,8 @@ class Utbetaling private constructor(
             førstegangsbehandling,
             inntektskilde,
             orgnummereMedRelevanteArbeidsforhold,
-            hendelse
+            hendelse,
+            tagBuilder
         )
     }
 
@@ -563,7 +562,8 @@ class Utbetaling private constructor(
             førstegangsbehandling: Boolean,
             inntektskilde: UtbetalingInntektskilde,
             orgnummereMedRelevanteArbeidsforhold: List<String>,
-            hendelse: IAktivitetslogg
+            hendelse: IAktivitetslogg,
+            tagBuilder: TagBuilder
         ) {
             hendelse.info("Forventet ikke å lage godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
             hendelse.funksjonellFeil(RV_UT_13)
@@ -611,7 +611,8 @@ class Utbetaling private constructor(
             førstegangsbehandling: Boolean,
             inntektskilde: UtbetalingInntektskilde,
             orgnummereMedRelevanteArbeidsforhold: List<String>,
-            hendelse: IAktivitetslogg
+            hendelse: IAktivitetslogg,
+            tagBuilder: TagBuilder
         ) {
             godkjenning(
                 aktivitetslogg = hendelse,
@@ -623,21 +624,15 @@ class Utbetaling private constructor(
                 utbetalingtype = utbetaling.type.name,
                 inntektskilde = inntektskilde.name,
                 orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
-                tags = tags(utbetaling).map { it.name }.toSet()
+                tags = tags(tagBuilder, utbetaling).build()
             )
         }
 
-        private fun tags(utbetaling: Utbetaling): Set<GodkjenningsbehovTag> {
-            val harArbeidsgiverutbetaling = utbetaling.arbeidsgiverOppdrag.nettoBeløp() > 0
-            val harPersonutbetaling = utbetaling.personOppdrag.nettoBeløp() > 0
-            val ingenUtbetaling = !harArbeidsgiverutbetaling && !harPersonutbetaling
-            return when {
-                harArbeidsgiverutbetaling && harPersonutbetaling -> setOf(ARBEIDSGIVERUTBETALING, PERSONUTBETALING)
-                harArbeidsgiverutbetaling -> setOf(ARBEIDSGIVERUTBETALING)
-                harPersonutbetaling -> setOf(PERSONUTBETALING)
-                ingenUtbetaling -> setOf(INGEN_UTBETALING)
-                else -> throw IllegalStateException("Hva slags utbetaling er dette!?")
-            }
+        private fun tags(tagBuilder: TagBuilder, utbetaling: Utbetaling): TagBuilder {
+            val arbeidsgiverNettoBeløp = utbetaling.arbeidsgiverOppdrag.nettoBeløp()
+            val personNettoBeløp = utbetaling.personOppdrag.nettoBeløp()
+            tagBuilder.tagUtbetaling(arbeidsgiverNettoBeløp, personNettoBeløp)
+            return tagBuilder
         }
     }
 
@@ -865,8 +860,6 @@ enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERIN
 enum class Endringskode { NY, UEND, ENDR }
 /* en enum-port/adapter-greie. Alternativet er en modul som inneholder ... kodeverk */
 enum class UtbetalingInntektskilde { EN_ARBEIDSGIVER, FLERE_ARBEIDSGIVERE }
-
-private enum class GodkjenningsbehovTag { ARBEIDSGIVERUTBETALING, PERSONUTBETALING, INGEN_UTBETALING }
 
 enum class Klassekode(val verdi: String) {
     RefusjonIkkeOpplysningspliktig(verdi = "SPREFAG-IOP"),

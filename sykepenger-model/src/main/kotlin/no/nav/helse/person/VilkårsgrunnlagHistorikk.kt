@@ -21,6 +21,7 @@ import no.nav.helse.person.inntekt.ManglerRefusjonsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
+import no.nav.helse.utbetalingslinjer.TagBuilder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -293,6 +294,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun lagreTidsnæreInntekter(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver) {
             sykepengegrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver)
         }
+
+        internal fun tags(tagBuilder: TagBuilder) = sykepengegrunnlag.tags(tagBuilder)
 
         internal companion object {
             internal fun skjæringstidspunktperioder(elementer: Collection<VilkårsgrunnlagElement>): List<Periode> {
