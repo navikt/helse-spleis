@@ -1,0 +1,21 @@
+# dette er et midlertidig tiltak for at apper
+# som ikke selv eier en database, skal kunne kontakte den (brannmurmessig)
+# (ip-adressene som gis tilgang på her er adresser som er tilgjengelige
+# i dokumentasjonen til google)
+#
+# plattformteamet har muligens en annen løsning på plass etter påske 2023
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: spleis-db-policy
+  namespace: tbd
+spec:
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 35.228.176.0/32
+  podSelector:
+    matchLabels:
+      db: spleis
+  policyTypes:
+    - Egress

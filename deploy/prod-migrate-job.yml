@@ -3,6 +3,7 @@ kind: Naisjob
 metadata:
   labels:
     team: tbd
+    db: spleis # trengs bare ifm. 'spleis-db-policy'
   name: spleis-migrate
   namespace: tbd
 spec:

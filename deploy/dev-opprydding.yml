@@ -5,6 +5,7 @@ metadata:
   namespace: tbd
   labels:
     team: tbd
+    db: spleis # trengs bare ifm. 'spleis-db-policy'
 spec:
   image: {{image}}
   port: 8080
