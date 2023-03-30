@@ -214,4 +214,7 @@ spec:
         - team: tbd
           application: spout
           access: write
+        - team: tbd
+          application: spoiler
+          access: readwrite
 
