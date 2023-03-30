@@ -1,7 +1,6 @@
 package no.nav.helse.serde.api.speil.builders
 
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -44,14 +43,14 @@ internal class VedtaksperiodeSykdomstidslinjeBuilder(vedtaksperiode: Vedtaksperi
     }
 }
 
-internal class SykdomshistorikkBuilder(private val id: UUID, element: Sykdomshistorikk.Element) : SykdomshistorikkVisitor {
+internal class SykdomshistorikkBuilder(element: Sykdomshistorikk.Element) : SykdomshistorikkVisitor {
     private val beregnetTidslinje: MutableList<Sykdomstidslinjedag> = mutableListOf()
 
     init {
         element.accept(this)
     }
 
-    fun build(): Pair<UUID, List<Sykdomstidslinjedag>> = id to beregnetTidslinje.toList()
+    fun build() = beregnetTidslinje.toList()
 
     override fun preVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {
         this.beregnetTidslinje.addAll(SykdomstidslinjeBuilder(tidslinje).build())

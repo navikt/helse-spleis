@@ -32,6 +32,7 @@ import no.nav.helse.serde.api.dto.Periodetilstand.TilUtbetaling
 import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
 import no.nav.helse.serde.api.dto.Periodetilstand.UtbetaltVenterPåAnnenPeriode
 import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
+import no.nav.helse.serde.api.dto.SammenslåttDag
 import no.nav.helse.serde.api.dto.SpeilOppdrag
 import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
 import no.nav.helse.serde.api.dto.SøknadNavDTO
@@ -46,7 +47,6 @@ import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
 import no.nav.helse.serde.api.dto.Utbetalingtype
 import no.nav.helse.serde.api.speil.IVedtaksperiode.Companion.tilGodkjenning
 import no.nav.helse.serde.api.speil.Tidslinjeberegninger.ITidslinjeberegning
-import no.nav.helse.serde.api.speil.builders.BeregningId
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlag
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.speil.builders.PeriodeVarslerBuilder
@@ -155,27 +155,21 @@ class Generasjoner {
 
 internal class Tidslinjeperioder(
     private val alder: Alder,
-    private val forkastetVedtaksperiodeIder: List<UUID>,
     vedtaksperioder: List<IVedtaksperiode>,
-    tidslinjeberegninger: Tidslinjeberegninger,
     vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
 ) {
     private var perioder: List<Tidslinjeperiode>
 
-    private fun erForkastet(vedtaksperiodeId: UUID) = vedtaksperiodeId in forkastetVedtaksperiodeIder
-
     init {
         perioder = vedtaksperioder.flatMap { periode ->
             when {
-                periode.utbetalinger.isEmpty() -> listOf(uberegnetPeriode(periode, erForkastet(periode.vedtaksperiodeId)))
+                periode.utbetalinger.isEmpty() -> listOf(uberegnetPeriode(periode, periode.forkastet))
                 else -> periode.utbetalinger.map { (vilkårsgrunnlag, utbetaling) ->
-                    val tidslinjeberegning = tidslinjeberegninger.finn(utbetaling.beregningId)
                     utbetaling.settTilGodkjenning(vedtaksperioder)
                     beregnetPeriode(
                         periode = periode,
                         vilkårsgrunnlagTilutbetaling = vilkårsgrunnlag to utbetaling,
-                        tidslinjeberegning = tidslinjeberegning,
-                        erForkastet = erForkastet(periode.vedtaksperiodeId),
+                        erForkastet = periode.forkastet,
                         vilkårsgrunnlaghistorikk = vilkårsgrunnlaghistorikk
                     )
                 }
@@ -215,14 +209,12 @@ internal class Tidslinjeperioder(
     private fun beregnetPeriode(
         periode: IVedtaksperiode,
         vilkårsgrunnlagTilutbetaling: Pair<IVilkårsgrunnlag, IUtbetaling>,
-        tidslinjeberegning: ITidslinjeberegning,
         erForkastet: Boolean,
         vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
     ): BeregnetPeriode {
         val utbetaling = vilkårsgrunnlagTilutbetaling.second
         val avgrensetUtbetalingstidslinje = utbetaling.utbetalingstidslinje.filter { periode.fom <= it.dato && it.dato <= periode.tom }
-        val sammenslåttTidslinje =
-            tidslinjeberegning.sammenslåttTidslinje(utbetaling.utbetalingstidslinje, periode.fom, periode.tom)
+        val sammenslåttTidslinje = utbetaling.sammenslåttTidslinje(periode.fom, periode.tom)
         val varsler = PeriodeVarslerBuilder(
             periode.aktivitetsloggForPeriode
         ).build()
@@ -233,7 +225,7 @@ internal class Tidslinjeperioder(
         if (!erAnnullering) vilkårsgrunnlaghistorikk.leggIBøtta(vilkårsgrunnlag)
         return BeregnetPeriode(
             vedtaksperiodeId = periode.vedtaksperiodeId,
-            beregningId = utbetaling.beregningId,
+            beregningId = utbetaling.beregning.beregningId,
             fom = periode.fom,
             tom = periode.tom,
             erForkastet = erForkastet,
@@ -319,7 +311,7 @@ internal class Tidslinjeperioder(
 
 internal class IVedtaksperiode(
     val vedtaksperiodeId: UUID,
-    private val forkastet: Boolean,
+    internal val forkastet: Boolean,
     val fom: LocalDate,
     val tom: LocalDate,
     val inntektskilde: Inntektskilde,
@@ -335,21 +327,6 @@ internal class IVedtaksperiode(
 ) {
     val utbetalinger = utbetalinger.toMutableList()
 
-    fun beholdAktivOgAnnullert(annulleringer: AnnulleringerAkkumulator): Boolean {
-        val annulleringerForVedtaksperioden = utbetalinger
-            .groupBy { it.second.korrelasjonsId }
-            .mapNotNull { (_, utbetalinger) ->
-                // mapper annullering til å peke på samme vilkårsgrunnlag som siste utbetaling
-                val sisteVilkårsgrunnlagId = utbetalinger.last().first
-                annulleringer.finnAnnullering(utbetalinger.first().second)?.let {
-                    sisteVilkårsgrunnlagId to it
-                }
-            }
-        this.utbetalinger.addAll(annulleringerForVedtaksperioden)
-
-        return !forkastet || annulleringerForVedtaksperioden.isNotEmpty()
-    }
-
     fun tilGodkjenning() = tilstand in listOf(AvventerGodkjenning, AvventerGodkjenningRevurdering)
 
     internal companion object {
@@ -361,7 +338,7 @@ internal class IVedtaksperiode(
 internal class IUtbetaling(
     val id: UUID,
     val korrelasjonsId: UUID,
-    val beregningId: BeregningId,
+    val beregning: ITidslinjeberegning,
     val opprettet: LocalDateTime,
     val utbetalingstidslinje: List<Utbetalingstidslinjedag>,
     val maksdato: LocalDate,
@@ -383,6 +360,8 @@ internal class IUtbetaling(
     fun erSammeSom(other: IUtbetaling) = id == other.id
     fun hørerSammen(other: IUtbetaling) = korrelasjonsId == other.korrelasjonsId
 
+    fun annulleringFor(other: IUtbetaling) = this.type == Utbetalingtype.ANNULLERING && this.korrelasjonsId == other.korrelasjonsId
+
     fun settTilGodkjenning(vedtaksperioder: List<IVedtaksperiode>) {
         erTilGodkjenning = vedtaksperioder.tilGodkjenning(this)
     }
@@ -401,6 +380,10 @@ internal class IUtbetaling(
             tilGodkjenning = erTilGodkjenning,
             korrelasjonsId = korrelasjonsId
         )
+    }
+
+    internal fun sammenslåttTidslinje(fom: LocalDate, tom: LocalDate): List<SammenslåttDag> {
+        return beregning.sammenslåttTidslinje(utbetalingstidslinje, fom, tom)
     }
 
     internal companion object {

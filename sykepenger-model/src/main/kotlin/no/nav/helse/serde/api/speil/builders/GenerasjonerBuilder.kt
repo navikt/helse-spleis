@@ -16,14 +16,8 @@ import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.api.dto.GenerasjonDTO
 import no.nav.helse.serde.api.dto.HendelseDTO
-import no.nav.helse.serde.api.speil.AnnulleringerAkkumulator
-import no.nav.helse.serde.api.speil.ForkastetVedtaksperiodeAkkumulator
-import no.nav.helse.serde.api.speil.GenerasjonIderAkkumulator
-import no.nav.helse.serde.api.speil.IVedtaksperiode
-import no.nav.helse.serde.api.speil.SykdomshistorikkAkkumulator
 import no.nav.helse.serde.api.speil.Tidslinjeberegninger
 import no.nav.helse.serde.api.speil.Tidslinjeperioder
-import no.nav.helse.serde.api.speil.VedtaksperiodeAkkumulator
 import no.nav.helse.serde.api.speil.builders.GenerasjonerBuilder.Byggetilstand.AktivePerioder
 import no.nav.helse.serde.api.speil.builders.GenerasjonerBuilder.Byggetilstand.ForkastedePerioder
 import no.nav.helse.serde.api.speil.builders.GenerasjonerBuilder.Byggetilstand.Initiell
@@ -33,17 +27,8 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 
-internal data class GenerasjonIder(
-    val beregningId: BeregningId,
-    val sykdomshistorikkId: SykdomshistorikkId,
-    val vilkårsgrunnlagshistorikkId: VilkårsgrunnlagshistorikkId
-)
-
 internal typealias BeregningId = UUID
-internal typealias SykdomshistorikkId = UUID
-internal typealias VilkårsgrunnlagshistorikkId = UUID
 internal typealias KorrelasjonsId = UUID
-internal typealias InntektsmeldingId = UUID
 
 // Besøker hele arbeidsgiver-treet
 internal class GenerasjonerBuilder(
@@ -52,11 +37,7 @@ internal class GenerasjonerBuilder(
     private val arbeidsgiver: Arbeidsgiver,
     private val vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
 ) : ArbeidsgiverVisitor {
-    private val vedtaksperiodeAkkumulator = VedtaksperiodeAkkumulator()
-    private val forkastetVedtaksperiodeAkkumulator = ForkastetVedtaksperiodeAkkumulator()
-    private val generasjonIderAkkumulator = GenerasjonIderAkkumulator()
-    private val sykdomshistorikkAkkumulator = SykdomshistorikkAkkumulator()
-    private val annulleringer = AnnulleringerAkkumulator()
+    private val tidslinjeberegninger = Tidslinjeberegninger()
     private var tilstand: Byggetilstand = Initiell
 
     init {
@@ -68,17 +49,29 @@ internal class GenerasjonerBuilder(
     private fun periodetype(periode: Periode) =
         arbeidsgiver.periodetype(periode)
 
-    fun build(): List<GenerasjonDTO> {
-        val vedtaksperioder = vedtaksperiodeAkkumulator.beholdAktiveOgAnnullerte(annulleringer)
-        val tidslinjeberegninger = Tidslinjeberegninger(generasjonIderAkkumulator.toList(), sykdomshistorikkAkkumulator)
+    internal fun build(): List<GenerasjonDTO> {
+        val vedtaksperioder = tidslinjeberegninger.build()
         val tidslinjeperioder = Tidslinjeperioder(
             alder = alder,
-            forkastetVedtaksperiodeIder = forkastetVedtaksperiodeAkkumulator.toList(),
             vedtaksperioder = vedtaksperioder,
-            tidslinjeberegninger = tidslinjeberegninger,
             vilkårsgrunnlaghistorikk = vilkårsgrunnlaghistorikk
         )
         return tidslinjeperioder.tilGenerasjoner()
+    }
+
+    private fun byggForkastetVedtaksperiode(
+        vedtaksperiode: Vedtaksperiode,
+        forkastet: Boolean,
+        vedtaksperiodeId: UUID,
+        tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+        opprettet: LocalDateTime,
+        oppdatert: LocalDateTime,
+        periode: Periode,
+        skjæringstidspunkt: LocalDate,
+        hendelseIder: Set<Dokumentsporing>,
+        inntektskilde: Inntektskilde
+    ) {
+        byggVedtaksperiode(vedtaksperiode, forkastet, vedtaksperiodeId, tilstand, opprettet, oppdatert, periode, skjæringstidspunkt, hendelseIder, inntektskilde)
     }
 
     private fun byggVedtaksperiode(
@@ -96,23 +89,21 @@ internal class GenerasjonerBuilder(
         val sykdomstidslinje = VedtaksperiodeSykdomstidslinjeBuilder(vedtaksperiode).build()
         val utbetalinger = UtbetalingerBuilder(vedtaksperiode).build()
         val aktivetsloggForPeriode = Vedtaksperiode.aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode)
-        vedtaksperiodeAkkumulator.leggTil(
-            IVedtaksperiode(
-                vedtaksperiodeId,
-                forkastet,
-                periode.start,
-                periode.endInclusive,
-                inntektskilde = inntektskilde,
-                hendelser = hendelser.filter { it.id in hendelseIder.ider().map(UUID::toString) },
-                utbetalinger = utbetalinger,
-                periodetype = periodetype(periode),
-                sykdomstidslinje = sykdomstidslinje,
-                opprettet = opprettet,
-                oppdatert = oppdatert,
-                tilstand = tilstand,
-                skjæringstidspunkt = skjæringstidspunkt,
-                aktivitetsloggForPeriode = aktivetsloggForPeriode
-            )
+        tidslinjeberegninger.leggTilVedtaksperiode(
+            vedtaksperiode = vedtaksperiodeId,
+            forkastet = forkastet,
+            fom = periode.start,
+            tom = periode.endInclusive,
+            inntektskilde = inntektskilde,
+            hendelser = hendelser.filter { it.id in hendelseIder.ider().map(UUID::toString) },
+            utbetalinger = utbetalinger,
+            periodetype = periodetype(periode),
+            sykdomstidslinje = sykdomstidslinje,
+            opprettet = opprettet,
+            oppdatert = oppdatert,
+            tilstand = tilstand,
+            skjæringstidspunkt = skjæringstidspunkt,
+            aktivitetsloggForPeriode = aktivetsloggForPeriode
         )
     }
 
@@ -180,7 +171,23 @@ internal class GenerasjonerBuilder(
         annulleringer: Set<UUID>
     ) {
         if (utbetalingstatus == Utbetalingstatus.FORKASTET) return
-        tilstand.besøkUtbetaling(this, utbetaling, type, annulleringer)
+        tilstand.besøkUtbetaling(
+            builder = this,
+            tidslinjeberegninger = tidslinjeberegninger,
+            internutbetaling = utbetaling,
+            id = id,
+            korrelasjonsId = korrelasjonsId,
+            type = type,
+            utbetalingstatus = utbetalingstatus,
+            tidsstempel = tidsstempel,
+            arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
+            personNettoBeløp = personNettoBeløp,
+            maksdato = maksdato,
+            forbrukteSykedager = forbrukteSykedager,
+            gjenståendeSykedager = gjenståendeSykedager,
+            beregningId = beregningId,
+            annulleringer = annulleringer
+        )
     }
 
     override fun preVisitUtbetalingstidslinjeberegning(
@@ -190,17 +197,31 @@ internal class GenerasjonerBuilder(
         sykdomshistorikkElementId: UUID,
         vilkårsgrunnlagHistorikkInnslagId: UUID
     ) {
-        generasjonIderAkkumulator.leggTil(id, GenerasjonIder(id, sykdomshistorikkElementId, vilkårsgrunnlagHistorikkInnslagId))
+        tidslinjeberegninger.leggTil(id, sykdomshistorikkElementId)
     }
 
     override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element, id: UUID, hendelseId: UUID?, tidsstempel: LocalDateTime) {
-        SykdomshistorikkBuilder(id, element).build().also { (id, tidslinje) ->
-            sykdomshistorikkAkkumulator.leggTil(id, tidslinje)
-        }
+        tidslinjeberegninger.leggTil(id, SykdomshistorikkBuilder(element).build())
     }
 
     private interface Byggetilstand {
-        fun besøkUtbetaling(builder: GenerasjonerBuilder, utbetaling: Utbetaling, type: Utbetalingtype, annulleringer: Set<UUID>) {}
+        fun besøkUtbetaling(
+            builder: GenerasjonerBuilder,
+            tidslinjeberegninger: Tidslinjeberegninger,
+            internutbetaling: Utbetaling,
+            id: UUID,
+            korrelasjonsId: UUID,
+            type: Utbetalingtype,
+            utbetalingstatus: Utbetalingstatus,
+            tidsstempel: LocalDateTime,
+            arbeidsgiverNettoBeløp: Int,
+            personNettoBeløp: Int,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int?,
+            gjenståendeSykedager: Int?,
+            beregningId: UUID,
+            annulleringer: Set<UUID>
+        ) {}
         fun besøkVedtaksperiode(
             builder: GenerasjonerBuilder,
             vedtaksperiode: Vedtaksperiode,
@@ -218,9 +239,70 @@ internal class GenerasjonerBuilder(
 
         object Initiell : Byggetilstand
         object Utbetalinger : Byggetilstand {
-            override fun besøkUtbetaling(builder: GenerasjonerBuilder, utbetaling: Utbetaling, type: Utbetalingtype, annulleringer: Set<UUID>) {
-                if (type != Utbetalingtype.ANNULLERING) return builder.annulleringer.fjerne(annulleringer)
-                builder.annulleringer.leggTil(UtbetalingBuilder(utbetaling).build())
+            override fun besøkUtbetaling(
+                builder: GenerasjonerBuilder,
+                tidslinjeberegninger: Tidslinjeberegninger,
+                internutbetaling: Utbetaling,
+                id: UUID,
+                korrelasjonsId: UUID,
+                type: Utbetalingtype,
+                utbetalingstatus: Utbetalingstatus,
+                tidsstempel: LocalDateTime,
+                arbeidsgiverNettoBeløp: Int,
+                personNettoBeløp: Int,
+                maksdato: LocalDate,
+                forbrukteSykedager: Int?,
+                gjenståendeSykedager: Int?,
+                beregningId: UUID,
+                annulleringer: Set<UUID>
+            ) {
+                when (type) {
+                    Utbetalingtype.UTBETALING -> builder.tidslinjeberegninger.leggTilUtbetaling(
+                        internutbetaling = internutbetaling,
+                        id = id,
+                        korrelasjonsId = korrelasjonsId,
+                        type = type,
+                        utbetalingstatus = utbetalingstatus,
+                        tidsstempel = tidsstempel,
+                        arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
+                        personNettoBeløp = personNettoBeløp,
+                        maksdato = maksdato,
+                        forbrukteSykedager = forbrukteSykedager,
+                        gjenståendeSykedager = gjenståendeSykedager,
+                        beregningId = beregningId,
+                        annulleringer = annulleringer
+                    )
+                    Utbetalingtype.REVURDERING -> builder.tidslinjeberegninger.leggTilRevurdering(
+                        internutbetaling = internutbetaling,
+                        id = id,
+                        korrelasjonsId = korrelasjonsId,
+                        type = type,
+                        utbetalingstatus = utbetalingstatus,
+                        tidsstempel = tidsstempel,
+                        arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
+                        personNettoBeløp = personNettoBeløp,
+                        maksdato = maksdato,
+                        forbrukteSykedager = forbrukteSykedager,
+                        gjenståendeSykedager = gjenståendeSykedager,
+                        beregningId = beregningId,
+                        annulleringer = annulleringer
+                    )
+                    Utbetalingtype.ANNULLERING -> builder.tidslinjeberegninger.leggTilAnnullering(
+                        internutbetaling = internutbetaling,
+                        id = id,
+                        korrelasjonsId = korrelasjonsId,
+                        type = type,
+                        utbetalingstatus = utbetalingstatus,
+                        tidsstempel = tidsstempel,
+                        arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
+                        personNettoBeløp = personNettoBeløp,
+                        maksdato = maksdato,
+                        forbrukteSykedager = forbrukteSykedager,
+                        gjenståendeSykedager = gjenståendeSykedager,
+                        beregningId = beregningId
+                    )
+                    else -> { /* ignorer */ }
+                }
             }
         }
         object AktivePerioder : Byggetilstand {
@@ -252,8 +334,7 @@ internal class GenerasjonerBuilder(
                 hendelseIder: Set<Dokumentsporing>,
                 inntektskilde: Inntektskilde
             ) {
-                builder.forkastetVedtaksperiodeAkkumulator.leggTil(vedtaksperiodeId)
-                builder.byggVedtaksperiode(vedtaksperiode, true, vedtaksperiodeId, tilstand, opprettet, oppdatert, periode, skjæringstidspunkt, hendelseIder, inntektskilde)
+                builder.byggForkastetVedtaksperiode(vedtaksperiode, true, vedtaksperiodeId, tilstand, opprettet, oppdatert, periode, skjæringstidspunkt, hendelseIder, inntektskilde)
             }
         }
     }

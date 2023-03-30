@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.Opptjening
-import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeUtbetalingVisitor
 import no.nav.helse.person.VedtaksperiodeVisitor
@@ -17,35 +16,29 @@ import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.serde.api.dto.EndringskodeDTO.Companion.dto
 import no.nav.helse.serde.api.dto.SpeilOppdrag
 import no.nav.helse.serde.api.dto.Utbetaling
-import no.nav.helse.serde.api.speil.IUtbetaling
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Satstype
-import no.nav.helse.utbetalingslinjer.Utbetalingtype
+import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus.FORKASTET
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_GODKJENT
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.økonomi.Prosent
-import org.slf4j.LoggerFactory
 import no.nav.helse.utbetalingslinjer.Utbetaling as InternUtbetaling
 
 // Besøker hele vedtaksperiode-treet
 internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode) : VedtaksperiodeVisitor {
-    val utbetalinger = mutableMapOf<UUID, IUtbetaling>()
     val vilkårsgrunnlag = mutableMapOf<UUID, IVilkårsgrunnlag>()
 
     init {
         vedtaksperiode.accept(this)
     }
 
-    internal fun build() =
-        utbetalinger.map { (utbetalingId, utbetaling) ->
-            vilkårsgrunnlag.getValue(utbetalingId) to utbetaling
-        }
+    internal fun build() = vilkårsgrunnlag
+        .map { (utbetalingId, vilkårsgrunnlag) -> utbetalingId  to vilkårsgrunnlag }
 
     override fun preVisitVedtaksperiodeUtbetaling(
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
@@ -86,7 +79,6 @@ internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode) : Vedtaksperi
             annulleringer: Set<UUID>
         ) {
             utbetalingId = id
-
         }
 
         override fun preVisitGrunnlagsdata(
@@ -154,85 +146,6 @@ internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode) : Vedtaksperi
                 id = vilkårsgrunnlagId
             )
         }
-    }
-
-    override fun preVisitUtbetaling(
-        utbetaling: no.nav.helse.utbetalingslinjer.Utbetaling,
-        id: UUID,
-        korrelasjonsId: UUID,
-        type: Utbetalingtype,
-        utbetalingstatus: Utbetalingstatus,
-        periode: Periode,
-        tidsstempel: LocalDateTime,
-        oppdatert: LocalDateTime,
-        arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int,
-        maksdato: LocalDate,
-        forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?,
-        stønadsdager: Int,
-        beregningId: UUID,
-        overføringstidspunkt: LocalDateTime?,
-        avsluttet: LocalDateTime?,
-        avstemmingsnøkkel: Long?,
-        annulleringer: Set<UUID>
-    ) {
-        if (utbetalingstatus == FORKASTET || (type == Utbetalingtype.UTBETALING && utbetalingstatus == IKKE_GODKJENT)) return
-        utbetalinger.putIfAbsent(id, UtbetalingBuilder(utbetaling).build())
-    }
-}
-
-internal class UtbetalingBuilder(utbetaling: InternUtbetaling) : UtbetalingVisitor {
-    private lateinit var utbetaling: IUtbetaling
-
-    init {
-        utbetaling.accept(this)
-    }
-
-    internal fun build() = utbetaling
-
-    override fun preVisitUtbetaling(
-        utbetaling: no.nav.helse.utbetalingslinjer.Utbetaling,
-        id: UUID,
-        korrelasjonsId: UUID,
-        type: Utbetalingtype,
-        utbetalingstatus: Utbetalingstatus,
-        periode: Periode,
-        tidsstempel: LocalDateTime,
-        oppdatert: LocalDateTime,
-        arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int,
-        maksdato: LocalDate,
-        forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?,
-        stønadsdager: Int,
-        beregningId: UUID,
-        overføringstidspunkt: LocalDateTime?,
-        avsluttet: LocalDateTime?,
-        avstemmingsnøkkel: Long?,
-        annulleringer: Set<UUID>
-    ) {
-        val tidslinje = UtbetalingstidslinjeBuilder(utbetaling).build()
-        val vurdering = VurderingBuilder(utbetaling).build()
-        val oppdragBuilder = OppdragBuilder(utbetaling)
-        this.utbetaling = IUtbetaling(
-            id = id,
-            korrelasjonsId = korrelasjonsId,
-            beregningId = beregningId,
-            opprettet = tidsstempel,
-            utbetalingstidslinje = tidslinje,
-            maksdato = maksdato,
-            gjenståendeSykedager = gjenståendeSykedager,
-            forbrukteSykedager = forbrukteSykedager,
-            type = type.toString(),
-            tilstand = utbetalingstatus.tilstandsnavn(),
-            arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
-            personNettoBeløp = personNettoBeløp,
-            arbeidsgiverFagsystemId = oppdragBuilder.arbeidsgiverFagsystemId(),
-            personFagsystemId = oppdragBuilder.personFagsystemId(),
-            vurdering = vurdering,
-            oppdrag = oppdragBuilder.oppdrag()
-        )
     }
 }
 
