@@ -228,4 +228,28 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
+
+    @Test
+    fun `Bytter arbeidsgiver i løpet i sykefraværet - første arbeidsgiver revurderes mens vi venter på IM for ny arbeidsgiver`() {
+        nyttVedtak(1.januar, 31.januar, orgnummer = a1)
+        nyPeriode(1.februar til 28.februar, orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = INNTEKT*1.1, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
+
+        val antallVedtaksperiodeVenterFør = observatør.vedtaksperiodeVenter.size
+        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar, orgnummer = a2)
+        val vedtaksperiodeVenterEtterHåndtertIM = observatør.vedtaksperiodeVenter.drop(antallVedtaksperiodeVenterFør)
+
+        assertEquals(2, vedtaksperiodeVenterEtterHåndtertIM.size)
+        // a1 venter på seg selv - mener den mangler informasjon fra a2 selv om vi har fått inntektsmelding.
+        // Ettersom vi har et vilkårsgrunnlag på skjæringstidspunktet a2 ikke inngår i blir vi stående å vente...
+        val a1venter = vedtaksperiodeVenterEtterHåndtertIM.single { it.vedtaksperiodeId == 1.vedtaksperiode.id(a1) }
+        assertEquals(1.vedtaksperiode.id(a1), a1venter.venterPå.vedtaksperiodeId)
+        assertEquals("MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE", a1venter.venterPå.venteårsak.hvorfor)
+        // a2 venter på a1
+        val a2venter = vedtaksperiodeVenterEtterHåndtertIM.single { it.vedtaksperiodeId == 1.vedtaksperiode.id(a2) }
+        assertEquals(1.vedtaksperiode.id(a1), a2venter.venterPå.vedtaksperiodeId)
+        assertEquals("MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE", a2venter.venterPå.venteårsak.hvorfor)
+    }
 }
