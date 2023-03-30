@@ -1276,10 +1276,18 @@ internal class Vedtaksperiode private constructor(
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
             if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode))
                 return INNTEKTSMELDING fordi MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
-            if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode, Aktivitetslogg(), arbeidsgivere))
+            if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode, Aktivitetslogg(), arbeidsgivere.aktuelleArbeidsgivere(vedtaksperiode)))
                 return INNTEKTSMELDING fordi MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE
             return uventetManglendeVenteårsak(vedtaksperiode)
         }
+
+        private fun Iterable<Arbeidsgiver>.aktuelleArbeidsgivere(vedtaksperiode: Vedtaksperiode): Iterable<Arbeidsgiver> {
+            // Om vi ikke har et vilkårsgrunnlag på skjæringstidspunktet bruker vi alle arbeidsgivere
+            val vilkårsgrunnlag = vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) ?: return this
+            // Om vi har et vilkårsgrunnlag velger vi kun de som inngår i sykepengegrunnlaget
+            return filter { vilkårsgrunnlag.inngårISykepengegrunnlaget(it.organisasjonsnummer()) }
+        }
+
 
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {
             vedtaksperiode.vedtaksperiodeVenter(nestemann)
@@ -1292,7 +1300,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode, hendelse))
                 return hendelse.info("Mangler nødvendig inntekt for vilkårsprøving eller refusjonsopplysninger og kan derfor ikke gjenoppta revurdering.")
-            if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode, hendelse, arbeidsgivere))
+            if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode, hendelse, arbeidsgivere.aktuelleArbeidsgivere(vedtaksperiode)))
                 return hendelse.info("En annen arbeidsgiver mangler nødvendig inntekt for vilkårsprøving eller refusjonsopplysninger og kan derfor ikke gjenoppta revurdering.")
             vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
             vedtaksperiode.arbeidsgiver.gjenopptaRevurdering(vedtaksperiode, hendelse)
