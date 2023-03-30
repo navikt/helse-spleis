@@ -202,6 +202,9 @@ internal class TestPerson(
         internal fun håndterForkastSykmeldingsperioder(periode: Periode) =
             arbeidsgiverHendelsefabrikk.lagHåndterForkastSykmeldingsperioder(periode).håndter(Person::håndter)
 
+        internal fun håndterAnmodningOmForkasting(vedtaksperiodeId: UUID) =
+            arbeidsgiverHendelsefabrikk.lagAnmodningOmForkasting(vedtaksperiodeId).håndter(Person::håndter)
+
         private fun håndterInntektsmeldingReplay(vedtaksperiodeId: UUID) {
             behovsamler.bekreftOgKvitterReplay(vedtaksperiodeId)
             arbeidsgiverHendelsefabrikk.lagInntektsmeldingReplay(vedtaksperiodeId).forEach { replay ->

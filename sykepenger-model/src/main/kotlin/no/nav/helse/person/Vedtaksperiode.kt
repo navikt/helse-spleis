@@ -11,6 +11,7 @@ import no.nav.helse.Alder
 import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.hendelser.InntektsmeldingReplayUtført
@@ -276,6 +277,17 @@ internal class Vedtaksperiode private constructor(
     private fun søknadHåndtert(søknad: Søknad) {
         søknad.leggTil(hendelseIder)
         person.emitSøknadHåndtert(søknad.meldingsreferanseId(), id, organisasjonsnummer)
+    }
+
+    internal fun håndter(anmodningOmForkasting: AnmodningOmForkasting) {
+        if (!anmodningOmForkasting.erRelevant(id)) return
+        kontekst(anmodningOmForkasting)
+        tilstand.håndter(this, anmodningOmForkasting)
+    }
+
+    private fun etterkomAnmodningOmForkasting(anmodningOmForkasting: AnmodningOmForkasting) {
+        anmodningOmForkasting.info("Etterkommer anmodning om forkasting")
+        forkast(anmodningOmForkasting)
     }
 
     internal fun håndter(inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
@@ -1081,6 +1093,10 @@ internal class Vedtaksperiode private constructor(
             vilkårsgrunnlag.funksjonellFeil(RV_VT_2)
         }
 
+        fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
+            anmodningOmForkasting.info("Avslår anmodning om forkasting i ${type.name}")
+        }
+
         fun håndter(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
@@ -1590,6 +1606,10 @@ internal class Vedtaksperiode private constructor(
             vurderOmKanGåVidere(vedtaksperiode, inntektsmeldingReplayUtført)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
+            vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting)
+        }
+
         private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             if (!vedtaksperiode.forventerInntekt()) return vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
             if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse)) return
@@ -1628,6 +1648,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vedtaksperiode.person.gjenopptaBehandling(påminnelse)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
+            vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting)
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {}
@@ -1772,6 +1796,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vedtaksperiode.trengerYtelser(påminnelse)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
+            vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting)
         }
 
         override fun håndter(

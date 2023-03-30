@@ -7,6 +7,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
@@ -473,6 +474,11 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(forkastSykmeldingsperioder: ForkastSykmeldingsperioder) {
         forkastSykmeldingsperioder.kontekst(this)
         forkastSykmeldingsperioder.forkast(sykmeldingsperioder)
+    }
+
+    internal fun håndter(anmodningOmForkasting: AnmodningOmForkasting) {
+        anmodningOmForkasting.kontekst(this)
+        håndter(anmodningOmForkasting, Vedtaksperiode::håndter)
     }
 
     private fun harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode): Boolean {

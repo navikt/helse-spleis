@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning.Companion.tilOverstyrt
+import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepermisjon
@@ -355,6 +356,15 @@ internal class ArbeidsgiverHendelsefabrikk(
             fødselsnummer = personidentifikator.toString(),
             organisasjonsnummer = organisasjonsnummer,
             periode = periode
+        )
+
+    internal fun lagAnmodningOmForkasting(vedtaksperiodeId: UUID) =
+        AnmodningOmForkasting(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = aktørId,
+            fødselsnummer = personidentifikator.toString(),
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId
         )
 
     internal fun lagHåndterOverstyrTidslinje(overstyringsdager: List<ManuellOverskrivingDag>) =

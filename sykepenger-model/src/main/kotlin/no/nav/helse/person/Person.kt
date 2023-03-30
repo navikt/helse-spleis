@@ -8,6 +8,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Dødsmelding
@@ -158,6 +159,12 @@ class Person private constructor(
         finnArbeidsgiver(forkastSykmeldingsperioder).håndter(forkastSykmeldingsperioder)
         gjenopptaBehandling(forkastSykmeldingsperioder)
         håndterGjenoppta(forkastSykmeldingsperioder)
+    }
+
+    fun håndter(anmodningOmForkasting: AnmodningOmForkasting) {
+        registrer(anmodningOmForkasting, "Behandler anmodning om forkasting")
+        finnArbeidsgiver(anmodningOmForkasting).håndter(anmodningOmForkasting)
+        håndterGjenoppta(anmodningOmForkasting)
     }
 
     fun håndter(søknad: Søknad) = håndter(søknad, "søknad") { arbeidsgiver, _ ->
