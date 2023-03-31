@@ -71,6 +71,8 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.Venteårsak.Companion.fordi
 import no.nav.helse.person.Venteårsak.Companion.utenBegrunnelse
+import no.nav.helse.person.Venteårsak.Companion.venterPåInntektsmelding
+import no.nav.helse.person.Venteårsak.Companion.venterPåSøknad
 import no.nav.helse.person.Venteårsak.Hva.BEREGNING
 import no.nav.helse.person.Venteårsak.Hva.GODKJENNING
 import no.nav.helse.person.Venteårsak.Hva.HJELP
@@ -782,7 +784,7 @@ internal class Vedtaksperiode private constructor(
             harVedtaksperiodeWarnings = person.aktivitetslogg.logg(this)
                 .let { it.harVarslerEllerVerre() && !it.harFunksjonelleFeilEllerVerre() },
             hendelser = hendelseIder(),
-            makstid = tilstand.makstid(LocalDateTime.now()),
+            makstid = person.makstid(this, LocalDateTime.now()),
             fom = periode.start,
             tom = periode.endInclusive
         )
@@ -875,7 +877,7 @@ internal class Vedtaksperiode private constructor(
     private fun Vedtaksperiodetilstand.påminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
         if (!påminnelse.gjelderTilstand(type)) return vedtaksperiode.person.vedtaksperiodeIkkePåminnet(id, organisasjonsnummer, type)
         vedtaksperiode.person.vedtaksperiodePåminnet(id, organisasjonsnummer, påminnelse)
-        if (påminnelse.nåddMakstid(::makstid)) return håndterMakstid(vedtaksperiode, påminnelse)
+        if (påminnelse.nåddMakstid(vedtaksperiode, person)) return håndterMakstid(vedtaksperiode, påminnelse)
         håndter(vedtaksperiode, påminnelse)
     }
 
@@ -992,7 +994,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiodeId = id,
             orgnummer = organisasjonsnummer,
             ventetSiden = oppdatert,
-            venterTil = tilstand.makstid(oppdatert)
+            venterTil = person.makstid(this, oppdatert)
         )
         builder.hendelseIder(hendelseIder())
         emitVedtaksperiodeVenter(builder.build())
@@ -1000,6 +1002,9 @@ internal class Vedtaksperiode private constructor(
 
     internal fun venteårsak(arbeidsgivere: List<Arbeidsgiver>) =
         tilstand.venteårsak(this, arbeidsgivere)
+
+    internal fun makstid(tilstandsendringstidspunkt: LocalDateTime, arbeidsgivere: List<Arbeidsgiver>) =
+        tilstand.makstid(tilstandsendringstidspunkt, this, arbeidsgivere)
 
     fun slutterEtter(dato: LocalDate) = periode.slutterEtter(dato)
 
@@ -1044,7 +1049,11 @@ internal class Vedtaksperiode private constructor(
 
         fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
-        fun makstid(tilstandsendringstidspunkt: LocalDateTime): LocalDateTime = LocalDateTime.MAX
+        fun makstid(
+            tilstandsendringstidspunkt: LocalDateTime,
+            vedtaksperiode: Vedtaksperiode,
+            arbeidsgivere: List<Arbeidsgiver>
+        ): LocalDateTime = LocalDateTime.MAX
 
         fun håndterMakstid(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             påminnelse.funksjonellFeil(RV_VT_1)
@@ -1410,7 +1419,11 @@ internal class Vedtaksperiode private constructor(
     internal object AvventerHistorikkRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_HISTORIKK_REVURDERING
 
-        override fun makstid(tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
+        override fun makstid(
+            tilstandsendringstidspunkt: LocalDateTime,
+            vedtaksperiode: Vedtaksperiode,
+            arbeidsgivere: List<Arbeidsgiver>
+        ): LocalDateTime =
             LocalDateTime.MAX
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
@@ -1523,7 +1536,11 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerInntektsmelding : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_INNTEKTSMELDING
-        override fun makstid(tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
+        override fun makstid(
+            tilstandsendringstidspunkt: LocalDateTime,
+            vedtaksperiode: Vedtaksperiode,
+            arbeidsgivere: List<Arbeidsgiver>
+        ): LocalDateTime =
             tilstandsendringstidspunkt.plusDays(180)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
@@ -1623,8 +1640,14 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
 
+        override fun makstid(
+            tilstandsendringstidspunkt: LocalDateTime,
+            vedtaksperiode: Vedtaksperiode,
+            arbeidsgivere: List<Arbeidsgiver>
+        ) = tilstand(vedtaksperiode, arbeidsgivere).makstid(tilstandsendringstidspunkt, vedtaksperiode)
+
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
-            return tilstand(vedtaksperiode, arbeidsgivere, Aktivitetslogg()).venteårsak(vedtaksperiode)
+            return tilstand(vedtaksperiode, arbeidsgivere).venteårsak(vedtaksperiode)
         }
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {
             vedtaksperiode.vedtaksperiodeVenter(nestemann)
@@ -1662,7 +1685,7 @@ internal class Vedtaksperiode private constructor(
         private fun tilstand(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgivere: Iterable<Arbeidsgiver>,
-            hendelse: IAktivitetslogg
+            hendelse: IAktivitetslogg = Aktivitetslogg()
         ) = when {
             arbeidsgivere.avventerSøknad(vedtaksperiode.periode) -> AvventerTidligereEllerOverlappendeSøknad
             !vedtaksperiode.forventerInntekt() -> ForventerIkkeInntekt
@@ -1677,6 +1700,12 @@ internal class Vedtaksperiode private constructor(
 
         private sealed interface Tilstand {
             fun venteårsak(vedtaksperiode: Vedtaksperiode): Venteårsak? = uventetManglendeVenteårsak(vedtaksperiode)
+            fun makstid(tilstandsendringstidspunkt: LocalDateTime, vedtaksperiode: Vedtaksperiode): LocalDateTime {
+                val venteårsak = venteårsak(vedtaksperiode)
+                return if (venteårsak.venterPåInntektsmelding) tilstandsendringstidspunkt.plusDays(180)
+                else if (venteårsak.venterPåSøknad) tilstandsendringstidspunkt.plusDays(90)
+                else LocalDateTime.MAX
+            }
             fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg)
         }
         private object AvventerTidligereEllerOverlappendeSøknad: Tilstand {
@@ -1734,7 +1763,11 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerVilkårsprøving : Vedtaksperiodetilstand {
         override val type = AVVENTER_VILKÅRSPRØVING
-        override fun makstid(tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
+        override fun makstid(
+            tilstandsendringstidspunkt: LocalDateTime,
+            vedtaksperiode: Vedtaksperiode,
+            arbeidsgivere: List<Arbeidsgiver>
+        ): LocalDateTime =
             tilstandsendringstidspunkt.plusDays(5)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
@@ -1773,7 +1806,9 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_HISTORIKK
 
         override fun makstid(
-            tilstandsendringstidspunkt: LocalDateTime
+            tilstandsendringstidspunkt: LocalDateTime,
+            vedtaksperiode: Vedtaksperiode,
+            arbeidsgivere: List<Arbeidsgiver>
         ): LocalDateTime = tilstandsendringstidspunkt
             .plusDays(4)
 
@@ -1883,7 +1918,9 @@ internal class Vedtaksperiode private constructor(
         override val type: TilstandType = AVVENTER_SIMULERING
 
         override fun makstid(
-            tilstandsendringstidspunkt: LocalDateTime
+            tilstandsendringstidspunkt: LocalDateTime,
+            vedtaksperiode: Vedtaksperiode,
+            arbeidsgivere: List<Arbeidsgiver>
         ): LocalDateTime = tilstandsendringstidspunkt.plusDays(7)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {

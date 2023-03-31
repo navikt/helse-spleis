@@ -2,8 +2,10 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVenter
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 
@@ -27,8 +29,8 @@ class Påminnelse(
     fun påminnelsestidspunkt() = påminnelsestidspunkt
     fun nestePåminnelsestidspunkt() = nestePåminnelsestidspunkt
 
-    internal fun nåddMakstid(makstid: (tilstandsendringstidspunkt: LocalDateTime) -> LocalDateTime): Boolean {
-        val beregnetMakstid = makstid(tilstandsendringstidspunkt)
+    internal fun nåddMakstid(vedtaksperiode: Vedtaksperiode, person: Person): Boolean {
+        val beregnetMakstid = person.makstid(vedtaksperiode, tilstandsendringstidspunkt)
         return nå >= beregnetMakstid
     }
 

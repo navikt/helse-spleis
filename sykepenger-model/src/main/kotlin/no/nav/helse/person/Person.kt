@@ -747,5 +747,6 @@ class Person private constructor(
         observers.forEach { it.vedtaksperiodeOpprettet(event) }
     }
     internal fun venteårsak(vedtaksperiode: Vedtaksperiode) = vedtaksperiode.venteårsak(arbeidsgivere)
+    internal fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) = vedtaksperiode.makstid(tilstandsendringstidspunkt, arbeidsgivere)
 }
 

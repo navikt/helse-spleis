@@ -105,7 +105,7 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
                 vedtaksperiodeId = 1.vedtaksperiode,
                 hendelser = setOf(søknadId, inntektsmeldingId),
                 ventetSiden = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert,
-                venterTil = LocalDateTime.MAX,
+                venterTil = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert.plusDays(90),
                 venterPå = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
                     vedtaksperiodeId = 1.vedtaksperiode,
                     organisasjonsnummer = a2,
