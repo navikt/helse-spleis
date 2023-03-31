@@ -32,11 +32,11 @@ internal class MakstidIAvventerBlokkerendePeriodeTest: AbstractDslTest() {
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            assertEquals(LocalDate.now().plusDays(180), venterTil(1.vedtaksperiode))
+            assertEquals(LocalDate.now().plusDays(110), venterTil(1.vedtaksperiode))
         }
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            assertEquals(LocalDate.now().plusDays(180), venterTil(1.vedtaksperiode))
+            assertEquals(LocalDate.now().plusDays(110), venterTil(1.vedtaksperiode))
         }
     }
 
@@ -82,11 +82,11 @@ internal class MakstidIAvventerBlokkerendePeriodeTest: AbstractDslTest() {
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            assertEquals(LocalDate.now().plusDays(180), venterTil(1.vedtaksperiode))
+            assertEquals(LocalDate.now().plusDays(110), venterTil(1.vedtaksperiode))
         }
         a1 {
             assertEquals(LocalDate.MAX, venterTil(1.vedtaksperiode))
-            assertEquals(LocalDate.now().plusDays(180), venterTil(2.vedtaksperiode))
+            assertEquals(LocalDate.now().plusDays(110), venterTil(2.vedtaksperiode))
         }
     }
 

@@ -48,7 +48,7 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
                 vedtaksperiodeId = 1.vedtaksperiode,
                 hendelser = setOf(søknadIdJanuar),
                 ventetSiden = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert,
-                venterTil = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert.plusDays(180),
+                venterTil = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert.plusDays(110),
                 venterPå = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
                     vedtaksperiodeId = 1.vedtaksperiode,
                     organisasjonsnummer = a1,
@@ -132,7 +132,7 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
                 vedtaksperiodeId = 1.vedtaksperiode,
                 hendelser = setOf(søknadId),
                 ventetSiden = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert,
-                venterTil = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert.plusDays(180),
+                venterTil = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert.plusDays(110),
                 venterPå = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
                     vedtaksperiodeId = 1.vedtaksperiode,
                     organisasjonsnummer = a1,

@@ -1541,7 +1541,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgivere: List<Arbeidsgiver>
         ): LocalDateTime =
-            tilstandsendringstidspunkt.plusDays(180)
+            tilstandsendringstidspunkt.plusDays(110)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             if(Toggle.Splarbeidsbros.enabled && vedtaksperiode.forventerInntekt()) {
@@ -1702,7 +1702,7 @@ internal class Vedtaksperiode private constructor(
             fun venteårsak(vedtaksperiode: Vedtaksperiode): Venteårsak? = uventetManglendeVenteårsak(vedtaksperiode)
             fun makstid(tilstandsendringstidspunkt: LocalDateTime, vedtaksperiode: Vedtaksperiode): LocalDateTime {
                 val venteårsak = venteårsak(vedtaksperiode)
-                return if (venteårsak.venterPåInntektsmelding) tilstandsendringstidspunkt.plusDays(180)
+                return if (venteårsak.venterPåInntektsmelding) tilstandsendringstidspunkt.plusDays(110)
                 else if (venteårsak.venterPåSøknad) tilstandsendringstidspunkt.plusDays(90)
                 else LocalDateTime.MAX
             }
