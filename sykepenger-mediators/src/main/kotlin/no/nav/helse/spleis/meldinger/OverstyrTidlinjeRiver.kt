@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.meldinger
 
+import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
@@ -16,11 +17,15 @@ internal class OverstyrTidlinjeRiver(
         message.requireKey("aktørId", "fødselsnummer", "organisasjonsnummer")
         message.requireArray("dager") {
             requireKey("dato")
-            requireKey("type")
+            requireAny("type", gyldigeTyper)
             interestedIn("grad")
         }
         message.require("dager") { require(!it.isEmpty) }
     }
 
     override fun createMessage(packet: JsonMessage) = OverstyrTidslinjeMessage(packet)
+
+    private companion object {
+        private val gyldigeTyper = Dagtype.values().map { it.name }
+    }
 }
