@@ -288,6 +288,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun etterkomAnmodningOmForkasting(anmodningOmForkasting: AnmodningOmForkasting) {
+        if (!arbeidsgiver.kanForkastes(this, anmodningOmForkasting)) return anmodningOmForkasting.info("Kan ikke etterkomme anmodning om forkasting")
         anmodningOmForkasting.info("Etterkommer anmodning om forkasting")
         forkast(anmodningOmForkasting)
     }
@@ -484,8 +485,24 @@ internal class Vedtaksperiode private constructor(
     private fun låsOpp() = arbeidsgiver.låsOpp(periode)
     private fun lås() = arbeidsgiver.lås(periode)
 
-    internal fun forkast(hendelse: IAktivitetslogg, utbetalinger: List<Utbetaling>): VedtaksperiodeForkastetEventBuilder? {
-        if (!this.utbetalinger.kanForkastes(utbetalinger) || this.tilstand == AvsluttetUtenUtbetaling) return null
+    internal fun kanForkastes(utbetalinger: List<Utbetaling>, vedtaksperioder: List<Vedtaksperiode>, hendelse: IAktivitetslogg): Boolean {
+        if (!this.utbetalinger.kanForkastes(utbetalinger)) return false
+        if (this.tilstand != AvsluttetUtenUtbetaling) return true
+        // Vurderer nå om kan forkaste periode i AvsluttetUtenUtbetaling
+        val førsteEtter = vedtaksperioder.sorted().firstOrNull { it etter this }
+        if (førsteEtter != null && førsteEtter.påvirkerArbeidsgiverperioden(this)) return false
+        if (Toggle.ForkasteAuu.enabled) return true
+        sikkerlogg.info("Periode i AvsluttetUtenUtbetaling kunne blitt forkastet. {}, {}, {}, {}",
+            kv("forventerInntekt", forventerInntekt()),
+            kv("vedtaksperiodeId", "$id"),
+            kv("fødselsnummer", fødselsnummer),
+            kv("hendelse", "${hendelse::class.simpleName}")
+        )
+        return false
+    }
+
+    internal fun forkast(hendelse: IAktivitetslogg, utbetalinger: List<Utbetaling>, vedtaksperioder: List<Vedtaksperiode>): VedtaksperiodeForkastetEventBuilder? {
+        if (!kanForkastes(utbetalinger, vedtaksperioder, hendelse)) return null
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
         this.utbetalinger.forkast(hendelse)
@@ -2259,6 +2276,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.revurderLåstTidslinje(hendelse)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
+            vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting)
         }
 
     }
