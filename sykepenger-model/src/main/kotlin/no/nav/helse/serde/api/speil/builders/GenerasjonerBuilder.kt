@@ -16,8 +16,9 @@ import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.api.dto.GenerasjonDTO
 import no.nav.helse.serde.api.dto.HendelseDTO
+import no.nav.helse.serde.api.dto.Tidslinjeperiode.Companion.sorterEtterHendelse
+import no.nav.helse.serde.api.speil.Generasjoner
 import no.nav.helse.serde.api.speil.Tidslinjeberegninger
-import no.nav.helse.serde.api.speil.Tidslinjeperioder
 import no.nav.helse.serde.api.speil.builders.GenerasjonerBuilder.Byggetilstand.AktivePerioder
 import no.nav.helse.serde.api.speil.builders.GenerasjonerBuilder.Byggetilstand.ForkastedePerioder
 import no.nav.helse.serde.api.speil.builders.GenerasjonerBuilder.Byggetilstand.Initiell
@@ -50,13 +51,12 @@ internal class GenerasjonerBuilder(
         arbeidsgiver.periodetype(periode)
 
     internal fun build(): List<GenerasjonDTO> {
-        val vedtaksperioder = tidslinjeberegninger.build()
-        val tidslinjeperioder = Tidslinjeperioder(
-            alder = alder,
-            vedtaksperioder = vedtaksperioder,
-            vilkårsgrunnlaghistorikk = vilkårsgrunnlaghistorikk
-        )
-        return tidslinjeperioder.tilGenerasjoner()
+        val perioder = tidslinjeberegninger.build(alder, vilkårsgrunnlaghistorikk)
+        return Generasjoner().apply {
+            perioder
+                .sorterEtterHendelse()
+                .forEach { periode -> periode.tilGenerasjon(this) }
+        }.build()
     }
 
     private fun byggForkastetVedtaksperiode(
@@ -89,13 +89,30 @@ internal class GenerasjonerBuilder(
         val sykdomstidslinje = VedtaksperiodeSykdomstidslinjeBuilder(vedtaksperiode).build()
         val utbetalinger = UtbetalingerBuilder(vedtaksperiode).build()
         val aktivetsloggForPeriode = Vedtaksperiode.aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode)
+        val filtrerteHendelser = hendelser.filter { it.id in hendelseIder.ider().map(UUID::toString) }
+        if (forkastet) {
+            return tidslinjeberegninger.leggTilForkastetVedtaksperiode(
+                vedtaksperiode = vedtaksperiodeId,
+                fom = periode.start,
+                tom = periode.endInclusive,
+                inntektskilde = inntektskilde,
+                hendelser = filtrerteHendelser,
+                utbetalinger = utbetalinger,
+                periodetype = periodetype(periode),
+                sykdomstidslinje = sykdomstidslinje,
+                opprettet = opprettet,
+                oppdatert = oppdatert,
+                tilstand = tilstand,
+                skjæringstidspunkt = skjæringstidspunkt,
+                aktivitetsloggForPeriode = aktivetsloggForPeriode
+            )
+        }
         tidslinjeberegninger.leggTilVedtaksperiode(
             vedtaksperiode = vedtaksperiodeId,
-            forkastet = forkastet,
             fom = periode.start,
             tom = periode.endInclusive,
             inntektskilde = inntektskilde,
-            hendelser = hendelser.filter { it.id in hendelseIder.ider().map(UUID::toString) },
+            hendelser = filtrerteHendelser,
             utbetalinger = utbetalinger,
             periodetype = periodetype(periode),
             sykdomstidslinje = sykdomstidslinje,
