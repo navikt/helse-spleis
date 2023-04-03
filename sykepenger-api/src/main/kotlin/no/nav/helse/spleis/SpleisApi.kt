@@ -26,12 +26,12 @@ import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 
-internal fun Application.spannerApi(dataSource: DataSource, authProviderName: String) {
+internal fun Application.spannerApi(dataSource: DataSource) {
     val hendelseDao = HendelseDao(dataSource)
     val personDao = PersonDao(dataSource)
 
     routing {
-        authenticate(authProviderName) {
+        authenticate {
             get("/api/person-json") {
                 withContext(Dispatchers.IO) {
                     val ident = fnr(personDao)
@@ -65,12 +65,12 @@ internal fun Application.spannerApi(dataSource: DataSource, authProviderName: St
     }
 }
 
-internal fun Application.sporingApi(dataSource: DataSource, authProviderName: String) {
+internal fun Application.sporingApi(dataSource: DataSource) {
     val hendelseDao = HendelseDao(dataSource)
     val personDao = PersonDao(dataSource)
 
     routing {
-        authenticate(authProviderName) {
+        authenticate {
             get("/api/vedtaksperioder") {
                 withContext(Dispatchers.IO) {
                     val fnr =  fnr(personDao)

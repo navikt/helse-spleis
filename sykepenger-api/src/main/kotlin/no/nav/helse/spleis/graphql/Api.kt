@@ -8,7 +8,7 @@ import javax.sql.DataSource
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 
-fun Application.installGraphQLApi(dataSource: DataSource, authProviderName: String) {
+fun Application.installGraphQLApi(dataSource: DataSource) {
     val personDao = PersonDao(dataSource)
     val hendelseDao = HendelseDao(dataSource)
 
@@ -16,7 +16,7 @@ fun Application.installGraphQLApi(dataSource: DataSource, authProviderName: Stri
         endpoint = "/graphql"
 
         wrap {
-            authenticate(authProviderName, build = it)
+            authenticate(build = it)
         }
 
         schema {

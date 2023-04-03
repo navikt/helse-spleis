@@ -46,7 +46,7 @@ internal object ApiV2i {
         it.registerSubtypes(NamedType(GraphQLSpleisVilkarsgrunnlag::class.java))
     }
 
-    internal fun Application.installGraphQLApiV2(dataSource: DataSource, authProviderName: String) {
+    internal fun Application.installGraphQLApiV2(dataSource: DataSource) {
         val personDao = PersonDao(dataSource)
         val hendelseDao = HendelseDao(dataSource)
 
@@ -54,7 +54,7 @@ internal object ApiV2i {
             post("/v2/graphql/introspection") {
                 call.respondText(schema, Json)
             }
-            authenticate(authProviderName) {
+            authenticate {
                 post("/v2/graphql") {
                     val fødselsnummer = call.receiveText().fnr ?: return@post call.respondText(schema, Json)
                     val person = personResolver(personDao, hendelseDao)(fødselsnummer)
