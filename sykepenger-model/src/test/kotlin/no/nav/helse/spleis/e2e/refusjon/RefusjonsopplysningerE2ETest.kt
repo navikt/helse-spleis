@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.refusjon
 
-import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
@@ -183,7 +182,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
 
     private fun Refusjonsopplysninger.assertRefusjonsbeløp(periode: Periode, beløp: Inntekt) {
         periode.forEach { dag ->
-            assertEquals(beløp, refusjonsbeløp(skjæringstidspunkt = LocalDate.MAX, dag = dag, manglerRefusjonsopplysning = { _, _->}))
+            assertEquals(beløp, refusjonsbeløpOrNull(dag))
         }
     }
 }

@@ -604,7 +604,7 @@ class Person private constructor(
         skatteopplysninger.keys.forEach { orgnr -> finnEllerOpprettArbeidsgiver(orgnr, hendelse) } // oppretter evt. nye arbeidsgivere
         return Sykepengegrunnlag.opprett(
             alder,
-            arbeidsgivere.avklarSykepengegrunnlag(skjæringstidspunkt, skatteopplysninger),
+            arbeidsgivere.avklarSykepengegrunnlag(hendelse, skjæringstidspunkt, skatteopplysninger),
             skjæringstidspunkt,
             subsumsjonObserver
         )

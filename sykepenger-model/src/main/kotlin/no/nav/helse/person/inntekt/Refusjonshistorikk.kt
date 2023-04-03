@@ -3,11 +3,13 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.RefusjonshistorikkVisitor
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.Companion.leggTilRefusjon
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.Companion.somOverlapperMedArbeidsgiverperiode
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.Companion.somTilstøterArbeidsgiverperiode
@@ -116,9 +118,20 @@ internal class Refusjonshistorikk {
                     if (førsteFraværsdag == null) return arbeidsgiverperioder.maxOf { it.start }
                     return arbeidsgiverperioder.map { it.start }.plus(førsteFraværsdag).max()
                 }
-                internal fun Refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt: LocalDate): Refusjonsopplysninger {
+                internal fun Refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg? = null): Refusjonsopplysninger {
                     val refusjonsopplysningBuilder = RefusjonsopplysningerBuilder()
-                    refusjoner.filter { it.startskuddet() >= skjæringstidspunkt }.leggTilRefusjonsopplysninger(refusjonsopplysningBuilder)
+                    val aktuelle = refusjoner.filter { it.startskuddet() >= skjæringstidspunkt }
+                    val første = aktuelle.minByOrNull { it.startskuddet() }
+                    if (første != null && første.startskuddet() != skjæringstidspunkt) {
+                        aktivitetslogg?.varsel(Varselkode.RV_RE_1)
+                        refusjonsopplysningBuilder.leggTil(Refusjonsopplysning(
+                            meldingsreferanseId = første.meldingsreferanseId,
+                            fom = skjæringstidspunkt,
+                            tom = første.startskuddet().forrigeDag,
+                            beløp = første.beløp ?: INGEN,
+                        ), første.tidsstempel)
+                    }
+                    aktuelle.leggTilRefusjonsopplysninger(refusjonsopplysningBuilder)
                     return refusjonsopplysningBuilder.build()
                 }
 

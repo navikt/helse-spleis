@@ -272,8 +272,8 @@ internal class Sykepengegrunnlag(
         return arbeidsgiverInntektsopplysninger.medInntekt(organisasjonsnummer, `6G`, dato, økonomi, regler, subsumsjonObserver) ?: utenInntekt(økonomi)
     }
 
-    internal fun medUtbetalingsopplysninger(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver, manglerRefusjonsopplysning: ManglerRefusjonsopplysning): Økonomi {
-        return arbeidsgiverInntektsopplysninger.medUtbetalingsopplysninger(organisasjonsnummer, `6G`, skjæringstidspunkt, dato, økonomi, regler, subsumsjonObserver, manglerRefusjonsopplysning)
+    internal fun medUtbetalingsopplysninger(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
+        return arbeidsgiverInntektsopplysninger.medUtbetalingsopplysninger(organisasjonsnummer, `6G`, skjæringstidspunkt, dato, økonomi, regler, subsumsjonObserver)
     }
     internal fun build(builder: VedtakFattetBuilder) {
         builder
@@ -336,9 +336,6 @@ internal class Sykepengegrunnlag(
         }
 
         internal fun resultat(): List<ArbeidsgiverInntektsopplysning>? {
-         /*   check(opprinneligArbeidsgiverInntektsopplysninger.inneholderAlleArbeidsgivereI(nyeInntektsopplysninger)) {
-                "De nye arbeidsgiveropplysningene inneholder arbeidsgivere som ikke er en del av sykepengegrunnlaget."
-            }*/
             return opprinneligArbeidsgiverInntektsopplysninger.overstyrInntekter(opptjening, nyeInntektsopplysninger, subsumsjonObserver).takeUnless { resultat ->
                 resultat == opprinneligArbeidsgiverInntektsopplysninger
             }

@@ -8,7 +8,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.manglerVilkårsgrunnlag
 import no.nav.helse.person.Vedtaksperiode.Companion.ugyldigUtbetalingstidslinje
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.person.inntekt.ManglerRefusjonsopplysning
 import no.nav.helse.økonomi.Økonomi
 
 internal class Inntekter(
@@ -18,18 +17,18 @@ internal class Inntekter(
     private val subsumsjonObserver: SubsumsjonObserver,
     private val vedtaksperioder: List<Vedtaksperiode> = emptyList()
 ) {
-    internal fun medInntekt(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?, økonomi: Økonomi = Økonomi.ikkeBetalt()) =
-        vilkårsgrunnlagHistorikk.medInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
+    internal fun medInntekt(dato: LocalDate, økonomi: Økonomi = Økonomi.ikkeBetalt()) =
+        vilkårsgrunnlagHistorikk.medInntekt(organisasjonsnummer, dato, økonomi, regler, subsumsjonObserver)
 
-    internal fun medUtbetalingsopplysninger(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?, økonomi: Økonomi = Økonomi.ikkeBetalt(), manglerRefusjonsopplysning: ManglerRefusjonsopplysning) = try {
-        vilkårsgrunnlagHistorikk.medUtbetalingsopplysninger(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver, manglerRefusjonsopplysning)
+    internal fun medUtbetalingsopplysninger(dato: LocalDate, økonomi: Økonomi = Økonomi.ikkeBetalt()) = try {
+        vilkårsgrunnlagHistorikk.medUtbetalingsopplysninger(organisasjonsnummer, dato, økonomi, regler, subsumsjonObserver)
     } catch (exception: IllegalStateException) {
         exception.håndter(dato, vedtaksperioder)
         throw exception
     }
 
-    internal fun utenInntekt(dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?) =
-        vilkårsgrunnlagHistorikk.utenInntekt(dato, økonomi, arbeidsgiverperiode)
+    internal fun utenInntekt(dato: LocalDate, økonomi: Økonomi) =
+        vilkårsgrunnlagHistorikk.utenInntekt(dato, økonomi)
 
     internal fun ugyldigUtbetalingstidslinje(dager: Set<LocalDate>) =
         vedtaksperioder.ugyldigUtbetalingstidslinje(dager)

@@ -9,8 +9,10 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
@@ -641,6 +643,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertVarsel(RV_RE_1, 2.vedtaksperiode.filter())
 
         assertEquals(listOf(
+            Refusjonsopplysning(inntektsmeldingId, 5.februar, 6.februar, INNTEKT),
             Refusjonsopplysning(inntektsmeldingId, 7.februar, null, INNTEKT),
         ), inspektør.refusjonsopplysningerISykepengegrunnlaget(5.februar, a1))
 
@@ -651,20 +654,8 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             ))
         ))
         håndterYtelser(2.vedtaksperiode)
-
-        assertForventetFeil(
-            forklaring = "Nå begrensens refusjonsopplysningene til fom'en vi hadde, ikke skjæringstidspunktet",
-            nå = {
-                assertEquals(listOf(
-                    Refusjonsopplysning(inntektsmeldingId, 7.februar, null, INNTEKT),
-                ), inspektør.refusjonsopplysningerISykepengegrunnlaget(5.februar, a1))
-            },
-            ønsket = {
-                assertEquals(listOf(
-                    Refusjonsopplysning(overstyringId, 5.februar, null, INNTEKT),
-                ), inspektør.refusjonsopplysningerISykepengegrunnlaget(5.februar, a1))
-            }
-        )
+        håndterSimulering(2.vedtaksperiode)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
     }
 
     private fun TestArbeidsgiverInspektør.inntektISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =

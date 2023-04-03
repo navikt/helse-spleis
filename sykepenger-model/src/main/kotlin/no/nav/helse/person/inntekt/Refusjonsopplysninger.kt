@@ -93,6 +93,7 @@ class Refusjonsopplysning(
 
     internal companion object {
         private fun List<Refusjonsopplysning>.merge(nyeOpplysninger: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
+            if (nyeOpplysninger.isEmpty()) return this
             return nyeOpplysninger.fold(this, ::mergeNyOpplysning).sortedBy { it.fom }
         }
 
@@ -134,9 +135,7 @@ class Refusjonsopplysning(
         }
 
         private fun validerteRefusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
-            if (!refusjonsopplysninger.overlapper()) return refusjonsopplysninger
-            val (første, resten) = refusjonsopplysninger.first() to refusjonsopplysninger.drop(1)
-            val merged = listOf(første).merge(resten)
+            val merged = emptyList<Refusjonsopplysning>().merge(refusjonsopplysninger)
             check(!merged.overlapper()) { "Refusjonsopplysninger skal ikke kunne inneholde overlappende informasjon etter merge. $merged" }
             return merged
         }
@@ -196,19 +195,6 @@ class Refusjonsopplysning(
         internal fun refusjonsbeløpOrNull(dag: LocalDate) = validerteRefusjonsopplysninger.singleOrNull { it.dekker(dag) }?.beløp
 
         private fun førsteRefusjonsopplysning() = validerteRefusjonsopplysninger.minByOrNull { it.fom }
-        internal fun refusjonsbeløp(skjæringstidspunkt: LocalDate, dag: LocalDate, manglerRefusjonsopplysning: ManglerRefusjonsopplysning): Inntekt {
-            val lagretRefusjonsbeløp = refusjonsbeløpOrNull(dag)
-            if (lagretRefusjonsbeløp != null) return lagretRefusjonsbeløp
-            val førsteRefusjonsopplysning = checkNotNull(førsteRefusjonsopplysning()) {
-                "Har ingen refusjonsopplysninger på vilkårsgrunnlag med skjæringstidspunkt $skjæringstidspunkt"
-            }
-            check(førsteRefusjonsopplysning.aksepterer(skjæringstidspunkt, dag)) {
-                "Har ingen refusjonsopplysninger på vilkårsgrunnlag md skjæringstidspunkt $skjæringstidspunkt som dekker $dag"
-            }
-            return førsteRefusjonsopplysning.beløp.also { benyttetRefusjonsbeløp ->
-                manglerRefusjonsopplysning(dag, benyttetRefusjonsbeløp)
-            }
-        }
 
         private fun dekker(dag: LocalDate) = validerteRefusjonsopplysninger.any { it.dekker(dag) }
 
@@ -273,7 +259,7 @@ class Refusjonsopplysning(
                 refusjonsopplysninger.add(tidsstempel to refusjonsopplysning)
             }
 
-            private fun sorterteRefusjonsopplysninger() = refusjonsopplysninger.sortedWith(compareBy({ it.first }, { it.second.fom })).map { it.second }
+            private fun sorterteRefusjonsopplysninger() = refusjonsopplysninger.sortedWith(compareBy({ it.second.fom }, { it.first })).map { it.second }
 
             fun build() = Refusjonsopplysninger(sorterteRefusjonsopplysninger())
         }

@@ -325,14 +325,15 @@ internal class InfotrygdhistorikkTest {
             Friperiode(11.februar,  15.februar),
         )))
         val sykdomstidslinje = 31.S
-        val builder = UtbetalingstidslinjeBuilder(Inntekter(
-            organisasjonsnummer = "a1",
-            vilkårsgrunnlagHistorikk = mapOf(
-                1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
-            ).somVilkårsgrunnlagHistorikk("a1"),
-            regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-            subsumsjonObserver = SubsumsjonObserver.NullObserver
-        ), beregningsperiode = 1.januar til 31.januar, Aktivitetslogg()
+        val builder = UtbetalingstidslinjeBuilder(
+            Inntekter(
+                organisasjonsnummer = "a1",
+                vilkårsgrunnlagHistorikk = mapOf(
+                    1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
+                ).somVilkårsgrunnlagHistorikk("a1"),
+                regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
+                subsumsjonObserver = SubsumsjonObserver.NullObserver
+            ), beregningsperiode = 1.januar til 31.januar
         )
         val utbetalingstidslinje = historikk.buildUtbetalingstidslinje("ag1", sykdomstidslinje, builder, SubsumsjonObserver.NullObserver).let { builder.result() }
         assertEquals(1.januar til 31.januar, utbetalingstidslinje.periode())
@@ -345,14 +346,15 @@ internal class InfotrygdhistorikkTest {
             Friperiode(26.januar,  31.januar),
         )))
         val sykdomstidslinje = 31.opphold + 28.S
-        val builder = UtbetalingstidslinjeBuilder(Inntekter(
-            organisasjonsnummer = "a1",
-            vilkårsgrunnlagHistorikk = mapOf(
-                1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
-            ).somVilkårsgrunnlagHistorikk("a1"),
-            regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-            subsumsjonObserver = SubsumsjonObserver.NullObserver
-        ), beregningsperiode = 1.februar til 28.februar, Aktivitetslogg()
+        val builder = UtbetalingstidslinjeBuilder(
+            Inntekter(
+                organisasjonsnummer = "a1",
+                vilkårsgrunnlagHistorikk = mapOf(
+                    1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
+                ).somVilkårsgrunnlagHistorikk("a1"),
+                regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
+                subsumsjonObserver = SubsumsjonObserver.NullObserver
+            ), beregningsperiode = 1.februar til 28.februar
         )
         val utbetalingstidslinje = historikk.buildUtbetalingstidslinje("ag1", sykdomstidslinje, builder, SubsumsjonObserver.NullObserver).let { builder.result()}
         assertEquals(1.februar til 28.februar, utbetalingstidslinje.periode())

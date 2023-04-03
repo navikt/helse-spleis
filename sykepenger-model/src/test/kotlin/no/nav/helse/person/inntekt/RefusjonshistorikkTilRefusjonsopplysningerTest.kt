@@ -402,6 +402,7 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
 
         assertEquals(
             listOf(
+                Refusjonsopplysning(inntektsmelding, 1.februar, 9.februar, 1000.daglig),
                 Refusjonsopplysning(inntektsmelding, 10.februar, null, 1000.daglig)
             ),
             refusjonshistorikk.refusjonsopplysninger(1.februar).inspektør.refusjonsopplysninger
@@ -425,6 +426,7 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
 
         assertEquals(
             listOf(
+                Refusjonsopplysning(inntektsmelding, 1.februar, 10.februar, 1000.daglig),
                 Refusjonsopplysning(inntektsmelding, 11.februar, null, 1000.daglig)
             ),
             refusjonshistorikk.refusjonsopplysninger(1.februar).inspektør.refusjonsopplysninger
@@ -447,6 +449,7 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
 
         assertEquals(
             listOf(
+                Refusjonsopplysning(inntektsmelding, 1.februar, 19.februar, 1000.daglig),
                 Refusjonsopplysning(inntektsmelding, 20.februar, null, 1000.daglig)
             ),
             refusjonshistorikk.refusjonsopplysninger(1.februar).inspektør.refusjonsopplysninger
@@ -472,6 +475,7 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
 
         assertEquals(
             listOf(
+                Refusjonsopplysning(inntektsmelding, 1.februar, 9.februar, 1000.daglig),
                 Refusjonsopplysning(inntektsmelding, 10.februar, 10.februar, 1000.daglig),
                 Refusjonsopplysning(inntektsmelding, 11.februar, null, 2000.daglig)
             ),

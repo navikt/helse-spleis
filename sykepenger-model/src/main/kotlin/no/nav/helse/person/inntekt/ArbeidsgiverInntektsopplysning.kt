@@ -91,7 +91,7 @@ class ArbeidsgiverInntektsopplysning(
             .also { it.subsummer(subsumsjonObserver, opptjening) }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.sjekkForNyArbeidsgiver(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening, orgnummer: String) {
-            val arbeidsforholdAktivePåSkjæringstidspunktet = filter { opptjening.ansattVedSkjæringstidspunkt(it.orgnummer) }.singleOrNull() ?: return
+            val arbeidsforholdAktivePåSkjæringstidspunktet = singleOrNull { opptjening.ansattVedSkjæringstidspunkt(it.orgnummer) } ?: return
             if (arbeidsforholdAktivePåSkjæringstidspunktet.orgnummer == orgnummer) return
             aktivitetslogg.varsel(Varselkode.RV_VV_8)
         }
@@ -157,14 +157,12 @@ class ArbeidsgiverInntektsopplysning(
                 Arbeidsgiverne i sykepengegrunlaget er ${map { it.orgnummer }}"""
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.medUtbetalingsopplysninger(organisasjonsnummer: String, `6G`: Inntekt, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver, manglerRefusjonsopplysning: ManglerRefusjonsopplysning): Økonomi {
+        internal fun List<ArbeidsgiverInntektsopplysning>.medUtbetalingsopplysninger(organisasjonsnummer: String, `6G`: Inntekt, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
             val arbeidsgiverInntektsopplysning = arbeidsgiverInntektsopplysning(organisasjonsnummer, dato)
             val inntekt = arbeidsgiverInntektsopplysning.inntektsopplysning.omregnetÅrsinntekt()
-            val refusjonsbeløp = arbeidsgiverInntektsopplysning.refusjonsopplysninger.refusjonsbeløp(
-                skjæringstidspunkt = skjæringstidspunkt,
-                dag = dato,
-                manglerRefusjonsopplysning = manglerRefusjonsopplysning
-            )
+            val refusjonsbeløp = checkNotNull(arbeidsgiverInntektsopplysning.refusjonsopplysninger.refusjonsbeløpOrNull(dato)) {
+                "Har ingen refusjonsopplysninger på vilkårsgrunnlag med skjæringstidspunkt $skjæringstidspunkt"
+            }
             return økonomi.inntekt(
                 aktuellDagsinntekt = inntekt,
                 dekningsgrunnlag = inntekt.dekningsgrunnlag(dato, regler, subsumsjonObserver),

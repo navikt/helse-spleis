@@ -20,7 +20,6 @@ import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Com
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.harNødvendigeRefusjonsopplysninger
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -243,7 +242,7 @@ internal class RefusjonsopplysningerTest {
         val nyttTidspunkt = eksisterendeTidspunkt.plusSeconds(1)
         val eksisterende = Refusjonsopplysning(eksisterendeId, 1.mars, 31.mars, 2000.daglig)
         val meldingsreferanseId = UUID.randomUUID()
-        val ny = Refusjonsopplysning(meldingsreferanseId, 1.januar, 1.mars, 1000.daglig)
+        val ny = Refusjonsopplysning(meldingsreferanseId, 1.mars, 1.mars, 1000.daglig)
         val refusjonsopplysning = RefusjonsopplysningerBuilder()
             .leggTil(eksisterende, eksisterendeTidspunkt).leggTil(ny, nyttTidspunkt).build()
         assertEquals(1.mars, refusjonsopplysning.finnFørsteDatoForEndring(RefusjonsopplysningerBuilder().leggTil(eksisterende).build()))
@@ -349,42 +348,19 @@ internal class RefusjonsopplysningerTest {
     }
 
     @Test
-    fun `Tomme refusjonsopplysninger skal feile ved oppslag på dato`() {
-        val refusjonsopplysninger = Refusjonsopplysninger()
-        val manglerRefusjonsopplysning: ManglerRefusjonsopplysning = { _, _ -> }
-        assertThrows<IllegalStateException> { refusjonsopplysninger.refusjonsbeløp(skjæringstidspunkt = 1.januar, dag = 1.januar, manglerRefusjonsopplysning) }
-    }
-
-    @Test
-    fun `Oppslag på dato før skjæringstidspunktet skal feile`() {
-        val refusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 2.januar, null, 1000.daglig).refusjonsopplysninger
-        val manglerRefusjonsopplysning: ManglerRefusjonsopplysning = { _, _ -> }
-        assertThrows<IllegalStateException> { refusjonsopplysninger.refusjonsbeløp(skjæringstidspunkt = 2.januar, dag = 1.januar, manglerRefusjonsopplysning) }
-    }
-
-    @Test
-    fun `Defaulter til første refusjonsopplysning i perioden helt tilbake til og med skjæringstidspunktet`() {
+    fun `finner riktige beløp`() {
         val meldingsreferanseIdJanuar = UUID.randomUUID()
         val meldingsreferanseIdFebruar = UUID.randomUUID()
         val skjæringstidspunkt = 1.januar
 
         val refusjonsopplysninger = RefusjonsopplysningerBuilder()
-            .leggTil(Refusjonsopplysning(meldingsreferanseIdJanuar, 20.januar, 31.januar, 1000.daglig), LocalDateTime.now())
+            .leggTil(Refusjonsopplysning(meldingsreferanseIdJanuar, skjæringstidspunkt, 31.januar, 1000.daglig), LocalDateTime.now())
             .leggTil(Refusjonsopplysning(meldingsreferanseIdFebruar, 1.februar, null, 1500.daglig), LocalDateTime.now())
             .build()
 
-        val manglerRefusjonsopplysninger = mutableMapOf<LocalDate, Inntekt>()
-        val manglerRefusjonsopplysning: ManglerRefusjonsopplysning = { dag, inntekt ->
-            check(manglerRefusjonsopplysninger[dag] == null) { "$dag mangler allerede refusjonsopplysning" }
-            manglerRefusjonsopplysninger[dag] = inntekt
-        }
-
         (skjæringstidspunkt til 31.januar).forEach { dag ->
-            assertEquals(1000.daglig, refusjonsopplysninger.refusjonsbeløp(skjæringstidspunkt = 1.januar, dag = dag, manglerRefusjonsopplysning))
+            assertEquals(1000.daglig, refusjonsopplysninger.refusjonsbeløpOrNull(dag))
         }
-
-        val forventetManglerRefusjonsopplysninger = (skjæringstidspunkt til 19.januar).associateWith { 1000.daglig }
-        assertEquals(forventetManglerRefusjonsopplysninger, manglerRefusjonsopplysninger)
     }
 
     @Test

@@ -1,0 +1,33 @@
+{
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2023-02-05",
+          "sykepengegrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "refusjonsopplysninger": [
+                  {
+                    "fom": "2023-02-05"
+                  }
+                ]
+              },
+              {
+                "refusjonsopplysninger": []
+              },
+              {
+                "refusjonsopplysninger": [
+                  {
+                    "fom": "2023-02-05"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 234
+}
