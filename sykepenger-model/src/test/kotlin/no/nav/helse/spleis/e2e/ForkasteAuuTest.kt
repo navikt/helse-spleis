@@ -54,4 +54,24 @@ internal class ForkasteAuuTest: AbstractDslTest() {
             assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
         }
     }
+
+    @Test
+    fun `Gjentatte Auuer etter hverandre`() {
+        a1 {
+            val agp = listOf(
+                1.januar til 5.januar,
+                8.januar til 12.januar,
+                15.januar til 19.januar,
+                22.januar til 22.januar
+            )
+            agp.forEach(::nyPeriode)
+            håndterInntektsmelding(agp)
+            nullstillTilstandsendringer()
+            håndterAnmodningOmForkasting(1.vedtaksperiode)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+        }
+    }
 }

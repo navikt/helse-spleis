@@ -488,8 +488,11 @@ internal class Vedtaksperiode private constructor(
     internal fun kanForkastes(utbetalinger: List<Utbetaling>, vedtaksperioder: List<Vedtaksperiode>, hendelse: IAktivitetslogg): Boolean {
         if (!this.utbetalinger.kanForkastes(utbetalinger)) return false
         if (this.tilstand != AvsluttetUtenUtbetaling) return true
-        // Vurderer nå om kan forkaste periode i AvsluttetUtenUtbetaling
-        val førsteEtter = vedtaksperioder.sorted().firstOrNull { it etter this }
+        sikkerlogg.info("Gjør vurdering på om periode i AvsluttetUtenUtbetaling kan forkastes.")
+        val førsteEtter = vedtaksperioder
+            .filterNot { it.tilstand == AvsluttetUtenUtbetaling }
+            .sorted()
+            .firstOrNull { it etter this }
         if (førsteEtter != null && førsteEtter.påvirkerArbeidsgiverperioden(this)) return false
         if (Toggle.ForkasteAuu.enabled) return true
         sikkerlogg.info("Periode i AvsluttetUtenUtbetaling kunne blitt forkastet. {}, {}, {}, {}",
