@@ -26,6 +26,7 @@ import no.nav.helse.utbetalingslinjer.Utbetalingtype
 internal class Tidslinjeberegninger {
     private val sykdomstidslinjer = mutableMapOf<UUID, List<Sykdomstidslinjedag>>()
     private val opphørteUtbetalinger = mutableSetOf<UUID>()
+    private var utbetalingTilGodkjenning: UUID? = null
 
     private val beregningklosser = mutableListOf<Beregningkloss>()
     private val utbetalingklosser = mutableListOf<Utbetalingkloss>()
@@ -33,7 +34,7 @@ internal class Tidslinjeberegninger {
 
     internal fun build(): List<IVedtaksperiode> {
         val beregninger = beregningklosser.map { it.tilTidslinjeberegning(sykdomstidslinjer) }
-        val utbetalinger = utbetalingklosser.mapNotNull { it.tilUtbetaling(beregninger, opphørteUtbetalinger) }
+        val utbetalinger = utbetalingklosser.mapNotNull { it.tilUtbetaling(beregninger, opphørteUtbetalinger, utbetalingTilGodkjenning) }
         return vedtaksperioderklosser.mapNotNull { it.tilVedtakseriode(utbetalinger) }
     }
 
@@ -192,6 +193,9 @@ internal class Tidslinjeberegninger {
         skjæringstidspunkt: LocalDate,
         aktivitetsloggForPeriode: Aktivitetslogg
     ) {
+        if (tilstand in listOf(Vedtaksperiode.AvventerGodkjenning, Vedtaksperiode.AvventerGodkjenningRevurdering)) {
+            utbetalingTilGodkjenning = utbetalinger.last().first
+        }
         vedtaksperioderklosser.add(Vedtaksperiodekloss(
             vedtaksperiodeId = vedtaksperiode,
             forkastet = forkastet,
@@ -289,7 +293,7 @@ internal class Tidslinjeberegninger {
         private val vurdering: no.nav.helse.serde.api.dto.Utbetaling.Vurdering?,
         private val oppdrag: Map<String, SpeilOppdrag>
     ) {
-        internal fun tilUtbetaling(tidslinjeberegninger: List<ITidslinjeberegning>, opphørteUtbetalinger: MutableSet<UUID>): IUtbetaling? {
+        internal fun tilUtbetaling(tidslinjeberegninger: List<ITidslinjeberegning>, opphørteUtbetalinger: MutableSet<UUID>, utbetalingTilGodkjenning: UUID?): IUtbetaling? {
             if (this.id in opphørteUtbetalinger) return null
             return IUtbetaling(
                 id = id,
@@ -307,7 +311,8 @@ internal class Tidslinjeberegninger {
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
                 personFagsystemId = personFagsystemId,
                 vurdering = vurdering,
-                oppdrag = oppdrag
+                oppdrag = oppdrag,
+                erTilGodkjenning = utbetalingTilGodkjenning == this.id
             )
         }
     }

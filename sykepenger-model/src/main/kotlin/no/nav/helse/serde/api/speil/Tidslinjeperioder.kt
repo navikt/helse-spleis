@@ -8,8 +8,6 @@ import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Vedtaksperiode.AvsluttetUtenUtbetaling
 import no.nav.helse.person.Vedtaksperiode.AvventerBlokkerendePeriode
-import no.nav.helse.person.Vedtaksperiode.AvventerGodkjenning
-import no.nav.helse.person.Vedtaksperiode.AvventerGodkjenningRevurdering
 import no.nav.helse.person.Vedtaksperiode.AvventerHistorikk
 import no.nav.helse.person.Vedtaksperiode.AvventerRevurdering
 import no.nav.helse.person.Vedtaksperiode.AvventerSimulering
@@ -45,7 +43,6 @@ import no.nav.helse.serde.api.dto.Utbetalingstatus
 import no.nav.helse.serde.api.dto.Utbetalingstidslinjedag
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
 import no.nav.helse.serde.api.dto.Utbetalingtype
-import no.nav.helse.serde.api.speil.IVedtaksperiode.Companion.tilGodkjenning
 import no.nav.helse.serde.api.speil.Tidslinjeberegninger.ITidslinjeberegning
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlag
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
@@ -165,7 +162,6 @@ internal class Tidslinjeperioder(
             when {
                 periode.utbetalinger.isEmpty() -> listOf(uberegnetPeriode(periode, periode.forkastet))
                 else -> periode.utbetalinger.map { (vilkårsgrunnlag, utbetaling) ->
-                    utbetaling.settTilGodkjenning(vedtaksperioder)
                     beregnetPeriode(
                         periode = periode,
                         vilkårsgrunnlagTilutbetaling = vilkårsgrunnlag to utbetaling,
@@ -326,13 +322,6 @@ internal class IVedtaksperiode(
     val aktivitetsloggForPeriode: Aktivitetslogg
 ) {
     val utbetalinger = utbetalinger.toMutableList()
-
-    fun tilGodkjenning() = tilstand in listOf(AvventerGodkjenning, AvventerGodkjenningRevurdering)
-
-    internal companion object {
-        fun List<IVedtaksperiode>.tilGodkjenning(utbetaling: IUtbetaling) =
-            any { periode -> periode.utbetalinger.any { it.second.erSammeSom(utbetaling) } && periode.tilGodkjenning() }
-    }
 }
 
 internal class IUtbetaling(
@@ -351,20 +340,14 @@ internal class IUtbetaling(
     private val arbeidsgiverFagsystemId: String,
     private val personFagsystemId: String,
     private val vurdering: Utbetaling.Vurdering?,
-    private val oppdrag: Map<String, SpeilOppdrag>
+    private val oppdrag: Map<String, SpeilOppdrag>,
+    private val erTilGodkjenning: Boolean
 ) {
-    private var erTilGodkjenning = false
     private val type: Utbetalingtype = utledType(type)
     private val status: Utbetalingstatus = utledStatus(this.type, tilstand)
 
-    fun erSammeSom(other: IUtbetaling) = id == other.id
-    fun hørerSammen(other: IUtbetaling) = korrelasjonsId == other.korrelasjonsId
 
     fun annulleringFor(other: IUtbetaling) = this.type == Utbetalingtype.ANNULLERING && this.korrelasjonsId == other.korrelasjonsId
-
-    fun settTilGodkjenning(vedtaksperioder: List<IVedtaksperiode>) {
-        erTilGodkjenning = vedtaksperioder.tilGodkjenning(this)
-    }
 
     fun toDTO(): Utbetaling {
         return Utbetaling(
