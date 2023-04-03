@@ -556,6 +556,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun nyArbeidsgiverperiodeEtterEndring(other: Vedtaksperiode, hendelse: OverstyrTidslinje): Boolean {
         // hvorvidt man delte samme utbetaling før
+        if (!this.utbetalinger.harAvsluttede()) return false
         if (other.utbetalinger.hørerIkkeSammenMed(this.utbetalinger)) return false
         val arbeidsgiverperiodeOther = other.finnArbeidsgiverperiode()
         val arbeidsgiverperiodeThis = this.finnArbeidsgiverperiode()
