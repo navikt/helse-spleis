@@ -287,10 +287,10 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, anmodningOmForkasting)
     }
 
-    private fun etterkomAnmodningOmForkasting(anmodningOmForkasting: AnmodningOmForkasting) {
+    private fun etterkomAnmodningOmForkasting(anmodningOmForkasting: AnmodningOmForkasting, forkastingFilter: VedtaksperiodeFilter = TIDLIGERE_OG_ETTERGØLGENDE(this)) {
         if (!arbeidsgiver.kanForkastes(this, anmodningOmForkasting)) return anmodningOmForkasting.info("Kan ikke etterkomme anmodning om forkasting")
         anmodningOmForkasting.info("Etterkommer anmodning om forkasting")
-        forkast(anmodningOmForkasting)
+        person.søppelbøtte(anmodningOmForkasting, forkastingFilter)
     }
 
     internal fun håndter(inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
@@ -2283,9 +2283,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
-            vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting)
+            vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting) {
+                it.id == vedtaksperiode.id
+            }
         }
-
     }
 
     internal object Avsluttet : Vedtaksperiodetilstand {

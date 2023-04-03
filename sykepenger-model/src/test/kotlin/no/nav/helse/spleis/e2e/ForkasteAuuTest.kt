@@ -47,11 +47,9 @@ internal class ForkasteAuuTest: AbstractDslTest() {
             nyPeriode(1.januar til 16.januar)
             nyPeriode(4.februar til 28.februar)
             nullstillTilstandsendringer()
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             håndterAnmodningOmForkasting(1.vedtaksperiode)
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+            assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         }
     }
 
@@ -68,6 +66,9 @@ internal class ForkasteAuuTest: AbstractDslTest() {
             håndterInntektsmelding(agp)
             nullstillTilstandsendringer()
             håndterAnmodningOmForkasting(1.vedtaksperiode)
+            håndterAnmodningOmForkasting(2.vedtaksperiode)
+            håndterAnmodningOmForkasting(3.vedtaksperiode)
+            håndterAnmodningOmForkasting(4.vedtaksperiode)
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
             assertForkastetPeriodeTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)

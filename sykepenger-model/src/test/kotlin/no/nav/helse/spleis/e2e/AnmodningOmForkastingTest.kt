@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
@@ -9,6 +10,7 @@ import no.nav.helse.juli
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
@@ -92,4 +94,33 @@ internal class AnmodningOmForkastingTest: AbstractDslTest() {
         }
     }
 
+    @Test
+    fun `Anmodning om å forkaste periode i AUU forkaster kun den éne perioden`() = Toggle.ForkasteAuu.enable {
+        (a1 og a2).forEach { ag -> ag {
+            nyPeriode(1.januar til 4.januar)
+            nyPeriode(6.januar til 9.januar)
+            nyPeriode(10.januar til 13.januar)
+            nyPeriode(1.mars til 31.mars)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        }}
+
+        a1 {
+            nullstillTilstandsendringer()
+            håndterAnmodningOmForkasting(2.vedtaksperiode)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+            assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        }
+
+        a2 {
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        }
+    }
 }
