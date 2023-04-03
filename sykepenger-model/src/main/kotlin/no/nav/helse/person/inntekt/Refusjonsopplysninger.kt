@@ -109,15 +109,18 @@ class Refusjonsopplysning(
     class Refusjonsopplysninger private constructor(
         refusjonsopplysninger: List<Refusjonsopplysning>
     ) {
-        private val validerteRefusjonsopplysninger = validerteRefusjonsopplysninger(refusjonsopplysninger)
+        private val validerteRefusjonsopplysninger = refusjonsopplysninger.sortedBy { it.fom }
         internal constructor(): this(emptyList())
+
+        init {
+            check(!validerteRefusjonsopplysninger.overlapper()) { "Refusjonsopplysninger skal ikke kunne inneholde overlappende informasjon: $refusjonsopplysninger" }
+        }
 
         internal fun lagreTidsnær(førsteFraværsdag: LocalDate, refusjonshistorikk: Refusjonshistorikk) {
             if (validerteRefusjonsopplysninger.isEmpty()) return
-            val sorterteOpplysninger = this.validerteRefusjonsopplysninger.sortedBy { it.fom }
-            val første = sorterteOpplysninger.first()
-            val sisteRefusjonsdag = sorterteOpplysninger.last().tom
-            val endringerIRefusjon = sorterteOpplysninger.map { refusjonsopplysning ->
+            val første = validerteRefusjonsopplysninger.first()
+            val sisteRefusjonsdag = validerteRefusjonsopplysninger.last().tom
+            val endringerIRefusjon = validerteRefusjonsopplysninger.map { refusjonsopplysning ->
                 Refusjonshistorikk.Refusjon.EndringIRefusjon(
                     endringsdato = refusjonsopplysning.fom,
                     beløp = refusjonsopplysning.beløp
@@ -134,11 +137,6 @@ class Refusjonsopplysning(
             visitor.postVisitRefusjonsopplysninger(this)
         }
 
-        private fun validerteRefusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
-            val merged = emptyList<Refusjonsopplysning>().merge(refusjonsopplysninger)
-            check(!merged.overlapper()) { "Refusjonsopplysninger skal ikke kunne inneholde overlappende informasjon etter merge. $merged" }
-            return merged
-        }
         internal fun merge(other: Refusjonsopplysninger): Refusjonsopplysninger {
             val nyeRefusjonsopplysninger = this - other
             if (nyeRefusjonsopplysninger.validerteRefusjonsopplysninger.isEmpty()) return this // Ingen endring
@@ -200,7 +198,7 @@ class Refusjonsopplysning(
 
         // finner første dato hvor refusjonsbeløpet for dagen er ulikt beløpet i forrige versjon
         internal fun finnFørsteDatoForEndring(other: Refusjonsopplysninger): LocalDate? {
-            val sorterteOpplysninger = other.begrens(this).validerteRefusjonsopplysninger.sortedBy { it.fom }
+            val sorterteOpplysninger = other.begrens(this).validerteRefusjonsopplysninger
             return førsteDatoMedUliktBeløp(sorterteOpplysninger, other.validerteRefusjonsopplysninger)
                 ?: førsteUlikeFom(sorterteOpplysninger, other.validerteRefusjonsopplysninger)
                 ?: førsteUlikeTom(sorterteOpplysninger, other.validerteRefusjonsopplysninger)
@@ -246,10 +244,7 @@ class Refusjonsopplysning(
 
         internal companion object {
             private fun List<Refusjonsopplysning>.overlapper() = map { it.periode }.overlapper()
-            internal fun List<Refusjonsopplysning>.gjennopprett(): Refusjonsopplysninger {
-                check(!overlapper()) { "Kan ikke gjennopprette refusjonsopplysningr med overlapp. For dette formålet må RefusjonsopplysningerBuilder benyttes." }
-                return Refusjonsopplysninger(this)
-            }
+            internal fun List<Refusjonsopplysning>.gjennopprett() = Refusjonsopplysninger(this)
             internal val Refusjonsopplysning.refusjonsopplysninger get() = Refusjonsopplysninger(listOf(this))
         }
 
@@ -261,7 +256,7 @@ class Refusjonsopplysning(
 
             private fun sorterteRefusjonsopplysninger() = refusjonsopplysninger.sortedWith(compareBy({ it.second.fom }, { it.first })).map { it.second }
 
-            fun build() = Refusjonsopplysninger(sorterteRefusjonsopplysninger())
+            fun build() = Refusjonsopplysninger(emptyList<Refusjonsopplysning>().merge(sorterteRefusjonsopplysninger()))
         }
     }
 
