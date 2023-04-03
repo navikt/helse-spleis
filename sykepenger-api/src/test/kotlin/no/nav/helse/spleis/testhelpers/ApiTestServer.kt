@@ -23,6 +23,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.person.Person
 import no.nav.helse.serde.serialize
+import no.nav.helse.spleis.Issuer
 import no.nav.helse.spleis.JwtStub
 import no.nav.helse.spleis.config.AzureAdAppConfig
 import no.nav.helse.spleis.config.DataSourceConfiguration
@@ -128,23 +129,19 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
         app.start(wait = false)
     }
 
-    private fun createToken() = jwtStub.createTokenFor(
-        subject = "en_saksbehandler_ident",
-        groups = listOf("sykepenger-saksbehandler-gruppe"),
-        audience = "spleis_azure_ad_app_id"
-    )
+    internal fun createToken(audience: String = Issuer.AUDIENCE) = jwtStub.createTokenFor(audience)
 
     internal fun httpPost(
         path: String,
         expectedStatus: HttpStatusCode = HttpStatusCode.OK,
         headers: Map<String, String> = emptyMap(),
         body: String = "",
-        medAccessToken: Boolean = true,
+        accessToken: String? = createToken(),
         testBlock: String.() -> Unit = {}
     ) {
         val connection = appBaseUrl.handleRequest(HttpMethod.Get, path) {
             doOutput = true
-            if (medAccessToken) setRequestProperty(HttpHeaders.Authorization, "Bearer ${createToken()}")
+            accessToken?.let { setRequestProperty(HttpHeaders.Authorization, "Bearer $it") }
             setRequestProperty("Content-Type", "application/json")
             setRequestProperty("Accept", "application/json")
             headers.forEach { (key, value) ->

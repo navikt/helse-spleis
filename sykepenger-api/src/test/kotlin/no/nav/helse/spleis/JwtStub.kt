@@ -8,16 +8,13 @@ import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 import java.util.*
+import org.intellij.lang.annotations.Language
 
-class JwtStub(private val issuer: String, private val wireMockServer: WireMockServer) {
-
+class Issuer(private val navn: String) {
    private val privateKey: RSAPrivateKey
    private val publicKey: RSAPublicKey
 
    init {
-      val client = WireMock.create().port(wireMockServer.port()).build()
-      WireMock.configureFor(client)
-
       val keyPairGenerator = KeyPairGenerator.getInstance("RSA")
       keyPairGenerator.initialize(512)
 
@@ -26,41 +23,62 @@ class JwtStub(private val issuer: String, private val wireMockServer: WireMockSe
       publicKey = keyPair.public as RSAPublicKey
    }
 
-   fun createTokenFor(subject: String, groups: List<String>, audience: String): String {
+   companion object {
+      private const val SUBJECT = "en_saksbehandler_ident"
+      private val GROUPS = listOf("sykepenger-saksbehandler-gruppe").toTypedArray()
+      val AUDIENCE = "spleis_azure_ad_app_id"
+   }
+
+   fun createToken(audience: String = AUDIENCE): String {
       val algorithm = Algorithm.RSA256(publicKey, privateKey)
 
       return JWT.create()
-         .withIssuer(issuer)
+         .withIssuer(navn)
          .withAudience(audience)
          .withKeyId("key-1234")
-         .withSubject(subject)
-         .withArrayClaim("groups", groups.toTypedArray())
+         .withSubject(SUBJECT)
+         .withArrayClaim("groups", GROUPS)
          .sign(algorithm)
    }
 
-   fun stubbedJwkProvider() = WireMock.get(WireMock.urlPathEqualTo("/jwks")).willReturn(
-      WireMock.okJson("""
-{
-    "keys": [
-        {
-            "kty": "RSA",
-            "alg": "RS256",
-            "kid": "key-1234",
-            "e": "${Base64.getUrlEncoder().encodeToString(publicKey.publicExponent.toByteArray())}",
-            "n": "${Base64.getUrlEncoder().encodeToString(publicKey.modulus.toByteArray())}"
-        }
-    ]
+   @Language("JSON")
+   val jwks = """
+   {
+       "keys": [
+           {
+               "kty": "RSA",
+               "alg": "RS256",
+               "kid": "key-1234",
+               "e": "${Base64.getUrlEncoder().encodeToString(publicKey.publicExponent.toByteArray())}",
+               "n": "${Base64.getUrlEncoder().encodeToString(publicKey.modulus.toByteArray())}"
+           }
+       ]
+   }
+   """
 }
-""".trimIndent())
-   )
+
+class JwtStub(private val navn: String, private val wireMockServer: WireMockServer) {
+
+   private val issuer = Issuer(navn)
+
+   init {
+      val client = WireMock.create().port(wireMockServer.port()).build()
+      WireMock.configureFor(client)
+   }
+
+   fun createTokenFor(audience: String = Issuer.AUDIENCE) =
+      issuer.createToken(audience)
+
+   fun stubbedJwkProvider() = WireMock.get(WireMock.urlPathEqualTo("/jwks")).willReturn(WireMock.okJson(issuer.jwks))
 
    fun stubbedConfigProvider() = WireMock.get(WireMock.urlPathEqualTo("/config")).willReturn(
       WireMock.okJson("""
-{
-    "jwks_uri": "${wireMockServer.baseUrl()}/jwks",
-    "token_endpoint": "${wireMockServer.baseUrl()}/token",
-    "issuer": "$issuer"
-}
-""".trimIndent())
+      {
+          "jwks_uri": "${wireMockServer.baseUrl()}/jwks",
+          "token_endpoint": "${wireMockServer.baseUrl()}/token",
+          "issuer": "$navn"
+      }
+      """
+      )
    )
 }

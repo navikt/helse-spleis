@@ -9,6 +9,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.AbstractObservableTest
+import no.nav.helse.spleis.Issuer
 import no.nav.helse.spleis.graphql.SchemaGenerator.Companion.IntrospectionQuery
 import no.nav.helse.spleis.objectMapper
 import no.nav.helse.spleis.testhelpers.ApiTestServer
@@ -629,10 +630,10 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     }
 
     @Test
-    fun `request uten access token`() {
+    fun `request med manglende eller feil access token`() {
         val query = """
             {
-                person(fnr: \"40440440440\") {
+                person(fnr: \"$UNG_PERSON_FNR\") {
                     arbeidsgivere {
                         organisasjonsnummer,
                         id,
@@ -644,10 +645,14 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             }
         """
 
-        requestBådeV1ogV2(
-            body = """{"query": "$query"}""",
-            medAccessToken = false
-        )
+        val body = """{"query": "$query"}"""
+
+        val annenIssuer = Issuer("annen")
+
+        requestBådeV1ogV2(body = body, accesToken = null, forventetHttpStatusCode = HttpStatusCode.Unauthorized)
+        requestBådeV1ogV2(body = body, accesToken = testServer.createToken(), forventetHttpStatusCode = HttpStatusCode.OK)
+        requestBådeV1ogV2(body = body, accesToken = testServer.createToken("feil_audience"), forventetHttpStatusCode = HttpStatusCode.Unauthorized)
+        requestBådeV1ogV2(body = body, accesToken = annenIssuer.createToken(), forventetHttpStatusCode = HttpStatusCode.Unauthorized)
     }
 
     @Test
@@ -663,7 +668,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         testServer.httpPost(
             path = "/v2/graphql",
             body = IntrospectionQuery,
-            medAccessToken = false,
+            accessToken = null,
         ) {
             JSONAssert.assertEquals(v1Response, this, STRICT)
         }
@@ -704,26 +709,25 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         v1Path: String = "/graphql",
         v2Path: String = "/v2/graphql",
         body: String,
-        medAccessToken: Boolean = true,
+        accesToken: String? = testServer.createToken(),
+        forventetHttpStatusCode: HttpStatusCode = HttpStatusCode.OK,
         assertBlock: String.() -> Unit = {},
         v2AssertBlock: String.() -> Unit = assertBlock,
     ): Pair<String, String> {
         lateinit var v1Response: String
         lateinit var v2Response: String
 
-        val forventetHttpStatusCode = if (medAccessToken) HttpStatusCode.OK else HttpStatusCode.Unauthorized
-
         testServer.httpPost(
             path = v1Path,
             body = body,
-            medAccessToken = medAccessToken,
+            accessToken = accesToken,
             expectedStatus = forventetHttpStatusCode
         ) { v1Response = this }
 
         testServer.httpPost(
             path = v2Path,
             body = body,
-            medAccessToken = medAccessToken,
+            accessToken = accesToken,
             expectedStatus = forventetHttpStatusCode
         ) { v2Response = this }
 

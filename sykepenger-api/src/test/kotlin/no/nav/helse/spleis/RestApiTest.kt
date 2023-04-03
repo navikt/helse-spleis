@@ -223,11 +223,7 @@ internal class RestApiTest {
         "/api/hendelse-json/${MELDINGSREFERANSE}".httpGet(HttpStatusCode.OK)
     }
 
-    private fun createToken() = jwtStub.createTokenFor(
-        subject = "en_saksbehandler_ident",
-        groups = listOf("sykepenger-saksbehandler-gruppe"),
-        audience = "spleis_azure_ad_app_id"
-    )
+    private fun createToken() = jwtStub.createTokenFor()
 
     private fun String.httpGet(
         expectedStatus: HttpStatusCode = HttpStatusCode.OK,
