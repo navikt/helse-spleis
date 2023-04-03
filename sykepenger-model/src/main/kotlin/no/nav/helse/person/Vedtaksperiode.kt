@@ -2496,11 +2496,6 @@ internal class Vedtaksperiode private constructor(
             return null
         }
 
-        internal fun List<Vedtaksperiode>.håndterHale(dager: DagerFraInntektsmelding) {
-            val sisteVedtaksperiodeSomOverlapper = lastOrNull { dager.skalHåndteresAv(it.periode) } ?: return
-            dager.håndterHaleEtter(sisteVedtaksperiodeSomOverlapper.periode, sisteVedtaksperiodeSomOverlapper.arbeidsgiver)
-        }
-
         internal fun harNyereForkastetPeriode(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) =
             forkastede
                 .filter { it.periode().endInclusive >= hendelse.periode().start }

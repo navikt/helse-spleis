@@ -94,22 +94,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    fun `ingen historie med søknad til arbeidsgiver først`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 8.januar))
-        håndterSøknad(Sykdom(3.januar, 8.januar, 100.prosent))
-        assertIngenVarsler()
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(3.januar til 18.januar), INNTEKT)
-        assertIngenFunksjonelleFeil()
-        assertActivities()
-        inspektør.also {
-            assertEquals(3, it.sykdomshistorikk.size)
-            assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
-            assertEquals(2, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
-        }
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
-    }
-
-    @Test
     fun `ingen historie med to søknader til arbeidsgiver før inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar))
         håndterSøknad(Sykdom(3.januar, 5.januar, 100.prosent))
@@ -201,28 +185,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK
-        )
-    }
-
-    @Test
-    fun `ingen historie med inntektsmelding, så søknad til arbeidsgiver`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 8.januar))
-        håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
-        assertIngenVarsler()
-        håndterSøknad(Sykdom(3.januar, 8.januar, 100.prosent))
-        assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
-        assertActivities()
-        inspektør.also {
-            assertEquals(3, it.sykdomshistorikk.size)
-            assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
-            assertEquals(2, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
-        }
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVSLUTTET_UTEN_UTBETALING
         )
     }
 

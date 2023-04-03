@@ -6,8 +6,6 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
-import no.nav.helse.hendelser.tilOrNull
-import no.nav.helse.nesteDag
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Vedtaksperiode
@@ -97,20 +95,6 @@ internal class DagerFraInntektsmelding(
             // Dette for å unngå uenighet om agp hvis kun deler av historikken er lagt til
             valider(arbeidsgiver.arbeidsgiverperiode(it))
         }
-    }
-
-    internal fun håndterHaleEtter(periode: Periode, arbeidsgiver: Arbeidsgiver) {
-        håndterHaleEtter(periode) {
-            arbeidsgiver.oppdaterSykdom(it)
-        }
-    }
-
-    internal fun håndterHaleEtter(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit) {
-        val fom = periode.endInclusive.nesteDag
-        val tom = gjenståendeDager.maxOrNull() ?: return
-        val hale = (fom tilOrNull tom) ?: return
-        oppdaterSykdom(BitAvInntektsmelding(inntektsmelding, hale.omsluttendePeriode!!))
-        gjenståendeDager.removeAll(hale)
     }
 
     internal fun noenDagerHåndtert() = håndterteDager.isNotEmpty()

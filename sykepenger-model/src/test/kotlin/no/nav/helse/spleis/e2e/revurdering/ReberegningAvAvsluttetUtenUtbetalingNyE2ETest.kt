@@ -88,6 +88,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -121,8 +122,11 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(10.januar til 25.januar))
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
-        assertNotNull(observatør.manglendeInntektsmeldingVedtaksperioder.single { it.søknadIder == setOf(søknadId) })
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTrue((21.januar til 25.januar).all {
+            inspektør.sykdomstidslinje[it] is Dag.UkjentDag
+        })
+        assertNull(observatør.manglendeInntektsmeldingVedtaksperioder.singleOrNull { it.søknadIder == setOf(søknadId) })
     }
 
     @Test

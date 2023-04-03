@@ -473,12 +473,11 @@ internal class InntektsmeldingMatchingTest {
 
         val (dager, _) = inntektsmelding(listOf(vedtaksperiode1, vedtaksperiode2, vedtaksperiode3), null, 1.januar til 16.januar)
 
-        assertEquals(13.januar til 16.januar, dager.håndterHaleEtter(vedtaksperiode3))
         assertEquals(2.januar til 3.januar, dager.håndter(vedtaksperiode1))
         assertEquals(8.januar til 9.januar, dager.håndter(vedtaksperiode2))
         assertEquals(11.januar til 12.januar, dager.håndter(vedtaksperiode3))
 
-        assertEquals(setOf(1.januar, 4.januar, 5.januar, 6.januar, 7.januar, 10.januar), dager.inspektør.gjenståendeDager)
+        assertEquals(setOf(1.januar, 4.januar, 5.januar, 6.januar, 7.januar, 10.januar, 13.januar, 14.januar, 15.januar, 16.januar), dager.inspektør.gjenståendeDager)
         assertTrue(dager.noenDagerHåndtert())
     }
 
@@ -505,14 +504,6 @@ internal class InntektsmeldingMatchingTest {
     private fun DagerFraInntektsmelding.håndterPeriodeRettFør(periode: Periode): Periode? {
         var håndtertPeriode: Periode? = null
         håndterPeriodeRettFør(periode) {
-            håndtertPeriode = it.sykdomstidslinje().periode()
-        }
-        return håndtertPeriode
-    }
-
-    private fun DagerFraInntektsmelding.håndterHaleEtter(periode: Periode): Periode? {
-        var håndtertPeriode: Periode? = null
-        håndterHaleEtter(periode) {
             håndtertPeriode = it.sykdomstidslinje().periode()
         }
         return håndtertPeriode

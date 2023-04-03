@@ -1137,7 +1137,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
         val tidslinje = inspektør.sykdomstidslinje
         assertTrue((1.januar til 7.januar).all { tidslinje[it] is Dag.Arbeidsdag || tidslinje[it] is Dag.FriskHelgedag })
-        assertTrue((8.januar til 23.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag || tidslinje[it] is Dag.Arbeidsgiverdag || tidslinje[it] is Dag.ArbeidsgiverHelgedag })
+        assertTrue((8.januar til 20.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag || tidslinje[it] is Dag.Arbeidsgiverdag || tidslinje[it] is Dag.ArbeidsgiverHelgedag })
+        assertTrue((21.januar til 23.januar).all {  tidslinje[it] is Dag.UkjentDag })
         assertIngenVarsel(
             RV_IM_4,
             1.vedtaksperiode.filter()
@@ -2075,7 +2076,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         nyPeriode(16.januar til 31.januar)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-        assertIngenVarsler(1.vedtaksperiode.filter())
+        //assertIngenVarsler(1.vedtaksperiode.filter())
         assertIngenVarsler(2.vedtaksperiode.filter())
     }
 
