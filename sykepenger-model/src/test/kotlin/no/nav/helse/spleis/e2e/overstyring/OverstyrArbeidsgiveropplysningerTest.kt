@@ -2,7 +2,9 @@ package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -13,6 +15,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_1
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -20,10 +23,14 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterSimulering
+import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
+import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.testhelpers.assertNotNull
@@ -621,6 +628,43 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             Refusjonsopplysning(overstyringId, 1.januar, 20.januar, inntektPerArbeidsgiver),
             Refusjonsopplysning(overstyringId, 21.januar, null, inntektPerArbeidsgiver*1.5)
         ), inspektør.refusjonsopplysningerISykepengegrunnlaget(1.januar, a2))
+    }
+
+    @Test
+    fun `Legge til refusjonsopplysninger tilbake i tid`() {
+        nyttVedtak(1.januar, 31.januar)
+
+        nyPeriode(5.februar til 28.februar)
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 7.februar)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        assertVarsel(RV_RE_1, 2.vedtaksperiode.filter())
+
+        assertEquals(listOf(
+            Refusjonsopplysning(inntektsmeldingId, 7.februar, null, INNTEKT),
+        ), inspektør.refusjonsopplysningerISykepengegrunnlaget(5.februar, a1))
+
+        val overstyringId = UUID.randomUUID()
+        håndterOverstyrArbeidsgiveropplysninger(5.februar, meldingsreferanseId = overstyringId, arbeidsgiveropplysninger = listOf(
+            OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "endre refusjon", null, listOf(
+                Triple(5.februar, null, INNTEKT)
+            ))
+        ))
+        håndterYtelser(2.vedtaksperiode)
+
+        assertForventetFeil(
+            forklaring = "Nå begrensens refusjonsopplysningene til fom'en vi hadde, ikke skjæringstidspunktet",
+            nå = {
+                assertEquals(listOf(
+                    Refusjonsopplysning(inntektsmeldingId, 7.februar, null, INNTEKT),
+                ), inspektør.refusjonsopplysningerISykepengegrunnlaget(5.februar, a1))
+            },
+            ønsket = {
+                assertEquals(listOf(
+                    Refusjonsopplysning(overstyringId, 5.februar, null, INNTEKT),
+                ), inspektør.refusjonsopplysningerISykepengegrunnlaget(5.februar, a1))
+            }
+        )
     }
 
     private fun TestArbeidsgiverInspektør.inntektISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =
