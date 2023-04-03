@@ -2,10 +2,14 @@ package no.nav.helse.spleis.graphql
 
 import com.fasterxml.jackson.databind.jsontype.NamedType
 import io.ktor.http.ContentType.Application.Json
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
 import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
 import io.ktor.server.request.receiveText
+import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
@@ -46,17 +50,15 @@ internal object ApiV2i {
         it.registerSubtypes(NamedType(GraphQLSpleisVilkarsgrunnlag::class.java))
     }
 
-    internal fun Application.installGraphQLApiV2(dataSource: DataSource) {
+    internal fun Application.installGraphQLApiV2(dataSource: DataSource, path: String = "/v2/graphql") {
         val personDao = PersonDao(dataSource)
         val hendelseDao = HendelseDao(dataSource)
 
         routing {
-            post("/v2/graphql/introspection") {
-                call.respondText(schema, Json)
-            }
-            authenticate {
-                post("/v2/graphql") {
+            authenticate(optional = true) {
+                post("$path{...}") {
                     val fødselsnummer = call.receiveText().fnr ?: return@post call.respondText(schema, Json)
+                    call.principal<JWTPrincipal>() ?: return@post call.respond(HttpStatusCode.Unauthorized)
                     val person = personResolver(personDao, hendelseDao)(fødselsnummer)
                     call.respondText(graphQLV2ObjectMapper.writeValueAsString(Response(Data(person))), Json)
                 }

@@ -659,6 +659,14 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         )
 
         JSONAssert.assertEquals(v1Response, v2Response, STRICT)
+
+        testServer.httpPost(
+            path = "/v2/graphql",
+            body = IntrospectionQuery,
+            medAccessToken = false,
+        ) {
+            JSONAssert.assertEquals(v1Response, this, STRICT)
+        }
     }
 
     @Test
