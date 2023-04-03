@@ -78,8 +78,8 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
 
     internal fun sammenlign(other: List<Periode>): Boolean {
         if (fiktiv()) return true
-        val otherSiste = other.lastOrNull()?.endInclusive ?: return false
         val thisSiste = this.perioder.last().endInclusive
+        val otherSiste = other.lastOrNull()?.endInclusive?.coerceAtMost(this.sisteKjente) ?: return false
         return otherSiste == thisSiste || (thisSiste.erHelg() && otherSiste.erRettFør(thisSiste)) || (otherSiste.erHelg() && thisSiste.erRettFør(otherSiste))
     }
 
@@ -150,12 +150,6 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
 
         internal fun List<Arbeidsgiverperiode>.finn(periode: Periode) = lastOrNull { arbeidsgiverperiode ->
             periode in arbeidsgiverperiode
-        }
-
-        internal fun Arbeidsgiverperiode?.sammenlign(other: Arbeidsgiverperiode?): Boolean {
-            if (this == null && other == null) return true
-            if (this == null || other == null) return false
-            return this.sammenlign(other.perioder)
         }
 
         private fun Periode.justerForHelg() = when (endInclusive.dayOfWeek) {

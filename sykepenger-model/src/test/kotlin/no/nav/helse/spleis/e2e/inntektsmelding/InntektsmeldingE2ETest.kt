@@ -2070,13 +2070,13 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Arbeidsgiverperiode skal ikke valideres før historikken er oppdatert`() {
+    fun `Arbeidsgiverperiode skal ikke valideres før sykdomshistorikken er oppdatert`() {
         nyPeriode(1.januar til 15.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         nyPeriode(16.januar til 31.januar)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-        //assertIngenVarsler(1.vedtaksperiode.filter())
+        assertIngenVarsler(1.vedtaksperiode.filter())
         assertIngenVarsler(2.vedtaksperiode.filter())
     }
 

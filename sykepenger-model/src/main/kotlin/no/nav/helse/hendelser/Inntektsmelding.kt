@@ -37,7 +37,6 @@ import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.slf4j.LoggerFactory
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
@@ -63,10 +62,6 @@ class Inntektsmelding(
     organisasjonsnummer = orgnummer,
     opprettet = mottatt, aktivitetslogg = aktivitetslogg
 ) {
-    companion object {
-        private val log = LoggerFactory.getLogger(Inntektsmelding::class.java)
-    }
-
     private val arbeidsgiverperioder = arbeidsgiverperioder.grupperSammenhengendePerioder()
     private val arbeidsgiverperiode = this.arbeidsgiverperioder.periode()
     private val overlappsperiode = when {
@@ -160,9 +155,6 @@ class Inntektsmelding(
     private fun validerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode) {
         if (arbeidsgiverperiode.sammenlign(arbeidsgiverperioder)) {
             return
-        }
-        if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) {
-            info("Første fraværsdag på inntektsmeldingen er etter arbeidsgiverperiden") // ville tidligere ikke gitt varsel
         }
         varsel(RV_IM_3)
     }

@@ -449,7 +449,7 @@ internal class InntektsmeldingTest {
     @Test
     fun `uenige om arbeidsgiverperiode`() {
         inntektsmelding(listOf(2.januar til 17.januar))
-        inntektsmelding.validerArbeidsgiverperiode(Arbeidsgiverperiode(listOf(1.januar til 16.januar)))
+        inntektsmelding.validerArbeidsgiverperiode(Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply { kjentDag(17.januar) })
         aktivitetslogg.assertVarsel(RV_IM_3)
     }
 
