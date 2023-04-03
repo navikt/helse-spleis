@@ -2463,9 +2463,11 @@ internal class Vedtaksperiode private constructor(
             it.tilstand == AvsluttetUtenUtbetaling && it.forventerInntekt()
         }
 
+        // TODO: denne kan fjernes når speilvendt er over på å hente varsler fra spesialist
         internal fun aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode: Vedtaksperiode): Aktivitetslogg {
-            val tidligereUbetalt =
+            val tidligereUbetalt = if (vedtaksperiode.sykdomstidslinje.periode() != null)
                 vedtaksperiode.arbeidsgiver.finnSykeperioderAvsluttetUtenUtbetalingRettFør(vedtaksperiode)
+            else emptyList()
             val aktivitetskontekster = listOf(vedtaksperiode) + tidligereUbetalt
             return vedtaksperiode.person.aktivitetslogg.logg(*aktivitetskontekster.toTypedArray())
         }
