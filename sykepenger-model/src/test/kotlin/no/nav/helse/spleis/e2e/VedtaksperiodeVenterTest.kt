@@ -41,6 +41,7 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
             assertEquals(8, observatør.vedtaksperiodeVenter.size)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            val venterTil = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert.plusDays(180)
             val forventetVedtaksperiode1 = PersonObserver.VedtaksperiodeVenterEvent(
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),
                 aktørId = AKTØRID,
@@ -48,7 +49,7 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
                 vedtaksperiodeId = 1.vedtaksperiode,
                 hendelser = setOf(søknadIdJanuar),
                 ventetSiden = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert,
-                venterTil = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert.plusDays(180),
+                venterTil = venterTil,
                 venterPå = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
                     vedtaksperiodeId = 1.vedtaksperiode,
                     organisasjonsnummer = a1,
@@ -65,7 +66,7 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
                 vedtaksperiodeId = 2.vedtaksperiode,
                 hendelser = setOf(søknadIdMars, inntektsmeldingIdMars),
                 ventetSiden = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.oppdatert,
-                venterTil = LocalDateTime.MAX,
+                venterTil = venterTil,
                 venterPå = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
                     vedtaksperiodeId = 1.vedtaksperiode,
                     organisasjonsnummer = a1,
@@ -185,6 +186,25 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
             val venteHendelseFør = observatør.vedtaksperiodeVenter.toList()
             håndterPåminnelse(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertEquals(venteHendelseFør, observatør.vedtaksperiodeVenter)
+        }
+    }
+
+    @Test
+    fun `Om perioden man venter på har en timeout bør den brukes som venter til`() {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+            håndterInntektsmelding(listOf(1.mars til 16.mars))
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+
+            val januarVenterTil = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert.plusDays(180)
+            val januarVenter = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }
+            assertEquals(1.vedtaksperiode, januarVenter.venterPå.vedtaksperiodeId)
+            assertEquals(januarVenterTil, januarVenter.venterTil)
+            val marsVenter = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 2.vedtaksperiode }
+            assertEquals(1.vedtaksperiode, marsVenter.venterPå.vedtaksperiodeId)
+            assertEquals(januarVenterTil, marsVenter.venterTil)
         }
     }
 }

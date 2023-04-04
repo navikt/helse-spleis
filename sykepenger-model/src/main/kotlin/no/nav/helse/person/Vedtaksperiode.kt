@@ -1015,11 +1015,15 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiodeId = id,
             orgnummer = organisasjonsnummer,
             ventetSiden = oppdatert,
-            venterTil = person.makstid(this, oppdatert)
+            venterTil = venterTil(venterPå)
         )
         builder.hendelseIder(hendelseIder())
         emitVedtaksperiodeVenter(builder.build())
     }
+
+    private fun venterTil(venterPå: Vedtaksperiode) =
+        if (id == venterPå.id) person.makstid(this, oppdatert)
+        else minOf(person.makstid(this, oppdatert), person.makstid(venterPå, venterPå.oppdatert))
 
     internal fun venteårsak(arbeidsgivere: List<Arbeidsgiver>) =
         tilstand.venteårsak(this, arbeidsgivere)
