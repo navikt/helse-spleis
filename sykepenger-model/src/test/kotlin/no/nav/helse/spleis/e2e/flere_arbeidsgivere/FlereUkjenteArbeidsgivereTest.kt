@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -8,7 +7,16 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeData
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -39,8 +47,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
         nyPeriode(1.februar til 20.februar, a1)
         nyPeriode(1.februar til 20.februar, a2)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
-        assertFunksjonellFeil("Minst en arbeidsgiver inngår ikke i sykepengegrunnlaget", 2.vedtaksperiode.filter(a1))
+        assertFunksjonellFeil("Minst en arbeidsgiver inngår ikke i sykepengegrunnlaget", 1.vedtaksperiode.filter(a2))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTrue(inspektør(a1).periodeErForkastet(2.vedtaksperiode))
         assertTrue(inspektør(a2).periodeErForkastet(1.vedtaksperiode))
@@ -87,29 +94,30 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         }
 
         val overstyringerIgangsatt = observatør.overstyringIgangsatt
-        assertEquals(2, overstyringerIgangsatt.size)
+        assertEquals(1, overstyringerIgangsatt.size)
 
         overstyringerIgangsatt.last().also { event ->
             assertEquals(PersonObserver.OverstyringIgangsatt(
-                årsak = "NY_PERIODE",
+                årsak = "KORRIGERT_INNTEKTSMELDING",
                 skjæringstidspunkt = 1.januar,
-                periodeForEndring = 1.mars til 20.mars,
+                periodeForEndring = 1.januar til 1.januar,
                 berørtePerioder = listOf(
+                    VedtaksperiodeData(a1, 1.vedtaksperiode.id(a1), 1.januar til 31.januar, 1.januar, "REVURDERING"),
+                    VedtaksperiodeData(a1, 2.vedtaksperiode.id(a1), 1.februar til 28.februar, 1.januar, "REVURDERING"),
                     VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
                 )
             ), event)
         }
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
-        assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD, orgnummer = a2)
+        assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
+        assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD, orgnummer = a2)
     }
 
     @Test
     fun `én arbeidsgiver blir to - førstegangsbehandlingen hos ag2 forkastes ikke`() {
         val inntektA1 = INNTEKT + 500.daglig
-        val inntektA2 = INNTEKT
 
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
         forlengVedtak(1.februar, 28.februar, orgnummer = a1)
@@ -119,52 +127,11 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
         håndterSimulering(3.vedtaksperiode, orgnummer = a1)
 
-        håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = inntektA2, orgnummer = a2)
         nullstillTilstandsendringer()
         nyPeriode(1.mars til 20.mars, a2)
 
-        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(3.vedtaksperiode)?.inspektør ?: fail { "må ha vilkårsgrunnlag" }
-        val inntektsopplysninger = vilkårsgrunnlag.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver
-
-        val a1Inspektør = inntektsopplysninger.getValue(a1).inspektør
-        assertEquals(Inntektsmelding::class, a1Inspektør.inntektsopplysning::class)
-        assertEquals(inntektA1, a1Inspektør.inntektsopplysning.inspektør.beløp)
-
-        assertForventetFeil(
-            forklaring = "1.vedtaksperiode er i feil tilstand. Revurderingen blir sittende fast fordi inntektsmeldingen til a2 ikke oppdaterer vilkårsgrunnlaget",
-            nå = {
-                assertEquals(1, inntektsopplysninger.size)
-                assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, orgnummer = a1)
-                assertTilstander(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, orgnummer = a1)
-                assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, orgnummer = a1)
-                assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
-            },
-            ønsket = {
-                assertEquals(2, inntektsopplysninger.size)
-                val a2Inspektør = inntektsopplysninger.getValue(a2).inspektør
-                assertEquals(Inntektsmelding::class, a2Inspektør.inntektsopplysning::class)
-                assertEquals(inntektA2, a2Inspektør.inntektsopplysning.inspektør.beløp)
-
-                val overstyringerIgangsatt = observatør.overstyringIgangsatt
-                assertEquals(2, overstyringerIgangsatt.size)
-
-                overstyringerIgangsatt.last().also { event ->
-                    assertEquals(PersonObserver.OverstyringIgangsatt(
-                        årsak = "NY_PERIODE",
-                        skjæringstidspunkt = 1.januar,
-                        periodeForEndring = 1.mars til 20.mars,
-                        berørtePerioder = listOf(
-                            VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
-                        )
-                    ), event)
-                }
-
-                assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
-                assertTilstander(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
-                assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
-                assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
-            }
-        )
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD, orgnummer = a2)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
     }
 
     @Test
@@ -230,26 +197,10 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Bytter arbeidsgiver i løpet i sykefraværet - første arbeidsgiver revurderes mens vi venter på IM for ny arbeidsgiver`() {
+    fun `Bytter arbeidsgiver i løpet i sykefraværet - ny arbeidsgiver kastes ut`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
         nyPeriode(1.februar til 28.februar, orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = INNTEKT*1.1, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
-
-        val antallVedtaksperiodeVenterFør = observatør.vedtaksperiodeVenter.size
-        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar, orgnummer = a2)
-        val vedtaksperiodeVenterEtterHåndtertIM = observatør.vedtaksperiodeVenter.drop(antallVedtaksperiodeVenterFør)
-
-        assertEquals(2, vedtaksperiodeVenterEtterHåndtertIM.size)
-        // a1 venter på seg selv - mener den mangler informasjon fra a2 selv om vi har fått inntektsmelding.
-        // Ettersom vi har et vilkårsgrunnlag på skjæringstidspunktet a2 ikke inngår i blir vi stående å vente...
-        val a1venter = vedtaksperiodeVenterEtterHåndtertIM.single { it.vedtaksperiodeId == 1.vedtaksperiode.id(a1) }
-        assertEquals(1.vedtaksperiode.id(a1), a1venter.venterPå.vedtaksperiodeId)
-        assertEquals("MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE", a1venter.venterPå.venteårsak.hvorfor)
-        // a2 venter på a1
-        val a2venter = vedtaksperiodeVenterEtterHåndtertIM.single { it.vedtaksperiodeId == 1.vedtaksperiode.id(a2) }
-        assertEquals(1.vedtaksperiode.id(a1), a2venter.venterPå.vedtaksperiodeId)
-        assertEquals("MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE", a2venter.venterPå.venteårsak.hvorfor)
+        assertFunksjonellFeil(RV_SV_2, 1.vedtaksperiode.filter(a2))
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD, orgnummer = a2)
     }
 }

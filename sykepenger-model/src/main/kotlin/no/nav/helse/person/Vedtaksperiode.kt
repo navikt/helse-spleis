@@ -612,6 +612,7 @@ internal class Vedtaksperiode private constructor(
         oppdaterHistorikk(søknad)
         søknad.valider(periode, jurist())
         søknad.validerInntektskilder(vilkårsgrunnlag == null)
+        if (manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) søknad.funksjonellFeil(RV_SV_2)
         if (søknad.harFunksjonelleFeilEllerVerre()) {
             return forkast(søknad)
         }

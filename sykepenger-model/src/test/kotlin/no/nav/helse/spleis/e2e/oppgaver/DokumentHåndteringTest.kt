@@ -89,15 +89,14 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     fun `har overlappende avslutta vedtaksperiode på annen arbeidsgiver`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a2)
         val søknad2 = håndterSøknad(Sykdom(28.januar, 28.februar, 100.prosent))
-        val im = håndterInntektsmelding(listOf(28.januar til 12.februar ), begrunnelseForReduksjonEllerIkkeUtbetalt = "bjeff")
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),
                 aktørId = AKTØRID,
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
-                gjeldendeTilstand = TilstandType.AVVENTER_INNTEKTSMELDING,
-                hendelser = setOf(søknad2, im),
+                gjeldendeTilstand = TilstandType.START,
+                hendelser = setOf(søknad2),
                 fom = 28.januar,
                 tom = 28.februar,
                 forlengerPeriode = true,
@@ -133,15 +132,14 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     fun `har en periode rett før på annen arbeidsgiver`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a2)
         val søknad2 = håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        val im = håndterInntektsmelding(listOf(1.februar til 16.februar ), begrunnelseForReduksjonEllerIkkeUtbetalt = "bjeff")
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),
                 aktørId = AKTØRID,
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
-                gjeldendeTilstand = TilstandType.AVVENTER_INNTEKTSMELDING,
-                hendelser = setOf(søknad2, im),
+                gjeldendeTilstand = TilstandType.START,
+                hendelser = setOf(søknad2),
                 fom = 1.februar,
                 tom = 28.februar,
                 forlengerPeriode = true,

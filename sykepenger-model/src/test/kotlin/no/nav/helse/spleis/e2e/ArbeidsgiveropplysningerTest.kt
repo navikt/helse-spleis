@@ -4,6 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -17,13 +18,21 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 @EnableToggle(Toggle.Splarbeidsbros::class)
@@ -234,25 +243,15 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
         nyPeriode(1.januar til 31.januar, a2)
 
-        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-        val actualForespurtOpplysning =
-            observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
-
-        val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(
-                PersonObserver.Inntektsforslag(
-                    listOf(
-                        oktober(2017),
-                        november(2017),
-                        desember(2017)
-                    )
-                )
-            ),
-            PersonObserver.Refusjon(forslag = emptyList()),
-            PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.januar til 16.januar))
+        assertForventetFeil(
+            forklaring = "Støtter ikke å legge til ny arbeidsgiver i eksisterende vilkårsgrunnlag",
+            nå = {
+                assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD, orgnummer = a2)
+            },
+            ønsket = {
+                fail("""\_(ツ)_/¯""")
+            }
         )
-
-        assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
     }
 
     @Test
