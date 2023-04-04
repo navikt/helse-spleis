@@ -1,5 +1,6 @@
 package no.nav.helse.spleis
 
+import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
@@ -27,6 +28,7 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
@@ -73,6 +75,8 @@ internal class TestHendelseMediator : IHendelseMediator {
     internal var lestPåminnelse = false
         private set
     internal var lestPersonpåminnelse = false
+        private set
+    internal var lestAnmodningOmForkasting = false
         private set
     internal var lestutbetalingpåminnelse = false
         private set
@@ -138,6 +142,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestEtterbetaling = false
         lestInfotrygdendring = false
         utbetalingshistorikkEtterInfotrygdendringMessage = false
+        lestAnmodningOmForkasting = false
     }
 
     override fun behandle(message: HendelseMessage, context: MessageContext) {
@@ -202,6 +207,14 @@ internal class TestHendelseMediator : IHendelseMediator {
 
     override fun behandle(message: PersonPåminnelseMessage, påminnelse: PersonPåminnelse, context: MessageContext) {
         lestPersonpåminnelse = true
+    }
+
+    override fun behandle(
+        message: AnmodningOmForkastingMessage,
+        anmodning: AnmodningOmForkasting,
+        context: MessageContext
+    ) {
+        lestAnmodningOmForkasting = true
     }
 
     override fun behandle(message: UtbetalingshistorikkMessage, utbetalingshistorikk: Utbetalingshistorikk, context: MessageContext) {

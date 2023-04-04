@@ -7,6 +7,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.serde.DeserializationException
 import no.nav.helse.serde.migration.JsonMigrationException
 import no.nav.helse.spleis.db.HendelseRepository
+import no.nav.helse.spleis.meldinger.AnmodningOmForkastingRiver
 import no.nav.helse.spleis.meldinger.AnnullerUtbetalingerRiver
 import no.nav.helse.spleis.meldinger.DødsmeldingerRiver
 import no.nav.helse.spleis.meldinger.EtterbetalingerRiver
@@ -78,6 +79,7 @@ internal class MessageMediator(
             UtbetalingshistorikkEtterInfotrygdendringRiver(it, this)
             DødsmeldingerRiver(it, this)
             ForkastSykmeldingsperioderRiver(it, this)
+            AnmodningOmForkastingRiver(it, this)
         }
     }
 

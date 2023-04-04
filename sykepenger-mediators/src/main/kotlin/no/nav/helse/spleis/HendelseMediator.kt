@@ -1,6 +1,7 @@
 package no.nav.helse.spleis
 
 import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
@@ -36,6 +37,7 @@ import no.nav.helse.serde.serialize
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
+import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
@@ -216,6 +218,16 @@ internal class HendelseMediator(
     override fun behandle(message: PersonPåminnelseMessage, påminnelse: PersonPåminnelse, context: MessageContext) {
         hentPersonOgHåndter(message, påminnelse, context) { person ->
             person.håndter(påminnelse)
+        }
+    }
+
+    override fun behandle(
+        message: AnmodningOmForkastingMessage,
+        anmodning: AnmodningOmForkasting,
+        context: MessageContext
+    ) {
+        hentPersonOgHåndter(message, anmodning, context) {person ->
+            person.håndter(anmodning)
         }
     }
 
@@ -400,6 +412,7 @@ internal interface IHendelseMediator {
     fun behandle(message: UtbetalingpåminnelseMessage, påminnelse: Utbetalingpåminnelse, context: MessageContext)
     fun behandle(message: PåminnelseMessage, påminnelse: Påminnelse, context: MessageContext)
     fun behandle(message: PersonPåminnelseMessage, påminnelse: PersonPåminnelse, context: MessageContext)
+    fun behandle(message: AnmodningOmForkastingMessage, anmodning: AnmodningOmForkasting, context: MessageContext)
     fun behandle(message: UtbetalingshistorikkMessage, utbetalingshistorikk: Utbetalingshistorikk, context: MessageContext)
     fun behandle(message: UtbetalingshistorikkForFeriepengerMessage, utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger, context: MessageContext)
     fun behandle(message: YtelserMessage, ytelser: Ytelser, context: MessageContext)

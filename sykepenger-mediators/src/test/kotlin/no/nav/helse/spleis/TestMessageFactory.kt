@@ -865,6 +865,17 @@ internal class TestMessageFactory(
         )
     }
 
+    fun lagAnmodningOmForkasting(vedtaksperiodeId: UUID = UUID.randomUUID()): Pair<String, String> {
+        return nyHendelse(
+            "anmodning_om_forkasting", mapOf(
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "vedtaksperiodeId" to vedtaksperiodeId
+            )
+        )
+    }
+
     fun lagUtbetaling(
         fagsystemId: String,
         utbetalingId: String,

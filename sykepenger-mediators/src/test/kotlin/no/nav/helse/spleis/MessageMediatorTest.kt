@@ -9,9 +9,9 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.spleis.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -63,6 +63,12 @@ internal class MessageMediatorTest {
     fun personpåminnelse() {
         testRapid.sendTestMessage(meldingsfabrikk.lagPersonPåminnelse())
         assertTrue(hendelseMediator.lestPersonpåminnelse)
+    }
+
+    @Test
+    fun `anmodning om forkasting`() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagAnmodningOmForkasting())
+        assertTrue(hendelseMediator.lestAnmodningOmForkasting)
     }
 
     @Test
