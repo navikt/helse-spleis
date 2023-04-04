@@ -46,8 +46,7 @@ internal class IUtbetaling(
             vurdering = vurdering,
             id = id,
             oppdrag = oppdrag,
-            tilGodkjenning = erTilGodkjenning,
-            korrelasjonsId = korrelasjonsId
+            tilGodkjenning = erTilGodkjenning
         )
     }
 

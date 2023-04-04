@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder
-import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Vedtaksperiode.AvsluttetUtenUtbetaling
 import no.nav.helse.person.Vedtaksperiode.AvventerBlokkerendePeriode
 import no.nav.helse.person.Vedtaksperiode.AvventerGodkjenning
@@ -26,6 +25,7 @@ import no.nav.helse.serde.api.dto.SpeilOppdrag
 import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
 import no.nav.helse.serde.api.dto.SøknadNavDTO
 import no.nav.helse.serde.api.dto.Tidslinjeperiode
+import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
 import no.nav.helse.serde.api.dto.UberegnetPeriode
 import no.nav.helse.serde.api.dto.Utbetalingstatus.Annullert
 import no.nav.helse.serde.api.dto.Utbetalingstatus.Godkjent
@@ -51,16 +51,16 @@ import no.nav.helse.utbetalingslinjer.Utbetalingtype
 internal class Tidslinjeberegninger {
     private val sykdomstidslinjer = mutableMapOf<UUID, List<Sykdomstidslinjedag>>()
     private val opphørteUtbetalinger = mutableSetOf<UUID>()
-    private var utbetalingTilGodkjenning: UUID? = null
+    private var utbetalingTilGodkjenning: Vedtaksperiodeutbetaling? = null
 
     private val beregningklosser = mutableListOf<Beregningkloss>()
     private val utbetalingklosser = mutableListOf<Utbetalingkloss>()
     private val vedtaksperioderklosser = mutableListOf<Vedtaksperiodekloss>()
 
-    internal fun build(alder: Alder, vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk): List<Tidslinjeperiode> {
+    internal fun build(organisasjonsnummer: String, alder: Alder, vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk): List<Tidslinjeperiode> {
         val beregninger = beregningklosser.map { it.tilTidslinjeberegning(sykdomstidslinjer) }
         val utbetalinger = utbetalingklosser.mapNotNull { it.tilUtbetaling(beregninger, opphørteUtbetalinger, utbetalingTilGodkjenning) }
-        return vedtaksperioderklosser.flatMap { it.tilTidslinjeperiode(alder, utbetalinger, vilkårsgrunnlaghistorikk) }
+        return vedtaksperioderklosser.flatMap { it.tilTidslinjeperiode(organisasjonsnummer, alder, utbetalinger, vilkårsgrunnlaghistorikk) }
     }
 
     internal fun leggTil(beregningId: UUID, sykdomshistorikkElementId: UUID) {
@@ -207,8 +207,7 @@ internal class Tidslinjeberegninger {
         fom: LocalDate,
         tom: LocalDate,
         hendelser: List<HendelseDTO>,
-        utbetalinger: List<Pair<UUID, IVilkårsgrunnlag>>,
-        periodetype: Periodetype,
+        utbetalinger: List<Vedtaksperiodeutbetaling>,
         sykdomstidslinje: List<Sykdomstidslinjedag>,
         opprettet: LocalDateTime,
         oppdatert: LocalDateTime,
@@ -223,7 +222,6 @@ internal class Tidslinjeberegninger {
                 tom = tom,
                 hendelser = hendelser,
                 vedtaksperiodeutbetalinger = utbetalinger,
-                periodetype = periodetype,
                 sykdomstidslinje = sykdomstidslinje,
                 opprettet = opprettet,
                 oppdatert = oppdatert,
@@ -234,7 +232,7 @@ internal class Tidslinjeberegninger {
             return
         }
         if (tilstand in listOf(AvventerGodkjenning, AvventerGodkjenningRevurdering)) {
-            utbetalingTilGodkjenning = utbetalinger.last().first
+            utbetalingTilGodkjenning = utbetalinger.last()
         }
         vedtaksperioderklosser.add(Vedtaksperiodekloss.PeriodeMedUtbetaling(
             vedtaksperiodeId = vedtaksperiode,
@@ -242,7 +240,6 @@ internal class Tidslinjeberegninger {
             tom = tom,
             hendelser = hendelser,
             vedtaksperiodeutbetalinger = utbetalinger,
-            periodetype = periodetype,
             sykdomstidslinje = sykdomstidslinje,
             opprettet = opprettet,
             oppdatert = oppdatert,
@@ -257,8 +254,7 @@ internal class Tidslinjeberegninger {
         fom: LocalDate,
         tom: LocalDate,
         hendelser: List<HendelseDTO>,
-        utbetalinger: List<Pair<UUID, IVilkårsgrunnlag>>,
-        periodetype: Periodetype,
+        utbetalinger: List<Vedtaksperiodeutbetaling>,
         sykdomstidslinje: List<Sykdomstidslinjedag>,
         opprettet: LocalDateTime,
         oppdatert: LocalDateTime,
@@ -274,7 +270,6 @@ internal class Tidslinjeberegninger {
             tom = tom,
             hendelser = hendelser,
             vedtaksperiodeutbetalinger = utbetalinger,
-            periodetype = periodetype,
             sykdomstidslinje = sykdomstidslinje,
             opprettet = opprettet,
             oppdatert = oppdatert,
@@ -284,13 +279,25 @@ internal class Tidslinjeberegninger {
         ))
     }
 
+    internal class Vedtaksperiodeutbetaling(private val utbetalingId: UUID, private val vilkårsgrunnlagId: UUID) {
+        fun utbetaling(utbetalinger: List<IUtbetaling>): IUtbetaling? {
+            return utbetalinger.singleOrNull { it.id == utbetalingId }
+        }
+        fun vilkårsgrunnlag(vilkårsgrunnlag: IVilkårsgrunnlagHistorikk): IVilkårsgrunnlag {
+            return vilkårsgrunnlag.leggIBøtta(this.vilkårsgrunnlagId)
+        }
+
+        fun erTilGodkjenning(id: UUID): Boolean {
+            return this.utbetalingId == id
+        }
+    }
+
     private sealed class Vedtaksperiodekloss(
         protected val vedtaksperiodeId: UUID,
         protected val fom: LocalDate,
         protected val tom: LocalDate,
         protected val hendelser: List<HendelseDTO>,
-        protected val vedtaksperiodeutbetalinger: List<Pair<UUID, IVilkårsgrunnlag>>,
-        protected val periodetype: Periodetype,
+        protected val vedtaksperiodeutbetalinger: List<Vedtaksperiodeutbetaling>,
         protected val sykdomstidslinje: List<Sykdomstidslinjedag>,
         protected val opprettet: LocalDateTime,
         protected val oppdatert: LocalDateTime,
@@ -299,6 +306,7 @@ internal class Tidslinjeberegninger {
         protected val aktivitetsloggForPeriode: Aktivitetslogg
     ) {
         abstract fun tilTidslinjeperiode(
+            organisasjonsnummer: String,
             alder: Alder,
             utbetalinger: List<IUtbetaling>,
             vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
@@ -309,16 +317,16 @@ internal class Tidslinjeberegninger {
             fom: LocalDate,
             tom: LocalDate,
             hendelser: List<HendelseDTO>,
-            vedtaksperiodeutbetalinger: List<Pair<UUID, IVilkårsgrunnlag>>,
-            periodetype: Periodetype,
+            vedtaksperiodeutbetalinger: List<Vedtaksperiodeutbetaling>,
             sykdomstidslinje: List<Sykdomstidslinjedag>,
             opprettet: LocalDateTime,
             oppdatert: LocalDateTime,
             tilstand: Vedtaksperiodetilstand,
             skjæringstidspunkt: LocalDate,
             aktivitetsloggForPeriode: Aktivitetslogg
-        ) : Vedtaksperiodekloss(vedtaksperiodeId, fom, tom, hendelser, vedtaksperiodeutbetalinger, periodetype, sykdomstidslinje, opprettet, oppdatert, tilstand, skjæringstidspunkt, aktivitetsloggForPeriode) {
+        ) : Vedtaksperiodekloss(vedtaksperiodeId, fom, tom, hendelser, vedtaksperiodeutbetalinger, sykdomstidslinje, opprettet, oppdatert, tilstand, skjæringstidspunkt, aktivitetsloggForPeriode) {
             override fun tilTidslinjeperiode(
+                organisasjonsnummer: String,
                 alder: Alder,
                 utbetalinger: List<IUtbetaling>,
                 vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
@@ -329,8 +337,8 @@ internal class Tidslinjeberegninger {
                     fom = fom,
                     tom = tom,
                     sammenslåttTidslinje = tidslinje,
-                    periodetype = periodetype,
-                    inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER,
+                    periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING, // feltet gir ikke mening for uberegnede perioder
+                    inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER, // feltet gir ikke mening for uberegnede perioder
                     erForkastet = false,
                     opprettet = opprettet,
                     oppdatert = oppdatert,
@@ -352,36 +360,36 @@ internal class Tidslinjeberegninger {
             fom: LocalDate,
             tom: LocalDate,
             hendelser: List<HendelseDTO>,
-            vedtaksperiodeutbetalinger: List<Pair<UUID, IVilkårsgrunnlag>>,
-            periodetype: Periodetype,
+            vedtaksperiodeutbetalinger: List<Vedtaksperiodeutbetaling>,
             sykdomstidslinje: List<Sykdomstidslinjedag>,
             opprettet: LocalDateTime,
             oppdatert: LocalDateTime,
             tilstand: Vedtaksperiodetilstand,
             skjæringstidspunkt: LocalDate,
             aktivitetsloggForPeriode: Aktivitetslogg
-        ) : Vedtaksperiodekloss(vedtaksperiodeId, fom, tom, hendelser, vedtaksperiodeutbetalinger, periodetype, sykdomstidslinje, opprettet, oppdatert, tilstand, skjæringstidspunkt, aktivitetsloggForPeriode) {
+        ) : Vedtaksperiodekloss(vedtaksperiodeId, fom, tom, hendelser, vedtaksperiodeutbetalinger, sykdomstidslinje, opprettet, oppdatert, tilstand, skjæringstidspunkt, aktivitetsloggForPeriode) {
             override fun tilTidslinjeperiode(
+                organisasjonsnummer: String,
                 alder: Alder,
                 utbetalinger: List<IUtbetaling>,
                 vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
-            ) = vedtaksperiodeutbetalinger.mapNotNull { (utbetalingId, vilkårsgrunnlag) ->
-                utbetalinger.singleOrNull { it.id == utbetalingId }?.let { mapTilBeregnetPeriode(alder, vilkårsgrunnlag, it, vilkårsgrunnlaghistorikk) }
+            ) = vedtaksperiodeutbetalinger.mapNotNull { vedtaksperiodeutbetaling ->
+                vedtaksperiodeutbetaling.utbetaling(utbetalinger)?.let { mapTilBeregnetPeriode(organisasjonsnummer, alder, vedtaksperiodeutbetaling.vilkårsgrunnlag(vilkårsgrunnlaghistorikk), it) }
             }
 
-            private fun mapTilBeregnetPeriode(alder: Alder, vilkårsgrunnlag: IVilkårsgrunnlag, utbetaling: IUtbetaling, vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk): BeregnetPeriode {
+            private fun mapTilBeregnetPeriode(organisasjonsnummer: String, alder: Alder, vilkårsgrunnlag: IVilkårsgrunnlag, utbetaling: IUtbetaling): BeregnetPeriode {
                 val avgrensetUtbetalingstidslinje = utbetaling.utbetalingstidslinje.filter { it.dato in fom..tom }
                 val sammenslåttTidslinje = utbetaling.sammenslåttTidslinje(fom, tom)
                 val varsler = PeriodeVarslerBuilder(aktivitetsloggForPeriode).build()
                 val utbetalingDTO = utbetaling.toDTO()
-                vilkårsgrunnlaghistorikk.leggIBøtta(vilkårsgrunnlag)
+
                 return BeregnetPeriode(
                     vedtaksperiodeId = vedtaksperiodeId,
                     beregningId = utbetaling.beregning.beregningId,
                     fom = fom,
                     tom = tom,
                     erForkastet = false,
-                    periodetype = periodetype,
+                    periodetype = vilkårsgrunnlag.utledPeriodetype(organisasjonsnummer, vedtaksperiodeId),
                     inntektskilde = if (vilkårsgrunnlag.inntekter.count { it.omregnetÅrsinntekt != null } > 1) UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE else UtbetalingInntektskilde.EN_ARBEIDSGIVER,
                     skjæringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt,
                     hendelser = hendelser,
@@ -463,17 +471,16 @@ internal class Tidslinjeberegninger {
             fom: LocalDate,
             tom: LocalDate,
             hendelser: List<HendelseDTO>,
-            vedtaksperiodeutbetalinger: List<Pair<UUID, IVilkårsgrunnlag>>,
-            periodetype: Periodetype,
+            vedtaksperiodeutbetalinger: List<Vedtaksperiodeutbetaling>,
             sykdomstidslinje: List<Sykdomstidslinjedag>,
             opprettet: LocalDateTime,
             oppdatert: LocalDateTime,
             tilstand: Vedtaksperiodetilstand,
             skjæringstidspunkt: LocalDate,
             aktivitetsloggForPeriode: Aktivitetslogg
-        ) : Vedtaksperiodekloss(vedtaksperiodeId, fom, tom, hendelser, vedtaksperiodeutbetalinger, periodetype, sykdomstidslinje, opprettet, oppdatert, tilstand, skjæringstidspunkt, aktivitetsloggForPeriode) {
+        ) : Vedtaksperiodekloss(vedtaksperiodeId, fom, tom, hendelser, vedtaksperiodeutbetalinger, sykdomstidslinje, opprettet, oppdatert, tilstand, skjæringstidspunkt, aktivitetsloggForPeriode) {
             private fun annullerteUtbetalinger(utbetalinger: List<IUtbetaling>) = vedtaksperiodeutbetalinger
-                .mapNotNull { (utbetalingId, _) -> utbetalinger.singleOrNull { it.id == utbetalingId } }
+                .mapNotNull { it.utbetaling(utbetalinger) }
                 .groupBy { it.korrelasjonsId }
                 .mapNotNull { (_, utbetalingene) ->
                     utbetalinger.firstOrNull { it.annulleringFor(utbetalingene.first()) }?.let {
@@ -482,13 +489,14 @@ internal class Tidslinjeberegninger {
                 }
 
             override fun tilTidslinjeperiode(
+                organisasjonsnummer: String,
                 alder: Alder,
                 utbetalinger: List<IUtbetaling>,
                 vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
             ) = annullerteUtbetalinger(utbetalinger).flatMap { (annulleringen, utbetalingene) ->
                 // en annullert periode har også en tidligere utbetalt periode med minst én utbetalt utbetaling
-                val utbetaltePerioder = PeriodeMedUtbetaling(vedtaksperiodeId, fom, tom, hendelser, vedtaksperiodeutbetalinger, periodetype, sykdomstidslinje, opprettet, oppdatert, tilstand, skjæringstidspunkt, aktivitetsloggForPeriode)
-                    .tilTidslinjeperiode(alder, utbetalingene, vilkårsgrunnlaghistorikk)
+                val utbetaltePerioder = PeriodeMedUtbetaling(vedtaksperiodeId, fom, tom, hendelser, vedtaksperiodeutbetalinger, sykdomstidslinje, opprettet, oppdatert, tilstand, skjæringstidspunkt, aktivitetsloggForPeriode)
+                    .tilTidslinjeperiode(organisasjonsnummer, alder, utbetalingene, vilkårsgrunnlaghistorikk)
 
                 val utbetalingDTO = annulleringen.toDTO()
                 utbetaltePerioder + listOf(BeregnetPeriode(
@@ -497,21 +505,21 @@ internal class Tidslinjeberegninger {
                     fom = fom,
                     tom = tom,
                     erForkastet = true,
-                    periodetype = periodetype,
-                    inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER,
-                    skjæringstidspunkt = fom,
+                    periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING, // feltet gir ikke mening for annullert periode
+                    inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER, // feltet gir ikke mening for annullert periode
+                    skjæringstidspunkt = fom, // feltet gir ikke mening for annullert periode
                     hendelser = hendelser,
-                    maksdato = annulleringen.maksdato,
+                    maksdato = LocalDate.MAX, // feltet gir ikke mening for annullert periode
                     beregnet = annulleringen.opprettet,
                     opprettet = opprettet,
                     oppdatert = oppdatert,
-                    periodevilkår = periodevilkårForAnnullertPeriode(alder),
-                    sammenslåttTidslinje = emptyList(),
-                    gjenståendeSykedager = null,
-                    forbrukteSykedager = null,
+                    periodevilkår = periodevilkårForAnnullertPeriode(alder), // feltet gir ikke mening for annullert periode
+                    sammenslåttTidslinje = emptyList(), // feltet gir ikke mening for annullert periode
+                    gjenståendeSykedager = null, // feltet gir ikke mening for annullert periode
+                    forbrukteSykedager = null, // feltet gir ikke mening for annullert periode
                     utbetaling = utbetalingDTO,
-                    vilkårsgrunnlagId = null,
-                    aktivitetslogg = emptyList(),
+                    vilkårsgrunnlagId = null, // feltet gir ikke mening for annullert periode
+                    aktivitetslogg = emptyList(), // feltet gir ikke mening for annullert periode
                     periodetilstand = when (utbetalingDTO.status) {
                         Annullert -> Periodetilstand.Annullert
                         else -> Periodetilstand.TilAnnullering
@@ -554,7 +562,7 @@ internal class Tidslinjeberegninger {
         private val vurdering: no.nav.helse.serde.api.dto.Utbetaling.Vurdering?,
         private val oppdrag: Map<String, SpeilOppdrag>
     ) {
-        fun tilUtbetaling(tidslinjeberegninger: List<ITidslinjeberegning>, opphørteUtbetalinger: MutableSet<UUID>, utbetalingTilGodkjenning: UUID?): IUtbetaling? {
+        fun tilUtbetaling(tidslinjeberegninger: List<ITidslinjeberegning>, opphørteUtbetalinger: Set<UUID>, utbetalingTilGodkjenning: Vedtaksperiodeutbetaling?): IUtbetaling? {
             if (this.id in opphørteUtbetalinger) return null
             return IUtbetaling(
                 id = id,
@@ -573,7 +581,7 @@ internal class Tidslinjeberegninger {
                 personFagsystemId = personFagsystemId,
                 vurdering = vurdering,
                 oppdrag = oppdrag,
-                erTilGodkjenning = utbetalingTilGodkjenning == this.id
+                erTilGodkjenning = utbetalingTilGodkjenning?.erTilGodkjenning(this.id) ?: false
             )
         }
     }

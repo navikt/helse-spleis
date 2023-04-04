@@ -13,6 +13,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.utbetalingslinjer.TagBuilder
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
+import no.nav.helse.utbetalingslinjer.UtbetalingPeriodetype
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Pair<VilkårsgrunnlagElement, Utbetaling>>) {
@@ -99,7 +100,7 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Pair<Vilkårsgrunnl
         hendelse: IAktivitetslogg,
         periode: Periode,
         skjæringstidspunkt: LocalDate,
-        periodetype: Periodetype,
+        periodetype: UtbetalingPeriodetype,
         førstegangsbehandling: Boolean,
         orgnummereMedRelevanteArbeidsforhold: List<String>,
         tagBuilder: TagBuilder
@@ -108,7 +109,7 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Pair<Vilkårsgrunnl
             hendelse = hendelse,
             periode = periode,
             skjæringstidspunkt = skjæringstidspunkt,
-            periodetype = periodetype.tilUtbetalingPeriodetype(),
+            periodetype = periodetype,
             førstegangsbehandling = førstegangsbehandling,
             inntektskilde = sisteVilkårsgrunnlag!!.inntektskilde(),
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,

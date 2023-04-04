@@ -9,9 +9,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.Periodetype
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 
@@ -89,12 +87,6 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         // …eller dersom det ikke har vært gap siden forrige utbetaling
         val forrigeUtbetaling = utbetalingsdager.lastOrNull { other -> other.endInclusive < periode.endInclusive } ?: return false
         return oppholdsdager.none { it.overlapperMed(forrigeUtbetaling.endInclusive til periode.endInclusive) }
-    }
-
-    internal fun periodetype(organisasjonsnummer: String, other: Periode, skjæringstidspunkt: LocalDate, infotrygdhistorikk: Infotrygdhistorikk): Periodetype {
-        val førsteUtbetalingsdag = utbetalingsdager.firstOrNull()?.start
-        val avgjørende = førsteUtbetalingsdag?.let { maxOf(it, skjæringstidspunkt) } ?: skjæringstidspunkt
-        return infotrygdhistorikk.periodetype(organisasjonsnummer, other, avgjørende) ?: if (avgjørende < other.start) return Periodetype.FORLENGELSE else Periodetype.FØRSTEGANGSBEHANDLING
     }
 
     override fun equals(other: Any?) = other is Arbeidsgiverperiode && other.førsteKjente == this.førsteKjente

@@ -4,9 +4,7 @@ import java.util.UUID
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.serde.api.BuilderState
 import no.nav.helse.serde.api.dto.ArbeidsgiverDTO
-import no.nav.helse.serde.api.dto.GhostPeriodeDTO
 import no.nav.helse.serde.api.dto.HendelseDTO
-import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
 import no.nav.helse.Alder
 
 internal class ArbeidsgiverBuilder(
@@ -19,7 +17,7 @@ internal class ArbeidsgiverBuilder(
         return ArbeidsgiverDTO(
             organisasjonsnummer = organisasjonsnummer,
             id = id,
-            generasjoner = GenerasjonerBuilder(hendelser, alder, arbeidsgiver, vilkårsgrunnlagHistorikk).build()
+            generasjoner = GenerasjonerBuilder(organisasjonsnummer, hendelser, alder, arbeidsgiver, vilkårsgrunnlagHistorikk).build()
         )
     }
 

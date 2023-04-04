@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.graphql
 
 import java.util.UUID
-import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.api.dto.Arbeidsgiverinntekt
 import no.nav.helse.serde.api.dto.Arbeidsgiverrefusjon
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
@@ -20,6 +19,7 @@ import no.nav.helse.serde.api.dto.SykmeldingDTO
 import no.nav.helse.serde.api.dto.SøknadArbeidsgiverDTO
 import no.nav.helse.serde.api.dto.SøknadNavDTO
 import no.nav.helse.serde.api.dto.Tidslinjeperiode
+import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
 import no.nav.helse.serde.api.dto.Utbetaling
 import no.nav.helse.serde.api.dto.Utbetalingstatus
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
@@ -267,11 +267,11 @@ private fun mapPeriodevilkår(vilkår: BeregnetPeriode.Vilkår) = GraphQLPeriode
     }
 )
 
-private fun mapPeriodetype(type: Periodetype) = when (type) {
-    Periodetype.FØRSTEGANGSBEHANDLING -> GraphQLPeriodetype.Forstegangsbehandling
-    Periodetype.FORLENGELSE -> GraphQLPeriodetype.Forlengelse
-    Periodetype.OVERGANG_FRA_IT -> GraphQLPeriodetype.OvergangFraIt
-    Periodetype.INFOTRYGDFORLENGELSE -> GraphQLPeriodetype.Infotrygdforlengelse
+private fun mapPeriodetype(type: Tidslinjeperiodetype) = when (type) {
+    Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING -> GraphQLPeriodetype.Forstegangsbehandling
+    Tidslinjeperiodetype.FORLENGELSE -> GraphQLPeriodetype.Forlengelse
+    Tidslinjeperiodetype.OVERGANG_FRA_IT -> GraphQLPeriodetype.OvergangFraIt
+    Tidslinjeperiodetype.INFOTRYGDFORLENGELSE -> GraphQLPeriodetype.Infotrygdforlengelse
 }
 
 private fun mapInntektstype(kilde: UtbetalingInntektskilde) = when (kilde) {

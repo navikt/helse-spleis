@@ -48,7 +48,6 @@ import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.Dokumentsporing.Companion.toMap
 import no.nav.helse.person.ForlengelseFraInfotrygd.IKKE_ETTERSPURT
-import no.nav.helse.person.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.person.Sykefraværstilfelleeventyr.Companion.bliMed
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -134,7 +133,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.TagBuilder
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
 import no.nav.helse.utbetalingslinjer.UtbetalingPeriodetype
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -916,16 +914,27 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
-        val periodetype = arbeidsgiver.periodetype(periode)
         val vilkårsgrunnlag = requireNotNull(person.vilkårsgrunnlagFor(skjæringstidspunkt))
         val tagBuilder = TagBuilder()
         vilkårsgrunnlag.tags(tagBuilder)
+        val erForlengelse = arbeidsgiver
+            .finnVedtaksperiodeRettFør(this)
+            ?.takeIf { it.forventerInntekt() } != null
         utbetalinger.godkjenning(
             hendelse = hendelse,
             periode = periode,
             skjæringstidspunkt = skjæringstidspunkt,
-            periodetype = periodetype,
-            førstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING,
+            periodetype = when (erForlengelse) {
+                true -> when (vilkårsgrunnlag) {
+                    is InfotrygdVilkårsgrunnlag -> UtbetalingPeriodetype.INFOTRYGDFORLENGELSE
+                    else -> UtbetalingPeriodetype.FORLENGELSE
+                }
+                false -> when (vilkårsgrunnlag) {
+                    is InfotrygdVilkårsgrunnlag -> UtbetalingPeriodetype.OVERGANG_FRA_IT
+                    else -> UtbetalingPeriodetype.FØRSTEGANGSBEHANDLING
+                }
+            },
+            førstegangsbehandling = !erForlengelse,
             tagBuilder = tagBuilder,
             orgnummereMedRelevanteArbeidsforhold = person.relevanteArbeidsgivere(skjæringstidspunkt)
         )
@@ -2602,27 +2611,6 @@ enum class ForlengelseFraInfotrygd {
     IKKE_ETTERSPURT,
     JA,
     NEI
-}
-
-enum class Periodetype {
-    /** Perioden er første periode i et sykdomstilfelle */
-    FØRSTEGANGSBEHANDLING,
-
-    /** Perioden en en forlengelse av en Spleis-periode */
-    FORLENGELSE,
-
-    /** Perioden en en umiddelbar forlengelse av en periode som er utbetalt i Infotrygd */
-    OVERGANG_FRA_IT,
-
-    /** Perioden er en direkte eller indirekte forlengelse av en OVERGANG_FRA_IT-periode */
-    INFOTRYGDFORLENGELSE;
-
-    fun tilUtbetalingPeriodetype(): UtbetalingPeriodetype = when (this) {
-        FØRSTEGANGSBEHANDLING -> UtbetalingPeriodetype.FØRSTEGANGSBEHANDLING
-        FORLENGELSE -> UtbetalingPeriodetype.FORLENGELSE
-        OVERGANG_FRA_IT -> UtbetalingPeriodetype.OVERGANG_FRA_IT
-        INFOTRYGDFORLENGELSE -> UtbetalingPeriodetype.INFOTRYGDFORLENGELSE
-    }
 }
 
 internal typealias VedtaksperiodeFilter = (Vedtaksperiode) -> Boolean

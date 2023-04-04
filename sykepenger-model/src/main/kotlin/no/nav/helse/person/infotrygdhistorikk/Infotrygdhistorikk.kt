@@ -6,7 +6,6 @@ import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.InfotrygdhistorikkVisitor
-import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -54,11 +53,6 @@ internal class Infotrygdhistorikk private constructor(
     internal fun utbetalingstidslinje(): Utbetalingstidslinje {
         if (!harHistorikk()) return Utbetalingstidslinje()
         return siste.utbetalingstidslinje()
-    }
-
-    internal fun periodetype(organisasjonsnummer: String, other: Periode, dag: LocalDate): Periodetype? {
-        if (!harHistorikk()) return null
-        return siste.periodetype(organisasjonsnummer, other, dag)
     }
 
     internal fun skjæringstidspunkt(organisasjonsnummer: String, periode: Periode, tidslinje: Sykdomstidslinje): LocalDate {

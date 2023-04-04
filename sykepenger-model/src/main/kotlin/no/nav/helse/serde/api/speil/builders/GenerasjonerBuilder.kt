@@ -28,13 +28,13 @@ import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 
 internal typealias BeregningId = UUID
-internal typealias KorrelasjonsId = UUID
 
 // Besøker hele arbeidsgiver-treet
 internal class GenerasjonerBuilder(
+    private val organisasjonsnummer: String,
     private val hendelser: List<HendelseDTO>,
     private val alder: Alder,
-    private val arbeidsgiver: Arbeidsgiver,
+    arbeidsgiver: Arbeidsgiver,
     private val vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
 ) : ArbeidsgiverVisitor {
     private val tidslinjeberegninger = Tidslinjeberegninger()
@@ -44,13 +44,8 @@ internal class GenerasjonerBuilder(
         arbeidsgiver.accept(this)
     }
 
-    // todo: speilbuilder bør regne ut dette selv slik at
-    // vi kan mykne opp bindingen tilbake til modellen
-    private fun periodetype(periode: Periode) =
-        arbeidsgiver.periodetype(periode)
-
     internal fun build(): List<GenerasjonDTO> {
-        val perioder = tidslinjeberegninger.build(alder, vilkårsgrunnlaghistorikk)
+        val perioder = tidslinjeberegninger.build(organisasjonsnummer, alder, vilkårsgrunnlaghistorikk)
         return Generasjoner().apply {
             perioder
                 .sorterEtterHendelse()
@@ -93,7 +88,6 @@ internal class GenerasjonerBuilder(
                 tom = periode.endInclusive,
                 hendelser = filtrerteHendelser,
                 utbetalinger = utbetalinger,
-                periodetype = periodetype(periode),
                 sykdomstidslinje = sykdomstidslinje,
                 opprettet = opprettet,
                 oppdatert = oppdatert,
@@ -108,7 +102,6 @@ internal class GenerasjonerBuilder(
             tom = periode.endInclusive,
             hendelser = filtrerteHendelser,
             utbetalinger = utbetalinger,
-            periodetype = periodetype(periode),
             sykdomstidslinje = sykdomstidslinje,
             opprettet = opprettet,
             oppdatert = oppdatert,

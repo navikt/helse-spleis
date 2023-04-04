@@ -10,18 +10,17 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.GenerasjonDTO
 import no.nav.helse.serde.api.dto.Periodetilstand
 import no.nav.helse.serde.api.dto.Tidslinjeperiode
 import no.nav.helse.serde.api.dto.Tidslinjeperiode.Companion.sorterEtterHendelse
+import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
 import no.nav.helse.serde.api.dto.UberegnetPeriode
 import no.nav.helse.serde.api.dto.Utbetaling
 import no.nav.helse.serde.api.dto.Utbetalingstatus
 import no.nav.helse.serde.api.dto.Utbetalingtype
 import no.nav.helse.serde.api.speil.Generasjoner
-import no.nav.helse.serde.api.speil.builders.KorrelasjonsId
 import no.nav.helse.serde.api.v2.buildere.GenerasjonerTest.Hva.beregnet
 import no.nav.helse.serde.api.v2.buildere.GenerasjonerTest.Hva.uberegnet
 import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
@@ -99,11 +98,10 @@ internal class GenerasjonerTest {
     @Test
     fun `annullering lager ny rad`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val korrelasjonsId = UUID.randomUUID()
         val generasjoner = byggGenerasjoner(
             uberegnetPeriode(1.mars til 10.mars),
-            beregnetPeriode(11.mars til 31.mars, utbetaling(Utbetalingtype.UTBETALING, korrelasjonsId), vedtaksperiodeId),
-            beregnetPeriode(11.mars til 31.mars, utbetaling(Utbetalingtype.ANNULLERING, korrelasjonsId), vedtaksperiodeId),
+            beregnetPeriode(11.mars til 31.mars, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId),
+            beregnetPeriode(11.mars til 31.mars, utbetaling(Utbetalingtype.ANNULLERING), vedtaksperiodeId),
 
         )
         generasjoner(2) {
@@ -121,15 +119,13 @@ internal class GenerasjonerTest {
     @Test
     fun `annullering etter en annen annullering fortsetter på samme rad`() {
         val vedtaksperiodeId1 = UUID.randomUUID()
-        val korrelasjonsId1 = UUID.randomUUID()
 
         val vedtaksperiodeId2 = UUID.randomUUID()
-        val korrelasjonsId2 = UUID.randomUUID()
         val generasjoner = byggGenerasjoner(
-            beregnetPeriode(1.mars til 31.mars, utbetaling(Utbetalingtype.UTBETALING, korrelasjonsId1), vedtaksperiodeId1),
-            beregnetPeriode(1.mai til 31.mai, utbetaling(Utbetalingtype.UTBETALING, korrelasjonsId2), vedtaksperiodeId2),
-            beregnetPeriode(1.mai til 31.mai, utbetaling(Utbetalingtype.ANNULLERING, korrelasjonsId2), vedtaksperiodeId2),
-            beregnetPeriode(1.mars til 31.mars, utbetaling(Utbetalingtype.ANNULLERING, korrelasjonsId1), vedtaksperiodeId1),
+            beregnetPeriode(1.mars til 31.mars, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId1),
+            beregnetPeriode(1.mai til 31.mai, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId2),
+            beregnetPeriode(1.mai til 31.mai, utbetaling(Utbetalingtype.ANNULLERING), vedtaksperiodeId2),
+            beregnetPeriode(1.mars til 31.mars, utbetaling(Utbetalingtype.ANNULLERING), vedtaksperiodeId1),
         )
         generasjoner(2) {
             generasjon(0, 2) {
@@ -146,11 +142,10 @@ internal class GenerasjonerTest {
     @Test
     fun `revurdering lager ny rad`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val korrelasjonsId = UUID.randomUUID()
         val generasjoner = byggGenerasjoner(
             uberegnetPeriode(1.mars til 10.mars),
-            beregnetPeriode(11.mars til 31.mars, utbetaling(Utbetalingtype.UTBETALING, korrelasjonsId), vedtaksperiodeId),
-            beregnetPeriode(11.mars til 31.mars, utbetaling(Utbetalingtype.REVURDERING, korrelasjonsId), vedtaksperiodeId),
+            beregnetPeriode(11.mars til 31.mars, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId),
+            beregnetPeriode(11.mars til 31.mars, utbetaling(Utbetalingtype.REVURDERING), vedtaksperiodeId),
 
         )
         generasjoner(2) {
@@ -222,11 +217,10 @@ internal class GenerasjonerTest {
     fun `revurdere etter annullering`() {
         val vedtaksperiodeId1 = UUID.randomUUID()
         val vedtaksperiodeId2 = UUID.randomUUID()
-        val korrelasjonsId = UUID.randomUUID()
         val generasjoner = byggGenerasjoner(
             beregnetPeriode(1.mars til 31.mars, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId1),
-            beregnetPeriode(1.april til 30.april, utbetaling(Utbetalingtype.UTBETALING, korrelasjonsId = korrelasjonsId), vedtaksperiodeId2),
-            beregnetPeriode(1.april til 30.april, utbetaling(Utbetalingtype.ANNULLERING, korrelasjonsId = korrelasjonsId), vedtaksperiodeId2),
+            beregnetPeriode(1.april til 30.april, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId2),
+            beregnetPeriode(1.april til 30.april, utbetaling(Utbetalingtype.ANNULLERING), vedtaksperiodeId2),
             beregnetPeriode(1.mars til 31.mars, utbetaling(Utbetalingtype.REVURDERING), vedtaksperiodeId1),
         )
         generasjoner(3) {
@@ -273,7 +267,7 @@ internal class GenerasjonerTest {
         assertEquals(tom, this.tom)
     }
 
-    private fun utbetaling(type: Utbetalingtype, korrelasjonsId: KorrelasjonsId = UUID.randomUUID(), utbetalingId: UUID = UUID.randomUUID()) = Utbetaling(
+    private fun utbetaling(type: Utbetalingtype, utbetalingId: UUID = UUID.randomUUID()) = Utbetaling(
         type = type,
         status = Utbetalingstatus.Utbetalt,
         arbeidsgiverNettoBeløp = 0,
@@ -283,15 +277,14 @@ internal class GenerasjonerTest {
         oppdrag = emptyMap(),
         vurdering = null,
         id = utbetalingId,
-        tilGodkjenning = false,
-        korrelasjonsId = korrelasjonsId
+        tilGodkjenning = false
     )
     private fun uberegnetPeriode(periode: Periode) = UberegnetPeriode(
         vedtaksperiodeId = UUID.randomUUID(),
         fom = periode.start,
         tom = periode.endInclusive,
         sammenslåttTidslinje = emptyList(),
-        periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+        periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING,
         inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER,
         erForkastet = false,
         opprettet = LocalDateTime.now(),
@@ -305,7 +298,7 @@ internal class GenerasjonerTest {
         fom = periode.start,
         tom = periode.endInclusive,
         sammenslåttTidslinje = emptyList(),
-        periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+        periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING,
         inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER,
         erForkastet = false,
         opprettet = LocalDateTime.now(),

@@ -59,6 +59,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         val vilkårsgrunnlagHistorikkBuilderResult = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk).build()
 
         GenerasjonerBuilder(
+            organisasjonsnummer,
             søknadDTOer,
             UNG_PERSON_FØDSELSDATO.alder,
             person.arbeidsgiver(organisasjonsnummer),

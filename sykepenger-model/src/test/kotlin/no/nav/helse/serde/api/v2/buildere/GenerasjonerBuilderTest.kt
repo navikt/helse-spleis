@@ -48,6 +48,7 @@ import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.GenerasjonDTO
+import no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.serde.api.dto.OmregnetÅrsinntekt
 import no.nav.helse.serde.api.dto.Periodetilstand
@@ -65,6 +66,8 @@ import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType.FORELDET_SYKEDAG
 import no.nav.helse.serde.api.dto.Tidslinjeperiode
+import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
+import no.nav.helse.serde.api.dto.Tidslinjeperiodetype.*
 import no.nav.helse.serde.api.dto.UberegnetPeriode
 import no.nav.helse.serde.api.dto.Utbetalingstatus
 import no.nav.helse.serde.api.dto.Utbetalingstatus.*
@@ -99,6 +102,7 @@ import no.nav.helse.spleis.e2e.manuellSykedag
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.spleis.e2e.speilApi
 import no.nav.helse.spleis.e2e.søknadDTOer
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
@@ -117,14 +121,26 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `happy case`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+        forlengVedtak(1.februar, 28.februar, a1, a2)
 
-        assertEquals(1, generasjoner.size)
-        assertEquals(1, generasjoner[0].perioder.size)
-        0.generasjon {
-            assertEquals(1, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+        generasjoner(a1).apply {
+            assertEquals(1, this.size)
+            this[0].apply {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt medPeriodetype FORLENGELSE avType UTBETALING fra 1.februar til 28.februar medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt medPeriodetype FØRSTEGANGSBEHANDLING avType UTBETALING fra 1.januar til 31.januar medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
         }
+        generasjoner(a2).apply {
+            assertEquals(1, this.size)
+            this[0].apply {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt medPeriodetype FORLENGELSE avType UTBETALING fra 1.februar til 28.februar medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt medPeriodetype FØRSTEGANGSBEHANDLING avType UTBETALING fra 1.januar til 31.januar medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
+        }
+
     }
 
     @Test
@@ -132,10 +148,16 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.juni)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
 
         0.generasjon {
-            assertEquals(1, perioder.size)
-            uberegnetPeriode(0) harTidslinje (1.januar til 31.januar to FORELDET_SYKEDAG) medTilstand ForberederGodkjenning
+            assertEquals(2, perioder.size)
+            beregnetPeriode(0) fra 1.februar til 28.februar medTilstand ForberederGodkjenning medPeriodetype FORLENGELSE
+            beregnetPeriode(1) harTidslinje (1.januar til 31.januar to FORELDET_SYKEDAG) medTilstand IngenUtbetaling medPeriodetype FØRSTEGANGSBEHANDLING
         }
     }
 
@@ -198,7 +220,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         0.generasjon {
-            val periode = beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt
+            assertEquals(2, perioder.size)
+            val periode = beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt medPeriodetype FØRSTEGANGSBEHANDLING
             assertNotEquals(periode.vedtaksperiodeId, periode.aktivitetslogg[0].vedtaksperiodeId)
         }
     }
@@ -222,7 +245,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         0.generasjon {
-            val periode = beregnetPeriode(0) avType UTBETALING er Utbetalingstatus.Utbetalt medTilstand Utbetalt
+            assertEquals(3, perioder.size)
+            val periode = beregnetPeriode(0) avType UTBETALING er Utbetalingstatus.Utbetalt medTilstand Utbetalt medPeriodetype FØRSTEGANGSBEHANDLING
             assertNotEquals(periode.vedtaksperiodeId, periode.aktivitetslogg[0].vedtaksperiodeId)
             assertNotEquals(periode.vedtaksperiodeId, periode.aktivitetslogg[1].vedtaksperiodeId)
         }
@@ -2099,6 +2123,23 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         }
     }
 
+    @Test
+    fun `overgang fra infotrygd`() {
+        createOvergangFraInfotrygdPerson()
+        forlengVedtak(1.mars, 31.mars, 100.prosent)
+        val personDto = speilApi()
+        val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val vilkårsgrunnlag = personDto.vilkårsgrunnlag[speilVilkårsgrunnlagId] as? InfotrygdVilkårsgrunnlag
+        assertTrue(vilkårsgrunnlag!!.arbeidsgiverrefusjoner.isNotEmpty())
+        val arbeidsgiverrefusjon = vilkårsgrunnlag.arbeidsgiverrefusjoner.single()
+        assertEquals(ORGNUMMER, arbeidsgiverrefusjon.arbeidsgiver)
+        val refusjonsopplysning = arbeidsgiverrefusjon.refusjonsopplysninger.single()
+
+        assertEquals(1.januar, refusjonsopplysning.fom)
+        assertEquals(null, refusjonsopplysning.tom)
+        assertEquals(INNTEKT,refusjonsopplysning.beløp.månedlig)
+    }
+
     private fun BeregnetPeriode.assertAldersvilkår(expectedOppfylt: Boolean, expectedAlderSisteSykedag: Int) {
         assertEquals(expectedOppfylt, periodevilkår.alder.oppfylt)
         assertEquals(expectedAlderSisteSykedag, periodevilkår.alder.alderSisteSykedag)
@@ -2138,6 +2179,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     private fun generasjoner(organisasjonsnummer: String): List<GenerasjonDTO> {
         val vilkårsgrunnlagHistorikkBuilderResult = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk).build()
         val generasjonerBuilder = GenerasjonerBuilder(
+            organisasjonsnummer,
             søknadDTOer,
             UNG_PERSON_FØDSELSDATO.alder,
             person.arbeidsgiver(organisasjonsnummer),
@@ -2190,9 +2232,22 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         return this
     }
 
+    private infix fun <T : Tidslinjeperiode> T.medPeriodetype(tidslinjeperiodetype: Tidslinjeperiodetype): T {
+        assertEquals(tidslinjeperiodetype, this.periodetype)
+        return this
+    }
+
     private infix fun <T : Tidslinjeperiode> T.fra(periode: Periode): T {
         assertEquals(periode.start, this.fom)
         assertEquals(periode.endInclusive, this.tom)
+        return this
+    }
+    private infix fun <T : Tidslinjeperiode> T.fra(fom: LocalDate): T {
+        assertEquals(fom, this.fom)
+        return this
+    }
+    private infix fun <T : Tidslinjeperiode> T.til(tom: LocalDate): T {
+        assertEquals(tom, this.tom)
         return this
     }
 

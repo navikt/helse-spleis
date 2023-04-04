@@ -34,6 +34,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.sisteBehov
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
+import no.nav.helse.utbetalingslinjer.UtbetalingPeriodetype
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -90,7 +91,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
         håndterYtelser()
         person.håndter(simulering())
         assertEquals(1, hendelse.behov().size)
-        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING.name, hendelse.behov().first().detaljer()["periodetype"])
+        assertEquals(UtbetalingPeriodetype.FØRSTEGANGSBEHANDLING.name, hendelse.behov().first().detaljer()["periodetype"])
         person.håndter(utbetalingsgodkjenning(true))
     }
 

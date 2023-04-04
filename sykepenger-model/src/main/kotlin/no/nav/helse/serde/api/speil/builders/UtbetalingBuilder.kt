@@ -16,6 +16,7 @@ import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.serde.api.dto.EndringskodeDTO.Companion.dto
 import no.nav.helse.serde.api.dto.SpeilOppdrag
 import no.nav.helse.serde.api.dto.Utbetaling
+import no.nav.helse.serde.api.speil.Tidslinjeberegninger
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Klassekode
@@ -29,33 +30,30 @@ import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.utbetalingslinjer.Utbetaling as InternUtbetaling
 
-// Besøker hele vedtaksperiode-treet
 internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode) : VedtaksperiodeVisitor {
-    val vilkårsgrunnlag = mutableMapOf<UUID, IVilkårsgrunnlag>()
+    val vilkårsgrunnlag = mutableListOf<Tidslinjeberegninger.Vedtaksperiodeutbetaling>()
 
     init {
         vedtaksperiode.accept(this)
     }
 
-    internal fun build() = vilkårsgrunnlag
-        .map { (utbetalingId, vilkårsgrunnlag) -> utbetalingId  to vilkårsgrunnlag }
+    internal fun build() = vilkårsgrunnlag.toList()
 
     override fun preVisitVedtaksperiodeUtbetaling(
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         utbetaling: no.nav.helse.utbetalingslinjer.Utbetaling
     ) {
-        val utbetalingIDTilVilkårsgrunnlag = VedtaksperiodeUtbetalingVilkårsgrunnlagBuilder(grunnlagsdata, utbetaling).build()
-        vilkårsgrunnlag[utbetalingIDTilVilkårsgrunnlag.first] = utbetalingIDTilVilkårsgrunnlag.second
+        vilkårsgrunnlag.add(VedtaksperiodeUtbetalingVilkårsgrunnlagBuilder(grunnlagsdata, utbetaling).build())
     }
 
     internal class VedtaksperiodeUtbetalingVilkårsgrunnlagBuilder(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetaling: InternUtbetaling): VedtaksperiodeUtbetalingVisitor {
         private lateinit var utbetalingId: UUID
-        private lateinit var vilkårsgrunnlag: IVilkårsgrunnlag
+        private lateinit var vilkårsgrunnlag: UUID
         init {
             grunnlagsdata.accept(this)
             utbetaling.accept(this)
         }
-        internal fun build() = utbetalingId to vilkårsgrunnlag
+        internal fun build() = Tidslinjeberegninger.Vedtaksperiodeutbetaling(utbetalingId, vilkårsgrunnlag)
 
         override fun preVisitUtbetaling(
             utbetaling: no.nav.helse.utbetalingslinjer.Utbetaling,
@@ -93,58 +91,11 @@ internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode) : Vedtaksperi
             vilkårsgrunnlagId: UUID,
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
         ) {
-            val sammenligningsgrunnlagBuilder =
-                VilkårsgrunnlagBuilder.InnslagBuilder.SammenligningsgrunnlagBuilder(sammenligningsgrunnlag)
-
-            val compositeSykepengegrunnlag = VilkårsgrunnlagBuilder.InnslagBuilder.SykepengegrunnlagBuilder(
-                sykepengegrunnlag,
-                sammenligningsgrunnlagBuilder
-            ).build()
-            val oppfyllerKravOmMedlemskap = when (medlemskapstatus) {
-                Medlemskapsvurdering.Medlemskapstatus.Ja -> true
-                Medlemskapsvurdering.Medlemskapstatus.Nei -> false
-                else -> null
-            }
-
-            vilkårsgrunnlag = ISpleisGrunnlag(
-                skjæringstidspunkt = skjæringstidspunkt,
-                omregnetÅrsinntekt = compositeSykepengegrunnlag.omregnetÅrsinntekt,
-                sammenligningsgrunnlag = sammenligningsgrunnlagBuilder.total(),
-                inntekter = compositeSykepengegrunnlag.inntekterPerArbeidsgiver,
-                refusjonsopplysningerPerArbeidsgiver = compositeSykepengegrunnlag.refusjonsopplysningerPerArbeidsgiver,
-                sykepengegrunnlag = compositeSykepengegrunnlag.sykepengegrunnlag,
-                avviksprosent = avviksprosent?.prosent(),
-                grunnbeløp = compositeSykepengegrunnlag.begrensning.grunnbeløp,
-                sykepengegrunnlagsgrense = compositeSykepengegrunnlag.begrensning,
-                meldingsreferanseId = meldingsreferanseId,
-                antallOpptjeningsdagerErMinst = opptjening.opptjeningsdager(),
-                oppfyllerKravOmMinstelønn = compositeSykepengegrunnlag.oppfyllerMinsteinntektskrav,
-                oppfyllerKravOmOpptjening = opptjening.erOppfylt(),
-                oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap,
-                id = vilkårsgrunnlagId
-            )
+            this.vilkårsgrunnlag = vilkårsgrunnlagId
         }
 
-        override fun preVisitInfotrygdVilkårsgrunnlag(
-            infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
-            skjæringstidspunkt: LocalDate,
-            sykepengegrunnlag: Sykepengegrunnlag,
-            vilkårsgrunnlagId: UUID
-        ) {
-            val byggetSykepengegrunnlag = VilkårsgrunnlagBuilder.InnslagBuilder.SykepengegrunnlagBuilder(
-                sykepengegrunnlag,
-                null /* vi har ikke noe sammenligningsgrunnlag for Infotrygd-saker */
-            )
-                .build()
-            vilkårsgrunnlag = IInfotrygdGrunnlag(
-                skjæringstidspunkt = skjæringstidspunkt,
-                omregnetÅrsinntekt = byggetSykepengegrunnlag.omregnetÅrsinntekt,
-                sammenligningsgrunnlag = null,
-                inntekter = byggetSykepengegrunnlag.inntekterPerArbeidsgiver,
-                refusjonsopplysningerPerArbeidsgiver = byggetSykepengegrunnlag.refusjonsopplysningerPerArbeidsgiver,
-                sykepengegrunnlag = byggetSykepengegrunnlag.sykepengegrunnlag,
-                id = vilkårsgrunnlagId
-            )
+        override fun preVisitInfotrygdVilkårsgrunnlag(infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag, skjæringstidspunkt: LocalDate, sykepengegrunnlag: Sykepengegrunnlag, vilkårsgrunnlagId: UUID) {
+            this.vilkårsgrunnlag = vilkårsgrunnlagId
         }
     }
 }

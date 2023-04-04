@@ -534,14 +534,6 @@ class Person private constructor(
         return infotrygdhistorikk.oppfriskNødvendig(hendelse, arbeidsgivere.tidligsteDato())
     }
 
-    internal fun periodetype(
-        orgnummer: String,
-        arbeidsgiverperiode: Arbeidsgiverperiode,
-        periode: Periode,
-        skjæringstidspunkt: LocalDate
-    ) =
-        arbeidsgiverperiode.periodetype(orgnummer, periode, skjæringstidspunkt, infotrygdhistorikk)
-
     internal fun accept(visitor: PersonVisitor) {
         visitor.preVisitPerson(this, opprettet, aktørId, personidentifikator, vilkårsgrunnlagHistorikk)
         alder.accept(visitor)

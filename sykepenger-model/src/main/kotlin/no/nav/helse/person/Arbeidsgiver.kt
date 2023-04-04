@@ -927,10 +927,6 @@ internal class Arbeidsgiver private constructor(
         return sykdomstidslinje().subset(førstePeriodeMedUtbetaling.periode().oppdaterFom(skjæringstidspunkt)).sisteSkjæringstidspunkt()
     }
 
-    internal fun periodetype(periode: Periode): Periodetype {
-        return arbeidsgiverperiode(periode)?.let { person.periodetype(organisasjonsnummer, it, periode, skjæringstidspunkt(periode)) } ?: Periodetype.FØRSTEGANGSBEHANDLING
-    }
-
     private fun skjæringstidspunkt(periode: Periode) = person.skjæringstidspunkt(organisasjonsnummer, sykdomstidslinje(), periode)
 
     internal fun builder(

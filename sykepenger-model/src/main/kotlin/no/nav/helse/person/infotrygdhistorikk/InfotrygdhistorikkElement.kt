@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.InfotrygdhistorikkVisitor
-import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -88,14 +87,6 @@ class InfotrygdhistorikkElement private constructor(
         val ulåst = Sykdomstidslinje().merge(sykdomstidslinje, replace)
         return sykdomstidslinje(orgnummer, ulåst)
     }
-
-    internal fun periodetype(organisasjonsnummer: String, other: Periode, dag: LocalDate): Periodetype? {
-        val utbetalinger = perioder.utbetalingsperioder(organisasjonsnummer)
-        if (dag > other.start || utbetalinger.none { dag in it }) return null
-        if (dag in other || utbetalinger.any { dag in it && it.erRettFør(other) }) return Periodetype.OVERGANG_FRA_IT
-        return Periodetype.INFOTRYGDFORLENGELSE
-    }
-
 
     internal fun sykdomstidslinje(orgnummer: String, sykdomstidslinje: Sykdomstidslinje = Sykdomstidslinje()): Sykdomstidslinje {
         return perioder.fold(sykdomstidslinje) { result, periode ->
