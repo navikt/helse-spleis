@@ -1319,9 +1319,19 @@ internal class Vedtaksperiode private constructor(
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
             if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode))
                 return INNTEKTSMELDING fordi MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
-            if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode, Aktivitetslogg(), arbeidsgivere))
+            if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode, Aktivitetslogg(), arbeidsgivere)) {
+                loggDersomStuckRevurdering(vedtaksperiode, arbeidsgivere)
                 return INNTEKTSMELDING fordi MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE
+            }
             return null
+        }
+
+        private fun loggDersomStuckRevurdering(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) {
+            val vilkårsgrunnlag = vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) ?: return
+            val arbeidsgivereISykepengegrunnlag = arbeidsgivere.filter { vilkårsgrunnlag.inngårISykepengegrunnlaget(it.organisasjonsnummer()) }
+            if (harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode, arbeidsgivere = arbeidsgivereISykepengegrunnlag)) {
+                sikkerlogg.info("Periode sitter fast i revurdering pga ny arbeidsgiver som ikke er i sykepengegrunnlaget. {}, {}", kv("vedtaksperiodeId", "${vedtaksperiode.id}"), kv("fødselsnummer", vedtaksperiode.fødselsnummer))
+            }
         }
 
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {
