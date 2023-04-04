@@ -550,11 +550,11 @@ internal class Vedtaksperiode private constructor(
 
     private fun igangsettOverstyringAvTidslinje(hendelse: OverstyrTidslinje) {
         val vedtaksperiodeTilRevurdering = arbeidsgiver.finnVedtaksperiodeFør(this)
-            ?.takeIf { nyArbeidsgiverperiodeEtterEndring(it, hendelse) } ?: this
+            ?.takeIf { nyArbeidsgiverperiodeEtterEndring(it) } ?: this
         person.igangsettOverstyring(hendelse, Revurderingseventyr.sykdomstidslinje(vedtaksperiodeTilRevurdering.skjæringstidspunkt, vedtaksperiodeTilRevurdering.periode))
     }
 
-    private fun nyArbeidsgiverperiodeEtterEndring(other: Vedtaksperiode, hendelse: OverstyrTidslinje): Boolean {
+    private fun nyArbeidsgiverperiodeEtterEndring(other: Vedtaksperiode): Boolean {
         // hvorvidt man delte samme utbetaling før
         if (!this.utbetalinger.harAvsluttede()) return false
         if (other.utbetalinger.hørerIkkeSammenMed(this.utbetalinger)) return false
@@ -1091,14 +1091,6 @@ internal class Vedtaksperiode private constructor(
 
         // Gitt at du er nestemann som skal behandles - hva venter du på?
         fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak?
-        fun uventetManglendeVenteårsak(vedtaksperiode: Vedtaksperiode): Venteårsak? {
-            sikkerlogg.info("Uventet manglende venteårsak {}, {}, {}",
-                kv("vedtaksperiodeId", vedtaksperiode.id),
-                kv("tilstand", type.name),
-                kv("fødselsnummer", vedtaksperiode.fødselsnummer)
-            )
-            return null
-        }
 
         // venter du på noe?
         fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode)
@@ -1324,7 +1316,7 @@ internal class Vedtaksperiode private constructor(
                 return INNTEKTSMELDING fordi MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
             if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode, Aktivitetslogg(), arbeidsgivere))
                 return INNTEKTSMELDING fordi MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE
-            return uventetManglendeVenteårsak(vedtaksperiode)
+            return null
         }
 
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {
@@ -1665,10 +1657,10 @@ internal class Vedtaksperiode private constructor(
             tilstandsendringstidspunkt: LocalDateTime,
             vedtaksperiode: Vedtaksperiode,
             arbeidsgivere: List<Arbeidsgiver>
-        ) = tilstand(vedtaksperiode, arbeidsgivere).makstid(tilstandsendringstidspunkt, vedtaksperiode)
+        ) = tilstand(vedtaksperiode, arbeidsgivere).makstid(tilstandsendringstidspunkt)
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
-            return tilstand(vedtaksperiode, arbeidsgivere).venteårsak(vedtaksperiode)
+            return tilstand(vedtaksperiode, arbeidsgivere).venteårsak()
         }
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {
             vedtaksperiode.vedtaksperiodeVenter(nestemann)
@@ -1720,9 +1712,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         private sealed interface Tilstand {
-            fun venteårsak(vedtaksperiode: Vedtaksperiode): Venteårsak? = uventetManglendeVenteårsak(vedtaksperiode)
-            fun makstid(tilstandsendringstidspunkt: LocalDateTime, vedtaksperiode: Vedtaksperiode): LocalDateTime {
-                val venteårsak = venteårsak(vedtaksperiode)
+            fun venteårsak(): Venteårsak? = null
+            fun makstid(tilstandsendringstidspunkt: LocalDateTime): LocalDateTime {
+                val venteårsak = venteårsak()
                 return if (venteårsak.venterPåInntektsmelding) tilstandsendringstidspunkt.plusDays(180)
                 else if (venteårsak.venterPåSøknad) tilstandsendringstidspunkt.plusDays(90)
                 else LocalDateTime.MAX
@@ -1730,7 +1722,7 @@ internal class Vedtaksperiode private constructor(
             fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg)
         }
         private object AvventerTidligereEllerOverlappendeSøknad: Tilstand {
-            override fun venteårsak(vedtaksperiode: Vedtaksperiode) = SØKNAD fordi HAR_SYKMELDING_SOM_OVERLAPPER_PÅ_ANDRE_ARBEIDSGIVERE
+            override fun venteårsak() = SØKNAD fordi HAR_SYKMELDING_SOM_OVERLAPPER_PÅ_ANDRE_ARBEIDSGIVERE
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
                 hendelse.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding som er før eller overlapper med vedtaksperioden")
             }
@@ -1753,13 +1745,13 @@ internal class Vedtaksperiode private constructor(
             }
         }
         private object ManglerNødvendigInntektForVilkårsprøvingForAndreArbeidsgivere: Tilstand {
-            override fun venteårsak(vedtaksperiode: Vedtaksperiode) = INNTEKTSMELDING fordi MANGLER_INNTEKT_FOR_VILKÅRSPRØVING_PÅ_ANDRE_ARBEIDSGIVERE
+            override fun venteårsak() = INNTEKTSMELDING fordi MANGLER_INNTEKT_FOR_VILKÅRSPRØVING_PÅ_ANDRE_ARBEIDSGIVERE
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
                 hendelse.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver ikke har tilstrekkelig inntekt for skjæringstidspunktet")
             }
         }
         private object TrengerInntektsmelding: Tilstand {
-            override fun venteårsak(vedtaksperiode: Vedtaksperiode) = INNTEKTSMELDING fordi MANGLER_REFUSJONSOPPLYSNINGER_PÅ_ANDRE_ARBEIDSGIVERE
+            override fun venteårsak() = INNTEKTSMELDING fordi MANGLER_REFUSJONSOPPLYSNINGER_PÅ_ANDRE_ARBEIDSGIVERE
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
                 hendelse.info("Gjenopptar ikke behandling fordi minst én overlappende periode venter på nødvendig opplysninger fra arbeidsgiver")
             }
@@ -2339,7 +2331,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
-            if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode.utbetalinger)) return uventetManglendeVenteårsak(vedtaksperiode)
+            if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode.utbetalinger)) return null
             return HJELP.utenBegrunnelse
         }
 
