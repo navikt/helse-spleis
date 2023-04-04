@@ -72,9 +72,6 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
     }
 
     internal fun start() {
-        mockkStatic("no.nav.helse.spleis.RequestResponseTracingKt")
-        every { any<Application>().requestResponseTracing(any()) } returns Unit
-
         mockkStatic("no.nav.helse.spleis.NaisKt")
         every { any<Application>().nais(any()) } returns Unit
 

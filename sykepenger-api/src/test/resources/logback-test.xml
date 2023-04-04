@@ -2,11 +2,21 @@
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>
-                %d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n
+                [ÅPEN LOG] %d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                [SIKRET LOG] %d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n
             </pattern>
         </encoder>
     </appender>
 
+    <logger name="no.nav.helse.spleis.api" additivity="false">
+        <appender-ref ref="SIKKER" />
+    </logger>
     <logger name="tjenestekall" level="INFO" />
     <logger name="kafka" level="ERROR" />
     <logger name="org.apache.zookeeper" level="ERROR" />
@@ -19,7 +29,7 @@
     <logger name="org.testcontainers" level="WARN" />
     <logger name="com.github.dockerjava" level="WARN" />
 
-    <root level="OFF">
+    <root level="INFO">
         <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>

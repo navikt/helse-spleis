@@ -36,7 +36,6 @@ internal val nyObjectmapper get() = jacksonObjectMapper()
     })
 
 internal val objectMapper = nyObjectmapper
-private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
 
 fun main() {
     val config = ApplicationConfiguration()
@@ -50,6 +49,7 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, da
         factory = Netty,
         environment = applicationEngineEnvironment {
             ktorConfig.configure(this)
+            log = LoggerFactory.getLogger("no.nav.helse.spleis.api.Application")
             module {
                 install(CallId) {
                     header("callId")
@@ -57,14 +57,14 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, da
                     generate { UUID.randomUUID().toString() }
                 }
                 install(CallLogging) {
-                    logger = httpTraceLog
+                    logger = LoggerFactory.getLogger("no.nav.helse.spleis.api.CallLogging")
                     level = Level.INFO
                     callIdMdc("callId")
                     filter { call -> call.request.path().startsWith("/api/") }
                 }
                 preStopHook(teller)
                 install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-                requestResponseTracing(httpTraceLog)
+                requestResponseTracing(LoggerFactory.getLogger("no.nav.helse.spleis.api.Tracing"))
                 nais(teller)
                 azureAdAppAuthentication(azureConfig)
                 val dataSource = dataSourceConfiguration.getDataSource()

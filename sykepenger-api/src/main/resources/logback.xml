@@ -20,8 +20,10 @@
     <logger name="tjenestekall" level="DEBUG" additivity="false">
         <appender-ref ref="secureLog" />
     </logger>
-
-    <logger name="io.ktor">
+    <logger name="no.nav.helse.spleis.api" additivity="false">
+        <appender-ref ref="secureLog" />
+    </logger>
+    <logger name="io.ktor" additivity="false">
         <appender-ref ref="secureLog" />
     </logger>
     <logger name="io.ktor.auth.jwt" level="TRACE" additivity="false">
