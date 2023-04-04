@@ -2127,17 +2127,13 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     fun `overgang fra infotrygd`() {
         createOvergangFraInfotrygdPerson()
         forlengVedtak(1.mars, 31.mars, 100.prosent)
-        val personDto = speilApi()
-        val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-        val vilkårsgrunnlag = personDto.vilkårsgrunnlag[speilVilkårsgrunnlagId] as? InfotrygdVilkårsgrunnlag
-        assertTrue(vilkårsgrunnlag!!.arbeidsgiverrefusjoner.isNotEmpty())
-        val arbeidsgiverrefusjon = vilkårsgrunnlag.arbeidsgiverrefusjoner.single()
-        assertEquals(ORGNUMMER, arbeidsgiverrefusjon.arbeidsgiver)
-        val refusjonsopplysning = arbeidsgiverrefusjon.refusjonsopplysninger.single()
 
-        assertEquals(1.januar, refusjonsopplysning.fom)
-        assertEquals(null, refusjonsopplysning.tom)
-        assertEquals(INNTEKT,refusjonsopplysning.beløp.månedlig)
+        assertEquals(1, generasjoner.size)
+        0.generasjon {
+            assertEquals(2, perioder.size)
+            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra 1.mars til 31.mars medTilstand Utbetalt medPeriodetype INFOTRYGDFORLENGELSE
+            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra 1.februar til 28.februar medTilstand Utbetalt medPeriodetype OVERGANG_FRA_IT
+        }
     }
 
     private fun BeregnetPeriode.assertAldersvilkår(expectedOppfylt: Boolean, expectedAlderSisteSykedag: Int) {
