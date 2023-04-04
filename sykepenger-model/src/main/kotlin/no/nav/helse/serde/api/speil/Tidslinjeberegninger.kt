@@ -272,8 +272,6 @@ internal class Tidslinjeberegninger {
     ) {
         // forkastede perioder tas med bare dersom de har vært annullert; dvs. de må ha minst én utbetaling iallfall
         if (utbetalinger.isEmpty()) return
-        // en annullert periode har også en tidligere utbetalt periode med minst én utbetalt utbetaling
-        leggTilVedtaksperiode(vedtaksperiode, fom, tom, inntektskilde, hendelser, utbetalinger, periodetype, sykdomstidslinje, opprettet, oppdatert, tilstand, skjæringstidspunkt, aktivitetsloggForPeriode)
         vedtaksperioderklosser.add(Vedtaksperiodekloss.AnnullertPeriode(
             vedtaksperiodeId = vedtaksperiode,
             fom = fom,
@@ -487,16 +485,22 @@ internal class Tidslinjeberegninger {
                 .mapNotNull { (utbetalingId, _) -> utbetalinger.singleOrNull { it.id == utbetalingId } }
                 .groupBy { it.korrelasjonsId }
                 .mapNotNull { (_, utbetalingene) ->
-                    utbetalinger.firstOrNull { it.annulleringFor(utbetalingene.first()) }
+                    utbetalinger.firstOrNull { it.annulleringFor(utbetalingene.first()) }?.let {
+                        it to utbetalingene
+                    }
                 }
 
             override fun tilTidslinjeperiode(
                 alder: Alder,
                 utbetalinger: List<IUtbetaling>,
                 vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
-            ) = annullerteUtbetalinger(utbetalinger).map { annulleringen ->
+            ) = annullerteUtbetalinger(utbetalinger).flatMap { (annulleringen, utbetalingene) ->
+                // en annullert periode har også en tidligere utbetalt periode med minst én utbetalt utbetaling
+                val utbetaltePerioder = PeriodeMedUtbetaling(vedtaksperiodeId, fom, tom, inntektskilde, hendelser, vedtaksperiodeutbetalinger, periodetype, sykdomstidslinje, opprettet, oppdatert, tilstand, skjæringstidspunkt, aktivitetsloggForPeriode)
+                    .tilTidslinjeperiode(alder, utbetalingene, vilkårsgrunnlaghistorikk)
+
                 val utbetalingDTO = annulleringen.toDTO()
-                BeregnetPeriode(
+                utbetaltePerioder + listOf(BeregnetPeriode(
                     vedtaksperiodeId = vedtaksperiodeId,
                     beregningId = annulleringen.beregning.beregningId,
                     fom = fom,
@@ -521,7 +525,7 @@ internal class Tidslinjeberegninger {
                         Annullert -> Periodetilstand.Annullert
                         else -> Periodetilstand.TilAnnullering
                     }
-                )
+                ))
             }
 
             private fun periodevilkårForAnnullertPeriode(alder: Alder) = BeregnetPeriode.Vilkår(
