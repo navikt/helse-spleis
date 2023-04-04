@@ -12,6 +12,7 @@ import io.ktor.server.application.Application
 import io.ktor.server.engine.ApplicationEngine
 import io.mockk.every
 import io.mockk.mockkStatic
+import io.prometheus.client.CollectorRegistry
 import java.net.Socket
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -67,6 +68,7 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
     }
 
     internal fun tearDown() {
+        CollectorRegistry.defaultRegistry.clear()
         app.stop(1000L, 1000L)
         wireMockServer.stop()
     }

@@ -9,6 +9,8 @@ import io.ktor.http.HttpHeaders.Authorization
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.engine.ApplicationEngine
+import io.prometheus.client.CollectorRegistry
+import io.prometheus.client.Counter
 import java.net.Socket
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -16,6 +18,7 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.atomic.AtomicInteger
 import javax.sql.DataSource
+import kotlinx.coroutines.flow.DEFAULT_CONCURRENCY
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Alder.Companion.alder
@@ -124,6 +127,7 @@ internal class RestApiTest {
 
     @AfterAll
     internal fun `stop embedded environment`() {
+        CollectorRegistry.defaultRegistry.clear()
         app.stop(1000L, 1000L)
         wireMockServer.stop()
     }
