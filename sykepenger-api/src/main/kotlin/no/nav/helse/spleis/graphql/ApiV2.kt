@@ -27,9 +27,11 @@ import no.nav.helse.spleis.graphql.dto.GraphQLSykmelding
 import no.nav.helse.spleis.graphql.dto.GraphQLUberegnetPeriode
 import no.nav.helse.spleis.nyObjectmapper
 import no.nav.helse.spleis.objectMapper
+import org.slf4j.LoggerFactory
 
-internal object ApiV2i {
-    private val schema = ApiV2i::class.java.getResource("/graphql-schema.json")!!.readText()
+internal object ApiV2 {
+    private val logger = LoggerFactory.getLogger(ApiV2::class.java)
+    private val schema = ApiV2::class.java.getResource("/graphql-schema.json")!!.readText()
     private val fraQueryRegex = "person\\(fnr:\"(\\d+)\"\\)".toRegex()
     private val sifferRegex = "\\d+".toRegex()
     private val String.fnr get() = objectMapper.readTree(this.replace(" ", "").replace("\n", "")).let { body ->
@@ -51,6 +53,7 @@ internal object ApiV2i {
     }
 
     internal fun Application.installGraphQLApiV2(dataSource: DataSource, path: String = "/v2/graphql") {
+        logger.info("Tilgjengeliggjør GraphQL V2 på under path $path")
         val personDao = PersonDao(dataSource)
         val hendelseDao = HendelseDao(dataSource)
 

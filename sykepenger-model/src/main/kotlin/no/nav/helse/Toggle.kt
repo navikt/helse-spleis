@@ -126,4 +126,5 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object Splarbeidsbros : Toggle("Splarbeidsbros", false)
     object Pølsefest: Toggle("FLERE_HVITE_POLSER", true) // 290323: toggle skrus på by default, men beholder toggle for kjapp revert.
     object ForkasteAuu: Toggle(false)
+    object GraphQLV2: Toggle("GRAPHQL_V2", false)
 }
