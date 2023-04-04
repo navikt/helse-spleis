@@ -2131,15 +2131,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     private val generasjoner get() = generasjoner(ORGNUMMER)
-    private lateinit var vilkårsgrunnlagHistorikk: Map<UUID, Map<LocalDate, Vilkårsgrunnlag>>
 
     // dette er vilkårsgrunnlag som pekes på av beregnede perioder
     private lateinit var vilkårsgrunnlag: Map<UUID, Vilkårsgrunnlag>
 
     private fun generasjoner(organisasjonsnummer: String): List<GenerasjonDTO> {
         val vilkårsgrunnlagHistorikkBuilderResult = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk).build()
-        vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikkBuilderResult.toDTO()
-
         val generasjonerBuilder = GenerasjonerBuilder(
             søknadDTOer,
             UNG_PERSON_FØDSELSDATO.alder,
@@ -2147,7 +2144,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             vilkårsgrunnlagHistorikkBuilderResult
         )
         val generasjoner = generasjonerBuilder.build()
-        vilkårsgrunnlag = vilkårsgrunnlagHistorikkBuilderResult.vilkårsgrunnlagSomBlirPektPå()
+        vilkårsgrunnlag = vilkårsgrunnlagHistorikkBuilderResult.toDTO()
         return generasjoner
     }
 

@@ -31,25 +31,6 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import kotlin.properties.Delegates
 
-private typealias VilkårsgrunnlagHistorikkId = UUID
-
-internal class IInnslag(
-    private val innslag: Map<LocalDate, IVilkårsgrunnlag>
-) {
-    internal fun toDTO() = innslag.mapValues { (_, vilkårsgrunnlag) -> vilkårsgrunnlag.toDTO() }
-    internal fun finn(skjæringstidspunkt: LocalDate) = innslag[skjæringstidspunkt]?.toDTO()
-    internal fun finn(id: UUID) = innslag.entries.first { (_, vilkårsgrunnlag) -> vilkårsgrunnlag.id == id }.value.toDTO()
-    internal fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) =
-        innslag.all { (_, vilkårsgrunnlag) -> vilkårsgrunnlag.inngårIkkeISammenligningsgrunnlag(organisasjonsnummer) }
-
-    internal fun potensielleGhostsperioder(
-        organisasjonsnummer: String,
-        nyesteInnslagId: UUID?,
-        sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>
-    ) = innslag
-        .mapNotNull { (_, innslag) -> innslag.potensiellGhostperiode(organisasjonsnummer, nyesteInnslagId!!, sykefraværstilfeller) }
-}
-
 internal class ISykepengegrunnlag(
     val inntekterPerArbeidsgiver: List<IArbeidsgiverinntekt>,
     val sykepengegrunnlag: Double,
@@ -77,7 +58,6 @@ internal interface IVilkårsgrunnlag {
     fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) = inntekter.none { it.arbeidsgiver == organisasjonsnummer }
     fun potensiellGhostperiode(
         organisasjonsnummer: String,
-        innslagId: UUID,
         sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>
     ): GhostPeriodeDTO? {
         if (this.inntekter.size < 2 || this.skjæringstidspunkt !in sykefraværstilfeller) return null
@@ -88,7 +68,6 @@ internal interface IVilkårsgrunnlag {
             fom = skjæringstidspunkt,
             tom = sykefraværstilfeller.getValue(skjæringstidspunkt).maxOf { it.endInclusive },
             skjæringstidspunkt = skjæringstidspunkt,
-            vilkårsgrunnlagHistorikkInnslagId = innslagId,
             vilkårsgrunnlagId = this.id,
             deaktivert = inntekten.deaktivert
         )
@@ -169,11 +148,7 @@ internal class IInfotrygdGrunnlag(
         )
     }
 
-    override fun potensiellGhostperiode(
-        organisasjonsnummer: String,
-        innslagId: UUID,
-        sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>
-    ) = null
+    override fun potensiellGhostperiode(organisasjonsnummer: String, sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>) = null
 }
 
 internal class InntektBuilder(private val inntekt: Inntekt) {
@@ -185,43 +160,25 @@ internal class InntektBuilder(private val inntekt: Inntekt) {
 }
 
 internal class IVilkårsgrunnlagHistorikk {
-    private var nyesteInnslagId: UUID? = null
-    private val historikk = mutableMapOf<VilkårsgrunnlagHistorikkId, IInnslag>()
-    private val nyesteInnslag get() = historikk[nyesteInnslagId]
-    private val vilkårsgrunnlagIBruk = mutableMapOf<UUID, Vilkårsgrunnlag>()
-
-    internal fun leggTil(vilkårsgrunnlagHistorikkId: UUID, innslag: IInnslag) {
-        if (nyesteInnslagId == null) nyesteInnslagId = vilkårsgrunnlagHistorikkId
-        historikk.putIfAbsent(vilkårsgrunnlagHistorikkId, innslag)
-    }
+    private val vilkårsgrunnlagIBruk = mutableMapOf<UUID, IVilkårsgrunnlag>()
 
     internal fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) =
-        nyesteInnslag?.inngårIkkeISammenligningsgrunnlag(organisasjonsnummer) ?: true
-
-    internal fun toDTO() = historikk.mapValues { (_, innslag) -> innslag.toDTO() }.toMap()
+        vilkårsgrunnlagIBruk.all { (_, a) -> a.inngårIkkeISammenligningsgrunnlag(organisasjonsnummer) }
 
     internal fun potensielleGhostsperioder(
         organisasjonsnummer: String,
         sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>
     ) =
-        nyesteInnslag?.potensielleGhostsperioder(organisasjonsnummer, nyesteInnslagId, sykefraværstilfeller) ?: emptyList()
+        vilkårsgrunnlagIBruk.mapNotNull { (_, vilkårsgrunnlag) ->
+            vilkårsgrunnlag.potensiellGhostperiode(organisasjonsnummer, sykefraværstilfeller)
+        }
 
-    internal fun vilkårsgrunnlagSomBlirPektPå(): Map<UUID, Vilkårsgrunnlag> {
-        return vilkårsgrunnlagIBruk.toMap()
+    internal fun toDTO(): Map<UUID, Vilkårsgrunnlag> {
+        return vilkårsgrunnlagIBruk.mapValues { (_, vilkårsgrunnlag) -> vilkårsgrunnlag.toDTO() }
     }
 
-    internal fun leggIBøtta(vilkårsgrunnlag: IVilkårsgrunnlag?) {
-        if (vilkårsgrunnlag == null) return
-        vilkårsgrunnlagIBruk[vilkårsgrunnlag.id] = vilkårsgrunnlag.toDTO()
-    }
-    internal fun leggIBøtta(innslagId: UUID?, vilkårsgrunnlagId: UUID?) {
-        if (innslagId == null || vilkårsgrunnlagId == null) return
-        vilkårsgrunnlagIBruk[vilkårsgrunnlagId] = historikk.getValue(innslagId).finn(vilkårsgrunnlagId)
-    }
-
-    internal fun finn(vilkårsgrunnlagHistorikkInnslagId: UUID?, vilkårsgrunnlagId: UUID?, skjæringstidspunkt: LocalDate,): Vilkårsgrunnlag? {
-        if (vilkårsgrunnlagHistorikkInnslagId == null || vilkårsgrunnlagId == null) return null
-        return historikk[vilkårsgrunnlagHistorikkInnslagId]?.finn(skjæringstidspunkt)
+    internal fun leggIBøtta(vilkårsgrunnlag: IVilkårsgrunnlag) {
+        vilkårsgrunnlagIBruk[vilkårsgrunnlag.id] = vilkårsgrunnlag
     }
 }
 
@@ -234,18 +191,12 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
 
     internal fun build() = historikk
 
-    override fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {
-        historikk.leggTil(id, InnslagBuilder(innslag).build())
-    }
-
     internal class InnslagBuilder(innslag: VilkårsgrunnlagHistorikk.Innslag) : VilkårsgrunnlagHistorikkVisitor {
         private val vilkårsgrunnlag = mutableMapOf<LocalDate, IVilkårsgrunnlag>()
 
         init {
             innslag.accept(this)
         }
-
-        internal fun build() = IInnslag(vilkårsgrunnlag.toMap())
 
         override fun preVisitGrunnlagsdata(
             skjæringstidspunkt: LocalDate,

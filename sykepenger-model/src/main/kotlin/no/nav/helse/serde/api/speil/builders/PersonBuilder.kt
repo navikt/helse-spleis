@@ -39,7 +39,7 @@ internal class PersonBuilder(
             arbeidsgivere = arbeidsgivere,
             dødsdato = dødsdato,
             versjon = versjon,
-            vilkårsgrunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagSomBlirPektPå()
+            vilkårsgrunnlag = vilkårsgrunnlagHistorikk.toDTO()
         )
     }
 
