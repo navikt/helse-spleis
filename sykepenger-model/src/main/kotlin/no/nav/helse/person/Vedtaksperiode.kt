@@ -287,12 +287,6 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, anmodningOmForkasting)
     }
 
-    private fun etterkomAnmodningOmForkasting(anmodningOmForkasting: AnmodningOmForkasting, forkastingFilter: VedtaksperiodeFilter = TIDLIGERE_OG_ETTERGØLGENDE(this)) {
-        if (!arbeidsgiver.kanForkastes(this, anmodningOmForkasting)) return anmodningOmForkasting.info("Kan ikke etterkomme anmodning om forkasting")
-        anmodningOmForkasting.info("Etterkommer anmodning om forkasting")
-        person.søppelbøtte(anmodningOmForkasting, forkastingFilter)
-    }
-
     internal fun håndter(inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
         if (!inntektsmeldingReplayUtført.erRelevant(this.id)) return
         kontekst(inntektsmeldingReplayUtført)
@@ -1651,10 +1645,6 @@ internal class Vedtaksperiode private constructor(
             vurderOmKanGåVidere(vedtaksperiode, inntektsmeldingReplayUtført)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
-            vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting)
-        }
-
         private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             if (!vedtaksperiode.forventerInntekt()) return vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
             if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse)) return
@@ -1699,10 +1689,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vedtaksperiode.person.gjenopptaBehandling(påminnelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
-            vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting)
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {}
@@ -1859,10 +1845,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vedtaksperiode.trengerYtelser(påminnelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
-            vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting)
         }
 
         override fun håndter(
@@ -2287,12 +2269,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.revurderLåstTidslinje(hendelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
-            vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting) {
-                it.id == vedtaksperiode.id
-            }
         }
     }
 
