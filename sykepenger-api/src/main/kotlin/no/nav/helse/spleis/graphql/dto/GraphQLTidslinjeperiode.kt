@@ -219,7 +219,7 @@ interface GraphQLTidslinjeperiode {
     val tidslinje: List<GraphQLDag>
     val periodetype: GraphQLPeriodetype
     val hendelser: List<GraphQLHendelse>
-    val inntektstype: GraphQLInntektstype
+    val inntektstype: GraphQLInntektstype // 040423: dette feltet virker ikke å være i bruk i Speil
     val erForkastet: Boolean
     val opprettet: LocalDateTime
     val vedtaksperiodeId: UUID

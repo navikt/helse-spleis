@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.graphql
 
 import java.util.UUID
-import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.api.dto.Arbeidsgiverinntekt
 import no.nav.helse.serde.api.dto.Arbeidsgiverrefusjon
@@ -67,6 +66,7 @@ import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlaghistorikk
 import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlagtype
 import no.nav.helse.spleis.graphql.dto.GraphQLVurdering
+import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
 import kotlin.Double.Companion.NEGATIVE_INFINITY
 import kotlin.Double.Companion.NaN
 import kotlin.Double.Companion.POSITIVE_INFINITY
@@ -274,9 +274,9 @@ private fun mapPeriodetype(type: Periodetype) = when (type) {
     Periodetype.INFOTRYGDFORLENGELSE -> GraphQLPeriodetype.Infotrygdforlengelse
 }
 
-private fun mapInntektstype(kilde: Inntektskilde) = when (kilde) {
-    Inntektskilde.EN_ARBEIDSGIVER -> GraphQLInntektstype.EnArbeidsgiver
-    Inntektskilde.FLERE_ARBEIDSGIVERE -> GraphQLInntektstype.FlereArbeidsgivere
+private fun mapInntektstype(kilde: UtbetalingInntektskilde) = when (kilde) {
+    UtbetalingInntektskilde.EN_ARBEIDSGIVER -> GraphQLInntektstype.EnArbeidsgiver
+    UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE -> GraphQLInntektstype.FlereArbeidsgivere
 }
 
 internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =

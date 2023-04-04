@@ -5,12 +5,12 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
+import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
 import no.nav.helse.økonomi.Prosent
 import org.junit.jupiter.api.fail
 import kotlin.properties.Delegates
@@ -131,7 +131,7 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         private set
     internal var vurdertOk by Delegates.notNull<Boolean>()
         private set
-    internal lateinit var inntektskilde: Inntektskilde
+    internal lateinit var inntektskilde: UtbetalingInntektskilde
         private set
     internal lateinit var vilkårsgrunnlagId: UUID
         private set

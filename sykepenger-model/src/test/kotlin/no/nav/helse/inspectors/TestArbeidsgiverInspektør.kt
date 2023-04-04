@@ -12,7 +12,6 @@ import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
@@ -92,7 +91,6 @@ internal class TestArbeidsgiverInspektør(
     private var inFeriepengeutbetaling = false
     private val forlengelserFraInfotrygd = mutableMapOf<Int, ForlengelseFraInfotrygd>()
     private val hendelseIder = mutableMapOf<Int, Set<Dokumentsporing>>()
-    private val inntektskilder = mutableMapOf<Int, () -> Inntektskilde>()
     private val sykmeldingsperioder = mutableListOf<Periode>()
 
     internal fun vilkårsgrunnlagHistorikkInnslag() = personInspektør.vilkårsgrunnlagHistorikkInnslag()
@@ -171,8 +169,7 @@ internal class TestArbeidsgiverInspektør(
         skjæringstidspunktFraInfotrygd: LocalDate?,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>,
-        inntektsmeldingInfo: InntektsmeldingInfo?,
-        inntektskilde: () -> Inntektskilde
+        inntektsmeldingInfo: InntektsmeldingInfo?
     ) {
         inVedtaksperiode = true
         vedtaksperiodeTeller += 1
@@ -182,7 +179,6 @@ internal class TestArbeidsgiverInspektør(
         this.hendelseIder[vedtaksperiodeindeks] = hendelseIder
         perioder[vedtaksperiodeindeks] = periode
         tilstander[vedtaksperiodeindeks] = tilstand.type
-        inntektskilder[vedtaksperiodeindeks] = inntektskilde
         skjæringstidspunkter[vedtaksperiodeindeks] = skjæringstidspunkt
         forlengelserFraInfotrygd[vedtaksperiodeindeks] = forlengelseFraInfotrygd
         vedtaksperiode.accept(VedtaksperiodeSykdomstidslinjeinnhenter())
@@ -205,8 +201,7 @@ internal class TestArbeidsgiverInspektør(
         skjæringstidspunktFraInfotrygd: LocalDate?,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>,
-        inntektsmeldingInfo: InntektsmeldingInfo?,
-        inntektskilde: () -> Inntektskilde
+        inntektsmeldingInfo: InntektsmeldingInfo?
     ) {
         vedtaksperiodeindeks += 1
         inVedtaksperiode = false
@@ -413,8 +408,7 @@ internal class TestArbeidsgiverInspektør(
             skjæringstidspunktFraInfotrygd: LocalDate?,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: Set<Dokumentsporing>,
-            inntektsmeldingInfo: InntektsmeldingInfo?,
-            inntektskilde: () -> Inntektskilde
+            inntektsmeldingInfo: InntektsmeldingInfo?
         ) {
             vedtaksperiodeId = id
         }
@@ -435,9 +429,7 @@ internal class TestArbeidsgiverInspektør(
     private val UUID.utbetalingsindeksOrNull get() = this.finnOrNull(vedtaksperiodeutbetalinger)
 
     internal fun sisteAvsluttedeUtbetalingForVedtaksperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeIdInnhenter).last()
-    internal fun sisteAvsluttedeUtbetalingForVedtaksperiode(vedtaksperiodeId: UUID) = avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeId).last()
     internal fun gjeldendeUtbetalingForVedtaksperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalinger.filterIndexed { index, _ -> index in vedtaksperiodeIdInnhenter.id(orgnummer).utbetalingsindeks }.last()
-    internal fun gjeldendeUtbetalingForVedtaksperiode(vedtaksperiodeId: UUID) = utbetalinger.filterIndexed { index, _ -> index in vedtaksperiodeId.utbetalingsindeks }.last()
     internal fun ikkeUtbetalteUtbetalingerForVedtaksperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalinger.filterIndexed { index, _ -> index in vedtaksperiodeIdInnhenter.id(orgnummer).utbetalingsindeks }.filter { it.inspektør.erUbetalt }
     internal fun ikkeUtbetalteUtbetalingerForVedtaksperiode(vedtaksperiodeId: UUID) = utbetalinger.filterIndexed { index, _ -> index in vedtaksperiodeId.utbetalingsindeks }.filter { it.inspektør.erUbetalt }
     internal fun avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalinger.filterIndexed { index, _ -> index in vedtaksperiodeIdInnhenter.id(orgnummer).utbetalingsindeks }.filter { it.erAvsluttet() }
@@ -502,8 +494,8 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun fagsystemId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(fagsystemIder)
 
-    internal fun inntektskilde(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(inntektskilder)()
-    internal fun inntektskilde(vedtaksperiodeId: UUID) = vedtaksperiodeId.finn(inntektskilder)()
+    internal fun inntektskilde(vedtaksperiodeIdInnhenter: IdInnhenter) = vilkårsgrunnlag(vedtaksperiodeIdInnhenter)?.inntektskilde()
+    internal fun inntektskilde(vedtaksperiodeId: UUID) = vilkårsgrunnlag(vedtaksperiodeId)?.inntektskilde()
 
     internal fun vedtaksperiodeId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.id(orgnummer)
 

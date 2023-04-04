@@ -8,7 +8,6 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverVisitor
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.ForlengelseFraInfotrygd
-import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
@@ -57,8 +56,7 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
         skjæringstidspunktFraInfotrygd: LocalDate?,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>,
-        inntektsmeldingInfo: InntektsmeldingInfo?,
-        inntektskilde: () -> Inntektskilde
+        inntektsmeldingInfo: InntektsmeldingInfo?
     ) {
         vedtaksperioder[id] = vedtaksperiode
         sisteVedtaksperiodeTilstander[id] = tilstand.type

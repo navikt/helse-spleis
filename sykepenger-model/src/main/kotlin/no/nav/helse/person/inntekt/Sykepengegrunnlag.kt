@@ -13,7 +13,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.SykepengegrunnlagVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -44,6 +43,7 @@ import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD
 import no.nav.helse.utbetalingslinjer.TagBuilder
+import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -254,8 +254,8 @@ internal class Sykepengegrunnlag(
         sammenligningsgrunnlag.avviksprosent(beregningsgrunnlag, subsumsjonObserver)
 
     internal fun inntektskilde() = when {
-        arbeidsgiverInntektsopplysninger.size > 1 -> Inntektskilde.FLERE_ARBEIDSGIVERE
-        else -> Inntektskilde.EN_ARBEIDSGIVER
+        arbeidsgiverInntektsopplysninger.size > 1 -> UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
+        else -> UtbetalingInntektskilde.EN_ARBEIDSGIVER
     }
 
     internal fun inngårISykepengegrunnlaget(organisasjonsnummer: String) = arbeidsgiverInntektsopplysninger.any { it.gjelder(organisasjonsnummer) }

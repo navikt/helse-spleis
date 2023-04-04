@@ -168,7 +168,6 @@ internal class Vedtaksperiode private constructor(
     private val jurist = jurist.medVedtaksperiode(id, hendelseIder.toMap(), sykmeldingsperiode)
     private val skjæringstidspunkt get() = person.skjæringstidspunkt(sykdomstidslinje.sykdomsperiode() ?: periode)
     private val vilkårsgrunnlag get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)
-    private val inntektskilde get() = vilkårsgrunnlag?.inntektskilde() ?: Inntektskilde.EN_ARBEIDSGIVER
 
     internal constructor(
         søknad: Søknad,
@@ -206,7 +205,6 @@ internal class Vedtaksperiode private constructor(
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
         val skjæringstidspunktMemoized = this::skjæringstidspunkt.memoized()
-        val inntektskildeMemoized = this::inntektskilde.memoized()
         visitor.preVisitVedtaksperiode(
             this,
             id,
@@ -219,8 +217,7 @@ internal class Vedtaksperiode private constructor(
             skjæringstidspunktFraInfotrygd,
             forlengelseFraInfotrygd,
             hendelseIder,
-            inntektsmeldingInfo,
-            inntektskildeMemoized
+            inntektsmeldingInfo
         )
         inntektsmeldingInfo?.accept(visitor)
         sykdomstidslinje.accept(visitor)
@@ -238,8 +235,7 @@ internal class Vedtaksperiode private constructor(
             skjæringstidspunktFraInfotrygd,
             forlengelseFraInfotrygd,
             hendelseIder,
-            inntektsmeldingInfo,
-            inntektskildeMemoized
+            inntektsmeldingInfo
         )
     }
 
@@ -930,7 +926,6 @@ internal class Vedtaksperiode private constructor(
             skjæringstidspunkt = skjæringstidspunkt,
             periodetype = periodetype,
             førstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING,
-            inntektskilde = vilkårsgrunnlag.inntektskilde(),
             tagBuilder = tagBuilder,
             orgnummereMedRelevanteArbeidsforhold = person.relevanteArbeidsgivere(skjæringstidspunkt)
         )
@@ -2627,15 +2622,6 @@ enum class Periodetype {
         FORLENGELSE -> UtbetalingPeriodetype.FORLENGELSE
         OVERGANG_FRA_IT -> UtbetalingPeriodetype.OVERGANG_FRA_IT
         INFOTRYGDFORLENGELSE -> UtbetalingPeriodetype.INFOTRYGDFORLENGELSE
-    }
-}
-
-enum class Inntektskilde {
-    EN_ARBEIDSGIVER,
-    FLERE_ARBEIDSGIVERE;
-    fun tilUtbetalingInntektskilde(): UtbetalingInntektskilde = when(this) {
-        EN_ARBEIDSGIVER -> UtbetalingInntektskilde.EN_ARBEIDSGIVER
-        FLERE_ARBEIDSGIVERE -> UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
     }
 }
 

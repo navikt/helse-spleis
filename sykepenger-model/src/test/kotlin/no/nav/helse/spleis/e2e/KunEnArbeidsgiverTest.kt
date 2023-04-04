@@ -19,7 +19,6 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
-import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -42,6 +41,7 @@ import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -770,7 +770,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør.inntektskilde(1.vedtaksperiode))
+        assertEquals(UtbetalingInntektskilde.EN_ARBEIDSGIVER, inspektør.inntektskilde(1.vedtaksperiode))
         assertEquals("EN_ARBEIDSGIVER", inspiser(personInspektør).aktivitetslogg.sisteBehov(1.vedtaksperiode).detaljer()["inntektskilde"])
     }
 

@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
-import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.api.dto.Periodetilstand.ForberederGodkjenning
 import no.nav.helse.serde.api.dto.Periodetilstand.ManglerInformasjon
@@ -13,6 +12,7 @@ import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
 import no.nav.helse.serde.api.speil.Generasjoner
 import no.nav.helse.serde.api.speil.builders.BeregningId
 import no.nav.helse.serde.api.speil.builders.KorrelasjonsId
+import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
 
 data class GenerasjonDTO(
     val id: UUID, // Runtime
@@ -50,7 +50,7 @@ abstract class Tidslinjeperiode : Comparable<Tidslinjeperiode> {
     abstract val tom: LocalDate
     abstract val sammenslåttTidslinje: List<SammenslåttDag>
     abstract val periodetype: Periodetype
-    abstract val inntektskilde: Inntektskilde
+    abstract val inntektskilde: UtbetalingInntektskilde
     abstract val erForkastet: Boolean
     abstract val opprettet: LocalDateTime
     abstract val oppdatert: LocalDateTime
@@ -82,7 +82,7 @@ data class UberegnetPeriode(
     override val tom: LocalDate,
     override val sammenslåttTidslinje: List<SammenslåttDag>,
     override val periodetype: Periodetype,
-    override val inntektskilde: Inntektskilde,
+    override val inntektskilde: UtbetalingInntektskilde,
     override val erForkastet: Boolean,
     override val opprettet: LocalDateTime,
     override val oppdatert: LocalDateTime,
@@ -108,7 +108,7 @@ data class BeregnetPeriode(
     override val sammenslåttTidslinje: List<SammenslåttDag>,
     override val erForkastet: Boolean,
     override val periodetype: Periodetype,
-    override val inntektskilde: Inntektskilde,
+    override val inntektskilde: UtbetalingInntektskilde,
     override val opprettet: LocalDateTime,
     val beregnet: LocalDateTime,
     override val oppdatert: LocalDateTime,
@@ -126,6 +126,9 @@ data class BeregnetPeriode(
 ) : Tidslinjeperiode() {
     override val sorteringstidspunkt = beregnet
 
+    init {
+        val a = 1
+    }
     override fun venter(): Boolean = super.venter() && periodetilstand != Utbetalt
 
     internal fun sammeUtbetaling(other: BeregnetPeriode) = this.utbetaling.id == other.utbetaling.id
@@ -251,8 +254,6 @@ class Utbetaling(
     private val korrelasjonsId: KorrelasjonsId
 ) {
     fun tilGodkjenning() = tilGodkjenning
-
-    fun hørerSammen(other: Utbetaling) = korrelasjonsId == other.korrelasjonsId
 
     data class Vurdering(
         val godkjent: Boolean,

@@ -373,8 +373,7 @@ internal interface VedtaksperiodeVisitor : VedtaksperiodeUtbetalingVisitor, Sykd
         skjæringstidspunktFraInfotrygd: LocalDate?,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>,
-        inntektsmeldingInfo: InntektsmeldingInfo?,
-        inntektskilde: () -> Inntektskilde
+        inntektsmeldingInfo: InntektsmeldingInfo?
     ) {}
 
     fun postVisitVedtaksperiode(
@@ -389,8 +388,7 @@ internal interface VedtaksperiodeVisitor : VedtaksperiodeUtbetalingVisitor, Sykd
         skjæringstidspunktFraInfotrygd: LocalDate?,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>,
-        inntektsmeldingInfo: InntektsmeldingInfo?,
-        inntektskilde: () -> Inntektskilde
+        inntektsmeldingInfo: InntektsmeldingInfo?
     ) {
     }
 }

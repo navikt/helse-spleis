@@ -11,7 +11,6 @@ import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.ForlengelseFraInfotrygd
-import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.api.dto.GenerasjonDTO
@@ -61,7 +60,6 @@ internal class GenerasjonerBuilder(
 
     private fun byggForkastetVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
-        forkastet: Boolean,
         vedtaksperiodeId: UUID,
         tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
         opprettet: LocalDateTime,
@@ -69,9 +67,8 @@ internal class GenerasjonerBuilder(
         periode: Periode,
         skjæringstidspunkt: LocalDate,
         hendelseIder: Set<Dokumentsporing>,
-        inntektskilde: Inntektskilde
     ) {
-        byggVedtaksperiode(vedtaksperiode, forkastet, vedtaksperiodeId, tilstand, opprettet, oppdatert, periode, skjæringstidspunkt, hendelseIder, inntektskilde)
+        byggVedtaksperiode(vedtaksperiode, true, vedtaksperiodeId, tilstand, opprettet, oppdatert, periode, skjæringstidspunkt, hendelseIder)
     }
 
     private fun byggVedtaksperiode(
@@ -84,7 +81,6 @@ internal class GenerasjonerBuilder(
         periode: Periode,
         skjæringstidspunkt: LocalDate,
         hendelseIder: Set<Dokumentsporing>,
-        inntektskilde: Inntektskilde
     ) {
         val sykdomstidslinje = VedtaksperiodeSykdomstidslinjeBuilder(vedtaksperiode).build()
         val utbetalinger = UtbetalingerBuilder(vedtaksperiode).build()
@@ -95,7 +91,6 @@ internal class GenerasjonerBuilder(
                 vedtaksperiode = vedtaksperiodeId,
                 fom = periode.start,
                 tom = periode.endInclusive,
-                inntektskilde = inntektskilde,
                 hendelser = filtrerteHendelser,
                 utbetalinger = utbetalinger,
                 periodetype = periodetype(periode),
@@ -111,7 +106,6 @@ internal class GenerasjonerBuilder(
             vedtaksperiode = vedtaksperiodeId,
             fom = periode.start,
             tom = periode.endInclusive,
-            inntektskilde = inntektskilde,
             hendelser = filtrerteHendelser,
             utbetalinger = utbetalinger,
             periodetype = periodetype(periode),
@@ -152,10 +146,9 @@ internal class GenerasjonerBuilder(
         skjæringstidspunktFraInfotrygd: LocalDate?,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>,
-        inntektsmeldingInfo: InntektsmeldingInfo?,
-        inntektskilde: () -> Inntektskilde
+        inntektsmeldingInfo: InntektsmeldingInfo?
     ) {
-        this.tilstand.besøkVedtaksperiode(this, vedtaksperiode, id, tilstand, opprettet, oppdatert, periode, skjæringstidspunkt(), hendelseIder, inntektskilde())
+        this.tilstand.besøkVedtaksperiode(this, vedtaksperiode, id, tilstand, opprettet, oppdatert, periode, skjæringstidspunkt(), hendelseIder)
     }
 
     override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
@@ -248,8 +241,7 @@ internal class GenerasjonerBuilder(
             oppdatert: LocalDateTime,
             periode: Periode,
             skjæringstidspunkt: LocalDate,
-            hendelseIder: Set<Dokumentsporing>,
-            inntektskilde: Inntektskilde
+            hendelseIder: Set<Dokumentsporing>
         ) {
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
         }
@@ -332,10 +324,9 @@ internal class GenerasjonerBuilder(
                 oppdatert: LocalDateTime,
                 periode: Periode,
                 skjæringstidspunkt: LocalDate,
-                hendelseIder: Set<Dokumentsporing>,
-                inntektskilde: Inntektskilde
+                hendelseIder: Set<Dokumentsporing>
             ) {
-                builder.byggVedtaksperiode(vedtaksperiode, false, vedtaksperiodeId, tilstand, opprettet, oppdatert, periode, skjæringstidspunkt, hendelseIder, inntektskilde)
+                builder.byggVedtaksperiode(vedtaksperiode, false, vedtaksperiodeId, tilstand, opprettet, oppdatert, periode, skjæringstidspunkt, hendelseIder)
             }
         }
         object ForkastedePerioder : Byggetilstand {
@@ -349,9 +340,8 @@ internal class GenerasjonerBuilder(
                 periode: Periode,
                 skjæringstidspunkt: LocalDate,
                 hendelseIder: Set<Dokumentsporing>,
-                inntektskilde: Inntektskilde
             ) {
-                builder.byggForkastetVedtaksperiode(vedtaksperiode, true, vedtaksperiodeId, tilstand, opprettet, oppdatert, periode, skjæringstidspunkt, hendelseIder, inntektskilde)
+                builder.byggForkastetVedtaksperiode(vedtaksperiode, vedtaksperiodeId, tilstand, opprettet, oppdatert, periode, skjæringstidspunkt, hendelseIder)
             }
         }
     }

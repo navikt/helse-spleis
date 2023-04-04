@@ -101,7 +101,6 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Pair<Vilkårsgrunnl
         skjæringstidspunkt: LocalDate,
         periodetype: Periodetype,
         førstegangsbehandling: Boolean,
-        inntektskilde: Inntektskilde,
         orgnummereMedRelevanteArbeidsforhold: List<String>,
         tagBuilder: TagBuilder
     ) {
@@ -111,7 +110,7 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Pair<Vilkårsgrunnl
             skjæringstidspunkt = skjæringstidspunkt,
             periodetype = periodetype.tilUtbetalingPeriodetype(),
             førstegangsbehandling = førstegangsbehandling,
-            inntektskilde = inntektskilde.tilUtbetalingInntektskilde(),
+            inntektskilde = sisteVilkårsgrunnlag!!.inntektskilde(),
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             tagBuilder = tagBuilder
         )

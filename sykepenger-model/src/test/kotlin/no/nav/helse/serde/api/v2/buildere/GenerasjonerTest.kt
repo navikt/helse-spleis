@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.GenerasjonDTO
@@ -25,6 +24,7 @@ import no.nav.helse.serde.api.speil.Generasjoner
 import no.nav.helse.serde.api.speil.builders.KorrelasjonsId
 import no.nav.helse.serde.api.v2.buildere.GenerasjonerTest.Hva.beregnet
 import no.nav.helse.serde.api.v2.buildere.GenerasjonerTest.Hva.uberegnet
+import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import kotlin.reflect.KClass
@@ -292,7 +292,7 @@ internal class GenerasjonerTest {
         tom = periode.endInclusive,
         sammenslåttTidslinje = emptyList(),
         periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-        inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+        inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER,
         erForkastet = false,
         opprettet = LocalDateTime.now(),
         oppdatert = LocalDateTime.now(),
@@ -306,7 +306,7 @@ internal class GenerasjonerTest {
         tom = periode.endInclusive,
         sammenslåttTidslinje = emptyList(),
         periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-        inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+        inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER,
         erForkastet = false,
         opprettet = LocalDateTime.now(),
         beregnet = LocalDateTime.now(),

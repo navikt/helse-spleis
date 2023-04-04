@@ -2,9 +2,9 @@ package no.nav.helse.inspectors
 
 import java.time.LocalDate
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
+import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
 import no.nav.helse.økonomi.Inntekt
 import kotlin.properties.Delegates
 
@@ -19,7 +19,7 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
     lateinit var `6G`: Inntekt
     lateinit var deaktiverteArbeidsforhold: List<String>
     internal val arbeidsgiverInntektsopplysningerPerArbeidsgiver: MutableMap<String, ArbeidsgiverInntektsopplysning> = mutableMapOf()
-    internal lateinit var inntektskilde: Inntektskilde
+    internal lateinit var inntektskilde: UtbetalingInntektskilde
         private set
     internal var arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning> = listOf()
         private set

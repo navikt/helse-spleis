@@ -17,7 +17,6 @@ import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.toMap
 import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.ForlengelseFraInfotrygd
-import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.InntektsmeldingInfoHistorikk
 import no.nav.helse.person.Opptjening
@@ -250,8 +249,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunktFraInfotrygd: LocalDate?,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: Set<Dokumentsporing>,
-            inntektsmeldingInfo: InntektsmeldingInfo?,
-            inntektskilde: () -> Inntektskilde
+            inntektsmeldingInfo: InntektsmeldingInfo?
         ) {
             val vedtaksperiodeMap = mutableMapOf<String, Any?>()
             vedtaksperiodeListe.add(vedtaksperiodeMap)
@@ -1238,8 +1236,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunktFraInfotrygd: LocalDate?,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: Set<Dokumentsporing>,
-            inntektsmeldingInfo: InntektsmeldingInfo?,
-            inntektskilde: () -> Inntektskilde
+            inntektsmeldingInfo: InntektsmeldingInfo?
         ) {
             pushState(VedtaksperiodeState(
                 vedtaksperiodeMap = vedtaksperiodeMap
@@ -1436,8 +1433,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunktFraInfotrygd: LocalDate?,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: Set<Dokumentsporing>,
-            inntektsmeldingInfo: InntektsmeldingInfo?,
-            inntektskilde: () -> Inntektskilde
+            inntektsmeldingInfo: InntektsmeldingInfo?
         ) {
             vedtaksperiodeMap.putAll(mutableMapOf(
                 "id" to id,
@@ -1446,7 +1442,6 @@ internal class JsonBuilder : AbstractBuilder() {
                 "sykmeldingFom" to opprinneligPeriode.start,
                 "sykmeldingTom" to opprinneligPeriode.endInclusive,
                 "hendelseIder" to hendelseIder.toMap(),
-                "inntektskilde" to inntektskilde(),
                 "tilstand" to tilstand.type.name,
                 "utbetalinger" to this.utbetalinger,
                 "skjæringstidspunktFraInfotrygd" to skjæringstidspunktFraInfotrygd,
