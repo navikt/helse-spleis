@@ -6,7 +6,7 @@
             </pattern>
         </encoder>
     </appender>
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="SIKKER" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>
                 [SIKRET LOG] %d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n
