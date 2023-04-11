@@ -15,7 +15,6 @@ import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagKildetype
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
-import no.nav.helse.serde.api.dto.UtbetalingsdagDTO
 import no.nav.helse.serde.api.dto.Utbetalingstidslinjedag
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagMedGrad
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
@@ -208,23 +207,8 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
         }
     }
 
-    private fun leggTilUtbetalingsdag(dato: LocalDate, økonomi: Økonomi, type: UtbetalingstidslinjedagType){
-        val (grad, totalGrad) = økonomi.medData { grad, totalGrad, _ -> grad to totalGrad }
-        økonomi.medAvrundetData { _, refusjonsbeløp, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, _ ->
-            utbetalingstidslinje.add(
-                UtbetalingsdagDTO(
-                    type = type,
-                    inntekt = aktuellDagsinntekt,
-                    dato = dato,
-                    utbetaling = arbeidsgiverbeløp!!,
-                    arbeidsgiverbeløp = arbeidsgiverbeløp,
-                    personbeløp = personbeløp!!,
-                    refusjonsbeløp = refusjonsbeløp,
-                    grad = grad,
-                    totalGrad = totalGrad
-                )
-            )
-        }
+    private fun leggTilUtbetalingsdag(dato: LocalDate, økonomi: Økonomi, type: UtbetalingstidslinjedagType) {
+        utbetalingstidslinje.add(UtbetalingsdagDTOBuilder(økonomi, type, dato).build())
     }
 
     override fun visit(dag: Utbetalingsdag.ArbeidsgiverperiodedagNav, dato: LocalDate, økonomi: Økonomi) {

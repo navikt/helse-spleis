@@ -4,6 +4,7 @@ import java.math.MathContext
 import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.AvrundetØkonomiAsserter
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.ØkonomiAsserter
 import no.nav.helse.januar
@@ -212,10 +213,10 @@ internal class ØkonomiTest {
     @Test
     fun `toIntMap med dekningsgrunnlag`() {
         79.5.prosent.sykdomsgrad.inntekt(1200.4.daglig, 1200.4.daglig, `6G` = `6G`.beløp(1.januar))
-            .medAvrundetData { grad, _, dekningsgrunnlag, _, _, _, _, _ ->
+            .accept(AvrundetØkonomiAsserter { grad, _, dekningsgrunnlag, _, _, _, _, _ ->
                 assertEquals(80, grad)
                 assertEquals(1200, dekningsgrunnlag)
-            }
+            })
     }
 
     @Test
@@ -237,12 +238,12 @@ internal class ØkonomiTest {
                 assertEquals(960.0, arbeidsgiverbeløp)
                 assertEquals(0.0, personbeløp)
             })
-            it.medAvrundetData { grad, _, dekningsgrunnlag, _, _, arbeidsgiverbeløp, personbeløp, _ ->
+            it.accept(AvrundetØkonomiAsserter { grad, _, dekningsgrunnlag, _, _, arbeidsgiverbeløp, personbeløp, _ ->
                 assertEquals(80, grad)
                 assertEquals(1200, dekningsgrunnlag)
                 assertEquals(960, arbeidsgiverbeløp)
                 assertEquals(0, personbeløp)
-            }
+            })
         }
     }
 

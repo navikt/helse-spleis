@@ -9,6 +9,7 @@ import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Økonomi
+import no.nav.helse.økonomi.ØkonomiVisitor
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -36,7 +37,8 @@ internal class MaksimumUtbetalingFilterFlereArbeidsgivereTest {
         val maksDagsats = Grunnbeløp.`6G`.dagsats(dato)
         MaksimumUtbetalingFilter().betal(listOf(ag2.first, ag1.first), periode, aktivitetslogg, MaskinellJurist())
 
-        val arbeidsgiverbeløp = { økonomi: Økonomi -> økonomi.medAvrundetData { _, _, _, _, _, arbeidsgiverbeløp, _, _ -> arbeidsgiverbeløp!! } }
+        val arbeidsgiverbeløp = { økonomi: Økonomi -> visitArbeidsgiverbeløp(økonomi) }
+
         assertTrue(ag1.first.inspektør.økonomi(arbeidsgiverbeløp).all { it.daglig == maksDagsats }) {
             "noen dager har fått nytt grunnbeløp"
         }
@@ -45,5 +47,15 @@ internal class MaksimumUtbetalingFilterFlereArbeidsgivereTest {
         }
         assertEquals(ag1.second, ag1.first.inspektør.totalUtbetaling())
         assertEquals(ag2.second, ag2.first.inspektør.totalUtbetaling())
+    }
+
+    private fun visitArbeidsgiverbeløp(økonomi: Økonomi): Int {
+        var res: Int? = null
+        økonomi.accept(object: ØkonomiVisitor {
+            override fun visitAvrundetØkonomi(grad: Int, arbeidsgiverRefusjonsbeløp: Int, dekningsgrunnlag: Int, totalGrad: Int, aktuellDagsinntekt: Int, arbeidsgiverbeløp: Int?, personbeløp: Int?, er6GBegrenset: Boolean?) {
+                res = arbeidsgiverbeløp
+            }
+        })
+        return res!!
     }
 }

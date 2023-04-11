@@ -6,6 +6,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.inspectors.AvrundetØkonomiAsserter
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
@@ -90,11 +91,11 @@ internal fun AbstractEndToEndTest.assertUtbetalingsbeløp(
     val utbetalingstidslinje = inspektør(orgnummer).utbetalingstidslinjer(vedtaksperiodeIdInnhenter).let { subset?.let(it::subset) ?: it }
 
     utbetalingstidslinje.filterNot { it.dato.erHelg() }.forEach { utbetalingsdag ->
-        utbetalingsdag.økonomi.medAvrundetData { _, arbeidsgiverRefusjonsbeløp, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
+        utbetalingsdag.økonomi.accept(AvrundetØkonomiAsserter { _, arbeidsgiverRefusjonsbeløp, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
             assertEquals(forventetArbeidsgiverbeløp, arbeidsgiverbeløp) { "feil arbeidsgiverbeløp for dag ${utbetalingsdag.dato} "}
             assertEquals(forventetArbeidsgiverRefusjonsbeløp, arbeidsgiverRefusjonsbeløp)
             assertEquals(0, personbeløp)
-        }
+        })
     }
 }
 

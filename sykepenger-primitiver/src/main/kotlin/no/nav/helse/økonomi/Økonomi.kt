@@ -164,7 +164,7 @@ class Økonomi private constructor(
 
     private fun <R> medData(lambda: MedØkonomiData<R>) = tilstand.medData(this, lambda)
 
-    fun <R> medAvrundetData(
+    private fun <R> medAvrundetData(
         block: (
             grad: Int,
             arbeidsgiverRefusjonsbeløp: Int,
@@ -248,6 +248,16 @@ class Økonomi private constructor(
             aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig },
             arbeidsgiverbeløp?.reflection { _, _, daglig, _ -> daglig },
             personbeløp?.reflection { _, _, daglig, _ -> daglig },
+            er6GBegrenset
+        )
+        visitor.visitAvrundetØkonomi(
+            grad.roundToInt(),
+            arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig.roundToInt() },
+            dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig.roundToInt() },
+            totalGrad.roundToInt(),
+            aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig.roundToInt() },
+            arbeidsgiverbeløp?.reflection { _, _, daglig, _ -> daglig.roundToInt() },
+            personbeløp?.reflection { _, _, daglig, _ -> daglig.roundToInt() },
             er6GBegrenset
         )
     }
@@ -552,5 +562,15 @@ interface ØkonomiVisitor {
         arbeidsgiverbeløp: Double?,
         personbeløp: Double?,
         er6GBegrenset: Boolean?
-    )
+    ) {}
+    fun visitAvrundetØkonomi(
+        grad: Int,
+        arbeidsgiverRefusjonsbeløp: Int,
+        dekningsgrunnlag: Int,
+        totalGrad: Int,
+        aktuellDagsinntekt: Int,
+        arbeidsgiverbeløp: Int?,
+        personbeløp: Int?,
+        er6GBegrenset: Boolean?
+    ) {}
 }

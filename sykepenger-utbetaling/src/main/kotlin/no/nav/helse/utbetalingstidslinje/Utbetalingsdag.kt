@@ -5,6 +5,7 @@ import no.nav.helse.utbetalingslinjer.Beløpkilde
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.periode
 import no.nav.helse.økonomi.Økonomi
 import no.nav.helse.økonomi.Økonomi.Companion.erUnderGrensen
+import no.nav.helse.økonomi.ØkonomiVisitor
 
 sealed class Utbetalingsdag(
     val dato: LocalDate,
@@ -128,7 +129,17 @@ sealed class Utbetalingsdag(
 /**
  * Tilpasser Økonomi så det passer til Beløpkilde-porten til utbetalingslinjer
  */
-internal class BeløpkildeAdapter(private val økonomi: Økonomi): Beløpkilde {
-    override fun arbeidsgiverbeløp(): Int = økonomi.medAvrundetData { _, _, _, _, _, arbeidsgiverbeløp, _, _ -> arbeidsgiverbeløp!! }
-    override fun personbeløp(): Int = økonomi.medAvrundetData { _, _, _, _, _, _, personbeløp, _ -> personbeløp!! }
+internal class BeløpkildeAdapter(økonomi: Økonomi): Beløpkilde, ØkonomiVisitor {
+    private var arbeidsgiverbeløp: Int? = null
+    private var personbeløp: Int? = null
+    init {
+        økonomi.accept(this)
+    }
+    override fun arbeidsgiverbeløp(): Int = arbeidsgiverbeløp!!
+    override fun personbeløp(): Int = personbeløp!!
+
+    override fun visitAvrundetØkonomi(grad: Int, arbeidsgiverRefusjonsbeløp: Int, dekningsgrunnlag: Int, totalGrad: Int, aktuellDagsinntekt: Int, arbeidsgiverbeløp: Int?, personbeløp: Int?, er6GBegrenset: Boolean?) {
+        this.arbeidsgiverbeløp = arbeidsgiverbeløp
+        this.personbeløp = personbeløp
+    }
 }

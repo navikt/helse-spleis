@@ -76,7 +76,7 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
         utbetalingstidslinje.accept(this)
     }
 
-    fun grad(dag: LocalDate) = økonomi.getValue(dag).medAvrundetData { grad, _, _, _, _, _, _, _ -> grad }
+    fun grad(dag: LocalDate) = økonomi.getValue(dag).grad()
     fun <R> økonomi(lambda: (Økonomi) -> R): List<R> = økonomi.values.map(lambda)
 
     fun totalUtbetaling() = totalUtbetaling
@@ -202,4 +202,23 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
         ukjentDagTeller += 1
         collect(dag, dato, økonomi)
     }
+}
+
+private fun Økonomi.grad(): Int {
+    var res: Int? = null
+    this.accept(object : ØkonomiVisitor {
+        override fun visitAvrundetØkonomi(
+            grad: Int,
+            arbeidsgiverRefusjonsbeløp: Int,
+            dekningsgrunnlag: Int,
+            totalGrad: Int,
+            aktuellDagsinntekt: Int,
+            arbeidsgiverbeløp: Int?,
+            personbeløp: Int?,
+            er6GBegrenset: Boolean?
+        ) {
+            res = grad
+        }
+    })
+    return res!!
 }

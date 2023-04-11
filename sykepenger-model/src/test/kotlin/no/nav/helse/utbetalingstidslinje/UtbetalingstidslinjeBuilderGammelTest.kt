@@ -10,6 +10,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.inspectors.AvrundetØkonomiAsserter
 import no.nav.helse.inspectors.ØkonomiAsserter
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Inntektsopplysning
@@ -908,10 +909,10 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
 
     private fun assertInntekter(dekningsgrunnlaget: Int? = null, aktuelleDagsinntekten: Int? = null) {
         tidslinje.inspektør.navdager.forEach { navDag ->
-            navDag.økonomi.medAvrundetData { _, _, dekningsgrunnlag, _, aktuellDagsinntekt, _, _, _ ->
+            navDag.økonomi.accept(AvrundetØkonomiAsserter { _, _, dekningsgrunnlag, _, aktuellDagsinntekt, _, _, _ ->
                 dekningsgrunnlaget?.let { assertEquals(it, dekningsgrunnlag) }
                 aktuelleDagsinntekten?.let { assertEquals(it, aktuellDagsinntekt) }
-            }
+            })
         }
     }
 
@@ -919,9 +920,9 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         filter { it.dato in periode }
             .forEach { utbetalingsdag ->
                 val daglig = dekningsgrunnlaget?.reflection { _, _, _, daglig -> daglig }
-                utbetalingsdag.økonomi.medAvrundetData { _, _, dekningsgrunnlag, _, _, _, _, _ ->
+                utbetalingsdag.økonomi.accept( AvrundetØkonomiAsserter { _, _, dekningsgrunnlag, _, _, _, _, _ ->
                     assertEquals(daglig, dekningsgrunnlag)
-                }
+                })
             }
 
     private fun Sykdomstidslinje.utbetalingslinjer(

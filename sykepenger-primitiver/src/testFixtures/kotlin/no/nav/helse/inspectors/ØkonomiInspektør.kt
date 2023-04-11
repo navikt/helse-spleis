@@ -73,3 +73,26 @@ class ØkonomiAsserter(
         assertions(grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, totalGrad, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, er6GBegrenset)
     }
 }
+class AvrundetØkonomiAsserter(
+    private val assertions: (grad: Int,
+                             arbeidsgiverRefusjonsbeløp: Int,
+                             dekningsgrunnlag: Int,
+                             totalGrad: Int,
+                             aktuellDagsinntekt: Int,
+                             arbeidsgiverbeløp: Int?,
+                             personbeløp: Int?,
+                             er6GBegrenset: Boolean?) -> Unit
+): ØkonomiVisitor {
+    override fun visitAvrundetØkonomi(
+        grad: Int,
+        arbeidsgiverRefusjonsbeløp: Int,
+        dekningsgrunnlag: Int,
+        totalGrad: Int,
+        aktuellDagsinntekt: Int,
+        arbeidsgiverbeløp: Int?,
+        personbeløp: Int?,
+        er6GBegrenset: Boolean?
+    ) {
+        assertions(grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, totalGrad, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, er6GBegrenset)
+    }
+}
