@@ -4,6 +4,10 @@ import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype.Feriedag
+import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.juli
@@ -12,10 +16,13 @@ import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
 internal class AnmodningOmForkastingTest: AbstractDslTest() {
@@ -121,6 +128,36 @@ internal class AnmodningOmForkastingTest: AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        }
+    }
+
+    @Test
+    fun `Forkaster senere periode påvirker ikke pågående revurdering på tidligere periode med samme skjæringstidspunkt`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(18.januar, Feriedag)))
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+
+            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+
+            nullstillTilstandsendringer()
+
+            assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+
+            håndterAnmodningOmForkasting(3.vedtaksperiode)
+
+            assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+            assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
         }
     }
 }
