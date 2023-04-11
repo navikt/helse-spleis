@@ -157,12 +157,21 @@ internal class TestPerson(
             sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
             sykmeldingSkrevet: LocalDateTime? = null,
             orgnummer: String = "",
-            søknadId: UUID = UUID.randomUUID()
+            søknadId: UUID = UUID.randomUUID(),
+            utenlandskSykmelding: Boolean = false
         ) =
             behovsamler.fangInntektsmeldingReplay({
                 vedtaksperiodesamler.fangVedtaksperiode {
-                    arbeidsgiverHendelsefabrikk.lagSøknad(*perioder, andreInntektskilder = andreInntektskilder, arbeidUtenforNorge = arbeidUtenforNorge, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet, id = søknadId, yrkesskade = yrkesskade)
-                        .håndter(Person::håndter)
+                    arbeidsgiverHendelsefabrikk.lagSøknad(
+                        *perioder,
+                        andreInntektskilder = andreInntektskilder,
+                        arbeidUtenforNorge = arbeidUtenforNorge,
+                        sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
+                        sykmeldingSkrevet = sykmeldingSkrevet,
+                        id = søknadId,
+                        yrkesskade = yrkesskade,
+                        utenlandskSykmelding = utenlandskSykmelding
+                    ).håndter(Person::håndter)
                 }?.also {
                     if (behovsamler.harBehov(it, Sykepengehistorikk)){
                         arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikk(it).håndter(Person::håndter)

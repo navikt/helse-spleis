@@ -456,6 +456,12 @@ internal class Vedtaksperiode private constructor(
         return dagerMellom < 18L
     }
 
+    private fun harInnvirkningPåArbeidsgiverperioden(other: Vedtaksperiode): Boolean {
+        if (this etter other) return false
+        if (this.periode.erRettFør(other.periode)) return true
+        return other.påvirkerArbeidsgiverperioden(this)
+    }
+
     override fun compareTo(other: Vedtaksperiode): Int {
         val delta = this.periode.start.compareTo(other.periode.start)
         if (delta != 0) return delta
@@ -487,7 +493,7 @@ internal class Vedtaksperiode private constructor(
             .filterNot { it.tilstand == AvsluttetUtenUtbetaling }
             .sorted()
             .firstOrNull { it etter this }
-        if (førsteEtter != null && førsteEtter.påvirkerArbeidsgiverperioden(this)) return false
+        if (førsteEtter != null && this.harInnvirkningPåArbeidsgiverperioden(førsteEtter)) return false
         if (Toggle.ForkasteAuu.enabled) return true
         sikkerlogg.info("Periode i AvsluttetUtenUtbetaling kunne blitt forkastet. {}, {}, {}, {}",
             kv("forventerInntekt", forventerInntekt()),

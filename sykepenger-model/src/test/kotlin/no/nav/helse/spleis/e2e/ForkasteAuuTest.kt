@@ -5,12 +5,16 @@ import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
 @EnableToggle(Toggle.ForkasteAuu::class)
@@ -73,6 +77,26 @@ internal class ForkasteAuuTest: AbstractDslTest() {
             assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
             assertForkastetPeriodeTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
             assertForkastetPeriodeTilstander(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
+    fun `Forkaster ikke AUU med etterfølgende utbetalt periode ved out of order søknad`() {
+        a1 {
+            håndterSøknad(Sykdom(1.februar, 16.februar, 100.prosent))
+            håndterSøknad(Sykdom(17.februar, 28.februar, 100.prosent))
+            håndterInntektsmelding(listOf(1.februar til 16.februar))
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterSøknad(Sykdom(1.januar, 25.januar, 100.prosent), utenlandskSykmelding = true)
+
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+            assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
         }
     }
 }
