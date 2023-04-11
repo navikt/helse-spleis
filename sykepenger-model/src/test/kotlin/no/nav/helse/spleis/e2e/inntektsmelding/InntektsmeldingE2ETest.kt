@@ -40,6 +40,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
@@ -97,8 +98,7 @@ import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
-import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde.*
+import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -2183,6 +2183,37 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
         assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+    }
+
+    @Test
+    fun `Out of order søknad rett før utbetalt periode tolkes som arbeidsdager`() {
+        håndterSøknad(Sykdom(1.februar, 16.februar, 100.prosent))
+        håndterSøknad(Sykdom(17.februar, 28.februar, 100.prosent))
+        håndterInntektsmelding(listOf(1.februar til 16.februar))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        assertForventetFeil(
+            forklaring = "Januar perioden håndterer også dager fra inntektsmeldingen ettersom den er rett før/ en del av sammenhengende periode",
+            nå = {
+                assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+
+                assertEquals("AAAAARR AAAAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            },
+            ønsket = {
+                assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+
+                assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            }
+        )
     }
 
 }
