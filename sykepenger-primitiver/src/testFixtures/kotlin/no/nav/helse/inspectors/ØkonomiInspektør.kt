@@ -1,18 +1,75 @@
 package no.nav.helse.inspectors
 
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
+import no.nav.helse.økonomi.ØkonomiVisitor
 
-val Økonomi.inspektør get() = ØkonomiInspektør(this)
+val Økonomi.inspektør get() = ØkonomiInspektørBuilder(this).build()
 
-class ØkonomiInspektør(økonomi: Økonomi) {
-    val grad = økonomi.medData { grad, _, _, _, _, _, _, _ -> grad.prosent }
-    val arbeidsgiverRefusjonsbeløp = økonomi.medData { _, arbeidsgiverRefusjonsbeløp, _, _, _, _, _, _ -> arbeidsgiverRefusjonsbeløp }.daglig
-    val dekningsgrunnlag = økonomi.medData { _, _, dekningsgrunnlag, _, _, _, _, _ -> dekningsgrunnlag }.daglig
-    val totalGrad = økonomi.medData { _, _, _, totalGrad, _, _, _, _ -> totalGrad }.prosent
-    val aktuellDagsinntekt = økonomi.medData { _, _, _, _, aktuellDagsinntekt, _, _, _ -> aktuellDagsinntekt }.daglig
-    val arbeidsgiverbeløp = økonomi.medData { _, _, _, _, _, arbeidsgiverbeløp, _, _ -> arbeidsgiverbeløp }?.daglig
-    val personbeløp = økonomi.medData { _, _, _, _, _, _, peronbeløp, _ -> peronbeløp }?.daglig
-    val er6GBegrenset = økonomi.medData { _, _, _, _, _, _, _, er6GBegrenset -> er6GBegrenset }
+private class ØkonomiInspektørBuilder(økonomi: Økonomi) : ØkonomiVisitor {
+    private var økonomi: ØkonomiInspektør? = null
+    init {
+        økonomi.accept(this)
+    }
+    override fun visitØkonomi(
+        grad: Double,
+        arbeidsgiverRefusjonsbeløp: Double,
+        dekningsgrunnlag: Double,
+        totalGrad: Double,
+        aktuellDagsinntekt: Double,
+        arbeidsgiverbeløp: Double?,
+        personbeløp: Double?,
+        er6GBegrenset: Boolean?
+    ) {
+        økonomi = ØkonomiInspektør(
+            grad.prosent,
+            arbeidsgiverRefusjonsbeløp.daglig,
+            dekningsgrunnlag.daglig,
+            totalGrad.prosent,
+            aktuellDagsinntekt.daglig,
+            arbeidsgiverbeløp?.daglig,
+            personbeløp?.daglig,
+            er6GBegrenset
+        )
+    }
+
+    fun build() = økonomi!!
+}
+
+class ØkonomiInspektør(
+    val grad: Prosentdel,
+    val arbeidsgiverRefusjonsbeløp: Inntekt,
+    val dekningsgrunnlag: Inntekt,
+    val totalGrad: Prosentdel,
+    val aktuellDagsinntekt: Inntekt,
+    val arbeidsgiverbeløp: Inntekt?,
+    val personbeløp: Inntekt?,
+    val er6GBegrenset: Boolean?
+)
+
+class ØkonomiAsserter(
+    private val assertions: (grad: Double,
+                             arbeidsgiverRefusjonsbeløp: Double,
+                             dekningsgrunnlag: Double,
+                             totalGrad: Double,
+                             aktuellDagsinntekt: Double,
+                             arbeidsgiverbeløp: Double?,
+                             personbeløp: Double?,
+                             er6GBegrenset: Boolean?) -> Unit
+): ØkonomiVisitor {
+    override fun visitØkonomi(
+        grad: Double,
+        arbeidsgiverRefusjonsbeløp: Double,
+        dekningsgrunnlag: Double,
+        totalGrad: Double,
+        aktuellDagsinntekt: Double,
+        arbeidsgiverbeløp: Double?,
+        personbeløp: Double?,
+        er6GBegrenset: Boolean?
+    ) {
+        assertions(grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, totalGrad, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, er6GBegrenset)
+    }
 }

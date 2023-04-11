@@ -162,7 +162,7 @@ class Økonomi private constructor(
         }
     }
 
-    fun <R> medData(lambda: MedØkonomiData<R>) = tilstand.medData(this, lambda)
+    private fun <R> medData(lambda: MedØkonomiData<R>) = tilstand.medData(this, lambda)
 
     fun <R> medAvrundetData(
         block: (
@@ -238,6 +238,19 @@ class Økonomi private constructor(
         null,
         null, null
     )
+
+    fun accept(visitor: ØkonomiVisitor) {
+        visitor.visitØkonomi(
+            grad.toDouble(),
+            arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig },
+            dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig },
+            totalGrad.toDouble(),
+            aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig },
+            arbeidsgiverbeløp?.reflection { _, _, daglig, _ -> daglig },
+            personbeløp?.reflection { _, _, daglig, _ -> daglig },
+            er6GBegrenset
+        )
+    }
 
     private fun utbetalingsgrad() = tilstand.utbetalingsgrad(this)
     private fun sykdomsgrad() = tilstand.sykdomsgrad(this)
@@ -524,4 +537,20 @@ fun interface MedØkonomiData<R> {
         personbeløp: Double?,
         er6GBegrenset: Boolean?
     ): R
+}
+
+/*
+Fordi vi må vekk fra `medData` og gjøre like ting sånn nogenlunde likt.
+ */
+interface ØkonomiVisitor {
+    fun visitØkonomi(
+        grad: Double,
+        arbeidsgiverRefusjonsbeløp: Double,
+        dekningsgrunnlag: Double,
+        totalGrad: Double,
+        aktuellDagsinntekt: Double,
+        arbeidsgiverbeløp: Double?,
+        personbeløp: Double?,
+        er6GBegrenset: Boolean?
+    )
 }

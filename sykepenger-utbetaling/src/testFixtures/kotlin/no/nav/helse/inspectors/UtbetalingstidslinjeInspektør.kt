@@ -15,13 +15,14 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
+import no.nav.helse.økonomi.ØkonomiVisitor
 import kotlin.reflect.KClass
 
 val Utbetalingstidslinje.inspektør get() = UtbetalingstidslinjeInspektør(this)
 
 // Collects assertable statistics for a Utbetalingstidslinje
 class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalingstidslinje):
-    UtbetalingsdagVisitor {
+    UtbetalingsdagVisitor, ØkonomiVisitor {
     var førstedato = LocalDate.MIN
     var sistedato = LocalDate.MAX
     lateinit var førstedag: Utbetalingsdag
@@ -153,14 +154,25 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.medData { _, _, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, _ ->
-            totalUtbetaling += arbeidsgiverbeløp ?: 0.0
-            totalUtbetaling += personbeløp ?: 0.0
-            totalInntekt += aktuellDagsinntekt
-        }
+        økonomi.accept(this)
         navDagTeller += 1
         navdager.add(dag)
         collect(dag, dato, økonomi)
+    }
+
+    override fun visitØkonomi(
+        grad: Double,
+        arbeidsgiverRefusjonsbeløp: Double,
+        dekningsgrunnlag: Double,
+        totalGrad: Double,
+        aktuellDagsinntekt: Double,
+        arbeidsgiverbeløp: Double?,
+        personbeløp: Double?,
+        er6GBegrenset: Boolean?
+    ) {
+        totalUtbetaling += arbeidsgiverbeløp ?: 0.0
+        totalUtbetaling += personbeløp ?: 0.0
+        totalInntekt += aktuellDagsinntekt
     }
 
     override fun visit(

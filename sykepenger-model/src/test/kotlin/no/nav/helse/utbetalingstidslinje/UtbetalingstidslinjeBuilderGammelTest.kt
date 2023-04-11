@@ -10,6 +10,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.inspectors.ØkonomiAsserter
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -574,14 +575,14 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
     @Test
     fun `feriedag før siste arbeidsgiverperiodedag`() {
         (15.U + 1.F + 1.U + 10.S).utbetalingslinjer()
-        assertNotEquals(
-            0.0,
-            tidslinje.inspektør
-                .navdager
-                .first()
-                .økonomi
-                .medData { _, _, dekningsgrunnlag, _, _, _, _, _ -> dekningsgrunnlag }
-        )
+        tidslinje.inspektør
+            .navdager
+            .first()
+            .økonomi
+            .accept(ØkonomiAsserter
+            { _, _, dekningsgrunnlag, _, _, _, _, _ ->
+                assertNotEquals(0.0, dekningsgrunnlag)
+            })
         assertEquals(18.januar, tidslinje.inspektør.navdager.first().dato)
     }
 
