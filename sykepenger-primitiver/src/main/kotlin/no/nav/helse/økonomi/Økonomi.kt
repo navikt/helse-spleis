@@ -152,7 +152,7 @@ class Økonomi private constructor(
     }
 
     fun <R> brukGrad(block: (grad: Double) -> R) = block(grad.toDouble())
-    fun brukAvrundetGrad(block: (grad: Int) -> Unit) = block(grad.roundToInt())
+    fun <R> brukAvrundetGrad(block: (grad: Int) -> R) = block(grad.roundToInt())
     fun <R> brukTotalGrad(block: (totalGrad: Double) -> R) = block(totalGrad.toDouble())
     fun brukAvrundetDagsinntekt(block: (aktuellDagsinntekt: Int) -> Unit) = block(aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig }.roundToInt())
     fun medAvrundetData(block: (grad: Int, aktuellDagsinntekt: Int) -> Unit) =
