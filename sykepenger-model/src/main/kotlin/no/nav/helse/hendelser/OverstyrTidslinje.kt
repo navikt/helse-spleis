@@ -71,7 +71,7 @@ class OverstyrTidslinje(
                 Dagtype.SykedagNav -> Sykdomstidslinje.sykedagerNav(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
-                    grad = 100.prosent,
+                    grad = it.grad!!.prosent, // Sykedager må ha grad
                     kilde = kilde
                 )
             }
