@@ -134,110 +134,29 @@ class Økonomi private constructor(
     }
 
     private fun _buildKunGrad(builder: ØkonomiBuilder) {
-        medData { grad, _, _, _, _, _, _, _ ->
-            /* ikke legg på flere felter - alle er enten null eller har defaultverdi */
-            builder.grad(grad)
-        }
+        /* ikke legg på flere felter - alle er enten null eller har defaultverdi */
+        builder.grad(grad.toDouble())
     }
 
     private fun _build(builder: ØkonomiBuilder) {
-        medData { grad,
-                  arbeidsgiverRefusjonsbeløp,
-                  dekningsgrunnlag,
-                  totalGrad,
-                  aktuellDagsinntekt,
-                  arbeidsgiverbeløp,
-                  personbeløp,
-                  er6GBegrenset ->
-            builder.grad(grad)
-                .arbeidsgiverRefusjonsbeløp(arbeidsgiverRefusjonsbeløp)
-                .dekningsgrunnlag(dekningsgrunnlag)
-                .totalGrad(totalGrad)
-                .aktuellDagsinntekt(aktuellDagsinntekt)
-                .arbeidsgiverbeløp(arbeidsgiverbeløp)
-                .personbeløp(personbeløp)
-                .er6GBegrenset(er6GBegrenset)
-                .grunnbeløpsgrense(grunnbeløpgrense?.reflection { årlig, _, _, _ -> årlig })
-                .tilstand(tilstand)
-        }
+        builder.grad(grad.toDouble())
+            .arbeidsgiverRefusjonsbeløp(arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig })
+            .dekningsgrunnlag(dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig })
+            .totalGrad(totalGrad.toDouble())
+            .aktuellDagsinntekt(aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig })
+            .arbeidsgiverbeløp(arbeidsgiverbeløp?.reflection { _, _, daglig, _ -> daglig })
+            .personbeløp(personbeløp?.reflection { _, _, daglig, _ -> daglig })
+            .er6GBegrenset(er6GBegrenset)
+            .grunnbeløpsgrense(grunnbeløpgrense?.reflection { årlig, _, _, _ -> årlig })
+            .tilstand(tilstand)
     }
 
-    private fun <R> medData(lambda: MedØkonomiData<R>) = tilstand.medData(this, lambda)
-
-    private fun <R> medAvrundetData(
-        block: (
-            grad: Int,
-            arbeidsgiverRefusjonsbeløp: Int,
-            dekningsgrunnlag: Int,
-            totalGrad: Int,
-            aktuellDagsinntekt: Int,
-            arbeidsgiverbeløp: Int?,
-            personbeløp: Int?,
-            er6GBegrenset: Boolean?
-        ) -> R
-    ) =
-        medData { grad: Double,
-                  arbeidsgiverRefusjonsbeløp: Double,
-                  dekningsgrunnlag: Double,
-                  totalGrad: Double,
-                  aktuellDagsinntekt: Double,
-                  arbeidsgiverbeløp: Double?,
-                  personbeløp: Double?,
-                  er6GBegrenset: Boolean? ->
-            block(
-                grad.roundToInt(),
-                arbeidsgiverRefusjonsbeløp.roundToInt(),
-                dekningsgrunnlag.roundToInt(),
-                totalGrad.roundToInt(),
-                aktuellDagsinntekt.roundToInt(),
-                arbeidsgiverbeløp?.roundToInt(),
-                personbeløp?.roundToInt(),
-                er6GBegrenset
-            )
-        }
-
-    fun <R> medData(block: (grad: Double, totalGrad: Double, aktuellDagsinntekt: Double) -> R) =
-        medData { grad: Double,
-                  _: Double,
-                  _: Double?,
-                  totalGrad: Double,
-                  aktuellDagsinntekt: Double,
-                  _: Double?,
-                  _: Double?,
-                  _: Boolean? ->
-            block(grad, totalGrad, aktuellDagsinntekt)
-        }
-
-    fun <R> brukGrad(block: (grad: Double) -> R) = medData { grad: Double, _:Double, _:Double -> block(grad) }
-    fun brukAvrundetGrad(block: (grad: Int) -> Unit) = medAvrundetData { grad: Int, _:Int, -> block(grad) }
-    fun <R> brukTotalGrad(block: (totalGrad: Double) -> R) = medData {_:Double, totalGrad: Double, _: Double -> block(totalGrad) }
-    fun brukAvrundetDagsinntekt(block: (aktuellDagsinntekt: Int) -> Unit) {
-        medAvrundetData {_:Int, aktuellDagsinntekt: Int -> block(aktuellDagsinntekt) }
-    }
-    fun medAvrundetData(block: (grad: Int, aktuellDagsinntekt: Int) -> Unit) {
-        medAvrundetData { grad, _, _, _, aktuellDagsinntekt, _, _, _ -> block(grad, aktuellDagsinntekt) }
-    }
-
-    private fun <R> medDataFraBeløp(lambda: MedØkonomiData<R>) = lambda(
-        grad.toDouble(),
-        arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig },
-        dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig },
-        totalGrad.toDouble(),
-        aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig },
-        arbeidsgiverbeløp!!.reflection { _, _, daglig, _ -> daglig },
-        personbeløp!!.reflection { _, _, daglig, _ -> daglig },
-        er6GBegrenset
-    )
-
-    private fun <R> medDataFraInntekt(lambda: MedØkonomiData<R>) = lambda(
-        grad.toDouble(),
-        arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig },
-        dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig },
-        totalGrad.toDouble(),
-        aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig },
-        null,
-        null, null
-    )
+    fun <R> brukGrad(block: (grad: Double) -> R) = block(grad.toDouble())
+    fun brukAvrundetGrad(block: (grad: Int) -> Unit) = block(grad.roundToInt())
+    fun <R> brukTotalGrad(block: (totalGrad: Double) -> R) = block(totalGrad.toDouble())
+    fun brukAvrundetDagsinntekt(block: (aktuellDagsinntekt: Int) -> Unit) = block(aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig }.roundToInt())
+    fun medAvrundetData(block: (grad: Int, aktuellDagsinntekt: Int) -> Unit) =
+        block(grad.roundToInt(), aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig }.roundToInt())
 
     fun accept(visitor: ØkonomiVisitor) {
         visitor.visitØkonomi(
@@ -307,8 +226,6 @@ class Økonomi private constructor(
         internal open fun utbetalingsgrad(økonomi: Økonomi) = sykdomsgrad(økonomi)
         internal open fun sykdomsgrad(økonomi: Økonomi) = økonomi.grad
 
-        internal abstract fun <R> medData(økonomi: Økonomi, lambda: MedØkonomiData<R>): R
-
         internal open fun builder(økonomi: Økonomi, builder: ØkonomiBuilder) {
             økonomi._build(builder)
         }
@@ -365,17 +282,6 @@ class Økonomi private constructor(
                 økonomi.tilstand = HarBeløp
             }
 
-            override fun <R> medData(økonomi: Økonomi, lambda: MedØkonomiData<R>) =
-                lambda(
-                    grad = økonomi.grad.toDouble(),
-                    arbeidsgiverRefusjonsbeløp = økonomi.arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig },
-                    dekningsgrunnlag = økonomi.dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig },
-                    totalGrad = økonomi.totalGrad.toDouble(),
-                    aktuellDagsinntekt = økonomi.aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig },
-                    arbeidsgiverbeløp = null,
-                    personbeløp = null,
-                    er6GBegrenset = null
-                )
         }
 
         internal object IkkeBetalt : Tilstand() {
@@ -406,7 +312,6 @@ class Økonomi private constructor(
                 økonomi.tilstand = HarBeløp
             }
 
-            override fun <R> medData(økonomi: Økonomi, lambda: MedØkonomiData<R>) = økonomi.medDataFraInntekt(lambda)
         }
 
         object HarInntekt : Tilstand() {
@@ -415,7 +320,6 @@ class Økonomi private constructor(
                 it.tilstand = Låst
             }
 
-            override fun <R> medData(økonomi: Økonomi, lambda: MedØkonomiData<R>) = økonomi.medDataFraInntekt(lambda)
 
             override fun betal(økonomi: Økonomi) {
                 økonomi._betal()
@@ -427,7 +331,6 @@ class Økonomi private constructor(
 
             override fun er6GBegrenset(økonomi: Økonomi) = økonomi.er6GBegrenset!!
 
-            override fun <R> medData(økonomi: Økonomi, lambda: MedØkonomiData<R>) = økonomi.medDataFraBeløp(lambda)
         }
 
         object Låst : Tilstand() {
@@ -437,7 +340,6 @@ class Økonomi private constructor(
 
             override fun lås(økonomi: Økonomi) = økonomi
 
-            override fun <R> medData(økonomi: Økonomi, lambda: MedØkonomiData<R>) = økonomi.medDataFraInntekt(lambda)
 
             override fun betal(økonomi: Økonomi) {
                 økonomi.arbeidsgiverbeløp = 0.daglig
@@ -455,7 +357,6 @@ class Økonomi private constructor(
 
             override fun er6GBegrenset(økonomi: Økonomi) = false
 
-            override fun <R> medData(økonomi: Økonomi, lambda: MedØkonomiData<R>) = økonomi.medDataFraBeløp(lambda)
         }
     }
 
@@ -535,19 +436,6 @@ abstract class ØkonomiBuilder {
 fun List<Økonomi>.betal() = Økonomi.betal(this)
 
 fun List<Økonomi>.er6GBegrenset() = Økonomi.er6GBegrenset(this)
-
-fun interface MedØkonomiData<R> {
-    operator fun invoke(
-        grad: Double,
-        arbeidsgiverRefusjonsbeløp: Double,
-        dekningsgrunnlag: Double,
-        totalGrad: Double,
-        aktuellDagsinntekt: Double,
-        arbeidsgiverbeløp: Double?,
-        personbeløp: Double?,
-        er6GBegrenset: Boolean?
-    ): R
-}
 
 /*
 Fordi vi må vekk fra `medData` og gjøre like ting sånn nogenlunde likt.
