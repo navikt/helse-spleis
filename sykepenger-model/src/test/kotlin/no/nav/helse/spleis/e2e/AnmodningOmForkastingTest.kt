@@ -18,7 +18,6 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
@@ -32,7 +31,7 @@ internal class AnmodningOmForkastingTest: AbstractDslTest() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
             håndterAnmodningOmForkasting(1.vedtaksperiode)
-            assertInfo("Avslår anmodning om forkasting i AVSLUTTET", 1.vedtaksperiode.filter())
+            assertInfo("Avslår anmodning om forkasting i AVSLUTTET (kan ikke forkastes)", 1.vedtaksperiode.filter())
         }
     }
 
@@ -86,18 +85,6 @@ internal class AnmodningOmForkastingTest: AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterAnmodningOmForkasting(1.vedtaksperiode)
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-        }
-    }
-
-    @Test
-    fun `anmodning innfris av en vedtaksperiode som avventer historikk`(){
-        a1 {
-            nyPeriode(1.januar til 31.januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            nullstillTilstandsendringer()
-            håndterAnmodningOmForkasting(1.vedtaksperiode)
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
         }
     }
 
