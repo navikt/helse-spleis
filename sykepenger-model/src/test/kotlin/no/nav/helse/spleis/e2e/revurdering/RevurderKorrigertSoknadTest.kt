@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
+import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -30,6 +31,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_4
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
@@ -45,6 +47,7 @@ import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
@@ -88,6 +91,34 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
         assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `Utbetaling i Infortrygd opphører tidligere utbetalinger innenfor samme arbeidsgiverperiode`() {
+        nyttVedtak(1.januar, 28.januar)
+        nyttVedtak(3.februar, 28.februar)
+        forlengVedtak(1.mars, 31.mars)
+
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 25.februar))
+        håndterSøknad(Sykdom(29.januar, 25.februar, 100.prosent))
+
+        assertFunksjonellFeil(RV_SØ_13)
+        assertForkastetPeriodeTilstander(4.vedtaksperiode, START, TIL_INFOTRYGD)
+
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 29.januar, 2.februar, 100.prosent, INNTEKT))
+        forlengVedtak(1.april, 30.april)
+        assertEquals(4, inspektør.utbetalinger.size)
+        val sisteUtbetaling = inspektør.utbetalinger.last()
+        assertEquals(2, sisteUtbetaling.inspektør.arbeidsgiverOppdrag.size)
+
+        val førsteLinje = sisteUtbetaling.inspektør.arbeidsgiverOppdrag.first()
+        assertEquals(ENDR, førsteLinje.inspektør.endringskode)
+        assertEquals("OPPH", førsteLinje.inspektør.statuskode)
+        assertEquals(17.januar, førsteLinje.inspektør.datoStatusFom)
+
+        val andreLinje = sisteUtbetaling.inspektør.arbeidsgiverOppdrag.last()
+        assertEquals(NY, andreLinje.inspektør.endringskode)
+        assertEquals(3.februar til 30.april, andreLinje.inspektør.periode)
     }
 
     @Test
