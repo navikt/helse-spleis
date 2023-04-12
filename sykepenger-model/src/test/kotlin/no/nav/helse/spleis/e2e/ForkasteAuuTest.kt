@@ -31,17 +31,34 @@ internal class ForkasteAuuTest: AbstractDslTest() {
     }
 
     @Test
+    fun `En auu med mindre en 17 dager til neste periode forkastes`() {
+        a1 {
+            nyPeriode(1.januar til 16.januar)
+            nyttVedtak(2.februar, 28.februar, 100.prosent)
+            nullstillTilstandsendringer()
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+            håndterAnmodningOmForkasting(1.vedtaksperiode)
+            assertIngenInfo("Kan ikke etterkomme anmodning om forkasting", 1.vedtaksperiode.filter())
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET)
+        }
+    }
+
+
+    @Test
     fun `En auu med mindre en 17 dager til neste periode forkastes ikke - forkaster heller ikke perioder bak`() {
         a1 {
             nyPeriode(1.januar til 16.januar)
-            nyPeriode(3.februar til 28.februar)
+            nyttVedtak(1.februar, 28.februar, 100.prosent, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+
             nullstillTilstandsendringer()
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
             håndterAnmodningOmForkasting(1.vedtaksperiode)
             assertInfo("Kan ikke etterkomme anmodning om forkasting", 1.vedtaksperiode.filter())
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET)
         }
     }
 
@@ -54,6 +71,30 @@ internal class ForkasteAuuTest: AbstractDslTest() {
             håndterAnmodningOmForkasting(1.vedtaksperiode)
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
             assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        }
+    }
+
+    @Test
+    fun `En auu vegg i vegg til neste periode forkastes`() {
+        a1 {
+            nyPeriode(1.januar til 16.januar)
+            nyPeriode(17.januar til 31.januar)
+            nullstillTilstandsendringer()
+            håndterAnmodningOmForkasting(2.vedtaksperiode)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
+    fun `En auu nesten vegg i vegg til neste periode forkastes ikke`() {
+        a1 {
+            nyPeriode(1.januar til 16.januar)
+            nyPeriode(18.januar til 31.januar)
+            nullstillTilstandsendringer()
+            håndterAnmodningOmForkasting(2.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
         }
     }
 

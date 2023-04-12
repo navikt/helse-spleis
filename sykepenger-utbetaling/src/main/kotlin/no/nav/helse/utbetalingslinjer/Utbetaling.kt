@@ -497,6 +497,9 @@ class Utbetaling private constructor(
         observers.forEach { it.nyVedtaksperiodeUtbetaling(this.id, vedtaksperiodeId) }
     }
 
+    fun overlapperMed(other: Periode): Boolean {
+        return this.periode.overlapperMed(other)
+    }
     fun overlapperMed(other: Utbetaling): Boolean {
         return this.periode.overlapperMed(other.periode)
     }

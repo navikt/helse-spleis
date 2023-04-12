@@ -2291,12 +2291,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun kanForkastes(vedtaksperiode: Vedtaksperiode, vedtaksperioder: List<Vedtaksperiode>, arbeidsgiverUtbetalinger: List<Utbetaling>, hendelse: IAktivitetslogg): Boolean {
+            val overlappendeUtbetalinger = arbeidsgiverUtbetalinger.filter {
+                it.overlapperMed(vedtaksperiode.periode)
+            }
             sikkerlogg.info("Gjør vurdering på om periode i AvsluttetUtenUtbetaling kan forkastes.")
-            val førsteEtter = vedtaksperioder
-                .filterNot { it.tilstand == AvsluttetUtenUtbetaling }
-                .sorted()
-                .firstOrNull { it etter vedtaksperiode }
-            if (førsteEtter != null && vedtaksperiode.harInnvirkningPåArbeidsgiverperioden(førsteEtter)) return false
+            if (!Utbetaling.kanForkastes(overlappendeUtbetalinger, arbeidsgiverUtbetalinger)) return false
             if (Toggle.ForkasteAuu.enabled) return true
             sikkerlogg.info("Periode i AvsluttetUtenUtbetaling kunne blitt forkastet. {}, {}, {}, {}",
                 kv("forventerInntekt", vedtaksperiode.forventerInntekt()),
