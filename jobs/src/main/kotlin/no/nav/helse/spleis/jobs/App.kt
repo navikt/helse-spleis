@@ -10,6 +10,7 @@ import java.util.concurrent.CountDownLatch
 import javax.sql.DataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -111,6 +112,7 @@ private fun migrateV2Task(targetVersjon: Int) {
 
 // tester hvorvidt personer lar seg serialisere til speil uten exceptions
 // bør bare kjøres med parallellism=1 fordi arbeidet kan ikke fordeles på flere podder
+@OptIn(ExperimentalCoroutinesApi::class)
 private fun testSpeilJsonTask(numberOfWorkers: Int = 16) {
     DataSourceConfiguration(DbUser.MIGRATE).dataSource(numberOfWorkers).use { ds ->
         sessionOf(ds).use { session ->
