@@ -861,7 +861,7 @@ internal class Arbeidsgiver private constructor(
         hendelse.kontekst(this)
         val perioder: List<Pair<Vedtaksperiode, Vedtaksperiode.VedtaksperiodeForkastetEventBuilder>> = vedtaksperioder
             .filter(filter)
-            .mapNotNull { vedtaksperiode -> vedtaksperiode.forkast(hendelse, utbetalinger, vedtaksperioder)?.let { vedtaksperiode to it } }
+            .mapNotNull { vedtaksperiode -> vedtaksperiode.forkast(hendelse, utbetalinger)?.let { vedtaksperiode to it } }
 
         vedtaksperioder.removeAll(perioder.map { it.first })
         forkastede.addAll(perioder.map { ForkastetVedtaksperiode(it.first) })
@@ -876,7 +876,7 @@ internal class Arbeidsgiver private constructor(
 
     private fun registrerForkastetVedtaksperiode(vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) {
         hendelse.info("Oppretter forkastet vedtaksperiode ettersom Søknad inneholder errors")
-        val vedtaksperiodeForkastetEventBuilder = vedtaksperiode.forkast(hendelse, utbetalinger, vedtaksperioder)
+        val vedtaksperiodeForkastetEventBuilder = vedtaksperiode.forkast(hendelse, utbetalinger)
         vedtaksperiodeForkastetEventBuilder!!.buildAndEmit()
         forkastede.add(ForkastetVedtaksperiode(vedtaksperiode))
     }
@@ -988,7 +988,7 @@ internal class Arbeidsgiver private constructor(
         vedtaksperiodeUtbetalinger.kanForkastes(utbetalinger)
 
     internal fun kanForkastes(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) =
-        vedtaksperiode.kanForkastes(vedtaksperioder, utbetalinger, aktivitetslogg)
+        vedtaksperiode.kanForkastes(utbetalinger, aktivitetslogg)
 
     fun vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?): List<Vedtaksperiode> {
         if (arbeidsgiverperiode == null) return emptyList()

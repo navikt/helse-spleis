@@ -395,7 +395,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         assertFalse(hendelselogg.harFunksjonelleFeilEllerVerre())
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-        assertFalse(inspektør.periodeErForkastet(2.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
     }
 
     @Test

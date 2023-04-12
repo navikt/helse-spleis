@@ -485,11 +485,18 @@ internal class Vedtaksperiode private constructor(
     private fun låsOpp() = arbeidsgiver.låsOpp(periode)
     private fun lås() = arbeidsgiver.lås(periode)
 
-    internal fun kanForkastes(vedtaksperioder: List<Vedtaksperiode>, arbeidsgiverUtbetalinger: List<Utbetaling>, hendelse: IAktivitetslogg) =
-        tilstand.kanForkastes(this, vedtaksperioder, arbeidsgiverUtbetalinger, hendelse)
+    internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>, hendelse: IAktivitetslogg): Boolean {
+        if (tilstand == AvsluttetUtenUtbetaling) {
+            val overlappendeUtbetalinger = arbeidsgiverUtbetalinger.filter {
+                it.overlapperMed(periode)
+            }
+            return Utbetaling.kanForkastes(overlappendeUtbetalinger, arbeidsgiverUtbetalinger)
+        }
+        return utbetalinger.kanForkastes(arbeidsgiverUtbetalinger)
+    }
 
-    internal fun forkast(hendelse: IAktivitetslogg, utbetalinger: List<Utbetaling>, vedtaksperioder: List<Vedtaksperiode>): VedtaksperiodeForkastetEventBuilder? {
-        if (!tilstand.kanForkastes(this, vedtaksperioder, utbetalinger, hendelse)) return null
+    internal fun forkast(hendelse: IAktivitetslogg, utbetalinger: List<Utbetaling>): VedtaksperiodeForkastetEventBuilder? {
+        if (!kanForkastes(utbetalinger, hendelse)) return null
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
         this.utbetalinger.forkast(hendelse)
@@ -1205,8 +1212,7 @@ internal class Vedtaksperiode private constructor(
         fun revurderingOmgjort(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
         fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {}
-        fun kanForkastes(vedtaksperiode: Vedtaksperiode, vedtaksperioder: List<Vedtaksperiode>, arbeidsgiverUtbetalinger: List<Utbetaling>, hendelse: IAktivitetslogg) =
-            vedtaksperiode.utbetalinger.kanForkastes(arbeidsgiverUtbetalinger)
+
     }
 
     internal object Start : Vedtaksperiodetilstand {
@@ -2284,27 +2290,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
-            if (Toggle.ForkasteAuu.disabled) return super.håndter(vedtaksperiode, anmodningOmForkasting)
+            if (Toggle.AnmodeOmForkastingIAUU.disabled) return super.håndter(vedtaksperiode, anmodningOmForkasting)
             vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting) {
                 it.id == vedtaksperiode.id
             }
         }
 
-        override fun kanForkastes(vedtaksperiode: Vedtaksperiode, vedtaksperioder: List<Vedtaksperiode>, arbeidsgiverUtbetalinger: List<Utbetaling>, hendelse: IAktivitetslogg): Boolean {
-            val overlappendeUtbetalinger = arbeidsgiverUtbetalinger.filter {
-                it.overlapperMed(vedtaksperiode.periode)
-            }
-            sikkerlogg.info("Gjør vurdering på om periode i AvsluttetUtenUtbetaling kan forkastes.")
-            if (!Utbetaling.kanForkastes(overlappendeUtbetalinger, arbeidsgiverUtbetalinger)) return false
-            if (Toggle.ForkasteAuu.enabled) return true
-            sikkerlogg.info("Periode i AvsluttetUtenUtbetaling kunne blitt forkastet. {}, {}, {}, {}",
-                kv("forventerInntekt", vedtaksperiode.forventerInntekt()),
-                kv("vedtaksperiodeId", "${vedtaksperiode.id}"),
-                kv("fødselsnummer", vedtaksperiode.fødselsnummer),
-                kv("hendelse", "${hendelse::class.simpleName}")
-            )
-            return false
-        }
     }
 
     internal object Avsluttet : Vedtaksperiodetilstand {

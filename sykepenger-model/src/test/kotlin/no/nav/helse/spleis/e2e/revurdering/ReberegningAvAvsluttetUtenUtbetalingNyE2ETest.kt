@@ -202,7 +202,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         nullstillTilstandsendringer()
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, utbetalingGodkjent = false)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
     }
 
@@ -271,7 +271,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, orgnummer = a1)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, TIL_INFOTRYGD, orgnummer = a2)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD, orgnummer = a2)
     }
@@ -883,12 +883,12 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         nullstillTilstandsendringer()
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, utbetalingGodkjent = false, orgnummer = a1)
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, orgnummer = a1)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, orgnummer = a2)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
-        assertTilstander(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, orgnummer = a2)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, orgnummer = a1)
+        assertForkastetPeriodeTilstander(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, orgnummer = a1)
     }
 
     @Test
@@ -924,16 +924,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 15.februar, 11.mars, 100.prosent, INNTEKT))
 
-        håndterInntektsmelding(listOf(
-            15.januar til 15.januar,
-            26.januar til 30.januar,
-            5.februar til 14.februar
-        ))
-
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
     }
 

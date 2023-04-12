@@ -35,7 +35,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forkaster ikke kort periode`() {
+    fun `forkaster kort periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar))
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(6.januar, 15.januar))
@@ -49,10 +49,10 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
         håndterAnnullerUtbetaling(ORGNUMMER)
-        assertEquals(1, observatør.forkastedePerioder())
+        assertEquals(3, observatør.forkastedePerioder())
         assertEquals(AVSLUTTET, observatør.forkastet(3.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
     }
 }

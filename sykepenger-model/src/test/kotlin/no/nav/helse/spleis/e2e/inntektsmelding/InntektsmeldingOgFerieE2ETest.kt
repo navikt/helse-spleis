@@ -33,6 +33,7 @@ import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.grunnlag
+import no.nav.helse.spleis.e2e.håndterAnnullerUtbetaling
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -41,6 +42,7 @@ import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
+import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
@@ -160,12 +162,13 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         assertFunksjonellFeil("Minst en arbeidsgiver inngår ikke i sykepengegrunnlaget", 1.vedtaksperiode.filter(a2))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertTilstander(
+        assertForkastetPeriodeTilstander(
             2.vedtaksperiode,
             START,
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVSLUTTET_UTEN_UTBETALING,
+            TIL_INFOTRYGD,
             orgnummer = a1
         )
         assertForkastetPeriodeTilstander(
@@ -174,6 +177,20 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
             TIL_INFOTRYGD,
             orgnummer = a2
         )
+    }
+
+    @Test
+    fun `forkaster kort periode etter annullering`() {
+        nyPeriode(1.januar til 5.januar, a1)
+        nyPeriode(10.januar til 16.januar, a1)
+        nyPeriode(17.januar til 20.januar, a1)
+        nyttVedtak(21.januar, 31.januar, arbeidsgiverperiode = listOf(1.januar til 5.januar, 10.januar til 20.januar), orgnummer = a1)
+        nullstillTilstandsendringer()
+        håndterAnnullerUtbetaling(a1)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, orgnummer = a1)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, orgnummer = a1)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, orgnummer = a1)
+        assertForkastetPeriodeTilstander(4.vedtaksperiode, AVSLUTTET, TIL_INFOTRYGD, orgnummer = a1)
     }
 
     @Test

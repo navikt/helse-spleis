@@ -33,6 +33,7 @@ import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -250,25 +251,15 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
                 }
             }
         ))
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, inntektFraIT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 17.januar, inntektFraIT, true)
         ))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        assertEquals(1.januar, inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.skjæringstidspunkt)
         val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(3.vedtaksperiode)
-        assertNotNull(vilkårsgrunnlag)
-        val grunnlagsdataInspektør = vilkårsgrunnlag.inspektør
-        assertForventetFeil(
-            forklaring = "vi plukker opp vilkårsgrunnlaget som ble lagret ved vurdering av 2.vedtaksperiode",
-            nå = {
-                assertEquals(INNTEKT, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
-            },
-            ønsket = {
-                assertEquals(inntektFraIT, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
-            }
-        )
+        assertNull(vilkårsgrunnlag)
     }
     
     @Test
@@ -284,12 +275,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
         assertVilkårsgrunnlagFraSpleisFor(1.januar)
         håndterAnnullerUtbetaling()
-        assertEquals(1.januar til 16.januar, inspektør.sykdomstidslinje.periode())
-        assertForventetFeil(
-            forklaring = "Sletter ikke vilkårsgrunnlaget lagret 1.januar pga. AUU-perioden",
-            ønsket = { assertIngenVilkårsgrunnlagFraSpleis() },
-            nå = { assertVilkårsgrunnlagFraSpleisFor(1.januar) }
-        )
+        assertIngenVilkårsgrunnlagFraSpleis()
     }
 
     @Test

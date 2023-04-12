@@ -17,7 +17,7 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
-@EnableToggle(Toggle.ForkasteAuu::class)
+@EnableToggle(Toggle.AnmodeOmForkastingIAUU::class)
 internal class ForkasteAuuTest: AbstractDslTest() {
 
     @Test

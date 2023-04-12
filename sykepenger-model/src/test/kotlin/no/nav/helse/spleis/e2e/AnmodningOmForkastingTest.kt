@@ -89,7 +89,7 @@ internal class AnmodningOmForkastingTest: AbstractDslTest() {
     }
 
     @Test
-    fun `Anmodning om å forkaste periode i AUU forkaster kun den éne perioden`() = Toggle.ForkasteAuu.enable {
+    fun `Anmodning om å forkaste periode i AUU forkaster kun den éne perioden`() = Toggle.AnmodeOmForkastingIAUU.enable {
         (a1 og a2).forEach { ag -> ag {
             nyPeriode(1.januar til 4.januar)
             nyPeriode(6.januar til 9.januar)
