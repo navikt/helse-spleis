@@ -19,6 +19,7 @@ import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.dto.GraphQLBeregnetPeriode
+import no.nav.helse.spleis.graphql.dto.GraphQLGhostPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLInfotrygdVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektsmelding
 import no.nav.helse.spleis.graphql.dto.GraphQLPerson
@@ -55,7 +56,8 @@ internal object ApiV2 {
         it.registerSubtypes(NamedType(GraphQLSpleisVilkarsgrunnlag::class.java))
         it.setMixIns(mapOf(
             GraphQLArbeidsgiver::class.java to GraphQLArbeidsgiverMixin::class.java,
-            GraphQLUtbetaling::class.java to GraphQLUtbetalingMixin::class.java
+            GraphQLUtbetaling::class.java to GraphQLUtbetalingMixin::class.java,
+            GraphQLGhostPeriode::class.java to GraphQLGhostPeriodeMixin::class.java
         ))
     }
 
@@ -80,4 +82,6 @@ internal object ApiV2 {
     private class GraphQLArbeidsgiverMixin
     @JsonIgnoreProperties("status", "type")
     private class GraphQLUtbetalingMixin
+    @JsonIgnoreProperties("organisasjonsnummer")
+    private class GraphQLGhostPeriodeMixin
 }
