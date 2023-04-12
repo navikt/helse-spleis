@@ -10,7 +10,6 @@ tasks.withType<Test> {
 
 dependencies {
     implementation("com.github.navikt:rapids-and-rivers-cli:$rapidsAndRiversCliVersion")
-    implementation("org.slf4j:jul-to-slf4j:2.0.7")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation(project(":sykepenger-model"))
     implementation(libs.bundles.database)

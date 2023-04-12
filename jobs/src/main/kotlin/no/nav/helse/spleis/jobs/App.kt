@@ -6,18 +6,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import java.util.concurrent.CountDownLatch
 import javax.sql.DataSource
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.channels.produce
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotliquery.Row
 import kotliquery.Session
 import kotliquery.TransactionalSession
@@ -31,7 +20,6 @@ import no.nav.rapids_and_rivers.cli.AivenConfig
 import no.nav.rapids_and_rivers.cli.ConsumerProducerFactory
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
-import org.slf4j.bridge.SLF4JBridgeHandler
 import kotlin.math.ceil
 import kotlin.properties.Delegates
 import kotlin.system.measureTimeMillis
@@ -112,83 +100,28 @@ private fun migrateV2Task(targetVersjon: Int) {
 
 // tester hvorvidt personer lar seg serialisere til speil uten exceptions
 // bør bare kjøres med parallellism=1 fordi arbeidet kan ikke fordeles på flere podder
-@OptIn(ExperimentalCoroutinesApi::class)
-private fun testSpeilJsonTask(numberOfWorkers: Int = 16) {
-    SLF4JBridgeHandler.install()
-    DataSourceConfiguration(DbUser.MIGRATE).dataSource(numberOfWorkers + 3).use { ds ->
+private fun testSpeilJsonTask() {
+    DataSourceConfiguration(DbUser.MIGRATE).dataSource().use { ds ->
         sessionOf(ds).use { session ->
-            runBlocking(Dispatchers.IO) {
-                val personer = producer(ds)
-                val progress = Channel<Pair<String, String?>>(capacity = UNLIMITED)
-                val latch = CountDownLatch(numberOfWorkers)
-                repeat(latch.count.toInt()) {
-                    consumer(it + 1, ds, personer, progress, latch)
-                }
-                // lukker progress-channel når alle consumerne er ferdig/latchen går til 0
-                launch {
-                    while (latch.count > 0) { /* nop */ }
-                    progress.close()
-                }
-                var counter = 0
-                val start = System.currentTimeMillis()
-                while (!progress.isClosedForReceive) {
-                    val now = System.currentTimeMillis()
-                    progress.receiveCatching().getOrNull()?.let { (aktørId, err) ->
-                        counter += 1
-                        if (err != null) {
-                            log.info("[${counter.toString().padStart(7)}][${now - start} ms elapsed][${latch.count}] - $aktørId virker ikke å være ok: $err")
-                        } else {
-                            log.info("[${counter.toString().padStart(7)}][${now - start} ms elapsed][${latch.count}] - $aktørId viker å være ok")
+            session.run(queryOf("SELECT fnr,aktor_id FROM unike_person").map {
+                it.long("fnr") to it.string("aktor_id")
+            }.asList)
+                .forEach {  (fnr, aktørId) ->
+                    hentPerson(session, fnr)?.let { data ->
+                        try {
+                            serializePersonForSpeil(SerialisertPerson(data).deserialize(MaskinellJurist()), emptyList())
+                        } catch (err: Exception) {
+                            log.info("$aktørId lar seg ikke serialisere: ${err.message}")
                         }
                     }
                 }
-                log.info("Task finished")
-            }
         }
     }
 }
-
-@ExperimentalCoroutinesApi
-private fun CoroutineScope.producer(dataSource: DataSource) = produce<Long>(capacity = UNLIMITED) {
-    log.info("[PRODUCER] Starting 👍")
-    sessionOf(dataSource).use {
-        it.run(queryOf("SELECT fnr FROM unike_person").map { it.long("fnr") }.asList)
-            .forEach { send(it) }
-    }
-    log.info("[PRODUCER] Done 👍")
-}
-
-@ExperimentalCoroutinesApi
-private fun CoroutineScope.consumer(id: Int, dataSource: DataSource, personer: ReceiveChannel<Long>, progress: SendChannel<Pair<String, String?>>, latch: CountDownLatch) {
-    launch {
-        sessionOf(dataSource).use { session ->
-            log.info("[CONSUMER $id] Starting UP!")
-            while (!personer.isClosedForReceive) {
-                personer.receiveCatching().getOrNull()?.also { fnr ->
-                    log.info("[CONSUMER $id] Consuming")
-                    hentPerson(session, fnr.toString())?.let { (_, aktørId, data) ->
-                        val err = try {
-                            serializePersonForSpeil(SerialisertPerson(data).deserialize(MaskinellJurist()), emptyList())
-                            null
-                        } catch (err: Exception) {
-                            err.message
-                        }
-                        progress.send(aktørId to err)
-                    } ?: log.info("[CONSUMER $id] Got null")
-                }
-            }
-        }
-        log.info("[CONSUMER $id] DOWN!")
-        latch.countDown()
-    }
-}
-
-private fun hentPerson(session: Session, ident: String) =
-    session.run(queryOf("SELECT fnr,aktor_id FROM unike_person WHERE fnr=:ident OR aktor_id=:ident", mapOf("ident" to ident.toLong())).map { it.string("fnr") }.asSingle)?.let { fnr ->
-        session.run(queryOf("SELECT data FROM person WHERE fnr = ? ORDER BY id DESC LIMIT 1", fnr.toLong()).map {
-            Triple(it.long("fnr"), it.string("aktor_id"), it.string("data"))
-        }.asSingle)
-    }
+private fun hentPerson(session: Session, fnr: Long) =
+    session.run(queryOf("SELECT data FROM person WHERE fnr = ? ORDER BY id DESC LIMIT 1", fnr).map {
+        it.string("data")
+    }.asSingle)
 
 private fun migrateTask(factory: ConsumerProducerFactory) {
     DataSourceConfiguration(DbUser.MIGRATE).dataSource().use { ds ->
