@@ -31,6 +31,7 @@ import no.nav.rapids_and_rivers.cli.AivenConfig
 import no.nav.rapids_and_rivers.cli.ConsumerProducerFactory
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
+import org.slf4j.bridge.SLF4JBridgeHandler
 import kotlin.math.ceil
 import kotlin.properties.Delegates
 import kotlin.system.measureTimeMillis
@@ -113,6 +114,7 @@ private fun migrateV2Task(targetVersjon: Int) {
 // bør bare kjøres med parallellism=1 fordi arbeidet kan ikke fordeles på flere podder
 @OptIn(ExperimentalCoroutinesApi::class)
 private fun testSpeilJsonTask(numberOfWorkers: Int = 16) {
+    SLF4JBridgeHandler.install()
     DataSourceConfiguration(DbUser.MIGRATE).dataSource(numberOfWorkers + 3).use { ds ->
         sessionOf(ds).use { session ->
             runBlocking(Dispatchers.IO) {
