@@ -73,4 +73,6 @@ spec:
     value: "helse-spleis"
   - name: DATABASE_DATABASE
     value: "spleis"
+  - name: GRAPHQL_V2
+    value: "true"
 
