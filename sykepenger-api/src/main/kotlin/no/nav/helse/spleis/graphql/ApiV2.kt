@@ -9,12 +9,14 @@ import io.ktor.server.application.call
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
+import io.ktor.server.plugins.callid.callId
 import io.ktor.server.request.receiveText
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import javax.sql.DataSource
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiver
@@ -35,6 +37,7 @@ import org.slf4j.LoggerFactory
 
 internal object ApiV2 {
     private val logger = LoggerFactory.getLogger(ApiV2::class.java)
+    private val sikkerlogger = LoggerFactory.getLogger("tjenestekall")
     private val schema = ApiV2::class.java.getResource("/graphql-schema.json")!!.readText()
     private val fraQueryRegex = "person\\(fnr:\"(\\d+)\"\\)".toRegex()
     private val sifferRegex = "\\d+".toRegex()
@@ -71,8 +74,22 @@ internal object ApiV2 {
                 post("$path{...}") {
                     val fødselsnummer = call.receiveText().fnr ?: return@post call.respondText(schema, Json)
                     call.principal<JWTPrincipal>() ?: return@post call.respond(HttpStatusCode.Unauthorized)
-                    val person = personResolver(personDao, hendelseDao)(fødselsnummer)
-                    call.respondText(graphQLV2ObjectMapper.writeValueAsString(Response(Data(person))), Json)
+                    try {
+                        val person = personResolver(personDao, hendelseDao)(fødselsnummer)
+                        call.respondText(graphQLV2ObjectMapper.writeValueAsString(Response(Data(person))), Json)
+                    } catch (err: Exception) {
+                        logger.error("callId=${call.callId} Kunne ikke lage JSON for Spesialist, sjekk tjenestekall-indeksen!")
+                        sikkerlogger.error("callId=${call.callId} {} Kunne ikke lage JSON for Spesialist: ${err.message}", keyValue("fødselsnummer", fødselsnummer), err)
+                        call.respondText(graphQLV2ObjectMapper.writeValueAsString(mapOf(
+                            "errors" to listOf(
+                                mapOf(
+                                    "message" to "Det har skjedd en feil 😵‍💫 Det er logget, og vi er kanskje på saken! 🫡",
+                                    "locations" to emptyList<Any>(),
+                                    "path" to emptyList<Any>()
+                                )
+                            )
+                        )))
+                    }
                 }
             }
         }
