@@ -6,7 +6,17 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import java.util.concurrent.CountDownLatch
 import javax.sql.DataSource
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.channels.produce
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotliquery.Row
 import kotliquery.Session
 import kotliquery.TransactionalSession
@@ -14,6 +24,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.SerialisertPerson
+import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.serialize
 import no.nav.rapids_and_rivers.cli.AivenConfig
 import no.nav.rapids_and_rivers.cli.ConsumerProducerFactory
@@ -45,6 +56,7 @@ fun main(args: Array<String>) {
         "avstemming" -> avstemmingTask(ConsumerProducerFactory(AivenConfig.default), args.getOrNull(1)?.toIntOrNull())
         "migrate" -> migrateTask(ConsumerProducerFactory(AivenConfig.default))
         "migrate_v2" -> migrateV2Task(args[1].trim().toInt())
+        "test_speiljson" -> testSpeilJsonTask()
         else -> log.error("Unknown task $task")
     }
 }
@@ -95,6 +107,75 @@ private fun migrateV2Task(targetVersjon: Int) {
         }
     }
 }
+
+// tester hvorvidt personer lar seg serialisere til speil uten exceptions
+// bør bare kjøres med parallellism=1 fordi arbeidet kan ikke fordeles på flere podder
+private fun testSpeilJsonTask(numberOfWorkers: Int = 16) {
+    DataSourceConfiguration(DbUser.MIGRATE).dataSource().use { ds ->
+        sessionOf(ds).use { session ->
+            runBlocking(Dispatchers.IO) {
+                val personer = producer(session)
+                val progress = Channel<Pair<String, String?>>(capacity = UNLIMITED)
+                val latch = CountDownLatch(numberOfWorkers)
+                repeat(latch.count.toInt()) {
+                    consumer(it + 1, session, personer, progress, latch)
+                }
+                // lukker progress-channel når alle consumerne er ferdig/latchen går til 0
+                launch {
+                    while (latch.count > 0) { /* nop */ }
+                    progress.close()
+                }
+                var counter = 0
+                val start = System.currentTimeMillis()
+                while (!progress.isClosedForReceive) {
+                    val now = System.currentTimeMillis()
+                    progress.receiveCatching().getOrNull()?.let { (aktørId, err) ->
+                        counter += 1
+                        if (err != null) {
+                            log.info("[${counter.toString().padStart(7)}][${now - start} ms elapsed][${latch.count}] - $aktørId -> $err")
+                        }
+                    }
+                }
+                log.info("Task finished")
+            }
+        }
+    }
+}
+
+private fun CoroutineScope.producer(session: Session) = produce<Long>(capacity = UNLIMITED) {
+    log.info("[PRODUCER] Starting 👍")
+    session.run(queryOf("SELECT fnr FROM unike_person").map { it.long("fnr") }.asList)
+        .forEach { send(it) }
+    log.info("[PRODUCER] Done 👍")
+}
+
+private fun CoroutineScope.consumer(id: Int, session: Session, personer: ReceiveChannel<Long>, progress: SendChannel<Pair<String, String?>>, latch: CountDownLatch) {
+    launch {
+        log.info("[CONSUMER $id] Starting UP!")
+        while (!personer.isClosedForReceive) {
+            personer.receiveCatching().getOrNull()?.also { fnr ->
+                hentPerson(session, fnr.toString())?.let { (_, aktørId, data) ->
+                    val err = try {
+                        serializePersonForSpeil(SerialisertPerson(data).deserialize(MaskinellJurist()), emptyList())
+                        null
+                    } catch (err: Exception) {
+                        err.message
+                    }
+                    progress.send(aktørId to err)
+                }
+            }
+        }
+        log.info("[CONSUMER $id] DOWN!")
+        latch.countDown()
+    }
+}
+
+private fun hentPerson(session: Session, ident: String) =
+    session.run(queryOf("SELECT fnr,aktor_id FROM unike_person WHERE fnr=:ident OR aktor_id=:ident", mapOf("ident" to ident.toLong())).map { it.string("fnr") }.asSingle)?.let { fnr ->
+        session.run(queryOf("SELECT data FROM person WHERE fnr = ? ORDER BY id DESC LIMIT 1", fnr.toLong()).map {
+            Triple(it.long("fnr"), it.string("aktor_id"), it.string("data"))
+        }.asSingle)
+    }
 
 private fun migrateTask(factory: ConsumerProducerFactory) {
     DataSourceConfiguration(DbUser.MIGRATE).dataSource().use { ds ->

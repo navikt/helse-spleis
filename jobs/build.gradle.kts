@@ -1,5 +1,5 @@
 val mainClass = "no.nav.helse.spleis.jobs.AppKt"
-val rapidsAndRiversCliVersion = "1.5142592"
+val rapidsAndRiversCliVersion = "1.6191629"
 
 tasks.withType<Test> {
     useJUnitPlatform()
@@ -10,6 +10,7 @@ tasks.withType<Test> {
 
 dependencies {
     implementation("com.github.navikt:rapids-and-rivers-cli:$rapidsAndRiversCliVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation(project(":sykepenger-model"))
     implementation(libs.bundles.database)
     implementation(libs.cloudsql)
