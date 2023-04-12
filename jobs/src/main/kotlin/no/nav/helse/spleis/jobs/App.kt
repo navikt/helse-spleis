@@ -32,7 +32,6 @@ import no.nav.rapids_and_rivers.cli.ConsumerProducerFactory
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import kotlin.math.ceil
-import kotlin.math.max
 import kotlin.properties.Delegates
 import kotlin.system.measureTimeMillis
 import kotlin.time.DurationUnit
@@ -147,6 +146,7 @@ private fun testSpeilJsonTask(numberOfWorkers: Int = 16) {
     }
 }
 
+@ExperimentalCoroutinesApi
 private fun CoroutineScope.producer(session: Session) = produce<Long>(capacity = UNLIMITED) {
     log.info("[PRODUCER] Starting 👍")
     session.run(queryOf("SELECT fnr FROM unike_person").map { it.long("fnr") }.asList)
@@ -154,11 +154,13 @@ private fun CoroutineScope.producer(session: Session) = produce<Long>(capacity =
     log.info("[PRODUCER] Done 👍")
 }
 
+@ExperimentalCoroutinesApi
 private fun CoroutineScope.consumer(id: Int, session: Session, personer: ReceiveChannel<Long>, progress: SendChannel<Pair<String, String?>>, latch: CountDownLatch) {
     launch {
         log.info("[CONSUMER $id] Starting UP!")
         while (!personer.isClosedForReceive) {
             personer.receiveCatching().getOrNull()?.also { fnr ->
+                log.info("[CONSUMER $id] Consuming")
                 hentPerson(session, fnr.toString())?.let { (_, aktørId, data) ->
                     val err = try {
                         serializePersonForSpeil(SerialisertPerson(data).deserialize(MaskinellJurist()), emptyList())
