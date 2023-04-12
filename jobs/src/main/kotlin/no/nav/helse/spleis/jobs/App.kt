@@ -31,6 +31,7 @@ import no.nav.rapids_and_rivers.cli.ConsumerProducerFactory
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import kotlin.math.ceil
+import kotlin.math.max
 import kotlin.properties.Delegates
 import kotlin.system.measureTimeMillis
 import kotlin.time.DurationUnit
@@ -111,7 +112,7 @@ private fun migrateV2Task(targetVersjon: Int) {
 // tester hvorvidt personer lar seg serialisere til speil uten exceptions
 // bør bare kjøres med parallellism=1 fordi arbeidet kan ikke fordeles på flere podder
 private fun testSpeilJsonTask(numberOfWorkers: Int = 16) {
-    DataSourceConfiguration(DbUser.MIGRATE).dataSource().use { ds ->
+    DataSourceConfiguration(DbUser.MIGRATE).dataSource(numberOfWorkers).use { ds ->
         sessionOf(ds).use { session ->
             runBlocking(Dispatchers.IO) {
                 val personer = producer(session)
@@ -132,7 +133,9 @@ private fun testSpeilJsonTask(numberOfWorkers: Int = 16) {
                     progress.receiveCatching().getOrNull()?.let { (aktørId, err) ->
                         counter += 1
                         if (err != null) {
-                            log.info("[${counter.toString().padStart(7)}][${now - start} ms elapsed][${latch.count}] - $aktørId -> $err")
+                            log.info("[${counter.toString().padStart(7)}][${now - start} ms elapsed][${latch.count}] - $aktørId virker ikke å være ok: $err")
+                        } else {
+                            log.info("[${counter.toString().padStart(7)}][${now - start} ms elapsed][${latch.count}] - $aktørId viker å være ok")
                         }
                     }
                 }
@@ -311,7 +314,9 @@ private class DataSourceConfiguration(dbUsername: DbUser) {
         idleTimeout = Duration.ofMinutes(10).toMillis()
     }
 
-    fun dataSource() = HikariDataSource(hikariConfig)
+    fun dataSource(maximumPoolSize: Int = 3) = HikariDataSource(hikariConfig.apply {
+        this.maximumPoolSize = maximumPoolSize
+    })
 }
 
 private enum class DbUser(private val dbUserPrefix: String) {
