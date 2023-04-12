@@ -229,13 +229,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                     assertEquals(1, arbeidsgivere.size())
                     assertEquals(3, arbeidsgivere.get(0).size())
                 }
-            },
-            v2AssertBlock = {
-                objectMapper.readTree(this).get("data").get("person").get("arbeidsgivere").let { arbeidsgivere ->
-                    assertEquals(1, arbeidsgivere.size())
-                    // For V2 vil man alltid få hele personen
-                    assertEquals(4, arbeidsgivere.get(0).size())
-                }
             }
         )
     }
