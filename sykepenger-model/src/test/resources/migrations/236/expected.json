@@ -1,0 +1,295 @@
+{
+  "arbeidsgivere": [
+    {
+      "utbetalinger": [
+        {
+          "id": "3d793669-038f-4e05-ac5c-9d9a82e42107",
+          "korrelasjonsId": "18c7dbd7-f997-4251-843f-fc1908c0371a",
+          "utbetalingstidslinje": {
+            "dager": [
+              {
+                "fom": "2018-01-01",
+                "tom": "2018-01-16",
+                "type": "ArbeidsgiverperiodeDag"
+              },
+              {
+                "fom": "2018-01-17",
+                "tom": "2018-01-19",
+                "type": "Arbeidsdag"
+              },
+              {
+                "fom": "2018-01-20",
+                "tom": "2018-01-21",
+                "type": "Fridag"
+              },
+              {
+                "fom": "2018-01-22",
+                "tom": "2018-01-26",
+                "type": "Arbeidsdag"
+              },
+              {
+                "fom": "2018-01-27",
+                "tom": "2018-01-28",
+                "type": "Fridag"
+              },
+              {
+                "fom": "2018-01-29",
+                "tom": "2018-01-31",
+                "type": "Arbeidsdag"
+              },
+              {
+                "fom": "2018-02-01",
+                "tom": "2018-02-02",
+                "type": "NavDag"
+              },
+              {
+                "fom": "2018-02-03",
+                "tom": "2018-02-04",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2018-02-05",
+                "tom": "2018-02-09",
+                "type": "NavDag"
+              },
+              {
+                "fom": "2018-02-10",
+                "tom": "2018-02-11",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2018-02-12",
+                "tom": "2018-02-16",
+                "type": "NavDag"
+              },
+              {
+                "fom": "2018-02-17",
+                "tom": "2018-02-18",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2018-02-19",
+                "tom": "2018-02-23",
+                "type": "NavDag"
+              },
+              {
+                "fom": "2018-02-24",
+                "tom": "2018-02-25",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2018-02-26",
+                "tom": "2018-02-28",
+                "type": "NavDag"
+              }
+            ]
+          },
+          "fom": "2018-01-01",
+          "tom": "2018-02-28",
+          "tidsstempel": "2023-04-12T10:56:10.272389"
+        },
+        {
+          "id": "37ece3c6-aa01-40c4-8ffa-1fc4a4222d5c",
+          "korrelasjonsId": "18c7dbd7-f997-4251-843f-fc1908c0371a",
+          "utbetalingstidslinje": {
+            "dager": [
+              {
+                "fom": "2018-01-01",
+                "tom": "2018-01-16",
+                "type": "ArbeidsgiverperiodeDag"
+              },
+              {
+                "fom": "2018-01-17",
+                "tom": "2018-01-19",
+                "type": "Arbeidsdag"
+              },
+              {
+                "fom": "2018-01-20",
+                "tom": "2018-01-21",
+                "type": "Fridag"
+              },
+              {
+                "fom": "2018-01-22",
+                "tom": "2018-01-26",
+                "type": "Arbeidsdag"
+              },
+              {
+                "fom": "2018-01-27",
+                "tom": "2018-01-28",
+                "type": "Fridag"
+              },
+              {
+                "fom": "2018-01-29",
+                "tom": "2018-01-31",
+                "type": "Arbeidsdag"
+              },
+              {
+                "fom": "2018-02-01",
+                "tom": "2018-02-02",
+                "type": "NavDag"
+              },
+              {
+                "fom": "2018-02-03",
+                "tom": "2018-02-04",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2018-02-05",
+                "tom": "2018-02-09",
+                "type": "NavDag"
+              },
+              {
+                "fom": "2018-02-10",
+                "tom": "2018-02-11",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2018-02-12",
+                "tom": "2018-02-16",
+                "type": "NavDag"
+              },
+              {
+                "fom": "2018-02-17",
+                "tom": "2018-02-18",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2018-02-19",
+                "tom": "2018-02-23",
+                "type": "NavDag"
+              },
+              {
+                "fom": "2018-02-24",
+                "tom": "2018-02-25",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2018-02-26",
+                "tom": "2018-02-28",
+                "type": "NavDag"
+              }
+            ]
+          },
+          "fom": "2018-01-01",
+          "tom": "2018-02-28",
+          "tidsstempel": "2023-04-13T10:56:10.272389"
+        }
+      ],
+      "vedtaksperioder": [
+        {
+          "fom": "2018-01-01",
+          "tom": "2018-01-16",
+          "tilstand": "AVSLUTTET_UTEN_UTBETALING"
+        },
+        {
+          "fom": "2018-02-01",
+          "tom": "2018-02-28",
+          "tilstand": "AVSLUTTET"
+        }
+      ]
+    },
+    {
+      "utbetalinger": [
+        {
+          "id": "3d793669-038f-4e05-ac5c-9d9a82e42107",
+          "korrelasjonsId": "18c7dbd7-f997-4251-843f-fc1908c0371a",
+          "utbetalingstidslinje": {
+            "dager": [
+              {
+                "fom": "2018-01-01",
+                "tom": "2018-01-16",
+                "type": "ArbeidsgiverperiodeDag"
+              },
+              {
+                "fom": "2018-01-17",
+                "tom": "2018-01-19",
+                "type": "UkjentDag"
+              },
+              {
+                "fom": "2018-01-20",
+                "tom": "2018-01-21",
+                "type": "Fridag"
+              },
+              {
+                "fom": "2018-01-22",
+                "tom": "2018-01-26",
+                "type": "Arbeidsdag"
+              },
+              {
+                "fom": "2018-01-27",
+                "tom": "2018-01-28",
+                "type": "Fridag"
+              },
+              {
+                "fom": "2018-01-29",
+                "tom": "2018-01-31",
+                "type": "Arbeidsdag"
+              },
+              {
+                "fom": "2018-02-01",
+                "tom": "2018-02-02",
+                "type": "NavDag"
+              },
+              {
+                "fom": "2018-02-03",
+                "tom": "2018-02-04",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2018-02-05",
+                "tom": "2018-02-09",
+                "type": "NavDag"
+              },
+              {
+                "fom": "2018-02-10",
+                "tom": "2018-02-11",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2018-02-12",
+                "tom": "2018-02-16",
+                "type": "NavDag"
+              },
+              {
+                "fom": "2018-02-17",
+                "tom": "2018-02-18",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2018-02-19",
+                "tom": "2018-02-23",
+                "type": "NavDag"
+              },
+              {
+                "fom": "2018-02-24",
+                "tom": "2018-02-25",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2018-02-26",
+                "tom": "2018-02-28",
+                "type": "NavDag"
+              }
+            ]
+          },
+          "fom": "2018-02-01",
+          "tom": "2018-02-28",
+          "tidsstempel": "2023-04-12T10:56:10.272389"
+        }
+      ],
+      "vedtaksperioder": [
+        {
+          "fom": "2018-01-01",
+          "tom": "2018-01-16",
+          "tilstand": "AVSLUTTET_UTEN_UTBETALING"
+        },
+        {
+          "fom": "2018-02-01",
+          "tom": "2018-02-28",
+          "tilstand": "AVSLUTTET"
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 236
+}
