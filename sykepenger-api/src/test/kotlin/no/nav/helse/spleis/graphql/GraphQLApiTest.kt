@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.skyscreamer.jsonassert.JSONAssert
-import org.skyscreamer.jsonassert.JSONCompare
 import org.skyscreamer.jsonassert.JSONCompareMode.STRICT
 
 @TestInstance(Lifecycle.PER_CLASS)
@@ -693,16 +692,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         ).let { it.first.utenVariableVerdier to it.second.utenVariableVerdier }
 
         JSONAssert.assertEquals(detSpesialistFaktiskForventer, v1response, STRICT)
-        val jsonCompareResult = JSONCompare.compareJSON(detSpesialistFaktiskForventer, v2response, STRICT)
-        assertEquals(0, jsonCompareResult.fieldFailures.size)
-        assertEquals(0, jsonCompareResult.fieldMissing.size)
-        // Tre ting Spesialist ikke spør etter
-        assertEquals(3, jsonCompareResult.fieldUnexpected.size)
-        assertEquals(setOf(
-            "data.person.arbeidsgivere[0].id",
-            "data.person.arbeidsgivere[0].generasjoner[0].perioder[0].utbetaling.status",
-            "data.person.arbeidsgivere[0].generasjoner[0].perioder[0].utbetaling.type"
-        ), jsonCompareResult.fieldUnexpected.map { "${it.field}.${it.actual}" }.toSet())
+        JSONAssert.assertEquals(detSpesialistFaktiskForventer, v2response, STRICT)
     }
 
     private fun requestBådeV1ogV2(

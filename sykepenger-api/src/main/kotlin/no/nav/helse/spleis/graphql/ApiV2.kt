@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.graphql
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.jsontype.NamedType
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.HttpStatusCode
@@ -16,6 +17,7 @@ import io.ktor.server.routing.routing
 import javax.sql.DataSource
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
+import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.dto.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLInfotrygdVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektsmelding
@@ -25,6 +27,7 @@ import no.nav.helse.spleis.graphql.dto.GraphQLSoknadNav
 import no.nav.helse.spleis.graphql.dto.GraphQLSpleisVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLSykmelding
 import no.nav.helse.spleis.graphql.dto.GraphQLUberegnetPeriode
+import no.nav.helse.spleis.graphql.dto.GraphQLUtbetaling
 import no.nav.helse.spleis.nyObjectmapper
 import no.nav.helse.spleis.objectMapper
 import org.slf4j.LoggerFactory
@@ -50,6 +53,10 @@ internal object ApiV2 {
         it.registerSubtypes(NamedType(GraphQLSoknadArbeidsgiver::class.java))
         it.registerSubtypes(NamedType(GraphQLInfotrygdVilkarsgrunnlag::class.java))
         it.registerSubtypes(NamedType(GraphQLSpleisVilkarsgrunnlag::class.java))
+        it.setMixIns(mapOf(
+            GraphQLArbeidsgiver::class.java to GraphQLArbeidsgiverMixin::class.java,
+            GraphQLUtbetaling::class.java to GraphQLUtbetalingMixin::class.java
+        ))
     }
 
     internal fun Application.installGraphQLApiV2(dataSource: DataSource, path: String = "/v2/graphql") {
@@ -68,4 +75,9 @@ internal object ApiV2 {
             }
         }
     }
+
+    @JsonIgnoreProperties("id")
+    private class GraphQLArbeidsgiverMixin
+    @JsonIgnoreProperties("status", "type")
+    private class GraphQLUtbetalingMixin
 }
