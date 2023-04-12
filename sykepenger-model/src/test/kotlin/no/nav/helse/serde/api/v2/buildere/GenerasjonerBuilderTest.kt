@@ -48,7 +48,6 @@ import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.GenerasjonDTO
-import no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.serde.api.dto.OmregnetÅrsinntekt
 import no.nav.helse.serde.api.dto.Periodetilstand
@@ -102,7 +101,6 @@ import no.nav.helse.spleis.e2e.manuellSykedag
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
-import no.nav.helse.spleis.e2e.speilApi
 import no.nav.helse.spleis.e2e.søknadDTOer
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
@@ -1893,7 +1891,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, utbetalingGodkjent = false)
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
 
         assertEquals(1, generasjoner.size)
