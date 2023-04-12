@@ -113,7 +113,7 @@ private fun migrateV2Task(targetVersjon: Int) {
 // bør bare kjøres med parallellism=1 fordi arbeidet kan ikke fordeles på flere podder
 @OptIn(ExperimentalCoroutinesApi::class)
 private fun testSpeilJsonTask(numberOfWorkers: Int = 16) {
-    DataSourceConfiguration(DbUser.MIGRATE).dataSource(numberOfWorkers).use { ds ->
+    DataSourceConfiguration(DbUser.MIGRATE).dataSource(numberOfWorkers + 3).use { ds ->
         sessionOf(ds).use { session ->
             runBlocking(Dispatchers.IO) {
                 val personer = producer(session)
@@ -169,7 +169,7 @@ private fun CoroutineScope.consumer(id: Int, session: Session, personer: Receive
                         err.message
                     }
                     progress.send(aktørId to err)
-                }
+                } ?: log.info("[CONSUMER $id] Got null")
             }
         }
         log.info("[CONSUMER $id] DOWN!")
