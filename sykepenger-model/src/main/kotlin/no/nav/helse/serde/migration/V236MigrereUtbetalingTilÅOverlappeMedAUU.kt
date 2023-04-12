@@ -55,7 +55,7 @@ internal class V236MigrereUtbetalingTilÅOverlappeMedAUU: JsonMigration(236) {
                             }.any { it.path("fom").dato() in nyPeriode }
                         }) {
                         sikkerlogg.info("" +
-                                "{} Endrer ikke fom fra ${it.path("fom").asText()} " +
+                                "{} Endrer ikke fom fra ${overlappendeUtbetaling.value.first().path("fom").dato()} " +
                                 "til ${periode.start} " +
                                 "for utbetalingId = ${it.path("id").asText()}", keyValue("aktørId", jsonNode.path("aktørId").asText()))
                     } else {
