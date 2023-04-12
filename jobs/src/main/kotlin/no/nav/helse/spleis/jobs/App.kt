@@ -116,11 +116,11 @@ private fun testSpeilJsonTask(numberOfWorkers: Int = 16) {
     DataSourceConfiguration(DbUser.MIGRATE).dataSource(numberOfWorkers + 3).use { ds ->
         sessionOf(ds).use { session ->
             runBlocking(Dispatchers.IO) {
-                val personer = producer(session)
+                val personer = producer(ds)
                 val progress = Channel<Pair<String, String?>>(capacity = UNLIMITED)
                 val latch = CountDownLatch(numberOfWorkers)
                 repeat(latch.count.toInt()) {
-                    consumer(it + 1, session, personer, progress, latch)
+                    consumer(it + 1, ds, personer, progress, latch)
                 }
                 // lukker progress-channel når alle consumerne er ferdig/latchen går til 0
                 launch {
@@ -147,29 +147,33 @@ private fun testSpeilJsonTask(numberOfWorkers: Int = 16) {
 }
 
 @ExperimentalCoroutinesApi
-private fun CoroutineScope.producer(session: Session) = produce<Long>(capacity = UNLIMITED) {
+private fun CoroutineScope.producer(dataSource: DataSource) = produce<Long>(capacity = UNLIMITED) {
     log.info("[PRODUCER] Starting 👍")
-    session.run(queryOf("SELECT fnr FROM unike_person").map { it.long("fnr") }.asList)
-        .forEach { send(it) }
+    sessionOf(dataSource).use {
+        it.run(queryOf("SELECT fnr FROM unike_person").map { it.long("fnr") }.asList)
+            .forEach { send(it) }
+    }
     log.info("[PRODUCER] Done 👍")
 }
 
 @ExperimentalCoroutinesApi
-private fun CoroutineScope.consumer(id: Int, session: Session, personer: ReceiveChannel<Long>, progress: SendChannel<Pair<String, String?>>, latch: CountDownLatch) {
+private fun CoroutineScope.consumer(id: Int, dataSource: DataSource, personer: ReceiveChannel<Long>, progress: SendChannel<Pair<String, String?>>, latch: CountDownLatch) {
     launch {
-        log.info("[CONSUMER $id] Starting UP!")
-        while (!personer.isClosedForReceive) {
-            personer.receiveCatching().getOrNull()?.also { fnr ->
-                log.info("[CONSUMER $id] Consuming")
-                hentPerson(session, fnr.toString())?.let { (_, aktørId, data) ->
-                    val err = try {
-                        serializePersonForSpeil(SerialisertPerson(data).deserialize(MaskinellJurist()), emptyList())
-                        null
-                    } catch (err: Exception) {
-                        err.message
-                    }
-                    progress.send(aktørId to err)
-                } ?: log.info("[CONSUMER $id] Got null")
+        sessionOf(dataSource).use { session ->
+            log.info("[CONSUMER $id] Starting UP!")
+            while (!personer.isClosedForReceive) {
+                personer.receiveCatching().getOrNull()?.also { fnr ->
+                    log.info("[CONSUMER $id] Consuming")
+                    hentPerson(session, fnr.toString())?.let { (_, aktørId, data) ->
+                        val err = try {
+                            serializePersonForSpeil(SerialisertPerson(data).deserialize(MaskinellJurist()), emptyList())
+                            null
+                        } catch (err: Exception) {
+                            err.message
+                        }
+                        progress.send(aktørId to err)
+                    } ?: log.info("[CONSUMER $id] Got null")
+                }
             }
         }
         log.info("[CONSUMER $id] DOWN!")
