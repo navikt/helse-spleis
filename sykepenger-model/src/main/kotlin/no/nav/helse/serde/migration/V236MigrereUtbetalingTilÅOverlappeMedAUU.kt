@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import org.slf4j.LoggerFactory
@@ -48,12 +49,7 @@ internal class V236MigrereUtbetalingTilÅOverlappeMedAUU: JsonMigration(236) {
                     }
                 }
                 if (overlappendeUtbetaling != null ) {
-                    val nyPeriode = periode.start til overlappendeUtbetaling.value.first().path("fom").dato()
-                    if (grupperteUtbetalinger.any {(korrelasjonsId, utbetalinger) ->
-                            korrelasjonsId != overlappendeUtbetaling.key && utbetalinger
-                                .filterNot { it.path("status").asText() == "FORKASTET"
-                            }.any { it.path("fom").dato() in nyPeriode }
-                        }) {
+                    if (finnesAndreOverlappendeUtbetalinger(periode, overlappendeUtbetaling.key, overlappendeUtbetaling.value.first(), grupperteUtbetalinger)) {
                         sikkerlogg.info("" +
                                 "{} Endrer ikke fom fra ${overlappendeUtbetaling.value.first().path("fom").dato()} " +
                                 "til ${periode.start} " +
@@ -73,6 +69,17 @@ internal class V236MigrereUtbetalingTilÅOverlappeMedAUU: JsonMigration(236) {
             }
         }
     }
+
+    private fun finnesAndreOverlappendeUtbetalinger(periode: Periode, overlappendeUtbetalingKorrelasjonsId: String, overlappendeUtbetaling: JsonNode, grupperteUtbetalinger: Map<String, List<JsonNode>>): Boolean {
+        val utbetalingFom = overlappendeUtbetaling.path("fom").dato()
+        val nyPeriode = periode.start til maxOf(periode.start, utbetalingFom)
+        return grupperteUtbetalinger.any {(korrelasjonsId, utbetalinger) ->
+                korrelasjonsId != overlappendeUtbetalingKorrelasjonsId && utbetalinger
+                    .filterNot { it.path("status").asText() == "FORKASTET"
+                    }.any { it.path("fom").dato() in nyPeriode }
+            }
+    }
+
     private fun JsonNode.dato() = LocalDate.parse(asText())
 
 }
