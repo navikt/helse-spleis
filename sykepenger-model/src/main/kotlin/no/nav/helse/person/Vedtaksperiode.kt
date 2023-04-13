@@ -467,6 +467,10 @@ internal class Vedtaksperiode private constructor(
     internal fun erVedtaksperiodeRettFør(other: Vedtaksperiode) =
         this.sykdomstidslinje.erRettFør(other.sykdomstidslinje)
 
+    private fun erForlengelse() = arbeidsgiver
+        .finnVedtaksperiodeRettFør(this)
+        ?.takeIf { it.forventerInntekt() } != null
+
     internal fun erSykeperiodeAvsluttetUtenUtbetalingRettFør(other: Vedtaksperiode) =
         this.sykdomstidslinje.erRettFør(other.sykdomstidslinje) && this.tilstand == AvsluttetUtenUtbetaling
 
@@ -917,9 +921,7 @@ internal class Vedtaksperiode private constructor(
         val vilkårsgrunnlag = requireNotNull(person.vilkårsgrunnlagFor(skjæringstidspunkt))
         val tagBuilder = TagBuilder()
         vilkårsgrunnlag.tags(tagBuilder)
-        val erForlengelse = arbeidsgiver
-            .finnVedtaksperiodeRettFør(this)
-            ?.takeIf { it.forventerInntekt() } != null
+        val erForlengelse = erForlengelse()
         utbetalinger.godkjenning(
             hendelse = hendelse,
             periode = periode,
@@ -1569,10 +1571,7 @@ internal class Vedtaksperiode private constructor(
             tilstandsendringstidspunkt.plusDays(180)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            val erForlengelse = vedtaksperiode.arbeidsgiver
-                .finnVedtaksperiodeRettFør(vedtaksperiode)
-                ?.takeIf { it.forventerInntekt() } != null
-            if(Toggle.Splarbeidsbros.enabled && vedtaksperiode.forventerInntekt() && !erForlengelse) {
+            if(Toggle.Splarbeidsbros.enabled && vedtaksperiode.forventerInntekt() && !vedtaksperiode.erForlengelse()) {
                 vedtaksperiode.trengerArbeidsgiveropplysninger()
             }
             vedtaksperiode.trengerInntektsmeldingReplay()
