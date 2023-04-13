@@ -52,9 +52,13 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Pair<Vilkårsgrunnl
     internal fun hørerIkkeSammenMed(other: VedtaksperiodeUtbetalinger) = other.siste != null && hørerIkkeSammenMed(other.siste!!)
     internal fun gjelderIkkeFor(hendelse: UtbetalingHendelse) = siste?.gjelderFor(hendelse) != true
 
-    internal fun lagreTidsnæreInntekter(arbeidsgiver: Arbeidsgiver, skjæringstidspunkt: LocalDate) {
+    internal fun lagreTidsnæreInntekter(
+        arbeidsgiver: Arbeidsgiver,
+        skjæringstidspunkt: LocalDate,
+        hendelse: IAktivitetslogg
+    ) {
         val forrige = sisteVilkårsgrunnlag ?: return
-        forrige.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver)
+        forrige.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, hendelse)
     }
 
     internal fun gjelderIkkeFor(hendelse: Utbetalingsgodkjenning) = siste?.gjelderFor(hendelse) != true

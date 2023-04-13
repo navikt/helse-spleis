@@ -584,13 +584,13 @@ internal class Vedtaksperiode private constructor(
         periode = hendelse.oppdaterFom(this.periode)
         val rettEtterFørEndring = arbeidsgiver.finnVedtaksperiodeRettEtter(this)
         sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
-        lagreTidsnæreopplysninger()
+        lagreTidsnæreopplysninger(hendelse)
         val periodeEtter = rettEtterFørEndring ?: arbeidsgiver.finnVedtaksperiodeRettEtter(this)
-        periodeEtter?.lagreTidsnæreopplysninger()
+        periodeEtter?.lagreTidsnæreopplysninger(hendelse)
     }
 
-    private fun lagreTidsnæreopplysninger() {
-        utbetalinger.lagreTidsnæreInntekter(arbeidsgiver, skjæringstidspunkt)
+    private fun lagreTidsnæreopplysninger(hendelse: IAktivitetslogg) {
+        utbetalinger.lagreTidsnæreInntekter(arbeidsgiver, skjæringstidspunkt, aktivitetsloggkopi(hendelse))
     }
 
     private fun håndterSøknad(søknad: Søknad, nesteTilstand: () -> Vedtaksperiodetilstand? = { null }) {
@@ -1382,10 +1382,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.skalReberegnes()) {
-                vedtaksperiode.lagreTidsnæreopplysninger()
-            }
-
             if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(påminnelse)) {
                 påminnelse.info("Varsler arbeidsgiver at vi har behov for inntektsmelding.")
                 vedtaksperiode.trengerInntektsmelding()

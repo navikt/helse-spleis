@@ -280,8 +280,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun overlappendeEllerSenereRefusjonsopplysninger(organisasjonsnummer: String, periode: Periode): List<Refusjonsopplysning> =
             refusjonsopplysninger(organisasjonsnummer).overlappendeEllerSenereRefusjonsopplysninger(periode)
 
-        internal fun lagreTidsnæreInntekter(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver) {
-            sykepengegrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver)
+        internal fun lagreTidsnæreInntekter(
+            skjæringstidspunkt: LocalDate,
+            arbeidsgiver: Arbeidsgiver,
+            hendelse: IAktivitetslogg
+        ) {
+            sykepengegrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, hendelse)
         }
 
         internal fun tags(tagBuilder: TagBuilder) = sykepengegrunnlag.tags(tagBuilder)

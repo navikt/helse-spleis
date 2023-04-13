@@ -186,10 +186,20 @@ class ArbeidsgiverInntektsopplysning(
             return endringsDatoer.minOrNull() ?: skjæringstidspunkt
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.lagreTidsnæreInntekter(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver) {
+        internal fun List<ArbeidsgiverInntektsopplysning>.lagreTidsnæreInntekter(
+            skjæringstidspunkt: LocalDate,
+            arbeidsgiver: Arbeidsgiver,
+            hendelse: IAktivitetslogg
+        ) {
             this.forEach {
                 when (it.inntektsopplysning) {
-                    is Inntektsmelding -> arbeidsgiver.lagreTidsnærInntektsmelding(skjæringstidspunkt, it.orgnummer, it.inntektsopplysning, it.refusjonsopplysninger)
+                    is Inntektsmelding -> arbeidsgiver.lagreTidsnærInntektsmelding(
+                        skjæringstidspunkt,
+                        it.orgnummer,
+                        it.inntektsopplysning,
+                        it.refusjonsopplysninger,
+                        hendelse
+                    )
                 }
             }
         }

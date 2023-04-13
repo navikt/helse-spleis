@@ -2,8 +2,11 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.økonomi.Inntekt
 
 internal class Inntektsmelding(
@@ -43,5 +46,8 @@ internal class Inntektsmelding(
         return other is Inntektsmelding && this.dato == other.dato && other.beløp == this.beløp
     }
 
-    internal fun kopierTidsnærOpplysning(nyDato: LocalDate): Inntektsmelding = Inntektsmelding(UUID.randomUUID(), nyDato,hendelseId, beløp, tidsstempel)
+    internal fun kopierTidsnærOpplysning(nyDato: LocalDate, hendelse: IAktivitetslogg): Inntektsmelding {
+        if (ChronoUnit.DAYS.between(this.dato, nyDato) >= 60) hendelse.varsel(RV_IV_7)
+        return Inntektsmelding(UUID.randomUUID(), nyDato,hendelseId, beløp, tidsstempel)
+    }
 }

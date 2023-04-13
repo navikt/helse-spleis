@@ -150,6 +150,7 @@ enum class Varselkode(
     RV_IV_4("Finnes inntekter fra flere virksomheter siste tre måneder", avviklet = true),
     RV_IV_5("Har inntekt på flere arbeidsgivere med forskjellig fom dato", avviklet = true),
     RV_IV_6("Inntekter fra mer enn én arbeidsgiver i A-ordningen siste tre måneder. Kontroller om brukeren har flere arbeidsforhold på sykmeldingstidspunktet. Flere arbeidsforhold støttes ikke av systemet.", avviklet = true),
+    RV_IV_7("Det er gjenbrukt inntektsopplysninger "),
 
     // SV: Sykepengegrunnlagsvurdering
     RV_SV_1("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag"),

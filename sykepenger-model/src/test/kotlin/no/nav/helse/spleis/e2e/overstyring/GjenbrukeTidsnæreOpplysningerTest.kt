@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
+import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson
@@ -30,9 +31,11 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
@@ -576,6 +579,33 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.sykepengegrunnlag
 
             assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
+        }
+    }
+
+    @Test
+    fun `tester nytt varsel`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+            håndterYtelser(3.vedtaksperiode)
+            håndterSimulering(3.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterSøknad(Sykdom(1.april, 30.april, 100.prosent))
+            håndterYtelser(4.vedtaksperiode)
+            håndterSimulering(4.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(4.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Arbeid(20.mars, 31.mars))
+            assertVarsel(RV_IV_7, 4.vedtaksperiode.filter())
         }
     }
 
