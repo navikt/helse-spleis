@@ -2336,6 +2336,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) { }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (!påminnelse.skalReberegnes()) return
+            påminnelse.info("Reberegner vedtaksperiode")
+            vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.reberegning(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
+        }
     }
 
     internal object RevurderingFeilet : Vedtaksperiodetilstand {
