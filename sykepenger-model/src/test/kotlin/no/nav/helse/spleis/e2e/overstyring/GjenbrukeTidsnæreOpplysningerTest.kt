@@ -11,7 +11,9 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OverstyrTidslinje
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -644,6 +646,36 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
 
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(13.februar, 28.februar))
             assertIngenVarsler(3.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `ikke varsel når det er en korrigert søknad som ikke endrer noe`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(30.januar, 31.januar))
+            assertIngenVarsel(RV_IV_7)
+        }
+    }
+
+    @Test
+    fun `ikke varsel når det er en forlengelse korrigeres til ferie`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 28.februar))
+            assertIngenVarsel(RV_IV_7)
         }
     }
 

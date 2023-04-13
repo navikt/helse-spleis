@@ -48,9 +48,14 @@ internal class Inntektsmelding(
     }
 
     internal fun kopierTidsnærOpplysning(nyDato: LocalDate, hendelse: IAktivitetslogg, oppholdsperiodeMellom: Periode?): Inntektsmelding {
-        if ((ChronoUnit.DAYS.between(this.dato, nyDato) >= 60) ||
-            (oppholdsperiodeMellom != null && oppholdsperiodeMellom.count() >= 16 && this.dato < oppholdsperiodeMellom.endInclusive))
+        val dagerMellom = ChronoUnit.DAYS.between(this.dato, nyDato)
+        if (dagerMellom >= 60) {
+            hendelse.info("Det er $dagerMellom dager mellom forrige inntektdato og ny inntektdato, dette utløser varsel om gjenbruk.")
             hendelse.varsel(RV_IV_7)
-        return Inntektsmelding(UUID.randomUUID(), nyDato,hendelseId, beløp, tidsstempel)
+        } else if (oppholdsperiodeMellom != null && oppholdsperiodeMellom.count() >= 16 && this.dato < oppholdsperiodeMellom.endInclusive) {
+            hendelse.info("Det er ${oppholdsperiodeMellom.count()} dager mellom forrige vedtaksperiodeperiode og det er en antagelse om at det er ny arbeidsgiverperiode, og dette utløser varsel om gjenbruk.")
+            hendelse.varsel(RV_IV_7)
+        }
+        return Inntektsmelding(UUID.randomUUID(), nyDato, hendelseId, beløp, tidsstempel)
     }
 }
