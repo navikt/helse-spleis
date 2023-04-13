@@ -2032,10 +2032,10 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             versjon = 1.januar(2019),
             input = mapOf(
                 "beregnetMånedsinntektPerArbeidsgiver" to mapOf(
-                    ORGNUMMER to nyInntekt.månedlig
+                    ORGNUMMER to nyInntekt.reflection { _, månedlig, _, _ -> månedlig }
                 )
             ),
-            output = mapOf("grunnlagForSykepengegrunnlag" to nyInntekt.årlig),
+            output = mapOf("grunnlagForSykepengegrunnlag" to nyInntekt.reflection { årlig, _, _, _ -> årlig }),
             sporing = mapOf(
                 "$hendelseId" to KontekstType.OverstyrArbeidsgiveropplysninger
             )
@@ -2080,10 +2080,10 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             versjon = 1.januar(2019),
             input = mapOf(
                 "beregnetMånedsinntektPerArbeidsgiver" to mapOf(
-                    ORGNUMMER to nyInntekt.månedlig
+                    ORGNUMMER to nyInntekt.reflection { _, månedlig, _, _ -> månedlig }
                 )
             ),
-            output = mapOf("grunnlagForSykepengegrunnlag" to nyInntekt.årlig),
+            output = mapOf("grunnlagForSykepengegrunnlag" to nyInntekt.reflection { årlig, _, _, _ -> årlig }),
             sporing = mapOf(
                 "$hendelseId2" to KontekstType.OverstyrArbeidsgiveropplysninger,
                 "$hendelseId" to KontekstType.OverstyrArbeidsgiveropplysninger

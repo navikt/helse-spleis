@@ -409,7 +409,7 @@ internal class JsonBuilder : AbstractBuilder() {
                     "meldingsreferanseId" to meldingsreferanseId,
                     "førsteFraværsdag" to førsteFraværsdag,
                     "arbeidsgiverperioder" to arbeidsgiverperioder.map { mapOf("fom" to it.start, "tom" to it.endInclusive) },
-                    "beløp" to beløp?.månedlig,
+                    "beløp" to beløp?.reflection { _, månedlig, _, _ -> månedlig },
                     "sisteRefusjonsdag" to sisteRefusjonsdag,
                     "endringerIRefusjon" to this.endringerIRefusjon,
                     "tidsstempel" to tidsstempel
@@ -420,7 +420,7 @@ internal class JsonBuilder : AbstractBuilder() {
         override fun visitEndringIRefusjon(beløp: Inntekt, endringsdato: LocalDate) {
             endringerIRefusjon.add(
                 mapOf(
-                    "beløp" to beløp.månedlig,
+                    "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
                     "endringsdato" to endringsdato
                 )
             )
@@ -692,7 +692,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 "fom" to fom,
                 "tom" to tom,
                 "grad" to grad.roundToInt(),
-                "inntekt" to inntekt.månedlig
+                "inntekt" to inntekt.reflection { _, månedlig, _, _ -> månedlig }
             ))
         }
 
@@ -709,7 +709,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 "fom" to fom,
                 "tom" to tom,
                 "grad" to grad.roundToInt(),
-                "inntekt" to inntekt.månedlig
+                "inntekt" to inntekt.reflection { _, månedlig, _, _ -> månedlig }
             ))
         }
 
@@ -725,7 +725,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 mapOf(
                     "orgnr" to orgnr,
                     "sykepengerFom" to sykepengerFom,
-                    "inntekt" to inntekt.månedlig,
+                    "inntekt" to inntekt.reflection { _, månedlig, _, _ -> månedlig },
                     "refusjonTilArbeidsgiver" to refusjonTilArbeidsgiver,
                     "refusjonTom" to refusjonTom,
                     "lagret" to lagret
@@ -954,17 +954,17 @@ internal class JsonBuilder : AbstractBuilder() {
         ) {
             this.sykepengegrunnlag.putAll(
                 mutableMapOf(
-                    "sykepengegrunnlag" to sykepengegrunnlag.årlig,
-                    "inntektsgrunnlag" to inntektsgrunnlag.årlig,
-                    "grunnbeløp" to `6G`.årlig,
+                    "sykepengegrunnlag" to sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "inntektsgrunnlag" to inntektsgrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "grunnbeløp" to `6G`.reflection { årlig, _, _, _ -> årlig },
                     "arbeidsgiverInntektsopplysninger" to arbeidsgiverInntektsopplysninger,
                     "begrensning" to begrensning,
                     "deaktiverteArbeidsforhold" to deaktiverteArbeidsgiverInntektsopplysninger,
                     "vurdertInfotrygd" to vurdertInfotrygd,
-                    "minsteinntekt" to minsteinntekt.årlig,
+                    "minsteinntekt" to minsteinntekt.reflection { årlig, _, _, _ -> årlig },
                     "oppfyllerMinsteinntektskrav" to oppfyllerMinsteinntektskrav
                 ).apply {
-                    compute("skjønnsmessigFastsattÅrsinntekt") { _, _ -> skjønnsmessigFastsattÅrsinntekt?.årlig }
+                    compute("skjønnsmessigFastsattÅrsinntekt") { _, _ -> skjønnsmessigFastsattÅrsinntekt?.reflection { årlig, _, _, _ -> årlig } }
                 }
             )
             popState()
@@ -977,7 +977,7 @@ internal class JsonBuilder : AbstractBuilder() {
         override fun postVisitSammenligningsgrunnlag(sammenligningsgrunnlag1: Sammenligningsgrunnlag, sammenligningsgrunnlag: Inntekt) {
             this.sammenligningsgrunnlag.putAll(
                 mapOf(
-                    "sammenligningsgrunnlag" to sammenligningsgrunnlag.årlig,
+                    "sammenligningsgrunnlag" to sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "arbeidsgiverInntektsopplysninger" to arbeidsgiverInntektsopplysninger,
                 )
             )
@@ -1022,7 +1022,7 @@ internal class JsonBuilder : AbstractBuilder() {
                     "meldingsreferanseId" to meldingsreferanseId,
                     "fom" to fom,
                     "tom" to tom,
-                    "beløp" to beløp.månedlig,
+                    "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
                 )
             )
         }
@@ -1041,7 +1041,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 "id" to id,
                 "dato" to dato,
                 "hendelseId" to hendelseId,
-                "beløp" to beløp.månedlig,
+                "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
                 "kilde" to Inntektsopplysningskilde.SAKSBEHANDLER,
                 "forklaring" to forklaring,
                 "subsumsjon" to subsumsjon?.let {
@@ -1067,7 +1067,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 "id" to id,
                 "dato" to dato,
                 "hendelseId" to hendelseId,
-                "beløp" to beløp.månedlig,
+                "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
                 "kilde" to Inntektsopplysningskilde.INNTEKTSMELDING,
                 "tidsstempel" to tidsstempel
             ))
@@ -1094,7 +1094,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 "id" to id,
                 "dato" to dato,
                 "hendelseId" to hendelseId,
-                "beløp" to beløp.månedlig,
+                "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
                 "kilde" to Inntektsopplysningskilde.INFOTRYGD,
                 "tidsstempel" to tidsstempel
             ))
@@ -1139,7 +1139,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skatteopplysninger.add(mapOf(
                 "kilde" to "SKATT_SYKEPENGEGRUNNLAG",
                 "hendelseId" to hendelseId,
-                "beløp" to beløp.månedlig,
+                "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
                 "tidsstempel" to tidsstempel,
                 "måned" to måned,
                 "type" to type,
@@ -1198,7 +1198,7 @@ internal class JsonBuilder : AbstractBuilder() {
         ) {
             inntektsopplysninger.add(mapOf(
                 "hendelseId" to hendelseId,
-                "beløp" to beløp.månedlig,
+                "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
                 "tidsstempel" to tidsstempel,
                 "måned" to måned,
                 "type" to type,
@@ -1387,7 +1387,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 "id" to id,
                 "dato" to dato,
                 "hendelseId" to hendelseId,
-                "beløp" to beløp.månedlig,
+                "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
                 "tidsstempel" to tidsstempel
             ))
         }

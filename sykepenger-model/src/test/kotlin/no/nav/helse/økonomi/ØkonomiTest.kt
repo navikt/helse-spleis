@@ -398,12 +398,12 @@ internal class ØkonomiTest {
         assertForventetFeil(
             forklaring = "det utbetales 1 kr mindre per dag totalt sett",
             nå = {
-                assertEquals(1384, listOf(a, b).mapNotNull { it.inspektør.arbeidsgiverbeløp }.summer().dagligInt)
+                assertEquals(1384, listOf(a, b).mapNotNull { it.inspektør.arbeidsgiverbeløp }.summer().reflection { _, _, _, dagligInt -> dagligInt })
                 assertUtbetaling(a, 692.0, 0.0)
                 assertUtbetaling(b, 692.0, 0.0)
             },
             ønsket = {
-                assertEquals(1385, listOf(a, b).mapNotNull { it.inspektør.arbeidsgiverbeløp }.summer().dagligInt)
+                assertEquals(1385, listOf(a, b).mapNotNull { it.inspektør.arbeidsgiverbeløp }.summer().reflection { _, _, _, dagligInt -> dagligInt })
                 assertUtbetaling(a, 693.0, 0.0)
                 assertUtbetaling(b, 692.0, 0.0)
             }
@@ -456,7 +456,7 @@ internal class ØkonomiTest {
         listOf(a, b).forEach {
             assertTrue(it.er6GBegrenset())
         }
-        assertEquals(2161, listOf(a, b).mapNotNull { it.inspektør.arbeidsgiverbeløp }.summer().dagligInt)
+        assertEquals(2161, listOf(a, b).mapNotNull { it.inspektør.arbeidsgiverbeløp }.summer().reflection { _, _, _, dagligInt -> dagligInt })
         assertForventetFeil(
             forklaring = "arbeidsgiver 2 har høyere avrundingsdifferanse enn arbeidsgiver 1, og bør få den 1 kr diffen." +
                     "sykepengegrunnlaget er 561 860 kr (6G). Arbeidsgiver 1 sin andel utgjør (30,000 / (30,000 + 35,000 kr)) * 561 860 kr = 997,38 kr daglig." +

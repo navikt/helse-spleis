@@ -170,7 +170,8 @@ class Inntektsmelding(
             varsel(RV_IM_2)
         }
 
-        subsumsjonObserver.`§ 8-10 ledd 3`( beregnetInntekt.årlig, beregnetInntekt.dagligDouble)
+        val (årligInntekt, dagligInntekt) = beregnetInntekt.reflection { årlig, _, daglig, _ -> årlig to daglig }
+        subsumsjonObserver.`§ 8-10 ledd 3`(årligInntekt, dagligInntekt)
         inntektshistorikk.leggTil(Inntektsmelding(UUID.randomUUID(), inntektsdato, meldingsreferanseId(), beregnetInntekt, LocalDateTime.now()))
     }
 

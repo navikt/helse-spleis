@@ -16,7 +16,7 @@ internal class V118LeggTilBegrensningPåSykepengegrunnlag : JsonMigration(versio
                 val grunnlagForSykepengegrunnlag = sykepengegrunnlag.get("grunnlagForSykepengegrunnlag").asDouble()
                 val skjæringstidspunkt: LocalDate = vilkårsgrunnlag.get("skjæringstidspunkt").asLocalDate()
                 val objectNode = sykepengegrunnlag as ObjectNode
-                val er6Gbegrenset = grunnlagForSykepengegrunnlag > Grunnbeløp.`6G`.beløp(skjæringstidspunkt).årlig
+                val er6Gbegrenset = grunnlagForSykepengegrunnlag > Grunnbeløp.`6G`.beløp(skjæringstidspunkt).reflection { årlig, _, _, _ -> årlig }
 
                 if (vilkårsgrunnlag.get("type").asText() == "Infotrygd") {
                     objectNode.put("begrensning", "VURDERT_I_INFOTRYGD")

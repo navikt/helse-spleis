@@ -49,7 +49,7 @@ class Saksbehandler internal constructor(
             subsumsjonObserver.`§ 8-28 ledd 3 bokstav b`(
                 organisasjonsnummer = organisasjonsnummer,
                 startdatoArbeidsforhold = startdatoArbeidsforhold,
-                overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.månedlig),
+                overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
                 skjæringstidspunkt = dato,
                 forklaring = forklaring,
                 grunnlagForSykepengegrunnlag = omregnetÅrsinntekt()
@@ -60,7 +60,7 @@ class Saksbehandler internal constructor(
         ) {
             subsumsjonObserver.`§ 8-28 ledd 3 bokstav c`(
                 organisasjonsnummer = organisasjonsnummer,
-                overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.månedlig),
+                overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
                 skjæringstidspunkt = dato,
                 forklaring = forklaring,
                 grunnlagForSykepengegrunnlag = omregnetÅrsinntekt()
@@ -68,7 +68,7 @@ class Saksbehandler internal constructor(
         } else if (subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref && subsumsjon.ledd == Ledd.LEDD_5.nummer) {
             subsumsjonObserver.`§ 8-28 ledd 5`(
                 organisasjonsnummer = organisasjonsnummer,
-                overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.månedlig),
+                overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
                 skjæringstidspunkt = dato,
                 forklaring = forklaring,
                 grunnlagForSykepengegrunnlag = omregnetÅrsinntekt()

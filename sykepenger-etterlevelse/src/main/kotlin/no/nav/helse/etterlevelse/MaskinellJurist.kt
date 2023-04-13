@@ -148,8 +148,8 @@ class MaskinellJurist private constructor(
                 punktum = 1.punktum,
                 input = mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt,
-                    "grunnlagForSykepengegrunnlag" to beregningsgrunnlag.årlig,
-                    "minimumInntekt" to minimumInntekt.årlig
+                    "grunnlagForSykepengegrunnlag" to beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "minimumInntekt" to minimumInntekt.reflection { årlig, _, _, _ -> årlig }
                 ),
                 output = emptyMap(),
                 kontekster = kontekster()
@@ -190,9 +190,9 @@ class MaskinellJurist private constructor(
                 ledd = 2.ledd,
                 punktum = 1.punktum,
                 input = mapOf(
-                    "maksimaltSykepengegrunnlag" to maksimaltSykepengegrunnlag.årlig,
+                    "maksimaltSykepengegrunnlag" to maksimaltSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "skjæringstidspunkt" to skjæringstidspunkt,
-                    "grunnlagForSykepengegrunnlag" to beregningsgrunnlag.årlig
+                    "grunnlagForSykepengegrunnlag" to beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
                 ),
                 output = mapOf(
                     "erBegrenset" to erBegrenset
@@ -576,8 +576,8 @@ class MaskinellJurist private constructor(
                     "skjæringstidspunkt" to skjæringstidspunkt
                 ),
                 output = mapOf(
-                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlag.årlig,
-                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlag.månedlig
+                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlag.reflection { _, månedlig, _, _ -> månedlig }
                 ),
                 kontekster = kontekster()
             )
@@ -608,8 +608,8 @@ class MaskinellJurist private constructor(
                     "forklaring" to forklaring
                 ),
                 output = mapOf(
-                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlag.årlig,
-                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlag.månedlig
+                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlag.reflection { _, månedlig, _, _ -> månedlig }
                 ),
                 kontekster = kontekster()
             )
@@ -638,8 +638,8 @@ class MaskinellJurist private constructor(
                     "forklaring" to forklaring
                 ),
                 output = mapOf(
-                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlag.årlig,
-                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlag.månedlig
+                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlag.reflection { _, månedlig, _, _ -> månedlig }
                 ),
                 kontekster = kontekster()
             )
@@ -667,8 +667,8 @@ class MaskinellJurist private constructor(
                     "forklaring" to forklaring
                 ),
                 output = mapOf(
-                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlag.årlig,
-                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlag.månedlig
+                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlag.reflection { _, månedlig, _, _ -> månedlig }
                 ),
                 kontekster = kontekster()
             )
@@ -694,7 +694,7 @@ class MaskinellJurist private constructor(
                     "inntektsopplysninger" to inntektsopplysninger
                 ),
                 output = mapOf(
-                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.årlig
+                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig }
                 ),
                 kontekster = kontekster()
             )
@@ -703,7 +703,7 @@ class MaskinellJurist private constructor(
 
     override fun `§ 8-30 ledd 1`(grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>, grunnlagForSykepengegrunnlag: Inntekt) {
         val beregnetMånedsinntektPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver
-            .mapValues { it.value.månedlig }
+            .mapValues { it.value.reflection { _, månedlig, _, _ -> månedlig } }
         leggTil(
             EnkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
@@ -715,7 +715,7 @@ class MaskinellJurist private constructor(
                     "beregnetMånedsinntektPerArbeidsgiver" to beregnetMånedsinntektPerArbeidsgiver
                 ),
                 output = mapOf(
-                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.årlig
+                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig }
                 ),
                 kontekster = kontekster()
             )
@@ -738,8 +738,8 @@ class MaskinellJurist private constructor(
                 punktum = 1.punktum,
                 input = mapOf(
                     "maksimaltTillattAvvikPåÅrsinntekt" to maksimaltTillattAvvikPåÅrsinntekt.prosent(),
-                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.årlig,
-                    "sammenligningsgrunnlag" to sammenligningsgrunnlag.årlig
+                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "sammenligningsgrunnlag" to sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
                 ),
                 output = mapOf("avviksprosent" to avvik.prosent()),
                 kontekster = kontekster()
@@ -792,8 +792,8 @@ class MaskinellJurist private constructor(
                 input = mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt,
                     "alderPåSkjæringstidspunkt" to alderPåSkjæringstidspunkt,
-                    "grunnlagForSykepengegrunnlag" to beregningsgrunnlag.årlig,
-                    "minimumInntekt" to minimumInntekt.årlig
+                    "grunnlagForSykepengegrunnlag" to beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "minimumInntekt" to minimumInntekt.reflection { årlig, _, _, _ -> årlig }
                 ),
                 output = emptyMap(),
                 kontekster = kontekster()

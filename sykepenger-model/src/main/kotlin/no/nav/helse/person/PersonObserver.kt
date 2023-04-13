@@ -141,7 +141,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
 
                     is FastsattInntekt -> mapOf(
                         "opplysningstype" to "FastsattInntekt",
-                        "fastsattInntekt" to forespurtOpplysning.fastsattInntekt.månedlig
+                        "fastsattInntekt" to forespurtOpplysning.fastsattInntekt.reflection { _, månedlig, _, _ -> månedlig }
                     )
 
                     is Refusjon -> mapOf(
@@ -150,7 +150,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
                             mapOf(
                                 "fom" to forslag.fom(),
                                 "tom" to forslag.tom(),
-                                "beløp" to forslag.beløp().månedlig
+                                "beløp" to forslag.beløp().reflection {_, månedlig, _, _ -> månedlig}
                             )
                         }
                     )

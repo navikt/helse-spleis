@@ -9,7 +9,7 @@ class SkattBuilder(skatt: SkatteopplysningPort) {
     init {
         skatt.accept { beløp, måned, type, fordel, beskrivelse ->
             inntekt = mapOf(
-                "beløp" to beløp.månedlig,
+                "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
                 "årMåned" to måned,
                 "type" to type,
                 "fordel" to fordel,

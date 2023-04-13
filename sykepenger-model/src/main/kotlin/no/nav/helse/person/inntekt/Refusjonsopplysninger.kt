@@ -81,7 +81,7 @@ class Refusjonsopplysning(
     private fun funksjoneltLik(other: Refusjonsopplysning) =
         fom == other.fom && tom == other.tom && beløp == other.beløp
 
-    override fun toString() = "$fom - $tom, ${beløp.dagligDouble } ($meldingsreferanseId)"
+    override fun toString() = "$fom - $tom, ${beløp.reflection { _, _, dagligDouble, _ -> dagligDouble }} ($meldingsreferanseId)"
 
     override fun hashCode(): Int {
         var result = meldingsreferanseId.hashCode()

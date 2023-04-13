@@ -95,12 +95,12 @@ internal class ArbeidsgiverInntektsopplysningTest {
                 "organisasjonsnummer" to orgnummer,
                 "skjæringstidspunkt" to skjæringstidspunkt,
                 "startdatoArbeidsforhold" to ansattFom,
-                "overstyrtInntektFraSaksbehandler" to mapOf("dato" to skjæringstidspunkt, "beløp" to overstyrtBeløp.månedlig),
+                "overstyrtInntektFraSaksbehandler" to mapOf("dato" to skjæringstidspunkt, "beløp" to overstyrtBeløp.reflection { _, månedlig, _, _ -> månedlig }),
                 "forklaring" to "Jeg bare måtte gjøre det"
             ),
             output = mapOf(
-                "beregnetGrunnlagForSykepengegrunnlagPrÅr" to overstyrtBeløp.årlig,
-                "beregnetGrunnlagForSykepengegrunnlagPrMåned" to overstyrtBeløp.månedlig
+                "beregnetGrunnlagForSykepengegrunnlagPrÅr" to overstyrtBeløp.reflection { årlig, _, _, _ -> årlig},
+                "beregnetGrunnlagForSykepengegrunnlagPrMåned" to overstyrtBeløp.reflection { _, månedlig, _, _ -> månedlig }
             )
         )
     }

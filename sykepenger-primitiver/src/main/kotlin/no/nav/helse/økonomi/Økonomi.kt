@@ -79,7 +79,8 @@ class Økonomi private constructor(
 
             beregningsresultat.forEach { it.oppdater(setter) }
 
-            val totaltRestbeløp = (total.coerceAtMost(grense) - total(økonomiList, getter)).dagligInt
+            val totaltRestbeløp = (total.coerceAtMost(grense) - total(økonomiList, getter))
+                .reflection { _, _, _, dagligInt -> dagligInt }
 
             Beregningsresultat.fordel(beregningsresultat, totaltRestbeløp, setter, getter)
         }
@@ -92,7 +93,7 @@ class Økonomi private constructor(
         private class Beregningsresultat(private val økonomi: Økonomi, beløp: Inntekt?) {
             private val utbetalingFørAvrunding = beløp ?: INGEN
             private val utbetalingEtterAvrunding = utbetalingFørAvrunding.rundNedTilDaglig()
-            private val differanse = (utbetalingFørAvrunding - utbetalingEtterAvrunding).dagligDouble
+            private val differanse = (utbetalingFørAvrunding - utbetalingEtterAvrunding).reflection { _, _, daglig, _ -> daglig }
 
             fun oppdater(setter: (Økonomi, Inntekt?) -> Unit) {
                 setter(this.økonomi, this.utbetalingEtterAvrunding)
@@ -139,43 +140,43 @@ class Økonomi private constructor(
 
     private fun _build(builder: ØkonomiBuilder) {
         builder.grad(grad.toDouble())
-            .arbeidsgiverRefusjonsbeløp(arbeidsgiverRefusjonsbeløp.dagligDouble)
-            .dekningsgrunnlag(dekningsgrunnlag.dagligDouble)
+            .arbeidsgiverRefusjonsbeløp(arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig })
+            .dekningsgrunnlag(dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig })
             .totalGrad(totalGrad.toDouble())
-            .aktuellDagsinntekt(aktuellDagsinntekt.dagligDouble)
-            .arbeidsgiverbeløp(arbeidsgiverbeløp?.dagligDouble)
-            .personbeløp(personbeløp?.dagligDouble)
+            .aktuellDagsinntekt(aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig })
+            .arbeidsgiverbeløp(arbeidsgiverbeløp?.reflection { _, _, daglig, _ -> daglig })
+            .personbeløp(personbeløp?.reflection { _, _, daglig, _ -> daglig })
             .er6GBegrenset(er6GBegrenset)
-            .grunnbeløpsgrense(grunnbeløpgrense?.årlig)
+            .grunnbeløpsgrense(grunnbeløpgrense?.reflection { årlig, _, _, _ -> årlig })
             .tilstand(tilstand)
     }
 
     fun <R> brukGrad(block: (grad: Double) -> R) = block(grad.toDouble())
     fun <R> brukAvrundetGrad(block: (grad: Int) -> R) = block(grad.roundToInt())
     fun <R> brukTotalGrad(block: (totalGrad: Double) -> R) = block(totalGrad.toDouble())
-    fun brukAvrundetDagsinntekt(block: (aktuellDagsinntekt: Int) -> Unit) = block(aktuellDagsinntekt.dagligDouble.roundToInt())
+    fun brukAvrundetDagsinntekt(block: (aktuellDagsinntekt: Int) -> Unit) = block(aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig }.roundToInt())
     fun medAvrundetData(block: (grad: Int, aktuellDagsinntekt: Int) -> Unit) =
-        block(grad.roundToInt(), aktuellDagsinntekt.dagligDouble.roundToInt())
+        block(grad.roundToInt(), aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig }.roundToInt())
 
     fun accept(visitor: ØkonomiVisitor) {
         visitor.visitØkonomi(
             grad.toDouble(),
-            arbeidsgiverRefusjonsbeløp.dagligDouble,
-            dekningsgrunnlag.dagligDouble,
+            arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig },
+            dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig },
             totalGrad.toDouble(),
-            aktuellDagsinntekt.dagligDouble,
-            arbeidsgiverbeløp?.dagligDouble,
-            personbeløp?.dagligDouble,
+            aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig },
+            arbeidsgiverbeløp?.reflection { _, _, daglig, _ -> daglig },
+            personbeløp?.reflection { _, _, daglig, _ -> daglig },
             er6GBegrenset
         )
         visitor.visitAvrundetØkonomi(
             grad.roundToInt(),
-            arbeidsgiverRefusjonsbeløp.dagligInt,
-            dekningsgrunnlag.dagligInt,
+            arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig.roundToInt() },
+            dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig.roundToInt() },
             totalGrad.roundToInt(),
-            aktuellDagsinntekt.dagligInt,
-            arbeidsgiverbeløp?.dagligInt,
-            personbeløp?.dagligInt,
+            aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig.roundToInt() },
+            arbeidsgiverbeløp?.reflection { _, _, daglig, _ -> daglig.roundToInt() },
+            personbeløp?.reflection { _, _, daglig, _ -> daglig.roundToInt() },
             er6GBegrenset
         )
     }

@@ -125,7 +125,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertEquals(1, utbetalingInspektør.personOppdrag.size)
         }
-        val dagsatsIT = (INNTEKT/2).dagligInt
+        val dagsatsIT = (INNTEKT/2).reflection { _, _, _, dagligInt -> dagligInt }
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2022),
             utbetalinger = listOf(
@@ -150,7 +150,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertEquals(1, utbetalingInspektør.personOppdrag.size)
         }
-        val dagsatsIT = (INNTEKT/2).dagligInt
+        val dagsatsIT = (INNTEKT/2).reflection { _, _, _, dagligInt -> dagligInt }
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2022),
             utbetalinger = listOf(
@@ -189,7 +189,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Infotrygd har betalt ut 48 dager til person - Spleis har utbetalt 48 i forkant`() {
         nyttVedtak(1.januar(2022), 31.mars(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
-        val dagsatsIT = (INNTEKT*1.1).dagligInt
+        val dagsatsIT = (INNTEKT*1.1).reflection { _, _, _, dagligInt -> dagligInt }
 
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2022),
@@ -218,7 +218,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Spleis utbetaler feriepenger til person, blir annullert i Spleis mellom første og andre kjøring`() {
         nyttVedtak(1.januar(2022), 31.mars(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
-        val dagsatsIT = (INNTEKT*1.1).dagligInt
+        val dagsatsIT = (INNTEKT*1.1).reflection { _, _, _, dagligInt -> dagligInt }
 
         // Første kjøring
         håndterUtbetalingshistorikkForFeriepenger(

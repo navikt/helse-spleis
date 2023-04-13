@@ -33,7 +33,7 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
                     vilkårsgrunnlagtype
                 )
             } * 12
-            val sykepengegrunnlag2 = minOf(grunnlagForSykepengegrunnlag, Grunnbeløp.`6G`.beløp(LocalDate.parse(skjæringstidspunkt)).årlig)
+            val sykepengegrunnlag2 = minOf(grunnlagForSykepengegrunnlag, Grunnbeløp.`6G`.beløp(LocalDate.parse(skjæringstidspunkt)).reflection { årlig, _, _, _ -> årlig })
 
             sykepengegrunnlag.put("sykepengegrunnlag", sykepengegrunnlag2)
             sykepengegrunnlag.put("grunnlagForSykepengegrunnlag", grunnlagForSykepengegrunnlag)
