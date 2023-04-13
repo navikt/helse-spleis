@@ -7,7 +7,6 @@ import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Subsumsjon
-import no.nav.helse.person.inntekt.InntektsopplysningVisitor
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
@@ -16,6 +15,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.InntektsopplysningVisitor
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
@@ -390,6 +390,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
     ) : VilkårsgrunnlagHistorikkVisitor {
         private lateinit var inntekt: IArbeidsgiverinntekt
         private val refusjonsopplysninger = mutableListOf<Refusjonselement>()
+        private var tilstand: Tilstand = Tilstand.FangeInntekt
 
         init {
             inntektsopplysning.accept(this)
@@ -428,10 +429,10 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
 
         override fun visitInfotrygd(infotrygd: Infotrygd, id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) {
             val inntekt = InntektBuilder(beløp).build()
-            this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.Infotrygd, inntekt)
+            this.tilstand.lagreInntekt(this, nyArbeidsgiverInntekt(IInntektkilde.Infotrygd, inntekt))
         }
 
-        override fun visitSaksbehandler(
+        override fun preVisitSaksbehandler(
             saksbehandler: Saksbehandler,
             id: UUID,
             dato: LocalDate,
@@ -442,7 +443,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             tidsstempel: LocalDateTime
         ) {
             val inntekt = InntektBuilder(beløp).build()
-            this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.Saksbehandler, inntekt)
+            this.tilstand.lagreInntekt(this, nyArbeidsgiverInntekt(IInntektkilde.Saksbehandler, inntekt))
         }
 
         override fun visitInntektsmelding(
@@ -454,12 +455,12 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             tidsstempel: LocalDateTime
         ) {
             val inntekt = InntektBuilder(beløp).build()
-            this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.Inntektsmelding, inntekt)
+            this.tilstand.lagreInntekt(this, nyArbeidsgiverInntekt(IInntektkilde.Inntektsmelding, inntekt))
         }
 
         override fun visitIkkeRapportert(id: UUID, hendelseId: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
             val inntekt = IInntekt(0.0, 0.0, 0.0)
-            this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.IkkeRapportert, inntekt)
+            this.tilstand.lagreInntekt(this, nyArbeidsgiverInntekt(IInntektkilde.IkkeRapportert, inntekt))
         }
 
         override fun preVisitSkattSykepengegrunnlag(
@@ -471,7 +472,20 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             tidsstempel: LocalDateTime
         ) {
             val (inntekt, inntekterFraAOrdningen) = SkattBuilder(skattSykepengegrunnlag).build()
-            this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.AOrdningen, inntekt, inntekterFraAOrdningen)
+            this.tilstand.lagreInntekt(this, nyArbeidsgiverInntekt(IInntektkilde.AOrdningen, inntekt, inntekterFraAOrdningen))
+        }
+
+        private sealed interface Tilstand {
+            fun lagreInntekt(builder: InntektsopplysningBuilder, inntekt: IArbeidsgiverinntekt)
+            object FangeInntekt : Tilstand {
+                override fun lagreInntekt(builder: InntektsopplysningBuilder, inntekt: IArbeidsgiverinntekt) {
+                    builder.inntekt = inntekt
+                    builder.tilstand = HarFangetInntekt
+                }
+            }
+            object HarFangetInntekt : Tilstand {
+                override fun lagreInntekt(builder: InntektsopplysningBuilder, inntekt: IArbeidsgiverinntekt) {}
+            }
         }
 
         class SkattBuilder(skattComposite: SkattSykepengegrunnlag) : InntektsopplysningVisitor {

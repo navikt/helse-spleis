@@ -7,7 +7,18 @@ import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.økonomi.Inntekt
 
 internal interface InntektsopplysningVisitor : InntektsmeldingVisitor, SkatteopplysningVisitor {
-    fun visitSaksbehandler(
+    fun preVisitSaksbehandler(
+        saksbehandler: Saksbehandler,
+        id: UUID,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        forklaring: String?,
+        subsumsjon: Subsumsjon?,
+        tidsstempel: LocalDateTime
+    ) {
+    }
+    fun postVisitSaksbehandler(
         saksbehandler: Saksbehandler,
         id: UUID,
         dato: LocalDate,

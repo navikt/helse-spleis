@@ -27,6 +27,8 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
     internal lateinit var refusjonsopplysninger: Refusjonsopplysninger
         private set
 
+    private var tilstand: Tilstand = Tilstand.FangeInntekt
+
     init {
         arbeidsgiverInntektsopplysning.accept(this)
     }
@@ -38,7 +40,7 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
         this.orgnummer = orgnummer
     }
 
-    override fun visitSaksbehandler(
+    override fun preVisitSaksbehandler(
         saksbehandler: Saksbehandler,
         id: UUID,
         dato: LocalDate,
@@ -48,7 +50,7 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
         subsumsjon: Subsumsjon?,
         tidsstempel: LocalDateTime
     ) {
-        this.inntektsopplysning = saksbehandler
+        this.tilstand.lagreInntekt(this, saksbehandler)
     }
 
     override fun visitInntektsmelding(
@@ -59,11 +61,11 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
         beløp: Inntekt,
         tidsstempel: LocalDateTime
     ) {
-        this.inntektsopplysning = inntektsmelding
+        this.tilstand.lagreInntekt(this, inntektsmelding)
     }
 
     override fun visitIkkeRapportert(id: UUID, hendelseId: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
-        this.inntektsopplysning = IkkeRapportert(id, hendelseId, dato, tidsstempel)
+        this.tilstand.lagreInntekt(this, IkkeRapportert(id, hendelseId, dato, tidsstempel))
     }
 
     override fun visitInfotrygd(
@@ -74,7 +76,7 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
         beløp: Inntekt,
         tidsstempel: LocalDateTime
     ) {
-        this.inntektsopplysning = infotrygd
+        this.tilstand.lagreInntekt(this, infotrygd)
     }
 
     override fun preVisitSkattSykepengegrunnlag(
@@ -85,10 +87,26 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
         beløp: Inntekt,
         tidsstempel: LocalDateTime
     ) {
-        this.inntektsopplysning = skattSykepengegrunnlag
+        this.tilstand.lagreInntekt(this, skattSykepengegrunnlag)
     }
 
     override fun preVisitRefusjonsopplysninger(refusjonsopplysninger: Refusjonsopplysninger) {
         this.refusjonsopplysninger = refusjonsopplysninger
+    }
+
+    private sealed interface Tilstand {
+        fun lagreInntekt(inspektør: ArbeidsgiverInntektsopplysningInspektør, inntektsopplysning: Inntektsopplysning)
+        object FangeInntekt : Tilstand {
+            override fun lagreInntekt(inspektør: ArbeidsgiverInntektsopplysningInspektør, inntektsopplysning: Inntektsopplysning) {
+                inspektør.inntektsopplysning = inntektsopplysning
+                inspektør.tilstand = HarFangetInntekt
+            }
+        }
+        object HarFangetInntekt : Tilstand {
+            override fun lagreInntekt(
+                inspektør: ArbeidsgiverInntektsopplysningInspektør,
+                inntektsopplysning: Inntektsopplysning
+            ) {}
+        }
     }
 }

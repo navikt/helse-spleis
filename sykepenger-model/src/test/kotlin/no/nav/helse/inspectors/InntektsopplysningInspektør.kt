@@ -24,12 +24,13 @@ internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysni
     internal lateinit var tidsstempel: LocalDateTime
         private set
 
+    private var tilstand: Tilstand = Tilstand.FangeInntekt
 
     init {
         inntektsopplysning.accept(this)
     }
 
-    override fun visitSaksbehandler(
+    override fun preVisitSaksbehandler(
         saksbehandler: Saksbehandler,
         id: UUID,
         dato: LocalDate,
@@ -39,9 +40,7 @@ internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysni
         subsumsjon: Subsumsjon?,
         tidsstempel: LocalDateTime
     ) {
-        this.beløp = beløp
-        this.hendelseId = hendelseId
-        this.tidsstempel = tidsstempel
+        this.tilstand.lagreInntekt(this, beløp, hendelseId, tidsstempel)
     }
 
     override fun visitInntektsmelding(
@@ -52,14 +51,11 @@ internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysni
         beløp: Inntekt,
         tidsstempel: LocalDateTime
     ) {
-        this.beløp = beløp
-        this.hendelseId = hendelseId
-        this.tidsstempel = tidsstempel
+        this.tilstand.lagreInntekt(this, beløp, hendelseId, tidsstempel)
     }
 
     override fun visitIkkeRapportert(id: UUID, hendelseId: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
-        this.beløp = INGEN
-        this.tidsstempel = tidsstempel
+        this.tilstand.lagreInntekt(this, INGEN, hendelseId, tidsstempel)
     }
 
     override fun visitInfotrygd(
@@ -70,9 +66,7 @@ internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysni
         beløp: Inntekt,
         tidsstempel: LocalDateTime
     ) {
-        this.beløp = beløp
-        this.hendelseId = hendelseId
-        this.tidsstempel = tidsstempel
+        this.tilstand.lagreInntekt(this, beløp, hendelseId, tidsstempel)
     }
 
     override fun preVisitSkattSykepengegrunnlag(
@@ -83,8 +77,26 @@ internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysni
         beløp: Inntekt,
         tidsstempel: LocalDateTime
     ) {
-        this.beløp = beløp
-        this.hendelseId = hendelseId
-        this.tidsstempel = tidsstempel
+        this.tilstand.lagreInntekt(this, beløp, hendelseId, tidsstempel)
+    }
+
+    private sealed interface Tilstand {
+        fun lagreInntekt(inspektør: InntektsopplysningInspektør, beløp: Inntekt, hendelseId: UUID, tidsstempel: LocalDateTime)
+        object FangeInntekt : Tilstand {
+            override fun lagreInntekt(inspektør: InntektsopplysningInspektør, beløp: Inntekt, hendelseId: UUID, tidsstempel: LocalDateTime) {
+                inspektør.beløp = beløp
+                inspektør.hendelseId = hendelseId
+                inspektør.tidsstempel = tidsstempel
+                inspektør.tilstand = HarFangetInntekt
+            }
+        }
+        object HarFangetInntekt : Tilstand {
+            override fun lagreInntekt(
+                inspektør: InntektsopplysningInspektør,
+                beløp: Inntekt,
+                hendelseId: UUID,
+                tidsstempel: LocalDateTime
+            ) {}
+        }
     }
 }

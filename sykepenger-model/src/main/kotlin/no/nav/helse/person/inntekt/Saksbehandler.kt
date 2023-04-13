@@ -3,11 +3,11 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 
@@ -18,18 +18,25 @@ class Saksbehandler internal constructor(
     private val beløp: Inntekt,
     private val forklaring: String?,
     private val subsumsjon: Subsumsjon?,
+    private val overstyrInntekt: Inntektsopplysning?,
     tidsstempel: LocalDateTime
 ) : Inntektsopplysning(id, hendelseId, dato, tidsstempel) {
-    constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, forklaring: String, subsumsjon: Subsumsjon?, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
+    constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, forklaring: String, subsumsjon: Subsumsjon?, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), dato, hendelseId, beløp, forklaring, subsumsjon, null, tidsstempel)
 
     override fun accept(visitor: InntektsopplysningVisitor) {
-        visitor.visitSaksbehandler(this, id, dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
+        visitor.preVisitSaksbehandler(this, id, dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
+        overstyrInntekt?.accept(visitor)
+        visitor.postVisitSaksbehandler(this, id, dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
     }
 
     override fun overstyres(ny: Inntektsopplysning): Inntektsopplysning {
         if (ny !is Saksbehandler) return this
         if (ny.beløp == this.beløp) return this
-        return ny
+        return ny.overstyrer(this.overstyrInntekt)
+    }
+
+    override fun overstyrer(overstyrInntekt: Inntektsopplysning?): Inntektsopplysning {
+        return Saksbehandler(id, dato, hendelseId, beløp, forklaring, subsumsjon, overstyrInntekt, tidsstempel)
     }
 
     override fun omregnetÅrsinntekt(): Inntekt = beløp

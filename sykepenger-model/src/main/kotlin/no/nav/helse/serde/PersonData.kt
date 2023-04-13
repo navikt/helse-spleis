@@ -361,6 +361,7 @@ internal data class PersonData(
                 private val forklaring: String?,
                 private val subsumsjon: SubsumsjonData?,
                 private val tidsstempel: LocalDateTime,
+                private val overstyrtInntektId: UUID?,
                 private val skatteopplysninger: List<SkatteopplysningData>?
             ) {
                 private companion object {
@@ -409,6 +410,7 @@ internal data class PersonData(
                                 beløp = requireNotNull(beløp).månedlig,
                                 forklaring = forklaring,
                                 subsumsjon = subsumsjon?.tilModellobjekt(),
+                                overstyrInntekt = null,
                                 tidsstempel = tidsstempel
                             )
                         Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG -> SkattSykepengegrunnlag(

@@ -902,7 +902,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitInntekthistorikk(inntektshistorikk)
     }
 
-    override fun visitSaksbehandler(
+    override fun preVisitSaksbehandler(
         saksbehandler: Saksbehandler,
         id: UUID,
         dato: LocalDate,
@@ -912,7 +912,20 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         subsumsjon: Subsumsjon?,
         tidsstempel: LocalDateTime
     ) {
-        delegatee.visitSaksbehandler(saksbehandler, id, dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
+        delegatee.preVisitSaksbehandler(saksbehandler, id, dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
+    }
+
+    override fun postVisitSaksbehandler(
+        saksbehandler: Saksbehandler,
+        id: UUID,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        forklaring: String?,
+        subsumsjon: Subsumsjon?,
+        tidsstempel: LocalDateTime
+    ) {
+        delegatee.postVisitSaksbehandler(saksbehandler, id, dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
     }
 
     override fun visitInntektsmelding(
