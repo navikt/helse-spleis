@@ -31,7 +31,7 @@ internal class ForkasteAuuTest: AbstractDslTest() {
     }
 
     @Test
-    fun `En auu med mindre en 17 dager til neste periode forkastes`() {
+    fun `En auu med 17 dager til neste periode forkastes`() {
         a1 {
             nyPeriode(1.januar til 16.januar)
             nyttVedtak(2.februar, 28.februar, 100.prosent)
