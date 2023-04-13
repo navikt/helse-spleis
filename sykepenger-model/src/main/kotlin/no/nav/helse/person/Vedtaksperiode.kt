@@ -456,12 +456,6 @@ internal class Vedtaksperiode private constructor(
         return dagerMellom < 18L
     }
 
-    private fun harInnvirkningPåArbeidsgiverperioden(other: Vedtaksperiode): Boolean {
-        if (this etter other) return false
-        if (this.periode.erRettFør(other.periode)) return true
-        return other.påvirkerArbeidsgiverperioden(this)
-    }
-
     override fun compareTo(other: Vedtaksperiode): Int {
         val delta = this.periode.start.compareTo(other.periode.start)
         if (delta != 0) return delta
@@ -1644,6 +1638,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) {
+                påminnelse.info("Mangler nødvendig inntekt ved tidligere beregnet sykepengegrunnlag")
+            }
             vurderOmKanGåVidere(vedtaksperiode, påminnelse)
         }
 
