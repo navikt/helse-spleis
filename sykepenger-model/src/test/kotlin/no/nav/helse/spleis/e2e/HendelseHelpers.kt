@@ -92,6 +92,6 @@ private val AbstractEndToEndTest.inntektsmeldingDTOer get() = inntektsmeldinger.
     InntektsmeldingDTO(
         id = id.toString(),
         mottattDato = LocalDateTime.now(),
-        beregnetInntekt = inntekter.getValue(id).årlig
+        beregnetInntekt = inntekter.getValue(id).reflection { årlig, _, _, _ -> årlig }
     )
 }
