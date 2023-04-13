@@ -1569,7 +1569,10 @@ internal class Vedtaksperiode private constructor(
             tilstandsendringstidspunkt.plusDays(180)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if(Toggle.Splarbeidsbros.enabled && vedtaksperiode.forventerInntekt()) {
+            val erForlengelse = vedtaksperiode.arbeidsgiver
+                .finnVedtaksperiodeRettFør(vedtaksperiode)
+                ?.takeIf { it.forventerInntekt() } != null
+            if(Toggle.Splarbeidsbros.enabled && vedtaksperiode.forventerInntekt() && !erForlengelse) {
                 vedtaksperiode.trengerArbeidsgiveropplysninger()
             }
             vedtaksperiode.trengerInntektsmeldingReplay()

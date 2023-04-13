@@ -38,7 +38,7 @@ import org.junit.jupiter.api.Test
 @EnableToggle(Toggle.Splarbeidsbros::class)
 internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
-    val INNTEKT_FLERE_AG = 20000.månedlig
+    private val INNTEKT_FLERE_AG = 20000.månedlig
 
     @Test
     fun `sender ut event TrengerArbeidsgiveropplysninger når vi ankommer AvventerInntektsmelding`() {
@@ -83,6 +83,15 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
+
+    @Test
+    fun `skal ikke be om arbeidsgiveropplysninger ved forlengelse selv når inntektsmeldingen ikke har kommet enda`() {
+        nyPeriode(1.januar til 31.januar)
+        nyPeriode(1.februar til 28.februar)
+
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+    }
+
 
     @Test
     fun `skal be om arbeidsgiverperiode ved 16 dagers gap`() {
