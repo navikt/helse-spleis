@@ -24,6 +24,7 @@ import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSøknad
+import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
@@ -54,6 +55,28 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
             this bleForårsaketAv "SYKDOMSTIDSLINJE"
             this medSkjæringstidspunkt 1.januar
             this avTypeEndring "OVERSTYRING"
+        }
+    }
+
+    @Test
+    fun `auu skal utbetales`() {
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(16.januar, Dagtype.SykedagNav, 100)))
+        revurderingIgangsattEvent {
+            this bleForårsaketAv "SYKDOMSTIDSLINJE"
+            this medSkjæringstidspunkt 1.januar
+            this avTypeEndring "OVERSTYRING"
+            assertEquals(
+                listOf(
+                    VedtaksperiodeData(
+                        orgnummer = a1,
+                        vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
+                        periode = 1.januar til 16.januar,
+                        skjæringstidspunkt = 1.januar,
+                        typeEndring = "ENDRING"
+                    ),
+                ), this.berørtePerioder
+            )
         }
     }
 
@@ -179,6 +202,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
             )
         }
     }
+
     @Test
     fun `tidligere skjæringstidspunkt -- revurderer tidslinje`() {
         nyttVedtak(1.januar, 31.januar)

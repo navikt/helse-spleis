@@ -74,7 +74,7 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        assertIngenVarsler(1.vedtaksperiode.filter())
+        assertVarsel(Varselkode.RV_OO_2, 1.vedtaksperiode.filter())
         assertVarsel(Varselkode.RV_OO_1, 2.vedtaksperiode.filter())
 
         håndterInntektsmelding(listOf(1.februar til 16.februar))
