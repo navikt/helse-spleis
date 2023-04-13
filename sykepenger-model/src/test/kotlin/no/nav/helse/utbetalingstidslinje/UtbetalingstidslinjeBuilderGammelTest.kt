@@ -919,7 +919,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
     private fun List<Utbetalingsdag>.assertDekningsgrunnlag(periode: Periode, dekningsgrunnlaget: Inntekt?) =
         filter { it.dato in periode }
             .forEach { utbetalingsdag ->
-                val daglig = dekningsgrunnlaget?.reflection { _, _, _, daglig -> daglig }
+                val daglig = dekningsgrunnlaget?.dagligInt
                 utbetalingsdag.økonomi.accept( AvrundetØkonomiAsserter { _, _, dekningsgrunnlag, _, _, _, _, _ ->
                     assertEquals(daglig, dekningsgrunnlag)
                 })

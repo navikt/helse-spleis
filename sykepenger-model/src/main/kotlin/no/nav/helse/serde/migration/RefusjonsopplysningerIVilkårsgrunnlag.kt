@@ -155,7 +155,7 @@ internal object RefusjonsopplysningerIVilkårsgrunnlag {
                 put("fom", "$fom")
                 if (tom == null) putNull("tom")
                 else put("tom", "$tom")
-                put("beløp", beløp.reflection { _, månedlig, _, _ -> månedlig })
+                put("beløp", beløp.månedlig )
             })
         }
     }

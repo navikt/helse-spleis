@@ -63,7 +63,7 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
     }
 
     private fun opprett(dag: ObjectNode, dagsats: Inntekt = INGEN, grad: Double = 0.0, utbetaling: Int = 0) {
-        val dagsatsDouble = dagsats.reflection { _, _, daglig, _ -> daglig}
+        val dagsatsDouble = dagsats.dagligDouble
         dag.remove("dagsats")
         dag.remove("utbetaling")
         dag.remove("grad")

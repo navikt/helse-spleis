@@ -23,7 +23,7 @@ internal class SammenligningsgrunnlagBuilder(sammenligningsgrunnlag: Sammenligni
     fun build() = SubsumsjonObserver.SammenligningsgrunnlagDTO(sammenligningsgrunnlag, inntekter)
 
     override fun preVisitSammenligningsgrunnlag(sammenligningsgrunnlag1: Sammenligningsgrunnlag, sammenligningsgrunnlag: Inntekt) {
-        this.sammenligningsgrunnlag = sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
+        this.sammenligningsgrunnlag = sammenligningsgrunnlag.årlig
     }
     override fun preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
         arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag,
@@ -46,7 +46,7 @@ internal class SammenligningsgrunnlagBuilder(sammenligningsgrunnlag: Sammenligni
     ) {
         inntektliste.add(
             mapOf(
-                "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
+                "beløp" to beløp.månedlig,
                 "årMåned" to måned,
                 "type" to type.somStreng(),
                 "fordel" to fordel,

@@ -9,7 +9,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.average
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
-class Inntekt private constructor(private val årlig: Double) : Comparable<Inntekt> {
+class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
 
     init {
         require(
@@ -51,10 +51,14 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
 
     fun <R> reflection(block: (årlig: Double, månedlig: Double, daglig: Double, dagligInt: Int) -> R) = block(
         årlig,
-        tilMånedligDouble(),
-        tilDagligDouble(),
-        tilDagligInt()
+        månedlig,
+        dagligDouble,
+        dagligInt
     )
+
+    val månedlig: Double get() = tilMånedligDouble()
+    val dagligDouble: Double get() = tilDagligDouble()
+    val dagligInt: Int get() = tilDagligInt()
 
     private fun tilDagligInt() = tilDagligIntMemoized(årlig)
     private fun tilDagligDouble() = tilDagligDoubleMemoized(årlig)

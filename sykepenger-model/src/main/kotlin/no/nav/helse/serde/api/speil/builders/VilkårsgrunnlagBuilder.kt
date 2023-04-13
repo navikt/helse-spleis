@@ -177,9 +177,7 @@ internal class IInfotrygdGrunnlag(
 
 internal class InntektBuilder(private val inntekt: Inntekt) {
     internal fun build(): IInntekt {
-        return inntekt.reflection { årlig, månedlig, daglig, _ ->
-            IInntekt(årlig, månedlig, daglig)
-        }
+        return IInntekt(inntekt.årlig, inntekt.månedlig, inntekt.dagligDouble)
     }
 }
 
@@ -409,7 +407,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 Refusjonselement(
                     fom = fom,
                     tom = tom,
-                    beløp = beløp.reflection { _, månedlig, _, _ -> månedlig },
+                    beløp = beløp.månedlig,
                     meldingsreferanseId = meldingsreferanseId
                 )
             )

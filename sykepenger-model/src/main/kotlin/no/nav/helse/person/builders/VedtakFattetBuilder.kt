@@ -41,10 +41,10 @@ internal class VedtakFattetBuilder(
             periode = periode,
             hendelseIder = hendelseIder,
             skjæringstidspunkt = skjæringstidspunkt,
-            sykepengegrunnlag = sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
-            beregningsgrunnlag = beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
-            omregnetÅrsinntektPerArbeidsgiver = omregnetÅrsinntektPerArbeidsgiver.mapValues { (_, inntekt) -> inntekt.reflection { årlig, _, _, _ -> årlig} },
-            inntekt = beregningsgrunnlag.reflection { _, månedlig, _, _ -> månedlig },
+            sykepengegrunnlag = sykepengegrunnlag.månedlig,
+            beregningsgrunnlag = beregningsgrunnlag.månedlig,
+            omregnetÅrsinntektPerArbeidsgiver = omregnetÅrsinntektPerArbeidsgiver.mapValues { (_, inntekt) -> inntekt.månedlig },
+            inntekt = beregningsgrunnlag.månedlig,
             utbetalingId = utbetalingId,
             sykepengegrunnlagsbegrensning = when (begrensning) {
                 Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET -> "ER_6G_BEGRENSET"

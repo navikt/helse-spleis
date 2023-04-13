@@ -20,9 +20,9 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     internal companion object {
         val INNTEKT = 31000.00.månedlig
-        val DAGSINNTEKT = INNTEKT.reflection { _, _, _, dagligInt -> dagligInt }
-        val MÅNEDLIG_INNTEKT = INNTEKT.reflection { _, månedlig, _, _ -> månedlig.toInt() }
-        val ÅRLIG_INNTEKT = INNTEKT.reflection { årlig, _, _, _ -> årlig.toInt() }
+        val DAGSINNTEKT = INNTEKT.dagligInt
+        val MÅNEDLIG_INNTEKT = INNTEKT.månedlig.toInt()
+        val ÅRLIG_INNTEKT = INNTEKT.årlig.toInt()
     }
 
     internal lateinit var hendelselogg: PersonHendelse

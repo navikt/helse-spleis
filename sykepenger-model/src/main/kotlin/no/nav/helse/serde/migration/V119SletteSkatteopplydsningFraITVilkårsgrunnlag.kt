@@ -23,7 +23,7 @@ internal class V119SletteSkatteopplydsningFraITVilkårsgrunnlag : JsonMigration(
         if(!fjernetSkatteopplysninger) return
 
         val grunnlagForSykepengegrunnlag = arbeidsgiverInntektsopplysninger.sumOf { it["inntektsopplysning"]["beløp"].asDouble() } * 12
-        val sykepengegrunnlag2 = minOf(grunnlagForSykepengegrunnlag, Grunnbeløp.`6G`.beløp(LocalDate.parse(vilkårsgrunnlag["skjæringstidspunkt"].asText())).reflection { årlig, _, _, _ -> årlig })
+        val sykepengegrunnlag2 = minOf(grunnlagForSykepengegrunnlag, Grunnbeløp.`6G`.beløp(LocalDate.parse(vilkårsgrunnlag["skjæringstidspunkt"].asText())).årlig)
 
         sykepengegrunnlag.put("sykepengegrunnlag", sykepengegrunnlag2)
         sykepengegrunnlag.put("grunnlagForSykepengegrunnlag", grunnlagForSykepengegrunnlag)
