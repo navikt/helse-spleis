@@ -2,6 +2,7 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -189,7 +190,8 @@ class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.lagreTidsnæreInntekter(
             skjæringstidspunkt: LocalDate,
             arbeidsgiver: Arbeidsgiver,
-            hendelse: IAktivitetslogg
+            hendelse: IAktivitetslogg,
+            oppholdsperiodeMellom: Periode?
         ) {
             this.forEach {
                 when (it.inntektsopplysning) {
@@ -198,7 +200,8 @@ class ArbeidsgiverInntektsopplysning(
                         it.orgnummer,
                         it.inntektsopplysning,
                         it.refusjonsopplysninger,
-                        hendelse
+                        hendelse,
+                        oppholdsperiodeMellom
                     )
                 }
             }

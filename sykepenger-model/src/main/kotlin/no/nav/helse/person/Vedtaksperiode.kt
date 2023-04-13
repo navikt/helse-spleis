@@ -590,7 +590,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun lagreTidsnæreopplysninger(hendelse: IAktivitetslogg) {
-        utbetalinger.lagreTidsnæreInntekter(arbeidsgiver, skjæringstidspunkt, aktivitetsloggkopi(hendelse))
+        val periodeFør = arbeidsgiver.finnVedtaksperiodeFør(this)
+        val oppholdsperiodeMellom = periodeFør?.sykdomstidslinje?.oppholdsperiodeMellom(this.sykdomstidslinje)
+
+        utbetalinger.lagreTidsnæreInntekter(arbeidsgiver, skjæringstidspunkt, aktivitetsloggkopi(hendelse), oppholdsperiodeMellom)
     }
 
     private fun håndterSøknad(søknad: Søknad, nesteTilstand: () -> Vedtaksperiodetilstand? = { null }) {

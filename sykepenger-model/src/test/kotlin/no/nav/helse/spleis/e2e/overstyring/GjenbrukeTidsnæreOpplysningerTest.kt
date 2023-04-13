@@ -577,13 +577,13 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
             val sykepengegrunnlagEtter = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.sykepengegrunnlag
-
+            assertIngenVarsel(RV_IV_7)
             assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
         }
     }
 
     @Test
-    fun `tester nytt varsel`() {
+    fun `varsel når det er 60 dager eller mer mellom ny og gammel første fraværsdag`() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
@@ -606,6 +606,44 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
 
             håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Arbeid(20.mars, 31.mars))
             assertVarsel(RV_IV_7, 4.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `varsel når det er 16 dager eller mer opphold`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+            håndterYtelser(3.vedtaksperiode)
+            håndterSimulering(3.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(13.februar, 28.februar))
+            assertVarsel(RV_IV_7, 3.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `ikke varsel når det var opphold`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            nyttVedtak(5.mars, 31.mars, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(13.februar, 28.februar))
+            assertIngenVarsler(3.vedtaksperiode.filter())
         }
     }
 

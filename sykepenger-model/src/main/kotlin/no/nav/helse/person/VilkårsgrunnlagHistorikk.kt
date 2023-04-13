@@ -283,9 +283,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun lagreTidsnæreInntekter(
             skjæringstidspunkt: LocalDate,
             arbeidsgiver: Arbeidsgiver,
-            hendelse: IAktivitetslogg
+            hendelse: IAktivitetslogg,
+            oppholdsperiodeMellom: Periode?
         ) {
-            sykepengegrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, hendelse)
+            sykepengegrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, hendelse, oppholdsperiodeMellom)
         }
 
         internal fun tags(tagBuilder: TagBuilder) = sykepengegrunnlag.tags(tagBuilder)

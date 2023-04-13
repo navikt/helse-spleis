@@ -175,6 +175,8 @@ internal abstract class AbstractDslTest {
         testArbeidsgiverAsserter.assertVarsel(warning, *filtre)
     protected fun TestPerson.TestArbeidsgiver.assertVarsel(kode: Varselkode, vararg filtre: AktivitetsloggFilter) =
         testArbeidsgiverAsserter.assertVarsel(kode, *filtre)
+    protected fun TestPerson.TestArbeidsgiver.assertIngenVarsel(kode: Varselkode, vararg filtre: AktivitetsloggFilter) =
+        testArbeidsgiverAsserter.assertIngenVarsel(kode.toString(), *filtre)
     protected fun TestPerson.TestArbeidsgiver.assertIngenVarsler(vararg filtre: AktivitetsloggFilter) =
         testArbeidsgiverAsserter.assertIngenVarsler(*filtre)
     protected fun TestPerson.TestArbeidsgiver.assertInfo(forventet: String, vararg filtre: AktivitetsloggFilter) =

@@ -55,10 +55,11 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Pair<Vilkårsgrunnl
     internal fun lagreTidsnæreInntekter(
         arbeidsgiver: Arbeidsgiver,
         skjæringstidspunkt: LocalDate,
-        hendelse: IAktivitetslogg
+        hendelse: IAktivitetslogg,
+        oppholdsperiodeMellom: Periode?
     ) {
         val forrige = sisteVilkårsgrunnlag ?: return
-        forrige.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, hendelse)
+        forrige.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, hendelse, oppholdsperiodeMellom)
     }
 
     internal fun gjelderIkkeFor(hendelse: Utbetalingsgodkjenning) = siste?.gjelderFor(hendelse) != true
