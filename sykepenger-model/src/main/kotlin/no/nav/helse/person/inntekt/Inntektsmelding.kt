@@ -6,6 +6,7 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.økonomi.Inntekt
@@ -14,13 +15,34 @@ internal class Inntektsmelding(
     id: UUID,
     dato: LocalDate,
     hendelseId: UUID,
-    private val beløp: Inntekt,
+    beløp: Inntekt,
     tidsstempel: LocalDateTime
-) : AvklarbarSykepengegrunnlag(id, hendelseId, dato, tidsstempel) {
+) : AvklarbarSykepengegrunnlag(id, hendelseId, dato, beløp, tidsstempel) {
     internal constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime = LocalDateTime.now()) : this(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel)
 
     override fun accept(visitor: InntektsopplysningVisitor) {
         accept(visitor as InntektsmeldingVisitor)
+    }
+
+    override fun lagreTidsnærInntekt(
+        skjæringstidspunkt: LocalDate,
+        arbeidsgiver: Arbeidsgiver,
+        hendelse: IAktivitetslogg,
+        oppholdsperiodeMellom: Periode?,
+        refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger,
+        orgnummer: String,
+        beløp: Inntekt?
+    ) {
+        arbeidsgiver.lagreTidsnærInntektsmelding(
+            skjæringstidspunkt,
+            orgnummer,
+            beløp?.let {
+                Inntektsmelding(dato, hendelseId, it, tidsstempel)
+            }?: this,
+            refusjonsopplysninger,
+            hendelse,
+            oppholdsperiodeMellom
+        )
     }
 
     internal fun accept(visitor: InntektsmeldingVisitor) {

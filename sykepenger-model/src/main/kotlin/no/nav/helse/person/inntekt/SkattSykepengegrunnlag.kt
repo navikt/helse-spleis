@@ -5,21 +5,39 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.AnsattPeriode.Companion.harArbeidsforholdNyereEnn
-import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.sisteMåneder
+import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.økonomi.Inntekt
 
-internal class SkattSykepengegrunnlag(
+internal class SkattSykepengegrunnlag private constructor(
     id: UUID,
     hendelseId: UUID,
     dato: LocalDate,
-    inntektsopplysninger: List<Skatteopplysning>,
+    beløp: Inntekt,
+    private val inntektsopplysninger: List<Skatteopplysning>,
     private val ansattPerioder: List<AnsattPeriode>,
     tidsstempel: LocalDateTime
-) : AvklarbarSykepengegrunnlag(id, hendelseId, dato, tidsstempel) {
-    private companion object {
+) : AvklarbarSykepengegrunnlag(id, hendelseId, dato, beløp, tidsstempel) {
+    internal companion object {
         private const val MAKS_INNTEKT_GAP = 2
+        internal fun ferdigSkattSykepengegrunnlag(
+            id: UUID,
+            hendelseId: UUID,
+            dato: LocalDate,
+            inntektsopplysninger: List<Skatteopplysning>,
+            ansattPerioder: List<AnsattPeriode>,
+            tidsstempel: LocalDateTime
+        ) = SkattSykepengegrunnlag(id, hendelseId, dato, inntektsopplysninger, ansattPerioder, tidsstempel)
     }
+
+    private constructor(
+        id: UUID,
+        hendelseId: UUID,
+        dato: LocalDate,
+        inntektsopplysninger: List<Skatteopplysning>,
+        ansattPerioder: List<AnsattPeriode>,
+        tidsstempel: LocalDateTime = LocalDateTime.now()
+    ) : this(id, hendelseId, dato, Skatteopplysning.omregnetÅrsinntekt(inntektsopplysninger), inntektsopplysninger, ansattPerioder, tidsstempel)
 
     internal constructor(
         hendelseId: UUID,
@@ -27,10 +45,7 @@ internal class SkattSykepengegrunnlag(
         inntektsopplysninger: List<Skatteopplysning>,
         ansattPerioder: List<AnsattPeriode>,
         tidsstempel: LocalDateTime = LocalDateTime.now()
-    ) : this(UUID.randomUUID(), hendelseId, dato, inntektsopplysninger, ansattPerioder, tidsstempel)
-
-    private val inntektsopplysninger = Skatteopplysning.sisteTreMåneder(dato, inntektsopplysninger)
-    private val beløp = Skatteopplysning.omregnetÅrsinntekt(this.inntektsopplysninger)
+    ) : this(UUID.randomUUID(), hendelseId, dato, Skatteopplysning.sisteTreMåneder(dato, inntektsopplysninger), ansattPerioder, tidsstempel)
 
     override fun accept(visitor: InntektsopplysningVisitor) {
         visitor.preVisitSkattSykepengegrunnlag(this, id, hendelseId, dato, beløp, tidsstempel)

@@ -7,7 +7,10 @@ import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Subsumsjon
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 
@@ -15,18 +18,38 @@ class Saksbehandler internal constructor(
     id: UUID,
     dato: LocalDate,
     hendelseId: UUID,
-    private val beløp: Inntekt,
+    beløp: Inntekt,
     private val forklaring: String?,
     private val subsumsjon: Subsumsjon?,
     private val overstyrtInntekt: Inntektsopplysning?,
     tidsstempel: LocalDateTime
-) : Inntektsopplysning(id, hendelseId, dato, tidsstempel) {
+) : Inntektsopplysning(id, hendelseId, dato, beløp, tidsstempel) {
     constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, forklaring: String, subsumsjon: Subsumsjon?, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), dato, hendelseId, beløp, forklaring, subsumsjon, null, tidsstempel)
 
     override fun accept(visitor: InntektsopplysningVisitor) {
         visitor.preVisitSaksbehandler(this, id, dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
         overstyrtInntekt?.accept(visitor)
         visitor.postVisitSaksbehandler(this, id, dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
+    }
+
+    override fun lagreTidsnærInntekt(
+        skjæringstidspunkt: LocalDate,
+        arbeidsgiver: Arbeidsgiver,
+        hendelse: IAktivitetslogg,
+        oppholdsperiodeMellom: Periode?,
+        refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger,
+        orgnummer: String,
+        beløp: Inntekt?
+    ) {
+        overstyrtInntekt?.lagreTidsnærInntekt(
+            skjæringstidspunkt,
+            arbeidsgiver,
+            hendelse,
+            oppholdsperiodeMellom,
+            refusjonsopplysninger,
+            orgnummer,
+            this.beløp
+        )
     }
 
     override fun overstyres(ny: Inntektsopplysning): Inntektsopplysning {

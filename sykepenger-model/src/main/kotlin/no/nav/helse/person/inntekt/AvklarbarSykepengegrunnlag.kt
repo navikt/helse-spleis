@@ -4,14 +4,17 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.person.inntekt.AvklarbarSykepengegrunnlag.Inntektturnering
+import no.nav.helse.økonomi.Inntekt
 import kotlin.reflect.KClass
 
 abstract class AvklarbarSykepengegrunnlag(
     id: UUID,
     hendelseId: UUID,
     dato: LocalDate,
+    beløp: Inntekt,
     tidsstempel: LocalDateTime
-) : Inntektsopplysning(id, hendelseId, dato, tidsstempel) {
+) : Inntektsopplysning(id, hendelseId, dato, beløp, tidsstempel) {
     protected abstract fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): AvklarbarSykepengegrunnlag?
 
     internal fun beste(other: AvklarbarSykepengegrunnlag): AvklarbarSykepengegrunnlag {

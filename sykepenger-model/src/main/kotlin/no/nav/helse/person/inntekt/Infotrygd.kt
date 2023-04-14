@@ -9,9 +9,9 @@ internal class Infotrygd(
     id: UUID,
     dato: LocalDate,
     hendelseId: UUID,
-    private val beløp: Inntekt,
+    beløp: Inntekt,
     tidsstempel: LocalDateTime
-) : Inntektsopplysning(id, hendelseId, dato, tidsstempel) {
+) : Inntektsopplysning(id, hendelseId, dato, beløp, tidsstempel) {
     override fun accept(visitor: InntektsopplysningVisitor) {
         visitor.visitInfotrygd(this, id, dato, hendelseId, beløp, tidsstempel)
     }

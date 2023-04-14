@@ -449,7 +449,7 @@ internal data class PersonData(
                     beløp = requireNotNull(beløp).månedlig,
                     tidsstempel = tidsstempel
                 )
-                private fun somSkattSykepengegrunnlag() = SkattSykepengegrunnlag(
+                private fun somSkattSykepengegrunnlag() = SkattSykepengegrunnlag.ferdigSkattSykepengegrunnlag(
                     id = id,
                     dato = dato,
                     inntektsopplysninger = requireNotNull(skatteopplysninger).map { skatteData ->

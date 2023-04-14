@@ -194,16 +194,14 @@ class ArbeidsgiverInntektsopplysning(
             oppholdsperiodeMellom: Periode?
         ) {
             this.forEach {
-                when (it.inntektsopplysning) {
-                    is Inntektsmelding -> arbeidsgiver.lagreTidsnærInntektsmelding(
-                        skjæringstidspunkt,
-                        it.orgnummer,
-                        it.inntektsopplysning,
-                        it.refusjonsopplysninger,
-                        hendelse,
-                        oppholdsperiodeMellom
-                    )
-                }
+                it.inntektsopplysning.lagreTidsnærInntekt(
+                    skjæringstidspunkt,
+                    arbeidsgiver,
+                    hendelse,
+                    oppholdsperiodeMellom,
+                    it.refusjonsopplysninger,
+                    it.orgnummer
+                )
             }
         }
     }
