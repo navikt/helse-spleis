@@ -363,6 +363,12 @@ internal data class PersonData(
                 private val tidsstempel: LocalDateTime,
                 private val skatteopplysninger: List<SkatteopplysningData>?
             ) {
+                private companion object {
+                    private val IKKE_MIGRERT_HENDELSE_ID = UUID.fromString("00000000-0000-0000-0000-000000000000")
+                }
+
+                private val ekteHendelseId = hendelseId ?: IKKE_MIGRERT_HENDELSE_ID // TODO: migrere json slik at alle inntektsopplysninger har hendelseId (det er bare IKKE_RAPPORTERT)
+
                 data class SubsumsjonData(
                     private val paragraf: String,
                     private val ledd: Int?,
@@ -376,7 +382,7 @@ internal data class PersonData(
                             Infotrygd(
                                 id = id,
                                 dato = dato,
-                                hendelseId = hendelseId!!,
+                                hendelseId = ekteHendelseId,
                                 beløp = requireNotNull(beløp).månedlig,
                                 tidsstempel = tidsstempel
                             )
@@ -384,13 +390,14 @@ internal data class PersonData(
                             Inntektsmelding(
                                 id = id,
                                 dato = dato,
-                                hendelseId = hendelseId!!,
+                                hendelseId = ekteHendelseId,
                                 beløp = requireNotNull(beløp).månedlig,
                                 tidsstempel = tidsstempel
                             )
                         Inntektsopplysningskilde.IKKE_RAPPORTERT ->
                             IkkeRapportert(
                                 id = id,
+                                hendelseId = ekteHendelseId,
                                 dato = dato,
                                 tidsstempel = tidsstempel
                             )
@@ -398,7 +405,7 @@ internal data class PersonData(
                             Saksbehandler(
                                 id = id,
                                 dato = dato,
-                                hendelseId = hendelseId!!,
+                                hendelseId = ekteHendelseId,
                                 beløp = requireNotNull(beløp).månedlig,
                                 forklaring = forklaring,
                                 subsumsjon = subsumsjon?.tilModellobjekt(),
@@ -412,7 +419,7 @@ internal data class PersonData(
                             },
                             ansattPerioder = emptyList(),
                             tidsstempel = tidsstempel,
-                            hendelseId = hendelseId!!
+                            hendelseId = ekteHendelseId
                         )
                         else -> error("Fant ${kilde}. Det er ugyldig for sykepengegrunnlag")
                     }

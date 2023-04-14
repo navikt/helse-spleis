@@ -109,7 +109,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
     fun `deaktiverer en inntekt`() {
         val skjæringstidspunkt = 1.januar
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", IkkeRapportert(skjæringstidspunkt, LocalDateTime.now()), Refusjonsopplysninger())
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", IkkeRapportert(skjæringstidspunkt, UUID.randomUUID(), LocalDateTime.now()), Refusjonsopplysninger())
 
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
         val (aktive, deaktiverte) = opprinnelig.deaktiver(emptyList(), "a2", "Denne må bort", NullObserver)
@@ -128,7 +128,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
     fun `subsummerer deaktivering`() {
         val skjæringstidspunkt = 1.januar
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", IkkeRapportert(skjæringstidspunkt, LocalDateTime.now()), Refusjonsopplysninger())
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", IkkeRapportert(skjæringstidspunkt, UUID.randomUUID(), LocalDateTime.now()), Refusjonsopplysninger())
 
         val jurist = MaskinellJurist()
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
@@ -155,7 +155,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
     fun `subsummerer aktivering`() {
         val skjæringstidspunkt = 1.januar
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", IkkeRapportert(skjæringstidspunkt, LocalDateTime.now()), Refusjonsopplysninger())
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", IkkeRapportert(skjæringstidspunkt, UUID.randomUUID(), LocalDateTime.now()), Refusjonsopplysninger())
 
         val jurist = MaskinellJurist()
         val opprinneligAktive = listOf(a1Opplysning)

@@ -62,8 +62,8 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
         this.inntektsopplysning = inntektsmelding
     }
 
-    override fun visitIkkeRapportert(id: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
-        this.inntektsopplysning = IkkeRapportert(id, dato, tidsstempel)
+    override fun visitIkkeRapportert(id: UUID, hendelseId: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
+        this.inntektsopplysning = IkkeRapportert(id, hendelseId, dato, tidsstempel)
     }
 
     override fun visitInfotrygd(

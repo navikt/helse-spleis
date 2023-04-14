@@ -457,7 +457,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.Inntektsmelding, inntekt)
         }
 
-        override fun visitIkkeRapportert(id: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
+        override fun visitIkkeRapportert(id: UUID, hendelseId: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
             val inntekt = IInntekt(0.0, 0.0, 0.0)
             this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.IkkeRapportert, inntekt)
         }

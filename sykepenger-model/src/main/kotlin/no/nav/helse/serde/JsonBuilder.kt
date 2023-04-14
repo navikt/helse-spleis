@@ -1073,9 +1073,10 @@ internal class JsonBuilder : AbstractBuilder() {
             ))
         }
 
-        override fun visitIkkeRapportert(id: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
+        override fun visitIkkeRapportert(id: UUID, hendelseId: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
             inntektsopplysninger.add(mapOf(
                 "id" to id,
+                "hendelseId" to hendelseId,
                 "dato" to dato,
                 "kilde" to Inntektsopplysningskilde.IKKE_RAPPORTERT,
                 "tidsstempel" to tidsstempel

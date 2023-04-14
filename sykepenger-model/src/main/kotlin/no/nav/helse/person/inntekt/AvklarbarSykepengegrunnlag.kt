@@ -8,9 +8,10 @@ import kotlin.reflect.KClass
 
 abstract class AvklarbarSykepengegrunnlag(
     id: UUID,
+    hendelseId: UUID,
     dato: LocalDate,
     tidsstempel: LocalDateTime
-) : Inntektsopplysning(id, dato, tidsstempel) {
+) : Inntektsopplysning(id, hendelseId, dato, tidsstempel) {
     protected abstract fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): AvklarbarSykepengegrunnlag?
 
     internal fun beste(other: AvklarbarSykepengegrunnlag): AvklarbarSykepengegrunnlag {

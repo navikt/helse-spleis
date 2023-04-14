@@ -10,6 +10,7 @@ import no.nav.helse.økonomi.Inntekt
 
 abstract class Inntektsopplysning protected constructor(
     protected val id: UUID,
+    protected val hendelseId: UUID,
     protected val dato: LocalDate,
     protected val tidsstempel: LocalDateTime
 ) {

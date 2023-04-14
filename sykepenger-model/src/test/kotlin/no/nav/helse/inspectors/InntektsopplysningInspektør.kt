@@ -57,7 +57,7 @@ internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysni
         this.tidsstempel = tidsstempel
     }
 
-    override fun visitIkkeRapportert(id: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
+    override fun visitIkkeRapportert(id: UUID, hendelseId: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
         this.beløp = INGEN
         this.tidsstempel = tidsstempel
     }

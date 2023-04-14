@@ -13,10 +13,10 @@ import no.nav.helse.økonomi.Inntekt
 internal class Inntektsmelding(
     id: UUID,
     dato: LocalDate,
-    private val hendelseId: UUID,
+    hendelseId: UUID,
     private val beløp: Inntekt,
     tidsstempel: LocalDateTime
-) : AvklarbarSykepengegrunnlag(id, dato, tidsstempel) {
+) : AvklarbarSykepengegrunnlag(id, hendelseId, dato, tidsstempel) {
     internal constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime = LocalDateTime.now()) : this(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel)
 
     override fun accept(visitor: InntektsopplysningVisitor) {

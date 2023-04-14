@@ -8,10 +8,10 @@ import no.nav.helse.økonomi.Inntekt
 internal class Infotrygd(
     id: UUID,
     dato: LocalDate,
-    private val hendelseId: UUID,
+    hendelseId: UUID,
     private val beløp: Inntekt,
     tidsstempel: LocalDateTime
-) : Inntektsopplysning(id, dato, tidsstempel) {
+) : Inntektsopplysning(id, hendelseId, dato, tidsstempel) {
     override fun accept(visitor: InntektsopplysningVisitor) {
         visitor.visitInfotrygd(this, id, dato, hendelseId, beløp, tidsstempel)
     }

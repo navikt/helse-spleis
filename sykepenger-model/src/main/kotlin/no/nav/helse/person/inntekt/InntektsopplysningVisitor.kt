@@ -21,6 +21,7 @@ internal interface InntektsopplysningVisitor : InntektsmeldingVisitor, Skatteopp
 
     fun visitIkkeRapportert(
         id: UUID,
+        hendelseId: UUID,
         dato: LocalDate,
         tidsstempel: LocalDateTime
     ) {

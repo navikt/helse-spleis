@@ -6,18 +6,18 @@ import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
 
-// TODO: legge til hendelseId fra SkattSykepengegrunnlag
 internal class IkkeRapportert(
     id: UUID,
+    hendelseId: UUID,
     dato: LocalDate,
     tidsstempel: LocalDateTime
-) : AvklarbarSykepengegrunnlag(id, dato, tidsstempel) {
-    internal constructor(dato: LocalDate, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), dato, tidsstempel)
+) : AvklarbarSykepengegrunnlag(id, hendelseId, dato, tidsstempel) {
+    internal constructor(dato: LocalDate, hendelseId: UUID, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), hendelseId, dato, tidsstempel)
     override fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
         takeIf { this.dato == skjæringstidspunkt }
 
     override fun accept(visitor: InntektsopplysningVisitor) {
-        visitor.visitIkkeRapportert(id, dato, tidsstempel)
+        visitor.visitIkkeRapportert(id, hendelseId, dato, tidsstempel)
     }
 
     override fun overstyres(ny: Inntektsopplysning) = ny

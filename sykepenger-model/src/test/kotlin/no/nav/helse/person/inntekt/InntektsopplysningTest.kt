@@ -26,7 +26,7 @@ internal class InntektsopplysningTest {
         val saksbehandler2 = Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val saksbehandler3 = Saksbehandler(20.januar, UUID.randomUUID(), 30000.månedlig, "", null, LocalDateTime.now())
         val saksbehandler4 = Saksbehandler(20.januar, UUID.randomUUID(), INGEN, "", null, LocalDateTime.now())
-        val ikkeRapportert = IkkeRapportert(1.januar, LocalDateTime.now())
+        val ikkeRapportert = IkkeRapportert(1.januar, UUID.randomUUID(), LocalDateTime.now())
 
         assertEquals(saksbehandler1, im1.overstyres(saksbehandler1))
         assertEquals(saksbehandler1, saksbehandler1.overstyres(saksbehandler2))
@@ -92,8 +92,8 @@ internal class InntektsopplysningTest {
     @Test
     fun `turnering - ikkeRapportert vs inntektsmelding`() {
         val im = Inntektsmelding(10.februar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
-        val ikkeRapportert1 = IkkeRapportert(1.februar, LocalDateTime.now())
-        val ikkeRapportert2 = IkkeRapportert(31.januar, LocalDateTime.now())
+        val ikkeRapportert1 = IkkeRapportert(1.februar, UUID.randomUUID(), LocalDateTime.now())
+        val ikkeRapportert2 = IkkeRapportert(31.januar, UUID.randomUUID(), LocalDateTime.now())
 
         assertEquals(im, im.beste(ikkeRapportert1))
         assertEquals(im, ikkeRapportert1.beste(im))
@@ -105,7 +105,7 @@ internal class InntektsopplysningTest {
     @Test
     fun `turnering - ikkeRapportert vs skatt`() {
         val skatt = SkattSykepengegrunnlag(UUID.randomUUID(), 1.februar, emptyList(), emptyList())
-        val ikkeRapportert = IkkeRapportert(31.januar, LocalDateTime.now())
+        val ikkeRapportert = IkkeRapportert(31.januar, UUID.randomUUID(), LocalDateTime.now())
 
         assertThrows<IllegalStateException> { assertEquals(skatt, skatt.beste(ikkeRapportert)) }
         assertThrows<IllegalStateException> { assertEquals(skatt, ikkeRapportert.beste(skatt)) }
@@ -122,8 +122,8 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `turnering - ikkeRapportert vs ikkeRapportert`() {
-        val ikkeRapportert1 = IkkeRapportert(31.januar, LocalDateTime.now())
-        val ikkeRapportert2 = IkkeRapportert(31.januar, LocalDateTime.now())
+        val ikkeRapportert1 = IkkeRapportert(31.januar, UUID.randomUUID(), LocalDateTime.now())
+        val ikkeRapportert2 = IkkeRapportert(31.januar, UUID.randomUUID(), LocalDateTime.now())
 
         assertThrows<IllegalStateException> { ikkeRapportert1.beste(ikkeRapportert2) }
         assertThrows<IllegalStateException> { ikkeRapportert2.beste(ikkeRapportert1) }

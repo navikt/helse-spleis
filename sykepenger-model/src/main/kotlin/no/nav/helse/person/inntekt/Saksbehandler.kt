@@ -14,12 +14,12 @@ import org.slf4j.LoggerFactory
 class Saksbehandler internal constructor(
     id: UUID,
     dato: LocalDate,
-    private val hendelseId: UUID,
+    hendelseId: UUID,
     private val beløp: Inntekt,
     private val forklaring: String?,
     private val subsumsjon: Subsumsjon?,
     tidsstempel: LocalDateTime
-) : Inntektsopplysning(id, dato, tidsstempel) {
+) : Inntektsopplysning(id, hendelseId, dato, tidsstempel) {
     constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, forklaring: String, subsumsjon: Subsumsjon?, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
 
     override fun accept(visitor: InntektsopplysningVisitor) {

@@ -11,12 +11,12 @@ import no.nav.helse.økonomi.Inntekt
 
 internal class SkattSykepengegrunnlag(
     id: UUID,
-    private val hendelseId: UUID,
+    hendelseId: UUID,
     dato: LocalDate,
     inntektsopplysninger: List<Skatteopplysning>,
     private val ansattPerioder: List<AnsattPeriode>,
     tidsstempel: LocalDateTime
-) : AvklarbarSykepengegrunnlag(id, dato, tidsstempel) {
+) : AvklarbarSykepengegrunnlag(id, hendelseId, dato, tidsstempel) {
     private companion object {
         private const val MAKS_INNTEKT_GAP = 2
     }
@@ -52,6 +52,7 @@ internal class SkattSykepengegrunnlag(
         // nyoppstartet arbeidsforhold (startdato innen 2 mnd fra skjæringstidspunktet), og ingen inntekter foreligger:
         // todo bare returnere "this" og mappe ut IKKE_RAPPORTERT i SpeilBuilder?
         return IkkeRapportert(
+            hendelseId = this.hendelseId,
             dato = this.dato,
             tidsstempel = this.tidsstempel
         )
@@ -120,7 +121,7 @@ class AnsattPeriode(
         fun List<AnsattPeriode>.harArbeidsforholdNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Int) =
             harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder).isNotEmpty()
 
-        fun List<AnsattPeriode>.harArbeidetMindreEnn(skjæringstidspunkt: LocalDate, antallMåneder: Int) = this
+        private fun List<AnsattPeriode>.harArbeidetMindreEnn(skjæringstidspunkt: LocalDate, antallMåneder: Int) = this
             .filter { it.harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder) }
             .filter { it.gjelder(skjæringstidspunkt) }
     }
