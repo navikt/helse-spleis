@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.søknad
 
 import java.util.UUID
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
@@ -16,8 +15,6 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
@@ -36,7 +33,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
@@ -148,13 +144,16 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar)
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode, foreldrepenger = listOf(5.februar til 15.februar))
-        assertForventetFeil("Førstegangsbehandling på out of order lager en utbetaling som også dekker avsluttet periode etter og annullerer utbetalingen som var der fra før. Når out of order forkastes blir også den avsluttede perioden forkastet.",
-            nå = {
-                assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET ,AVVENTER_REVURDERING, TIL_INFOTRYGD)
-            },
-            ønsket = {
-                fail("""\_(ツ)_/¯""")
-            })
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertEquals(5, inspektør.utbetalinger.size)
+        assertEquals(UTBETALT, inspektør.utbetaling(0).inspektør.tilstand)
+        assertEquals(UTBETALT, inspektør.utbetaling(1).inspektør.tilstand)
+        assertEquals(FORKASTET, inspektør.utbetaling(2).inspektør.tilstand)
+        assertEquals(FORKASTET, inspektør.utbetaling(3).inspektør.tilstand)
+        assertEquals(GODKJENT_UTEN_UTBETALING, inspektør.utbetaling(4).inspektør.tilstand)
     }
 
     @Test

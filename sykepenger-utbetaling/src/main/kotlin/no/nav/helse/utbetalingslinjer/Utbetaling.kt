@@ -418,7 +418,7 @@ class Utbetaling private constructor(
 
         // kan forkaste dersom ingen utbetalinger er utbetalt/in flight, eller de er annullert
         fun kanForkastes(vedtaksperiodeUtbetalinger: List<Utbetaling>, arbeidsgiverUtbetalinger: List<Utbetaling>): Boolean {
-            val annulleringer = arbeidsgiverUtbetalinger.filter { it.erAnnullering() }
+            val annulleringer = arbeidsgiverUtbetalinger.filter { it.erAnnullering() && it.tilstand != Forkastet }
             return vedtaksperiodeUtbetalinger.filter { it.erAktiv() }.all { utbetaling ->
                 annulleringer.any { annullering -> annullering.hørerSammen(utbetaling) }
             }
