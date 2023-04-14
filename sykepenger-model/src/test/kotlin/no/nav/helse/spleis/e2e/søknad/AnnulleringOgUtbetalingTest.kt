@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.søknad
 
 import java.util.UUID
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
@@ -14,32 +15,28 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.nullstillTilstandsendringer
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.spleis.e2e.assertSisteTilstand
-import no.nav.helse.spleis.e2e.assertVarsel
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
-import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
-import no.nav.helse.spleis.e2e.håndterSimulering
-import no.nav.helse.spleis.e2e.håndterSøknad
-import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
-import no.nav.helse.spleis.e2e.håndterUtbetalt
-import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
-import no.nav.helse.spleis.e2e.håndterYtelser
-import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus.*
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.ANNULLERT
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.FORKASTET
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.GODKJENT
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.GODKJENT_UTEN_UTBETALING
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_UTBETALT
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.NY
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.OVERFØRT
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.UTBETALT
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
@@ -137,9 +134,27 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
             assertEquals(Endringskode.NY, linje.endringskode)
         }
 
-        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
-        assertSisteTilstand(2.vedtaksperiode, TilstandType.AVSLUTTET)
-        assertSisteTilstand(3.vedtaksperiode, TilstandType.AVSLUTTET)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
+    }
+    @Test
+    fun `Forkaster feilaktig avsluttet periode når to utbetalinger blir til én`() = a1 {
+        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(1.mars, 31.mars)
+
+        nullstillTilstandsendringer()
+        nyPeriode(5.februar til 15.februar, a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode, foreldrepenger = listOf(5.februar til 15.februar))
+        assertForventetFeil("Førstegangsbehandling på out of order lager en utbetaling som også dekker avsluttet periode etter og annullerer utbetalingen som var der fra før. Når out of order forkastes blir også den avsluttede perioden forkastet.",
+            nå = {
+                assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET ,AVVENTER_REVURDERING, TIL_INFOTRYGD)
+            },
+            ønsket = {
+                fail("""\_(ツ)_/¯""")
+            })
     }
 
     @Test
