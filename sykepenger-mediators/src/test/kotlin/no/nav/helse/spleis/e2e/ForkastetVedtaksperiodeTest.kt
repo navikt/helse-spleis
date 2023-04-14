@@ -1,12 +1,12 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.mars
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import no.nav.helse.spleis.e2e.KontraktAssertions.assertAntallUtgåendeMeldinger
+import no.nav.helse.spleis.e2e.KontraktAssertions.assertOgFjernUUID
+import no.nav.helse.spleis.e2e.KontraktAssertions.assertUtgåendeMelding
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 
 internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
@@ -24,20 +24,40 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
         assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING", "TIL_INFOTRYGD")
         assertTilstander(1, "TIL_INFOTRYGD")
 
-        val vedtaksperiodeForkastet = testRapid.inspektør.meldinger("vedtaksperiode_forkastet")
-        assertEquals(2, vedtaksperiodeForkastet.size)
-        assertEquals(3.januar, LocalDate.parse(vedtaksperiodeForkastet.first().path("fom").asText()))
-        assertEquals(26.januar, LocalDate.parse(vedtaksperiodeForkastet.first().path("tom").asText()))
-        assertTrue(vedtaksperiodeForkastet.first().path("forlengerPeriode").isBoolean)
-        assertTrue(vedtaksperiodeForkastet.first().path("harPeriodeInnenfor16Dager").isBoolean)
-        assertEquals(3.januar, LocalDate.parse(vedtaksperiodeForkastet.last().path("fom").asText()))
-        assertEquals(27.januar, LocalDate.parse(vedtaksperiodeForkastet.last().path("tom").asText()))
-        assertTrue(vedtaksperiodeForkastet.last().path("forlengerPeriode").isBoolean)
-        assertTrue(vedtaksperiodeForkastet.last().path("harPeriodeInnenfor16Dager").isBoolean)
-        assertEquals(
-            listOf(søknadId, søknadId2),
-            vedtaksperiodeForkastet.flatMap { it.path("hendelser").map { UUID.fromString(it.asText()) } }.distinct()
-        )
+        testRapid.assertAntallUtgåendeMeldinger("vedtaksperiode_forkastet", 2)
+
+        @Language("JSON")
+        val forventet1 = """
+            {
+              "@event_name": "vedtaksperiode_forkastet",
+              "aktørId": "$AKTØRID",
+              "fødselsnummer": "$UNG_PERSON_FNR_2018",
+              "organisasjonsnummer": "$ORGNUMMER",
+              "tilstand" : "AVVENTER_INNTEKTSMELDING",
+              "fom" : "2018-01-03",
+              "tom" : "2018-01-26",
+              "forlengerPeriode" : false,
+              "harPeriodeInnenfor16Dager" : false,
+              "hendelser": ["$søknadId", "$søknadId2"]
+            }
+        """
+        assertVedtaksperiodeForkastet(forventet1, 0)
+        @Language("JSON")
+        val forventet2 = """
+            {
+              "@event_name": "vedtaksperiode_forkastet",
+              "aktørId": "$AKTØRID",
+              "fødselsnummer": "$UNG_PERSON_FNR_2018",
+              "organisasjonsnummer": "$ORGNUMMER",
+              "tilstand" : "START",
+              "fom" : "2018-01-03",
+              "tom" : "2018-01-27",
+              "forlengerPeriode" : false,
+              "harPeriodeInnenfor16Dager" : false,
+              "hendelser": ["$søknadId2"]
+            }
+        """
+        assertVedtaksperiodeForkastet(forventet2, 1)
     }
 
     @Test
@@ -58,13 +78,29 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
             fnr = nyttFnr
         )
 
-        val vedtaksperiodeForkastet = testRapid.inspektør.meldinger("vedtaksperiode_forkastet")
-        assertEquals(1, vedtaksperiodeForkastet.size)
-        assertEquals(1.mars, LocalDate.parse(vedtaksperiodeForkastet.first().path("fom").asText()))
-        assertEquals(31.mars, LocalDate.parse(vedtaksperiodeForkastet.first().path("tom").asText()))
-        assertEquals(
-            listOf(søknadId2),
-            vedtaksperiodeForkastet.flatMap { it.path("hendelser").map { UUID.fromString(it.asText()) } }.distinct()
-        )
+        testRapid.assertAntallUtgåendeMeldinger("vedtaksperiode_forkastet", 1)
+
+        @Language("JSON")
+        val forventet = """
+            {
+              "@event_name": "vedtaksperiode_forkastet",
+              "aktørId": "$AKTØRID",
+              "fødselsnummer": "111",
+              "organisasjonsnummer": "$ORGNUMMER",
+              "tilstand" : "START",
+              "fom" : "2018-03-01",
+              "tom" : "2018-03-31",
+              "forlengerPeriode" : false,
+              "harPeriodeInnenfor16Dager" : false,
+              "hendelser": ["$søknadId2"]
+            }
+        """
+        assertVedtaksperiodeForkastet(forventet, 0)
+    }
+
+    private fun assertVedtaksperiodeForkastet(forventetMelding: String, index: Int) {
+        testRapid.assertUtgåendeMelding(forventetMelding, faktiskMelding = { it[index] }) {
+            it.assertOgFjernUUID("vedtaksperiodeId")
+        }
     }
 }

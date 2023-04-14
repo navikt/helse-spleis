@@ -7,6 +7,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.spleis.meldinger.TestRapid
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode.STRICT
 
@@ -24,6 +25,10 @@ internal object KontraktAssertions {
         førAssertEquals(event)
         JSONAssert.assertEquals(forventetMelding, event.toString(), STRICT)
         return kopi
+    }
+
+    internal fun TestRapid.assertAntallUtgåendeMeldinger(eventName: String, forventetAntall: Int) {
+        assertEquals(forventetAntall, inspektør.meldinger(eventName).size)
     }
 
     private fun ObjectNode.assertOgFjernStandardfelter() {
