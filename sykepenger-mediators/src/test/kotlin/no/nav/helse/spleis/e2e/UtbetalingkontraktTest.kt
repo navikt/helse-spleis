@@ -3,7 +3,7 @@ package no.nav.helse.spleis.e2e
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.helse.ForventetFeil
+import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarstypeDTO
@@ -11,9 +11,12 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
+import no.nav.helse.spleis.e2e.KontraktAssertions.assertOgFjernLocalDateTime
+import no.nav.helse.spleis.e2e.KontraktAssertions.assertOgFjernUUID
+import no.nav.helse.spleis.e2e.KontraktAssertions.assertUtgåendeMelding
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -263,10 +266,25 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
-        sendAnnullering(testRapid.inspektør.etterspurteBehov(Utbetaling).path(Utbetaling.name).path("fagsystemId").asText())
+        sendAnnullering(arbeidsgiverFagsystemId)
         sendUtbetaling()
-        val utbetalt = testRapid.inspektør.siste("utbetaling_annullert")
-        assertAnnullert(utbetalt)
+        @Language("JSON")
+        val forventet = """
+            {
+                "@event_name": "utbetaling_annullert",
+                "organisasjonsnummer": "$ORGNUMMER",
+                "aktørId": "$AKTØRID",
+                "fødselsnummer": "$UNG_PERSON_FNR_2018",
+                "epost" : "siri.saksbehandler@nav.no",
+                "ident" : "S1234567",
+                "fom" : "2018-01-03",
+                "tom" : "2018-01-26",
+                "arbeidsgiverFagsystemId": "$arbeidsgiverFagsystemId",
+                "personFagsystemId": "$personFagsystemId",
+                "korrelasjonsId": "$korrelasjonsId"
+            }
+        """
+        assertUtbetalingAnnullert(forventet)
         val utbetalingEndret = testRapid.inspektør.siste("utbetaling_endret")
         assertUtbetalingEndret(utbetalingEndret, "OVERFØRT", "ANNULLERT", true)
     }
@@ -287,14 +305,29 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK, forventedeFagområder = setOf("SPREF", "SP"))
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
-        sendAnnullering(testRapid.inspektør.alleEtterspurteBehov(Utbetaling).first { it.path(Utbetaling.name).path("fagområde").asText() == "SPREF"}.path(Utbetaling.name).path("fagsystemId").asText())
+        sendAnnullering(arbeidsgiverFagsystemId)
         sendUtbetaling()
-        val utbetalt = testRapid.inspektør.siste("utbetaling_annullert")
-        assertAnnullert(utbetalt)
+        @Language("JSON")
+        val forventet = """
+            {
+                "@event_name": "utbetaling_annullert",
+                "organisasjonsnummer": "$ORGNUMMER",
+                "aktørId": "$AKTØRID",
+                "fødselsnummer": "$UNG_PERSON_FNR_2018",
+                "epost" : "siri.saksbehandler@nav.no",
+                "ident" : "S1234567",
+                "fom" : "2018-01-03",
+                "tom" : "2018-01-26",
+                "arbeidsgiverFagsystemId": "$arbeidsgiverFagsystemId",
+                "personFagsystemId": "$personFagsystemId",
+                "korrelasjonsId": "$korrelasjonsId"
+            }
+        """
+        assertUtbetalingAnnullert(forventet)
     }
 
     @Test
-    @ForventetFeil("https://trello.com/c/2tTTa7k9")
+    //@ForventetFeil("https://trello.com/c/2tTTa7k9")
     fun `annullering ingen refusjon`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
@@ -307,13 +340,29 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
-        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK, forventedeFagområder = setOf("SP"))
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
-        sendAnnullering(testRapid.inspektør.alleEtterspurteBehov(Utbetaling).first { it.path(Utbetaling.name).path("fagområde").asText() == "SPREF"}.path(Utbetaling.name).path("fagsystemId").asText())
+        sendAnnullering(arbeidsgiverFagsystemId)
         sendUtbetaling()
-        val utbetalt = testRapid.inspektør.siste("utbetaling_annullert")
-        assertAnnullert(utbetalt)
+        @Language("JSON")
+        val forventet = """
+            {
+                "@event_name": "utbetaling_annullert",
+                "organisasjonsnummer": "$ORGNUMMER",
+                "aktørId": "$AKTØRID",
+                "fødselsnummer": "$UNG_PERSON_FNR_2018",
+                "epost" : "siri.saksbehandler@nav.no",
+                "ident" : "S1234567",
+                "fom" : "2018-01-03",
+                "tom" : "2018-01-26",
+                "arbeidsgiverFagsystemId": "$arbeidsgiverFagsystemId",
+                "personFagsystemId": "$personFagsystemId",
+                "korrelasjonsId": "$korrelasjonsId"
+            }
+        """
+        assertUtbetalingAnnullert(forventet)
+
     }
 
     private fun assertUtbetaltInkluderAvviste(melding: JsonNode) {
@@ -369,21 +418,6 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         assertOppdragdetaljer(melding.path("personOppdrag"), false)
     }
 
-    private fun assertAnnullert(melding: JsonNode) {
-        assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
-        assertTrue(melding.path("aktørId").asText().isNotEmpty())
-        assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
-        assertTrue(melding.path("utbetalingId").asText().isNotEmpty())
-        assertTrue(melding.path("korrelasjonsId").asText().isNotEmpty())
-        assertTrue(melding.path("arbeidsgiverFagsystemId").asText().isNotEmpty())
-        assertTrue(melding.path("personFagsystemId").asText().isNotEmpty())
-        assertDato(melding.path("fom").asText())
-        assertDato(melding.path("tom").asText())
-        assertDatotid(melding.path("tidspunkt").asText())
-        assertTrue(melding.path("epost").asText().isNotEmpty())
-        assertTrue(melding.path("ident").asText().isNotEmpty())
-    }
-
     private fun assertOppdragdetaljer(oppdrag: JsonNode, erAnnullering: Boolean) {
         assertTrue(oppdrag.path("mottaker").asText().isNotEmpty())
         assertTrue(oppdrag.path("fagsystemId").asText().isNotEmpty())
@@ -433,6 +467,19 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     private fun assertDatotid(tekst: String) {
         assertTrue(tekst.isNotEmpty())
         assertDoesNotThrow { LocalDateTime.parse(tekst) }
+    }
+
+    private fun assertUtbetalingAnnullert(forventetMelding: String) {
+        testRapid.assertUtgåendeMelding(forventetMelding) {
+            it.assertOgFjernLocalDateTime("tidspunkt")
+            it.assertOgFjernUUID("utbetalingId")
+        }
+    }
+    private val arbeidsgiverFagsystemId get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("arbeidsgiverOppdrag").path("fagsystemId").asText().also { check(it.matches(FagsystemIdRegex)) }
+    private val personFagsystemId get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("personOppdrag").path("fagsystemId").asText().also { check(it.matches(FagsystemIdRegex)) }
+    private val korrelasjonsId get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("korrelasjonsId").let { UUID.fromString(it.asText()) }
+    private companion object {
+        private val FagsystemIdRegex = "[A-Z,2-7]{26}".toRegex()
     }
 }
 
