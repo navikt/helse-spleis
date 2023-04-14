@@ -41,9 +41,16 @@ internal object KontraktAssertions {
 
     internal fun ObjectNode.assertOgFjernUUID(key: String) = assertOgFjern(key) { UUID.fromString(it.asText()) }
     internal fun ObjectNode.assertOgFjernLocalDateTime(key: String) = assertOgFjern(key) { LocalDateTime.parse(it.asText()) }
-    private fun ObjectNode.assertOgFjern(key: String, validation:(value: JsonNode) -> Unit) {
-        assertDoesNotThrow { validation(path(key)) }
-        remove(key)
+    internal fun ObjectNode.assertOgFjern(key: String, validation:(value: JsonNode) -> Unit) {
+        if (!key.contains(".")) {
+            assertDoesNotThrow { validation(path(key)) }
+            remove(key)
+            return
+        }
+        val sisteKey = key.split(".").last()
+        val objekt = key.substringBeforeLast(".").split(".").fold(this as JsonNode) { result, nestedKey -> result.path(nestedKey) } as ObjectNode
+        assertDoesNotThrow { validation(objekt.path(sisteKey)) }
+        objekt.remove(sisteKey)
     }
 
     private val objectMapper = jacksonObjectMapper()

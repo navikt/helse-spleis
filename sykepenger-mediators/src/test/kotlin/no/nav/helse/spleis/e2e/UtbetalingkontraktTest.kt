@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -11,6 +12,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.januar
+import no.nav.helse.spleis.e2e.KontraktAssertions.assertOgFjern
 import no.nav.helse.spleis.e2e.KontraktAssertions.assertOgFjernLocalDateTime
 import no.nav.helse.spleis.e2e.KontraktAssertions.assertOgFjernUUID
 import no.nav.helse.spleis.e2e.KontraktAssertions.assertUtgåendeMelding
@@ -39,10 +41,10 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         @Language("JSON")
         val forventet = """
            {
-              "@event_name": "vedtaksperiode_ny_utbetaling",
-              "aktørId": "$AKTØRID",
-              "fødselsnummer": "$UNG_PERSON_FNR_2018",
-              "organisasjonsnummer": "$ORGNUMMER"
+              "@event_name": "vedtaksperiode_ny_utbetaling", 
+              "aktørId": "42", 
+              "fødselsnummer": "12029240045",
+              "organisasjonsnummer": "987654321"
            }
         """
         assertNyUtbetaling(forventet)
@@ -107,8 +109,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
-        val utbetalt = testRapid.inspektør.siste("utbetaling_utbetalt")
-        assertUtbetalt(utbetalt)
+        assertUtbetalingUtbetalt(utbetalingUtbetaltForventetJson)
         val utbetalingEndret = testRapid.inspektør.siste("utbetaling_endret")
         assertUtbetalingEndret(utbetalingEndret, "OVERFØRT", "UTBETALT")
     }
@@ -280,9 +281,9 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         val forventet = """
             {
                 "@event_name": "utbetaling_annullert",
-                "organisasjonsnummer": "$ORGNUMMER",
-                "aktørId": "$AKTØRID",
-                "fødselsnummer": "$UNG_PERSON_FNR_2018",
+                "aktørId": "42", 
+                "fødselsnummer": "12029240045",
+                "organisasjonsnummer": "987654321",
                 "epost" : "siri.saksbehandler@nav.no",
                 "ident" : "S1234567",
                 "fom" : "2018-01-03",
@@ -319,9 +320,9 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         val forventet = """
             {
                 "@event_name": "utbetaling_annullert",
-                "organisasjonsnummer": "$ORGNUMMER",
-                "aktørId": "$AKTØRID",
-                "fødselsnummer": "$UNG_PERSON_FNR_2018",
+                "aktørId": "42", 
+                "fødselsnummer": "12029240045",
+                "organisasjonsnummer": "987654321",
                 "epost" : "siri.saksbehandler@nav.no",
                 "ident" : "S1234567",
                 "fom" : "2018-01-03",
@@ -356,9 +357,9 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         val forventet = """
             {
                 "@event_name": "utbetaling_annullert",
-                "organisasjonsnummer": "$ORGNUMMER",
-                "aktørId": "$AKTØRID",
-                "fødselsnummer": "$UNG_PERSON_FNR_2018",
+                "aktørId": "42", 
+                "fødselsnummer": "12029240045",
+                "organisasjonsnummer": "987654321",
                 "epost" : "siri.saksbehandler@nav.no",
                 "ident" : "S1234567",
                 "fom" : "2018-01-03",
@@ -467,6 +468,25 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(tekst.isNotEmpty())
         assertDoesNotThrow { LocalDateTime.parse(tekst) }
     }
+
+    private fun assertUtbetalingUtbetalt(forventetMelding: String) {
+        testRapid.assertUtgåendeMelding(forventetMelding) {
+            it.assertOgFjernUUID("utbetalingId")
+            it.assertOgFjernUUID("korrelasjonsId")
+            it.assertOgFjernLocalDateTime("tidspunkt")
+            it.assertOgFjernFagsystemId("arbeidsgiverOppdrag.fagsystemId")
+            it.assertOgFjernLocalDateTime("arbeidsgiverOppdrag.tidsstempel")
+            it.assertOgFjernLocalDateTime("arbeidsgiverOppdrag.overføringstidspunkt")
+            it.assertOgFjernFagsystemId("personOppdrag.fagsystemId")
+            it.assertOgFjernLocalDateTime("personOppdrag.tidsstempel")
+            it.assertOgFjern("vedtaksperiodeIder") { vedtaksperiodeIder ->
+                check(vedtaksperiodeIder.isArray)
+                check(vedtaksperiodeIder.size() == 1)
+                UUID.fromString(vedtaksperiodeIder.first().asText())
+            }
+        }
+    }
+
     private fun assertNyUtbetaling(forventetMelding: String) {
         testRapid.assertUtgåendeMelding(forventetMelding) {
             it.assertOgFjernUUID("utbetalingId")
@@ -483,8 +503,209 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     private val arbeidsgiverFagsystemId get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("arbeidsgiverOppdrag").path("fagsystemId").asText().also { check(it.matches(FagsystemIdRegex)) }
     private val personFagsystemId get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("personOppdrag").path("fagsystemId").asText().also { check(it.matches(FagsystemIdRegex)) }
     private val korrelasjonsId get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("korrelasjonsId").let { UUID.fromString(it.asText()) }
+
+
     private companion object {
         private val FagsystemIdRegex = "[A-Z,2-7]{26}".toRegex()
+        private fun ObjectNode.assertOgFjernFagsystemId(key: String) {
+            assertOgFjern(key) { check(it.asText().matches(FagsystemIdRegex)) }
+        }
+
+        @Language("JSON")
+        private val utbetalingUtbetaltForventetJson = """
+        {
+            "@event_name": "utbetaling_utbetalt",
+            "organisasjonsnummer": "987654321",
+            "type": "UTBETALING",
+            "fom": "2018-01-03",
+            "tom": "2018-01-26",
+            "maksdato": "2019-01-01",
+            "forbrukteSykedager": 6,
+            "gjenståendeSykedager": 242,
+            "stønadsdager": 6,
+            "ident": "O123456",
+            "epost": "jan@banan.no",
+            "automatiskBehandling": false,
+            "arbeidsgiverOppdrag": {
+                "mottaker": "987654321",
+                "fagområde": "SPREF",
+                "linjer": [{
+                    "fom": "2018-01-19",
+                    "tom": "2018-01-26",
+                    "satstype": "DAG",
+                    "sats": 1431,
+                    "dagsats": 1431,
+                    "lønn": 1431,
+                    "grad": 100.0,
+                    "stønadsdager": 6,
+                    "totalbeløp": 8586,
+                    "endringskode": "NY",
+                    "delytelseId": 1,
+                    "refDelytelseId": null,
+                    "refFagsystemId": null,
+                    "statuskode": null,
+                    "datoStatusFom": null,
+                    "klassekode": "SPREFAG-IOP"
+                }],
+                "endringskode": "NY",
+                "sisteArbeidsgiverdag": "2018-01-18",
+                "nettoBeløp": 8586,
+                "stønadsdager": 6,
+                "avstemmingsnøkkel": "123456",
+                "status": "AKSEPTERT",
+                "fom": "2018-01-19",
+                "tom": "2018-01-26",
+                "simuleringsResultat": {
+                    "totalbeløp": 9999,
+                    "perioder": [{
+                        "fom": "2020-01-01",
+                        "tom": "2020-01-02",
+                        "utbetalinger": [{
+                            "forfallsdato": "2020-01-03",
+                            "utbetalesTil": {
+                                "id": "987654321",
+                                "navn": "Koronavirus"
+                            },
+                            "feilkonto": true,
+                            "detaljer": [{
+                                "fom": "2020-01-01",
+                                "tom": "2020-01-02",
+                                "konto": "12345678910og1112",
+                                "beløp": 9999,
+                                "klassekode": {
+                                    "kode": "SPREFAG-IOP",
+                                    "beskrivelse": "Sykepenger, Refusjon arbeidsgiver"
+                                },
+                                "uføregrad": 100,
+                                "utbetalingstype": "YTEL",
+                                "tilbakeføring": false,
+                                "sats": {
+                                    "sats": 1000.5,
+                                    "antall": 9,
+                                    "type": "DAG"
+                                },
+                                "refunderesOrgnummer": "987654321"
+                            }]
+                        }]
+                    }]
+                }
+            },
+            "personOppdrag": {
+                "mottaker": "12029240045",
+                "fagområde": "SP",
+                "linjer": [],
+                "endringskode": "NY",
+                "sisteArbeidsgiverdag": "2018-01-18",
+                "nettoBeløp": 0,
+                "stønadsdager": 0,
+                "avstemmingsnøkkel": null,
+                "status": null,
+                "overføringstidspunkt": null,
+                "fom": "-999999999-01-01",
+                "tom": "-999999999-01-01",
+                "simuleringsResultat": null
+            },
+            "utbetalingsdager": [{
+                "dato": "2018-01-03",
+                "type": "ArbeidsgiverperiodeDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-04",
+                "type": "ArbeidsgiverperiodeDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-05",
+                "type": "ArbeidsgiverperiodeDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-06",
+                "type": "ArbeidsgiverperiodeDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-07",
+                "type": "ArbeidsgiverperiodeDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-08",
+                "type": "ArbeidsgiverperiodeDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-09",
+                "type": "ArbeidsgiverperiodeDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-10",
+                "type": "ArbeidsgiverperiodeDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-11",
+                "type": "ArbeidsgiverperiodeDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-12",
+                "type": "ArbeidsgiverperiodeDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-13",
+                "type": "ArbeidsgiverperiodeDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-14",
+                "type": "ArbeidsgiverperiodeDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-15",
+                "type": "ArbeidsgiverperiodeDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-16",
+                "type": "ArbeidsgiverperiodeDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-17",
+                "type": "ArbeidsgiverperiodeDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-18",
+                "type": "ArbeidsgiverperiodeDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-19",
+                "type": "NavDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-20",
+                "type": "NavHelgDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-21",
+                "type": "NavHelgDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-22",
+                "type": "NavDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-23",
+                "type": "NavDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-24",
+                "type": "NavDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-25",
+                "type": "NavDag",
+                "begrunnelser": null
+            }, {
+                "dato": "2018-01-26",
+                "type": "NavDag",
+                "begrunnelser": null
+            }],
+            "aktørId": "42",
+            "fødselsnummer": "12029240045"
+        }
+    """
     }
 }
 
