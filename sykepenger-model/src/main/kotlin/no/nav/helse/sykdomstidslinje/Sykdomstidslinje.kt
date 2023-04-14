@@ -190,7 +190,7 @@ internal class Sykdomstidslinje private constructor(
     private fun erSisteDagArbeidsdag() = this.dager.keys.lastOrNull()?.let(::erArbeidsdag) ?: true
 
     private fun sisteOppholdsdag() = periode?.lastOrNull { erOppholdsdag(it) }
-    private fun førsteOppholdsdag() = periode?.firstOrNull { erOppholdsdag(it) }
+    private fun førsteOppholdsdag(etter: LocalDate) = periode?.firstOrNull { it > etter && erOppholdsdag(it) }
     private fun sisteOppholdsdag(før: LocalDate) = periode?.filter { erOppholdsdag(it) }?.lastOrNull { it.isBefore(før) }
 
     private fun erOppholdsdag(dato: LocalDate): Boolean {
@@ -262,8 +262,12 @@ internal class Sykdomstidslinje private constructor(
     internal fun sykdomsperiode() = kuttEtterSisteSykedag().periode
     internal fun subsumsjonsformat(): List<Tidslinjedag> = SykdomstidslinjeBuilder(this).dager()
     internal fun oppholdsperiodeMellom(other: Sykdomstidslinje): Periode? {
-        val førsteSykedag = other.førsteSykedag() ?: other.periode?.endInclusive ?: return null
-        val sisteIkkeOppholdsdag = this.førsteOppholdsdag()?.forrigeDag ?: periode?.endInclusive ?: return null
+        val førsteSykedag = other.finnSkjæringstidspunkt() ?: other.periode?.endInclusive ?: return null
+        val førsteSkjæringstidspunkt = this.sisteSkjæringstidspunkt()
+        val førsteOppholdsdagEtterSkjæringstidspunkt = førsteSkjæringstidspunkt?.let {
+            this.førsteOppholdsdag(it)?.forrigeDag ?: this.periode?.endInclusive
+        }
+        val sisteIkkeOppholdsdag = førsteOppholdsdagEtterSkjæringstidspunkt ?: this.periode?.start ?: return null
         return sisteIkkeOppholdsdag.somPeriode().periodeMellom(førsteSykedag)
     }
 

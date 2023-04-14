@@ -726,6 +726,27 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
         }
     }
 
+    @Test
+    fun `ikke varsel når det er hull i agp`() {
+        a1 {
+            håndterSøknad(Sykdom(17.januar, 20.januar, 100.prosent))
+            håndterSøknad(Sykdom(21.januar, 8.februar, 100.prosent))
+            håndterSøknad(Sykdom(9.februar, 28.februar, 100.prosent))
+            håndterInntektsmelding(listOf(
+                17.januar til 20.januar,
+                2.februar til 13.februar
+            ))
+            håndterVilkårsgrunnlag(3.vedtaksperiode)
+            håndterYtelser(3.vedtaksperiode)
+            håndterSimulering(3.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterSøknad(Sykdom(9.februar, 28.februar, 100.prosent), Ferie(28.februar, 28.februar))
+            assertIngenVarsel(RV_IV_7)
+        }
+    }
+
     private fun assertTidsnærInntektsopplysning(orgnummer: String, sykepengegrunnlagFør: Sykepengegrunnlag, sykepengegrunnlagEtter: Sykepengegrunnlag) {
         val inntektsopplysningerFørEndring = sykepengegrunnlagFør.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(orgnummer)
         val inntektsopplysningerEtterEndring = sykepengegrunnlagEtter.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(orgnummer)

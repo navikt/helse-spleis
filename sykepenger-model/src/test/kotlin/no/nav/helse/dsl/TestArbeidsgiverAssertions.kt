@@ -76,6 +76,10 @@ internal class TestArbeidsgiverAssertions(private val observat√∏r: TestObservat√
         val warnings = collectVarsler(*filtre)
         assertFalse(warnings.contains(warning), "\nFant et varsel vi ikke forventet:\n\t$warning\nWarnings funnet:\n\t${warnings.joinToString("\n\t")}\n")
     }
+    internal fun assertIngenVarsel(warning: Varselkode, vararg filtre: AktivitetsloggFilter) {
+        val varselkoder = collectVarselkoder(*filtre)
+        assertTrue(warning !in varselkoder, "\nFant et varsel vi ikke forventet:\n\t$warning\nWarnings funnet:\n\t${varselkoder.joinToString("\n\t")}\n")
+    }
 
     internal fun assertFunksjonellFeil(error: String, vararg filtre: AktivitetsloggFilter) {
         val errors = collectFunksjonelleFeil(*filtre)
