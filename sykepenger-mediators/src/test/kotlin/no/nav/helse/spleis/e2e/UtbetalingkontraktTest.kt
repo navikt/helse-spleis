@@ -36,8 +36,16 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendYtelser(0)
         val utbetalingEndret = testRapid.inspektør.siste("utbetaling_endret")
         assertUtbetalingEndret(utbetalingEndret, "NY", "IKKE_UTBETALT")
-        val nyUtbetaling = testRapid.inspektør.siste("vedtaksperiode_ny_utbetaling")
-        assertNyUtbetaling(nyUtbetaling)
+        @Language("JSON")
+        val forventet = """
+           {
+              "@event_name": "vedtaksperiode_ny_utbetaling",
+              "aktørId": "$AKTØRID",
+              "fødselsnummer": "$UNG_PERSON_FNR_2018",
+              "organisasjonsnummer": "$ORGNUMMER"
+           }
+        """
+        assertNyUtbetaling(forventet)
     }
 
     @Test
@@ -327,7 +335,6 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    //@ForventetFeil("https://trello.com/c/2tTTa7k9")
     fun `annullering ingen refusjon`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
@@ -371,14 +378,6 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
             assertTrue(avvisteDager.isNotEmpty())
             assertTrue(avvisteDager.all { it.hasNonNull("begrunnelser") })
         }
-    }
-
-    private fun assertNyUtbetaling(melding: JsonNode) {
-        assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
-        assertTrue(melding.path("aktørId").asText().isNotEmpty())
-        assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
-        assertTrue(melding.path("vedtaksperiodeId").asText().isNotEmpty())
-        assertTrue(melding.path("utbetalingId").asText().isNotEmpty())
     }
 
     private fun assertUtbetalingEndret(melding: JsonNode, fra: String, til: String, annullering: Boolean = false) {
@@ -467,6 +466,12 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     private fun assertDatotid(tekst: String) {
         assertTrue(tekst.isNotEmpty())
         assertDoesNotThrow { LocalDateTime.parse(tekst) }
+    }
+    private fun assertNyUtbetaling(forventetMelding: String) {
+        testRapid.assertUtgåendeMelding(forventetMelding) {
+            it.assertOgFjernUUID("utbetalingId")
+            it.assertOgFjernUUID("vedtaksperiodeId")
+        }
     }
 
     private fun assertUtbetalingAnnullert(forventetMelding: String) {
