@@ -1,22 +1,18 @@
 package no.nav.helse.spleis.e2e
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
+import no.nav.helse.spleis.e2e.KontraktAssertions.assertUtgåendeMelding
+import no.nav.helse.spleis.e2e.KontraktAssertions.assertOgFjernLocalDateTime
+import no.nav.helse.spleis.e2e.KontraktAssertions.assertOgFjernUUID
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.skyscreamer.jsonassert.JSONAssert
-import org.skyscreamer.jsonassert.JSONCompareMode
 
 internal class VedtakkontraktTest : AbstractEndToEndMediatorTest() {
 
@@ -126,32 +122,21 @@ internal class VedtakkontraktTest : AbstractEndToEndMediatorTest() {
         assertVedtakFattet(forventet, forventetUtbetalingEventNavn = "utbetaling_uten_utbetaling")
     }
 
-    private fun assertVedtakFattet(forventetJson: String, forventetUtbetalingEventNavn: String?) {
-        val faktiskJson = testRapid.inspektør.siste("vedtak_fattet") as ObjectNode
-        faktiskJson.assertOgFjern("@id") { UUID.fromString(it.asText()) }
-        faktiskJson.assertOgFjern("@opprettet") { LocalDateTime.parse(it.asText()) }
-        faktiskJson.assertOgFjern("@forårsaket_av") { check(it.isObject) }
-        faktiskJson.assertOgFjern("system_read_count") { check(it.isInt) }
-        faktiskJson.assertOgFjern("system_participating_services") { check(it.isArray) }
-        faktiskJson.assertOgFjern("vedtaksperiodeId") { UUID.fromString(it.asText()) }
-        if (forventetUtbetalingEventNavn != null) faktiskJson.assertOgFjern("utbetalingId") { UUID.fromString(it.asText()) }
-        faktiskJson.assertOgFjern("vedtakFattetTidspunkt") { LocalDateTime.parse(it.asText()) }
-        println(faktiskJson.toPrettyString())
-        JSONAssert.assertEquals(forventetJson, faktiskJson.toString(), JSONCompareMode.STRICT)
+    private fun assertVedtakFattet(forventetMelding: String, forventetUtbetalingEventNavn: String?) {
+        val vedtakFattet = testRapid.assertUtgåendeMelding(forventetMelding) {
+            it.assertOgFjernUUID("vedtaksperiodeId")
+            it.assertOgFjernLocalDateTime("vedtakFattetTidspunkt")
+            if (forventetUtbetalingEventNavn != null) it.assertOgFjernUUID("utbetalingId")
+        }
 
         if (forventetUtbetalingEventNavn != null) {
-            val vedtakFattetUtbetalingId = testRapid.inspektør.siste("vedtak_fattet").path("utbetalingId").asText()
+            val vedtakFattetUtbetalingId = vedtakFattet.path("utbetalingId").asText()
             val utbetalingEventUtbetalingId = testRapid.inspektør.siste(forventetUtbetalingEventNavn).path("utbetalingId").asText()
             assertEquals(vedtakFattetUtbetalingId, utbetalingEventUtbetalingId)
         } else {
             assertTrue(testRapid.inspektør.meldinger("utbetaling_utbetalt").isEmpty())
             assertTrue(testRapid.inspektør.meldinger("utbetaling_uten_utbetaling").isEmpty())
         }
-    }
-
-    private fun ObjectNode.assertOgFjern(key: String, validation:(value: JsonNode) -> Unit) {
-        assertDoesNotThrow { validation(path(key)) }
-        remove(key)
     }
 }
 
