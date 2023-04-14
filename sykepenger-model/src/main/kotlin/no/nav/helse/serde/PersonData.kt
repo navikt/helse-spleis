@@ -60,9 +60,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.Vedtaks
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.Companion.parseArbeidsgiverInntektsopplysninger
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData.Companion.parseArbeidsgiverInntektsopplysninger
-import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.Companion.grunnlagMap
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.OpptjeningData.ArbeidsgiverOpptjeningsgrunnlagData.Companion.tilArbeidsgiverOpptjeningsgrunnlag
-import no.nav.helse.serde.PersonData.VilkårsgrunnlagInnslagData.Companion.grunnlagMap
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagInnslagData.Companion.tilModellObjekt
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.somPersonidentifikator
@@ -109,6 +107,7 @@ internal data class PersonData(
     private val modelAktivitetslogg get() = aktivitetslogg?.konverterTilAktivitetslogg() ?: Aktivitetslogg()
     private val fnr by lazy { fødselsnummer.somPersonidentifikator() }
     private val alder by lazy { Alder(fødselsdato, dødsdato) }
+    private val vilkårsgrunnlaghistorikkBuilder = VilkårsgrunnlaghistorikkBuilder(vilkårsgrunnlagHistorikk)
 
     private fun person(jurist: MaskinellJurist, tidligereBehandlinger: List<Person> = emptyList()) = Person.ferdigPerson(
         aktørId = aktørId,
@@ -118,7 +117,7 @@ internal data class PersonData(
         aktivitetslogg = modelAktivitetslogg,
         opprettet = opprettet,
         infotrygdhistorikk = infotrygdhistorikk.tilModellObjekt(),
-        vilkårsgrunnlaghistorikk = vilkårsgrunnlagHistorikk.tilModellObjekt(alder),
+        vilkårsgrunnlaghistorikk = vilkårsgrunnlaghistorikkBuilder.build(alder),
         tidligereBehandlinger = tidligereBehandlinger,
         jurist = jurist
     )
@@ -132,7 +131,7 @@ internal data class PersonData(
                 this.aktørId,
                 this.fødselsnummer,
                 this.alder,
-                vilkårsgrunnlagHistorikk.grunnlagMap(alder),
+                vilkårsgrunnlaghistorikkBuilder::hentVilkårsgrunnlagelement,
                 personJurist
             )
         })
@@ -225,25 +224,51 @@ internal data class PersonData(
         }
     }
 
+    internal class VilkårsgrunnlaghistorikkBuilder(private val historikk: List<VilkårsgrunnlagInnslagData>) {
+        private val inntekter = mutableMapOf<UUID, no.nav.helse.person.inntekt.Inntektsopplysning>()
+        private val elementer = mutableMapOf<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>()
+
+        internal fun registrerVilkårsgrunnlagElement(id: UUID, element: () -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) =
+            elementer.getOrPut(id, element)
+        internal fun registrerInntekt(id: UUID, inntektsopplysning: () -> no.nav.helse.person.inntekt.Inntektsopplysning) =
+            inntekter.getOrPut(id, inntektsopplysning)
+
+        fun build(alder: Alder) =
+            historikk.tilModellObjekt(this, alder)
+
+        internal fun hentVilkårsgrunnlagelement(id: UUID) = elementer.getValue(id)
+        internal fun hentInntekt(id: UUID) = inntekter.getValue(id)
+    }
+
     data class VilkårsgrunnlagInnslagData(
         private val id: UUID,
         private val opprettet: LocalDateTime,
         private val vilkårsgrunnlag: List<VilkårsgrunnlagElementData>
     ) {
-        private fun tilModellobjekt(alder: Alder) = VilkårsgrunnlagHistorikk.Innslag.gjenopprett(
+        private fun tilModellobjekt(builder: VilkårsgrunnlaghistorikkBuilder, alder: Alder) = id to VilkårsgrunnlagHistorikk.Innslag.gjenopprett(
             id = id,
             opprettet = opprettet,
-            elementer = vilkårsgrunnlag.associate { it.parseDataForVilkårsvurdering(alder) }
+            elementer = vilkårsgrunnlag.associate { it.parseDataForVilkårsvurdering(builder, alder) }
         )
 
         internal companion object {
-            private fun List<VilkårsgrunnlagInnslagData>.parseVilkårsgrunnlag(alder: Alder) =
-                this.map { innslagData -> innslagData.tilModellobjekt(alder) }
+            private fun List<VilkårsgrunnlagInnslagData>.parseVilkårsgrunnlag(builder: VilkårsgrunnlaghistorikkBuilder, alder: Alder): List<VilkårsgrunnlagHistorikk.Innslag> {
+                // parser vilkårsgrunnlag fra eldste innslag (bakerst i listen) til nyeste (først i listen) fordi nyere inntekter kan peke på eldre inntekter (overstyringer)
+                val mellombelsResultat = this
+                    .asReversed()
+                    .map { innslagData -> innslagData.tilModellobjekt(builder, alder) }
+                    // snu rekkefølgen tilbake igjen
+                    .reversed()
+                this.bekreftRekkefølgeErIvaretatt(mellombelsResultat.map { it.first })
+                return mellombelsResultat.map { it.second }
+            }
 
-            internal fun List<VilkårsgrunnlagInnslagData>.tilModellObjekt(alder: Alder) = VilkårsgrunnlagHistorikk.ferdigVilkårsgrunnlagHistorikk(parseVilkårsgrunnlag(alder))
-            internal fun List<VilkårsgrunnlagInnslagData>.grunnlagMap(alder: Alder) = this
-                .flatMap { it.vilkårsgrunnlag }
-                .grunnlagMap(alder)
+            private fun List<VilkårsgrunnlagInnslagData>.bekreftRekkefølgeErIvaretatt(rekkefølge: List<UUID>) {
+                check(this.size == rekkefølge.size) { "antall innslag har blitt endret" }
+                check(this.zip(rekkefølge) { a, b -> a.id == b }.all { it }) { "rekkefølgen har endret seg, minst ett innslag ligger feil!" }
+            }
+
+            internal fun List<VilkårsgrunnlagInnslagData>.tilModellObjekt(builder: VilkårsgrunnlaghistorikkBuilder, alder: Alder) = VilkårsgrunnlagHistorikk.ferdigVilkårsgrunnlagHistorikk(parseVilkårsgrunnlag(builder, alder))
         }
     }
 
@@ -259,33 +284,32 @@ internal data class PersonData(
         private val meldingsreferanseId: UUID?,
         private val vilkårsgrunnlagId: UUID
     ) {
-        companion object {
-            fun List<VilkårsgrunnlagElementData>.grunnlagMap(alder: Alder) = this
-                .groupBy({ it.vilkårsgrunnlagId }) { it.parseDataForVilkårsvurdering(alder).second }
-                .mapValues { (_, vilkårsgrunnlag) -> vilkårsgrunnlag.first() }
-
-        }
-        internal fun parseDataForVilkårsvurdering(alder: Alder): Pair<LocalDate, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement> = skjæringstidspunkt to when (type) {
-            GrunnlagsdataType.Vilkårsprøving -> VilkårsgrunnlagHistorikk.Grunnlagsdata(
-                skjæringstidspunkt = skjæringstidspunkt,
-                sykepengegrunnlag = sykepengegrunnlag.parseSykepengegrunnlag(alder, skjæringstidspunkt),
-                sammenligningsgrunnlag = sammenligningsgrunnlag!!.parseSammenligningsgrunnlag(),
-                avviksprosent = avviksprosent?.ratio,
-                opptjening = opptjening!!.tilOpptjening(skjæringstidspunkt),
-                medlemskapstatus = when (medlemskapstatus!!) {
-                    JsonMedlemskapstatus.JA -> Medlemskapsvurdering.Medlemskapstatus.Ja
-                    JsonMedlemskapstatus.NEI -> Medlemskapsvurdering.Medlemskapstatus.Nei
-                    JsonMedlemskapstatus.VET_IKKE -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
-                },
-                vurdertOk = vurdertOk!!,
-                meldingsreferanseId = meldingsreferanseId,
-                vilkårsgrunnlagId = vilkårsgrunnlagId
-            )
-            GrunnlagsdataType.Infotrygd -> VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
-                skjæringstidspunkt = skjæringstidspunkt,
-                sykepengegrunnlag = sykepengegrunnlag.parseSykepengegrunnlag(alder, skjæringstidspunkt),
-                vilkårsgrunnlagId = vilkårsgrunnlagId
-            )
+        internal fun parseDataForVilkårsvurdering(
+            builder: VilkårsgrunnlaghistorikkBuilder,
+            alder: Alder,
+        ) = skjæringstidspunkt to builder.registrerVilkårsgrunnlagElement(vilkårsgrunnlagId) {
+            when (type) {
+                GrunnlagsdataType.Vilkårsprøving -> VilkårsgrunnlagHistorikk.Grunnlagsdata(
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    sykepengegrunnlag = sykepengegrunnlag.parseSykepengegrunnlag(builder, alder, skjæringstidspunkt),
+                    sammenligningsgrunnlag = sammenligningsgrunnlag!!.parseSammenligningsgrunnlag(),
+                    avviksprosent = avviksprosent?.ratio,
+                    opptjening = opptjening!!.tilOpptjening(skjæringstidspunkt),
+                    medlemskapstatus = when (medlemskapstatus!!) {
+                        JsonMedlemskapstatus.JA -> Medlemskapsvurdering.Medlemskapstatus.Ja
+                        JsonMedlemskapstatus.NEI -> Medlemskapsvurdering.Medlemskapstatus.Nei
+                        JsonMedlemskapstatus.VET_IKKE -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
+                    },
+                    vurdertOk = vurdertOk!!,
+                    meldingsreferanseId = meldingsreferanseId,
+                    vilkårsgrunnlagId = vilkårsgrunnlagId
+                )
+                GrunnlagsdataType.Infotrygd -> VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    sykepengegrunnlag = sykepengegrunnlag.parseSykepengegrunnlag(builder, alder, skjæringstidspunkt),
+                    vilkårsgrunnlagId = vilkårsgrunnlagId
+                )
+            }
         }
 
         enum class GrunnlagsdataType {
@@ -302,12 +326,15 @@ internal data class PersonData(
             private val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningData>,
             private val vurdertInfotrygd: Boolean?, // TODO: migrere denne i json
         ) {
-
-            internal fun parseSykepengegrunnlag(alder: Alder, skjæringstidspunkt: LocalDate): Sykepengegrunnlag = Sykepengegrunnlag(
+            internal fun parseSykepengegrunnlag(
+                builder: VilkårsgrunnlaghistorikkBuilder,
+                alder: Alder,
+                skjæringstidspunkt: LocalDate
+            ) = Sykepengegrunnlag(
                 alder = alder,
                 skjæringstidspunkt = skjæringstidspunkt,
-                arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger.parseArbeidsgiverInntektsopplysninger(),
-                deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.parseArbeidsgiverInntektsopplysninger(),
+                arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger.parseArbeidsgiverInntektsopplysninger(builder),
+                deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.parseArbeidsgiverInntektsopplysninger(builder),
                 vurdertInfotrygd = this.vurdertInfotrygd ?: (begrensning == Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD), // TODO: migrere denne til boolean i json
                 skjønnsmessigFastsattBeregningsgrunnlag = skjønnsmessigFastsattBeregningsgrunnlag?.årlig,
                 `6G` = grunnbeløp?.årlig
@@ -334,9 +361,9 @@ internal data class PersonData(
                 private fun List<ArbeidsgiverData.RefusjonsopplysningData>.tilModellobjekt() =
                     map { it.tilModellobjekt() }
 
-                internal fun List<ArbeidsgiverInntektsopplysningData>.parseArbeidsgiverInntektsopplysninger(): List<ArbeidsgiverInntektsopplysning> =
+                internal fun List<ArbeidsgiverInntektsopplysningData>.parseArbeidsgiverInntektsopplysninger(builder: VilkårsgrunnlaghistorikkBuilder) =
                     map {
-                        ArbeidsgiverInntektsopplysning(it.orgnummer, it.inntektsopplysning.tilModellobjekt(), it.refusjonsopplysninger.tilModellobjekt().gjennopprett())
+                        ArbeidsgiverInntektsopplysning(it.orgnummer, it.inntektsopplysning.tilModellobjekt(builder), it.refusjonsopplysninger.tilModellobjekt().gjennopprett())
                     }
             }
 
@@ -377,54 +404,61 @@ internal data class PersonData(
                 ) {
                     internal fun tilModellobjekt() = Subsumsjon(paragraf, ledd, bokstav)
                 }
-                internal fun tilModellobjekt() =
-                    when (kilde.let(Inntektsopplysningskilde::valueOf)) {
-                        Inntektsopplysningskilde.INFOTRYGD ->
-                            Infotrygd(
-                                id = id,
-                                dato = dato,
-                                hendelseId = ekteHendelseId,
-                                beløp = requireNotNull(beløp).månedlig,
-                                tidsstempel = tidsstempel
-                            )
-                        Inntektsopplysningskilde.INNTEKTSMELDING ->
-                            Inntektsmelding(
-                                id = id,
-                                dato = dato,
-                                hendelseId = ekteHendelseId,
-                                beløp = requireNotNull(beløp).månedlig,
-                                tidsstempel = tidsstempel
-                            )
-                        Inntektsopplysningskilde.IKKE_RAPPORTERT ->
-                            IkkeRapportert(
-                                id = id,
-                                hendelseId = ekteHendelseId,
-                                dato = dato,
-                                tidsstempel = tidsstempel
-                            )
-                        Inntektsopplysningskilde.SAKSBEHANDLER ->
-                            Saksbehandler(
-                                id = id,
-                                dato = dato,
-                                hendelseId = ekteHendelseId,
-                                beløp = requireNotNull(beløp).månedlig,
-                                forklaring = forklaring,
-                                subsumsjon = subsumsjon?.tilModellobjekt(),
-                                overstyrInntekt = null,
-                                tidsstempel = tidsstempel
-                            )
-                        Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG -> SkattSykepengegrunnlag(
-                            id = id,
-                            dato = dato,
-                            inntektsopplysninger = requireNotNull(skatteopplysninger).map { skatteData ->
-                                skatteData.tilModellobjekt()
-                            },
-                            ansattPerioder = emptyList(),
-                            tidsstempel = tidsstempel,
-                            hendelseId = ekteHendelseId
-                        )
-                        else -> error("Fant ${kilde}. Det er ugyldig for sykepengegrunnlag")
+                internal fun tilModellobjekt(builder: VilkårsgrunnlaghistorikkBuilder): no.nav.helse.person.inntekt.Inntektsopplysning {
+                    val opplysning = builder.registrerInntekt(id) {
+                        when (kilde.let(Inntektsopplysningskilde::valueOf)) {
+                            Inntektsopplysningskilde.INFOTRYGD -> somInfotrygd()
+                            Inntektsopplysningskilde.INNTEKTSMELDING -> somInntektsmelding()
+                            Inntektsopplysningskilde.IKKE_RAPPORTERT -> somIkkeRapportert()
+                            Inntektsopplysningskilde.SAKSBEHANDLER -> somSaksbehandler(builder)
+                            Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG -> somSkattSykepengegrunnlag()
+                            else -> error("Fant ${kilde}. Det er ugyldig for sykepengegrunnlag")
+                        }
                     }
+                    return opplysning
+                }
+
+                private fun somSaksbehandler(builder: VilkårsgrunnlaghistorikkBuilder) =
+                    Saksbehandler(
+                        id = id,
+                        dato = dato,
+                        hendelseId = ekteHendelseId,
+                        beløp = requireNotNull(beløp).månedlig,
+                        forklaring = forklaring,
+                        subsumsjon = subsumsjon?.tilModellobjekt(),
+                        overstyrtInntekt = overstyrtInntektId?.let { uuid -> builder.hentInntekt(uuid) },
+                        tidsstempel = tidsstempel
+                    )
+                private fun somIkkeRapportert() = IkkeRapportert(
+                    id = id,
+                    hendelseId = ekteHendelseId,
+                    dato = dato,
+                    tidsstempel = tidsstempel
+                )
+                private fun somInntektsmelding() = Inntektsmelding(
+                    id = id,
+                    dato = dato,
+                    hendelseId = ekteHendelseId,
+                    beløp = requireNotNull(beløp).månedlig,
+                    tidsstempel = tidsstempel
+                )
+                private fun somInfotrygd() = Infotrygd(
+                    id = id,
+                    dato = dato,
+                    hendelseId = ekteHendelseId,
+                    beløp = requireNotNull(beløp).månedlig,
+                    tidsstempel = tidsstempel
+                )
+                private fun somSkattSykepengegrunnlag() = SkattSykepengegrunnlag(
+                    id = id,
+                    dato = dato,
+                    inntektsopplysninger = requireNotNull(skatteopplysninger).map { skatteData ->
+                        skatteData.tilModellobjekt()
+                    },
+                    ansattPerioder = emptyList(),
+                    tidsstempel = tidsstempel,
+                    hendelseId = ekteHendelseId
+                )
             }
         }
 
@@ -585,7 +619,7 @@ internal data class PersonData(
             aktørId: String,
             fødselsnummer: String,
             alder: Alder,
-            grunnlagMap: Map<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>,
+            grunnlagoppslag: (UUID) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
             jurist: MaskinellJurist
         ): Arbeidsgiver {
             val arbeidsgiverJurist = jurist.medOrganisasjonsnummer(organisasjonsnummer)
@@ -613,7 +647,7 @@ internal data class PersonData(
                     aktørId,
                     fødselsnummer,
                     this.organisasjonsnummer,
-                    grunnlagMap,
+                    grunnlagoppslag,
                     utbetalingMap,
                     inntektsmeldingInfo,
                     arbeidsgiverJurist
@@ -628,7 +662,7 @@ internal data class PersonData(
                         aktørId,
                         fødselsnummer,
                         this.organisasjonsnummer,
-                        grunnlagMap,
+                        grunnlagoppslag,
                         utbetalingMap,
                         inntektsmeldingInfo,
                         arbeidsgiverJurist
@@ -916,9 +950,9 @@ internal data class PersonData(
                 private val utbetalingId: UUID
             ) {
                 companion object {
-                    fun List<VedtaksperiodeUtbetalingData>.tilModellobjekt(grunnlag: Map<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>) =
+                    fun List<VedtaksperiodeUtbetalingData>.tilModellobjekt(grunnlagoppslag: (UUID) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetalinger: Map<UUID, Utbetaling>) =
                         this.map { (grunnlagId, utbetalingId) ->
-                            grunnlag.getValue(grunnlagId) to utbetalinger.getValue(utbetalingId)
+                            grunnlagoppslag(grunnlagId) to utbetalinger.getValue(utbetalingId)
                         }
                 }
             }
@@ -928,7 +962,7 @@ internal data class PersonData(
                 aktørId: String,
                 fødselsnummer: String,
                 organisasjonsnummer: String,
-                grunnlag: Map<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>,
+                grunnlagoppslag: (UUID) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
                 utbetalinger: Map<UUID, Utbetaling>,
                 inntektsmeldingInfoHistorikk: List<InntektsmeldingInfoHistorikkElementData>,
                 jurist: MaskinellJurist
@@ -955,7 +989,7 @@ internal data class PersonData(
                     periode = Periode(fom, tom),
                     sykmeldingsperiode = sykmeldingsperiode,
                     utbetalinger = VedtaksperiodeUtbetalinger(
-                        utbetalinger = this.utbetalinger.tilModellobjekt(grunnlag, utbetalinger)
+                        utbetalinger = this.utbetalinger.tilModellobjekt(grunnlagoppslag, utbetalinger)
                     ),
                     utbetalingstidslinje = this.utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
                     forlengelseFraInfotrygd = forlengelseFraInfotrygd,
