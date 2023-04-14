@@ -23,7 +23,6 @@ class ArbeidsgiverInntekt(
 ) {
     internal fun tilSykepengegrunnlag(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, ansattPerioder: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold> = emptyList()) =
         SkattSykepengegrunnlag(
-            id = UUID.randomUUID(),
             hendelseId = meldingsreferanseId,
             dato = skjæringstidspunkt,
             inntektsopplysninger = inntekter.map { it.somInntekt(meldingsreferanseId) },
@@ -41,12 +40,10 @@ class ArbeidsgiverInntekt(
         internal fun List<ArbeidsgiverInntekt>.avklarSykepengegrunnlag(hendelse: IAktivitetslogg, person: Person, opptjening: Map<String, List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold>>, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
             val rapporteArbeidsforhold = opptjening.mapValues { (_, ansattPerioder) ->
                 SkattSykepengegrunnlag(
-                    id = UUID.randomUUID(),
                     hendelseId = meldingsreferanseId,
                     dato = skjæringstidspunkt,
                     inntektsopplysninger = emptyList(),
-                    ansattPerioder = ansattPerioder.somAnsattPerioder(),
-                    tidsstempel = LocalDateTime.now()
+                    ansattPerioder = ansattPerioder.somAnsattPerioder()
                 )
             }
             val rapporterteInntekter = this.associateBy({ it.arbeidsgiver }) { it.tilSykepengegrunnlag(skjæringstidspunkt, meldingsreferanseId) }

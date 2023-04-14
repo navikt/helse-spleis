@@ -25,7 +25,6 @@ internal class SkattSykepengegrunnlagTest {
     fun `inntekt må gjelde skjæringstidspunktet`() {
         val skjæringstidspunkt = 2.april
         val skattSykepengegrunnlag = SkattSykepengegrunnlag(
-            id = UUID.randomUUID(),
             hendelseId = UUID.randomUUID(),
             dato = skjæringstidspunkt,
             inntektsopplysninger = listOf(
@@ -59,8 +58,7 @@ internal class SkattSykepengegrunnlagTest {
             ),
             ansattPerioder = listOf(
                 Arbeidsforhold(EPOCH, null, false)
-            ).somAnsattPerioder(),
-            tidsstempel = LocalDateTime.now()
+            ).somAnsattPerioder()
         )
         assertNull(emptyList<Inntektsmelding>().avklarSykepengegrunnlag(
             skjæringstidspunkt.forrigeDag,
@@ -78,7 +76,6 @@ internal class SkattSykepengegrunnlagTest {
     fun `inntekt må være innenfor 2 mnd fra skjæringstidspunktet`() {
         val skjæringstidspunkt = 2.april
         val skattSykepengegrunnlag1 = SkattSykepengegrunnlag(
-            id = UUID.randomUUID(),
             hendelseId = UUID.randomUUID(),
             dato = skjæringstidspunkt,
             inntektsopplysninger = listOf(
@@ -103,11 +100,9 @@ internal class SkattSykepengegrunnlagTest {
             ),
             ansattPerioder = listOf(
                 Arbeidsforhold(EPOCH, null, false)
-            ).somAnsattPerioder(),
-            tidsstempel = LocalDateTime.now()
+            ).somAnsattPerioder()
         )
         val skattSykepengegrunnlag2 = SkattSykepengegrunnlag(
-            id = UUID.randomUUID(),
             hendelseId = UUID.randomUUID(),
             dato = skjæringstidspunkt,
             inntektsopplysninger = listOf(
@@ -123,8 +118,7 @@ internal class SkattSykepengegrunnlagTest {
             ),
             ansattPerioder = listOf(
                 Arbeidsforhold(EPOCH, null, false)
-            ).somAnsattPerioder(),
-            tidsstempel = LocalDateTime.now()
+            ).somAnsattPerioder()
         )
         assertTrue(skattSykepengegrunnlag1 === emptyList<Inntektsmelding>().avklarSykepengegrunnlag(
             skjæringstidspunkt,
@@ -142,24 +136,20 @@ internal class SkattSykepengegrunnlagTest {
     fun `nytt arbeidsforhold innenfor 2 mnd telles som ikke rapportert inntekt`() {
         val skjæringstidspunkt = 2.april
         val skattSykepengegrunnlag1 = SkattSykepengegrunnlag(
-            id = UUID.randomUUID(),
             hendelseId = UUID.randomUUID(),
             dato = skjæringstidspunkt,
             inntektsopplysninger = emptyList(),
             ansattPerioder = listOf(
                 Arbeidsforhold(1.februar, null, false)
-            ).somAnsattPerioder(),
-            tidsstempel = LocalDateTime.now()
+            ).somAnsattPerioder()
         )
         val skattSykepengegrunnlag2 = SkattSykepengegrunnlag(
-            id = UUID.randomUUID(),
             hendelseId = UUID.randomUUID(),
             dato = skjæringstidspunkt,
             inntektsopplysninger = emptyList(),
             ansattPerioder = listOf(
                 Arbeidsforhold(1.januar, null, false)
-            ).somAnsattPerioder(),
-            tidsstempel = LocalDateTime.now()
+            ).somAnsattPerioder()
         )
         val resultat = emptyList<Inntektsmelding>().avklarSykepengegrunnlag(
             skjæringstidspunkt,

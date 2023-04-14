@@ -172,7 +172,7 @@ class Inntektsmelding(
 
         val (årligInntekt, dagligInntekt) = beregnetInntekt.reflection { årlig, _, daglig, _ -> årlig to daglig }
         subsumsjonObserver.`§ 8-10 ledd 3`(årligInntekt, dagligInntekt)
-        inntektshistorikk.leggTil(Inntektsmelding(UUID.randomUUID(), inntektsdato, meldingsreferanseId(), beregnetInntekt, LocalDateTime.now()))
+        inntektshistorikk.leggTil(Inntektsmelding(inntektsdato, meldingsreferanseId(), beregnetInntekt))
     }
 
     internal fun cacheRefusjon(refusjonshistorikk: Refusjonshistorikk) {
@@ -189,7 +189,7 @@ class Inntektsmelding(
         builder.leggTilInntekt(
             ArbeidsgiverInntektsopplysning(
                 organisasjonsnummer,
-                Inntektsmelding(UUID.randomUUID(), inntektsdato, meldingsreferanseId(), beregnetInntekt, LocalDateTime.now()),
+                Inntektsmelding(inntektsdato, meldingsreferanseId(), beregnetInntekt),
                 refusjon.refusjonsopplysninger(meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
             )
         )

@@ -329,7 +329,7 @@ internal class InfotrygdhistorikkTest {
             Inntekter(
                 organisasjonsnummer = "a1",
                 vilkårsgrunnlagHistorikk = mapOf(
-                    1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
+                    1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
                 ).somVilkårsgrunnlagHistorikk("a1"),
                 regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
                 subsumsjonObserver = SubsumsjonObserver.NullObserver
@@ -350,7 +350,7 @@ internal class InfotrygdhistorikkTest {
             Inntekter(
                 organisasjonsnummer = "a1",
                 vilkårsgrunnlagHistorikk = mapOf(
-                    1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
+                    1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
                 ).somVilkårsgrunnlagHistorikk("a1"),
                 regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
                 subsumsjonObserver = SubsumsjonObserver.NullObserver

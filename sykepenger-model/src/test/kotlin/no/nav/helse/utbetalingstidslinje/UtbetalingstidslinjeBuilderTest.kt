@@ -524,9 +524,9 @@ internal class UtbetalingstidslinjeBuilderTest {
     private val perioder: MutableList<Arbeidsgiverperiode> = mutableListOf()
 
     private val inntektsopplysningPerSkjæringstidspunkt = mapOf(
-        1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 31000.månedlig, LocalDateTime.now()),
-        1.februar to Inntektsmelding(UUID.randomUUID(), 1.februar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now()),
-        1.mars to Inntektsmelding(UUID.randomUUID(), 1.mars, UUID.randomUUID(), 50000.månedlig, LocalDateTime.now()),
+        1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 31000.månedlig, LocalDateTime.now()),
+        1.februar to Inntektsmelding(1.februar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now()),
+        1.mars to Inntektsmelding(1.mars, UUID.randomUUID(), 50000.månedlig, LocalDateTime.now()),
     )
 
     private fun undersøke(tidslinje: Sykdomstidslinje, delegator: ((Arbeidsgiverperiodeteller, SykdomstidslinjeVisitor) -> SykdomstidslinjeVisitor)? = null) {

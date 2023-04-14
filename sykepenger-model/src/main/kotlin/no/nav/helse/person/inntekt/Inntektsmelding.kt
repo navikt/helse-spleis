@@ -11,12 +11,13 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.økonomi.Inntekt
 
 internal class Inntektsmelding(
-    private val id: UUID,
+    id: UUID,
     dato: LocalDate,
     private val hendelseId: UUID,
     private val beløp: Inntekt,
     tidsstempel: LocalDateTime
-) : AvklarbarSykepengegrunnlag(dato, tidsstempel) {
+) : AvklarbarSykepengegrunnlag(id, dato, tidsstempel) {
+    internal constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime = LocalDateTime.now()) : this(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel)
 
     override fun accept(visitor: InntektsopplysningVisitor) {
         accept(visitor as InntektsmeldingVisitor)
@@ -56,6 +57,6 @@ internal class Inntektsmelding(
             hendelse.info("Det er ${oppholdsperiodeMellom.count()} dager mellom forrige vedtaksperiodeperiode og det er en antagelse om at det er ny arbeidsgiverperiode, og dette utløser varsel om gjenbruk.")
             hendelse.varsel(RV_IV_7)
         }
-        return Inntektsmelding(UUID.randomUUID(), nyDato, hendelseId, beløp, tidsstempel)
+        return Inntektsmelding(nyDato, hendelseId, beløp, tidsstempel)
     }
 }

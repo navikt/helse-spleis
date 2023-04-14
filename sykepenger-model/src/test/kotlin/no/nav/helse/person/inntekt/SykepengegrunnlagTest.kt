@@ -337,7 +337,7 @@ internal class SykepengegrunnlagTest {
             alder = UNG_PERSON_FØDSELSDATO.alder,
             skjæringstidspunkt = 1.januar,
             arbeidsgiverInntektsopplysninger = listOf(
-                ArbeidsgiverInntektsopplysning("orgnr", Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), inntekt, LocalDateTime.now()), Refusjonsopplysninger())
+                ArbeidsgiverInntektsopplysning("orgnr", Inntektsmelding(1.januar, UUID.randomUUID(), inntekt, LocalDateTime.now()), Refusjonsopplysninger())
             ),
             deaktiverteArbeidsforhold = emptyList(),
             vurdertInfotrygd = false,
@@ -351,10 +351,10 @@ internal class SykepengegrunnlagTest {
     @Test
     fun `overstyre inntekt og refusjon - endre til samme`() {
         val opprinnelig = listOf(
-            ArbeidsgiverInntektsopplysning("a1", Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
+            ArbeidsgiverInntektsopplysning("a1", Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
                 leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
             }.build()),
-            ArbeidsgiverInntektsopplysning("a2", Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
+            ArbeidsgiverInntektsopplysning("a2", Inntektsmelding(1.januar, UUID.randomUUID(), 5000.månedlig, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
                 leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, INGEN), LocalDateTime.now())
             }.build()),
         )
@@ -368,8 +368,8 @@ internal class SykepengegrunnlagTest {
     }
     @Test
     fun `overstyre inntekt og refusjon - endrer kun refusjon`() {
-        val a1Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
-        val a2Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig, LocalDateTime.now())
+        val a1Inntektsopplysning = Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
+        val a2Inntektsopplysning = Inntektsmelding(1.januar, UUID.randomUUID(), 5000.månedlig, LocalDateTime.now())
         val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, INGEN), LocalDateTime.now())
         }.build()
@@ -392,8 +392,8 @@ internal class SykepengegrunnlagTest {
     }
     @Test
     fun `overstyre inntekt og refusjon - endrer kun inntekt`() {
-        val a1Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
-        val a2Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig, LocalDateTime.now())
+        val a1Inntektsopplysning = Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
+        val a2Inntektsopplysning = Inntektsmelding(1.januar, UUID.randomUUID(), 5000.månedlig, LocalDateTime.now())
         val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, INGEN), LocalDateTime.now())
         }.build()
@@ -445,8 +445,8 @@ internal class SykepengegrunnlagTest {
     }
     @Test
     fun `overstyre inntekt og refusjon - forsøker å legge til ny arbeidsgiver`() {
-        val a1Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
-        val a2Inntektsopplysning = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 5000.månedlig, LocalDateTime.now())
+        val a1Inntektsopplysning = Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
+        val a2Inntektsopplysning = Inntektsmelding(1.januar, UUID.randomUUID(), 5000.månedlig, LocalDateTime.now())
         val a2Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, INGEN), LocalDateTime.now())
         }.build()
@@ -497,7 +497,6 @@ internal class SykepengegrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     inntektsopplysning = Inntektsmelding(
-                        id = UUID.randomUUID(),
                         dato = skjæringstidspunkt,
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
@@ -508,7 +507,6 @@ internal class SykepengegrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
                     inntektsopplysning = SkattSykepengegrunnlag(
-                        id = UUID.randomUUID(),
                         hendelseId = UUID.randomUUID(),
                         dato = skjæringstidspunkt,
                         inntektsopplysninger = listOf(
@@ -522,7 +520,7 @@ internal class SykepengegrunnlagTest {
                                 tidsstempel = LocalDateTime.now()
                             )
                         ),
-                        tidsstempel = LocalDateTime.now()
+                        ansattPerioder = emptyList()
                     ),
                     refusjonsopplysninger = Refusjonsopplysninger()
                 )
@@ -573,7 +571,6 @@ internal class SykepengegrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     inntektsopplysning = Inntektsmelding(
-                        id = UUID.randomUUID(),
                         dato = førsteFraværsdagAG1,
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
@@ -584,7 +581,6 @@ internal class SykepengegrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
                     inntektsopplysning = SkattSykepengegrunnlag(
-                        id = UUID.randomUUID(),
                         hendelseId = UUID.randomUUID(),
                         dato = skjæringstidspunkt,
                         inntektsopplysninger = listOf(
@@ -598,7 +594,7 @@ internal class SykepengegrunnlagTest {
                                 tidsstempel = LocalDateTime.now()
                             )
                         ),
-                        tidsstempel = LocalDateTime.now()
+                        ansattPerioder = emptyList()
                     ),
                     refusjonsopplysninger = Refusjonsopplysninger()
                 )
@@ -628,7 +624,6 @@ internal class SykepengegrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     inntektsopplysning = Inntektsmelding(
-                        id = UUID.randomUUID(),
                         dato = førsteFraværsdagAG1,
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
@@ -639,7 +634,6 @@ internal class SykepengegrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
                     inntektsopplysning = Inntektsmelding(
-                        id = UUID.randomUUID(),
                         dato = førsteFraværsdagAG2,
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
@@ -671,7 +665,6 @@ internal class SykepengegrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     inntektsopplysning = Inntektsmelding(
-                        id = UUID.randomUUID(),
                         dato = skjæringstidspunkt,
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
@@ -682,7 +675,6 @@ internal class SykepengegrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
                     inntektsopplysning = Inntektsmelding(
-                        id = UUID.randomUUID(),
                         dato = skjæringstidspunkt,
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
@@ -746,7 +738,6 @@ internal class SykepengegrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     inntektsopplysning = Inntektsmelding(
-                        id = UUID.randomUUID(),
                         dato = førsteFraværsdagAG1,
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
@@ -757,7 +748,6 @@ internal class SykepengegrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
                     inntektsopplysning = Inntektsmelding(
-                        id = UUID.randomUUID(),
                         dato = førsteFraværsdagAG2,
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
@@ -789,7 +779,6 @@ internal class SykepengegrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     inntektsopplysning = Inntektsmelding(
-                        id = UUID.randomUUID(),
                         dato = skjæringstidspunkt,
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,
@@ -847,7 +836,6 @@ internal class SykepengegrunnlagTest {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
                     inntektsopplysning = Inntektsmelding(
-                        id = UUID.randomUUID(),
                         dato = skjæringstidspunkt,
                         hendelseId = UUID.randomUUID(),
                         beløp = 25000.månedlig,

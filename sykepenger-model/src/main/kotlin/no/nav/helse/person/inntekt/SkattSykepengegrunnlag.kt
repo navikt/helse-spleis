@@ -10,24 +10,24 @@ import no.nav.helse.person.inntekt.Skatteopplysning.Companion.sisteMåneder
 import no.nav.helse.økonomi.Inntekt
 
 internal class SkattSykepengegrunnlag(
-    private val id: UUID,
+    id: UUID,
     private val hendelseId: UUID,
     dato: LocalDate,
     inntektsopplysninger: List<Skatteopplysning>,
     private val ansattPerioder: List<AnsattPeriode>,
     tidsstempel: LocalDateTime
-) : AvklarbarSykepengegrunnlag(dato, tidsstempel) {
+) : AvklarbarSykepengegrunnlag(id, dato, tidsstempel) {
     private companion object {
         private const val MAKS_INNTEKT_GAP = 2
     }
 
     internal constructor(
-        id: UUID,
         hendelseId: UUID,
         dato: LocalDate,
         inntektsopplysninger: List<Skatteopplysning>,
-        tidsstempel: LocalDateTime
-    ) : this(id, hendelseId, dato, inntektsopplysninger, emptyList(), tidsstempel)
+        ansattPerioder: List<AnsattPeriode>,
+        tidsstempel: LocalDateTime = LocalDateTime.now()
+    ) : this(UUID.randomUUID(), hendelseId, dato, inntektsopplysninger, ansattPerioder, tidsstempel)
 
     private val inntektsopplysninger = Skatteopplysning.sisteTreMåneder(dato, inntektsopplysninger)
     private val beløp = Skatteopplysning.omregnetÅrsinntekt(this.inntektsopplysninger)
@@ -52,7 +52,6 @@ internal class SkattSykepengegrunnlag(
         // nyoppstartet arbeidsforhold (startdato innen 2 mnd fra skjæringstidspunktet), og ingen inntekter foreligger:
         // todo bare returnere "this" og mappe ut IKKE_RAPPORTERT i SpeilBuilder?
         return IkkeRapportert(
-            id = UUID.randomUUID(),
             dato = this.dato,
             tidsstempel = this.tidsstempel
         )

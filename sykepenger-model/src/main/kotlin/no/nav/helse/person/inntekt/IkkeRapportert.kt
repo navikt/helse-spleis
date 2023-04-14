@@ -8,10 +8,11 @@ import no.nav.helse.økonomi.Inntekt
 
 // TODO: legge til hendelseId fra SkattSykepengegrunnlag
 internal class IkkeRapportert(
-    private val id: UUID,
+    id: UUID,
     dato: LocalDate,
     tidsstempel: LocalDateTime
-) : AvklarbarSykepengegrunnlag(dato, tidsstempel) {
+) : AvklarbarSykepengegrunnlag(id, dato, tidsstempel) {
+    internal constructor(dato: LocalDate, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), dato, tidsstempel)
     override fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
         takeIf { this.dato == skjæringstidspunkt }
 

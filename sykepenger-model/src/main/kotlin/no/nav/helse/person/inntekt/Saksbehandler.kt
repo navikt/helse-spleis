@@ -12,15 +12,14 @@ import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 
 class Saksbehandler internal constructor(
-    private val id: UUID,
+    id: UUID,
     dato: LocalDate,
     private val hendelseId: UUID,
     private val beløp: Inntekt,
     private val forklaring: String?,
     private val subsumsjon: Subsumsjon?,
     tidsstempel: LocalDateTime
-) : Inntektsopplysning(dato, tidsstempel) {
-
+) : Inntektsopplysning(id, dato, tidsstempel) {
     constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, forklaring: String, subsumsjon: Subsumsjon?, tidsstempel: LocalDateTime) : this(UUID.randomUUID(), dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
 
     override fun accept(visitor: InntektsopplysningVisitor) {

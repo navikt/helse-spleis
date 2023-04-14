@@ -62,14 +62,12 @@ internal class InntektshistorikkTest {
             1.februar,
             1.februar,
             SkattSykepengegrunnlag(
-                id = UUID.randomUUID(),
                 hendelseId = UUID.randomUUID(),
                 dato = 1.februar,
                 inntektsopplysninger = emptyList(),
                 ansattPerioder = listOf(
                     Arbeidsforhold(1.januar, null, false)
-                ).somAnsattPerioder(),
-                tidsstempel = LocalDateTime.now()
+                ).somAnsattPerioder()
             )
         )
         assertNotNull(opplysning)
@@ -83,14 +81,12 @@ internal class InntektshistorikkTest {
             1.februar,
             1.februar,
             SkattSykepengegrunnlag(
-                id = UUID.randomUUID(),
                 hendelseId = UUID.randomUUID(),
                 dato = 1.februar,
                 inntektsopplysninger = emptyList(),
                 ansattPerioder = listOf(
                     Arbeidsforhold(1.januar, null, true)
-                ).somAnsattPerioder(),
-                tidsstempel = LocalDateTime.now()
+                ).somAnsattPerioder()
             )
         )
         assertNotNull(opplysning)
@@ -202,7 +198,7 @@ internal class InntektshistorikkTest {
     @Test
     fun `Inntekt fra skatt er minst 0 kroner`() {
         val skattComposite = SkattSykepengegrunnlag(
-            UUID.randomUUID(), UUID.randomUUID(), 1.januar, inntektsopplysninger = listOf(
+            UUID.randomUUID(), 1.januar, inntektsopplysninger = listOf(
                 Skatteopplysning(
                     hendelseId = UUID.randomUUID(),
                     beløp = (-2500).daglig,
@@ -211,7 +207,7 @@ internal class InntektshistorikkTest {
                     fordel = "fordel",
                     beskrivelse = "beskrivelse"
                 ),
-            ), LocalDateTime.now()
+            ), emptyList()
         )
         assertEquals(INGEN, skattComposite.inspektør.beløp)
     }

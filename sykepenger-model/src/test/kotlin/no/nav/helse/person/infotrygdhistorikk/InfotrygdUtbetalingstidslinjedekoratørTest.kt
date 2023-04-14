@@ -36,7 +36,7 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
         val builder = UtbetalingstidslinjeBuilder(
             Inntekter(
                 vilkårsgrunnlagHistorikk = mapOf(
-                    1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
+                    1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
                 ).somVilkårsgrunnlagHistorikk("a1"),
                 organisasjonsnummer = "a1",
                 regler = NormalArbeidstaker,
@@ -54,7 +54,7 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
         val builder = UtbetalingstidslinjeBuilder(
             Inntekter(
                 vilkårsgrunnlagHistorikk = mapOf(
-                    1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
+                    1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
                 ).somVilkårsgrunnlagHistorikk("a1"),
                 organisasjonsnummer = "a1",
                 regler = NormalArbeidstaker,
@@ -72,7 +72,7 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
         val builder = UtbetalingstidslinjeBuilder(
             Inntekter(
                 vilkårsgrunnlagHistorikk = mapOf(
-                    1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
+                    1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
                 ).somVilkårsgrunnlagHistorikk("a1"),
                 organisasjonsnummer = "a1",
                 regler = NormalArbeidstaker,
@@ -90,7 +90,7 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
         val builder = UtbetalingstidslinjeBuilder(
             Inntekter(
                 vilkårsgrunnlagHistorikk = mapOf(
-                    1.januar to Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
+                    1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
                 ).somVilkårsgrunnlagHistorikk("a1"),
                 organisasjonsnummer = "a1",
                 regler = NormalArbeidstaker,

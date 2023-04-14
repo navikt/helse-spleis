@@ -27,7 +27,7 @@ internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringsti
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysning(
                 orgnr,
-                Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), this, LocalDateTime.now()),
+                Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), this, LocalDateTime.now()),
                 Refusjonsopplysninger()
             )
         ),
@@ -41,7 +41,7 @@ internal fun Inntekt.sykepengegrunnlag(orgnr: String, skjæringstidspunkt: Local
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysning(
                 orgnr,
-                Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), this, LocalDateTime.now()),
+                Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), this, LocalDateTime.now()),
                 Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, this).refusjonsopplysninger
             )
         ),

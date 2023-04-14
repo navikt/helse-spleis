@@ -20,13 +20,13 @@ internal class InntektsopplysningTest {
 
     @Test
     fun overstyres() {
-        val im1 = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
-        val im2 = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
+        val im1 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
+        val im2 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
         val saksbehandler1 = Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val saksbehandler2 = Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val saksbehandler3 = Saksbehandler(20.januar, UUID.randomUUID(), 30000.månedlig, "", null, LocalDateTime.now())
         val saksbehandler4 = Saksbehandler(20.januar, UUID.randomUUID(), INGEN, "", null, LocalDateTime.now())
-        val ikkeRapportert = IkkeRapportert(UUID.randomUUID(), 1.januar, LocalDateTime.now())
+        val ikkeRapportert = IkkeRapportert(1.januar, LocalDateTime.now())
 
         assertEquals(saksbehandler1, im1.overstyres(saksbehandler1))
         assertEquals(saksbehandler1, saksbehandler1.overstyres(saksbehandler2))
@@ -40,8 +40,8 @@ internal class InntektsopplysningTest {
     @Test
     fun `inntektsmelding-likhet`() {
         val hendelsesId = UUID.randomUUID()
-        val im1 = Inntektsmelding(UUID.randomUUID(), 1.januar, hendelsesId, INNTEKT, LocalDateTime.now())
-        val im2 = Inntektsmelding(UUID.randomUUID(), 1.januar, hendelsesId, INNTEKT, LocalDateTime.now())
+        val im1 = Inntektsmelding(1.januar, hendelsesId, INNTEKT, LocalDateTime.now())
+        val im2 = Inntektsmelding(1.januar, hendelsesId, INNTEKT, LocalDateTime.now())
 
         assertEquals(im1, im2)
         assertFalse(im1.kanLagres(im2))
@@ -51,8 +51,8 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `inntektsmelding-ulikhet`() {
-        val im1 = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
-        val im2 = Inntektsmelding(UUID.randomUUID(), 2.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
+        val im1 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
+        val im2 = Inntektsmelding(2.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
 
         assertNotEquals(im1, im2)
         assertTrue(im1.kanLagres(im2))
@@ -69,8 +69,8 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `turnering - inntektsmelding vs inntektsmelding`() {
-        val im1 = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
-        val im2 = Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now().plusSeconds(1))
+        val im1 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
+        val im2 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now().plusSeconds(1))
 
         assertEquals(im2, im1.beste(im2))
         assertEquals(im2, im2.beste(im1))
@@ -78,9 +78,9 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `turnering - skatt vs inntektsmelding`() {
-        val im = Inntektsmelding(UUID.randomUUID(), 10.februar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
-        val skatt1 = SkattSykepengegrunnlag(UUID.randomUUID(), UUID.randomUUID(), 1.februar, emptyList(), LocalDateTime.now() )
-        val skatt2 = SkattSykepengegrunnlag(UUID.randomUUID(), UUID.randomUUID(), 31.januar, emptyList(), LocalDateTime.now() )
+        val im = Inntektsmelding(10.februar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
+        val skatt1 = SkattSykepengegrunnlag(UUID.randomUUID(), 1.februar, emptyList(), emptyList())
+        val skatt2 = SkattSykepengegrunnlag(UUID.randomUUID(), 31.januar, emptyList(), emptyList())
 
         assertEquals(im, im.beste(skatt1))
         assertEquals(im, skatt1.beste(im))
@@ -91,9 +91,9 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `turnering - ikkeRapportert vs inntektsmelding`() {
-        val im = Inntektsmelding(UUID.randomUUID(), 10.februar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
-        val ikkeRapportert1 = IkkeRapportert(UUID.randomUUID(), 1.februar, LocalDateTime.now())
-        val ikkeRapportert2 = IkkeRapportert(UUID.randomUUID(), 31.januar, LocalDateTime.now())
+        val im = Inntektsmelding(10.februar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
+        val ikkeRapportert1 = IkkeRapportert(1.februar, LocalDateTime.now())
+        val ikkeRapportert2 = IkkeRapportert(31.januar, LocalDateTime.now())
 
         assertEquals(im, im.beste(ikkeRapportert1))
         assertEquals(im, ikkeRapportert1.beste(im))
@@ -104,8 +104,8 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `turnering - ikkeRapportert vs skatt`() {
-        val skatt = SkattSykepengegrunnlag(UUID.randomUUID(), UUID.randomUUID(), 1.februar, emptyList(), LocalDateTime.now() )
-        val ikkeRapportert = IkkeRapportert(UUID.randomUUID(), 31.januar, LocalDateTime.now())
+        val skatt = SkattSykepengegrunnlag(UUID.randomUUID(), 1.februar, emptyList(), emptyList())
+        val ikkeRapportert = IkkeRapportert(31.januar, LocalDateTime.now())
 
         assertThrows<IllegalStateException> { assertEquals(skatt, skatt.beste(ikkeRapportert)) }
         assertThrows<IllegalStateException> { assertEquals(skatt, ikkeRapportert.beste(skatt)) }
@@ -113,8 +113,8 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `turnering - skatt vs skatt`() {
-        val skatt1 = SkattSykepengegrunnlag(UUID.randomUUID(), UUID.randomUUID(), 1.februar, emptyList(), LocalDateTime.now() )
-        val skatt2 = SkattSykepengegrunnlag(UUID.randomUUID(), UUID.randomUUID(), 1.februar, emptyList(), LocalDateTime.now() )
+        val skatt1 = SkattSykepengegrunnlag(UUID.randomUUID(), 1.februar, emptyList(), emptyList())
+        val skatt2 = SkattSykepengegrunnlag(UUID.randomUUID(), 1.februar, emptyList(), emptyList())
 
         assertThrows<IllegalStateException> { skatt1.beste(skatt2) }
         assertThrows<IllegalStateException> { skatt2.beste(skatt1) }
@@ -122,8 +122,8 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `turnering - ikkeRapportert vs ikkeRapportert`() {
-        val ikkeRapportert1 = IkkeRapportert(UUID.randomUUID(), 31.januar, LocalDateTime.now())
-        val ikkeRapportert2 = IkkeRapportert(UUID.randomUUID(), 31.januar, LocalDateTime.now())
+        val ikkeRapportert1 = IkkeRapportert(31.januar, LocalDateTime.now())
+        val ikkeRapportert2 = IkkeRapportert(31.januar, LocalDateTime.now())
 
         assertThrows<IllegalStateException> { ikkeRapportert1.beste(ikkeRapportert2) }
         assertThrows<IllegalStateException> { ikkeRapportert2.beste(ikkeRapportert1) }

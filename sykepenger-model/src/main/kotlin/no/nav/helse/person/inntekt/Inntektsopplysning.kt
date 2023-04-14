@@ -2,12 +2,14 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.økonomi.Inntekt
 
 abstract class Inntektsopplysning protected constructor(
+    protected val id: UUID,
     protected val dato: LocalDate,
     protected val tidsstempel: LocalDateTime
 ) {

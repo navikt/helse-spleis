@@ -6,13 +6,12 @@ import java.util.UUID
 import no.nav.helse.økonomi.Inntekt
 
 internal class Infotrygd(
-    private val id: UUID,
+    id: UUID,
     dato: LocalDate,
     private val hendelseId: UUID,
     private val beløp: Inntekt,
     tidsstempel: LocalDateTime
-) : Inntektsopplysning(dato, tidsstempel) {
-
+) : Inntektsopplysning(id, dato, tidsstempel) {
     override fun accept(visitor: InntektsopplysningVisitor) {
         visitor.visitInfotrygd(this, id, dato, hendelseId, beløp, tidsstempel)
     }
