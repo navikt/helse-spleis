@@ -1,0 +1,78 @@
+{
+  "aktørId": "12345",
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-01-01",
+          "type": "Vilkårsprøving",
+          "vilkårsgrunnlagId": "b368f198-d74e-4180-881a-8966261c14d6",
+          "sykepengegrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "123456789",
+                "inntektsopplysning": {
+                  "id": "f98c7bec-4fdb-4044-aadb-b21a27d990d7",
+                  "kilde": "SAKSBEHANDLER"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "skjæringstidspunkt": "2018-01-02",
+          "type": "Vilkårsprøving",
+          "vilkårsgrunnlagId": "85911819-9137-4a95-8c94-c49e6e7fe07b",
+          "sykepengegrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "123456789",
+                "inntektsopplysning": {
+                  "id": "f8a97187-a118-41d5-a4c1-ed26e8d1f903",
+                  "kilde": "INNTEKTSMELDING"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-01-01",
+          "type": "Vilkårsprøving",
+          "vilkårsgrunnlagId": "68b59f9c-4cc5-4da6-bc1d-b6bf2f56d3c9",
+          "sykepengegrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "123456789",
+                "inntektsopplysning": {
+                  "id": "8b5fda9e-8d9b-4549-9bba-1478ef598fdd",
+                  "kilde": "INNTEKTSMELDING"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "skjæringstidspunkt": "2018-01-02",
+          "type": "Vilkårsprøving",
+          "vilkårsgrunnlagId": "85911819-9137-4a95-8c94-c49e6e7fe07b",
+          "sykepengegrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "123456789",
+                "inntektsopplysning": {
+                  "id": "f8a97187-a118-41d5-a4c1-ed26e8d1f903",
+                  "kilde": "INNTEKTSMELDING"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 237
+}
