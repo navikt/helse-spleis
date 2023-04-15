@@ -947,12 +947,13 @@ internal data class PersonData(
         ) {
             data class VedtaksperiodeUtbetalingData(
                 private val vilkårsgrunnlagId: UUID,
-                private val utbetalingId: UUID
+                private val utbetalingId: UUID,
+                private val sykdomstidslinje: SykdomstidslinjeData?
             ) {
                 companion object {
                     fun List<VedtaksperiodeUtbetalingData>.tilModellobjekt(grunnlagoppslag: (UUID) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetalinger: Map<UUID, Utbetaling>) =
-                        this.map { (grunnlagId, utbetalingId) ->
-                            grunnlagoppslag(grunnlagId) to utbetalinger.getValue(utbetalingId)
+                        this.map { (grunnlagId, utbetalingId, sykdomstidslinjedata) ->
+                            Triple(grunnlagoppslag(grunnlagId), utbetalinger.getValue(utbetalingId), sykdomstidslinjedata?.createSykdomstidslinje())
                         }
                 }
             }

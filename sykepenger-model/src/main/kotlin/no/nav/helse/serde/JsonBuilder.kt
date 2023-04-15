@@ -1469,7 +1469,7 @@ internal class JsonBuilder : AbstractBuilder() {
     }
 
     private class VedtaksperiodeState(private val vedtaksperiodeMap: MutableMap<String, Any?>) : BuilderState() {
-        private val utbetalinger = mutableListOf<Map<String, String?>>()
+        private val utbetalinger = mutableListOf<Map<String, Any?>>()
 
         override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
             val sykdomstidslinje = mutableMapOf<String, Any?>()
@@ -1478,7 +1478,7 @@ internal class JsonBuilder : AbstractBuilder() {
             pushState(SykdomstidslinjeState(sykdomstidslinje))
         }
 
-        override fun preVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Pair<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, Utbetaling>>) {
+        override fun preVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Triple<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, Utbetaling, Sykdomstidslinje?>>) {
             pushState(VedtaksperiodeUtbetalingerState(this.utbetalinger))
         }
 
@@ -1526,21 +1526,23 @@ internal class JsonBuilder : AbstractBuilder() {
         }
     }
 
-    private class VedtaksperiodeUtbetalingerState(private val utbetalinger: MutableList<Map<String, String?>>) : BuilderState() {
+    private class VedtaksperiodeUtbetalingerState(private val utbetalinger: MutableList<Map<String, Any?>>) : BuilderState() {
         override fun preVisitVedtaksperiodeUtbetaling(
             grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
-            utbetaling: Utbetaling
+            utbetaling: Utbetaling,
+            sykdomstidslinje: Sykdomstidslinje
         ) {
             pushState(VedtaksperiodeUtbetalingState(utbetalinger))
         }
 
-        override fun postVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Pair<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, Utbetaling>>) {
+        override fun postVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Triple<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, Utbetaling, Sykdomstidslinje?>>) {
             popState()
         }
 
-        private class VedtaksperiodeUtbetalingState(private val utbetalinger: MutableList<Map<String, String?>>) : BuilderState() {
+        private class VedtaksperiodeUtbetalingState(private val utbetalinger: MutableList<Map<String, Any?>>) : BuilderState() {
             private lateinit var grunnlagId: UUID
             private lateinit var utbetalingId: UUID
+            private val sykdomstidslinjedetaljer = mutableMapOf<String, Any?>()
 
             override fun preVisitGrunnlagsdata(
                 skjæringstidspunkt: LocalDate,
@@ -1590,13 +1592,19 @@ internal class JsonBuilder : AbstractBuilder() {
                 utbetalingId = id
             }
 
+            override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
+                pushState(SykdomstidslinjeState(sykdomstidslinjedetaljer))
+            }
+
             override fun postVisitVedtaksperiodeUtbetaling(
                 grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
-                utbetaling: Utbetaling
+                utbetaling: Utbetaling,
+                sykdomstidslinje: Sykdomstidslinje
             ) {
                 this.utbetalinger.add(mapOf(
                     "utbetalingId" to this.utbetalingId.toString(),
-                    "vilkårsgrunnlagId" to this.grunnlagId.toString()
+                    "vilkårsgrunnlagId" to this.grunnlagId.toString(),
+                    "sykdomstidslinje" to sykdomstidslinjedetaljer.takeUnless { it.isEmpty() }
                 ))
                 popState()
             }

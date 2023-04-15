@@ -10,6 +10,7 @@ import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
@@ -53,7 +54,8 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
 
     override fun preVisitVedtaksperiodeUtbetaling(
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
-        utbetaling: Utbetaling
+        utbetaling: Utbetaling,
+        sykdomstidslinje: Sykdomstidslinje
     ) {
         val vilkårsgrunnlagId = grunnlagsdata?.inspektør?.vilkårsgrunnlagId
         val utbetalingId = utbetaling.inspektør.utbetalingId

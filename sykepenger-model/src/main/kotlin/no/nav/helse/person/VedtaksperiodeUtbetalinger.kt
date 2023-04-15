@@ -10,27 +10,30 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.TagBuilder
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
 import no.nav.helse.utbetalingslinjer.UtbetalingPeriodetype
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
-internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Pair<VilkårsgrunnlagElement, Utbetaling>>) {
+internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Triple<VilkårsgrunnlagElement, Utbetaling, Sykdomstidslinje?>>) {
     internal constructor() : this(mutableListOf())
 
-    private val utbetalingene get() = utbetalinger.map(Pair<*, Utbetaling>::second)
+    private val utbetalingene get() = utbetalinger.map(Triple<*, Utbetaling, *>::second)
     private val utbetalinger = utbetalinger.toMutableList()
     private val sisteVilkårsgrunnlag get() = utbetalinger.lastOrNull()?.first
     private val siste get() = utbetalinger.lastOrNull()?.second
 
     internal fun accept(visitor: VedtaksperiodeUtbetalingVisitor) {
         visitor.preVisitVedtakserperiodeUtbetalinger(utbetalinger)
-        utbetalinger.forEach { (grunnlagsdata, utbetaling) ->
-            visitor.preVisitVedtaksperiodeUtbetaling(grunnlagsdata, utbetaling)
+        utbetalinger.forEach { (grunnlagsdata, utbetaling, sydomstidslinje) ->
+            val sykdomstidslinje1 = sydomstidslinje ?: Sykdomstidslinje()
+            visitor.preVisitVedtaksperiodeUtbetaling(grunnlagsdata, utbetaling, sykdomstidslinje1)
             grunnlagsdata.accept(visitor)
             utbetaling.accept(visitor)
-            visitor.postVisitVedtaksperiodeUtbetaling(grunnlagsdata, utbetaling)
+            sykdomstidslinje1.accept(visitor)
+            visitor.postVisitVedtaksperiodeUtbetaling(grunnlagsdata, utbetaling, sykdomstidslinje1)
         }
         visitor.postVisitVedtakserperiodeUtbetalinger(utbetalinger)
     }
@@ -74,13 +77,14 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Pair<Vilkårsgrunnl
     internal fun nyUtbetaling(
         vedtaksperiodeId: UUID,
         grunnlagsdata: VilkårsgrunnlagElement,
+        sykdomstidslinje: Sykdomstidslinje,
         periode: Periode,
         utbetaling: Utbetaling,
         utbetalingstidslinje: Utbetalingstidslinje
     ): Utbetalingstidslinje {
         check(utbetaling !== siste) { "kan ikke legge til lik utbetaling som forrige" }
         utbetaling.nyVedtaksperiodeUtbetaling(vedtaksperiodeId)
-        utbetalinger.add(grunnlagsdata to utbetaling)
+        utbetalinger.add(Triple(grunnlagsdata, utbetaling, sykdomstidslinje))
         return utbetalingstidslinje.subset(periode)
     }
 

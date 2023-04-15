@@ -15,8 +15,10 @@ import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.serde.api.dto.EndringskodeDTO.Companion.dto
 import no.nav.helse.serde.api.dto.SpeilOppdrag
+import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
 import no.nav.helse.serde.api.dto.Utbetaling
 import no.nav.helse.serde.api.speil.Tidslinjeberegninger
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Klassekode
@@ -41,19 +43,26 @@ internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode) : Vedtaksperi
 
     override fun preVisitVedtaksperiodeUtbetaling(
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
-        utbetaling: no.nav.helse.utbetalingslinjer.Utbetaling
+        utbetaling: no.nav.helse.utbetalingslinjer.Utbetaling,
+        sykdomstidslinje: Sykdomstidslinje
     ) {
-        vilkårsgrunnlag.add(VedtaksperiodeUtbetalingVilkårsgrunnlagBuilder(grunnlagsdata, utbetaling).build())
+        vilkårsgrunnlag.add(VedtaksperiodeUtbetalingVilkårsgrunnlagBuilder(grunnlagsdata, utbetaling, sykdomstidslinje).build())
     }
 
-    internal class VedtaksperiodeUtbetalingVilkårsgrunnlagBuilder(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetaling: InternUtbetaling): VedtaksperiodeUtbetalingVisitor {
+    internal class VedtaksperiodeUtbetalingVilkårsgrunnlagBuilder(
+        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
+        utbetaling: InternUtbetaling,
+        sykdomstidslinje: Sykdomstidslinje
+    ): VedtaksperiodeUtbetalingVisitor {
         private lateinit var utbetalingId: UUID
         private lateinit var vilkårsgrunnlag: UUID
+        private val sykdomstidslinjedager = SykdomstidslinjeBuilder(sykdomstidslinje).build()
+
         init {
             grunnlagsdata.accept(this)
             utbetaling.accept(this)
         }
-        internal fun build() = Tidslinjeberegninger.Vedtaksperiodeutbetaling(utbetalingId, vilkårsgrunnlag)
+        internal fun build() = Tidslinjeberegninger.Vedtaksperiodeutbetaling(utbetalingId, vilkårsgrunnlag, sykdomstidslinjedager)
 
         override fun preVisitUtbetaling(
             utbetaling: no.nav.helse.utbetalingslinjer.Utbetaling,

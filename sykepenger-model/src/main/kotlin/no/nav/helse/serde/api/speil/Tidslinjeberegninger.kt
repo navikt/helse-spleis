@@ -279,9 +279,13 @@ internal class Tidslinjeberegninger {
         ))
     }
 
-    internal class Vedtaksperiodeutbetaling(private val utbetalingId: UUID, private val vilkårsgrunnlagId: UUID) {
-        fun utbetaling(utbetalinger: List<IUtbetaling>): IUtbetaling? {
-            return utbetalinger.singleOrNull { it.id == utbetalingId }
+    internal class Vedtaksperiodeutbetaling(
+        private val utbetalingId: UUID,
+        private val vilkårsgrunnlagId: UUID,
+        private val sykdomstidslinje: List<Sykdomstidslinjedag>
+    ) {
+        fun utbetaling(utbetalinger: List<IUtbetaling>): Pair<IUtbetaling, List<SammenslåttDag>>? {
+            return utbetalinger.singleOrNull { it.id == utbetalingId }?.let { it to sykdomstidslinje.merge(it.utbetalingstidslinje) }
         }
         fun vilkårsgrunnlag(vilkårsgrunnlag: IVilkårsgrunnlagHistorikk): IVilkårsgrunnlag {
             return vilkårsgrunnlag.leggIBøtta(this.vilkårsgrunnlagId)
@@ -374,12 +378,13 @@ internal class Tidslinjeberegninger {
                 utbetalinger: List<IUtbetaling>,
                 vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
             ) = vedtaksperiodeutbetalinger.mapNotNull { vedtaksperiodeutbetaling ->
-                vedtaksperiodeutbetaling.utbetaling(utbetalinger)?.let { mapTilBeregnetPeriode(organisasjonsnummer, alder, vedtaksperiodeutbetaling.vilkårsgrunnlag(vilkårsgrunnlaghistorikk), it) }
+                vedtaksperiodeutbetaling.utbetaling(utbetalinger)?.let { (utbetaling, sammenslåttTidslinje) ->
+                    mapTilBeregnetPeriode(organisasjonsnummer, alder, vedtaksperiodeutbetaling.vilkårsgrunnlag(vilkårsgrunnlaghistorikk), utbetaling, sammenslåttTidslinje)
+                }
             }
 
-            private fun mapTilBeregnetPeriode(organisasjonsnummer: String, alder: Alder, vilkårsgrunnlag: IVilkårsgrunnlag, utbetaling: IUtbetaling): BeregnetPeriode {
+            private fun mapTilBeregnetPeriode(organisasjonsnummer: String, alder: Alder, vilkårsgrunnlag: IVilkårsgrunnlag, utbetaling: IUtbetaling, sammenslåttTidslinje: List<SammenslåttDag>): BeregnetPeriode {
                 val avgrensetUtbetalingstidslinje = utbetaling.utbetalingstidslinje.filter { it.dato in fom..tom }
-                val sammenslåttTidslinje = utbetaling.sammenslåttTidslinje(fom, tom)
                 val varsler = PeriodeVarslerBuilder(aktivitetsloggForPeriode).build()
                 val utbetalingDTO = utbetaling.toDTO()
 
@@ -398,7 +403,7 @@ internal class Tidslinjeberegninger {
                     opprettet = opprettet,
                     oppdatert = oppdatert,
                     periodevilkår = periodevilkår(alder, vilkårsgrunnlag.skjæringstidspunkt, utbetaling, avgrensetUtbetalingstidslinje, hendelser),
-                    sammenslåttTidslinje = sammenslåttTidslinje,
+                    sammenslåttTidslinje = sammenslåttTidslinje.takeIf { it.isNotEmpty() } ?: utbetaling.sammenslåttTidslinje(fom, tom),
                     gjenståendeSykedager = utbetaling.gjenståendeSykedager,
                     forbrukteSykedager = utbetaling.forbrukteSykedager,
                     utbetaling = utbetalingDTO,
@@ -480,7 +485,7 @@ internal class Tidslinjeberegninger {
             aktivitetsloggForPeriode: Aktivitetslogg
         ) : Vedtaksperiodekloss(vedtaksperiodeId, fom, tom, hendelser, vedtaksperiodeutbetalinger, sykdomstidslinje, opprettet, oppdatert, tilstand, skjæringstidspunkt, aktivitetsloggForPeriode) {
             private fun annullerteUtbetalinger(utbetalinger: List<IUtbetaling>) = vedtaksperiodeutbetalinger
-                .mapNotNull { it.utbetaling(utbetalinger) }
+                .mapNotNull { it.utbetaling(utbetalinger)?.first }
                 .groupBy { it.korrelasjonsId }
                 .mapNotNull { (_, utbetalingene) ->
                     utbetalinger.firstOrNull { it.annulleringFor(utbetalingene.first()) }?.let {

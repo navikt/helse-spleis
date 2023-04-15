@@ -836,7 +836,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun nyUtbetaling(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetaling: Utbetaling, utbetalingstidslinjeKilde: Utbetalingstidslinje) {
-        utbetalingstidslinje = utbetalinger.nyUtbetaling(id, grunnlagsdata, periode, utbetaling, utbetalingstidslinjeKilde)
+        utbetalingstidslinje = utbetalinger.nyUtbetaling(id, grunnlagsdata, sykdomstidslinje, periode, utbetaling, utbetalingstidslinjeKilde)
     }
 
     private fun høstingsresultater(hendelse: ArbeidstakerHendelse, simuleringtilstand: Vedtaksperiodetilstand, godkjenningtilstand: Vedtaksperiodetilstand) = when {
