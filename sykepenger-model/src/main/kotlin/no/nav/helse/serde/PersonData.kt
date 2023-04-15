@@ -426,7 +426,7 @@ internal data class PersonData(
                         beløp = requireNotNull(beløp).månedlig,
                         forklaring = forklaring,
                         subsumsjon = subsumsjon?.tilModellobjekt(),
-                        overstyrtInntekt = overstyrtInntektId?.let { uuid -> builder.hentInntekt(uuid) },
+                        overstyrtInntekt = builder.hentInntekt(requireNotNull(overstyrtInntektId)),
                         tidsstempel = tidsstempel
                     )
                 private fun somIkkeRapportert() = IkkeRapportert(

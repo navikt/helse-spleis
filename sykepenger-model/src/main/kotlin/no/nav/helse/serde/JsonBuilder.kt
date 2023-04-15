@@ -1175,7 +1175,7 @@ internal class JsonBuilder : AbstractBuilder() {
             val inntektDetaljer = mutableMapOf(
                 "id" to id,
                 "dato" to dato,
-                "overstyrtInntektId" to overstyrtInntektId,
+                "overstyrtInntektId" to checkNotNull(overstyrtInntektId) { "En saksbehandlerinntekt skal peke til en overstyrt inntekt!" },
                 "hendelseId" to hendelseId,
                 "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
                 "kilde" to Inntektsopplysningskilde.SAKSBEHANDLER,
