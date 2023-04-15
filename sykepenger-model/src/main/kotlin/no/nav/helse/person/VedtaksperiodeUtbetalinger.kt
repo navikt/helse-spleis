@@ -17,7 +17,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
 import no.nav.helse.utbetalingslinjer.UtbetalingPeriodetype
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
-internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Triple<VilkårsgrunnlagElement, Utbetaling, Sykdomstidslinje?>>) {
+internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Triple<VilkårsgrunnlagElement, Utbetaling, Sykdomstidslinje>>) {
     internal constructor() : this(mutableListOf())
 
     private val utbetalingene get() = utbetalinger.map(Triple<*, Utbetaling, *>::second)
@@ -27,13 +27,12 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Triple<Vilkårsgrun
 
     internal fun accept(visitor: VedtaksperiodeUtbetalingVisitor) {
         visitor.preVisitVedtakserperiodeUtbetalinger(utbetalinger)
-        utbetalinger.forEach { (grunnlagsdata, utbetaling, sydomstidslinje) ->
-            val sykdomstidslinje1 = sydomstidslinje ?: Sykdomstidslinje()
-            visitor.preVisitVedtaksperiodeUtbetaling(grunnlagsdata, utbetaling, sykdomstidslinje1)
+        utbetalinger.forEach { (grunnlagsdata, utbetaling, sykdomstidslinje) ->
+            visitor.preVisitVedtaksperiodeUtbetaling(grunnlagsdata, utbetaling, sykdomstidslinje)
             grunnlagsdata.accept(visitor)
             utbetaling.accept(visitor)
-            sykdomstidslinje1.accept(visitor)
-            visitor.postVisitVedtaksperiodeUtbetaling(grunnlagsdata, utbetaling, sykdomstidslinje1)
+            sykdomstidslinje.accept(visitor)
+            visitor.postVisitVedtaksperiodeUtbetaling(grunnlagsdata, utbetaling, sykdomstidslinje)
         }
         visitor.postVisitVedtakserperiodeUtbetalinger(utbetalinger)
     }

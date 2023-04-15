@@ -2452,7 +2452,28 @@
       ],
       "id": "52d48b82-faea-4088-bb6c-fb4154345aed",
       "organisasjonsnummer": "987654321",
-      "beregnetUtbetalingstidslinjer": [],
+      "beregnetUtbetalingstidslinjer": [
+        {
+          "id": "1468ee7e-03aa-4ebe-9799-f73c201865d9",
+          "organisasjonsnummer": "12",
+          "sykdomshistorikkElementId": "ca1dddf9-e1e4-409c-ae33-64b23d19e4dc",
+          "vilkårsgrunnlagHistorikkInnslagId": "00000000-0000-0000-0000-000000000000",
+          "tidsstempel": "2018-01-01T00:00:00.000",
+          "utbetalingstidslinje": {
+            "dager": []
+          }
+        },
+        {
+          "id": "ede75747-d8ed-434a-a521-8eb621287e51",
+          "organisasjonsnummer": "12",
+          "sykdomshistorikkElementId": "ca1dddf9-e1e4-409c-ae33-64b23d19e4dc",
+          "vilkårsgrunnlagHistorikkInnslagId": "00000000-0000-0000-0000-000000000000",
+          "tidsstempel": "2018-01-01T00:00:00.000",
+          "utbetalingstidslinje": {
+            "dager": []
+          }
+        }
+      ],
       "refusjonOpphører": [],
       "feriepengeutbetalinger": []
     }

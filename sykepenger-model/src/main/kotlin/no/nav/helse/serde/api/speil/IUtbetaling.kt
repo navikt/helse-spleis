@@ -3,7 +3,6 @@ package no.nav.helse.serde.api.speil
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.serde.api.dto.SammenslåttDag
 import no.nav.helse.serde.api.dto.SpeilOppdrag
 import no.nav.helse.serde.api.dto.Utbetaling
 import no.nav.helse.serde.api.dto.Utbetalingstatus
@@ -13,7 +12,6 @@ import no.nav.helse.serde.api.dto.Utbetalingtype
 internal class IUtbetaling(
     val id: UUID,
     val korrelasjonsId: UUID,
-    val beregning: Tidslinjeberegninger.ITidslinjeberegning,
     val opprettet: LocalDateTime,
     val utbetalingstidslinje: List<Utbetalingstidslinjedag>,
     val maksdato: LocalDate,
@@ -48,10 +46,6 @@ internal class IUtbetaling(
             oppdrag = oppdrag,
             tilGodkjenning = erTilGodkjenning
         )
-    }
-
-    internal fun sammenslåttTidslinje(fom: LocalDate, tom: LocalDate): List<SammenslåttDag> {
-        return beregning.sammenslåttTidslinje(utbetalingstidslinje, fom, tom)
     }
 
     internal companion object {

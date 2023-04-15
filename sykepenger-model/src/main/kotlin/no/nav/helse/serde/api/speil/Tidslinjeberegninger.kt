@@ -36,7 +36,6 @@ import no.nav.helse.serde.api.dto.Utbetalingstatus.Ubetalt
 import no.nav.helse.serde.api.dto.Utbetalingstatus.Utbetalt
 import no.nav.helse.serde.api.dto.Utbetalingstidslinjedag
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
-import no.nav.helse.serde.api.speil.builders.BeregningId
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlag
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.speil.builders.OppdragBuilder
@@ -53,18 +52,12 @@ internal class Tidslinjeberegninger {
     private val opphørteUtbetalinger = mutableSetOf<UUID>()
     private var utbetalingTilGodkjenning: Vedtaksperiodeutbetaling? = null
 
-    private val beregningklosser = mutableListOf<Beregningkloss>()
     private val utbetalingklosser = mutableListOf<Utbetalingkloss>()
     private val vedtaksperioderklosser = mutableListOf<Vedtaksperiodekloss>()
 
     internal fun build(organisasjonsnummer: String, alder: Alder, vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk): List<Tidslinjeperiode> {
-        val beregninger = beregningklosser.map { it.tilTidslinjeberegning(sykdomstidslinjer) }
-        val utbetalinger = utbetalingklosser.mapNotNull { it.tilUtbetaling(beregninger, opphørteUtbetalinger, utbetalingTilGodkjenning) }
+        val utbetalinger = utbetalingklosser.mapNotNull { it.tilUtbetaling(opphørteUtbetalinger, utbetalingTilGodkjenning) }
         return vedtaksperioderklosser.flatMap { it.tilTidslinjeperiode(organisasjonsnummer, alder, utbetalinger, vilkårsgrunnlaghistorikk) }
-    }
-
-    internal fun leggTil(beregningId: UUID, sykdomshistorikkElementId: UUID) {
-        beregningklosser.add(Beregningkloss(beregningId, sykdomshistorikkElementId))
     }
 
     internal fun leggTil(sykdomshistorikkElementId: UUID, tidslinje: List<Sykdomstidslinjedag>) {
@@ -83,7 +76,6 @@ internal class Tidslinjeberegninger {
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
-        beregningId: UUID,
         annulleringer: Set<UUID>
     ) {
         if (utbetalingstatus == Utbetalingstatus.IKKE_GODKJENT) return
@@ -99,8 +91,7 @@ internal class Tidslinjeberegninger {
             personNettoBeløp = personNettoBeløp,
             maksdato = maksdato,
             forbrukteSykedager = forbrukteSykedager,
-            gjenståendeSykedager = gjenståendeSykedager,
-            beregningId = beregningId
+            gjenståendeSykedager = gjenståendeSykedager
         )
     }
     internal fun leggTilRevurdering(
@@ -115,7 +106,6 @@ internal class Tidslinjeberegninger {
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
-        beregningId: UUID,
         annulleringer: Set<UUID>
     ) {
         opphørteUtbetalinger.addAll(annulleringer)
@@ -130,8 +120,7 @@ internal class Tidslinjeberegninger {
             personNettoBeløp = personNettoBeløp,
             maksdato = maksdato,
             forbrukteSykedager = forbrukteSykedager,
-            gjenståendeSykedager = gjenståendeSykedager,
-            beregningId = beregningId
+            gjenståendeSykedager = gjenståendeSykedager
         )
     }
 
@@ -146,8 +135,7 @@ internal class Tidslinjeberegninger {
         personNettoBeløp: Int,
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?,
-        beregningId: UUID
+        gjenståendeSykedager: Int?
     ) {
         nyUtbetaling(
             internutbetaling = internutbetaling,
@@ -160,8 +148,7 @@ internal class Tidslinjeberegninger {
             personNettoBeløp = personNettoBeløp,
             maksdato = maksdato,
             forbrukteSykedager = forbrukteSykedager,
-            gjenståendeSykedager = gjenståendeSykedager,
-            beregningId = beregningId
+            gjenståendeSykedager = gjenståendeSykedager
         )
     }
 
@@ -176,8 +163,7 @@ internal class Tidslinjeberegninger {
         personNettoBeløp: Int,
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?,
-        beregningId: UUID
+        gjenståendeSykedager: Int?
     ) {
         // tar ikke vare på forkastede utbetalinger i det hele tatt
         if (utbetalingstatus == Utbetalingstatus.FORKASTET) return
@@ -185,7 +171,6 @@ internal class Tidslinjeberegninger {
         utbetalingklosser.add(Utbetalingkloss(
             id = id,
             korrelasjonsId = korrelasjonsId,
-            beregningId = beregningId,
             opprettet = tidsstempel,
             utbetalingstidslinje = UtbetalingstidslinjeBuilder(internutbetaling).build(),
             maksdato = maksdato,
@@ -390,7 +375,7 @@ internal class Tidslinjeberegninger {
 
                 return BeregnetPeriode(
                     vedtaksperiodeId = vedtaksperiodeId,
-                    beregningId = utbetaling.beregning.beregningId,
+                    beregningId = utbetaling.id,
                     fom = fom,
                     tom = tom,
                     erForkastet = false,
@@ -403,7 +388,7 @@ internal class Tidslinjeberegninger {
                     opprettet = opprettet,
                     oppdatert = oppdatert,
                     periodevilkår = periodevilkår(alder, vilkårsgrunnlag.skjæringstidspunkt, utbetaling, avgrensetUtbetalingstidslinje, hendelser),
-                    sammenslåttTidslinje = sammenslåttTidslinje.takeIf { it.isNotEmpty() } ?: utbetaling.sammenslåttTidslinje(fom, tom),
+                    sammenslåttTidslinje = sammenslåttTidslinje,
                     gjenståendeSykedager = utbetaling.gjenståendeSykedager,
                     forbrukteSykedager = utbetaling.forbrukteSykedager,
                     utbetaling = utbetalingDTO,
@@ -506,7 +491,7 @@ internal class Tidslinjeberegninger {
                 val utbetalingDTO = annulleringen.toDTO()
                 utbetaltePerioder + listOf(BeregnetPeriode(
                     vedtaksperiodeId = vedtaksperiodeId,
-                    beregningId = annulleringen.beregning.beregningId,
+                    beregningId = annulleringen.id,
                     fom = fom,
                     tom = tom,
                     erForkastet = true,
@@ -541,18 +526,9 @@ internal class Tidslinjeberegninger {
 
     }
 
-    private class Beregningkloss(
-        private val beregningId: BeregningId,
-        private val sykdomshistorikkElementId: UUID
-    ) {
-        fun tilTidslinjeberegning(sykdomstidslinjer: MutableMap<UUID, List<Sykdomstidslinjedag>>) =
-            ITidslinjeberegning(beregningId, sykdomstidslinjer[sykdomshistorikkElementId] ?: error("Finner ikke tidslinjeberegning for beregningId'en! Hvordan kan det skje?"))
-    }
-
     private class Utbetalingkloss(
         private val id: UUID,
         private val korrelasjonsId: UUID,
-        private val beregningId: BeregningId,
         private val opprettet: LocalDateTime,
         private val utbetalingstidslinje: List<Utbetalingstidslinjedag>,
         private val maksdato: LocalDate,
@@ -567,12 +543,11 @@ internal class Tidslinjeberegninger {
         private val vurdering: no.nav.helse.serde.api.dto.Utbetaling.Vurdering?,
         private val oppdrag: Map<String, SpeilOppdrag>
     ) {
-        fun tilUtbetaling(tidslinjeberegninger: List<ITidslinjeberegning>, opphørteUtbetalinger: Set<UUID>, utbetalingTilGodkjenning: Vedtaksperiodeutbetaling?): IUtbetaling? {
+        fun tilUtbetaling(opphørteUtbetalinger: Set<UUID>, utbetalingTilGodkjenning: Vedtaksperiodeutbetaling?): IUtbetaling? {
             if (this.id in opphørteUtbetalinger) return null
             return IUtbetaling(
                 id = id,
                 korrelasjonsId = korrelasjonsId,
-                beregning = tidslinjeberegninger.single { it.beregningId == beregningId },
                 opprettet = opprettet,
                 utbetalingstidslinje = utbetalingstidslinje,
                 maksdato = maksdato,
@@ -589,19 +564,6 @@ internal class Tidslinjeberegninger {
                 erTilGodkjenning = utbetalingTilGodkjenning?.erTilGodkjenning(this.id) ?: false
             )
         }
-    }
-
-    internal class ITidslinjeberegning(
-        internal val beregningId: BeregningId,
-        private val sykdomstidslinje: List<Sykdomstidslinjedag>
-    ) {
-        fun sammenslåttTidslinje(utbetalingstidslinje: List<Utbetalingstidslinjedag>, fom: LocalDate, tom: LocalDate): List<SammenslåttDag> {
-            return sykdomstidslinje
-                .subset(fom, tom)
-                .merge(utbetalingstidslinje)
-        }
-
-        private fun List<Sykdomstidslinjedag>.subset(fom: LocalDate, tom: LocalDate) = this.filter { it.dagen in fom..tom }
     }
 }
 

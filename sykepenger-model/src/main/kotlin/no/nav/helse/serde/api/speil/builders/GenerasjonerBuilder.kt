@@ -27,8 +27,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 
-internal typealias BeregningId = UUID
-
 // Besøker hele arbeidsgiver-treet
 internal class GenerasjonerBuilder(
     private val organisasjonsnummer: String,
@@ -188,19 +186,8 @@ internal class GenerasjonerBuilder(
             maksdato = maksdato,
             forbrukteSykedager = forbrukteSykedager,
             gjenståendeSykedager = gjenståendeSykedager,
-            beregningId = beregningId,
             annulleringer = annulleringer
         )
-    }
-
-    override fun preVisitUtbetalingstidslinjeberegning(
-        id: UUID,
-        tidsstempel: LocalDateTime,
-        organisasjonsnummer: String,
-        sykdomshistorikkElementId: UUID,
-        vilkårsgrunnlagHistorikkInnslagId: UUID
-    ) {
-        tidslinjeberegninger.leggTil(id, sykdomshistorikkElementId)
     }
 
     override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element, id: UUID, hendelseId: UUID?, tidsstempel: LocalDateTime) {
@@ -222,7 +209,6 @@ internal class GenerasjonerBuilder(
             maksdato: LocalDate,
             forbrukteSykedager: Int?,
             gjenståendeSykedager: Int?,
-            beregningId: UUID,
             annulleringer: Set<UUID>
         ) {}
         fun besøkVedtaksperiode(
@@ -255,7 +241,6 @@ internal class GenerasjonerBuilder(
                 maksdato: LocalDate,
                 forbrukteSykedager: Int?,
                 gjenståendeSykedager: Int?,
-                beregningId: UUID,
                 annulleringer: Set<UUID>
             ) {
                 when (type) {
@@ -271,7 +256,6 @@ internal class GenerasjonerBuilder(
                         maksdato = maksdato,
                         forbrukteSykedager = forbrukteSykedager,
                         gjenståendeSykedager = gjenståendeSykedager,
-                        beregningId = beregningId,
                         annulleringer = annulleringer
                     )
                     Utbetalingtype.REVURDERING -> builder.tidslinjeberegninger.leggTilRevurdering(
@@ -286,7 +270,6 @@ internal class GenerasjonerBuilder(
                         maksdato = maksdato,
                         forbrukteSykedager = forbrukteSykedager,
                         gjenståendeSykedager = gjenståendeSykedager,
-                        beregningId = beregningId,
                         annulleringer = annulleringer
                     )
                     Utbetalingtype.ANNULLERING -> builder.tidslinjeberegninger.leggTilAnnullering(
@@ -300,8 +283,7 @@ internal class GenerasjonerBuilder(
                         personNettoBeløp = personNettoBeløp,
                         maksdato = maksdato,
                         forbrukteSykedager = forbrukteSykedager,
-                        gjenståendeSykedager = gjenståendeSykedager,
-                        beregningId = beregningId
+                        gjenståendeSykedager = gjenståendeSykedager
                     )
                     else -> { /* ignorer */ }
                 }

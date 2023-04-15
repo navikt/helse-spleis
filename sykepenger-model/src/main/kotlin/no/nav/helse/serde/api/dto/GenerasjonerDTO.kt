@@ -9,7 +9,6 @@ import no.nav.helse.serde.api.dto.Periodetilstand.ManglerInformasjon
 import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
 import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
 import no.nav.helse.serde.api.speil.Generasjoner
-import no.nav.helse.serde.api.speil.builders.BeregningId
 import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
 
 data class GenerasjonDTO(
@@ -120,7 +119,9 @@ data class BeregnetPeriode(
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate,
     override val hendelser: List<HendelseDTO>,
-    val beregningId: BeregningId,
+    // todo: feltet brukes så og si ikke i speil, kan fjernes fra graphql
+    // verdien av ID-en brukes ifm. å lage en unik ID for notatet om utbetalingene.
+    val beregningId: UUID,
     val gjenståendeSykedager: Int?,
     val forbrukteSykedager: Int?,
     val maksdato: LocalDate,

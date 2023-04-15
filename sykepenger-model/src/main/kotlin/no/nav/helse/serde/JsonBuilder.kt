@@ -1604,7 +1604,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 this.utbetalinger.add(mapOf(
                     "utbetalingId" to this.utbetalingId.toString(),
                     "vilkårsgrunnlagId" to this.grunnlagId.toString(),
-                    "sykdomstidslinje" to sykdomstidslinjedetaljer.takeUnless { it.isEmpty() }
+                    "sykdomstidslinje" to sykdomstidslinjedetaljer
                 ))
                 popState()
             }
