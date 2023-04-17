@@ -40,8 +40,6 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.memoized
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
-import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigRefusjonsopplysninger
-import no.nav.helse.person.Arbeidsgiver.Companion.harTilstrekkeligInformasjonTilUtbetaling
 import no.nav.helse.person.Arbeidsgiver.Companion.trengerInntektsmelding
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Dokumentsporing.Companion.ider
@@ -1313,7 +1311,7 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_REVURDERING
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse)) {
+            if (!vedtaksperiode.arbeidsgiver.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt)) {
                 hendelse.info("Revurdering førte til at sykefraværstilfellet trenger inntektsmelding")
                 vedtaksperiode.trengerInntektsmelding()
             }
@@ -1342,6 +1340,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.vedtaksperiodeVenter(nestemann)
         }
 
+
+
         override fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgivere: Iterable<Arbeidsgiver>,
@@ -1351,14 +1351,14 @@ internal class Vedtaksperiode private constructor(
                 return hendelse.info("Mangler nødvendig inntekt for vilkårsprøving eller refusjonsopplysninger og kan derfor ikke gjenoppta revurdering.")
             if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode, hendelse, arbeidsgivere))
                 return hendelse.info("En annen arbeidsgiver mangler nødvendig inntekt for vilkårsprøving eller refusjonsopplysninger og kan derfor ikke gjenoppta revurdering.")
+            if (arbeidsgivere.trengerInntektsmelding(vedtaksperiode.periode)) return hendelse.info("Mangler inntekt på andre arbeidsgivere")
             vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
             vedtaksperiode.arbeidsgiver.gjenopptaRevurdering(vedtaksperiode, hendelse)
         }
 
         private fun harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg = Aktivitetslogg(), arbeidsgivere: Iterable<Arbeidsgiver> = listOf(vedtaksperiode.arbeidsgiver)): Boolean {
             val skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt
-            val periode = arbeidsgivere.vedtaksperioder { other -> other.skjæringstidspunkt == skjæringstidspunkt && other.tilstand == AvventerRevurdering }.periode()
-            return arbeidsgivere.harTilstrekkeligInformasjonTilUtbetaling(skjæringstidspunkt, periode, hendelse)
+            return arbeidsgivere.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt)
         }
 
         override fun gjenopptaRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, første: Vedtaksperiode) {
@@ -1388,7 +1388,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(påminnelse)) {
+            if (!vedtaksperiode.arbeidsgiver.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt)) {
                 påminnelse.info("Varsler arbeidsgiver at vi har behov for inntektsmelding.")
                 vedtaksperiode.trengerInntektsmelding()
             }
@@ -1724,7 +1724,6 @@ internal class Vedtaksperiode private constructor(
             !vedtaksperiode.arbeidsgiver.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) -> ManglerNødvendigInntektForVilkårsprøving
             !arbeidsgivere.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) -> ManglerNødvendigInntektForVilkårsprøvingForAndreArbeidsgivere
             arbeidsgivere.trengerInntektsmelding(vedtaksperiode.periode) -> TrengerInntektsmelding
-            !arbeidsgivere.harNødvendigRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, hendelse) -> ManglerNødvendigRefusjonsopplysninger
             vedtaksperiode.vilkårsgrunnlag == null -> KlarForVilkårsprøving
             else -> KlarForBeregning
         }
@@ -2234,7 +2233,7 @@ internal class Vedtaksperiode private constructor(
             if (!revurdering.inngåSomEndring(hendelse, vedtaksperiode)) return
             revurdering.loggDersomKorrigerendeSøknad(hendelse, "Startet omgjøring grunnet korrigerende søknad")
             hendelse.info(RV_RV_1.varseltekst)
-            if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse)) {
+            if (!vedtaksperiode.arbeidsgiver.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt)) {
                 hendelse.info("mangler nødvendige opplysninger fra arbeidsgiver")
                 return vedtaksperiode.tilstand(hendelse, AvventerInntektsmelding)
             }
