@@ -303,6 +303,7 @@ sealed class Aktivitet(
     class FunksjonellFeil private constructor(
         id: UUID,
         kontekster: List<SpesifikkKontekst>,
+        private val kode: Varselkode,
         private val melding: String,
         private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
     ) : Aktivitet(id, 75, 'E', melding, tidsstempel, kontekster) {
@@ -310,14 +311,16 @@ sealed class Aktivitet(
             internal fun filter(aktiviteter: List<Aktivitet>): List<FunksjonellFeil> {
                 return aktiviteter.filterIsInstance<FunksjonellFeil>()
             }
-            internal fun gjennopprett(id: UUID, kontekster: List<SpesifikkKontekst>, melding: String, tidsstempel: String) =
-                FunksjonellFeil(id, kontekster, melding, tidsstempel)
-            internal fun opprett(kontekster: List<SpesifikkKontekst>, melding: String) =
-                FunksjonellFeil(UUID.randomUUID(), kontekster, melding)
+            internal fun opprett(kontekster: List<SpesifikkKontekst>, kode: Varselkode, melding: String) =
+                FunksjonellFeil(UUID.randomUUID(), kontekster, kode, melding)
         }
 
         override fun accept(visitor: AktivitetsloggVisitor) {
             visitor.visitFunksjonellFeil(id, kontekster, this, melding, tidsstempel)
+        }
+
+        override fun notify(observer: AktivitetsloggObserver) {
+            observer.funksjonellFeil(id, label, kode, melding, kontekster, LocalDateTime.parse(tidsstempel, tidsstempelformat))
         }
     }
 

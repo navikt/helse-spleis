@@ -2,13 +2,13 @@ package no.nav.helse.person
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_1
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggObserver
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_1
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -43,7 +43,7 @@ internal class AktivitetsloggObserverTest {
 
         testObserver.assertAktivitet('I', melding = "Dette er en info-melding", kontekster = listOf(personkontekst, arbeidsgiverkontekst, vedtaksperiodekontekst))
         testObserver.assertAktivitet('W', kode = RV_SØ_1, melding = "Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger", kontekster = listOf(personkontekst, arbeidsgiverkontekst, vedtaksperiodekontekst))
-        testObserver.assertAktivitet('E', melding = "Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger", kontekster = listOf(personkontekst, arbeidsgiverkontekst, vedtaksperiodekontekst))
+        testObserver.assertAktivitet('E', kode = RV_SØ_1, melding = "Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger", kontekster = listOf(personkontekst, arbeidsgiverkontekst, vedtaksperiodekontekst))
         testObserver.assertAktivitet('S', melding = "Dette er en severe", kontekster = listOf(personkontekst, arbeidsgiverkontekst, vedtaksperiodekontekst))
     }
 
@@ -83,6 +83,24 @@ internal class AktivitetsloggObserverTest {
                 if (kode != null) put("varselkode", kode)
             }.toMap()
             aktiviteter.add(actual)
+        }
+
+        override fun funksjonellFeil(
+            id: UUID,
+            label: Char,
+            kode: Varselkode,
+            melding: String,
+            kontekster: List<SpesifikkKontekst>,
+            tidsstempel: LocalDateTime
+        ) {
+            aktiviteter.add(
+                mutableMapOf(
+                    "type" to label,
+                    "melding" to melding,
+                    "kontekster" to kontekster,
+                    "varselkode" to kode
+                )
+            )
         }
 
         fun assertAktivitet(type: Char, kode: Varselkode? = null, melding: String, kontekster: List<Aktivitetskontekst>) {

@@ -3,8 +3,8 @@ package no.nav.helse.spleis
 import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.person.aktivitetslogg.AktivitetsloggObserver
 import no.nav.helse.hendelser.PersonHendelse
+import no.nav.helse.person.aktivitetslogg.AktivitetsloggObserver
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -37,6 +37,19 @@ class DatadelingMediator(private val hendelse: PersonHendelse): AktivitetsloggOb
     override fun varsel(id: UUID, label: Char, kode: Varselkode?, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: LocalDateTime) {
         val aktivitetMap = aktivitetMap(id, label, melding, kontekster, tidsstempel).toMutableMap()
         if (kode != null) aktivitetMap["varselkode"] = kode
+        aktiviteter.add(aktivitetMap.toMap())
+    }
+
+    override fun funksjonellFeil(
+        id: UUID,
+        label: Char,
+        kode: Varselkode,
+        melding: String,
+        kontekster: List<SpesifikkKontekst>,
+        tidsstempel: LocalDateTime
+    ) {
+        val aktivitetMap = aktivitetMap(id, label, melding, kontekster, tidsstempel).toMutableMap()
+        aktivitetMap["varselkode"] = kode
         aktiviteter.add(aktivitetMap.toMap())
     }
 
