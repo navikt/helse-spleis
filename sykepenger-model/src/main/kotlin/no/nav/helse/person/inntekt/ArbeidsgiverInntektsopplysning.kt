@@ -162,7 +162,7 @@ class ArbeidsgiverInntektsopplysning(
             val arbeidsgiverInntektsopplysning = arbeidsgiverInntektsopplysning(organisasjonsnummer, dato)
             val inntekt = arbeidsgiverInntektsopplysning.inntektsopplysning.omregnetÅrsinntekt()
             val refusjonsbeløp = checkNotNull(arbeidsgiverInntektsopplysning.refusjonsopplysninger.refusjonsbeløpOrNull(dato)) {
-                "Har ingen refusjonsopplysninger på vilkårsgrunnlag med skjæringstidspunkt $skjæringstidspunkt"
+                "Har ingen refusjonsopplysninger på vilkårsgrunnlag med skjæringstidspunkt $skjæringstidspunkt for utbetalingsdag $dato"
             }
             return økonomi.inntekt(
                 aktuellDagsinntekt = inntekt,
