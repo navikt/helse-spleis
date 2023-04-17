@@ -119,6 +119,14 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `sender med skjæringstidspunkt i eventet`() {
+        nyPeriode(1.januar til 31.januar)
+        val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
+
+        assertEquals(1.januar, trengerArbeidsgiveropplysningerEvent.skjæringstidspunkt)
+    }
+
+    @Test
     fun `sender med begge sykmeldingsperiodene når vi har en kort periode som forlenges av en lang`() {
         nyPeriode(1.januar til 16.januar)
         nyPeriode(17.januar til 31.januar)
@@ -144,7 +152,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
-
 
     @Test
     fun `sender med riktig sykmeldingsperioder og forslag til arbeidsgiverperiode når arbeidsperioden er stykket opp i flere korte perioder`() {

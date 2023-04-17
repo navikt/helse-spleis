@@ -32,6 +32,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             val faktiskResultat = trengerOpplysningerEvent.json(
                 "@event_name",
                 "organisasjonsnummer",
+                "skjæringstidspunkt",
                 "sykmeldingsperioder",
                 "forespurteOpplysninger",
                 "aktørId",
@@ -61,6 +62,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             val faktiskResultat = trengerOpplysningerEvent.json(
                 "@event_name",
                 "organisasjonsnummer",
+                "skjæringstidspunkt",
                 "sykmeldingsperioder",
                 "forespurteOpplysninger",
                 "aktørId",
@@ -151,6 +153,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         {
           "@event_name": "trenger_opplysninger_fra_arbeidsgiver",
           "organisasjonsnummer": "ag2",
+          "skjæringstidspunkt": "2018-01-01",
           "sykmeldingsperioder": [
             {
               "fom": "2018-03-01",
@@ -191,6 +194,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         {
           "@event_name": "trenger_opplysninger_fra_arbeidsgiver",
           "organisasjonsnummer": "987654321",
+          "skjæringstidspunkt": "2018-01-01",
           "sykmeldingsperioder": [
             {
               "fom": "2018-01-01",

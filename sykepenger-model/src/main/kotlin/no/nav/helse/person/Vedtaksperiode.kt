@@ -699,8 +699,9 @@ internal class Vedtaksperiode private constructor(
         person.trengerArbeidsgiveropplysninger(
             PersonObserver.TrengerArbeidsgiveropplysningerEvent(
                 organisasjonsnummer = organisasjonsnummer,
-                sykmeldingsperioder = relevanteSykmeldingsperioder,
                 vedtaksperiodeId = id,
+                skjæringstidspunkt = skjæringstidspunkt,
+                sykmeldingsperioder = relevanteSykmeldingsperioder,
                 forespurteOpplysninger = forespurteOpplysninger
             )
         )

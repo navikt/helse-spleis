@@ -100,6 +100,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     class TrengerArbeidsgiveropplysningerEvent(
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
+        val skjæringstidspunkt: LocalDate,
         val sykmeldingsperioder: List<Periode>,
         val forespurteOpplysninger: List<ForespurtOpplysning>
     ) {
@@ -107,6 +108,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
             mapOf(
                 "organisasjonsnummer" to organisasjonsnummer,
                 "vedtaksperiodeId" to vedtaksperiodeId,
+                "skjæringstidspunkt" to skjæringstidspunkt,
                 "sykmeldingsperioder" to sykmeldingsperioder.map {
                     mapOf(
                         "fom" to it.start,
