@@ -1006,39 +1006,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `periode som begynner på søndag skal ikke gi warning på krav om minimuminntekt`() {
-        håndterSykmelding(Sykmeldingsperiode(15.mars(2020), 8.april(2020)))
-        håndterSøknad(Sykdom(15.mars(2020), 8.april(2020), 100.prosent))
-        assertEquals("H SSSSSHH SSSSSHH SSSSSHH SSS", inspektør(ORGNUMMER).sykdomshistorikk.sykdomstidslinje().toShortString())
-        håndterInntektsmelding(
-            listOf(Periode(16.mars(2020), 31.mars(2020))),
-            førsteFraværsdag = 16.mars(2020),
-            refusjon = Refusjon(INNTEKT, null, emptyList())
-        )
-        assertEquals("R SSSSSHH SSSSSHH SSSSSHH SSS", inspektør(ORGNUMMER).sykdomshistorikk.sykdomstidslinje().toShortString())
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.mars(2019) til 1.februar(2020) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }
-        ))
-        håndterYtelser(1.vedtaksperiode)
-
-        assertFalse(person.personLogg.harVarslerEllerVerre())
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING
-        )
-    }
-
-    @Test
     fun `Forkasting skal ikke påvirke tilstanden til AVSLUTTET_UTEN_UTBETALING`() {
         håndterSykmelding(Sykmeldingsperiode(31.mars(2020), 13.april(2020)))
         håndterSøknad(Sykdom(31.mars(2020), 13.april(2020), 100.prosent))

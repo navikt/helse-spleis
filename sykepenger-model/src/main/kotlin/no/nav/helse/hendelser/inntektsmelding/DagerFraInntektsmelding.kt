@@ -8,7 +8,6 @@ import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -31,7 +30,6 @@ internal class DagerFraInntektsmelding(
     internal fun meldingsreferanseId() = inntektsmelding.meldingsreferanseId()
     internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = inntektsmelding.leggTil(hendelseIder)
 
-    private fun valider(arbeidsgiverperiode: Arbeidsgiverperiode?) = inntektsmelding.validerArbeidsgiverperiode(arbeidsgiverperiode)
     internal fun vurdertTilOgMed(dato: LocalDate) = inntektsmelding.trimLeft(dato)
     internal fun oppdatertFom(periode: Periode) = inntektsmelding.oppdaterFom(periode)
     internal fun leggTilArbeidsdagerFør(dato: LocalDate) {
@@ -67,34 +65,23 @@ internal class DagerFraInntektsmelding(
 
     internal fun harBlittHåndtertAv(periode: Periode) = håndterteDager.any { it in periode }
 
-    internal fun håndter(periode: Periode, arbeidsgiver: Arbeidsgiver) = håndter(periode) {
-        arbeidsgiver.oppdaterSykdom(it)
-    }
+    internal fun håndter(periode: Periode, arbeidsgiver: Arbeidsgiver) = håndter(
+        periode = periode,
+        arbeidsgiverperiode = { arbeidsgiver.arbeidsgiverperiode(periode)},
+        oppdaterSykdom = { arbeidsgiver.oppdaterSykdom(it) }
+    )
 
-    private var forrigePeriodeSomHåndterteDager: Periode? = null
-
-    internal fun håndter(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Sykdomstidslinje): Sykdomstidslinje? {
+    internal fun håndter(periode: Periode, arbeidsgiverperiode: () -> Arbeidsgiverperiode?, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Sykdomstidslinje): Sykdomstidslinje? {
         val overlappendeDager = overlappendeDager(periode).takeUnless { it.isEmpty() } ?: return null
         val arbeidsgiverSykedomstidslinje = oppdaterSykdom(BitAvInntektsmelding(inntektsmelding, overlappendeDager.omsluttendePeriode!!))
         gjenståendeDager.removeAll(overlappendeDager)
-        forrigePeriodeSomHåndterteDager = periode
+        if (gjenståendeDager.isEmpty()) inntektsmelding.validerArbeidsgiverperiode(arbeidsgiverperiode())
         return arbeidsgiverSykedomstidslinje.subset(periode)
     }
 
-    internal fun valider(arbeidsgiver: Arbeidsgiver, periodeSomHåndtereInntekt: Vedtaksperiode?) {
-        // Hvis ingen vedtaksperioder håndterte dagene kan det likevel hende vi behøver varsel
-        if (forrigePeriodeSomHåndterteDager == null) {
-            periodeSomHåndtereInntekt?.let {
-                kontekst(periodeSomHåndtereInntekt)
-                valider(arbeidsgiver.arbeidsgiverperiode(it.periode()))
-                return
-            }
-        }
-        forrigePeriodeSomHåndterteDager?.let {
-            // Vi ønsker kun å validere arbeidsgiverperioden en gang, og dette til slutt
-            // Dette for å unngå uenighet om agp hvis kun deler av historikken er lagt til
-            valider(arbeidsgiver.arbeidsgiverperiode(it))
-        }
+    internal fun valider(arbeidsgiverperiode: Arbeidsgiverperiode?) {
+        if (gjenståendeDager.isEmpty()) return
+        inntektsmelding.validerArbeidsgiverperiode(arbeidsgiverperiode)
     }
 
     internal fun noenDagerHåndtert() = håndterteDager.isNotEmpty()

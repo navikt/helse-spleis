@@ -494,7 +494,7 @@ internal class InntektsmeldingMatchingTest {
 
     private fun DagerFraInntektsmelding.håndter(periode: Periode): Periode? {
         var håndtertPeriode: Periode? = null
-        håndter(periode) {
+        håndter(periode, { null }) {
             håndtertPeriode = it.sykdomstidslinje().periode()
             Sykdomstidslinje()
         }

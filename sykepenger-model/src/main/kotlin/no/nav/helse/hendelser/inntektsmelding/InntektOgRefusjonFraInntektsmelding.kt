@@ -11,12 +11,13 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 
 internal class InntektOgRefusjonFraInntektsmelding(
     private val inntektsmelding: Inntektsmelding,
     private val førsteFraværsdag: LocalDate?,
     arbeidsgiverperioder: List<Periode>,
-    dagerFraInntektsmelding: DagerFraInntektsmelding
+    private val dagerFraInntektsmelding: DagerFraInntektsmelding
 ): IAktivitetslogg by inntektsmelding {
 
     private val sisteDagIArbeidsgiverperioden = arbeidsgiverperioder
@@ -34,8 +35,10 @@ internal class InntektOgRefusjonFraInntektsmelding(
     internal fun nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt: LocalDate, person: Person, subsumsjonObserver: SubsumsjonObserver) =
         person.nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt, inntektsmelding, subsumsjonObserver)
 
-    internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate) =
+    internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?) {
         inntektsmelding.validerInntektOgRefusjon(periode, skjæringstidspunkt)
+        dagerFraInntektsmelding.valider(arbeidsgiverperiode)
+    }
 
     internal fun addInntektsmelding(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver, jurist: SubsumsjonObserver) =
         arbeidsgiver.addInntektsmelding(skjæringstidspunkt, inntektsmelding, jurist)

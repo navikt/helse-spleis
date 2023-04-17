@@ -522,8 +522,6 @@ internal class Arbeidsgiver private constructor(
             vedtaksperioder.skalHåndtere(inntektsmelding.inntektOgRefusjon(dager))
         val inntektOgRefusjonHåndteres = vedtaksperiodeSomSkalHåndtereInntektOgRefusjon != null
 
-        dager.valider(this@Arbeidsgiver, vedtaksperiodeSomSkalHåndtereInntektOgRefusjon)
-
         vedtaksperiodeSomSkalHåndtereInntektOgRefusjon?.håndter(inntektsmelding.inntektOgRefusjon(dager))?.also {
             // En av vedtaksperiodene har håndtert inntekt og refusjon
             // vi må informere de andre vedtaksperiodene på arbeidsgiveren som berøres av dette

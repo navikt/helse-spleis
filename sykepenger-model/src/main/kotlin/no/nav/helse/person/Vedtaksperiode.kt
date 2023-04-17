@@ -322,7 +322,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterInntektOgRefusjon(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding, nesteTilstand: Vedtaksperiodetilstand? = null) {
-        inntektOgRefusjon.valider(periode, skjæringstidspunkt)
+        inntektOgRefusjon.valider(periode, skjæringstidspunkt, arbeidsgiver.arbeidsgiverperiode(periode))
         inntektOgRefusjon.info("Fullført behandling av inntektsmelding")
         if (inntektOgRefusjon.harFunksjonelleFeilEllerVerre()) return forkast(inntektOgRefusjon)
         nesteTilstand?.also { tilstand(inntektOgRefusjon, it) }
