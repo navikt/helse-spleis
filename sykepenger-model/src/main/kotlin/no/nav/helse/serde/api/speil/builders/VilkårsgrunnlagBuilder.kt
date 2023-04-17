@@ -55,13 +55,14 @@ internal abstract class IVilkårsgrunnlag(
     val id: UUID
 ) {
     private val vedtaksperioder = mutableMapOf<String, MutableList<UUID>>()
+    private val arbeidsgivereMedInntekt = inntekter.filter { it.omregnetÅrsinntekt != null }
     abstract fun toDTO(): Vilkårsgrunnlag
     fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) = inntekter.none { it.arbeidsgiver == organisasjonsnummer }
     open fun potensiellGhostperiode(
         organisasjonsnummer: String,
         sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>
     ): GhostPeriodeDTO? {
-        if (this.inntekter.size < 2 || this.skjæringstidspunkt !in sykefraværstilfeller) return null
+        if (arbeidsgivereMedInntekt.size < 2 || this.skjæringstidspunkt !in sykefraværstilfeller) return null
         val inntekten = inntekter.firstOrNull { it.arbeidsgiver == organisasjonsnummer }
         if (inntekten == null || inntekten.omregnetÅrsinntekt?.kilde == null) return null
         return GhostPeriodeDTO(
@@ -183,7 +184,7 @@ internal class InntektBuilder(private val inntekt: Inntekt) {
     }
 }
 
-internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunnlag: Map<UUID, IVilkårsgrunnlag>) {
+internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunnlag: Map<Int, Map<UUID, IVilkårsgrunnlag>>) {
     private val vilkårsgrunnlagIBruk = mutableMapOf<UUID, IVilkårsgrunnlag>()
 
     internal fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) =
@@ -193,21 +194,26 @@ internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunn
         organisasjonsnummer: String,
         sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>
     ) =
-        vilkårsgrunnlagIBruk.mapNotNull { (_, vilkårsgrunnlag) ->
+        tilgjengeligeVilkårsgrunnlag[0]?.mapNotNull { (_, vilkårsgrunnlag) ->
             vilkårsgrunnlag.potensiellGhostperiode(organisasjonsnummer, sykefraværstilfeller)
-        }
+        } ?: emptyList()
 
     internal fun toDTO(): Map<UUID, Vilkårsgrunnlag> {
         return vilkårsgrunnlagIBruk.mapValues { (_, vilkårsgrunnlag) -> vilkårsgrunnlag.toDTO() }
     }
 
     internal fun leggIBøtta(vilkårsgrunnlagId: UUID): IVilkårsgrunnlag {
-        return vilkårsgrunnlagIBruk.getOrPut(vilkårsgrunnlagId) { tilgjengeligeVilkårsgrunnlag.getValue(vilkårsgrunnlagId) }
+        return vilkårsgrunnlagIBruk.getOrPut(vilkårsgrunnlagId) {
+            tilgjengeligeVilkårsgrunnlag.entries.firstNotNullOf { (_, elementer) ->
+                elementer[vilkårsgrunnlagId]
+            }
+        }
     }
 }
 
 internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk) : VilkårsgrunnlagHistorikkVisitor {
-    private val historikk = mutableMapOf<UUID, IVilkårsgrunnlag>()
+    private var innslagIndex = 0
+    private val historikk = mutableMapOf<Int, MutableMap<UUID, IVilkårsgrunnlag>>()
 
     init {
         vilkårsgrunnlagHistorikk.accept(this)
@@ -215,6 +221,9 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
 
     internal fun build() = IVilkårsgrunnlagHistorikk(historikk)
 
+    override fun postVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {
+        innslagIndex += 1
+    }
 
     override fun preVisitGrunnlagsdata(
         skjæringstidspunkt: LocalDate,
@@ -228,50 +237,53 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         vilkårsgrunnlagId: UUID,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
     ) {
-        historikk.getOrPut(vilkårsgrunnlagId) {
-            val sammenligningsgrunnlagBuilder = SammenligningsgrunnlagBuilder(sammenligningsgrunnlag)
-            val compositeSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder).build()
-            val oppfyllerKravOmMedlemskap = when (medlemskapstatus) {
-                Medlemskapsvurdering.Medlemskapstatus.Ja -> true
-                Medlemskapsvurdering.Medlemskapstatus.Nei -> false
-                else -> null
+        historikk.getOrPut(innslagIndex) { mutableMapOf() }
+            .getOrPut(vilkårsgrunnlagId) {
+                val sammenligningsgrunnlagBuilder = SammenligningsgrunnlagBuilder(sammenligningsgrunnlag)
+                val compositeSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder).build()
+                val oppfyllerKravOmMedlemskap = when (medlemskapstatus) {
+                    Medlemskapsvurdering.Medlemskapstatus.Ja -> true
+                    Medlemskapsvurdering.Medlemskapstatus.Nei -> false
+                    else -> null
+                }
+                ISpleisGrunnlag(
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    omregnetÅrsinntekt = compositeSykepengegrunnlag.omregnetÅrsinntekt,
+                    sammenligningsgrunnlag = sammenligningsgrunnlagBuilder.total(),
+                    inntekter = compositeSykepengegrunnlag.inntekterPerArbeidsgiver,
+                    refusjonsopplysningerPerArbeidsgiver = compositeSykepengegrunnlag.refusjonsopplysningerPerArbeidsgiver,
+                    sykepengegrunnlag = compositeSykepengegrunnlag.sykepengegrunnlag,
+                    avviksprosent = avviksprosent?.prosent(),
+                    grunnbeløp = compositeSykepengegrunnlag.begrensning.grunnbeløp,
+                    sykepengegrunnlagsgrense = compositeSykepengegrunnlag.begrensning,
+                    meldingsreferanseId = meldingsreferanseId,
+                    antallOpptjeningsdagerErMinst = opptjening.opptjeningsdager(),
+                    oppfyllerKravOmMinstelønn = compositeSykepengegrunnlag.oppfyllerMinsteinntektskrav,
+                    oppfyllerKravOmOpptjening = opptjening.erOppfylt(),
+                    oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap,
+                    id = vilkårsgrunnlagId
+                )
             }
-            ISpleisGrunnlag(
-                skjæringstidspunkt = skjæringstidspunkt,
-                omregnetÅrsinntekt = compositeSykepengegrunnlag.omregnetÅrsinntekt,
-                sammenligningsgrunnlag = sammenligningsgrunnlagBuilder.total(),
-                inntekter = compositeSykepengegrunnlag.inntekterPerArbeidsgiver,
-                refusjonsopplysningerPerArbeidsgiver = compositeSykepengegrunnlag.refusjonsopplysningerPerArbeidsgiver,
-                sykepengegrunnlag = compositeSykepengegrunnlag.sykepengegrunnlag,
-                avviksprosent = avviksprosent?.prosent(),
-                grunnbeløp = compositeSykepengegrunnlag.begrensning.grunnbeløp,
-                sykepengegrunnlagsgrense = compositeSykepengegrunnlag.begrensning,
-                meldingsreferanseId = meldingsreferanseId,
-                antallOpptjeningsdagerErMinst = opptjening.opptjeningsdager(),
-                oppfyllerKravOmMinstelønn = compositeSykepengegrunnlag.oppfyllerMinsteinntektskrav,
-                oppfyllerKravOmOpptjening = opptjening.erOppfylt(),
-                oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap,
-                id = vilkårsgrunnlagId
-            )
-        }
     }
 
     override fun preVisitInfotrygdVilkårsgrunnlag(infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag, skjæringstidspunkt: LocalDate, sykepengegrunnlag: Sykepengegrunnlag, vilkårsgrunnlagId: UUID) {
-        historikk.getOrPut(vilkårsgrunnlagId) {
-            val byggetSykepengegrunnlag = SykepengegrunnlagBuilder(
-                sykepengegrunnlag,
-                null /* vi har ikke noe sammenligningsgrunnlag for Infotrygd-saker */
-            ).build()
-            IInfotrygdGrunnlag(
-                skjæringstidspunkt = skjæringstidspunkt,
-                omregnetÅrsinntekt = byggetSykepengegrunnlag.omregnetÅrsinntekt,
-                sammenligningsgrunnlag = null,
-                inntekter = byggetSykepengegrunnlag.inntekterPerArbeidsgiver,
-                refusjonsopplysningerPerArbeidsgiver = byggetSykepengegrunnlag.refusjonsopplysningerPerArbeidsgiver,
-                sykepengegrunnlag = byggetSykepengegrunnlag.sykepengegrunnlag,
-                id = vilkårsgrunnlagId
-            )
-        }
+        historikk
+            .getOrPut(innslagIndex) { mutableMapOf() }
+            .getOrPut(vilkårsgrunnlagId) {
+                val byggetSykepengegrunnlag = SykepengegrunnlagBuilder(
+                    sykepengegrunnlag,
+                    null /* vi har ikke noe sammenligningsgrunnlag for Infotrygd-saker */
+                ).build()
+                IInfotrygdGrunnlag(
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    omregnetÅrsinntekt = byggetSykepengegrunnlag.omregnetÅrsinntekt,
+                    sammenligningsgrunnlag = null,
+                    inntekter = byggetSykepengegrunnlag.inntekterPerArbeidsgiver,
+                    refusjonsopplysningerPerArbeidsgiver = byggetSykepengegrunnlag.refusjonsopplysningerPerArbeidsgiver,
+                    sykepengegrunnlag = byggetSykepengegrunnlag.sykepengegrunnlag,
+                    id = vilkårsgrunnlagId
+                )
+            }
     }
 
     internal class SammenligningsgrunnlagBuilder(sammenligningsgrunnlag: Sammenligningsgrunnlag) : SammenligningsgrunnlagVisitor {

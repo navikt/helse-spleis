@@ -3,6 +3,7 @@ package no.nav.helse.serde.api
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
+import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -740,7 +741,18 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
 
         val speilJson = serializePersonForSpeil(person)
         val perioder = speilJson.arbeidsgivere.singleOrNull { it.organisasjonsnummer == a2 }?.ghostPerioder
-        assertNull(perioder)
+        val actual = perioder?.single()!!
+        assertEquals(
+            GhostPeriodeDTO(
+                id = actual.id,
+                fom = 1.januar,
+                tom = 20.januar,
+                skjæringstidspunkt = 1.januar,
+                vilkårsgrunnlagId = person.vilkårsgrunnlagFor(inspektør.skjæringstidspunkt(1.vedtaksperiode))!!.inspektør.vilkårsgrunnlagId,
+                deaktivert = false
+            ),
+            actual
+        )
         val vilkårsgrunnlag = speilJson.vilkårsgrunnlag
         assertEquals(0, vilkårsgrunnlag.size)
     }
