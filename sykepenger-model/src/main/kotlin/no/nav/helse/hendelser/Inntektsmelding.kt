@@ -78,18 +78,31 @@ class Inntektsmelding(
         sykdomstidslinje = arbeidsgivertidslinje()
     }
 
-    private fun arbeidsgivertidslinje(): Sykdomstidslinje {
-        val arbeidsdager = arbeidsgiverperiode?.let { Sykdomstidslinje.arbeidsdager(arbeidsgiverperiode, kilde) } ?: return Sykdomstidslinje()
-        val friskHelg = førsteFraværsdag
-            ?.takeIf { arbeidsgiverperiode.erRettFør(førsteFraværsdag) }
-            ?.let { arbeidsgiverperiode.periodeMellom(førsteFraværsdag) }
-            ?.let { Sykdomstidslinje.arbeidsdager(it, kilde) }
-            ?: Sykdomstidslinje()
-        val arbeidsgiverdager = arbeidsgiverperioder.map(::asArbeidsgivertidslinje).merge()
-        return arbeidsdager.merge(arbeidsgiverdager, replace).merge(friskHelg)
+    private companion object {
+        private val ikkeStøttedeBegrunnelserForReduksjon = setOf(
+            "BetvilerArbeidsufoerhet",
+            "FiskerMedHyre",
+            "StreikEllerLockout"
+        )
     }
 
-    private fun asArbeidsgivertidslinje(periode: Periode) = Sykdomstidslinje.arbeidsgiverdager(periode.start, periode.endInclusive, 100.prosent, kilde)
+    private fun arbeidsgivertidslinje(): Sykdomstidslinje {
+        val arbeidsdager = arbeidsgiverperiode?.let { Sykdomstidslinje.arbeidsdager(arbeidsgiverperiode, kilde) } ?: Sykdomstidslinje()
+        val friskHelg = førsteFraværsdag
+            ?.takeIf { arbeidsgiverperiode?.erRettFør(førsteFraværsdag) == true }
+            ?.let { arbeidsgiverperiode?.periodeMellom(førsteFraværsdag) }
+            ?.let { Sykdomstidslinje.arbeidsdager(it, kilde) }
+            ?: Sykdomstidslinje()
+        return arbeidsdager.merge(lagArbeidsgivertidslinje(), replace).merge(friskHelg)
+    }
+
+    private fun lagArbeidsgivertidslinje(): Sykdomstidslinje {
+        if (begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank() || begrunnelseForReduksjonEllerIkkeUtbetalt == "FerieEllerAvspasering" || begrunnelseForReduksjonEllerIkkeUtbetalt in ikkeStøttedeBegrunnelserForReduksjon) return arbeidsgiverperioder.map(::arbeidsgiverdager).merge()
+        return (arbeidsgiverperioder.takeUnless { it.isEmpty() } ?: listOfNotNull(førsteFraværsdag?.somPeriode())).map(::sykedagerNav).merge()
+    }
+
+    private fun arbeidsgiverdager(periode: Periode) = Sykdomstidslinje.arbeidsgiverdager(periode.start, periode.endInclusive, 100.prosent, kilde)
+    private fun sykedagerNav(periode: Periode) = Sykdomstidslinje.sykedagerNav(periode.start, periode.endInclusive, 100.prosent, kilde)
 
     override fun sykdomstidslinje() = sykdomstidslinje
 
@@ -137,10 +150,10 @@ class Inntektsmelding(
     private fun validerØvrig() {
         if (harOpphørAvNaturalytelser) funksjonellFeil(RV_IM_7)
         if (harFlereInntektsmeldinger) varsel(RV_IM_22)
-        begrunnelseForReduksjonEllerIkkeUtbetalt?.takeIf(String::isNotBlank)?.also {
-            info("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s".format(it))
-            funksjonellFeil(RV_IM_8)
-        }
+        if (begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank()) return
+        info("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s".format(begrunnelseForReduksjonEllerIkkeUtbetalt))
+        if (begrunnelseForReduksjonEllerIkkeUtbetalt in ikkeStøttedeBegrunnelserForReduksjon) return funksjonellFeil(RV_IM_8)
+        varsel(RV_IM_8)
     }
 
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {

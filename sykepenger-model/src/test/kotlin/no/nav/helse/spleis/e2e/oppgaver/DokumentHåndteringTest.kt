@@ -111,7 +111,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
 
         val søknad2 = håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
-        val im = håndterInntektsmelding(listOf(10.januar til 26.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "bjeff")
+        val im = håndterInntektsmelding(listOf(10.januar til 26.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre")
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),

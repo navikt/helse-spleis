@@ -4,7 +4,6 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
-import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -56,7 +55,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_2
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
-import no.nav.helse.september
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertActivities
@@ -281,31 +279,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), harFlereInntektsmeldinger = true)
         assertVarsel(RV_IM_22)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-    }
-
-
-    @Test
-    fun `to korte perioder og en lang rett etter foreldrepenger - ag sier med rette at det ikke er noen AGP`() {
-        håndterSykmelding(Sykmeldingsperiode(29.august(2022), 5.september(2022)))
-        håndterSykmelding(Sykmeldingsperiode(6.september(2022), 9.september(2022)))
-        håndterSøknad(Sykdom(29.august(2022), 5.september(2022), 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(10.september(2022), 24.september(2022)))
-        håndterSøknad(Sykdom(6.september(2022), 9.september(2022), 100.prosent))
-
-        håndterInntektsmelding(emptyList(), 29.august(2022), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
-
-        assertForventetFeil("""
-            Sykmeldt etter f.eks foreldrepenger eller i ny stilling betyr at arbeidsgiver ikke er pliktiget til å betale AGP,
-             men at NAV dekker sykepenger allerede fra første sykedag
-             
-             I dag risikerer vi at bruker ikke får utbetalt penger, siden vi sender de korte periodene til AUU,
-             og det er ikke sikkert at en saksbehandler ser sakene i det hele tatt""".trimIndent(), nå = {
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        }, ønsket = {
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-            assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
-        })
     }
 
     @Test
@@ -1940,12 +1913,12 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `kaste ut vedtaksperiode hvis arbeidsgiver ikke utbetaler arbeidsgiverperiode`() {
+    fun `kaste ut vedtaksperiode hvis arbeidsgiver ikke utbetaler arbeidsgiverperiode med begrunnelse FiskerMedHyre`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "begrunnelse")
+        håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre")
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-        assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: begrunnelse", 1.vedtaksperiode.filter())
+        assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: FiskerMedHyre", 1.vedtaksperiode.filter())
         assertFunksjonellFeil("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden", 1.vedtaksperiode.filter())
     }
 
@@ -2061,15 +2034,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(5.januar til 20.januar), førsteFraværsdag = 22.januar)
         assertEquals(5.januar til 16.februar, inspektør.periode(1.vedtaksperiode))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-    }
-
-    @Test
-    fun `Arbeidsgiverperiode treffer ingen vedtaksperioder og oppgitt begrunnelseForReduksjonEllerIkkeUtbetalt`() {
-        nyPeriode(22.januar til 16.februar)
-        assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-        håndterInntektsmelding(listOf(5.januar til 20.januar), førsteFraværsdag = 22.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "Mjau")
-        assertEquals(0, inspektør.sykdomshistorikk.sykdomstidslinje().count())
-        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
     }
 
     @Test

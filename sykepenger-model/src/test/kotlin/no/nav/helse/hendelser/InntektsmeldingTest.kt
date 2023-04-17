@@ -219,11 +219,11 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `inntektsmelding uten arbeidsgiverperiode med førsteFraværsdag & begrunnelseForReduksjonEllerIkkeUtbetalt satt`() {
-        inntektsmelding(emptyList(), førsteFraværsdag = 1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "begrunnelse")
+        inntektsmelding(emptyList(), førsteFraværsdag = 1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre")
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
         inntektsmelding.validerArbeidsgiverperiode(null)
         aktivitetslogg.assertInfo("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode")
-        aktivitetslogg.assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: begrunnelse")
+        aktivitetslogg.assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: FiskerMedHyre")
         aktivitetslogg.assertFunksjonellFeil("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden")
         assertNull(nyTidslinje.periode()?.start)
         assertNull(nyTidslinje.periode()?.endInclusive)
@@ -306,14 +306,14 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    fun `begrunnelseForReduksjonEllerIkkeUtbetalt i inntektsmelding gir warning`() {
+    fun `FiskerMedHyre satt som begrunnelseForReduksjonEllerIkkeUtbetalt i inntektsmelding kastes ut`() {
         inntektsmelding(
             listOf(Periode(1.januar, 10.januar)),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "begrunnelse"
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre"
         )
         inntektsmelding.validerArbeidsgiverperiode(null)
         aktivitetslogg.assertFunksjonellFeil("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden")
-        aktivitetslogg.assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: begrunnelse")
+        aktivitetslogg.assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: FiskerMedHyre")
     }
 
     @Test

@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -16,11 +17,15 @@ import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
+import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
-import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
@@ -29,7 +34,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
     fun `Overstyrer agp til sykedagNav - ingen refusjon`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null, emptyList()))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList()))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -39,13 +44,13 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         val utbetalinger = inspektør.utbetalinger
-        Assertions.assertEquals(2, utbetalinger.size)
+        assertEquals(2, utbetalinger.size)
         utbetalinger.last().inspektør.also { overstyringen ->
-            Assertions.assertEquals(1, overstyringen.personOppdrag.size)
-            Assertions.assertEquals(0, overstyringen.arbeidsgiverOppdrag.size)
+            assertEquals(1, overstyringen.personOppdrag.size)
+            assertEquals(0, overstyringen.arbeidsgiverOppdrag.size)
             overstyringen.personOppdrag[0].inspektør.also { linje ->
-                Assertions.assertEquals(1.januar til 31.januar, linje.fom til linje.tom)
-                Assertions.assertEquals(1431, linje.beløp)
+                assertEquals(1.januar til 31.januar, linje.fom til linje.tom)
+                assertEquals(1431, linje.beløp)
             }
         }
     }
@@ -53,7 +58,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
     @Test
     fun `Overstyrer egenmeldingsdager til SykedagNav`() {
         håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null, emptyList()))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList()))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -63,13 +68,13 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         val utbetalinger = inspektør.utbetalinger
-        Assertions.assertEquals(2, utbetalinger.size)
+        assertEquals(2, utbetalinger.size)
         utbetalinger.last().inspektør.also { overstyringen ->
-            Assertions.assertEquals(1, overstyringen.personOppdrag.size)
-            Assertions.assertEquals(0, overstyringen.arbeidsgiverOppdrag.size)
+            assertEquals(1, overstyringen.personOppdrag.size)
+            assertEquals(0, overstyringen.arbeidsgiverOppdrag.size)
             overstyringen.personOppdrag[0].inspektør.also { linje ->
-                Assertions.assertEquals(1.januar til 31.januar, linje.fom til linje.tom)
-                Assertions.assertEquals(1431, linje.beløp)
+                assertEquals(1.januar til 31.januar, linje.fom til linje.tom)
+                assertEquals(1431, linje.beløp)
             }
         }
     }
@@ -88,14 +93,40 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         val utbetalinger = inspektør.utbetalinger
-        Assertions.assertEquals(2, utbetalinger.size)
+        assertEquals(2, utbetalinger.size)
         utbetalinger.last().inspektør.also { overstyringen ->
-            Assertions.assertEquals(0, overstyringen.personOppdrag.size)
-            Assertions.assertEquals(1, overstyringen.arbeidsgiverOppdrag.size)
+            assertEquals(0, overstyringen.personOppdrag.size)
+            assertEquals(1, overstyringen.arbeidsgiverOppdrag.size)
             overstyringen.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-                Assertions.assertEquals(1.januar til 31.januar, linje.fom til linje.tom)
-                Assertions.assertEquals(1431, linje.beløp)
+                assertEquals(1.januar til 31.januar, linje.fom til linje.tom)
+                assertEquals(1431, linje.beløp)
             }
         }
+    }
+
+    @Test
+    fun `arbeidsgiver ikke utbetalt i arbeidsgiverperiode på grunn av manglende opptjening`() {
+        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
+        håndterInntektsmelding(listOf(), førsteFraværsdag = 1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening", refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList()))
+        assertEquals(Dag.SykedagNav::class, inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar]::class)
+        assertTrue(inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar].kommerFra(Inntektsmelding::class))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        val utbetaling = inspektør.utbetalinger.single().inspektør
+        assertTrue(utbetaling.arbeidsgiverOppdrag.isEmpty())
+        assertEquals(1, utbetaling.personOppdrag.size)
+        assertEquals(1.januar til 1.januar, utbetaling.personOppdrag[0].periode)
+    }
+
+    @Test
+    fun `arbeidsgiver ikke utbetalt i arbeidsgiverperiode på grunn av ferie eller avspasering`() {
+        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
+        håndterInntektsmelding(listOf(), førsteFraværsdag = 1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering")
+        assertEquals(Dag.Sykedag::class, inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar]::class)
+        assertTrue(inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar].kommerFra(Søknad::class))
     }
 }
