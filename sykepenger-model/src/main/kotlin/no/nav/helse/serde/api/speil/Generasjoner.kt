@@ -1,6 +1,7 @@
 package no.nav.helse.serde.api.speil
 
 import java.util.UUID
+import no.nav.helse.serde.api.dto.AnnullertPeriode
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.GenerasjonDTO
 import no.nav.helse.serde.api.dto.Tidslinjeperiode
@@ -21,7 +22,7 @@ class Generasjoner {
         tilstand.revurdertPeriode(this, periode)
     }
 
-    internal fun annullertPeriode(periode: BeregnetPeriode) {
+    internal fun annullertPeriode(periode: AnnullertPeriode) {
         tilstand.annullertPeriode(this, periode)
     }
 
@@ -62,16 +63,14 @@ class Generasjoner {
         fun utbetaltPeriode(generasjoner: Generasjoner, periode: BeregnetPeriode) {
             generasjoner.leggTilNyPeriode(periode, AktivGenerasjon(periode))
         }
-        fun annullertPeriode(generasjoner: Generasjoner, periode: BeregnetPeriode) {
-            generasjoner.leggTilNyRadOgPeriode(periode, AnnullertGenerasjon)
+        fun annullertPeriode(generasjoner: Generasjoner, periode: AnnullertPeriode) {
+            generasjoner.leggTilNyRadOgPeriode(periode.somBeregnetPeriode(), AnnullertGenerasjon)
         }
         fun revurdertPeriode(generasjoner: Generasjoner, periode: BeregnetPeriode) {
             generasjoner.leggTilNyRadOgPeriode(periode, RevurdertGenerasjon(periode))
         }
 
         object Initiell : Byggetilstand {
-            override fun annullertPeriode(generasjoner: Generasjoner, periode: BeregnetPeriode) =
-                error("forventet ikke en annullert periode i tilstand ${this::class.simpleName}!")
             override fun revurdertPeriode(generasjoner: Generasjoner, periode: BeregnetPeriode) =
                 error("forventet ikke en revurdert periode i tilstand ${this::class.simpleName}!")
         }
@@ -95,8 +94,8 @@ class Generasjoner {
         }
 
         object AnnullertGenerasjon : Byggetilstand {
-            override fun annullertPeriode(generasjoner: Generasjoner, periode: BeregnetPeriode) {
-                generasjoner.leggTilNyPeriode(periode)
+            override fun annullertPeriode(generasjoner: Generasjoner, periode: AnnullertPeriode) {
+                generasjoner.leggTilNyPeriode(periode.somBeregnetPeriode())
             }
         }
 

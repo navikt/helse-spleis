@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.serde.api.dto.AnnullertPeriode
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.GenerasjonDTO
 import no.nav.helse.serde.api.dto.Periodetilstand
@@ -37,7 +38,6 @@ internal class GenerasjonerTest {
             beregnetPeriode(11.mars til 31.mars, utbetaling(Utbetalingtype.UTBETALING)),
             beregnetPeriode(10.april til 28.april, utbetaling(Utbetalingtype.UTBETALING)),
             uberegnetPeriode(1.januar til 10.januar)
-
         )
         generasjoner(1) {
             generasjon(0, 4) {
@@ -101,8 +101,7 @@ internal class GenerasjonerTest {
         val generasjoner = byggGenerasjoner(
             uberegnetPeriode(1.mars til 10.mars),
             beregnetPeriode(11.mars til 31.mars, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId),
-            beregnetPeriode(11.mars til 31.mars, utbetaling(Utbetalingtype.ANNULLERING), vedtaksperiodeId),
-
+            annullertPeriode(11.mars til 31.mars, utbetaling(Utbetalingtype.ANNULLERING), vedtaksperiodeId),
         )
         generasjoner(2) {
             generasjon(0, 2) {
@@ -124,8 +123,8 @@ internal class GenerasjonerTest {
         val generasjoner = byggGenerasjoner(
             beregnetPeriode(1.mars til 31.mars, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId1),
             beregnetPeriode(1.mai til 31.mai, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId2),
-            beregnetPeriode(1.mai til 31.mai, utbetaling(Utbetalingtype.ANNULLERING), vedtaksperiodeId2),
-            beregnetPeriode(1.mars til 31.mars, utbetaling(Utbetalingtype.ANNULLERING), vedtaksperiodeId1),
+            annullertPeriode(1.mai til 31.mai, utbetaling(Utbetalingtype.ANNULLERING), vedtaksperiodeId2),
+            annullertPeriode(1.mars til 31.mars, utbetaling(Utbetalingtype.ANNULLERING), vedtaksperiodeId1),
         )
         generasjoner(2) {
             generasjon(0, 2) {
@@ -220,7 +219,7 @@ internal class GenerasjonerTest {
         val generasjoner = byggGenerasjoner(
             beregnetPeriode(1.mars til 31.mars, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId1),
             beregnetPeriode(1.april til 30.april, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId2),
-            beregnetPeriode(1.april til 30.april, utbetaling(Utbetalingtype.ANNULLERING), vedtaksperiodeId2),
+            annullertPeriode(1.april til 30.april, utbetaling(Utbetalingtype.ANNULLERING), vedtaksperiodeId2),
             beregnetPeriode(1.mars til 31.mars, utbetaling(Utbetalingtype.REVURDERING), vedtaksperiodeId1),
         )
         generasjoner(3) {
@@ -269,6 +268,7 @@ internal class GenerasjonerTest {
 
     private fun utbetaling(type: Utbetalingtype, utbetalingId: UUID = UUID.randomUUID()) = Utbetaling(
         type = type,
+        korrelasjonsId = UUID.randomUUID(),
         status = Utbetalingstatus.Utbetalt,
         arbeidsgiverNettoBeløp = 0,
         personNettoBeløp = 0,
@@ -276,8 +276,7 @@ internal class GenerasjonerTest {
         personFagsystemId = "",
         oppdrag = emptyMap(),
         vurdering = null,
-        id = utbetalingId,
-        tilGodkjenning = false
+        id = utbetalingId
     )
     private fun uberegnetPeriode(periode: Periode) = UberegnetPeriode(
         vedtaksperiodeId = UUID.randomUUID(),
@@ -319,5 +318,23 @@ internal class GenerasjonerTest {
         ),
         aktivitetslogg = emptyList(),
         vilkårsgrunnlagId = UUID.randomUUID()
+    )
+
+    fun annullertPeriode(periode: Periode, utbetaling: Utbetaling, vedtaksperiodeId: UUID = UUID.randomUUID()) = AnnullertPeriode(
+        vedtaksperiodeId = vedtaksperiodeId,
+        fom = periode.start,
+        tom = periode.endInclusive,
+        opprettet = LocalDateTime.now(),
+        vilkår = BeregnetPeriode.Vilkår(
+            BeregnetPeriode.Sykepengedager(periode.start, 28.desember, null, null, true),
+            BeregnetPeriode.Alder(30, true),
+            null
+        ),
+        beregnet = LocalDateTime.now(),
+        oppdatert = LocalDateTime.now(),
+        periodetilstand = Periodetilstand.Annullert,
+        hendelser = emptyList(),
+        beregningId = UUID.randomUUID(),
+        utbetaling = utbetaling
     )
 }

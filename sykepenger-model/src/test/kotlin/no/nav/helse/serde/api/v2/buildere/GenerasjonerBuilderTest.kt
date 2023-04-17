@@ -1403,52 +1403,26 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        assertForventetFeil(
-            forklaring = "skal lage pølse av den uberegnede perioden som har fått en forkastet utbetaling",
-            nå = {
-                generasjoner(a1).apply {
-                    assertEquals(2, size)
-                    this[0].apply {
-                        assertEquals(1, perioder.size)
-                        beregnetPeriode(0) medTilstand TilGodkjenning
-                    }
-                    this[1].apply {
-                        assertEquals(1, perioder.size)
-                        beregnetPeriode(0) medTilstand Utbetalt
-                    }
-                }
-                generasjoner(a2).apply {
-                    assertEquals(1, size)
-                    this[0].apply {
-                        assertEquals(2, perioder.size)
-                        beregnetPeriode(0) medTilstand VenterPåAnnenPeriode
-                        beregnetPeriode(1) medTilstand UtbetaltVenterPåAnnenPeriode
-                    }
-                }
-            },
-            ønsket = {
-                generasjoner(a1).apply {
-                    assertEquals(2, size)
-                    this[0].apply {
-                        assertEquals(2, perioder.size)
-                        uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
-                        beregnetPeriode(1) medTilstand TilGodkjenning
-                    }
-                    this[1].apply {
-                        assertEquals(1, perioder.size)
-                        beregnetPeriode(0) medTilstand Utbetalt
-                    }
-                }
-                generasjoner(a2).apply {
-                    assertEquals(1, size)
-                    this[0].apply {
-                        assertEquals(2, perioder.size)
-                        beregnetPeriode(0) medTilstand VenterPåAnnenPeriode
-                        beregnetPeriode(1) medTilstand UtbetaltVenterPåAnnenPeriode
-                    }
-                }
+        generasjoner(a1).apply {
+            assertEquals(2, size)
+            this[0].apply {
+                assertEquals(2, perioder.size)
+                uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
+                beregnetPeriode(1) medTilstand TilGodkjenning
             }
-        )
+            this[1].apply {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) medTilstand Utbetalt
+            }
+        }
+        generasjoner(a2).apply {
+            assertEquals(1, size)
+            this[0].apply {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) medTilstand VenterPåAnnenPeriode
+                beregnetPeriode(1) medTilstand UtbetaltVenterPåAnnenPeriode
+            }
+        }
     }
 
     @Test
