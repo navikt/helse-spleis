@@ -163,6 +163,9 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
             beregnetInntekt = 30000.månedlig,
             refusjon = Inntektsmelding.Refusjon(30000.månedlig, null, emptyList())
         )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)

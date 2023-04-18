@@ -136,6 +136,11 @@ class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.harInntekt(organisasjonsnummer: String) =
             singleOrNull { it.orgnummer == organisasjonsnummer } != null
 
+        internal fun List<ArbeidsgiverInntektsopplysning>.erGhost(organisasjonsnummer: String): Boolean {
+            val inntektsopplysning = singleOrNull { it.orgnummer == organisasjonsnummer }?.inntektsopplysning ?: return false
+            return inntektsopplysning is SkattSykepengegrunnlag
+        }
+
         internal fun List<ArbeidsgiverInntektsopplysning>.omregnetÅrsinntekt() =
             fold(INGEN) { acc, item -> item.omregnetÅrsinntekt(acc)}
 
