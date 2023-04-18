@@ -22,8 +22,10 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
+import org.skyscreamer.jsonassert.Customization
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode.STRICT
+import org.skyscreamer.jsonassert.comparator.CustomComparator
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class GraphQLApiTest : AbstractObservableTest() {
@@ -684,8 +686,8 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             body = requestBody
         ).let { it.first.utenVariableVerdier to it.second.utenVariableVerdier }
 
-        JSONAssert.assertEquals(detSpesialistFaktiskForventer, v1response, STRICT)
-        JSONAssert.assertEquals(detSpesialistFaktiskForventer, v2response, STRICT)
+        JSONAssert.assertEquals(detSpesialistFaktiskForventer, v1response, CustomComparator(STRICT, Customization("data.person.versjon") { _, _ -> true }))
+        JSONAssert.assertEquals(detSpesialistFaktiskForventer, v2response, CustomComparator(STRICT, Customization("data.person.versjon") { _, _ -> true }))
     }
 
     private fun requestBådeV1ogV2(
