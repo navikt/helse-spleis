@@ -298,9 +298,6 @@ class Inntektsmelding(
             endringerIRefusjon.cacheRefusjon(refusjonshistorikk, meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, opphørsdato)
         }
     }
-    internal fun dager(sammenhengendePerioder: List<Periode>): DagerFraInntektsmelding {
-        return DagerFraInntektsmelding(this, sammenhengendePerioder)
-    }
 
     internal fun inntektOgRefusjon(dagerFraInntektsmelding: DagerFraInntektsmelding): InntektOgRefusjonFraInntektsmelding {
         return InntektOgRefusjonFraInntektsmelding(

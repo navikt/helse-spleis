@@ -6,7 +6,6 @@ import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding.FørsteDagEtterArbeidsgiverperiodenForskyvningsstrategi
 import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding.FørsteDagEtterArbeidsgiverperiodenStrategi
 import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding.FørsteFraværsdagForskyvningsstrategi
@@ -248,7 +247,7 @@ internal class InntektsmeldingMatchingTest {
         assertFalse(dager.harBlittHåndtertAv(vedtaksperiode1))
         assertEquals(1.januar.somPeriode(), dager.håndterPeriodeRettFør(vedtaksperiode1))
         assertEquals(2.januar til 15.januar, dager.håndter(vedtaksperiode1))
-        assertFalse(dager.skalHåndteresAv(vedtaksperiode1))
+        assertTrue(dager.skalHåndteresAv(vedtaksperiode1))
         assertTrue(dager.harBlittHåndtertAv(vedtaksperiode1))
     }
 
@@ -556,7 +555,7 @@ internal class InntektsmeldingMatchingTest {
             harFlereInntektsmeldinger = false,
             mottatt = LocalDateTime.now()
         ).let { inntektsmelding ->
-            val dager = inntektsmelding.dager(perioder.grupperSammenhengendePerioderMedHensynTilHelg())
+            val dager = DagerFraInntektsmelding(inntektsmelding)
             dager to inntektsmelding.inntektOgRefusjon(dager)
         }
 

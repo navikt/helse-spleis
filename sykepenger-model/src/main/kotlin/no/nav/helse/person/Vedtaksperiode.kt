@@ -20,6 +20,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
@@ -292,12 +293,12 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(dager: DagerFraInntektsmelding): Boolean {
-        val skalHåndtereDager = dager.skalHåndteresAv(periode)
+        kontekst(dager)
+        val skalHåndtereDager = tilstand.skalHåndtereDager(this, dager)
         if (erAlleredeHensyntatt(dager.meldingsreferanseId()) || !skalHåndtereDager) {
             dager.vurdertTilOgMed(periode.endInclusive)
             return skalHåndtereDager
         }
-        kontekst(dager)
         return tilstand.håndter(this, dager).also {
             dager.vurdertTilOgMed(periode.endInclusive)
         }
@@ -329,8 +330,12 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterDager(dager: DagerFraInntektsmelding) {
-        tilstand.håndterDagerFør(this, dager)
-        dager.håndter(periode, arbeidsgiver)?.let { oppdatertSykdomstidslinje ->
+        håndterDagerFør(dager)
+        dager.håndter(
+            periode = periode,
+            arbeidsgiverperiode = { arbeidsgiver.arbeidsgiverperiode(periode)},
+            oppdaterSykdom = { arbeidsgiver.oppdaterSykdom(it) }
+        )?.let { oppdatertSykdomstidslinje ->
             sykdomstidslinje = oppdatertSykdomstidslinje
         }
     }
@@ -339,7 +344,7 @@ internal class Vedtaksperiode private constructor(
         val periodstartFør = periode.start
         dager.leggTilArbeidsdagerFør(periode.start)
         periode = dager.oppdatertFom(periode)
-        dager.håndterPeriodeRettFør(periode, arbeidsgiver)
+        dager.håndterPeriodeRettFør(periode) { arbeidsgiver.oppdaterSykdom(it) }
         if (periode.start == periodstartFør) return
         dager.info("Perioden ble strukket tilbake fra $periodstartFør til ${periode.start} (${DAYS.between(periode.start, periodstartFør)} dager)")
     }
@@ -1102,12 +1107,14 @@ internal class Vedtaksperiode private constructor(
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad)
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {}
-        fun håndterDagerFør(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {}
+        fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
+            dager.skalHåndteresAv(vedtaksperiode.periode)
         fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
             if (!dager.påvirker(vedtaksperiode.sykdomstidslinje)) return false
             dager.varsel(RV_IM_4, "Inntektsmeldingen ville påvirket sykdomstidslinjen i ${type.name}")
             return false
         }
+
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
             inntektOgRefusjon.varsel(RV_IM_4, "Håndterer inntekt og refusjon fra inntektsmelding i ${type.name}")
         }
@@ -1208,7 +1215,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun revurderingOmgjort(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {}
-
         fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {}
 
     }
@@ -1592,8 +1598,14 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.trengerIkkeInntektsmeldingReplay(vedtaksperiode.id)
         }
 
-        override fun håndterDagerFør(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
-            vedtaksperiode.håndterDagerFør(dager)
+        override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
+            if (super.skalHåndtereDager(vedtaksperiode, dager)) return true
+            val sammenhengende = vedtaksperiode.arbeidsgiver.finnSammenhengendeVedtaksperioder(vedtaksperiode)
+                .map { it.periode }
+                .periode() ?: return false
+            if (!dager.skalHåndteresAv(sammenhengende)) return false
+            dager.info("Vedtaksperioden ${vedtaksperiode.periode} håndterer dager fordi den sammenhengende perioden $sammenhengende overlapper med inntektsmelding")
+            return true
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
@@ -2243,9 +2255,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             søknad.info("Prøver å igangsette revurdering grunnet korrigerende søknad")
             vedtaksperiode.håndterLåstOverlappendeSøknadRevurdering(søknad)
-        }
-        override fun håndterDagerFør(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
-             vedtaksperiode.håndterDagerFør(dager)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {

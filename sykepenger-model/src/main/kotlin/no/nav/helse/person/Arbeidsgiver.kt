@@ -16,7 +16,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
@@ -26,6 +25,7 @@ import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
@@ -514,8 +514,7 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID? = null) {
         inntektsmelding.kontekst(this)
         if (vedtaksperiodeId != null) inntektsmelding.info("Replayer inntektsmelding.")
-        val sammenhengendePerioder = sammenhengendePerioder()
-        val dager = inntektsmelding.dager(sammenhengendePerioder)
+        val dager = DagerFraInntektsmelding(inntektsmelding)
         håndter(inntektsmelding) { håndter(dager) }
 
         val vedtaksperiodeSomSkalHåndtereInntektOgRefusjon =
@@ -822,10 +821,6 @@ internal class Arbeidsgiver private constructor(
                 sammenhengendePerioder.add(it)
         }
         return sammenhengendePerioder
-    }
-
-    private fun sammenhengendePerioder(): List<Periode> {
-        return vedtaksperioder.map { it.periode() }.grupperSammenhengendePerioderMedHensynTilHelg()
     }
 
     internal fun finnTidligereInntektsmeldinginfo(skjæringstidspunkt: LocalDate) = inntektsmeldingInfo.finn(skjæringstidspunkt)

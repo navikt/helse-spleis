@@ -318,18 +318,17 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `ulik arbeidsgiverperiode - flere arbeidsgivere`() {
-        håndterSykmelding(Sykmeldingsperiode(22.januar, 15.februar), orgnummer = a1)
         håndterSøknad(Sykdom(22.januar, 15.februar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(22.januar, 15.februar), orgnummer = a2)
         håndterSøknad(Sykdom(22.januar, 15.februar, 100.prosent), orgnummer = a2)
 
         håndterInntektsmelding(listOf(11.januar til 13.januar, 20.januar til 2.februar), orgnummer = a1)
-
-        assertEquals("UUGR AAAAAGG SSSSSHH SSSSSHH SSSSSHH SSSS", inspektør(a1).sykdomshistorikk.sykdomstidslinje().toShortString())
         håndterInntektsmelding(listOf(16.februar til 3.mars), orgnummer = a2)
 
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
+        assertEquals("UUGR AAAAAGG SSSSSHH SSSSSHH SSSSSHH SSSS", inspektør(a1).sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertEquals("AAAAARR AAAAARR AAAAARR AAAA", inspektør(a2).sykdomshistorikk.sykdomstidslinje().toShortString())
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
 
         håndterSykmelding(Sykmeldingsperiode(16.februar, 10.mars), orgnummer = a2)
         håndterSøknad(Sykdom(16.februar, 10.mars, 100.prosent), orgnummer = a2)
@@ -1975,15 +1974,12 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `padding med arbeidsdager før arbeidsgiverperioden`() {
-        håndterSykmelding(Sykmeldingsperiode(28.januar, 16.februar))
         håndterSøknad(Sykdom(28.januar, 16.februar, 100.prosent))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-        håndterSykmelding(Sykmeldingsperiode(17.februar, 8.mars))
         håndterSøknad(Sykdom(17.februar, 8.mars, 100.prosent))
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-        håndterSykmelding(Sykmeldingsperiode(9.mars, 31.mars))
         håndterSøknad(Sykdom(9.mars, 31.mars, 100.prosent))
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
