@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.erHelg
 import no.nav.helse.februar
@@ -1386,6 +1387,68 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(1, perioder.size)
             beregnetPeriode(0) er Overført avType UTBETALING medTilstand TilUtbetaling
         }
+    }
+
+    @Test
+    fun `overlappende periode flere arbeidsgivere`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+
+        nyPeriode(1.februar til 28.februar, a1)
+        nyPeriode(1.februar til 28.februar, a2)
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        assertForventetFeil(
+            forklaring = "skal lage pølse av den uberegnede perioden som har fått en forkastet utbetaling",
+            nå = {
+                generasjoner(a1).apply {
+                    assertEquals(2, size)
+                    this[0].apply {
+                        assertEquals(1, perioder.size)
+                        beregnetPeriode(0) medTilstand TilGodkjenning
+                    }
+                    this[1].apply {
+                        assertEquals(1, perioder.size)
+                        beregnetPeriode(0) medTilstand Utbetalt
+                    }
+                }
+                generasjoner(a2).apply {
+                    assertEquals(1, size)
+                    this[0].apply {
+                        assertEquals(2, perioder.size)
+                        beregnetPeriode(0) medTilstand VenterPåAnnenPeriode
+                        beregnetPeriode(1) medTilstand UtbetaltVenterPåAnnenPeriode
+                    }
+                }
+            },
+            ønsket = {
+                generasjoner(a1).apply {
+                    assertEquals(2, size)
+                    this[0].apply {
+                        assertEquals(2, perioder.size)
+                        uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
+                        beregnetPeriode(1) medTilstand TilGodkjenning
+                    }
+                    this[1].apply {
+                        assertEquals(1, perioder.size)
+                        beregnetPeriode(0) medTilstand Utbetalt
+                    }
+                }
+                generasjoner(a2).apply {
+                    assertEquals(1, size)
+                    this[0].apply {
+                        assertEquals(2, perioder.size)
+                        beregnetPeriode(0) medTilstand VenterPåAnnenPeriode
+                        beregnetPeriode(1) medTilstand UtbetaltVenterPåAnnenPeriode
+                    }
+                }
+            }
+        )
     }
 
     @Test
