@@ -110,6 +110,8 @@ class Refusjonsopplysning(
         refusjonsopplysninger: List<Refusjonsopplysning>
     ) {
         private val validerteRefusjonsopplysninger = refusjonsopplysninger.sortedBy { it.fom }
+
+        internal val erTom = validerteRefusjonsopplysninger.isEmpty()
         internal constructor(): this(emptyList())
 
         init {

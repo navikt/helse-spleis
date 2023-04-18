@@ -26,6 +26,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.buil
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnEndringsdato
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harInntekt
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.ingenRefusjonsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.inntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.lagreTidsnæreInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.markerFlereArbeidsgivere
@@ -194,7 +195,7 @@ internal class Sykepengegrunnlag(
 
     internal fun nyeArbeidsgiverInntektsopplysninger(inntektsmelding: Inntektsmelding, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag? {
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(arbeidsgiverInntektsopplysninger, null, subsumsjonObserver)
-        inntektsmelding.nyeArbeidsgiverInntektsopplysninger(builder)
+        inntektsmelding.nyeArbeidsgiverInntektsopplysninger(builder, skjæringstidspunkt)
         val resultat = builder.resultat()
         if (resultat == null) {
             inntektsmelding.info("Gjør ingen korrigering av sykepengegrunnlaget siden korrigert inntektsmelding er funksjonelt lik sykepengegrunnlaget.")
@@ -334,6 +335,8 @@ internal class Sykepengegrunnlag(
         internal fun leggTilInntekt(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning) {
             nyeInntektsopplysninger.add(arbeidsgiverInntektsopplysning)
         }
+
+        internal fun ingenRefusjonsopplysninger(organisasjonsnummer: String) = opprinneligArbeidsgiverInntektsopplysninger.ingenRefusjonsopplysninger(organisasjonsnummer)
 
         internal fun resultat(): List<ArbeidsgiverInntektsopplysning>? {
             return opprinneligArbeidsgiverInntektsopplysninger.overstyrInntekter(opptjening, nyeInntektsopplysninger, subsumsjonObserver).takeUnless { resultat ->

@@ -202,15 +202,23 @@ class Inntektsmelding(
     override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) =
         hendelseIder.add(Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId()))
 
-    internal fun nyeArbeidsgiverInntektsopplysninger(builder: ArbeidsgiverInntektsopplysningerOverstyringer) {
+    internal fun nyeArbeidsgiverInntektsopplysninger(builder: ArbeidsgiverInntektsopplysningerOverstyringer, skjæringstidspunkt: LocalDate) {
         val inntektsdato = if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) førsteFraværsdag else arbeidsgiverperioder.maxOf { it.start }
+        val refusjonsopplysninger = if (builder.ingenRefusjonsopplysninger(organisasjonsnummer)) {
+            val refusjonshistorikk = Refusjonshistorikk()
+            refusjon.cacheRefusjon(refusjonshistorikk, meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
+            refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt, this)
+        } else {
+            refusjon.refusjonsopplysninger(meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
+        }
         builder.leggTilInntekt(
             ArbeidsgiverInntektsopplysning(
                 organisasjonsnummer,
                 Inntektsmelding(inntektsdato, meldingsreferanseId(), beregnetInntekt),
-                refusjon.refusjonsopplysninger(meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
+                refusjonsopplysninger
             )
         )
+
     }
 
 
