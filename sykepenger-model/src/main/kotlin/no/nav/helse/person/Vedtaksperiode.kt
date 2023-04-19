@@ -295,6 +295,9 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(dager: DagerFraInntektsmelding): Boolean {
         kontekst(dager)
         val skalHåndtereDager = tilstand.skalHåndtereDager(this, dager)
+        if (!skalHåndtereDager && dager.skalHåndteresAvSammenhengende(periode)) {
+            dager.leggTilArbeidsdagerFør(periode.start)
+        }
         if (erAlleredeHensyntatt(dager.meldingsreferanseId()) || !skalHåndtereDager) {
             dager.vurdertTilOgMed(periode.endInclusive)
             return skalHåndtereDager
@@ -2258,7 +2261,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
-            if (!skalHensyntaInntektsmelding(vedtaksperiode, dager)) return false
+            //if (!skalHensyntaInntektsmelding(vedtaksperiode, dager)) return false
             vedtaksperiode.låsOpp()
             vedtaksperiode.håndterDager(dager)
             vedtaksperiode.lås()

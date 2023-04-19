@@ -707,10 +707,15 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         forlengVedtak(1.mars, 31.mars)
         nyPeriode(10.april til 30.april)
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 10.april)
-        assertNotNull(inspektør.vilkårsgrunnlag(5.januar))
-        assertNull(inspektør.vilkårsgrunnlag(1.januar))
-        assertInfo("Hensyntar ikke inntektsmelding fordi dette eller nyere skjæringstidspunkt har vært utbetalt")
-        assertVarsel(RV_IM_3)
+        assertForventetFeil("Selv om AUU nå håndterer inntektsmelding, skal vi likevel ikke lagre tidsnære opplysninger", nå = {
+            assertNull(inspektør.vilkårsgrunnlag(5.januar))
+            assertNull(inspektør.vilkårsgrunnlag(1.januar))
+        }, ønsket = {
+            assertNotNull(inspektør.vilkårsgrunnlag(5.januar))
+            assertNull(inspektør.vilkårsgrunnlag(1.januar))
+            assertInfo("Hensyntar ikke inntektsmelding fordi dette eller nyere skjæringstidspunkt har vært utbetalt")
+            assertVarsel(RV_IM_3)
+        })
     }
 
     @Test
@@ -1047,7 +1052,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Unngår aggresiv håndtering av arbeidsdager før opplyst AGP ved tidligere revurdering uten endring`() {
+    fun `Unngår aggressiv håndtering av arbeidsdager før opplyst AGP ved tidligere revurdering uten endring`() {
         nyPeriode(1.januar til 16.januar)
         håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar))
         håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), Ferie(22.januar, 23.januar))
@@ -1070,7 +1075,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Unngår aggresiv håndtering av arbeidsdager før opplyst AGP ved pågående revurdering`() {
+    fun `Unngår aggressiv håndtering av arbeidsdager før opplyst AGP ved pågående revurdering`() {
         nyPeriode(1.januar til 16.januar)
         nyttVedtak(17.januar, 31.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
 
@@ -1090,7 +1095,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Unngår aggresiv håndtering av arbeidsdager før opplyst AGP ved senere utbetalt periode på annen arbeidsgiver`() {
+    fun `Unngår aggressiv håndtering av arbeidsdager før opplyst AGP ved senere utbetalt periode på annen arbeidsgiver`() {
         nyPeriode(1.februar til 16.februar, a1)
         nyttVedtak(1.april, 30.april, orgnummer = a2)
         nullstillTilstandsendringer()

@@ -53,6 +53,11 @@ internal class DagerFraInntektsmelding(
     private fun periodeRettFør(periode: Periode) = gjenståendeDager.periodeRettFør(periode.start)
 
     internal fun skalHåndteresAv(periode: Periode): Boolean {
+        val overlapperMedSammenhengende = overlappendeDager(periode).isNotEmpty()
+        val periodeRettFør = periodeRettFør(periode) != null
+        return overlapperMedSammenhengende || periodeRettFør
+    }
+    internal fun skalHåndteresAvSammenhengende(periode: Periode): Boolean {
         val overlapperMedVedtaksperiode = overlappendeDager(periode).isNotEmpty()
         val periodeRettFør = periodeRettFør(periode) != null
         val vedtaksperiodeRettFør = gjenståendeDager.isNotEmpty() && periode.endInclusive.erRettFør(gjenståendeDager.first())

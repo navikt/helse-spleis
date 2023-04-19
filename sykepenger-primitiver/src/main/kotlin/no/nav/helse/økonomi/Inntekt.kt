@@ -49,6 +49,7 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
         private val rundNedTilDagligMemoized = { tall: Double -> tilDagligDoubleMemoized(tall).toInt().daglig }.memoize()
     }
 
+    val årligString: String get() = "$årlig"
     fun <R> reflection(block: (årlig: Double, månedlig: Double, daglig: Double, dagligInt: Int) -> R) = block(
         årlig,
         tilMånedligDouble(),

@@ -21,6 +21,7 @@ import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -34,6 +35,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
@@ -131,18 +133,18 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    fun `revurderer ikke eldre skjæringstidspunkt`() {
+    fun `revurderer eldre skjæringstidspunkt`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         nyttVedtak(1.mars, 31.mars)
         nullstillTilstandsendringer()
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar))
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
     }
 
     @Test
-    fun `revurderer ikke eldre skjæringstidspunkt selv ved flere mindre perioder`() {
+    fun `revurderer eldre skjæringstidspunkt også ved flere mindre perioder`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
@@ -155,26 +157,18 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterInntektsmelding(listOf(10.januar til 25.januar))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
     }
 
 
     @Test
-    fun `gjenopptar ikke behandling dersom det er nyere periode som er utbetalt`() {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
+    fun `gjenopptar behandling selv om det er nyere periode som er utbetalt`() {
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         nyttVedtak(1.mars, 31.mars)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-        håndterSykmelding(Sykmeldingsperiode(1.mai, 15.mai))
-        håndterSykmelding(Sykmeldingsperiode(16.mai, 28.mai))
-        håndterSøknad(Sykdom(1.mai, 15.mai, 100.prosent))
-        håndterSøknad(Sykdom(16.mai, 28.mai, 100.prosent))
-
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(4.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
     }
 
     @Test
@@ -412,7 +406,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    fun `støtter ikke omgjøring om det er utbetalt en senere periode på samme skjæringstidspunkt`() {
+    fun `støtter omgjøring selv om det er utbetalt en senere periode på samme skjæringstidspunkt`() {
         håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar))
         håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
 
@@ -437,12 +431,12 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterInntektsmelding(listOf(10.januar til 20.januar, 28.januar til 1.februar))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
     }
 
     @Test
-    fun `støtter ikke omgjøring om det er utbetalt en senere periode på nyere skjæringstidspunkt`()  {
+    fun `støtter omgjøring selv om det er utbetalt en senere periode på nyere skjæringstidspunkt`()  {
         håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar))
         håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
 
@@ -459,8 +453,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterInntektsmelding(listOf(10.januar til 20.januar, 28.januar til 1.februar))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
     }
 
     @Test
@@ -1166,11 +1160,11 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertEquals(5.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
 
         håndterInntektsmelding(listOf(2.januar til 17.januar), beregnetInntekt = INNTEKT*1.2)
-        assertEquals(5.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(5.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
 
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
 
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
@@ -1180,18 +1174,16 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         // 1.januar - 16.januar, og vi mener det er utbetaling fom 17.januar.
         // Dette vil nok rettes opp i den dagen vi ikke hensyntar forkastede perioder ved beregning av AGP mer (rundt juni 2023)"
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, TIL_INFOTRYGD)
+        assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
         assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
         håndterYtelser(2.vedtaksperiode)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
 
-        assertEquals(5.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(5.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(21.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
-        assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
     }
 
     @Test
