@@ -4,9 +4,13 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
+import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonObserver.ArbeidsgiveropplysningerKorrigertEvent.KorrigerendeInntektektsopplysningstype.INNTEKTSMELDING
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.økonomi.Inntekt
@@ -68,6 +72,25 @@ internal class Inntektsmelding(
 
     override fun erSamme(other: Inntektsopplysning): Boolean {
         return other is Inntektsmelding && this.dato == other.dato && other.beløp == this.beløp
+    }
+    override fun arbeidsgiveropplysningerKorrigert(
+        person: Person,
+        inntektsmelding: no.nav.helse.hendelser.Inntektsmelding
+    ) {
+        person.arbeidsgiveropplysningerKorrigert(
+            PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
+                korrigertInntektsmeldingId = hendelseId,
+                korrigerendeInntektektsopplysningstype = INNTEKTSMELDING,
+                korrigerendeInntektsopplysningId = inntektsmelding.meldingsreferanseId()
+            )
+        )
+    }
+    override fun arbeidsgiveropplysningerKorrigert(
+        person: Person,
+        orgnummer: String,
+        saksbehandlerOverstyring: OverstyrArbeidsgiveropplysninger
+    ) {
+        saksbehandlerOverstyring.arbeidsgiveropplysningerKorrigert(person, orgnummer, hendelseId)
     }
 
     internal fun kopierTidsnærOpplysning(nyDato: LocalDate, hendelse: IAktivitetslogg, oppholdsperiodeMellom: Periode?): Inntektsmelding {

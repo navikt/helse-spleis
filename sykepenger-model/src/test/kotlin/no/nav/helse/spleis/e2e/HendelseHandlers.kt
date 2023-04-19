@@ -823,7 +823,7 @@ internal fun AbstractEndToEndTest.håndterOverstyrArbeidsgiveropplysninger(
     skjæringstidspunkt: LocalDate,
     arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>,
     meldingsreferanseId: UUID = UUID.randomUUID()
-) {
+): UUID {
     OverstyrArbeidsgiveropplysninger(
         meldingsreferanseId = meldingsreferanseId,
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),
@@ -831,6 +831,7 @@ internal fun AbstractEndToEndTest.håndterOverstyrArbeidsgiveropplysninger(
         skjæringstidspunkt = skjæringstidspunkt,
         arbeidsgiveropplysninger = arbeidsgiveropplysninger.tilOverstyrt(meldingsreferanseId, skjæringstidspunkt)
     ).håndter(Person::håndter)
+    return meldingsreferanseId
 }
 
 internal class OverstyrtArbeidsgiveropplysning(

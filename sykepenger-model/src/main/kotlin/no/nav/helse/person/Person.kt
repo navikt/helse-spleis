@@ -465,6 +465,11 @@ class Person private constructor(
         observers.forEach { it.trengerArbeidsgiveropplysninger(event) }
     }
 
+
+    internal fun arbeidsgiveropplysningerKorrigert(event: PersonObserver.ArbeidsgiveropplysningerKorrigertEvent) {
+        observers.forEach { it.arbeidsgiveropplysningerKorrigert(event) }
+    }
+
     internal fun utbetalingUtbetalt(event: PersonObserver.UtbetalingUtbetaltEvent) {
         observers.forEach { it.utbetalingUtbetalt(event) }
     }
@@ -656,7 +661,7 @@ class Person private constructor(
         subsumsjonObserver: SubsumsjonObserver
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return
-        val (nyttGrunnlag, eventyr) = (grunnlag.nyeArbeidsgiverInntektsopplysninger(inntektsmelding, subsumsjonObserver) ?: return)
+        val (nyttGrunnlag, eventyr) = (grunnlag.nyeArbeidsgiverInntektsopplysninger(this, inntektsmelding, subsumsjonObserver) ?: return)
         nyttVilkårsgrunnlag(inntektsmelding, nyttGrunnlag)
         igangsettOverstyring(inntektsmelding, eventyr)
     }
@@ -667,7 +672,7 @@ class Person private constructor(
         subsumsjonObserver: SubsumsjonObserver
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
-        val (nyttGrunnlag, eventyr) = (grunnlag.overstyrArbeidsgiveropplysninger(hendelse, subsumsjonObserver) ?: return)
+        val (nyttGrunnlag, eventyr) = (grunnlag.overstyrArbeidsgiveropplysninger(this, hendelse, subsumsjonObserver) ?: return)
         nyttVilkårsgrunnlag(hendelse, nyttGrunnlag)
         igangsettOverstyring(hendelse, eventyr)
     }

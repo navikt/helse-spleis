@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
+import no.nav.helse.person.Person
 import no.nav.helse.person.SykepengegrunnlagVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -24,6 +25,7 @@ import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.build
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finn
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnEndringsdato
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.ingenRefusjonsopplysninger
@@ -179,10 +181,11 @@ internal class Sykepengegrunnlag(
         return hendelse.overstyr(this, subsumsjonObserver)
     }
 
-    internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, opptjening: Opptjening?, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag? {
+    internal fun overstyrArbeidsgiveropplysninger(person: Person, hendelse: OverstyrArbeidsgiveropplysninger, opptjening: Opptjening?, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag? {
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(arbeidsgiverInntektsopplysninger, opptjening, subsumsjonObserver)
         hendelse.overstyr(builder)
         val resultat = builder.resultat() ?: return null
+        arbeidsgiverInntektsopplysninger.forEach { it.arbeidsgiveropplysningerKorrigert(person, hendelse) }
         return kopierSykepengegrunnlag(resultat, deaktiverteArbeidsforhold)
     }
 
@@ -192,7 +195,11 @@ internal class Sykepengegrunnlag(
     internal fun inntekt(organisasjonsnummer: String): Inntekt? =
         arbeidsgiverInntektsopplysninger.inntekt(organisasjonsnummer)
 
-    internal fun nyeArbeidsgiverInntektsopplysninger(inntektsmelding: Inntektsmelding, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag? {
+    internal fun nyeArbeidsgiverInntektsopplysninger(
+        person: Person,
+        inntektsmelding: Inntektsmelding,
+        subsumsjonObserver: SubsumsjonObserver
+    ): Sykepengegrunnlag? {
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(arbeidsgiverInntektsopplysninger, null, subsumsjonObserver)
         inntektsmelding.nyeArbeidsgiverInntektsopplysninger(builder, skjæringstidspunkt)
         val resultat = builder.resultat()
@@ -200,8 +207,14 @@ internal class Sykepengegrunnlag(
             inntektsmelding.info("Gjør ingen korrigering av sykepengegrunnlaget siden korrigert inntektsmelding er funksjonelt lik sykepengegrunnlaget.")
             return null // ingen endring
         }
+        arbeidsgiverInntektsopplysninger
+            .finn(inntektsmelding.organisasjonsnummer())
+            ?.arbeidsgiveropplysningerKorrigert(person, inntektsmelding)
+
         return kopierSykepengegrunnlag(resultat, deaktiverteArbeidsforhold)
     }
+
+
 
     private fun kopierSykepengegrunnlag(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
