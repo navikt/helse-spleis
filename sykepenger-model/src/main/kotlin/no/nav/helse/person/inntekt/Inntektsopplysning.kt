@@ -4,8 +4,13 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonObserver.ArbeidsgiveropplysningerKorrigertEvent
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.økonomi.Inntekt
@@ -57,6 +62,17 @@ abstract class Inntektsopplysning protected constructor(
         refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger,
         orgnummer: String,
         beløp: Inntekt? = null
+    ) {}
+
+    internal open fun arbeidsgiveropplysningerKorrigert(
+        person: Person,
+        inntektsmelding: Inntektsmelding
+    ) {}
+
+    internal open fun arbeidsgiveropplysningerKorrigert(
+        person: Person,
+        orgnummer: String,
+        saksbehandlerOverstyring: OverstyrArbeidsgiveropplysninger
     ) {}
 
     internal companion object {

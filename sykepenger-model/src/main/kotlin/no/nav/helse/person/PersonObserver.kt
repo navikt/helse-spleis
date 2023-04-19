@@ -119,6 +119,24 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
 
             )
     }
+
+    data class ArbeidsgiveropplysningerKorrigertEvent(
+        val korrigertInntektsmeldingId: UUID,
+        val korrigerendeInntektsopplysningId: UUID,
+        val korrigerendeInntektektsopplysningstype: KorrigerendeInntektektsopplysningstype
+    ) {
+        fun toJsonMap(): Map<String, Any> =
+            mapOf(
+                "korrigertInntektsmeldingId" to korrigertInntektsmeldingId,
+                "korrigerendeInntektsopplysningId" to korrigerendeInntektsopplysningId,
+                "korrigerendeInntektektsopplysningstype" to korrigerendeInntektektsopplysningstype
+            )
+
+        enum class KorrigerendeInntektektsopplysningstype {
+            INNTEKTSMELDING,
+            SAKSBEHANDLER
+        }
+    }
     sealed class ForespurtOpplysning {
 
         companion object {
@@ -347,6 +365,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     fun manglerInntektsmelding(event: ManglendeInntektsmeldingEvent) {}
     fun trengerIkkeInntektsmelding(event: TrengerIkkeInntektsmeldingEvent) {}
     fun trengerArbeidsgiveropplysninger(event: TrengerArbeidsgiveropplysningerEvent) {}
+    fun arbeidsgiveropplysningerKorrigert(event: ArbeidsgiveropplysningerKorrigertEvent) {}
     fun utbetalingEndret(event: UtbetalingEndretEvent) {}
     fun utbetalingUtbetalt(event: UtbetalingUtbetaltEvent) {}
     fun utbetalingUtenUtbetaling(event: UtbetalingUtbetaltEvent) {}

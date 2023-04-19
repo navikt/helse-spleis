@@ -2,9 +2,13 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonObserver.ArbeidsgiveropplysningerKorrigertEvent
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.VedtakFattetBuilder
@@ -67,7 +71,24 @@ class ArbeidsgiverInntektsopplysning(
         return result
     }
 
+    internal fun arbeidsgiveropplysningerKorrigert(
+        person: Person,
+        inntektsmelding: Inntektsmelding
+    ) {
+        inntektsopplysning.arbeidsgiveropplysningerKorrigert(person, inntektsmelding)
+    }
+
+    internal fun arbeidsgiveropplysningerKorrigert(
+        person: Person,
+        saksbehandleroverstyring: OverstyrArbeidsgiveropplysninger
+    ) {
+        inntektsopplysning.arbeidsgiveropplysningerKorrigert(person, orgnummer, saksbehandleroverstyring)
+    }
+
     internal companion object {
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.finn(orgnummer: String) = firstOrNull { it.gjelder(orgnummer) }
+
         internal fun List<ArbeidsgiverInntektsopplysning>.deaktiver(deaktiverte: List<ArbeidsgiverInntektsopplysning>, orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserver) =
             this.fjernInntekt(deaktiverte, orgnummer, forklaring, true, subsumsjonObserver)
 
