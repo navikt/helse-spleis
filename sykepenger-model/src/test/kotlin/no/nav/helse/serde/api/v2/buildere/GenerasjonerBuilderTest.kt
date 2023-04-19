@@ -2058,7 +2058,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertEquals(2, generasjoner.size)
         0.generasjon {
             assertEquals(2, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Ubetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand TilGodkjenning
+            beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand TilGodkjenning
             beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 19.januar) medTilstand Utbetalt
         }
         1.generasjon {
@@ -2095,7 +2095,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertEquals(2, generasjoner.size)
         0.generasjon {
             assertEquals(3, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Ubetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand TilGodkjenning
+            beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand TilGodkjenning
             beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (16.januar til 31.januar) medTilstand Utbetalt
             uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
         }
@@ -2131,7 +2131,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertEquals(2, generasjoner.size)
         0.generasjon {
             assertEquals(3, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Ubetalt avType REVURDERING fra (1.april til 10.april) medTilstand TilGodkjenning
+            beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.april til 10.april) medTilstand TilGodkjenning
             beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
             uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
         }
@@ -2153,7 +2153,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Arbeid(1.februar, 28.februar))
 
-        nyttVedtak(1.mars, 31.mars)
+        nyttVedtak(2.mars, 31.mars)
 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
@@ -2169,13 +2169,13 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertEquals(2, generasjoner.size)
         0.generasjon {
             assertEquals(3, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand Utbetalt
+            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING fra (2.mars til 31.mars) medTilstand Utbetalt
             beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medTilstand Utbetalt
             beregnetPeriode(2) er GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
         }
         1.generasjon {
             assertEquals(2, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (2.mars til 31.mars) medTilstand Utbetalt
             beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
         }
     }

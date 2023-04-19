@@ -47,11 +47,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
         val im = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 10.februar)
         assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
-        assertEquals(3, observatør.inntektsmeldingHåndtert.size)
-        assertEquals(listOf(
-            im to 2.vedtaksperiode.id(ORGNUMMER),
-            im to 1.vedtaksperiode.id(ORGNUMMER) // todo: vedtaksperiode 1 håndterer tydligvis dagene
-        ), observatør.inntektsmeldingHåndtert.takeLast(2))
+        assertEquals(2, observatør.inntektsmeldingHåndtert.size)
+        assertEquals(im to 2.vedtaksperiode.id(ORGNUMMER), observatør.inntektsmeldingHåndtert.last())
     }
 
     @Test

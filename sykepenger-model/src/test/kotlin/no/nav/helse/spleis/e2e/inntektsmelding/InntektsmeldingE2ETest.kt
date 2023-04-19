@@ -709,8 +709,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 10.april)
         assertNotNull(inspektør.vilkårsgrunnlag(5.januar))
         assertNull(inspektør.vilkårsgrunnlag(1.januar))
-        assertInfo("Hensyntar ikke inntektsmelding fordi dette eller nyere skjæringstidspunkt har vært utbetalt")
-        assertVarsel(RV_IM_3)
+        assertIngenVarsel(RV_IM_3)
     }
 
     @Test
@@ -1090,16 +1089,16 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Unngår aggresiv håndtering av arbeidsdager før opplyst AGP ved senere utbetalt periode på annen arbeidsgiver`() {
+    fun `Unngår aggressiv håndtering av arbeidsdager før opplyst AGP ved senere utbetalt periode på annen arbeidsgiver`() {
         nyPeriode(1.februar til 16.februar, a1)
         nyttVedtak(1.april, 30.april, orgnummer = a2)
         nullstillTilstandsendringer()
 
         håndterInntektsmelding(listOf(16.januar til 31.januar), orgnummer = a1)
 
-        assertEquals(1.februar til 16.februar, inspektør(a1).periode(1.vedtaksperiode))
-        assertEquals(1.februar, inspektør(a1).skjæringstidspunkt(1.vedtaksperiode))
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertEquals(16.januar til 16.februar, inspektør(a1).periode(1.vedtaksperiode))
+        assertEquals(16.januar, inspektør(a1).skjæringstidspunkt(1.vedtaksperiode))
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
     }
 
     @Test
@@ -2114,9 +2113,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             14.januar til 19.januar
         ), førsteFraværsdag = 1.mars)
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
-
     }
 
     @Test
@@ -2143,7 +2140,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             14.januar til 19.januar
         ), førsteFraværsdag = 1.mars)
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
     }
 

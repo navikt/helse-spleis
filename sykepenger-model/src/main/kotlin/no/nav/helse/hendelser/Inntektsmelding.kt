@@ -87,6 +87,10 @@ class Inntektsmelding(
     }
 
     private fun arbeidsgivertidslinje(): Sykdomstidslinje {
+        val periodeMellom = førsteFraværsdag?.let{
+            arbeidsgiverperiode?.periodeMellom(it)
+        }
+        if (periodeMellom != null && periodeMellom.count() >= 20) return Sykdomstidslinje()
         val arbeidsdager = arbeidsgiverperiode?.let { Sykdomstidslinje.arbeidsdager(arbeidsgiverperiode, kilde) } ?: Sykdomstidslinje()
         val friskHelg = førsteFraværsdag
             ?.takeIf { arbeidsgiverperiode?.erRettFør(førsteFraværsdag) == true }
