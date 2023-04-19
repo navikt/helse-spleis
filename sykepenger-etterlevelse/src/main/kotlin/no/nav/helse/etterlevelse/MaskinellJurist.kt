@@ -953,7 +953,8 @@ class MaskinellJurist private constructor(
     private fun DokumentType.tilKontekst() = when (this) {
         DokumentType.Sykmelding -> KontekstType.Sykmelding
         DokumentType.Søknad -> KontekstType.Søknad
-        DokumentType.Inntektsmelding -> KontekstType.Inntektsmelding
+        DokumentType.InntektsmeldingDager -> KontekstType.Inntektsmelding
+        DokumentType.InntektsmeldingInntekt -> KontekstType.Inntektsmelding
         DokumentType.OverstyrTidslinje -> KontekstType.OverstyrTidslinje
         DokumentType.OverstyrInntekt -> KontekstType.OverstyrInntekt
         DokumentType.OverstyrRefusjon -> KontekstType.OverstyrRefusjon

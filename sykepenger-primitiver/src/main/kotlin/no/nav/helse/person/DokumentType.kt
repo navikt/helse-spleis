@@ -3,7 +3,8 @@ package no.nav.helse.person
 enum class DokumentType {
     Sykmelding,
     Søknad,
-    Inntektsmelding,
+    InntektsmeldingInntekt,
+    InntektsmeldingDager,
     OverstyrTidslinje,
     OverstyrInntekt,
     OverstyrRefusjon,

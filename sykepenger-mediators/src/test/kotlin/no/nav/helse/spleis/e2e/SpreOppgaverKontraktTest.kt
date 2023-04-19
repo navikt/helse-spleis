@@ -9,6 +9,8 @@ import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -42,17 +44,20 @@ internal class SpreOppgaverKontraktTest : AbstractEndToEndMediatorTest() {
         )
         val vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(0)
 
-        Assertions.assertEquals(1, testRapid.inspektør.meldinger("inntektsmelding_håndtert").size)
-        val inntektsmeldingHåndtertEvent = testRapid.inspektør.siste("inntektsmelding_håndtert")
-        Assertions.assertEquals(
-            inntektsmeldingId.toString(),
-            inntektsmeldingHåndtertEvent["inntektsmeldingId"].asText()
-        )
-        Assertions.assertEquals(
-            vedtaksperiodeId.toString(),
-            inntektsmeldingHåndtertEvent["vedtaksperiodeId"].asText()
-        )
-        Assertions.assertNotNull(inntektsmeldingHåndtertEvent["@opprettet"].asLocalDateTime())
+        val meldinger = testRapid.inspektør.meldinger("inntektsmelding_håndtert")
+        assertEquals(2, meldinger.size)
+        meldinger[0].also { inntektsmeldingHåndtertEvent ->
+            // håndtert dagene fra im
+            assertEquals(inntektsmeldingId.toString(), inntektsmeldingHåndtertEvent["inntektsmeldingId"].asText())
+            assertEquals(vedtaksperiodeId.toString(), inntektsmeldingHåndtertEvent["vedtaksperiodeId"].asText())
+            assertNotNull(inntektsmeldingHåndtertEvent["@opprettet"].asLocalDateTime())
+        }
+        meldinger[1].also { inntektsmeldingHåndtertEvent ->
+            // håndtert inntekten fra im
+            assertEquals(inntektsmeldingId.toString(), inntektsmeldingHåndtertEvent["inntektsmeldingId"].asText())
+            assertEquals(vedtaksperiodeId.toString(), inntektsmeldingHåndtertEvent["vedtaksperiodeId"].asText())
+            assertNotNull(inntektsmeldingHåndtertEvent["@opprettet"].asLocalDateTime())
+        }
     }
 
 

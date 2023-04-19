@@ -527,10 +527,6 @@ internal class Arbeidsgiver private constructor(
             håndtertInntektPåSkjæringstidspunkt(vedtaksperiodeSomSkalHåndtereInntektOgRefusjon, inntektsmelding)
         }
 
-        // Vedtaksperioder som kun har håndtert dager (og ikke inntekt) må også få dokumentsporing
-        // Vi legger det til i en posthåndtering for at vedtaksperioder som både håndterer dager og inntekt ikke skal stoppes av erAlleredeHensyntatt
-        håndter(dager) { postHåndter(dager) }
-
         if (dager.noenDagerHåndtert() || inntektOgRefusjonHåndteres) return
         inntektsmeldingIkkeHåndtert(inntektsmelding)
     }
@@ -822,8 +818,6 @@ internal class Arbeidsgiver private constructor(
         }
         return sammenhengendePerioder
     }
-
-    internal fun finnTidligereInntektsmeldinginfo(skjæringstidspunkt: LocalDate) = inntektsmeldingInfo.finn(skjæringstidspunkt)
 
     internal fun addInntektsmelding(
         skjæringstidspunkt: LocalDate,

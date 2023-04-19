@@ -40,22 +40,22 @@ internal class V144TyperPåHendelserIVedtaksperiode : JsonMigration(version = 14
                         return@fold acc
                     }
                     val sporingsType = hendelseTypeTilSporing(hendelseType, vedtaksperiodeId)
-                    acc.put(idNode.asText(), sporingsType.name)
+                    acc.put(idNode.asText(), sporingsType)
                     acc
                 }
                 it.set<ObjectNode>("hendelseIder", hendelser)
             }
     }
 
-    private fun hendelseTypeTilSporing(hendelseType: String, vedtaksperiodeId: UUID): DokumentType {
+    private fun hendelseTypeTilSporing(hendelseType: String, vedtaksperiodeId: UUID): String {
         return when (hendelseType) {
-            "NY_SØKNAD" -> DokumentType.Sykmelding
-            "SENDT_SØKNAD_ARBEIDSGIVER" -> DokumentType.Søknad
-            "SENDT_SØKNAD_NAV" -> DokumentType.Søknad
-            "INNTEKTSMELDING" -> DokumentType.Inntektsmelding
-            "OVERSTYRTIDSLINJE" -> DokumentType.OverstyrTidslinje
-            "OVERSTYRINNTEKT" -> DokumentType.OverstyrInntekt
-            "OVERSTYRARBEIDSFORHOLD" -> DokumentType.OverstyrArbeidsforhold
+            "NY_SØKNAD" -> "Sykmelding"
+            "SENDT_SØKNAD_ARBEIDSGIVER" -> "Søknad"
+            "SENDT_SØKNAD_NAV" -> "Søknad"
+            "INNTEKTSMELDING" -> "Inntektsmelding"
+            "OVERSTYRTIDSLINJE" -> "OverstyrTidslinje"
+            "OVERSTYRINNTEKT" -> "OverstyrInntekt"
+            "OVERSTYRARBEIDSFORHOLD" -> "OverstyrArbeidsforhold"
             else -> throw IllegalArgumentException("Hendelse med type=$hendelseType var ikke forventet i migrering. VedtaksperiodeId=$vedtaksperiodeId")
         }
     }

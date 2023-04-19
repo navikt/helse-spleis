@@ -31,7 +31,8 @@ internal class InntektOgRefusjonFraInntektsmelding(
     private val ingenArbeidsgiverperiode = sisteDagIArbeidsgiverperioden == null
 
     internal fun meldingsreferanseId() = inntektsmelding.meldingsreferanseId()
-    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = inntektsmelding.leggTil(hendelseIder)
+    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) =
+        hendelseIder.add(Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId()))
     internal fun nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt: LocalDate, person: Person, subsumsjonObserver: SubsumsjonObserver) =
         person.nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt, inntektsmelding, subsumsjonObserver)
 

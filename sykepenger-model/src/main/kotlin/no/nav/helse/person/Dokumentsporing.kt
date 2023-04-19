@@ -1,25 +1,36 @@
 package no.nav.helse.person
 
+import java.util.Objects
 import java.util.UUID
 
-data class Dokumentsporing private constructor(private val id: UUID, private val dokumentType: DokumentType) {
+class Dokumentsporing private constructor(private val id: UUID, private val dokumentType: DokumentType) {
 
     companion object {
         internal fun sykmelding(id: UUID) = Dokumentsporing(id, DokumentType.Sykmelding)
         internal fun søknad(id: UUID) = Dokumentsporing(id, DokumentType.Søknad)
-        internal fun inntektsmelding(id: UUID) = Dokumentsporing(id, DokumentType.Inntektsmelding)
+        internal fun inntektsmeldingInntekt(id: UUID) = Dokumentsporing(id, DokumentType.InntektsmeldingInntekt)
+        internal fun inntektsmeldingDager(id: UUID) = Dokumentsporing(id, DokumentType.InntektsmeldingDager)
         internal fun overstyrTidslinje(id: UUID) = Dokumentsporing(id, DokumentType.OverstyrTidslinje)
         internal fun overstyrInntekt(id: UUID) = Dokumentsporing(id, DokumentType.OverstyrInntekt)
         internal fun overstyrRefusjon(id: UUID) = Dokumentsporing(id, DokumentType.OverstyrRefusjon)
         internal fun overstyrArbeidsgiveropplysninger(id: UUID) = Dokumentsporing(id, DokumentType.OverstyrArbeidsgiveropplysninger)
         internal fun overstyrArbeidsforhold(id: UUID) = Dokumentsporing(id, DokumentType.OverstyrArbeidsforhold)
 
+        // overskriver potensielt dersom en vedtaksperiode har håndtert en hendelse to ganger (les: InntektsmeldingDager/InntektsmeldingInntekt)
         internal fun Iterable<Dokumentsporing>.toMap() = associate { it.id to it.dokumentType }
+        internal fun Iterable<Dokumentsporing>.toJsonList() = map { it.id to it.dokumentType }
         internal fun Iterable<Dokumentsporing>.ider() = map { it.id }.toSet()
         internal fun Iterable<Dokumentsporing>.søknadIder() = filter { it.dokumentType == DokumentType.Søknad }.map { it.id }.toSet()
-        internal fun Map<UUID, DokumentType>.tilSporing() = map { Dokumentsporing(it.key, it.value) }.toSet()
     }
 
-    internal fun toMap() = mapOf(id.toString() to dokumentType.name)
+    override fun equals(other: Any?): Boolean {
+        if (other !is Dokumentsporing) return false
+        if (other === this) return true
+        return this.id == other.id && this.dokumentType == other.dokumentType
+    }
+    override fun hashCode(): Int {
+        return Objects.hash(id, dokumentType)
+    }
+    override fun toString() = "$dokumentType ($id)"
 }
 

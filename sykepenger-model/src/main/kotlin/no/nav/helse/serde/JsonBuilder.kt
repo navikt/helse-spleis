@@ -14,7 +14,7 @@ import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.Dokumentsporing.Companion.toMap
+import no.nav.helse.person.Dokumentsporing.Companion.toJsonList
 import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.InntektsmeldingInfo
@@ -1512,7 +1512,12 @@ internal class JsonBuilder : AbstractBuilder() {
                 "tom" to periode.endInclusive,
                 "sykmeldingFom" to opprinneligPeriode.start,
                 "sykmeldingTom" to opprinneligPeriode.endInclusive,
-                "hendelseIder" to hendelseIder.toMap(),
+                "hendelseIder" to hendelseIder.toJsonList().map { (id, type) ->
+                    mapOf(
+                        "dokumentId" to id,
+                        "dokumenttype" to type.name
+                    )
+                },
                 "tilstand" to tilstand.type.name,
                 "utbetalinger" to this.utbetalinger,
                 "skjæringstidspunktFraInfotrygd" to skjæringstidspunktFraInfotrygd,

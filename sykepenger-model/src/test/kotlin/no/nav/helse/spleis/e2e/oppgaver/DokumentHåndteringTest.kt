@@ -6,6 +6,8 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.DokumentType
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -44,10 +46,16 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     @Test
     fun `Inntektsmelding bare håndtert inntekt`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
+        val hendelserHåndtertFør = inspektør.hendelser(1.vedtaksperiode)
+        val søknad = håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
         val im = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 10.februar)
         assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
-        assertEquals(2, observatør.inntektsmeldingHåndtert.size)
+        assertEquals(hendelserHåndtertFør, inspektør.hendelser(1.vedtaksperiode))
+        assertEquals(listOf(
+            Dokumentsporing.søknad(søknad),
+            Dokumentsporing.inntektsmeldingInntekt(im)
+        ), inspektør.hendelser(2.vedtaksperiode))
+        assertEquals(3, observatør.inntektsmeldingHåndtert.size)
         assertEquals(im to 2.vedtaksperiode.id(ORGNUMMER), observatør.inntektsmeldingHåndtert.last())
     }
 
@@ -67,6 +75,26 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val søknad3 = håndterSøknad(Sykdom(17.januar, 20.januar, 100.prosent))
         val søknad4 = håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent))
         val im = håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        assertEquals(listOf(
+            Dokumentsporing.søknad(søknad1),
+            Dokumentsporing.inntektsmeldingDager(im),
+            Dokumentsporing.inntektsmeldingInntekt(im)
+        ), inspektør.hendelser(1.vedtaksperiode))
+        assertEquals(listOf(
+            Dokumentsporing.søknad(søknad2),
+            Dokumentsporing.inntektsmeldingDager(im),
+            Dokumentsporing.inntektsmeldingInntekt(im)
+        ), inspektør.hendelser(2.vedtaksperiode))
+        assertEquals(listOf(
+            Dokumentsporing.søknad(søknad3),
+            Dokumentsporing.inntektsmeldingInntekt(im)
+        ), inspektør.hendelser(3.vedtaksperiode))
+        assertEquals(listOf(
+            Dokumentsporing.søknad(søknad4),
+            Dokumentsporing.inntektsmeldingInntekt(im)
+        ), inspektør.hendelser(4.vedtaksperiode))
+
         assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
         assertEquals(listOf(
             søknad1 to 1.vedtaksperiode.id(ORGNUMMER),
@@ -75,6 +103,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             søknad4 to 4.vedtaksperiode.id(ORGNUMMER)
         ), observatør.søknadHåndtert)
         assertEquals(listOf(
+            im to 1.vedtaksperiode.id(ORGNUMMER),
+            im to 2.vedtaksperiode.id(ORGNUMMER),
             im to 3.vedtaksperiode.id(ORGNUMMER),
             im to 1.vedtaksperiode.id(ORGNUMMER),
             im to 2.vedtaksperiode.id(ORGNUMMER),

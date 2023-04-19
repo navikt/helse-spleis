@@ -15,8 +15,7 @@ import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.DokumentType
-import no.nav.helse.person.Dokumentsporing.Companion.tilSporing
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.InntektsmeldingInfo
@@ -56,6 +55,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingInfoHistori
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingInfoHistorikkElementData.Companion.tilInntektsmeldingInfoHistorikk
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.Companion.parseRefusjon
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.EndringIRefusjonData.Companion.parseEndringerIRefusjon
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.DokumentsporingData.Companion.tilSporing
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.VedtaksperiodeUtbetalingData.Companion.tilModellobjekt
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.Companion.parseArbeidsgiverInntektsopplysninger
@@ -932,7 +932,7 @@ internal data class PersonData(
             private val skjæringstidspunktFraInfotrygd: LocalDate?,
             private val skjæringstidspunkt: LocalDate?,
             private val sykdomstidslinje: SykdomstidslinjeData,
-            private val hendelseIder: Map<UUID, DokumentType>,
+            private val hendelseIder: List<DokumentsporingData>,
             private val inntektsmeldingInfo: InntektsmeldingInfoHistorikkElementData.InntektsmeldingInfoData?,
             private val fom: LocalDate,
             private val tom: LocalDate,
@@ -945,6 +945,28 @@ internal data class PersonData(
             private val opprettet: LocalDateTime,
             private val oppdatert: LocalDateTime
         ) {
+            data class DokumentsporingData(
+                private val dokumentId: UUID,
+                private val dokumenttype: DokumentTypeData
+            ) {
+                companion object {
+                    internal fun List<DokumentsporingData>.tilSporing() = map { it.dokumenttype.tilModelltype(it.dokumentId) }.toSet()
+                }
+            }
+            enum class DokumentTypeData(private val modelltype: (UUID) -> Dokumentsporing) {
+                Sykmelding(Dokumentsporing::sykmelding),
+                Søknad(Dokumentsporing::søknad),
+                InntektsmeldingInntekt(Dokumentsporing::inntektsmeldingInntekt),
+                InntektsmeldingDager(Dokumentsporing::inntektsmeldingDager),
+                OverstyrTidslinje(Dokumentsporing::overstyrTidslinje),
+                OverstyrInntekt(Dokumentsporing::overstyrInntekt),
+                OverstyrRefusjon(Dokumentsporing::overstyrRefusjon),
+                OverstyrArbeidsgiveropplysninger(Dokumentsporing::overstyrArbeidsgiveropplysninger),
+                OverstyrArbeidsforhold(Dokumentsporing::overstyrArbeidsforhold);
+
+                fun tilModelltype(dokumentId: UUID) = modelltype(dokumentId)
+            }
+
             data class VedtaksperiodeUtbetalingData(
                 private val vilkårsgrunnlagId: UUID,
                 private val utbetalingId: UUID,

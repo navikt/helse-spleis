@@ -7,11 +7,6 @@ internal class InntektsmeldingInfo(
     private val id: UUID,
     private val arbeidsforholdId: String?
 ) {
-
-    internal fun leggTil(hendelser: MutableSet<Dokumentsporing>) {
-        hendelser.add(Dokumentsporing.inntektsmelding(id))
-    }
-
     internal fun accept(visitor: InntektsmeldingInfoVisitor) {
         visitor.visitInntektsmeldinginfo(id, arbeidsforholdId)
     }
@@ -22,8 +17,4 @@ internal class InntektsmeldingInfo(
     }
 
     override fun hashCode() = Objects.hash(id, arbeidsforholdId)
-
-    internal companion object {
-        fun List<InntektsmeldingInfo>.ider() = map { it.id }
-    }
 }

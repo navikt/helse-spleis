@@ -256,17 +256,19 @@ internal class Vedtaksperiode private constructor(
         søknad.trimLeft(periode.endInclusive)
     }
 
-    private fun inntektsmeldingHåndtert(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
-        if (!inntektOgRefusjon.leggTil(hendelseIder)) return
+    private fun inntektsmeldingHåndtert(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding): Boolean {
+        if (!inntektOgRefusjon.leggTil(hendelseIder)) return true
         person.emitInntektsmeldingHåndtert(inntektOgRefusjon.meldingsreferanseId(), id, organisasjonsnummer)
+        return false
     }
     private fun inntektsmeldingHåndtert(hendelse: SykdomstidslinjeHendelse) {
         if (!hendelse.leggTil(hendelseIder)) return
         person.emitInntektsmeldingHåndtert(hendelse.meldingsreferanseId(), id, organisasjonsnummer)
     }
-    private fun inntektsmeldingHåndtert(dager: DagerFraInntektsmelding) {
-        if (!dager.leggTil(hendelseIder)) return
+    private fun inntektsmeldingHåndtert(dager: DagerFraInntektsmelding): Boolean {
+        if (!dager.leggTil(hendelseIder)) return true
         person.emitInntektsmeldingHåndtert(dager.meldingsreferanseId(), id, organisasjonsnummer)
+        return false
     }
 
     private fun søknadHåndtert(søknad: Søknad) {
@@ -295,7 +297,7 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(dager: DagerFraInntektsmelding): Boolean {
         kontekst(dager)
         val skalHåndtereDager = tilstand.skalHåndtereDager(this, dager)
-        if (erAlleredeHensyntatt(dager.meldingsreferanseId()) || !skalHåndtereDager) {
+        if (!skalHåndtereDager || inntektsmeldingHåndtert(dager)) {
             dager.vurdertTilOgMed(periode.endInclusive)
             return skalHåndtereDager
         }
@@ -304,20 +306,12 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal fun postHåndter(dager: DagerFraInntektsmelding) {
-        if (dager.harBlittHåndtertAv(periode) || dager.skalHåndteresAv(periode)) {
-            inntektsmeldingHåndtert(dager)
-        }
-    }
-
     private fun forventerInntektOgRefusjonFraInntektsmelding() = tilstand != AvsluttetUtenUtbetaling || forventerInntekt()
 
     internal fun håndter(inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
-        val alleredeHensyntatt = erAlleredeHensyntatt(inntektOgRefusjon.meldingsreferanseId())
         kontekst(inntektOgRefusjon)
-        inntektsmeldingHåndtert(inntektOgRefusjon)
         inntektsmeldingInfo = inntektOgRefusjon.addInntektsmelding(skjæringstidspunkt, arbeidsgiver, jurist)
-        if (alleredeHensyntatt) return
+        if (inntektsmeldingHåndtert(inntektOgRefusjon)) return
         inntektOgRefusjon.nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt, person, jurist())
         tilstand.håndter(this, inntektOgRefusjon)
     }
@@ -348,9 +342,6 @@ internal class Vedtaksperiode private constructor(
         if (periode.start == periodstartFør) return
         dager.info("Perioden ble strukket tilbake fra $periodstartFør til ${periode.start} (${DAYS.between(periode.start, periodstartFør)} dager)")
     }
-
-    private fun erAlleredeHensyntatt(meldingsreferanseId: UUID) =
-        hendelseIder.ider().contains(meldingsreferanseId)
 
     internal fun håndterHistorikkFraInfotrygd(hendelse: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
         tilstand.håndter(person, arbeidsgiver, this, hendelse, infotrygdhistorikk)
@@ -914,11 +905,6 @@ internal class Vedtaksperiode private constructor(
             "Vedtaksperioden {} for {} er egentlig innenfor arbeidsgiverperioden ved {}",
             keyValue("vedtaksperiodeId", id), keyValue("fnr", fødselsnummer), keyValue("tilstand", tilstand.type)
         )
-    }
-
-    private fun kopierManglende(other: InntektsmeldingInfo) {
-        this.inntektsmeldingInfo = other
-        other.leggTil(this.hendelseIder)
     }
 
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
@@ -1915,11 +1901,6 @@ internal class Vedtaksperiode private constructor(
                 }
                 valider {
                     person.valider(this, vilkårsgrunnlag, vedtaksperiode.organisasjonsnummer, vedtaksperiode.skjæringstidspunkt)
-                }
-                onSuccess {
-                    if (vedtaksperiode.inntektsmeldingInfo == null) {
-                        arbeidsgiver.finnTidligereInntektsmeldinginfo(vedtaksperiode.skjæringstidspunkt)?.also { vedtaksperiode.kopierManglende(it) }
-                    }
                 }
                 lateinit var arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
                 valider(RV_UT_16) {

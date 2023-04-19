@@ -116,7 +116,7 @@ internal class VedtakkontraktTest : AbstractEndToEndMediatorTest() {
             },
             "inntekt" : 31000.0,
             "begrensning" : "ER_IKKE_6G_BEGRENSET",
-            "hendelser": ["$søknadId", "$inntektsmeldingId"]
+            "hendelser": ["$søknadId"]
         }
         """
         assertVedtakFattet(forventet, forventetUtbetalingEventNavn = "utbetaling_uten_utbetaling")

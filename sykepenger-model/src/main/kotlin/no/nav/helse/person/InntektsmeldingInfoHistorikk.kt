@@ -17,9 +17,6 @@ internal class InntektsmeldingInfoHistorikk(
         visitor.postVisitInntektsmeldinginfoHistorikk(this)
     }
 
-    internal fun finn(dato: LocalDate) =
-        historikk[dato]?.last()
-
     internal fun opprett(dato: LocalDate, inntektsmelding: Inntektsmelding) =
         finnEllerOpprett(dato, inntektsmelding.inntektsmeldingsinfo())
 
