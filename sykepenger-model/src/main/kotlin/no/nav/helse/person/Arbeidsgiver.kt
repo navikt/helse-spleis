@@ -511,7 +511,7 @@ internal class Arbeidsgiver private constructor(
         val dager = DagerFraInntektsmelding(inntektsmelding)
         håndter(inntektsmelding) { håndter(dager) }
 
-        val inntektOgRefusjon = inntektsmelding.inntektOgRefusjon(dager)
+        val inntektOgRefusjon = inntektsmelding.inntektOgRefusjon()
         val vedtaksperiodeSomSkalHåndtereInntektOgRefusjon = vedtaksperioder.skalHåndtere(inntektOgRefusjon)
         val inntektOgRefusjonHåndteres = vedtaksperiodeSomSkalHåndtereInntektOgRefusjon != null
 

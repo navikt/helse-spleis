@@ -1417,7 +1417,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `revurder første dag i periode på en sykedag som forlenger tidligere arbeidsgiverperiode med nytt skjæringstidspunkt`() {
         nyttVedtak(1.januar, 20.januar)
-        nyttVedtak(25.januar, 25.januar)
+        nyttVedtak(25.januar, 25.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(25.januar, Dagtype.Sykedag, 80)))
         håndterYtelser(2.vedtaksperiode)
 

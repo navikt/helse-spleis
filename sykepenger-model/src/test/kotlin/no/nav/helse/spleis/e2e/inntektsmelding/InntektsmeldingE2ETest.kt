@@ -709,7 +709,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 10.april)
         assertNotNull(inspektør.vilkårsgrunnlag(5.januar))
         assertNull(inspektør.vilkårsgrunnlag(1.januar))
-        assertIngenVarsel(RV_IM_3)
+        assertVarsel(RV_IM_3)
     }
 
     @Test

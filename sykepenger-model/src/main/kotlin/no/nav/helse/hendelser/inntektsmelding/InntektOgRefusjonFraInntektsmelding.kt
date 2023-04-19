@@ -6,25 +6,26 @@ import no.nav.helse.førsteArbeidsdag
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 
 internal class InntektOgRefusjonFraInntektsmelding(
     private val inntektsmelding: Inntektsmelding,
     private val førsteFraværsdag: LocalDate?,
-    arbeidsgiverperioder: List<Periode>,
-    private val dagerFraInntektsmelding: DagerFraInntektsmelding
+    arbeidsgiverperioder: List<Periode>
 ): IAktivitetslogg by inntektsmelding {
 
-    private val sisteDagIArbeidsgiverperioden = arbeidsgiverperioder
+    private val arbeidsgiverperioden = arbeidsgiverperioder
         .flatten()
         .sorted()
         .take(16)
-        .maxOrNull()
+    private val sisteDagIArbeidsgiverperioden = arbeidsgiverperioden.maxOrNull()
 
     private val førsteFraværsdagEtterArbeidsgiverperioden =
         førsteFraværsdag != null && sisteDagIArbeidsgiverperioden != null && førsteFraværsdag > sisteDagIArbeidsgiverperioden
@@ -38,7 +39,8 @@ internal class InntektOgRefusjonFraInntektsmelding(
 
     internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?) {
         inntektsmelding.validerInntektOgRefusjon(periode, skjæringstidspunkt)
-        dagerFraInntektsmelding.valider(arbeidsgiverperiode)
+        if (arbeidsgiverperiode?.sammenlign(arbeidsgiverperioden.grupperSammenhengendePerioder()) == true) return
+        varsel(Varselkode.RV_IM_3)
     }
 
     internal fun addInntektsmelding(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver, jurist: SubsumsjonObserver) =
@@ -92,6 +94,14 @@ internal class InntektOgRefusjonFraInntektsmelding(
         }
     }
 
+    internal inner class ArbeidsgiverperiodenStrategi: InntektOgRefusjonMatchingstrategi {
+        override fun matcher(skjæringstidspunkt: LocalDate, periode: Periode, forventerInntekt: () -> Boolean): Boolean {
+            if (sisteDagIArbeidsgiverperioden == null) return false
+            if (førsteFraværsdag?.isAfter(sisteDagIArbeidsgiverperioden) == true) return false
+            return arbeidsgiverperioden.any { it in periode } && forventerInntekt()
+        }
+    }
+
     internal inner class FørsteDagEtterArbeidsgiverperiodenForskyvningsstrategi : InntektOgRefusjonMatchingstrategi {
         // Bruker matching på første dag etter arbeidsgiverprioden, men forskyver dagen om vedtaksperioden(e) som treffes ikke forventer inntekt
         private val førsteDagEtterArbeidsgiverperioden = sisteDagIArbeidsgiverperioden?.nesteDag
@@ -121,9 +131,9 @@ internal class InntektOgRefusjonFraInntektsmelding(
     internal val strategier = listOf(
         FørsteDagEtterArbeidsgiverperiodenStrategi(),
         FørsteFraværsdagStrategi(),
+        ArbeidsgiverperiodenStrategi(),
         FørsteDagEtterArbeidsgiverperiodenForskyvningsstrategi(),
-        FørsteFraværsdagForskyvningsstrategi(),
-        HarHåndtertDagerFraInntektsmeldingenStrategi(dagerFraInntektsmelding)
+        FørsteFraværsdagForskyvningsstrategi()
     )
 }
 

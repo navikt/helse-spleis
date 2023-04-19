@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companio
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.refusjonshistorikkRefusjon
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
-import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Dokumentsporing
@@ -305,13 +304,8 @@ class Inntektsmelding(
         }
     }
 
-    internal fun inntektOgRefusjon(dagerFraInntektsmelding: DagerFraInntektsmelding): InntektOgRefusjonFraInntektsmelding {
-        return InntektOgRefusjonFraInntektsmelding(
-            this,
-            førsteFraværsdag,
-            arbeidsgiverperioder,
-            dagerFraInntektsmelding
-        )
+    internal fun inntektOgRefusjon(): InntektOgRefusjonFraInntektsmelding {
+        return InntektOgRefusjonFraInntektsmelding(this, førsteFraværsdag, arbeidsgiverperioder)
     }
 
     internal fun overlappendeSykmeldingsperioder(perioder: List<Periode>): List<Periode> {

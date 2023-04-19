@@ -6,11 +6,11 @@ import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding.ArbeidsgiverperiodenStrategi
 import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding.FørsteDagEtterArbeidsgiverperiodenForskyvningsstrategi
 import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding.FørsteDagEtterArbeidsgiverperiodenStrategi
 import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding.FørsteFraværsdagForskyvningsstrategi
 import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding.FørsteFraværsdagStrategi
-import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding.HarHåndtertDagerFraInntektsmeldingenStrategi
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -439,7 +439,7 @@ internal class InntektsmeldingMatchingTest {
             vedtaksperiode1 som forventerInntekt,
             vedtaksperiode2 som forventerInntekt
         ) {
-            this bleHåndtertMed HarHåndtertDagerFraInntektsmeldingenStrategi::class av vedtaksperiode2
+            this bleHåndtertMed ArbeidsgiverperiodenStrategi::class av vedtaksperiode2
         }
     }
 
@@ -460,7 +460,7 @@ internal class InntektsmeldingMatchingTest {
             vedtaksperiode1 som forventerInntekt,
             vedtaksperiode2 som forventerInntekt
         ) {
-            bleIkkeHåndtert
+            this bleHåndtertMed ArbeidsgiverperiodenStrategi::class av vedtaksperiode2
         }
     }
 
@@ -556,7 +556,7 @@ internal class InntektsmeldingMatchingTest {
             mottatt = LocalDateTime.now()
         ).let { inntektsmelding ->
             val dager = DagerFraInntektsmelding(inntektsmelding)
-            dager to inntektsmelding.inntektOgRefusjon(dager)
+            dager to inntektsmelding.inntektOgRefusjon()
         }
 
         private val DagerFraInntektsmelding.inspektør get() = DagerFraInntektsmeldingInspektør(this)
