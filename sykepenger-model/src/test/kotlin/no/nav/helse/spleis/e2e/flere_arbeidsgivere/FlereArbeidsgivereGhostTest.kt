@@ -78,18 +78,20 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
     @Test
     fun `Korrigerende refusjonsopplysninger på arbeidsgiver med skatteinntekt i sykepengegrunnlaget`() {
-        utbetalPeriodeMedGhost(tilGodkjenning = true)
+        utbetalPeriodeMedGhost()
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2, beregnetInntekt = 32000.månedlig)
         assertVarsel(RV_RE_1, 1.vedtaksperiode.filter(a2))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        // siden beløpet i inntektsmeldingen er det samme som vi hadde fra skatt, beholder vi SkattSykepengegrunnlag
         assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to SkattSykepengegrunnlag::class))
+        inspektør.refusjonsopplysningerFraVilkårsgrunnlag(1.januar)
+
     }
 
     @Test
@@ -1044,8 +1046,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     }
 
     private fun utbetalPeriodeMedGhost(tilGodkjenning: Boolean = false) {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
