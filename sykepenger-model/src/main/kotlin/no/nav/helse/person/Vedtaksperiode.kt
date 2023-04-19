@@ -2258,7 +2258,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
-            //if (!skalHensyntaInntektsmelding(vedtaksperiode, dager)) return false
             vedtaksperiode.låsOpp()
             vedtaksperiode.håndterDager(dager)
             vedtaksperiode.lås()
@@ -2267,22 +2266,6 @@ internal class Vedtaksperiode private constructor(
                 Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
             )
             return true
-        }
-
-        private fun skalHensyntaInntektsmelding(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg
-        ): Boolean {
-            val skalHensyntaInntektsmelding = vedtaksperiode.person.vedtaksperioder(NYERE_ELLER_SAMME_SKJÆRINGSTIDSPUNKT_ER_UTBETALT(vedtaksperiode)).isEmpty()
-            if (skalHensyntaInntektsmelding) return true
-            sikkerlogg.info(
-                "Inntektsmelding i AUU hensyntas ikke i {} for {} {} fordi dette eller nyere skjæringstidspunkt har vært utbetalt",
-                keyValue("vedtaksperiodeId", vedtaksperiode.id),
-                keyValue("aktørId", vedtaksperiode.aktørId),
-                keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer)
-            )
-            hendelse.info("Hensyntar ikke inntektsmelding fordi dette eller nyere skjæringstidspunkt har vært utbetalt")
-            return false
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -2466,13 +2449,6 @@ internal class Vedtaksperiode private constructor(
             val skjæringstidspunkt = segSelv.skjæringstidspunkt
             { vedtaksperiode: Vedtaksperiode ->
                 vedtaksperiode.utbetalinger.erAvsluttet() && vedtaksperiode.skjæringstidspunkt > skjæringstidspunkt && vedtaksperiode.skjæringstidspunkt > segSelv.periode.endInclusive
-            }
-        }
-
-        internal val NYERE_ELLER_SAMME_SKJÆRINGSTIDSPUNKT_ER_UTBETALT = { segSelv: Vedtaksperiode ->
-            val skjæringstidspunkt = segSelv.skjæringstidspunkt
-            { vedtaksperiode: Vedtaksperiode ->
-                vedtaksperiode.utbetalinger.harAvsluttede() && vedtaksperiode.skjæringstidspunkt >= skjæringstidspunkt
             }
         }
 
