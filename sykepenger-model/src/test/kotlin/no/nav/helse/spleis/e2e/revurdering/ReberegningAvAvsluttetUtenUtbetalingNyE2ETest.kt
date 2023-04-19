@@ -1238,6 +1238,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterYtelser(1.vedtaksperiode)
 
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
+        assertInfo("Deeskalerer RV_IT_3: Utbetaling i Infotrygd overlapper med vedtaksperioden", 1.vedtaksperiode.filter())
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)

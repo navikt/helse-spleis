@@ -11,7 +11,10 @@ import no.nav.helse.person.aktivitetslogg.Subaktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 
 class FunksjonelleFeilTilVarsler(private val other: IAktivitetslogg) : IAktivitetslogg by other {
-    override fun funksjonellFeil(kode: Varselkode) = varsel(kode)
+    override fun funksjonellFeil(kode: Varselkode) {
+        varsel(kode)
+        info("Deeskalerer $kode")
+    }
 
     override fun barn() = FunksjonelleFeilTilVarsler(other.barn())
 
