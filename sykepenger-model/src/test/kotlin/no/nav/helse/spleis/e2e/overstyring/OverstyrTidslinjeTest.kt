@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
+import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -43,7 +44,6 @@ import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterSøknadMedValidering
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.manuellArbeidsgiverdag
@@ -56,8 +56,6 @@ import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -411,6 +409,29 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING_REVURDERING
         )
     }
+
+    @Test
+    fun `overstyrer fra SykedagNav til Sykedag`(){
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "Saerregler")
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        val agp = (1.januar til 16.januar).filterNot { it.erHelg() }
+        agp.forEach {
+            assertSykdomstidslinjedag(it, Dag.SykedagNav::class, no.nav.helse.hendelser.Inntektsmelding::class)
+        }
+        val førsteUtbetalingsdag = inspektør.utbetalinger[0].inspektør.arbeidsgiverOppdrag[0].fom
+        assertEquals(1.januar, førsteUtbetalingsdag)
+        håndterOverstyrTidslinje(agp.map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
+        håndterYtelser(1.vedtaksperiode)
+        agp.forEach {
+            assertSykdomstidslinjedag(it, Dag.Sykedag::class, OverstyrTidslinje::class)
+        }
+        val førsteUtbetalingsdagEtterOverstyring = inspektør.utbetalinger[1].inspektør.arbeidsgiverOppdrag[0].fom
+        assertEquals(17.januar, førsteUtbetalingsdagEtterOverstyring)
+    }
+
 
     private fun assertSykdomstidslinjedag(dato: LocalDate, dagtype: KClass<out Dag>, kommerFra: KClass<out SykdomstidslinjeHendelse>) {
         val dagen = inspektør.sykdomstidslinje[dato]
