@@ -61,6 +61,10 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
         this.låstePerioder.addAll(låstePerioder)
     }
 
+    override fun visitDag(dag: Dag.SykedagNav, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
+        set(dag, dato, kilde)
+    }
+
     override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
         set(dag, dato, kilde)
 

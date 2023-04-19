@@ -1,8 +1,10 @@
 package no.nav.helse.spleis.e2e.overstyring
 
+import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -50,6 +52,38 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
             assertEquals(0, overstyringen.arbeidsgiverOppdrag.size)
             overstyringen.personOppdrag[0].inspektør.also { linje ->
                 assertEquals(1.januar til 31.januar, linje.fom til linje.tom)
+                assertEquals(1431, linje.beløp)
+            }
+        }
+    }
+
+    @Test
+    fun `Overstyrer sykedagNav tilbake til vanlig agp`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList()), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        val dagerFør = inspektør.sykdomstidslinje.inspektør.dager
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterOverstyrTidslinje((1.januar til 16.januar).map { dagen -> ManuellOverskrivingDag(dagen, Dagtype.Sykedag, 100) })
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        val dagerEtter = inspektør.sykdomstidslinje.inspektør.dager
+        (1.januar til 16.januar).forEach {
+            if (!it.erHelg()) assertTrue(dagerFør.getValue(it).kommerFra(Inntektsmelding::class)) { "$it kommer ikke fra Inntektsmelding" }
+            assertTrue(dagerEtter.getValue(it).kommerFra(OverstyrTidslinje::class)) { "$it kommer ikke fra OverstyrTidslinje" }
+        }
+
+        val utbetalinger = inspektør.utbetalinger
+        assertEquals(2, utbetalinger.size)
+        utbetalinger.last().inspektør.also { overstyringen ->
+            assertEquals(1, overstyringen.personOppdrag.size)
+            assertEquals(0, overstyringen.arbeidsgiverOppdrag.size)
+            overstyringen.personOppdrag[0].inspektør.also { linje ->
+                assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
                 assertEquals(1431, linje.beløp)
             }
         }
