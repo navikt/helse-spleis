@@ -82,7 +82,9 @@ class Inntektsmelding(
         private val ikkeStøttedeBegrunnelserForReduksjon = setOf(
             "BetvilerArbeidsufoerhet",
             "FiskerMedHyre",
-            "StreikEllerLockout"
+            "StreikEllerLockout",
+            "FravaerUtenGyldigGrunn",
+            "BeskjedGittForSent"
         )
     }
 
