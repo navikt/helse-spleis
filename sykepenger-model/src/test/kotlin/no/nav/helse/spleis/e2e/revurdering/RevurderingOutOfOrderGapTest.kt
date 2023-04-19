@@ -96,8 +96,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyttVedtak(1.februar, 28.februar)
         håndterSøknad(Sykdom(26.januar, 31.januar, 100.prosent))
         håndterYtelser(3.vedtaksperiode, foreldrepenger = listOf(26.januar til 31.januar))
-        assertFunksjonellFeil(`Overlapper med foreldrepenger eller svangerskapspenger`, 3.vedtaksperiode.filter())
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+        assertVarsel(`Overlapper med foreldrepenger eller svangerskapspenger`, 3.vedtaksperiode.filter())
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 
     @Test
