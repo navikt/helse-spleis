@@ -26,6 +26,7 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
+import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
@@ -39,7 +40,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.PÅGÅENDE_REVURDERING
-import no.nav.helse.person.Vedtaksperiode.Companion.SAMMENHENGENDE_MED_SAMME_SKJÆRINGSTIDSPUNKT_SOM
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
 import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_REFUSJONSOPPLYSNINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.feiletRevurdering
@@ -499,16 +499,10 @@ internal class Arbeidsgiver private constructor(
         val vedtaksperiode = søknad.lagVedtaksperiode(person, this, jurist)
         if (søknad.harFunksjonelleFeilEllerVerre() || arbeidsgivere.nekterOpprettelseAvPeriode(vedtaksperiode, søknad)) {
             registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
-            vedtaksperiode.trengerInntektsmeldingReplay()
             return
         }
         registrerNyVedtaksperiode(vedtaksperiode)
         vedtaksperiode.håndter(søknad)
-        if (søknad.harFunksjonelleFeilEllerVerre()) {
-            søknad.info("Forsøkte å opprette en ny vedtaksperiode, men den ble forkastet før den rakk å spørre om inntektsmeldingReplay. " +
-                    "Ber om inntektsmeldingReplay så vi kan opprette gosys-oppgaver for inntektsmeldinger som ville ha truffet denne vedtaksperioden")
-            vedtaksperiode.trengerInntektsmeldingReplay()
-        }
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID? = null) {
@@ -517,23 +511,24 @@ internal class Arbeidsgiver private constructor(
         val dager = DagerFraInntektsmelding(inntektsmelding)
         håndter(inntektsmelding) { håndter(dager) }
 
-        val vedtaksperiodeSomSkalHåndtereInntektOgRefusjon =
-            vedtaksperioder.skalHåndtere(inntektsmelding.inntektOgRefusjon(dager))
+        val inntektOgRefusjon = inntektsmelding.inntektOgRefusjon(dager)
+        val vedtaksperiodeSomSkalHåndtereInntektOgRefusjon = vedtaksperioder.skalHåndtere(inntektOgRefusjon)
         val inntektOgRefusjonHåndteres = vedtaksperiodeSomSkalHåndtereInntektOgRefusjon != null
 
-        vedtaksperiodeSomSkalHåndtereInntektOgRefusjon?.håndter(inntektsmelding.inntektOgRefusjon(dager))?.also {
+        vedtaksperiodeSomSkalHåndtereInntektOgRefusjon?.also { vedtaksperiode ->
+            vedtaksperiode.håndter(inntektOgRefusjon)
             // En av vedtaksperiodene har håndtert inntekt og refusjon
             // vi må informere de andre vedtaksperiodene på arbeidsgiveren som berøres av dette
-            håndtertInntektPåSkjæringstidspunkt(vedtaksperiodeSomSkalHåndtereInntektOgRefusjon, inntektsmelding)
+            håndtertInntektPåSkjæringstidspunkt(vedtaksperiode, inntektOgRefusjon)
         }
 
         if (dager.noenDagerHåndtert() || inntektOgRefusjonHåndteres) return
         inntektsmeldingIkkeHåndtert(inntektsmelding)
     }
 
-    private fun håndtertInntektPåSkjæringstidspunkt(vedtaksperiode: Vedtaksperiode, inntektsmelding: SykdomstidslinjeHendelse) {
-        vedtaksperioder.filter(SAMMENHENGENDE_MED_SAMME_SKJÆRINGSTIDSPUNKT_SOM(vedtaksperiode)).forEach {
-            it.håndtertInntektPåSkjæringstidspunktet(inntektsmelding)
+    private fun håndtertInntektPåSkjæringstidspunkt(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
+        finnSammenhengendeVedtaksperioder(vedtaksperiode).forEach {
+            it.håndtertInntektPåSkjæringstidspunktet(vedtaksperiode, inntektOgRefusjon)
         }
     }
 

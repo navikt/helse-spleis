@@ -261,10 +261,7 @@ internal class Vedtaksperiode private constructor(
         person.emitInntektsmeldingHåndtert(inntektOgRefusjon.meldingsreferanseId(), id, organisasjonsnummer)
         return false
     }
-    private fun inntektsmeldingHåndtert(hendelse: SykdomstidslinjeHendelse) {
-        if (!hendelse.leggTil(hendelseIder)) return
-        person.emitInntektsmeldingHåndtert(hendelse.meldingsreferanseId(), id, organisasjonsnummer)
-    }
+
     private fun inntektsmeldingHåndtert(dager: DagerFraInntektsmelding): Boolean {
         if (!dager.leggTil(hendelseIder)) return true
         person.emitInntektsmeldingHåndtert(dager.meldingsreferanseId(), id, organisasjonsnummer)
@@ -993,9 +990,11 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    internal fun håndtertInntektPåSkjæringstidspunktet(hendelse: SykdomstidslinjeHendelse) {
-        inntektsmeldingHåndtert(hendelse)
-        tilstand.håndtertInntektPåSkjæringstidspunktet(this, hendelse)
+    internal fun håndtertInntektPåSkjæringstidspunktet(other: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
+        if (other.skjæringstidspunkt != this.skjæringstidspunkt) return
+        kontekst(inntektOgRefusjon)
+        inntektsmeldingHåndtert(inntektOgRefusjon)
+        tilstand.håndtertInntektPåSkjæringstidspunktet(this, inntektOgRefusjon)
     }
 
     private fun vedtaksperiodeVenter(venterPå: Vedtaksperiode) {
@@ -1105,7 +1104,7 @@ internal class Vedtaksperiode private constructor(
             inntektOgRefusjon.varsel(RV_IM_4, "Håndterer inntekt og refusjon fra inntektsmelding i ${type.name}")
         }
 
-        fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) {}
+        fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: InntektOgRefusjonFraInntektsmelding) {}
 
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             vilkårsgrunnlag.info("Forventet ikke vilkårsgrunnlag i %s".format(type.name))
@@ -1613,7 +1612,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterInntektOgRefusjon(inntektOgRefusjon, tilstandEtterInntektPåSkjæringstidspunkt(vedtaksperiode))
         }
 
-        override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) {
+        override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: InntektOgRefusjonFraInntektsmelding) {
             vedtaksperiode.tilstand(hendelse, tilstandEtterInntektPåSkjæringstidspunkt(vedtaksperiode))
         }
 
@@ -2407,11 +2406,6 @@ internal class Vedtaksperiode private constructor(
 
         internal val MED_SKJÆRINGSTIDSPUNKT = { skjæringstidspunkt: LocalDate ->
             { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.skjæringstidspunkt == skjæringstidspunkt }
-        }
-
-        internal fun SAMMENHENGENDE_MED_SAMME_SKJÆRINGSTIDSPUNKT_SOM(vedtaksperiode: Vedtaksperiode): VedtaksperiodeFilter {
-            val sammenhengendePerioder = vedtaksperiode.arbeidsgiver.finnSammenhengendeVedtaksperioder(vedtaksperiode)
-            return { other: Vedtaksperiode -> other.skjæringstidspunkt == vedtaksperiode.skjæringstidspunkt && other in sammenhengendePerioder}
         }
 
         internal val SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG = { skjæringstidspunkt: LocalDate ->
