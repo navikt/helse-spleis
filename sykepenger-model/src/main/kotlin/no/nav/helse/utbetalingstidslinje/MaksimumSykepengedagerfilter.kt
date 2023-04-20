@@ -99,13 +99,10 @@ internal class MaksimumSykepengedagerfilter(
             perioder.forEach { (periode, _, jurist) -> it.sisteDag(karantenesporing(periode, jurist)) }
         }
 
-        begrunnelserForAvvisteDager.forEach { (begrunnelse, avvisteDager) ->
-            Utbetalingstidslinje.avvis(
-                tidslinjer = tidslinjer,
-                avvistePerioder = avvisteDager.grupperSammenhengendePerioder(),
-                begrunnelser = listOf(begrunnelse)
-            )
+        val avvisteTidslinjer = begrunnelserForAvvisteDager.entries.fold(tidslinjer) { result, (begrunnelse, dager) ->
+            Utbetalingstidslinje.avvis(result, dager.grupperSammenhengendePerioder(), listOf(begrunnelse))
         }
+
         perioder.forEach { (periode, aktivitetslogg, subsumsjonObserver) ->
             // TODO: logge juridisk vurdering for 70 år i "karantenesporing"
             alder.etterlevelse70år(aktivitetslogg, beregnetTidslinje.periode(), avvisteDager, subsumsjonObserver)
@@ -119,7 +116,7 @@ internal class MaksimumSykepengedagerfilter(
                 aktivitetslogg.info("Maksimalt antall sykedager overskrides ikke i perioden")
         }
 
-        return tidslinjer
+        return avvisteTidslinjer
     }
 
     private fun state(nyState: State) {

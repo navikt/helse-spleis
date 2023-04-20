@@ -13,7 +13,6 @@ internal class AvvisInngangsvilkårfilter(
         tidslinjer: List<Utbetalingstidslinje>,
         perioder: List<Triple<Periode, IAktivitetslogg, SubsumsjonObserver>>
     ): List<Utbetalingstidslinje> {
-        vilkårsgrunnlagHistorikk.avvisInngangsvilkår(tidslinjer)
-        return tidslinjer
+        return vilkårsgrunnlagHistorikk.avvisInngangsvilkår(tidslinjer)
     }
 }

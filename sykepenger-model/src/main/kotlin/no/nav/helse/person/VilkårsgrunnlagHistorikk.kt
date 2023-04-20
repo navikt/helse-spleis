@@ -66,9 +66,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
         sisteInnlag()?.vilkårsgrunnlagFor(skjæringstidspunkt)
 
-    internal fun avvisInngangsvilkår(tidslinjer: List<Utbetalingstidslinje>) {
-        sisteInnlag()?.avvis(tidslinjer)
-    }
+    internal fun avvisInngangsvilkår(tidslinjer: List<Utbetalingstidslinje>) =
+        sisteInnlag()?.avvis(tidslinjer) ?: tidslinjer
 
     internal fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver) =
         sisteInnlag()!!.medInntekt(organisasjonsnummer, dato, økonomi, regler, subsumsjonObserver)
@@ -114,11 +113,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
             vilkårsgrunnlag[skjæringstidspunkt]
 
-        internal fun avvis(tidslinjer: List<Utbetalingstidslinje>) {
+        internal fun avvis(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
             val skjæringstidspunktperioder = skjæringstidspunktperioder(vilkårsgrunnlag.values)
-            vilkårsgrunnlag.forEach { (skjæringstidspunkt, element) ->
+            return vilkårsgrunnlag.entries.fold(tidslinjer) { resultat, (skjæringstidspunkt, element) ->
                 val periode = checkNotNull(skjæringstidspunktperioder.singleOrNull { it.start == skjæringstidspunkt })
-                element.avvis(tidslinjer, periode)
+                element.avvis(resultat, periode)
             }
         }
 
@@ -202,7 +201,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
         internal fun inntektskilde() = sykepengegrunnlag.inntektskilde()
 
-        internal open fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode) {}
+        internal open fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode): List<Utbetalingstidslinje> {
+            return tidslinjer
+        }
 
         final override fun toSpesifikkKontekst() = SpesifikkKontekst(
             kontekstType = "vilkårsgrunnlag",
@@ -414,13 +415,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun inngårISammenligningsgrunnlaget(organisasjonsnummer: String) =
             sammenligningsgrunnlag.erRelevant(organisasjonsnummer)
 
-        override fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode) {
-            sykepengegrunnlag.avvis(tidslinjer, skjæringstidspunktperiode)
+        override fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode): List<Utbetalingstidslinje> {
+            val foreløpigAvvist = sykepengegrunnlag.avvis(tidslinjer, skjæringstidspunktperiode)
             val begrunnelser = mutableListOf<Begrunnelse>()
             if (medlemskapstatus == Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
             if (!opptjening.erOppfylt()) begrunnelser.add(Begrunnelse.ManglerOpptjening)
-            if (begrunnelser.isEmpty()) return
-            Utbetalingstidslinje.avvis(tidslinjer, listOf(skjæringstidspunktperiode), begrunnelser)
+            return Utbetalingstidslinje.avvis(foreløpigAvvist, listOf(skjæringstidspunktperiode), begrunnelser)
         }
 
         override fun vilkårsgrunnlagtype() = "Spleis"

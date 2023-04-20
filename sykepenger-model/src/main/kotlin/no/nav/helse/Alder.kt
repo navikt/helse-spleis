@@ -121,8 +121,7 @@ class Alder(private val fødselsdato: LocalDate, private val dødsdato: LocalDat
 
     internal fun avvisDager(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
         if (dødsdato == null) return tidslinjer
-        Utbetalingstidslinje.avvis(tidslinjer, listOf(dødsdato.nesteDag til LocalDate.MAX), listOf(Begrunnelse.EtterDødsdato))
-        return tidslinjer
+        return Utbetalingstidslinje.avvis(tidslinjer, listOf(dødsdato.nesteDag til LocalDate.MAX), listOf(Begrunnelse.EtterDødsdato))
     }
 
     internal class MaksimumSykepenger private constructor(

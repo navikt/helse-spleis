@@ -7,17 +7,26 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.ØkonomiAsserter
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.AVV
 import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import kotlin.properties.Delegates
 
 internal class ØkonomiDagTest {
 
@@ -102,11 +111,42 @@ internal class ØkonomiDagTest {
     }
 
     @Test
+    fun `avvist dag endrer ikke på økonomi til navdag`() {
+        val økonomi = Økonomi.sykdomsgrad(100.prosent).inntekt(500.daglig, 500.daglig, 600000.årlig, 500.daglig)
+        val builderFør = Økonomitester()
+        økonomi.builder(builderFør)
+
+        val a = Utbetalingsdag.NavDag(1.januar, økonomi)
+        val b = a.avvis(listOf(Begrunnelse.MinimumInntekt))
+
+        assertNotNull(b)
+        val builderEtter = Økonomitester()
+        økonomi.builder(builderEtter)
+
+        assertFalse(økonomi === b.økonomi)
+        assertTrue(builderFør.erLike(builderEtter))
+    }
+
+    private class Økonomitester : ØkonomiBuilder() {
+        fun erLike(other: Økonomitester): Boolean {
+            if (this.grad != other.grad) return false
+            if (this.arbeidsgiverRefusjonsbeløp != other.arbeidsgiverRefusjonsbeløp) return false
+            if (this.dekningsgrunnlag != other.dekningsgrunnlag) return false
+            if (this.totalGrad != other.totalGrad) return false
+            if (this.aktuellDagsinntekt != other.aktuellDagsinntekt) return false
+            if (this.arbeidsgiverbeløp != other.arbeidsgiverbeløp) return false
+            if (this.personbeløp != other.personbeløp) return false
+            if (this.er6GBegrenset != other.er6GBegrenset) return false
+            if (this.grunnbeløpgrense != other.grunnbeløpgrense) return false
+            return this.tilstand == other.tilstand
+        }
+    }
+
+    @Test
     fun `Beløp medNavDag som har blitt avvist`() {
         val a = tidslinjeOf(2.NAV(1200))
         val b = tidslinjeOf(2.NAV(1200))
-        val c = tidslinjeOf(2.NAV(1200))
-            .onEach { it.avvis(listOf(Begrunnelse.MinimumInntekt)) }
+        val c = Utbetalingstidslinje.avvis(listOf(tidslinjeOf(2.NAV(1200))), listOf(1.januar til 31.januar), listOf(Begrunnelse.MinimumInntekt)).single()
         listOf(a, b, c).betal()
         assertØkonomi(a, 721.0)
         assertØkonomi(b, 720.0)

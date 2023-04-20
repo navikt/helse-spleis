@@ -104,21 +104,25 @@ internal class Sykepengegrunnlag(
         }
     }
 
-    internal fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode) {
+    internal fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode): List<Utbetalingstidslinje> {
         val tidslinjeperiode = Utbetalingstidslinje.periode(tidslinjer)
-        if (tidslinjeperiode.starterEtter(skjæringstidspunktperiode) || tidslinjeperiode.endInclusive < skjæringstidspunkt) return
+        if (tidslinjeperiode.starterEtter(skjæringstidspunktperiode) || tidslinjeperiode.endInclusive < skjæringstidspunkt) return tidslinjer
 
         val avvisningsperiode = skjæringstidspunktperiode.start til minOf(tidslinjeperiode.endInclusive, skjæringstidspunktperiode.endInclusive)
         val avvisteDager = avvisningsperiode.filter { dato ->
             val faktor = if (alder.forhøyetInntektskrav(dato)) `2G` else halvG
             beregningsgrunnlag < faktor.minsteinntekt(skjæringstidspunkt)
         }
-        if (avvisteDager.isEmpty()) return
+        if (avvisteDager.isEmpty()) return tidslinjer
         val (avvisteDagerOver67, avvisteDagerTil67) = avvisteDager.partition { alder.forhøyetInntektskrav(it) }
-        if (avvisteDagerOver67.isNotEmpty()) Utbetalingstidslinje.avvis(tidslinjer, avvisteDagerOver67.grupperSammenhengendePerioder(), listOf(
-            Begrunnelse.MinimumInntektOver67))
-        if (avvisteDagerTil67.isNotEmpty()) Utbetalingstidslinje.avvis(tidslinjer, avvisteDagerTil67.grupperSammenhengendePerioder(), listOf(
-            Begrunnelse.MinimumInntekt))
+
+        val dager = listOf(
+            Begrunnelse.MinimumInntektOver67 to avvisteDagerOver67.grupperSammenhengendePerioder(),
+            Begrunnelse.MinimumInntekt to avvisteDagerTil67.grupperSammenhengendePerioder()
+        )
+        return dager.fold(tidslinjer) { result, (begrunnelse, perioder) ->
+            Utbetalingstidslinje.avvis(result, perioder, listOf(begrunnelse))
+        }
     }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {

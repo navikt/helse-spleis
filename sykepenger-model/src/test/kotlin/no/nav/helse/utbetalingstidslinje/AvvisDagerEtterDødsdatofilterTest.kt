@@ -84,14 +84,15 @@ internal class AvvisDagerEtterDødsdatofilterTest {
             tidslinjeOf(16.AP, 5.NAV)
         )
         val periode = Periode(1.januar, 21.januar)
-        undersøke(tidslinjer, 1.januar, periode)
-        assertEquals(3, tidslinjer.first().inspektør.avvistDagTeller)
-        assertEquals(3, tidslinjer.last().inspektør.avvistDagTeller)
+        val resultat = undersøke(tidslinjer, 1.januar, periode)
+        assertEquals(3, resultat.first().inspektør.avvistDagTeller)
+        assertEquals(3, resultat.last().inspektør.avvistDagTeller)
     }
 
-    private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, dødsdato: LocalDate?, periode: Periode) {
+    private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, dødsdato: LocalDate?, periode: Periode): List<Utbetalingstidslinje> {
         aktivitetslogg = Aktivitetslogg()
-        AvvisDagerEtterDødsdatofilter(Alder(EPOCH, dødsdato)).filter(tidslinjer, periode, aktivitetslogg, MaskinellJurist())
-        inspektør = tidslinjer.first().inspektør
+        val resultat = AvvisDagerEtterDødsdatofilter(Alder(EPOCH, dødsdato)).filter(tidslinjer, periode, aktivitetslogg, MaskinellJurist())
+        inspektør = resultat.first().inspektør
+        return resultat
     }
 }

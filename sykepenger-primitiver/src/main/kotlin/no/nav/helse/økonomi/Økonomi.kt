@@ -316,9 +316,7 @@ class Økonomi private constructor(
 
         object HarInntekt : Tilstand() {
 
-            override fun lås(økonomi: Økonomi) = økonomi.also {
-                it.tilstand = Låst
-            }
+            override fun lås(økonomi: Økonomi) = økonomi.kopierMed(tilstand = Låst)
 
 
             override fun betal(økonomi: Økonomi) {

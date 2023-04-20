@@ -22,7 +22,7 @@ import no.nav.helse.økonomi.Økonomi
  */
 
 class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Collection<Utbetalingsdag> by utbetalingsdager {
-    private val utbetalingsdager = utbetalingsdager.toMutableList()
+    private val utbetalingsdager = utbetalingsdager.toList()
     private val førsteDato get() = utbetalingsdager.first().dato
     private val sisteDato get() = utbetalingsdager.last().dato
 
@@ -44,7 +44,7 @@ class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Collection<
             tidslinjer: List<Utbetalingstidslinje>,
             avvistePerioder: List<Periode>,
             begrunnelser: List<Begrunnelse>
-        ) = tidslinjer.forEach { it.avvis(avvistePerioder, begrunnelser) }
+        ) = tidslinjer.map { it.avvis(avvistePerioder, begrunnelser) }
 
         fun avvisteDager(
             tidslinjer: List<Utbetalingstidslinje>,
@@ -70,13 +70,12 @@ class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Collection<
         visitor.postVisitUtbetalingstidslinje()
     }
 
-    private fun avvis(avvistePerioder: List<Periode>, begrunnelser: List<Begrunnelse>) {
-        if (begrunnelser.isEmpty()) return
-        utbetalingsdager.forEachIndexed { index, utbetalingsdag ->
-            if (utbetalingsdag.dato in avvistePerioder) {
-                utbetalingsdag.avvis(begrunnelser)?.also { utbetalingsdager[index] = it }
-            }
-        }
+    private fun avvis(avvistePerioder: List<Periode>, begrunnelser: List<Begrunnelse>): Utbetalingstidslinje {
+        if (begrunnelser.isEmpty()) return this
+        return Utbetalingstidslinje(utbetalingsdager.map { utbetalingsdag ->
+            val avvistDag = if (utbetalingsdag.dato in avvistePerioder) utbetalingsdag.avvis(begrunnelser) else null
+            avvistDag ?: utbetalingsdag
+        })
     }
 
     operator fun plus(other: Utbetalingstidslinje): Utbetalingstidslinje {
