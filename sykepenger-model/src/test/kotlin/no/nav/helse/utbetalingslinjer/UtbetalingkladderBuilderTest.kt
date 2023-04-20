@@ -76,7 +76,6 @@ internal class UtbetalingkladderBuilderTest {
         }
     }
 
-    private fun Utbetalingstidslinje.betale(aktivitetslogg: Aktivitetslogg = Aktivitetslogg()) = apply {
-        MaksimumUtbetalingFilter().betal(listOf(this), this.periode(), aktivitetslogg, MaskinellJurist())
-    }
+    private fun Utbetalingstidslinje.betale(aktivitetslogg: Aktivitetslogg = Aktivitetslogg()) =
+        MaksimumUtbetalingFilter().betal(listOf(this), this.periode(), aktivitetslogg, MaskinellJurist()).single()
 }

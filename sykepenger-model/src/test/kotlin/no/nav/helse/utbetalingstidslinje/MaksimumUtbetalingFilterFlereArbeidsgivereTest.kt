@@ -35,18 +35,19 @@ internal class MaksimumUtbetalingFilterFlereArbeidsgivereTest {
         val periode = Utbetalingstidslinje.periode(listOf(ag1.first, ag2.first))
         val dato = periode.start
         val maksDagsats = Grunnbeløp.`6G`.dagsats(dato)
-        MaksimumUtbetalingFilter().betal(listOf(ag2.first, ag1.first), periode, aktivitetslogg, MaskinellJurist())
+
+        val resultat = MaksimumUtbetalingFilter().betal(listOf(ag2.first, ag1.first), periode, aktivitetslogg, MaskinellJurist())
 
         val arbeidsgiverbeløp = { økonomi: Økonomi -> visitArbeidsgiverbeløp(økonomi) }
 
-        assertTrue(ag1.first.inspektør.økonomi(arbeidsgiverbeløp).all { it.daglig == maksDagsats }) {
+        assertTrue(resultat.first().inspektør.økonomi(arbeidsgiverbeløp).all { it.daglig == maksDagsats }) {
             "noen dager har fått nytt grunnbeløp"
         }
-        assertTrue(ag2.first.inspektør.økonomi(arbeidsgiverbeløp).all { it.daglig == maksDagsats }) {
+        assertTrue(resultat.last().inspektør.økonomi(arbeidsgiverbeløp).all { it.daglig == maksDagsats }) {
             "noen dager har fått nytt grunnbeløp"
         }
-        assertEquals(ag1.second, ag1.first.inspektør.totalUtbetaling())
-        assertEquals(ag2.second, ag2.first.inspektør.totalUtbetaling())
+        assertEquals(ag1.second, resultat.last().inspektør.totalUtbetaling())
+        assertEquals(ag2.second, resultat.first().inspektør.totalUtbetaling())
     }
 
     private fun visitArbeidsgiverbeløp(økonomi: Økonomi): Int {

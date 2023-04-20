@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import no.nav.helse.utbetalingslinjer.Beløpkilde
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.periode
+import no.nav.helse.økonomi.betal
 import no.nav.helse.økonomi.Økonomi
 import no.nav.helse.økonomi.Økonomi.Companion.erUnderGrensen
 import no.nav.helse.økonomi.ØkonomiVisitor
@@ -107,6 +108,23 @@ sealed class Utbetalingsdag(
                 .groupBy({ it.dato }) { it.økonomi }
                 .filterValues { it.erUnderGrensen() }
                 .keys
+        }
+
+        fun betale(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
+            return periode(tidslinjer).fold(tidslinjer) { resultat, dato ->
+                try {
+                    tidslinjer
+                        .map { it[dato].økonomi }
+                        .betal()
+                        .mapIndexed { index, økonomi ->
+                            Utbetalingstidslinje(resultat[index].map {
+                                if (it.dato == dato) it.kopierMed(økonomi) else it
+                            })
+                        }
+                } catch (err: Exception) {
+                    throw IllegalArgumentException("Klarte ikke å utbetale for dag=$dato, fordi: ${err.message}", err)
+                }
+            }
         }
 
         fun totalSykdomsgrad(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {

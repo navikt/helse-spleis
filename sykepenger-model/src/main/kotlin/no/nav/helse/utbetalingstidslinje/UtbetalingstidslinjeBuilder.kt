@@ -36,15 +36,15 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
     }
 
     override fun fridag(dato: LocalDate) {
-        builder.addFridag(dato, inntekter.medInntekt(dato))
+        builder.addFridag(dato, inntekter.medInntekt(dato, Økonomi.ikkeBetalt()))
     }
 
     override fun fridagOppholdsdag(dato: LocalDate) {
-        builder.addFridag(dato, inntekter.medInntekt(dato))
+        builder.addFridag(dato, inntekter.medInntekt(dato, Økonomi.ikkeBetalt()))
     }
 
     override fun arbeidsdag(dato: LocalDate) {
-        builder.addArbeidsdag(dato, inntekter.medInntekt(dato))
+        builder.addArbeidsdag(dato, inntekter.medInntekt(dato, Økonomi.ikkeBetalt()))
     }
 
     override fun arbeidsgiverperiodedag(
@@ -85,6 +85,6 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
     }
 
     override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse) {
-        builder.addAvvistDag(dato, inntekter.medInntekt(dato), listOf(begrunnelse))
+        builder.addAvvistDag(dato, inntekter.medInntekt(dato, Økonomi.ikkeBetalt()), listOf(begrunnelse))
     }
 }

@@ -17,10 +17,10 @@ internal class Inntekter(
     private val subsumsjonObserver: SubsumsjonObserver,
     private val vedtaksperioder: List<Vedtaksperiode> = emptyList()
 ) {
-    internal fun medInntekt(dato: LocalDate, økonomi: Økonomi = Økonomi.ikkeBetalt()) =
+    internal fun medInntekt(dato: LocalDate, økonomi: Økonomi) =
         vilkårsgrunnlagHistorikk.medInntekt(organisasjonsnummer, dato, økonomi, regler, subsumsjonObserver)
 
-    internal fun medUtbetalingsopplysninger(dato: LocalDate, økonomi: Økonomi = Økonomi.ikkeBetalt()) = try {
+    internal fun medUtbetalingsopplysninger(dato: LocalDate, økonomi: Økonomi) = try {
         vilkårsgrunnlagHistorikk.medUtbetalingsopplysninger(organisasjonsnummer, dato, økonomi, regler, subsumsjonObserver)
     } catch (exception: IllegalStateException) {
         exception.håndter(dato, vedtaksperioder)

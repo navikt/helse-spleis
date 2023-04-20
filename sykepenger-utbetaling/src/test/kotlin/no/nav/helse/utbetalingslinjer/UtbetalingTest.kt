@@ -32,7 +32,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.betal
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -329,12 +328,10 @@ internal class UtbetalingTest {
 
     @Test
     fun `ny utbetaling starter før`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV, startDato = 17.januar)
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV, startDato = 17.januar).betale()
         val utbetaling1 = opprettUtbetaling(tidslinje)
 
-        val tidslinjeNy = tidslinjeOf(16.AP, 15.NAV, 16.NAV, startDato = 1.januar)
-        beregnUtbetalinger(tidslinjeNy)
+        val tidslinjeNy = tidslinjeOf(16.AP, 15.NAV, 16.NAV, startDato = 1.januar).betale()
         val utbetaling2 = opprettUtbetaling(tidslinjeNy, utbetaling1, sisteDato = 31.januar)
 
         val utbetaling1Inspektør = utbetaling1.inspektør
@@ -371,12 +368,10 @@ internal class UtbetalingTest {
 
     @Test
     fun `ny utbetaling splitter opp tidligere utbetaling før`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV, 1.ARB, 27.NAV, 2.ARB, 29.NAV, startDato = 1.januar)
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV, 1.ARB, 27.NAV, 2.ARB, 29.NAV, startDato = 1.januar).betale()
         val utbetaling1 = opprettUtbetaling(tidslinje)
 
-        val tidslinjeNy = tidslinjeOf(16.AP, 15.NAV, 18.ARB, 16.AP, 25.NAV, startDato = 1.januar)
-        beregnUtbetalinger(tidslinjeNy)
+        val tidslinjeNy = tidslinjeOf(16.AP, 15.NAV, 18.ARB, 16.AP, 25.NAV, startDato = 1.januar).betale()
         val utbetaling2 = opprettUtbetaling(tidslinjeNy, utbetaling1, sisteDato = 31.januar)
 
         val utbetaling1Inspektør = utbetaling1.inspektør
@@ -418,12 +413,10 @@ internal class UtbetalingTest {
     }
     @Test
     fun `ny utbetaling slutter på helg`() {
-        val tidslinje = tidslinjeOf(16.AP, 5.NAV, startDato = 1.januar)
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 5.NAV, startDato = 1.januar).betale()
         val utbetaling1 = opprettUtbetaling(tidslinje)
 
-        val tidslinjeNy = tidslinjeOf(16.AP, 5.NAV, 4.NAV, 1.FRI, 2.NAV, 5.NAV, startDato = 1.januar)
-        beregnUtbetalinger(tidslinjeNy)
+        val tidslinjeNy = tidslinjeOf(16.AP, 5.NAV, 4.NAV, 1.FRI, 2.NAV, 5.NAV, startDato = 1.januar).betale()
         val utbetaling2 = opprettUtbetaling(tidslinjeNy, utbetaling1, sisteDato = 28.januar)
 
         val utbetaling1Inspektør = utbetaling1.inspektør
@@ -454,8 +447,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `utbetalinger med ulik korrelasjonsId kan ikke overlappe`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV).betale()
         val utbetaling = opprettUtbetaling(tidslinje)
         val utbetaling2 = opprettUtbetaling(tidslinje)
         assertFalse(listOf(utbetaling).tillaterOpprettelseAvUtbetaling(utbetaling2))
@@ -463,8 +455,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `utbetalinger med ulik korrelasjonsId kan overlappe hvis det er annullering`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV).betale()
         val utbetaling = opprettUtbetaling(tidslinje)
         val utbetaling2 = annuller(opprettUtbetaling(tidslinje))
         assertTrue(listOf(utbetaling).tillaterOpprettelseAvUtbetaling(utbetaling2!!))
@@ -472,19 +463,16 @@ internal class UtbetalingTest {
 
     @Test
     fun `utbetalinger med samme korrelasjonsId kan overlappe`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV).betale()
         val utbetaling = opprettUtbetaling(tidslinje)
-        val tidslinje2 = tidslinjeOf(16.AP, 30.NAV)
-        beregnUtbetalinger(tidslinje2)
+        val tidslinje2 = tidslinjeOf(16.AP, 30.NAV).betale()
         val utbetaling2 = opprettUtbetaling(tidslinje2, tidligere = utbetaling)
         assertTrue(listOf(utbetaling).tillaterOpprettelseAvUtbetaling(utbetaling2))
     }
 
     @Test
     fun `utbetaling starter i Ny`() {
-        val tidslinje = tidslinjeOf(16.AP, 17.NAV)
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 17.NAV).betale()
 
         val sisteDato = 21.januar
         val utbetaling = Utbetaling.lagUtbetaling(
@@ -506,8 +494,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `utbetalinger inkluderer ikke dager etter siste dato`() {
-        val tidslinje = tidslinjeOf(16.AP, 17.NAV)
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 17.NAV).betale()
 
         val sisteDato = 21.januar
         val utbetaling = Utbetaling.lagUtbetaling(
@@ -528,8 +515,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `periode for annullering`() {
-        val tidslinje = tidslinjeOf(16.AP, 5.NAV, 1.FRI, 6.NAV, 1.FRI, 4.NAV)
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 5.NAV, 1.FRI, 6.NAV, 1.FRI, 4.NAV).betale()
         val første = opprettUtbetaling(tidslinje, sisteDato = 21.januar)
         val andre = opprettUtbetaling(tidslinje, første, 28.januar)
         val tredje = opprettUtbetaling(tidslinje, andre, 2.februar)
@@ -546,8 +532,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `forlenger seg ikke på en annullering`() {
-        val tidslinje = tidslinjeOf(16.AP, 10.NAV)
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 10.NAV).betale()
         val første = opprettUtbetaling(tidslinje)
         val annullering = annuller(første)
         no.nav.helse.testhelpers.assertNotNull(annullering)
@@ -560,10 +545,9 @@ internal class UtbetalingTest {
     fun `omgjøre en revurdert periode med opphør`() {
         val tidslinje = tidslinjeOf(16.AP, 10.NAV)
         val ferietidslinje = tidslinjeOf(16.AP, 10.FRI)
-        beregnUtbetalinger(tidslinje)
-        val første = opprettUtbetaling(tidslinje)
-        val andre = opprettUtbetaling(ferietidslinje, første)
-        val tredje = opprettUtbetaling(tidslinje, andre)
+        val første = opprettUtbetaling(tidslinje.betale())
+        val andre = opprettUtbetaling(ferietidslinje.betale(), første)
+        val tredje = opprettUtbetaling(tidslinje.betale(), andre)
         assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
         assertTrue(andre.inspektør.arbeidsgiverOppdrag[0].erOpphør())
@@ -576,8 +560,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `forlenge en utbetaling uten utbetaling`() {
-        val tidslinje = tidslinjeOf(16.AP, 10.NAV)
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 10.NAV).betale()
         val første = opprettUtbetaling(tidslinje.kutt(16.januar))
         val andre = opprettUtbetaling(tidslinje, første)
         assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
@@ -594,11 +577,10 @@ internal class UtbetalingTest {
 
     @Test
     fun `forlenger seg på en revurdert periode med opphør`() {
-        val tidslinje = tidslinjeOf(16.AP, 10.NAV)
+        val tidslinje = tidslinjeOf(16.AP, 10.NAV).betale()
         val ferietidslinje = tidslinjeOf(16.AP, 10.FRI)
-        beregnUtbetalinger(tidslinje)
         val første = opprettUtbetaling(tidslinje)
-        val andre = opprettUtbetaling(ferietidslinje, første)
+        val andre = opprettUtbetaling(ferietidslinje.betale(), første)
         val tredje = opprettUtbetaling(beregnUtbetalinger(ferietidslinje + tidslinjeOf(10.NAV, startDato = 27.januar)), andre)
         assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
@@ -614,8 +596,7 @@ internal class UtbetalingTest {
 
     @Test
     fun nettoBeløp() {
-        val tidslinje = tidslinjeOf(11.NAV)
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(11.NAV).betale()
         val første = opprettUtbetaling(tidslinje, sisteDato = 7.januar)
         val andre = opprettUtbetaling(tidslinje, første)
 
@@ -628,9 +609,7 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(
             16.AP, 3.NAV, 5.NAV(1200, 50.0), 16.ARB, 16.AP, 1.NAV,
             startDato = 1.januar(2020)
-        )
-
-        beregnUtbetalinger(tidslinje)
+        ).betale()
 
         val første = opprettUtbetaling(tidslinje.kutt(19.januar(2020)))
         val andre = opprettUtbetaling(tidslinje.kutt(24.januar(2020)), tidligere = første)
@@ -647,9 +626,7 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(
             16.AP, 3.NAV, 5.NAV(1200, 50.0),
             startDato = 1.januar(2020)
-        )
-
-        beregnUtbetalinger(tidslinje)
+        ).betale()
 
         val tidligere = opprettUtbetaling(tidslinje.kutt(19.januar(2020)))
         val utbetaling = opprettUtbetaling(tidslinje.kutt(24.januar(2020)), tidligere = tidligere)
@@ -673,9 +650,7 @@ internal class UtbetalingTest {
             5.AP,
             30.NAV,
             startDato = 1.januar(2020)
-        )
-
-        beregnUtbetalinger(tidslinje)
+        ).betale()
 
         val første = opprettUtbetaling(tidslinje.kutt(19.januar(2020)))
         val andre = opprettUtbetaling(tidslinje, tidligere = første)
@@ -700,16 +675,14 @@ internal class UtbetalingTest {
 
     @Test
     fun `kan forkaste ubetalt utbetaling`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV).betale()
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
         assertTrue(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
     }
 
     @Test
     fun `kan forkaste underkjent utbetaling`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV).betale()
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
         godkjenn(utbetaling, false)
         assertTrue(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
@@ -717,8 +690,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `kan forkaste forkastet utbetaling`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV).betale()
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
         utbetaling.forkast(Aktivitetslogg())
         assertTrue(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
@@ -726,8 +698,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `kan ikke forkaste utbetaling i spill`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV).betale()
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
         assertFalse(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
         assertFalse(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
@@ -737,8 +708,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `kan ikke forkaste feilet utbetaling`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV).betale()
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
         kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), status = AVVIST)
         assertFalse(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
@@ -746,8 +716,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `kan forkaste annullert utbetaling`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV).betale()
         val utbetaling = opprettUtbetaling(tidslinje)
         val annullering = annuller(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId()) ?: fail { "Kunne ikke annullere" }
         assertTrue(Utbetaling.kanForkastes(listOf(utbetaling), listOf(annullering)))
@@ -755,8 +724,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `kan forkaste utbetalt utbetaling dersom den er annullert`() {
-        val tidslinje = tidslinjeOf(16.AP, 32.NAV)
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 32.NAV).betale()
         val utbetaling = opprettUtbetaling(tidslinje.kutt(31.januar))
         val annullert = opprettUtbetaling(tidslinje.kutt(17.februar), tidligere = utbetaling).let {
             annuller(it, it.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
@@ -766,8 +734,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `går ikke videre når ett av to oppdrag er akseptert`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600)).betale()
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
         kvittèr(utbetaling)
         assertEquals(OVERFØRT, utbetaling.inspektør.tilstand)
@@ -775,8 +742,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `går videre når begge oppdragene er akseptert`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600)).betale()
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
         kvittèr(utbetaling)
         kvittèr(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId())
@@ -785,8 +751,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `utbetalingen er feilet dersom én av oppdragene er avvist 1`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600)).betale()
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
         kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), AVVIST)
         assertEquals(OVERFØRT, utbetaling.inspektør.tilstand)
@@ -794,8 +759,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `tar imot kvittering på det andre oppdraget selv om utbetalingen har feilet`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600)).betale()
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
         kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), AVVIST)
         kvittèr(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId(), AKSEPTERT)
@@ -806,8 +770,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `utbetalingen er feilet dersom én av oppdragene er avvist 2`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600)).betale()
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
         kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), AKSEPTERT)
         kvittèr(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId(), AVVIST)
@@ -816,16 +779,14 @@ internal class UtbetalingTest {
 
     @Test
     fun `delvis refusjon`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600)).betale()
         val utbetaling = opprettUtbetaling(tidslinje)
         assertTrue(utbetaling.harDelvisRefusjon())
     }
 
     @Test
     fun `annullere delvis refusjon`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600)).betale()
         val utbetaling = opprettUtbetaling(tidslinje)
         val annullering = annuller(utbetaling)
         no.nav.helse.testhelpers.assertNotNull(annullering)
@@ -835,8 +796,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `annullere på fagsystemId for personoppdrag`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0))
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0)).betale()
         val utbetaling = opprettUtbetaling(tidslinje)
         val annullering = annuller(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId())
         assertNull(annullering) { "Det er ikke støttet å annullere på personoppdrag sin fagsystemId pt. Annullering bør skje på utbetalingId" }
@@ -844,8 +804,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `annullere utbetaling med full refusjon, så null refusjon`() {
-        val tidslinje = tidslinjeOf(16.AP, 5.NAV, 10.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 5.NAV, 10.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600)).betale()
         val første = opprettUtbetaling(tidslinje.kutt(21.januar))
         val andre = opprettUtbetaling(tidslinje, første)
         val annullering = annuller(andre)
@@ -856,8 +815,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `null refusjon`() {
-        val tidslinje = tidslinjeOf(16.AP, 30.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0))
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 30.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0)).betale()
         val første = opprettUtbetaling(tidslinje.kutt(31.januar))
         val andre = opprettUtbetaling(tidslinje, første)
         assertFalse(første.harDelvisRefusjon())
@@ -914,8 +872,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `overføre utbetaling med delvis refusjon`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600))
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600)).betale()
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
         val hendelselogg = godkjenn(utbetaling)
         val utbetalingsbehov = hendelselogg.behov().filter { it.type == Behovtype.Utbetaling }
@@ -927,8 +884,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `overføre utbetaling med null refusjon`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0))
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0)).betale()
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
         val hendelselogg = godkjenn(utbetaling)
         val utbetalingsbehov = hendelselogg.behov().filter { it.type == Behovtype.Utbetaling }
@@ -941,9 +897,7 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(
             16.AP, 3.NAV, 5.NAV(1200, 50.0), 7.NAV,
             startDato = 1.januar(2020)
-        )
-
-        beregnUtbetalinger(tidslinje)
+        ).betale()
 
         val første = opprettUtbetaling(tidslinje.kutt(19.januar(2020)))
         val andre = opprettUtbetaling(tidslinje.kutt(24.januar(2020)), tidligere = første)
@@ -974,9 +928,7 @@ internal class UtbetalingTest {
             9.NAV,
             1.ARB,
             4.NAV(1200, refusjonsbeløp = 0.0)
-        )
-
-        beregnUtbetalinger(tidslinje)
+        ).betale()
 
         val første = opprettUtbetaling(tidslinje.kutt(26.januar))
         val andre = opprettUtbetaling(tidslinje.kutt(31.januar), tidligere = første)
@@ -1016,8 +968,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `serialiserer avstemmingsnøkkel som null når den ikke er satt`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000))
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000)).betale()
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
         assertNull(utbetaling.inspektør.avstemmingsnøkkel)
     }
@@ -1046,8 +997,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `simulerer ingen refusjon`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0))
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0)).betale()
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
         val simulering = opprettSimulering(
             utbetaling.inspektør.personOppdrag.fagsystemId(), Fagområde.Sykepenger, utbetaling.inspektør.utbetalingId, SimuleringResultat(
@@ -1062,8 +1012,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `simulerer full refusjon`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 1000))
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 1000)).betale()
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
         val simulering = opprettSimulering(
             utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), Fagområde.SykepengerRefusjon, utbetaling.inspektør.utbetalingId, SimuleringResultat(
@@ -1078,8 +1027,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `simulerer delvis refusjon`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 500))
-        beregnUtbetalinger(tidslinje)
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 500)).betale()
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
 
         val simuleringArbeidsgiver = opprettSimulering(
@@ -1116,13 +1064,8 @@ internal class UtbetalingTest {
             utbetalingId = utbetalingId
         )
 
-    private fun beregnUtbetalinger(tidslinje: Utbetalingstidslinje) = tidslinje.also {
-        Utbetalingstidslinje.periode(listOf(tidslinje)).forEach { dato ->
-            listOf(tidslinje).map { it[dato].økonomi }.also { økonomiList ->
-                økonomiList.betal()
-            }
-        }
-    }
+    private fun Utbetalingstidslinje.betale() = beregnUtbetalinger(this)
+    private fun beregnUtbetalinger(tidslinje: Utbetalingstidslinje) = Utbetalingstidslinje.betale(listOf(tidslinje)).single()
 
     private fun opprettGodkjentUtbetaling(
         tidslinje: Utbetalingstidslinje,

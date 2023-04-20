@@ -52,10 +52,14 @@ class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Collection<
             begrunnelse: Begrunnelse
         ) = tidslinjer.flatMap { it.subset(periode) }.mapNotNull { it.erAvvistMed(begrunnelse) }
 
+        fun betale(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
+            return Utbetalingsdag.betale(tidslinjer)
+        }
+
         fun ferdigUtbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) = Utbetalingstidslinje(utbetalingsdager.toMutableList())
     }
 
-    internal fun er6GBegrenset(): Boolean {
+    fun er6GBegrenset(): Boolean {
         return utbetalingsdager.any {
             it.økonomi.er6GBegrenset()
         }

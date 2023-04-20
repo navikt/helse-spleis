@@ -260,13 +260,13 @@ internal class LagUtbetalingForRevurderingTest {
         utbetalt: Boolean = false,
         type: Utbetalingtype = Utbetalingtype.UTBETALING,
     ): Utbetaling {
-        beregnUtbetalinger(tidslinje)
+        val betaltTidslinje = beregnUtbetalinger(tidslinje)
         return Utbetaling.lagUtbetaling(
             tidligere?.let { listOf(tidligere) } ?: emptyList(),
             fødselsnummer,
             UUID.randomUUID(),
             orgnummer,
-            tidslinje,
+            betaltTidslinje,
             sisteDato.somPeriode(),
             aktivitetslogg,
             LocalDate.MAX,
@@ -333,7 +333,8 @@ internal class LagUtbetalingForRevurderingTest {
         )
     }
 
-    private fun beregnUtbetalinger(tidslinje: Utbetalingstidslinje) = tidslinje.also { MaksimumUtbetalingFilter().betal(listOf(tidslinje), tidslinje.periode(), aktivitetslogg, MaskinellJurist()) }
+    private fun beregnUtbetalinger(tidslinje: Utbetalingstidslinje) =
+        MaksimumUtbetalingFilter().betal(listOf(tidslinje), tidslinje.periode(), aktivitetslogg, MaskinellJurist()).single()
 
     private fun vedtaksperiode(periode: Periode = 1.januar til 31.januar, organisasjonsnummer: String = ORGNUMMER): Vedtaksperiode {
         val søknad = søknad(periode)

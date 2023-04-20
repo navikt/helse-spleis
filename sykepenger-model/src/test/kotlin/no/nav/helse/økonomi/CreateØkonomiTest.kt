@@ -26,20 +26,10 @@ import org.junit.jupiter.api.assertThrows
 internal class CreateØkonomiTest {
 
     @Test
-    fun `betale uten inntekt gir 0 i beløp`() {
+    fun `kan ikke betale økonomi med kun grad`() {
         val data = sykdomstidslinjedag(79.5)
         createØkonomi(data).also { økonomi ->
-            listOf(økonomi).betal()
-            økonomi.accept(ØkonomiAsserter { grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, begrenset ->
-                assertEquals(79.5, grad)
-                assertEquals(0.0, arbeidsgiverRefusjonsbeløp)
-                assertEquals(0.0, dekningsgrunnlag)
-                assertEquals(0.0, aktuellDagsinntekt)
-                assertEquals(0.0, arbeidsgiverbeløp)
-                assertEquals(0.0, personbeløp)
-                assertNotNull(begrenset)
-                assertFalse(begrenset)
-            })
+            assertThrows<IllegalStateException> { listOf(økonomi).betal() }
         }
     }
 
