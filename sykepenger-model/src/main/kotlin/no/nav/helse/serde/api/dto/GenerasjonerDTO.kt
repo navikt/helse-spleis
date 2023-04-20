@@ -46,7 +46,9 @@ data class Utbetalingsinfo(
     val arbeidsgiverbeløp: Int? = null,
     val refusjonsbeløp: Int? = null,
     val totalGrad: Double? = null
-)
+) {
+    fun harUtbetaling() = personbeløp != null || arbeidsgiverbeløp != null
+}
 
 enum class Tidslinjeperiodetype {
     FØRSTEGANGSBEHANDLING,
@@ -349,7 +351,7 @@ data class BeregnetPeriode(
                 Utbetalingstatus.IkkeGodkjent -> Periodetilstand.RevurderingFeilet
                 Utbetalingstatus.Utbetalt -> when {
                     periodetilstand == Vedtaksperiode.AvventerRevurdering -> Periodetilstand.UtbetaltVenterPåAnnenPeriode
-                    avgrensetUtbetalingstidslinje.none { it.type == UtbetalingstidslinjedagType.NavDag } -> Periodetilstand.IngenUtbetaling
+                    avgrensetUtbetalingstidslinje.none { it.utbetalingsinfo()?.harUtbetaling() == true } -> Periodetilstand.IngenUtbetaling
                     else -> Utbetalt
                 }
                 Utbetalingstatus.Ubetalt -> when {

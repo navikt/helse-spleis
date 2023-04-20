@@ -2003,6 +2003,24 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `omgjøre kort periode til at nav utbetaler`() {
+        nyPeriode(4.januar til 20.januar)
+        håndterInntektsmelding(listOf(4.januar til 19.januar))
+
+        håndterOverstyrTidslinje(4.januar.til(19.januar).map { ManuellOverskrivingDag(it, Dagtype.SykedagNav, 100) })
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        assertEquals(1, generasjoner.size)
+        0.generasjon {
+            assertEquals(1, perioder.size)
+            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (4.januar til 20.januar) medTilstand Utbetalt
+        }
+    }
+
+    @Test
     fun `omgjøring av eldre kort periode`() {
         nyPeriode(5.januar til 19.januar, orgnummer = a1)
         nyttVedtak(1.mars, 31.mars, orgnummer = a1)
