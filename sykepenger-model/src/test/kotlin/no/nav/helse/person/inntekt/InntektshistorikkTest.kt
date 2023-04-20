@@ -1,7 +1,6 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -16,7 +15,6 @@ import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
-import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.somAnsattPerioder
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.testhelpers.assertNotNull
@@ -96,7 +94,7 @@ internal class InntektshistorikkTest {
 
     @Test
     fun `Inntekt fra inntektsmelding brukes til å beregne sykepengegrunnlaget`() {
-        inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, 1.januar, MaskinellJurist())
+        inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, 1.januar)
         assertEquals(1, inspektør.size)
         assertEquals(INNTEKT, historikk.avklarSykepengegrunnlag(
             1.januar,
@@ -107,16 +105,16 @@ internal class InntektshistorikkTest {
 
     @Test
     fun `Inntekt fra andre inntektsmelding overskriver inntekt fra første, gitt samme første fraværsdag`() {
-        inntektsmelding(førsteFraværsdag = 1.januar, beregnetInntekt = 30000.månedlig).addInntekt(historikk, 1.januar, MaskinellJurist())
-        inntektsmelding(førsteFraværsdag = 1.januar, beregnetInntekt = 29000.månedlig).addInntekt(historikk, 1.januar, MaskinellJurist())
-        inntektsmelding(førsteFraværsdag = 1.februar, beregnetInntekt = 31000.månedlig).addInntekt(historikk, 1.februar, MaskinellJurist())
+        inntektsmelding(førsteFraværsdag = 1.januar, beregnetInntekt = 30000.månedlig).addInntekt(historikk, 1.januar)
+        inntektsmelding(førsteFraværsdag = 1.januar, beregnetInntekt = 29000.månedlig).addInntekt(historikk, 1.januar)
+        inntektsmelding(førsteFraværsdag = 1.februar, beregnetInntekt = 31000.månedlig).addInntekt(historikk, 1.februar)
         assertEquals(29000.månedlig, historikk.avklarSykepengegrunnlag(1.januar, 1.januar, null)?.inspektør?.beløp)
         assertEquals(31000.månedlig, historikk.avklarSykepengegrunnlag(1.februar, 1.februar, null)?.inspektør?.beløp)
     }
 
     @Test
     fun `Inntekt fra inntektsmelding brukes ikke til å beregne sykepengegrunnlaget på annen dato`() {
-        inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, 1.januar, MaskinellJurist())
+        inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, 1.januar)
         assertEquals(1, inspektør.size)
         assertNull(historikk.avklarSykepengegrunnlag(2.januar, 2.januar, null))
     }
@@ -214,11 +212,11 @@ internal class InntektshistorikkTest {
 
     @Test
     fun `Inntekt for annen dato og samme kilde erstatter ikke eksisterende`() {
-        inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, 1.januar, MaskinellJurist())
+        inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, 1.januar)
         inntektsmelding(
             førsteFraværsdag = 2.januar,
             arbeidsgiverperioder = listOf(2.januar til 17.januar)
-        ).addInntekt(historikk, 1.januar, MaskinellJurist())
+        ).addInntekt(historikk, 1.januar)
         assertEquals(2, inspektør.size)
     }
 

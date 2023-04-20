@@ -26,7 +26,7 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
-import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
@@ -45,7 +45,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_REFUSJONSOPPLYSNINGE
 import no.nav.helse.person.Vedtaksperiode.Companion.feiletRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
-import no.nav.helse.person.Vedtaksperiode.Companion.skalHåndtere
 import no.nav.helse.person.Vedtaksperiode.Companion.sykefraværstilfelle
 import no.nav.helse.person.Vedtaksperiode.Companion.trengerInntektsmelding
 import no.nav.helse.person.Vedtaksperiode.Companion.venter
@@ -505,41 +504,13 @@ internal class Arbeidsgiver private constructor(
         val dager = DagerFraInntektsmelding(inntektsmelding)
         håndter(inntektsmelding) { håndter(dager) }
 
-        val inntektOgRefusjon = inntektsmelding.inntektOgRefusjon()
-        val vedtaksperiodeSomSkalHåndtereInntektOgRefusjon = vedtaksperioder.skalHåndtere(inntektOgRefusjon)
-        val inntektOgRefusjonHåndteres = vedtaksperiodeSomSkalHåndtereInntektOgRefusjon != null
+        addInntektsmelding(inntektsmelding, jurist)
 
-        vedtaksperiodeSomSkalHåndtereInntektOgRefusjon?.also { vedtaksperiode ->
-            vedtaksperiode.håndter(inntektOgRefusjon)
-            // En av vedtaksperiodene har håndtert inntekt og refusjon
-            // vi må informere de andre vedtaksperiodene på arbeidsgiveren som berøres av dette
-            håndtertInntektPåSkjæringstidspunkt(vedtaksperiode, inntektOgRefusjon)
-        }
+        inntektsmelding.ikkeHåndert(person, sykmeldingsperioder, dager)
 
-        if (dager.noenDagerHåndtert() || inntektOgRefusjonHåndteres) return
-        inntektsmeldingIkkeHåndtert(inntektsmelding)
     }
 
-    private fun håndtertInntektPåSkjæringstidspunkt(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
-        finnSammenhengendeVedtaksperioder(vedtaksperiode).forEach {
-            it.håndtertInntektPåSkjæringstidspunktet(vedtaksperiode, inntektOgRefusjon)
-        }
-    }
-
-    private fun inntektsmeldingIkkeHåndtert(inntektsmelding: Inntektsmelding) {
-        inntektsmelding.info("Inntektsmelding ikke håndtert")
-        val overlappendeSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(inntektsmelding)
-        if (overlappendeSykmeldingsperioder.isNotEmpty()) {
-            person.emitInntektsmeldingFørSøknadEvent(inntektsmelding, overlappendeSykmeldingsperioder, organisasjonsnummer)
-            return inntektsmelding.info("Inntektsmelding overlapper med sykmeldingsperioder $overlappendeSykmeldingsperioder")
-        }
-        person.emitInntektsmeldingIkkeHåndtert(inntektsmelding, organisasjonsnummer)
-    }
-
-    private fun håndter(
-        hendelse: UtbetalingshistorikkEtterInfotrygdendring,
-        infotrygdhistorikk: Infotrygdhistorikk
-    ) {
+    private fun håndter(hendelse: UtbetalingshistorikkEtterInfotrygdendring, infotrygdhistorikk: Infotrygdhistorikk) {
         håndter(hendelse) { håndter(hendelse, infotrygdhistorikk) }
     }
 
@@ -808,15 +779,21 @@ internal class Arbeidsgiver private constructor(
         return sammenhengendePerioder
     }
 
-    internal fun addInntektsmelding(
-        skjæringstidspunkt: LocalDate,
+    private fun addInntektsmelding(
         inntektsmelding: Inntektsmelding,
         subsumsjonObserver: SubsumsjonObserver
-    ): InntektsmeldingInfo {
-        val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
-        if (førsteFraværsdag != null) inntektsmelding.addInntekt(inntektshistorikk, førsteFraværsdag, subsumsjonObserver)
+    ) {
+        val (inntektsdato, lagtTilNå) = inntektsmelding.addInntekt(inntektshistorikk, subsumsjonObserver)
         inntektsmelding.cacheRefusjon(refusjonshistorikk)
-        return inntektsmeldingInfo.opprett(skjæringstidspunkt, inntektsmelding)
+        val sykdomstidslinjeperiode = sykdomstidslinje().periode()
+        if (sykdomstidslinjeperiode != null && inntektsdato !in sykdomstidslinjeperiode)
+            return inntektsmelding.info("Lagrer ikke inntekt på skjæringstidspunkt fordi inntektdato er oppgitt til å være utenfor den perioden arbeidsgiver har sykdom for")
+        val skjæringstidspunkt = person.skjæringstidspunkt(inntektsdato.somPeriode())
+        finnAlternativInntektsdato(inntektsdato, skjæringstidspunkt)?.let {
+            inntektsmelding.addInntekt(inntektshistorikk, it)
+        }
+        if (lagtTilNå) person.nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt, inntektsmelding, subsumsjonObserver)
+        vedtaksperioder.forEach { it.håndtertInntektPåSkjæringstidspunktet(skjæringstidspunkt, inntektsmelding) }
     }
 
     internal fun lagreTidsnærInntektsmelding(
@@ -905,7 +882,10 @@ internal class Arbeidsgiver private constructor(
         return sykdomstidslinje().subset(førstePeriodeMedUtbetaling.periode().oppdaterFom(skjæringstidspunkt)).sisteSkjæringstidspunkt()
     }
 
-    private fun skjæringstidspunkt(periode: Periode) = person.skjæringstidspunkt(organisasjonsnummer, sykdomstidslinje(), periode)
+    private fun finnAlternativInntektsdato(inntektsdato: LocalDate, skjæringstidspunkt: LocalDate): LocalDate? {
+        if (inntektsdato <= skjæringstidspunkt) return null
+        return sykdomstidslinje().sisteSkjæringstidspunktTidligereEnn(inntektsdato)?.takeUnless { it == inntektsdato }
+    }
 
     internal fun builder(
         regler: ArbeidsgiverRegler,

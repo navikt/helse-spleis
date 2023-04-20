@@ -19,9 +19,10 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
         visitor.postVisitInntekthistorikk(this)
     }
 
-    internal fun leggTil(inntekt: Inntektsmelding) {
-        if (historikk.any { !it.kanLagres(inntekt) }) return
+    internal fun leggTil(inntekt: Inntektsmelding): Boolean {
+        if (historikk.any { !it.kanLagres(inntekt) }) return false
         historikk.add(0, inntekt)
+        return true
     }
 
     internal fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?, skattSykepengegrunnlag: SkattSykepengegrunnlag?): Inntektsopplysning? =

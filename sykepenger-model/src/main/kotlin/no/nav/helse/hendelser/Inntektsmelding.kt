@@ -10,10 +10,12 @@ import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companio
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.refusjonshistorikkRefusjon
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
-import no.nav.helse.hendelser.inntektsmelding.InntektOgRefusjonFraInntektsmelding
+import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.InntektsmeldingInfo
+import no.nav.helse.person.Person
+import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_2
@@ -133,23 +135,17 @@ class Inntektsmelding(
         return arbeidsgiverperiode == null || førsteFraværsdag > arbeidsgiverperiode.endInclusive.nesteDag
     }
 
-    internal fun validerArbeidsgiverperiode(
-        arbeidsgiverperiode: Arbeidsgiverperiode?
-    ): IAktivitetslogg {
+    internal fun validerArbeidsgiverperiode(periode: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?): IAktivitetslogg {
+        if (!skalValideresAv(periode)) return this
         if (arbeidsgiverperiode != null) validerArbeidsgiverperiode(arbeidsgiverperiode)
         if (arbeidsgiverperioder.isEmpty()) info("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode")
         validerØvrig()
         return this
     }
 
-    internal fun validerInntektOgRefusjon(
-        periode: Periode,
-        skjæringstidspunkt: LocalDate
-    ): IAktivitetslogg {
-        validerFørsteFraværsdag(skjæringstidspunkt)
-        refusjon.valider(this, periode, beregnetInntekt)
-        validerØvrig()
-        return this
+    private fun skalValideresAv(periode: Periode): Boolean {
+        if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) return førsteFraværsdag in periode
+        return arbeidsgiverperioder.periode()?.overlapperMed(periode) == true
     }
 
     private fun validerØvrig() {
@@ -165,32 +161,20 @@ class Inntektsmelding(
         throw IllegalStateException("Inntektsmeldingen håndteres og valideres oppdelt.")
     }
 
-    private fun validerFørsteFraværsdag(skjæringstidspunkt: LocalDate) {
-        if (førsteFraværsdag == null || førsteFraværsdag == skjæringstidspunkt) return
-        varsel(RV_IM_2)
-    }
-
     private fun validerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode) {
-        if (arbeidsgiverperiode.sammenlign(arbeidsgiverperioder)) {
-            return
-        }
+        if (arbeidsgiverperiode.sammenlign(arbeidsgiverperioder)) return
         varsel(RV_IM_3)
     }
 
-    private var inntektLagret = false
+    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, alternativInntektsdato: LocalDate) {
+        if (!inntektshistorikk.leggTil(Inntektsmelding(alternativInntektsdato, meldingsreferanseId(), beregnetInntekt))) return
+        info("Lagrer inntekt på alternativ inntektsdato $alternativInntektsdato")
+    }
 
-    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, førsteFraværsdagFraSpleis: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
-        if (inntektLagret) return
-        inntektLagret = true
-
-        val inntektsdato = if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) minOf(førsteFraværsdagFraSpleis, førsteFraværsdag) else arbeidsgiverperioder.maxOf { it.start }
-        if (inntektsdato != førsteFraværsdag) {
-            varsel(RV_IM_2)
-        }
-
+    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, subsumsjonObserver: SubsumsjonObserver): Pair<LocalDate, Boolean> {
         val (årligInntekt, dagligInntekt) = beregnetInntekt.reflection { årlig, _, daglig, _ -> årlig to daglig }
         subsumsjonObserver.`§ 8-10 ledd 3`(årligInntekt, dagligInntekt)
-        inntektshistorikk.leggTil(Inntektsmelding(inntektsdato, meldingsreferanseId(), beregnetInntekt))
+        return inntektsdato to inntektshistorikk.leggTil(Inntektsmelding(inntektsdato, meldingsreferanseId(), beregnetInntekt))
     }
 
     internal fun cacheRefusjon(refusjonshistorikk: Refusjonshistorikk) {
@@ -198,12 +182,16 @@ class Inntektsmelding(
     }
 
     internal fun inntektsmeldingsinfo() = InntektsmeldingInfo(id = meldingsreferanseId(), arbeidsforholdId = arbeidsforholdId)
+    private var håndtertInntekt = false
+    private val inntektsdato = if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) førsteFraværsdag else arbeidsgiverperioder.maxOf { it.start }
 
-    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) =
-        hendelseIder.add(Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId()))
+    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>): Boolean {
+        håndtertInntekt = true
+        return hendelseIder.add(Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId()))
+    }
+
 
     internal fun nyeArbeidsgiverInntektsopplysninger(builder: ArbeidsgiverInntektsopplysningerOverstyringer, skjæringstidspunkt: LocalDate) {
-        val inntektsdato = if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) førsteFraværsdag else arbeidsgiverperioder.maxOf { it.start }
         val refusjonsopplysninger = if (builder.ingenRefusjonsopplysninger(organisasjonsnummer)) {
             val refusjonshistorikk = Refusjonshistorikk()
             refusjon.cacheRefusjon(refusjonshistorikk, meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
@@ -232,10 +220,12 @@ class Inntektsmelding(
             return endringerIRefusjon.refusjonshistorikkRefusjon(meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, opphørsdato).refusjonsopplysninger()
         }
 
+
         class EndringIRefusjon(
             private val beløp: Inntekt,
             private val endringsdato: LocalDate
         ) {
+
 
             internal companion object {
 
@@ -244,7 +234,6 @@ class Inntektsmelding(
 
                 internal fun List<EndringIRefusjon>.minOf(opphørsdato: LocalDate?) =
                     (map { it.endringsdato } + opphørsdato).filterNotNull().minOrNull()
-
                 internal fun List<EndringIRefusjon>.refusjonshistorikkRefusjon(
                     meldingsreferanseId: UUID,
                     førsteFraværsdag: LocalDate?,
@@ -299,7 +288,6 @@ class Inntektsmelding(
 
         private fun opphørerRefusjon(periode: Periode) =
             opphørsdato?.let { it in periode } ?: false
-
         private fun endrerRefusjon(periode: Periode) =
             endringerIRefusjon.endrerRefusjon(periode)
         internal fun cacheRefusjon(
@@ -312,12 +300,19 @@ class Inntektsmelding(
         }
     }
 
-    internal fun inntektOgRefusjon(): InntektOgRefusjonFraInntektsmelding {
-        return InntektOgRefusjonFraInntektsmelding(this, førsteFraværsdag, arbeidsgiverperioder)
-    }
-
     internal fun overlappendeSykmeldingsperioder(perioder: List<Periode>): List<Periode> {
         if (overlappsperiode == null) return emptyList()
         return perioder.mapNotNull { periode -> periode.overlappendePeriode(overlappsperiode) }
+    }
+
+    internal fun ikkeHåndert(person: Person, sykmeldingsperioder: Sykmeldingsperioder, dager: DagerFraInntektsmelding) {
+        if (håndtertInntekt || dager.noenDagerHåndtert()) return
+        info("Inntektsmelding ikke håndtert")
+        val overlappendeSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(this)
+        if (overlappendeSykmeldingsperioder.isNotEmpty()) {
+            person.emitInntektsmeldingFørSøknadEvent(this, overlappendeSykmeldingsperioder, organisasjonsnummer)
+            return info("Inntektsmelding overlapper med sykmeldingsperioder $overlappendeSykmeldingsperioder")
+        }
+        person.emitInntektsmeldingIkkeHåndtert(this, organisasjonsnummer)
     }
 }

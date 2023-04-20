@@ -119,13 +119,9 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `arbeidsgiverperiode med brudd i helg`() {
-        håndterSykmelding(Sykmeldingsperiode(4.januar, 5.januar))
         håndterSøknad(Sykdom(4.januar, 5.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(8.januar, 12.januar))
         håndterSøknad(Sykdom(8.januar, 12.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(13.januar, 19.januar))
         håndterSøknad(Sykdom(13.januar, 19.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 1.februar))
         håndterSøknad(Sykdom(20.januar, 1.februar, 100.prosent))
 
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)

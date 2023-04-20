@@ -3,11 +3,11 @@ package no.nav.helse.hendelser.inntektsmelding
 import java.time.LocalDate
 import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -39,7 +39,7 @@ internal class DagerFraInntektsmelding(
         val oppdatertPeriode = inntektsmelding.sykdomstidslinje().periode() ?: return
         if (opprinneligPeriode == oppdatertPeriode) return
         val arbeidsdagerFør = oppdatertPeriode - opprinneligPeriode
-        arbeidsdager.addAll(arbeidsdagerFør)
+        if (!arbeidsdager.addAll(arbeidsdagerFør)) return
         gjenståendeDager.addAll(arbeidsdagerFør)
     }
 
@@ -62,17 +62,33 @@ internal class DagerFraInntektsmelding(
 
     internal fun harBlittHåndtertAv(periode: Periode) = håndterteDager.any { it in periode }
 
-    internal fun håndter(periode: Periode, arbeidsgiverperiode: () -> Arbeidsgiverperiode?, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Sykdomstidslinje): Sykdomstidslinje? {
+    internal fun håndter(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Sykdomstidslinje): Sykdomstidslinje? {
         val overlappendeDager = overlappendeDager(periode).takeUnless { it.isEmpty() } ?: return null
         val arbeidsgiverSykedomstidslinje = oppdaterSykdom(BitAvInntektsmelding(inntektsmelding, overlappendeDager.omsluttendePeriode!!))
         gjenståendeDager.removeAll(overlappendeDager)
-        if (gjenståendeDager.isEmpty()) inntektsmelding.validerArbeidsgiverperiode(arbeidsgiverperiode())
         return arbeidsgiverSykedomstidslinje.subset(periode)
     }
 
-    internal fun valider(arbeidsgiverperiode: Arbeidsgiverperiode?) {
-        if (gjenståendeDager.isEmpty()) return
-        inntektsmelding.validerArbeidsgiverperiode(arbeidsgiverperiode)
+    internal fun validerHvis(periode: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?) {
+        // dersom vedtaksperioden håndterer dagene skal vi bare validere dersom gjenstående dager er tom,
+        // dette for å unngå at vi validerer/sammenligner arbeidsgiverperioder som fortsatt mangler grunnlag i beregningen
+        if (gjenståendeDager.isNotEmpty()) return
+        inntektsmelding.validerArbeidsgiverperiode(periode, arbeidsgiverperiode)
+    }
+
+    internal fun valider(periode: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?) {
+        // dersom vedtaksperioden håndterer dagene skal vi bare validere dersom gjenstående dager er tom,
+        // dette for å unngå at vi validerer/sammenligner arbeidsgiverperioder som fortsatt mangler grunnlag i beregningen
+        inntektsmelding.validerArbeidsgiverperiode(periode, arbeidsgiverperiode)
+    }
+
+    internal fun validerFeilTilVarsler(periode: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?) {
+        // dersom vedtaksperioden håndterer dagene skal vi bare validere dersom gjenstående dager er tom,
+        // dette for å unngå at vi validerer/sammenligner arbeidsgiverperioder som fortsatt mangler grunnlag i beregningen
+        if (gjenståendeDager.isNotEmpty()) return
+        FunksjonelleFeilTilVarsler.wrap(inntektsmelding) {
+            inntektsmelding.validerArbeidsgiverperiode(periode, arbeidsgiverperiode)
+        }
     }
 
     internal fun noenDagerHåndtert() = håndterteDager.isNotEmpty()

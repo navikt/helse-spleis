@@ -186,7 +186,7 @@ internal fun AbstractPersonTest.assertLogiskFeil(severe: String, vararg filtre: 
 
 internal fun Aktivitetslogg.assertInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {
     val info = collectInfo(*filtre)
-    assertTrue(info.contains(forventet), "fant ikke ett tilfelle av info. Info:\n${info.joinToString("\n")}")
+    assertTrue(info.contains(forventet), "fant ikke ett tilfelle av infomelding <$forventet>. Info:\n${info.joinToString("\n")}")
 }
 
 internal fun Aktivitetslogg.assertIngenInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {

@@ -460,11 +460,12 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingMedValidering(
     førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+    harOpphørAvNaturalytelser: Boolean = false,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
 ): UUID {
     assertIkkeEtterspurt(Inntektsmelding::class, Behovtype.InntekterForSammenligningsgrunnlag, vedtaksperiodeIdInnhenter, orgnummer)
-    return håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, beregnetInntekt = beregnetInntekt, refusjon, orgnummer = orgnummer, fnr = fnr)
+    return håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, beregnetInntekt = beregnetInntekt, refusjon, harOpphørAvNaturalytelser = harOpphørAvNaturalytelser, orgnummer = orgnummer, fnr = fnr)
 }
 
 internal fun AbstractEndToEndTest.håndterInntektsmelding(
@@ -510,7 +511,7 @@ private fun AbstractEndToEndTest.håndterInntektsmeldingReplay(
 }
 
 private fun AbstractEndToEndTest.håndterInntektsmeldingReplayUtført(vedtaksperiodeId: UUID, orgnummer: String) {
-    person.håndter(InntektsmeldingReplayUtført(UUID.randomUUID(), UNG_PERSON_FNR_2018.toString(), "aktør", orgnummer, vedtaksperiodeId))
+    InntektsmeldingReplayUtført(UUID.randomUUID(), UNG_PERSON_FNR_2018.toString(), "aktør", orgnummer, vedtaksperiodeId).håndter(Person::håndter)
 }
 
 internal fun YearMonth.lønnsinntekt(inntekt: Inntekt = INNTEKT) =

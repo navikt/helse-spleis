@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
-import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.inspectors.inspektør
@@ -14,6 +13,9 @@ import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
+import no.nav.helse.spleis.e2e.assertIngenFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertIngenVarsel
+import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
@@ -209,9 +211,9 @@ internal class InntektsmeldingTest {
     fun `inntektsmelding uten arbeidsgiverperiode med førsteFraværsdag satt`() {
         inntektsmelding(emptyList(), førsteFraværsdag = 1.januar)
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
-        inntektsmelding.validerArbeidsgiverperiode(null)
-        aktivitetslogg.assertInfo("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode")
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
+        inntektsmelding.validerArbeidsgiverperiode(1.januar til 31.januar, null)
+        aktivitetslogg.assertIngenVarsler()
+        aktivitetslogg.assertIngenFunksjonellFeil()
         assertEquals(1.januar til 1.januar, inntektsmelding.periode())
         assertNull(nyTidslinje.periode()?.start)
         assertNull(nyTidslinje.periode()?.endInclusive)
@@ -221,8 +223,7 @@ internal class InntektsmeldingTest {
     fun `inntektsmelding uten arbeidsgiverperiode med førsteFraværsdag & begrunnelseForReduksjonEllerIkkeUtbetalt satt`() {
         inntektsmelding(emptyList(), førsteFraværsdag = 1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre")
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
-        inntektsmelding.validerArbeidsgiverperiode(null)
-        aktivitetslogg.assertInfo("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode")
+        inntektsmelding.validerArbeidsgiverperiode(1.januar til 31.januar, null)
         aktivitetslogg.assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: FiskerMedHyre")
         aktivitetslogg.assertFunksjonellFeil("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden")
         assertNull(nyTidslinje.periode()?.start)
@@ -269,20 +270,14 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `arbeidgiverperioden kan ha overlappende perioder`() {
-        inntektsmelding(
-            arbeidsgiverperioder = listOf(
-                Periode(1.januar, 2.januar), Periode(4.januar, 5.januar), Periode(3.januar, 4.januar)
-            )
-        )
-        inntektsmelding.validerArbeidsgiverperiode(null)
-        assertFalse(inntektsmelding.harFunksjonelleFeilEllerVerre())
+        inntektsmelding(listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar), Periode(3.januar, 4.januar)))
+        inntektsmelding.validerArbeidsgiverperiode(1.januar til 6.januar, null)
+        aktivitetslogg.assertIngenFunksjonellFeil()
     }
 
     @Test
     fun `helg i opphold i arbeidsgiverperioden skal være helgedager`() {
-        inntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(1.januar, 4.januar), Periode(9.januar, 10.januar))
-        )
+        inntektsmelding(listOf(Periode(1.januar, 4.januar), Periode(9.januar, 10.januar)))
 
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[1.januar]::class)
@@ -311,7 +306,7 @@ internal class InntektsmeldingTest {
             listOf(Periode(1.januar, 10.januar)),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre"
         )
-        inntektsmelding.validerArbeidsgiverperiode(null)
+        inntektsmelding.validerArbeidsgiverperiode(1.januar til 12.januar, null)
         aktivitetslogg.assertFunksjonellFeil("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden")
         aktivitetslogg.assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: FiskerMedHyre")
     }
@@ -322,7 +317,7 @@ internal class InntektsmeldingTest {
             listOf(Periode(1.januar, 10.januar)),
             begrunnelseForReduksjonEllerIkkeUtbetalt = ""
         )
-        assertFalse(inntektsmelding.validerArbeidsgiverperiode(null).harFunksjonelleFeilEllerVerre())
+        assertFalse(inntektsmelding.validerArbeidsgiverperiode(1.januar til 10.januar, null).harFunksjonelleFeilEllerVerre())
     }
 
     @Test
@@ -434,14 +429,14 @@ internal class InntektsmeldingTest {
     @Test
     fun `førsteFraværsdag kan være null ved lagring av inntekt`() {
         inntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = null)
-        assertDoesNotThrow { inntektsmelding.addInntekt(Inntektshistorikk(), 1.januar, MaskinellJurist()) }
+        assertDoesNotThrow { inntektsmelding.addInntekt(Inntektshistorikk(), 1.januar) }
     }
 
     @Test
     fun `lagrer inntekt for periodens skjæringstidspunkt dersom det er annerledes enn inntektmeldingens skjæringstidspunkt`() {
         inntektsmelding(listOf(Periode(1.januar, 16.januar)), refusjonBeløp = 2000.månedlig, beregnetInntekt = 2000.månedlig, førsteFraværsdag = 3.februar)
         val inntektshistorikk = Inntektshistorikk()
-        inntektsmelding.addInntekt(inntektshistorikk, 1.februar, MaskinellJurist())
+        inntektsmelding.addInntekt(inntektshistorikk, 1.februar)
         assertEquals(2000.månedlig, inntektshistorikk.avklarSykepengegrunnlag(1.februar, 1.februar, null)?.inspektør?.beløp)
         assertNull(inntektshistorikk.avklarSykepengegrunnlag(3.februar, 3.februar, null))
     }
@@ -449,7 +444,7 @@ internal class InntektsmeldingTest {
     @Test
     fun `uenige om arbeidsgiverperiode`() {
         inntektsmelding(listOf(2.januar til 17.januar))
-        inntektsmelding.validerArbeidsgiverperiode(Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply { kjentDag(17.januar) })
+        inntektsmelding.validerArbeidsgiverperiode(1.januar til 17.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply { kjentDag(17.januar) })
         aktivitetslogg.assertVarsel(RV_IM_3)
     }
 

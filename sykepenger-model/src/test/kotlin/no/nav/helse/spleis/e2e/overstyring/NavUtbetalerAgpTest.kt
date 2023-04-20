@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.overstyring
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
@@ -12,8 +11,8 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -26,37 +25,30 @@ import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
-import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 
 internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
 
     @Test
     fun `nav utbetaler en hullete arbeidsgiverperiode`() {
-        nyPeriode(1.januar til 21.januar)
-        håndterInntektsmelding(listOf(1.januar til 5.januar, 10.januar til 20.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn", refusjon = Inntektsmelding.Refusjon(INGEN, null))
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        assertForventetFeil(
-            forklaring = "Den hullete arbeidsgiverperioden gir egentlig perioden to skjæringstidspunkter: Fant ikke vilkårsgrunnlag for 2018-01-01. Må ha et vilkårsgrunnlag for å legge til utbetalingsopplysninger",
-            nå = {
-                val msg = assertThrows<IllegalStateException> { håndterYtelser(1.vedtaksperiode) }.message
-                assertNotNull(msg)
-                assertTrue(msg.contains("Fant ikke vilkårsgrunnlag for 2018-01-01. Må ha et vilkårsgrunnlag for å legge til utbetalingsopplysninger"))
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-            },
-            ønsket = {
-                assertDoesNotThrow { håndterYtelser(1.vedtaksperiode) }
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
-            }
-        )
+        val søknad = håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
+        val im = håndterInntektsmelding(listOf(1.januar til 5.januar, 10.januar til 20.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn", refusjon = Inntektsmelding.Refusjon(INGEN, null))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertEquals(listOf(
+            Dokumentsporing.søknad(søknad),
+            Dokumentsporing.inntektsmeldingDager(im),
+            Dokumentsporing.inntektsmeldingInntekt(im)
+        ), inspektør.hendelser(1.vedtaksperiode))
+        assertEquals(listOf(
+            im to 1.vedtaksperiode.id(ORGNUMMER),
+            im to 1.vedtaksperiode.id(ORGNUMMER)
+        ), observatør.inntektsmeldingHåndtert)
+        assertTrue(observatør.inntektsmeldingIkkeHåndtert.isEmpty())
     }
 
     @Test

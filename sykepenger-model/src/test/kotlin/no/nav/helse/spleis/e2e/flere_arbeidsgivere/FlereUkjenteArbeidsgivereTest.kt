@@ -167,16 +167,6 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
 
         overstyringerIgangsatt[1].also { event ->
             assertEquals(PersonObserver.OverstyringIgangsatt(
-                årsak = "NY_PERIODE",
-                skjæringstidspunkt = 1.januar,
-                periodeForEndring = 1.mars til 20.mars,
-                berørtePerioder = listOf(
-                    VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
-                )
-            ), event)
-        }
-        overstyringerIgangsatt[2].also { event ->
-            assertEquals(PersonObserver.OverstyringIgangsatt(
                 årsak = "KORRIGERT_INNTEKTSMELDING",
                 skjæringstidspunkt = 1.januar,
                 periodeForEndring = 1.mars til 1.mars,
@@ -189,9 +179,20 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             ), event)
         }
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
-        assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+        overstyringerIgangsatt[2].also { event ->
+            assertEquals(PersonObserver.OverstyringIgangsatt(
+                årsak = "NY_PERIODE",
+                skjæringstidspunkt = 1.januar,
+                periodeForEndring = 1.mars til 20.mars,
+                berørtePerioder = listOf(
+                    VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
+                )
+            ), event)
+        }
+
+        assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
+        assertTilstander(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }

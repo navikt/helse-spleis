@@ -515,9 +515,6 @@ class Person private constructor(
     internal fun nyesteIdForVilkårsgrunnlagHistorikk() =
         vilkårsgrunnlagHistorikk.sisteId()
 
-    internal fun skjæringstidspunkt(orgnummer: String, sykdomstidslinje: Sykdomstidslinje, periode: Periode) =
-        infotrygdhistorikk.skjæringstidspunkt(orgnummer, periode, sykdomstidslinje)
-
     internal fun skjæringstidspunkt(periode: Periode) =
         Arbeidsgiver.skjæringstidspunkt(arbeidsgivere, periode, infotrygdhistorikk)
 

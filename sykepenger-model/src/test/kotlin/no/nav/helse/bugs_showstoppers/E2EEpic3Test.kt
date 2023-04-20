@@ -306,19 +306,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `periode som begynner på siste dag i arbeidsgiverperioden`() {
-        håndterSykmelding(Sykmeldingsperiode(3.februar(2020), 17.februar(2020)))
-        håndterSykmelding(Sykmeldingsperiode(18.februar(2020), 1.mars(2020)))
-
-        håndterSøknad(Sykdom(3.februar(2020), 17.februar(2020), 100.prosent))
-        håndterSøknad(Sykdom(18.februar(2020), 1.mars(2020), 100.prosent))
-
-        håndterInntektsmelding(listOf(3.februar(2020) til 18.februar(2020)), førsteFraværsdag = 3.januar(2020))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-    }
-
-    @Test
     fun `Inntektsmelding, etter søknad, overskriver sykedager før arbeidsgiverperiode med arbeidsdager`() {
         håndterSykmelding(Sykmeldingsperiode(7.januar, 28.januar))
         håndterSøknad(Sykdom(7.januar, 28.januar, 100.prosent))

@@ -22,9 +22,13 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_1
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -593,6 +597,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         )
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT+100.månedlig,
             refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -604,15 +609,14 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
         val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.januar)
         assertNotNull(vilkårsgrunnlag)
-        assertEquals(INNTEKT/2, vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(
-            ORGNUMMER).inspektør.refusjonsopplysninger.inspektør.refusjonsopplysninger.single().inspektør.beløp)
+        val inntektsopplysninger = vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(ORGNUMMER).inspektør
+        assertEquals(INNTEKT+100.månedlig, inntektsopplysninger.inntektsopplysning.inspektør.beløp)
+        assertEquals(INNTEKT/2, inntektsopplysninger.refusjonsopplysninger.inspektør.refusjonsopplysninger.single().inspektør.beløp)
     }
 
     @Test
@@ -690,7 +694,9 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        assertVarsel(RV_IM_2, 1.vedtaksperiode.filter())
+        assertIngenVarsel(RV_IM_2, 1.vedtaksperiode.filter())
+        assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
+        assertVarsel(RV_RE_1, 1.vedtaksperiode.filter())
     }
 
     @Test
