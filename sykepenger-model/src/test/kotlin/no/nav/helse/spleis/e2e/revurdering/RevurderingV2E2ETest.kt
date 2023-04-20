@@ -33,6 +33,7 @@ import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_5
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_4
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -220,7 +221,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
         nyPeriode(1.mars til 31.mars)
         assertIngenVarsler(1.vedtaksperiode.filter())
-        assertIngenVarsler(2.vedtaksperiode.filter())
+        assertVarsel(RV_UT_23, 2.vedtaksperiode.filter())
         assertIngenVarsler(3.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
@@ -982,7 +983,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertTilstand(3.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertIngenVarsler(1.vedtaksperiode.filter())
         assertVarsel(RV_AY_5, 2.vedtaksperiode.filter())
-        assertIngenVarsler(3.vedtaksperiode.filter())
+        assertVarsel(RV_UT_23, 3.vedtaksperiode.filter())
     }
 
     @Test

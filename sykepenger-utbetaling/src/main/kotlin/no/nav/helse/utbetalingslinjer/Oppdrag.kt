@@ -17,6 +17,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.FEIL
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.kjedeSammenLinjer
@@ -89,6 +90,11 @@ class Oppdrag private constructor(
             erSimulert = erSimulert,
             simuleringsResultat = simuleringResultat
         )
+
+        internal fun List<Oppdrag>.valider(aktivitetslogg: IAktivitetslogg) {
+            if (all { it.nettoBeløp >= 0 }) return
+            aktivitetslogg.varsel(RV_UT_23)
+        }
     }
 
     private val overlapperiode get() = when {
