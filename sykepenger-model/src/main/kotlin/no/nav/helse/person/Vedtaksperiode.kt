@@ -1699,6 +1699,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) {
+                påminnelse.info("Mangler nødvendig inntekt ved tidligere beregnet sykepengegrunnlag")
+            }
             vedtaksperiode.person.gjenopptaBehandling(påminnelse)
         }
 
