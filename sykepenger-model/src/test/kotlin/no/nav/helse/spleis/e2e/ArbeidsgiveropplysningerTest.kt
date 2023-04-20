@@ -434,6 +434,20 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
     }
 
+    @Test
+    fun `Skal ikke sende ut forespørsel for en periode som allerede har mottatt inntektsmelding`() {
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        nyPeriode(1.januar til 31.januar)
+        assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+    }
+
+    @Test
+    fun `Skal sende ut forespørsel for en periode dersom inntektsmeldingReplay ikke bærer noen frukter`() {
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        nyPeriode(1.februar til 28.februar)
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+    }
+
     private fun gapHosÉnArbeidsgiver(refusjon: Inntektsmelding.Refusjon) {
         nyPeriode(1.januar til 31.januar, a1)
         nyPeriode(1.januar til 31.januar, a2)

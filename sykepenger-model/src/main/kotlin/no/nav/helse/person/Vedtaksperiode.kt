@@ -1559,9 +1559,6 @@ internal class Vedtaksperiode private constructor(
             tilstandsendringstidspunkt.plusDays(180)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if(Toggle.Splarbeidsbros.enabled && vedtaksperiode.forventerInntekt() && !vedtaksperiode.erForlengelse()) {
-                vedtaksperiode.trengerArbeidsgiveropplysninger()
-            }
             vedtaksperiode.trengerInntektsmeldingReplay()
             vedtaksperiode.trengerInntektsmelding()
         }
@@ -1644,6 +1641,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
+            if(Toggle.Splarbeidsbros.enabled && vedtaksperiode.forventerInntekt() && !vedtaksperiode.erForlengelse()) {
+                vedtaksperiode.trengerArbeidsgiveropplysninger()
+            }
             vurderOmKanGåVidere(vedtaksperiode, inntektsmeldingReplayUtført)
         }
 
