@@ -220,12 +220,6 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate) = this
             .all { arbeidsgiver -> arbeidsgiver.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt) }
 
-        internal fun Iterable<Arbeidsgiver>.harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg) = this
-            .all { arbeidsgiver -> arbeidsgiver.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, periode, hendelse) }
-
-        internal fun Iterable<Arbeidsgiver>.harTilstrekkeligInformasjonTilUtbetaling(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg) = this
-            .all { arbeidsgiver -> arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(skjæringstidspunkt, periode, hendelse) }
-
         internal fun Iterable<Arbeidsgiver>.trengerInntektsmelding(periode: Periode) = this
             .flatMap { it.vedtaksperioder }
             .filter { it.periode().overlapperMed(periode) }

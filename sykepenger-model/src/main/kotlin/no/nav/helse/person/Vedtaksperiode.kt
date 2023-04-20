@@ -106,7 +106,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
@@ -1306,19 +1305,21 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
-            if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode))
+            if (!harNødvendigInntektForVilkårsprøving(vedtaksperiode))
                 return INNTEKTSMELDING fordi MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
-            if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode, Aktivitetslogg(), arbeidsgivere)) {
+            if (!harNødvendigInntektForVilkårsprøving(vedtaksperiode, arbeidsgivere)) {
                 loggDersomStuckRevurdering(vedtaksperiode, arbeidsgivere)
                 return INNTEKTSMELDING fordi MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE
             }
+            if (arbeidsgivere.trengerInntektsmelding(vedtaksperiode.periode))
+                return INNTEKTSMELDING fordi MANGLER_REFUSJONSOPPLYSNINGER_PÅ_ANDRE_ARBEIDSGIVERE
             return null
         }
 
         private fun loggDersomStuckRevurdering(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) {
             val vilkårsgrunnlag = vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) ?: return
             val arbeidsgivereISykepengegrunnlag = arbeidsgivere.filter { vilkårsgrunnlag.inngårISykepengegrunnlaget(it.organisasjonsnummer()) }
-            if (harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode, arbeidsgivere = arbeidsgivereISykepengegrunnlag)) {
+            if (harNødvendigInntektForVilkårsprøving(vedtaksperiode, arbeidsgivere = arbeidsgivereISykepengegrunnlag)) {
                 sikkerlogg.info("Periode sitter fast i revurdering pga ny arbeidsgiver som ikke er i sykepengegrunnlaget. {}, {}", kv("vedtaksperiodeId", "${vedtaksperiode.id}"), kv("fødselsnummer", vedtaksperiode.fødselsnummer))
             }
         }
@@ -1327,23 +1328,22 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.vedtaksperiodeVenter(nestemann)
         }
 
-
-
         override fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgivere: Iterable<Arbeidsgiver>,
             hendelse: IAktivitetslogg
         ) {
-            if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode, hendelse))
-                return hendelse.info("Mangler nødvendig inntekt for vilkårsprøving eller refusjonsopplysninger og kan derfor ikke gjenoppta revurdering.")
-            if (!harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode, hendelse, arbeidsgivere))
-                return hendelse.info("En annen arbeidsgiver mangler nødvendig inntekt for vilkårsprøving eller refusjonsopplysninger og kan derfor ikke gjenoppta revurdering.")
-            if (arbeidsgivere.trengerInntektsmelding(vedtaksperiode.periode)) return hendelse.info("Mangler inntekt på andre arbeidsgivere")
+            if (!harNødvendigInntektForVilkårsprøving(vedtaksperiode))
+                return hendelse.info("Mangler nødvendig inntekt for vilkårsprøving og kan derfor ikke gjenoppta revurdering.")
+            if (!harNødvendigInntektForVilkårsprøving(vedtaksperiode, arbeidsgivere))
+                return hendelse.info("Mangler nødvendig inntekt for vilkårsprøving på annen arbeidsgiver og kan derfor ikke gjenoppta revurdering.")
+            if (arbeidsgivere.trengerInntektsmelding(vedtaksperiode.periode))
+                return hendelse.info("Trenger inntektsmelding for overlappende periode på annen arbeidsgiver og kan derfor ikke gjenoppta revurdering.")
             vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
             vedtaksperiode.arbeidsgiver.gjenopptaRevurdering(vedtaksperiode, hendelse)
         }
 
-        private fun harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg = Aktivitetslogg(), arbeidsgivere: Iterable<Arbeidsgiver> = listOf(vedtaksperiode.arbeidsgiver)): Boolean {
+        private fun harNødvendigInntektForVilkårsprøving(vedtaksperiode: Vedtaksperiode, arbeidsgivere: Iterable<Arbeidsgiver> = listOf(vedtaksperiode.arbeidsgiver)): Boolean {
             val skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt
             return arbeidsgivere.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt)
         }
@@ -1690,7 +1690,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgivere: Iterable<Arbeidsgiver>,
             hendelse: IAktivitetslogg
-        ) = tilstand(vedtaksperiode, arbeidsgivere, hendelse).gjenopptaBehandling(vedtaksperiode, hendelse)
+        ) = tilstand(vedtaksperiode, arbeidsgivere).gjenopptaBehandling(vedtaksperiode, hendelse)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
             super.håndter(vedtaksperiode, inntektOgRefusjon)
@@ -1713,8 +1713,7 @@ internal class Vedtaksperiode private constructor(
         }
         private fun tilstand(
             vedtaksperiode: Vedtaksperiode,
-            arbeidsgivere: Iterable<Arbeidsgiver>,
-            hendelse: IAktivitetslogg = Aktivitetslogg()
+            arbeidsgivere: Iterable<Arbeidsgiver>
         ) = when {
             arbeidsgivere.avventerSøknad(vedtaksperiode.periode) -> AvventerTidligereEllerOverlappendeSøknad
             !vedtaksperiode.forventerInntekt() -> ForventerIkkeInntekt
@@ -1771,12 +1770,7 @@ internal class Vedtaksperiode private constructor(
                 hendelse.info("Gjenopptar ikke behandling fordi minst én overlappende periode venter på nødvendig opplysninger fra arbeidsgiver")
             }
         }
-        private object ManglerNødvendigRefusjonsopplysninger: Tilstand {
-            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-                hendelse.funksjonellFeil(RV_RE_2)
-                vedtaksperiode.forkast(hendelse)
-            }
-        }
+
         private object KlarForVilkårsprøving: Tilstand {
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
                 vedtaksperiode.tilstand(hendelse, AvventerVilkårsprøving)
