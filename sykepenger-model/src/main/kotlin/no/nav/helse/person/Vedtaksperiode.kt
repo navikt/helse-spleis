@@ -1390,6 +1390,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (!påminnelse.skalReberegnes()) return
+            return vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.reberegning(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
+        }
+
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) =
             HJELP.utenBegrunnelse
 
