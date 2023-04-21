@@ -1057,6 +1057,13 @@ internal class Vedtaksperiode private constructor(
         val type: TilstandType
         val erFerdigBehandlet: Boolean get() = false
 
+        fun håndterRevurdering(hendelse: PersonHendelse, block: () -> Unit) { FunksjonelleFeilTilVarsler.wrap(hendelse, block) }
+        fun håndterFørstegangsbehandling(hendelse: PersonHendelse, vedtaksperiode: Vedtaksperiode, block: () -> Unit) {
+            if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode)) return block()
+            // Om førstegangsbehandling ikke kan forkastes (typisk Out of Order/ omgjøring av AUU) så håndteres det som om det er en revurdering
+            håndterRevurdering(hendelse, block)
+        }
+
         fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
         fun makstid(
@@ -1365,7 +1372,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
-            inntektOgRefusjon.wrap { vedtaksperiode.håndterInntektOgRefusjon(inntektOgRefusjon) }
+            håndterRevurdering(inntektOgRefusjon.inntektsmelding) { vedtaksperiode.håndterInntektOgRefusjon(inntektOgRefusjon)}
             vedtaksperiode.trengerIkkeInntektsmelding()
             vedtaksperiode.person.gjenopptaBehandling(inntektOgRefusjon)
         }
@@ -1477,7 +1484,7 @@ internal class Vedtaksperiode private constructor(
                 ytelser.info("Trenger å utføre vilkårsprøving før vi kan beregne utbetaling for revurderingen.")
             }
 
-            FunksjonelleFeilTilVarsler.wrap(ytelser) {
+            håndterRevurdering(ytelser) {
                 // beregningsperiode brukes for å avgjøre hvilke perioder vi skal -kreve- inntekt for
                 // beregningsperioder brukes for å lage varsel
                 val utvalg = beregningsperioder(person, vedtaksperiode)
@@ -1545,7 +1552,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            FunksjonelleFeilTilVarsler.wrap(vilkårsgrunnlag) { vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikkRevurdering) }
+            håndterRevurdering(vilkårsgrunnlag) { vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikkRevurdering) }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -1858,11 +1865,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.trengerYtelser(påminnelse)
         }
 
-        private fun wrapValidation(vedtaksperiode: Vedtaksperiode, arbeidsgiver: Arbeidsgiver, ytelser: Ytelser, block: () -> Unit) {
-            if (arbeidsgiver.kanForkastes(vedtaksperiode)) return block()
-            FunksjonelleFeilTilVarsler.wrap(ytelser, block)
-        }
-
         override fun håndter(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
@@ -1871,7 +1873,7 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk,
             arbeidsgiverUtbetalingerFun: (SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
         ) {
-            wrapValidation(vedtaksperiode, arbeidsgiver, ytelser) {
+            håndterFørstegangsbehandling(ytelser, vedtaksperiode) {
                 validation(ytelser) {
                     onValidationFailed {
                         if (!ytelser.harFunksjonelleFeilEllerVerre()) funksjonellFeil(RV_AY_10)
@@ -2017,7 +2019,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
-            FunksjonelleFeilTilVarsler.wrap(simulering) {
+            håndterRevurdering(simulering) {
                 vedtaksperiode.utbetalinger.valider(simulering)
             }
             if (!vedtaksperiode.utbetalinger.erKlarForGodkjenning()) return simulering.info("Kan ikke gå videre da begge oppdragene ikke er simulert.")

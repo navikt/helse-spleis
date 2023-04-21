@@ -3,7 +3,6 @@ package no.nav.helse.hendelser.inntektsmelding
 import java.time.LocalDate
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.førsteArbeidsdag
-import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -16,7 +15,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 
 internal class InntektOgRefusjonFraInntektsmelding(
-    private val inntektsmelding: Inntektsmelding,
+    internal val inntektsmelding: Inntektsmelding,
     private val førsteFraværsdag: LocalDate?,
     arbeidsgiverperioder: List<Periode>
 ): IAktivitetslogg by inntektsmelding {
@@ -45,8 +44,6 @@ internal class InntektOgRefusjonFraInntektsmelding(
 
     internal fun addInntektsmelding(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver, jurist: SubsumsjonObserver) =
         arbeidsgiver.addInntektsmelding(skjæringstidspunkt, inntektsmelding, jurist)
-
-    internal fun wrap(block: () -> Unit) = FunksjonelleFeilTilVarsler.wrap(inntektsmelding) { block() }
 
     private var håndtert: Boolean = false
     internal fun skalHåndteresAv(skjæringstidspunkt: LocalDate, periode: Periode, strategy: InntektOgRefusjonMatchingstrategi, forventerInntekt: () -> Boolean): Boolean {
@@ -117,15 +114,6 @@ internal class InntektOgRefusjonFraInntektsmelding(
             forskjøvetFørsteDagEtterArbeidsgiverperioden = periode.endInclusive.nesteDag
             return false
         }
-    }
-
-    internal inner class HarHåndtertDagerFraInntektsmeldingenStrategi(private val dagerFraInntektsmelding: DagerFraInntektsmelding) : InntektOgRefusjonMatchingstrategi {
-        // Denne er en slags fallback-strategi hvis ingen av de andre strategiene fungerer, for å beholde dagens oppførsel
-        override fun matcher(skjæringstidspunkt: LocalDate, periode: Periode, forventerInntekt: () -> Boolean): Boolean {
-            if (førsteFraværsdag?.isAfter(periode.endInclusive) == true) return false
-            return dagerFraInntektsmelding.harBlittHåndtertAv(periode) && forventerInntekt()
-        }
-
     }
 
     internal val strategier = listOf(
