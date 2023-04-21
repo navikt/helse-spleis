@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -21,15 +22,24 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_1
 import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.person.nullstillTilstandsendringer
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
@@ -197,27 +207,19 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar, orgnummer = a2)
         nyPeriode(1.mars til 31.mars, a1)
 
-        assertForventetFeil(
-            forklaring = "perioden i mars (2.vedtaksperiode for a1) har en ny arbeidsgiverperiode og skal vente på opplysninger fra AG",
-            nå = {
-                assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
-            },
-            ønsket = {
-                assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, orgnummer = a1)
 
-                assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
-                val actualForespurteOpplysninger =
-                    observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
-                val inntektsmeldingId = inspektør(a1).hendelseIder(1.vedtaksperiode.id(a1)).last()
-                val expectedForespurteOpplysninger = listOf(
-                    PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
-                    PersonObserver.Refusjon(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, INNTEKT_FLERE_AG))),
-                    PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
-                )
-                assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
-            }
+        val actualForespurteOpplysninger =
+            observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
+        val inntektsmeldingId = inspektør(a1).hendelseIder(1.vedtaksperiode.id(a1)).last()
+        val expectedForespurteOpplysninger = listOf(
+            PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
+            PersonObserver.Refusjon(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, INNTEKT_FLERE_AG))),
+            PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
         )
+        assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
     }
 
     @Test
@@ -286,28 +288,20 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar, orgnummer = a2)
         nyPeriode(1.mars til 31.mars, a1)
 
-        assertForventetFeil(
-            forklaring = "perioden i mars (2.vedtaksperiode for a1) har en ny arbeidsgiverperiode og skal vente på opplysninger fra AG",
-            nå = {
-                assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
-            },
-            ønsket = {
-                assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, orgnummer = a1)
 
-                assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-                val inntektsmeldingId = inspektør(a1).hendelseIder(1.vedtaksperiode.id(a1)).last()
-                val actualForespurtOpplysning =
-                    observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
+        assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        val inntektsmeldingId = inspektør(a1).hendelseIder(1.vedtaksperiode.id(a1)).last()
+        val actualForespurtOpplysning =
+            observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
 
-                val expectedForespurteOpplysninger = listOf(
-                    PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
-                    PersonObserver.Refusjon(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, INNTEKT_FLERE_AG))),
-                    PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
-                )
-
-                assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
-            }
+        val expectedForespurteOpplysninger = listOf(
+            PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
+            PersonObserver.Refusjon(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, INNTEKT_FLERE_AG))),
+            PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
         )
+
+        assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
     }
 
     @Test
@@ -320,27 +314,19 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
         forlengVedtak(1.februar, 28.februar, orgnummer = a1)
         nyPeriode(1.mars til 31.mars, a2)
-        assertForventetFeil(
-            forklaring = "perioden i mars (2.vedtaksperiode for a2) har en ny arbeidsgiverperiode og skal vente på opplysninger fra AG",
-            nå = {
-                assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a2)
-            },
-            ønsket = {
-                assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
 
-                assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-                val inntektsmeldingId = inspektør(a2).hendelseIder(1.vedtaksperiode.id(a2)).last()
+        assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        val inntektsmeldingId = inspektør(a2).hendelseIder(1.vedtaksperiode.id(a2)).last()
 
-                val actualForespurtOpplysning =
-                    observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
-                val expectedForespurteOpplysninger = listOf(
-                    PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
-                    PersonObserver.Refusjon(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, INNTEKT_FLERE_AG))),
-                    PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
-                )
-                assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
-            }
+        val actualForespurtOpplysning =
+            observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
+        val expectedForespurteOpplysninger = listOf(
+        PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
+            PersonObserver.Refusjon(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, INNTEKT_FLERE_AG))),
+            PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
         )
+        assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
     }
 
     @Test
@@ -390,6 +376,57 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+    }
+
+    @Test
+    fun `blir syk fra ghost`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode,
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt INNTEKT
+                }
+            }, emptyList()),
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt INNTEKT
+                }
+            }),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH),
+            ), orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
+
+        val arbeidsgiveropplysningerEvents = observatør.trengerArbeidsgiveropplysningerVedtaksperioder
+        assertEquals(2, arbeidsgiveropplysningerEvents.size)
+        val trengerArbeidsgiveropplysningerEvent = arbeidsgiveropplysningerEvents.last()
+
+        val expectedForespurteOpplysninger = listOf(
+            PersonObserver.FastsattInntekt(INNTEKT),
+            PersonObserver.Refusjon(emptyList()),
+            PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.februar til 16.februar))
+        )
+        assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
+
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
+        assertVarsel(RV_IM_4, AktivitetsloggFilter.arbeidsgiver(a1))
+        assertVarsel(RV_IM_4, AktivitetsloggFilter.arbeidsgiver(a2))
+        assertVarsel(RV_RE_1, AktivitetsloggFilter.arbeidsgiver(a2))
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 
     @Test

@@ -5,6 +5,7 @@ import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.somPeriode
@@ -161,7 +162,7 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         internal fun harNødvendigeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg, organisasjonsnummer: String): Boolean {
             val utbetalingsdager = periode.filter { dag -> arbeidsgiverperiode.utbetalingsdager.any { utbetalingsperiode -> dag in utbetalingsperiode }}
             val førsteUtbetalingsdag = utbetalingsdager.firstOrNull() ?: return true
-            val sisteOppholdsdagFørUtbetalingsdager = arbeidsgiverperiode.oppholdsdager.lastOrNull { it.endInclusive < førsteUtbetalingsdag }?.endInclusive
+            val sisteOppholdsdagFørUtbetalingsdager = arbeidsgiverperiode.oppholdsdager.lastOrNull { it.endInclusive < førsteUtbetalingsdag }?.endInclusive ?: arbeidsgiverperiode.first().forrigeDag
             return refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, utbetalingsdager, sisteOppholdsdagFørUtbetalingsdager, hendelse, organisasjonsnummer)
         }
     }

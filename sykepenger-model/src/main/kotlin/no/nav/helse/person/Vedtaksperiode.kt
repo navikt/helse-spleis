@@ -1588,18 +1588,9 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {
             vedtaksperiode.inntektsmeldingHåndtert(hendelse)
-            vedtaksperiode.tilstand(hendelse, tilstandEtterInntektPåSkjæringstidspunkt(vedtaksperiode, hendelse))
+            vurderOmKanGåVidere(vedtaksperiode, hendelse)
         }
-
-        private fun tilstandEtterInntektPåSkjæringstidspunkt(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) = when {
-            !vedtaksperiode.forventerInntekt() -> AvsluttetUtenUtbetaling
-            !vedtaksperiode.arbeidsgiver.kanBeregneSykepengegrunnlag(vedtaksperiode.skjæringstidspunkt) -> AvventerInntektsmelding.also {
-                sikkerlogg.info("Har lagret inntekt, men kan ikke beregne sykepengegrunnlag på skjæringstidspunkt ${vedtaksperiode.skjæringstidspunkt} for arbeidsgiver ${vedtaksperiode.arbeidsgiver.organisasjonsnummer()}")
-            }
-            !vedtaksperiode.arbeidsgiver.harNødvendigRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, hendelse) -> AvventerInntektsmelding
-            else -> AvventerBlokkerendePeriode
-        }
-
+        
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
         }

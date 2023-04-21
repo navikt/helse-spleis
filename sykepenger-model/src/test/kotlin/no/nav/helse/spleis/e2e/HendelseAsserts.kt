@@ -281,7 +281,7 @@ internal fun Aktivitetslogg.collectVarsler(vararg filtre: AktivitetsloggFilter):
     this.accept(object : AktivitetsloggVisitor {
         override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
             if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
-                warnings.add(melding)
+                warnings.add("$kode melding")
             }
         }
     })
@@ -336,6 +336,9 @@ internal fun interface AktivitetsloggFilter {
 
         internal fun person(personidentifikator: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018): AktivitetsloggFilter = AktivitetsloggFilter { kontekst ->
             kontekst.kontekstMap["fødselsnummer"] == personidentifikator.toString()
+        }
+        internal fun arbeidsgiver(orgnummer: String): AktivitetsloggFilter = AktivitetsloggFilter { kontekst ->
+            kontekst.kontekstMap["organisasjonsnummer"] == orgnummer
         }
     }
 
