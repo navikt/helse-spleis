@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Modelltester uten e2e" type="JUnit" factoryName="JUnit">
+    <module name="sykepenger-spleis.sykepenger-model.test" />
+    <option name="PACKAGE_NAME" value="no.nav.helse" />
+    <option name="MAIN_CLASS_NAME" value="" />
+    <option name="METHOD_NAME" value="" />
+    <option name="TEST_OBJECT" value="tags" />
+    <envs>
+      <env name="IKKE_E2E" value="true" />
+    </envs>
+    <tag value="!e2e" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

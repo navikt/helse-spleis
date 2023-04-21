@@ -15,7 +15,9 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
 
+@Tag("e2e")
 internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     internal companion object {

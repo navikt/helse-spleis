@@ -37,8 +37,10 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.extension.ExtendWith
 
+@Tag("e2e")
 @ExtendWith(DeferredLogging::class)
 internal abstract class AbstractDslTest {
     internal companion object {
