@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -35,7 +34,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
@@ -56,7 +54,6 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
-import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -1145,11 +1142,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    fun `Skal ikke forkaste vedtaksperioder i revurdering hvor en vedtaksperiode har utbetaling`() {
-        håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar))
+    fun `Skal ikke forkaste vedtaksperioder med overlappende utbetaling som treffes av søknad som forkastes på direkten`() {
         håndterSøknad(Sykdom(10.januar, 20.januar, 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar))
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
 
         håndterInntektsmelding(listOf(5.januar til 20.januar))
@@ -1175,17 +1169,16 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
 
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, TIL_INFOTRYGD)
-        assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
-        assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
-        håndterYtelser(2.vedtaksperiode)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
 
         assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(21.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-        assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
-        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
     }
 
     @Test
@@ -1254,18 +1247,10 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         nyttVedtak(18.januar, 31.januar, arbeidsgiverperiode = listOf(2.januar til 17.januar))
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre")
-        assertForventetFeil(
-            forklaring = "Omgjøringer bør ikke kunne forkastes",
-            nå = {
-                assertFunksjonellFeil(RV_IM_8, 1.vedtaksperiode.filter())
-                assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-            },
-            ønsket = {
-                assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
-                assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-            }
-        )
+        assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
     }
+
     @Test
     fun `omgjøring med funksjonell feil i vilkårsprøving`() {
         håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent))
@@ -1273,16 +1258,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT*2)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        assertForventetFeil(
-            forklaring = "Omgjøringer bør ikke kunne forkastes",
-            nå = {
-                assertFunksjonellFeil(RV_IV_2, 1.vedtaksperiode.filter())
-                assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, TIL_INFOTRYGD)
-            },
-            ønsket = {
-                assertVarsel(RV_IV_2, 1.vedtaksperiode.filter())
-                assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
-            }
-        )
+        assertVarsel(RV_IV_2, 1.vedtaksperiode.filter())
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
     }
 }

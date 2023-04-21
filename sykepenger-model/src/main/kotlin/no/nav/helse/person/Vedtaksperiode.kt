@@ -474,11 +474,10 @@ internal class Vedtaksperiode private constructor(
     private fun lås() = arbeidsgiver.lås(periode)
 
     internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>): Boolean {
-        if (tilstand in setOf(AvsluttetUtenUtbetaling, AvventerHistorikk)) {
-            val overlappendeUtbetalinger = arbeidsgiverUtbetalinger.filter { it.overlapperMed(periode) }
-            return Utbetaling.kanForkastes(overlappendeUtbetalinger, arbeidsgiverUtbetalinger)
-        }
-        return utbetalinger.kanForkastes(arbeidsgiverUtbetalinger)
+        if (tilstand == Start) return true // For vedtaksperioder som forkates på "direkten"
+        if (!utbetalinger.kanForkastes(arbeidsgiverUtbetalinger)) return false
+        val overlappendeUtbetalinger = arbeidsgiverUtbetalinger.filter { it.overlapperMed(periode) }
+        return Utbetaling.kanForkastes(overlappendeUtbetalinger, arbeidsgiverUtbetalinger)
     }
 
     internal fun forkast(hendelse: IAktivitetslogg, utbetalinger: List<Utbetaling>): VedtaksperiodeForkastetEventBuilder? {
@@ -1614,7 +1613,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektOgRefusjon: InntektOgRefusjonFraInntektsmelding) {
-            vedtaksperiode.håndterInntektOgRefusjon(inntektOgRefusjon, tilstandEtterInntektPåSkjæringstidspunkt(vedtaksperiode))
+            håndterFørstegangsbehandling(inntektOgRefusjon.inntektsmelding, vedtaksperiode) {
+                vedtaksperiode.håndterInntektOgRefusjon(inntektOgRefusjon, tilstandEtterInntektPåSkjæringstidspunkt(vedtaksperiode))
+            }
         }
 
         override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: InntektOgRefusjonFraInntektsmelding) {
@@ -1819,8 +1820,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikk) { grunnlagsdata ->
-                grunnlagsdata.validerFørstegangsvurdering(vilkårsgrunnlag)
+            håndterFørstegangsbehandling(vilkårsgrunnlag, vedtaksperiode) {
+                vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikk) { grunnlagsdata ->
+                    grunnlagsdata.validerFørstegangsvurdering(vilkårsgrunnlag)
+                }
             }
         }
 
@@ -1981,7 +1984,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
-            vedtaksperiode.utbetalinger.valider(simulering)
+            håndterFørstegangsbehandling(simulering, vedtaksperiode) {
+                vedtaksperiode.utbetalinger.valider(simulering)
+            }
             if (!vedtaksperiode.utbetalinger.erKlarForGodkjenning()) return simulering.info("Kan ikke gå videre da begge oppdragene ikke er simulert.")
             vedtaksperiode.tilstand(simulering, AvventerGodkjenning)
         }
