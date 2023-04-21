@@ -72,7 +72,8 @@ internal class RefusjonshistorikkTest {
     @Test
     fun `legger til refusjon for samme inntektsmelding med ulik dato flere ganger`() {
         val meldingsreferanseId = UUID.randomUUID()
-        val refusjon1 = refusjon(1.januar til 16.januar, førsteFraværsdag = 16.januar, meldingsreferanseId = meldingsreferanseId)
+        // setter tidsstempel for å unngå flickering test
+        val refusjon1 = refusjon(1.januar til 16.januar, førsteFraværsdag = 16.januar, meldingsreferanseId = meldingsreferanseId, tidsstempel = LocalDateTime.now().minusSeconds(1))
         // I praksis vil ikke arbeidsgiverperioden være noe annet, men vi har satt den for å validere duplikatsjekk
         val refusjon2 = refusjon(1.januar til 16.januar, førsteFraværsdag = 17.januar, meldingsreferanseId = meldingsreferanseId)
         val refusjonshistorikk = Refusjonshistorikk()
