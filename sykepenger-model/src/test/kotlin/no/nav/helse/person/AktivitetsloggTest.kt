@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
 internal class AktivitetsloggTest {
@@ -58,6 +59,11 @@ internal class AktivitetsloggTest {
         assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
         assertTrue(aktivitetslogg.toString().contains(melding))
         assertLogiskFeil(melding)
+    }
+
+    @Test
+    fun `logge noe som inneholder % uten parametre`() {
+        assertDoesNotThrow { aktivitetslogg.info("Jeg er 100 % overrasket over at dette feilet") }
     }
 
     @Test

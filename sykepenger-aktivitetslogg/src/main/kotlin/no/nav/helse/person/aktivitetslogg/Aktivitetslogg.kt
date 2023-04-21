@@ -23,7 +23,8 @@ class Aktivitetslogg(
     }
 
     override fun info(melding: String, vararg params: Any?) {
-        add(Aktivitet.Info.opprett(kontekster.toSpesifikk(), String.format(melding, *params)))
+        val formatertMelding = if (params.isEmpty()) melding else String.format(melding, *params)
+        add(Aktivitet.Info.opprett(kontekster.toSpesifikk(), formatertMelding))
     }
 
     override fun varsel(melding: String) {
