@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -234,7 +233,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
     fun `arbeidsgiver ikke utbetalt i arbeidsgiverperiode på grunn av ferie eller avspasering`() {
         håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
         håndterInntektsmelding(listOf(), førsteFraværsdag = 1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering")
-        assertEquals(Dag.Sykedag::class, inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar]::class)
-        assertTrue(inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar].kommerFra(Søknad::class))
+        assertEquals(Dag.SykedagNav::class, inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar]::class)
+        assertTrue(inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar].kommerFra(Inntektsmelding::class))
     }
 }

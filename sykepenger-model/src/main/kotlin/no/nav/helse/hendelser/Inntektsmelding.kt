@@ -101,7 +101,7 @@ class Inntektsmelding(
     }
 
     private fun lagArbeidsgivertidslinje(): Sykdomstidslinje {
-        if (begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank() || begrunnelseForReduksjonEllerIkkeUtbetalt == "FerieEllerAvspasering" || begrunnelseForReduksjonEllerIkkeUtbetalt in ikkeStøttedeBegrunnelserForReduksjon) return arbeidsgiverperioder.map(::arbeidsgiverdager).merge()
+        if (begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank() || begrunnelseForReduksjonEllerIkkeUtbetalt in ikkeStøttedeBegrunnelserForReduksjon) return arbeidsgiverperioder.map(::arbeidsgiverdager).merge()
         return arbeidsgiverperiodeNavSkalUtbetale().map(::sykedagerNav).merge()
     }
 
