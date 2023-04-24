@@ -507,7 +507,6 @@ internal class Arbeidsgiver private constructor(
         addInntektsmelding(inntektsmelding, jurist)
 
         inntektsmelding.ikkeHåndert(person, sykmeldingsperioder, dager)
-
     }
 
     private fun håndter(hendelse: UtbetalingshistorikkEtterInfotrygdendring, infotrygdhistorikk: Infotrygdhistorikk) {

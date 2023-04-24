@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.forrigeDag
+import no.nav.helse.førsteArbeidsdag
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
@@ -101,7 +102,12 @@ class Inntektsmelding(
 
     private fun lagArbeidsgivertidslinje(): Sykdomstidslinje {
         if (begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank() || begrunnelseForReduksjonEllerIkkeUtbetalt == "FerieEllerAvspasering" || begrunnelseForReduksjonEllerIkkeUtbetalt in ikkeStøttedeBegrunnelserForReduksjon) return arbeidsgiverperioder.map(::arbeidsgiverdager).merge()
-        return (arbeidsgiverperioder.takeUnless { it.isEmpty() } ?: listOfNotNull(førsteFraværsdag?.somPeriode())).map(::sykedagerNav).merge()
+        return arbeidsgiverperiodeNavSkalUtbetale().map(::sykedagerNav).merge()
+    }
+
+    private fun arbeidsgiverperiodeNavSkalUtbetale(): List<Periode> {
+        if (arbeidsgiverperioder.isNotEmpty()) return arbeidsgiverperioder
+        return listOfNotNull(førsteFraværsdag?.førsteArbeidsdag()?.somPeriode())
     }
 
     private fun arbeidsgiverdager(periode: Periode) = Sykdomstidslinje.arbeidsgiverdager(periode.start, periode.endInclusive, 100.prosent, kilde)
