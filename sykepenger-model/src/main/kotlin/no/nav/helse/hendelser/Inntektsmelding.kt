@@ -139,7 +139,6 @@ class Inntektsmelding(
         if (!skalValideresAv(periode)) return this
         if (arbeidsgiverperiode != null) validerArbeidsgiverperiode(arbeidsgiverperiode)
         if (arbeidsgiverperioder.isEmpty()) info("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode")
-        validerØvrig()
         return this
     }
 
@@ -148,7 +147,8 @@ class Inntektsmelding(
         return arbeidsgiverperioder.periode()?.overlapperMed(periode) == true
     }
 
-    private fun validerØvrig() {
+    internal fun validerØvrig(periode: Periode) {
+        if (!skalValideresAv(periode)) return
         if (harOpphørAvNaturalytelser) funksjonellFeil(RV_IM_7)
         if (harFlereInntektsmeldinger) varsel(RV_IM_22)
         if (begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank()) return

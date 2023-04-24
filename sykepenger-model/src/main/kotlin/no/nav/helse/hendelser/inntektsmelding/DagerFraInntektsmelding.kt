@@ -70,6 +70,7 @@ internal class DagerFraInntektsmelding(
     }
 
     internal fun validerHvis(periode: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?) {
+        inntektsmelding.validerØvrig(periode)
         // dersom vedtaksperioden håndterer dagene skal vi bare validere dersom gjenstående dager er tom,
         // dette for å unngå at vi validerer/sammenligner arbeidsgiverperioder som fortsatt mangler grunnlag i beregningen
         if (gjenståendeDager.isNotEmpty()) return
@@ -77,16 +78,16 @@ internal class DagerFraInntektsmelding(
     }
 
     internal fun valider(periode: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?) {
-        // dersom vedtaksperioden håndterer dagene skal vi bare validere dersom gjenstående dager er tom,
-        // dette for å unngå at vi validerer/sammenligner arbeidsgiverperioder som fortsatt mangler grunnlag i beregningen
+        inntektsmelding.validerØvrig(periode)
         inntektsmelding.validerArbeidsgiverperiode(periode, arbeidsgiverperiode)
     }
 
     internal fun validerFeilTilVarsler(periode: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?) {
         // dersom vedtaksperioden håndterer dagene skal vi bare validere dersom gjenstående dager er tom,
         // dette for å unngå at vi validerer/sammenligner arbeidsgiverperioder som fortsatt mangler grunnlag i beregningen
-        if (gjenståendeDager.isNotEmpty()) return
         FunksjonelleFeilTilVarsler.wrap(inntektsmelding) {
+            inntektsmelding.validerØvrig(periode)
+            if (gjenståendeDager.isNotEmpty()) return@wrap
             inntektsmelding.validerArbeidsgiverperiode(periode, arbeidsgiverperiode)
         }
     }

@@ -99,11 +99,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        assertForventetFeil(
-            forklaring = "kort periode bør få varsel",
-            nå = { assertIngenVarsel(RV_IM_8, 1.vedtaksperiode.filter()) },
-            ønsket = { assertVarsel(RV_IM_8, 1.vedtaksperiode.filter()) }
-        )
+        assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
         assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
         assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)

@@ -223,7 +223,7 @@ internal class InntektsmeldingTest {
     fun `inntektsmelding uten arbeidsgiverperiode med førsteFraværsdag & begrunnelseForReduksjonEllerIkkeUtbetalt satt`() {
         inntektsmelding(emptyList(), førsteFraværsdag = 1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre")
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
-        inntektsmelding.validerArbeidsgiverperiode(1.januar til 31.januar, null)
+        inntektsmelding.validerØvrig(1.januar til 31.januar)
         aktivitetslogg.assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: FiskerMedHyre")
         aktivitetslogg.assertFunksjonellFeil("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden")
         assertNull(nyTidslinje.periode()?.start)
@@ -306,7 +306,7 @@ internal class InntektsmeldingTest {
             listOf(Periode(1.januar, 10.januar)),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre"
         )
-        inntektsmelding.validerArbeidsgiverperiode(1.januar til 12.januar, null)
+        inntektsmelding.validerØvrig(1.januar til 12.januar)
         aktivitetslogg.assertFunksjonellFeil("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden")
         aktivitetslogg.assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: FiskerMedHyre")
     }
