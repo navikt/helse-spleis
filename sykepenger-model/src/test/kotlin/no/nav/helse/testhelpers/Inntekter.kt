@@ -29,6 +29,9 @@ internal class Inntektperioder(block: Inntektperioder.() -> Unit) {
     internal infix fun Periode.sykepenger(block: Inntekter.() -> Unit) =
         lagInntekter("sykepenger", ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.YTELSE_FRA_OFFENTLIGE, block)
 
+    internal infix fun Periode.feriepenger(block: Inntekter.() -> Unit) =
+        lagInntekter("feriepenger", ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, block)
+
     private fun Periode.lagInntekter(
         beskrivelse: String = "fastloenn",
         type: ArbeidsgiverInntekt.MånedligInntekt.Inntekttype = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
