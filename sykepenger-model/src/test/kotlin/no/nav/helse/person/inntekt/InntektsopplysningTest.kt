@@ -28,12 +28,12 @@ internal class InntektsopplysningTest {
         val saksbehandler4 = Saksbehandler(20.januar, UUID.randomUUID(), INGEN, "", null, LocalDateTime.now())
         val ikkeRapportert = IkkeRapportert(1.januar, UUID.randomUUID(), LocalDateTime.now())
 
-        assertEquals(saksbehandler1, im1.overstyres(saksbehandler1))
-        assertEquals(saksbehandler1, saksbehandler1.overstyres(saksbehandler2))
-        assertEquals(saksbehandler3, saksbehandler1.overstyres(saksbehandler3))
-        assertEquals(im1, im1.overstyres(im2))
-        assertEquals(saksbehandler4, ikkeRapportert.overstyres(saksbehandler4))
-        assertEquals(im1, ikkeRapportert.overstyres(im1))
+        assertEquals(saksbehandler1, im1.overstyresAv(saksbehandler1))
+        assertEquals(saksbehandler1, saksbehandler1.overstyresAv(saksbehandler2))
+        assertEquals(saksbehandler3, saksbehandler1.overstyresAv(saksbehandler3))
+        assertEquals(im1, im1.overstyresAv(im2))
+        assertEquals(saksbehandler4, ikkeRapportert.overstyresAv(saksbehandler4))
+        assertEquals(im1, ikkeRapportert.overstyresAv(im1))
     }
 
 

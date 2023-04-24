@@ -19,12 +19,16 @@ abstract class Inntektsopplysning protected constructor(
 ) {
     internal abstract fun accept(visitor: InntektsopplysningVisitor)
     internal abstract fun omregnetÅrsinntekt(): Inntekt
-    internal open fun overstyres(ny: Inntektsopplysning): Inntektsopplysning {
-        if (ny.omregnetÅrsinntekt() == this.omregnetÅrsinntekt()) return this
+    internal fun overstyresAv(ny: Inntektsopplysning): Inntektsopplysning {
+        if (!kanOverstyresAv(ny)) return this
         return ny.overstyrer(this)
     }
 
-    protected open fun overstyrer(overstyrInntekt: Inntektsopplysning?) = this
+    protected open fun kanOverstyresAv(ny: Inntektsopplysning): Boolean {
+        return ny.omregnetÅrsinntekt() != this.omregnetÅrsinntekt()
+    }
+
+    protected open fun overstyrer(gammel: Inntektsopplysning?) = this
 
     final override fun equals(other: Any?) = other is Inntektsopplysning && erSamme(other)
 

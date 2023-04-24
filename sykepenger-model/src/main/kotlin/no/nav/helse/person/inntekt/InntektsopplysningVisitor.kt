@@ -31,6 +31,7 @@ internal interface InntektsopplysningVisitor : InntektsmeldingVisitor, Skatteopp
     }
 
     fun visitIkkeRapportert(
+        ikkeRapportert: IkkeRapportert,
         id: UUID,
         hendelseId: UUID,
         dato: LocalDate,

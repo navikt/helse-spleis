@@ -19,6 +19,7 @@ import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
+import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmelding
@@ -939,8 +940,14 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitInntektsmelding(inntektsmelding, id, dato, hendelseId, beløp, tidsstempel)
     }
 
-    override fun visitIkkeRapportert(id: UUID, hendelseId: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
-        delegatee.visitIkkeRapportert(id, hendelseId, dato, tidsstempel)
+    override fun visitIkkeRapportert(
+        ikkeRapportert: IkkeRapportert,
+        id: UUID,
+        hendelseId: UUID,
+        dato: LocalDate,
+        tidsstempel: LocalDateTime
+    ) {
+        delegatee.visitIkkeRapportert(ikkeRapportert, id, hendelseId, dato, tidsstempel)
     }
 
     override fun visitInfotrygd(infotrygd: Infotrygd, id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) {

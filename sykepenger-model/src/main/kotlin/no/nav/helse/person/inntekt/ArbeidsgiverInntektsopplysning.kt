@@ -38,8 +38,8 @@ class ArbeidsgiverInntektsopplysning(
         return overstyring.overstyrer(this)
     }
 
-    private fun overstyrer(overstyrt: ArbeidsgiverInntektsopplysning): ArbeidsgiverInntektsopplysning {
-        return ArbeidsgiverInntektsopplysning(orgnummer = this.orgnummer, inntektsopplysning = overstyrt.inntektsopplysning.overstyres(this.inntektsopplysning), refusjonsopplysninger = overstyrt.refusjonsopplysninger.merge(this.refusjonsopplysninger))
+    private fun overstyrer(gammel: ArbeidsgiverInntektsopplysning): ArbeidsgiverInntektsopplysning {
+        return ArbeidsgiverInntektsopplysning(orgnummer = this.orgnummer, inntektsopplysning = gammel.inntektsopplysning.overstyresAv(this.inntektsopplysning), refusjonsopplysninger = gammel.refusjonsopplysninger.merge(this.refusjonsopplysninger))
     }
 
     private fun subsummer(subsumsjonObserver: SubsumsjonObserver, opptjening: Opptjening?) {

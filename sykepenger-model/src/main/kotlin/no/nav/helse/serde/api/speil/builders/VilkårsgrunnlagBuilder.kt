@@ -13,6 +13,7 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
+import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.InntektsopplysningVisitor
@@ -470,7 +471,13 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             this.tilstand.lagreInntekt(this, nyArbeidsgiverInntekt(IInntektkilde.Inntektsmelding, inntekt))
         }
 
-        override fun visitIkkeRapportert(id: UUID, hendelseId: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
+        override fun visitIkkeRapportert(
+            ikkeRapportert: IkkeRapportert,
+            id: UUID,
+            hendelseId: UUID,
+            dato: LocalDate,
+            tidsstempel: LocalDateTime
+        ) {
             val inntekt = IInntekt(0.0, 0.0, 0.0)
             this.tilstand.lagreInntekt(this, nyArbeidsgiverInntekt(IInntektkilde.IkkeRapportert, inntekt))
         }

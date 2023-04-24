@@ -16,7 +16,8 @@ internal class Infotrygd(
         visitor.visitInfotrygd(this, id, dato, hendelseId, beløp, tidsstempel)
     }
 
-    override fun overstyres(ny: Inntektsopplysning) = this
+    override fun kanOverstyresAv(ny: Inntektsopplysning) = false
+
 
     override fun omregnetÅrsinntekt(): Inntekt = beløp
 

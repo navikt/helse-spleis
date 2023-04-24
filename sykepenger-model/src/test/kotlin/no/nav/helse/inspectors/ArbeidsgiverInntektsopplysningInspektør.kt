@@ -64,7 +64,13 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
         this.tilstand.lagreInntekt(this, inntektsmelding)
     }
 
-    override fun visitIkkeRapportert(id: UUID, hendelseId: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
+    override fun visitIkkeRapportert(
+        ikkeRapportert: IkkeRapportert,
+        id: UUID,
+        hendelseId: UUID,
+        dato: LocalDate,
+        tidsstempel: LocalDateTime
+    ) {
         this.tilstand.lagreInntekt(this, IkkeRapportert(id, hendelseId, dato, tidsstempel))
     }
 

@@ -52,14 +52,14 @@ class Saksbehandler internal constructor(
         )
     }
 
-    override fun overstyres(ny: Inntektsopplysning): Inntektsopplysning {
-        if (ny !is Saksbehandler) return this
-        if (ny.beløp == this.beløp) return this
-        return ny.overstyrer(this.overstyrtInntekt)
+    override fun kanOverstyresAv(ny: Inntektsopplysning): Boolean {
+        if (ny !is Saksbehandler) return false
+        if (ny.beløp == this.beløp) return false
+        return true
     }
 
-    override fun overstyrer(overstyrInntekt: Inntektsopplysning?): Inntektsopplysning {
-        return Saksbehandler(id, dato, hendelseId, beløp, forklaring, subsumsjon, overstyrInntekt, tidsstempel)
+    override fun overstyrer(gammel: Inntektsopplysning?): Inntektsopplysning {
+        return Saksbehandler(id, dato, hendelseId, beløp, forklaring, subsumsjon, if (gammel is Saksbehandler) gammel.overstyrtInntekt else gammel, tidsstempel)
     }
 
     override fun omregnetÅrsinntekt(): Inntekt = beløp

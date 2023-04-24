@@ -29,6 +29,7 @@ import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
+import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmelding
@@ -1059,7 +1060,13 @@ internal class JsonBuilder : AbstractBuilder() {
             ))
         }
 
-        override fun visitIkkeRapportert(id: UUID, hendelseId: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
+        override fun visitIkkeRapportert(
+            ikkeRapportert: IkkeRapportert,
+            id: UUID,
+            hendelseId: UUID,
+            dato: LocalDate,
+            tidsstempel: LocalDateTime
+        ) {
             tilstand.lagreInntekt(this, mapOf(
                 "id" to id,
                 "hendelseId" to hendelseId,
@@ -1125,7 +1132,13 @@ internal class JsonBuilder : AbstractBuilder() {
 
     class SaksbehandlerInntektState(private val lagreInntekt: (Map<String, Any?>) -> Unit): BuilderState() {
         private var overstyrtInntektId: UUID? = null
-        override fun visitIkkeRapportert(id: UUID, hendelseId: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
+        override fun visitIkkeRapportert(
+            ikkeRapportert: IkkeRapportert,
+            id: UUID,
+            hendelseId: UUID,
+            dato: LocalDate,
+            tidsstempel: LocalDateTime
+        ) {
             overstyrtInntektId = id
         }
 

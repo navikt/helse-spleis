@@ -49,11 +49,11 @@ internal class Inntektsmelding(
         visitor.visitInntektsmelding(this, id, dato, hendelseId, beløp, tidsstempel)
     }
 
-    override fun overstyres(ny: Inntektsopplysning): Inntektsopplysning {
-        if (ny !is Saksbehandler && ny !is Inntektsmelding) return this
+    override fun kanOverstyresAv(ny: Inntektsopplysning): Boolean {
+        if (ny !is Saksbehandler && ny !is Inntektsmelding) return false
         val måned = this.dato.withDayOfMonth(1) til this.dato.withDayOfMonth(this.dato.lengthOfMonth())
-        if (ny is Inntektsmelding && ny.dato !in måned) return this
-        return super.overstyres(ny)
+        if (ny is Inntektsmelding && ny.dato !in måned) return false
+        return super.kanOverstyresAv(ny)
     }
 
     override fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): AvklarbarSykepengegrunnlag? {
