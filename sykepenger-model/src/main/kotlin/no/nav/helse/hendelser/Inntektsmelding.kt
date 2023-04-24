@@ -5,9 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.forrigeDag
-import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.cacheRefusjon
-import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.endrerRefusjon
-import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.refusjonshistorikkRefusjon
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
@@ -20,7 +17,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
@@ -28,7 +24,6 @@ import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
-import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -179,8 +174,8 @@ class Inntektsmelding(
         return inntektsdato to inntektshistorikk.leggTil(Inntektsmelding(inntektsdato, meldingsreferanseId(), beregnetInntekt))
     }
 
-    internal fun cacheRefusjon(refusjonshistorikk: Refusjonshistorikk) {
-        refusjon.cacheRefusjon(refusjonshistorikk, meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
+    internal fun leggTilRefusjon(refusjonshistorikk: Refusjonshistorikk) {
+        refusjon.leggTilRefusjon(refusjonshistorikk, meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
     }
 
     internal fun inntektsmeldingsinfo() = InntektsmeldingInfo(id = meldingsreferanseId(), arbeidsforholdId = arbeidsforholdId)
@@ -192,18 +187,16 @@ class Inntektsmelding(
 
 
     internal fun nyeArbeidsgiverInntektsopplysninger(builder: ArbeidsgiverInntektsopplysningerOverstyringer, skjæringstidspunkt: LocalDate) {
-        val refusjonsopplysninger = if (builder.ingenRefusjonsopplysninger(organisasjonsnummer)) {
-            val refusjonshistorikk = Refusjonshistorikk()
-            refusjon.cacheRefusjon(refusjonshistorikk, meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
-            refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt, this)
-        } else {
-            refusjon.refusjonsopplysninger(meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
-        }
+        val refusjonshistorikk = Refusjonshistorikk()
+        refusjon.leggTilRefusjon(refusjonshistorikk, meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
+        // startskuddet dikterer hvorvidt refusjonsopplysningene skal strekkes tilbake til å fylle gråsonen (perioden mellom skjæringstidspunkt og første refusjonsopplysning)
+        // inntektsdato er den dagen refusjonsopplysningen i IM gjelder fom slik at det blir ingen strekking da, bare dersom skjæringstidspunkt brukes
+        val startskudd = if (builder.ingenRefusjonsopplysninger(organisasjonsnummer)) skjæringstidspunkt else inntektsdato
         builder.leggTilInntekt(
             ArbeidsgiverInntektsopplysning(
                 organisasjonsnummer,
                 Inntektsmelding(inntektsdato, meldingsreferanseId(), beregnetInntekt),
-                refusjonsopplysninger
+                refusjonshistorikk.refusjonsopplysninger(startskudd, this)
             )
         )
 
@@ -215,88 +208,27 @@ class Inntektsmelding(
         private val opphørsdato: LocalDate?,
         private val endringerIRefusjon: List<EndringIRefusjon> = emptyList()
     ) {
-
-        internal fun refusjonsopplysninger(meldingsreferanseId: UUID, førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>): Refusjonsopplysninger {
-            return endringerIRefusjon.refusjonshistorikkRefusjon(meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, opphørsdato).refusjonsopplysninger()
+        internal fun leggTilRefusjon(
+            refusjonshistorikk: Refusjonshistorikk,
+            meldingsreferanseId: UUID,
+            førsteFraværsdag: LocalDate?,
+            arbeidsgiverperioder: List<Periode>
+        ) {
+            val refusjon = Refusjonshistorikk.Refusjon(meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, opphørsdato, endringerIRefusjon.map { it.tilEndring() })
+            refusjonshistorikk.leggTilRefusjon(refusjon)
         }
-
 
         class EndringIRefusjon(
             private val beløp: Inntekt,
             private val endringsdato: LocalDate
         ) {
 
+            internal fun tilEndring() = Refusjonshistorikk.Refusjon.EndringIRefusjon(beløp, endringsdato)
 
             internal companion object {
-
-                internal fun List<EndringIRefusjon>.endrerRefusjon(periode: Periode) =
-                    any { it.endringsdato in periode }
-
                 internal fun List<EndringIRefusjon>.minOf(opphørsdato: LocalDate?) =
                     (map { it.endringsdato } + opphørsdato).filterNotNull().minOrNull()
-                internal fun List<EndringIRefusjon>.refusjonshistorikkRefusjon(
-                    meldingsreferanseId: UUID,
-                    førsteFraværsdag: LocalDate?,
-                    arbeidsgiverperioder: List<Periode>,
-                    beløp: Inntekt?,
-                    sisteRefusjonsdag: LocalDate?
-                ) = Refusjonshistorikk.Refusjon(
-                    meldingsreferanseId = meldingsreferanseId,
-                    førsteFraværsdag = førsteFraværsdag,
-                    arbeidsgiverperioder = arbeidsgiverperioder,
-                    beløp = beløp,
-                    sisteRefusjonsdag = sisteRefusjonsdag,
-                    endringerIRefusjon = map {
-                        Refusjonshistorikk.Refusjon.EndringIRefusjon(
-                            it.beløp, it.endringsdato
-                        )
-                    }
-                )
-                internal fun List<EndringIRefusjon>.cacheRefusjon(
-                    refusjonshistorikk: Refusjonshistorikk,
-                    meldingsreferanseId: UUID,
-                    førsteFraværsdag: LocalDate?,
-                    arbeidsgiverperioder: List<Periode>,
-                    beløp: Inntekt?,
-                    sisteRefusjonsdag: LocalDate?
-                ) {
-                    refusjonshistorikk.leggTilRefusjon(
-                        refusjonshistorikkRefusjon(
-                            meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, sisteRefusjonsdag
-                        )
-                    )
-                }
             }
-        }
-
-        internal fun valider(
-            aktivitetslogg: IAktivitetslogg,
-            periode: Periode,
-            beregnetInntekt: Inntekt
-        ): IAktivitetslogg {
-            when {
-                beregnetInntekt <= Inntekt.INGEN -> aktivitetslogg.funksjonellFeil(RV_IM_6)
-                (beløp == null || beløp <= Inntekt.INGEN) -> aktivitetslogg.info("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
-                beløp != beregnetInntekt -> aktivitetslogg.info("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
-                opphørerRefusjon(periode) -> aktivitetslogg.info("Arbeidsgiver opphører refusjon i perioden")
-                opphørsdato != null -> aktivitetslogg.info("Arbeidsgiver opphører refusjon")
-                endrerRefusjon(periode) -> aktivitetslogg.info("Arbeidsgiver endrer refusjon i perioden")
-                endringerIRefusjon.isNotEmpty() -> aktivitetslogg.info("Arbeidsgiver har endringer i refusjon")
-            }
-            return aktivitetslogg
-        }
-
-        private fun opphørerRefusjon(periode: Periode) =
-            opphørsdato?.let { it in periode } ?: false
-        private fun endrerRefusjon(periode: Periode) =
-            endringerIRefusjon.endrerRefusjon(periode)
-        internal fun cacheRefusjon(
-            refusjonshistorikk: Refusjonshistorikk,
-            meldingsreferanseId: UUID,
-            førsteFraværsdag: LocalDate?,
-            arbeidsgiverperioder: List<Periode>
-        ) {
-            endringerIRefusjon.cacheRefusjon(refusjonshistorikk, meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, opphørsdato)
         }
     }
 
