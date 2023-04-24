@@ -6,11 +6,9 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.DokumentType
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
@@ -28,6 +26,7 @@ import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class DokumentHåndteringTest : AbstractEndToEndTest() {
@@ -165,13 +164,14 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
                 gjeldendeTilstand = TilstandType.AVVENTER_INNTEKTSMELDING,
-                hendelser = setOf(søknad2, im),
+                hendelser = setOf(søknad2),
                 fom = 17.januar,
                 tom = 31.januar,
                 forlengerPeriode = false,
                 harPeriodeInnenfor16Dager = false
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER))
         )
+        assertTrue(im in observatør.inntektsmeldingIkkeHåndtert)
     }
 
     @Test

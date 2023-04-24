@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
@@ -16,7 +15,6 @@ import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenFunksjonellFeil
-import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
@@ -225,7 +223,7 @@ internal class InntektsmeldingTest {
     fun `inntektsmelding uten arbeidsgiverperiode med førsteFraværsdag & begrunnelseForReduksjonEllerIkkeUtbetalt satt`() {
         inntektsmelding(emptyList(), førsteFraværsdag = 1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre")
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
-        inntektsmelding.validerØvrig(1.januar til 31.januar)
+        inntektsmelding.valider(1.januar til 31.januar, NullObserver)
         aktivitetslogg.assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: FiskerMedHyre")
         aktivitetslogg.assertFunksjonellFeil("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden")
         assertNull(nyTidslinje.periode()?.start)
@@ -308,7 +306,7 @@ internal class InntektsmeldingTest {
             listOf(Periode(1.januar, 10.januar)),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre"
         )
-        inntektsmelding.validerØvrig(1.januar til 12.januar)
+        inntektsmelding.valider(1.januar til 12.januar, NullObserver)
         aktivitetslogg.assertFunksjonellFeil("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden")
         aktivitetslogg.assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: FiskerMedHyre")
     }

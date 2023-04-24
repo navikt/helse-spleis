@@ -1253,9 +1253,9 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         nyttVedtak(18.januar, 31.januar, arbeidsgiverperiode = listOf(2.januar til 17.januar))
         nullstillTilstandsendringer()
         val im = håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre")
-        assertTrue(im !in observatør.inntektsmeldingIkkeHåndtert)
-        assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        assertTrue(im in observatør.inntektsmeldingIkkeHåndtert)
+        assertFunksjonellFeil(RV_IM_8, 1.vedtaksperiode.filter())
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test

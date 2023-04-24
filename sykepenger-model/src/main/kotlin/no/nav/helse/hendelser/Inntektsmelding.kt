@@ -144,23 +144,17 @@ class Inntektsmelding(
         return this
     }
 
-    private fun skalValideresAv(periode: Periode): Boolean {
-        if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) return førsteFraværsdag in periode
-        return arbeidsgiverperioder.periode()?.overlapperMed(periode) == true
-    }
-
-    internal fun validerØvrig(periode: Periode) {
-        if (!skalValideresAv(periode)) return
-        if (harOpphørAvNaturalytelser) funksjonellFeil(RV_IM_7)
-        if (harFlereInntektsmeldinger) varsel(RV_IM_22)
-        if (begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank()) return
-        info("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s".format(begrunnelseForReduksjonEllerIkkeUtbetalt))
-        if (begrunnelseForReduksjonEllerIkkeUtbetalt in ikkeStøttedeBegrunnelserForReduksjon) return funksjonellFeil(RV_IM_8)
-        varsel(RV_IM_8)
-    }
+    private fun skalValideresAv(periode: Periode) = overlappsperiode?.overlapperMed(periode) == true
 
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
-        throw IllegalStateException("Inntektsmeldingen håndteres og valideres oppdelt.")
+        if (!skalValideresAv(periode)) return this
+        if (harOpphørAvNaturalytelser) funksjonellFeil(RV_IM_7)
+        if (harFlereInntektsmeldinger) varsel(RV_IM_22)
+        if (begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank()) return this
+        info("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s".format(begrunnelseForReduksjonEllerIkkeUtbetalt))
+        if (begrunnelseForReduksjonEllerIkkeUtbetalt in ikkeStøttedeBegrunnelserForReduksjon) funksjonellFeil(RV_IM_8)
+        else varsel(RV_IM_8)
+        return this
     }
 
     private fun validerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode) {

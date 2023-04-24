@@ -290,7 +290,7 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, inntektsmeldingReplayUtført)
     }
 
-    internal fun håndter(dager: DagerFraInntektsmelding): Boolean {
+    internal fun håndter(dager: DagerFraInntektsmelding) {
         kontekst(dager)
         val skalHåndtereDager = tilstand.skalHåndtereDager(this, dager)
         if (!skalHåndtereDager || inntektsmeldingHåndtert(dager)) {
@@ -303,17 +303,15 @@ internal class Vedtaksperiode private constructor(
                 dager.valider(this.periode, finnArbeidsgiverperiode())
                 if (dager.harFunksjonelleFeilEllerVerre()) forkast(dager)
             }
-
-            return skalHåndtereDager
+            return
         }
-        return tilstand.håndter(this, dager).also {
-            dager.vurdertTilOgMed(periode.endInclusive)
-        }
+        tilstand.håndter(this, dager)
+        dager.vurdertTilOgMed(periode.endInclusive)
     }
 
     private fun håndterDager(dager: DagerFraInntektsmelding) {
         håndterDagerFør(dager)
-        dager.håndter(periode) { arbeidsgiver.oppdaterSykdom(it) }?.let { oppdatertSykdomstidslinje ->
+        dager.håndter(periode, ::finnArbeidsgiverperiode) { arbeidsgiver.oppdaterSykdom(it) }?.let { oppdatertSykdomstidslinje ->
             sykdomstidslinje = oppdatertSykdomstidslinje
         }
     }
@@ -1082,10 +1080,9 @@ internal class Vedtaksperiode private constructor(
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {}
         fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
             dager.skalHåndteresAv(vedtaksperiode.periode)
-        fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
-            if (!dager.påvirker(vedtaksperiode.sykdomstidslinje)) return false
+        fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
+            if (!dager.påvirker(vedtaksperiode.sykdomstidslinje)) return
             dager.varsel(RV_IM_4, "Inntektsmeldingen ville påvirket sykdomstidslinjen i ${type.name}")
-            return false
         }
 
         fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {}
@@ -1574,16 +1571,15 @@ internal class Vedtaksperiode private constructor(
             return true
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
-            vedtaksperiode.håndterDager(dager)
-            dager.validerHvis(vedtaksperiode.periode, vedtaksperiode.finnArbeidsgiverperiode())
+        override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
+            dager.valider(vedtaksperiode.periode)
             if (dager.harFunksjonelleFeilEllerVerre()) {
                 vedtaksperiode.forkast(dager)
-                return true
+                return
             }
-            if (vedtaksperiode.forventerInntekt()) return true
+            vedtaksperiode.håndterDager(dager)
+            if (vedtaksperiode.forventerInntekt()) return
             vedtaksperiode.tilstand(dager, AvsluttetUtenUtbetaling)
-            return true
         }
 
         override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {
@@ -2220,16 +2216,21 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterLåstOverlappendeSøknadRevurdering(søknad)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
+            dager.valider(vedtaksperiode.periode)
+            if (dager.harFunksjonelleFeilEllerVerre()) {
+                vedtaksperiode.forkast(dager)
+                return
+            }
+
             vedtaksperiode.låsOpp()
             vedtaksperiode.håndterDager(dager)
             vedtaksperiode.lås()
-            dager.validerFeilTilVarsler(vedtaksperiode.periode, vedtaksperiode.finnArbeidsgiverperiode())
+
             vedtaksperiode.person.igangsettOverstyring(
                 dager,
                 Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
             )
-            return true
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {

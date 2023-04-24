@@ -24,7 +24,7 @@ internal class InntektsmeldingMatchingTest {
     @Test
     fun `1-16 - auu som eneste periode mottar inntektsmelding`() {
         val vedtaksperiode1 = 1.januar til 16.januar
-        val dager = inntektsmelding(listOf(vedtaksperiode1), 1.januar, 1.januar til 16.januar)
+        val dager = inntektsmelding(1.januar, 1.januar til 16.januar)
         assertEquals(1.januar til 16.januar, dager.håndter(vedtaksperiode1))
     }
 
@@ -32,7 +32,7 @@ internal class InntektsmeldingMatchingTest {
     fun `1-16, 17-31 - auu håndterer dager, forlengelse håndterer inntekt og refusjon`() {
         val vedtaksperiode1 = 1.januar til 16.januar
         val vedtaksperiode2 = 17.januar til 31.januar
-        val dager = inntektsmelding(listOf(vedtaksperiode1, vedtaksperiode2), 1.januar, 1.januar til 16.januar)
+        val dager = inntektsmelding(1.januar, 1.januar til 16.januar)
 
         assertEquals(1.januar til 16.januar, dager.håndter(vedtaksperiode1))
         assertNull(dager.håndter(vedtaksperiode2))
@@ -42,7 +42,7 @@ internal class InntektsmeldingMatchingTest {
     fun `2-17, 22-31 - opplyser om annen arbeidsgiverperiode`() {
         val vedtaksperiode1 = 2.januar til 17.januar
         val vedtaksperiode2 = 22.januar til 31.januar
-        val dager = inntektsmelding(listOf(vedtaksperiode1, vedtaksperiode2), 22.januar, 1.januar til 16.januar)
+        val dager = inntektsmelding(22.januar, 1.januar til 16.januar)
 
         assertEquals(2.januar til 16.januar, dager.håndter(vedtaksperiode1))
         assertEquals(1.januar.somPeriode(), dager.håndterPeriodeRettFør(vedtaksperiode1))
@@ -53,7 +53,7 @@ internal class InntektsmeldingMatchingTest {
     fun `arbeidsgiverperiode slutter på lørdag, forlengelse starter på mandag - første fraværsdag 5 januar`() {
         val vedtaksperiode1 = 5.januar til 20.januar
         val vedtaksperiode2 = 22.januar til 31.januar
-        val dager = inntektsmelding(listOf(vedtaksperiode1, vedtaksperiode2), 5.januar, 5.januar til 20.januar)
+        val dager = inntektsmelding(5.januar, 5.januar til 20.januar)
 
         assertEquals(5.januar til 20.januar, dager.håndter(vedtaksperiode1))
         assertNull(dager.håndterPeriodeRettFør(vedtaksperiode1))
@@ -64,7 +64,7 @@ internal class InntektsmeldingMatchingTest {
     fun `arbeidsgiverperiode slutter på lørdag, forlengelse starter på mandag - første fraværsdag 22 januar`() {
         val vedtaksperiode1 = 5.januar til 20.januar
         val vedtaksperiode2 = 22.januar til 31.januar
-        val dager = inntektsmelding(listOf(vedtaksperiode1, vedtaksperiode2), 22.januar, 5.januar til 20.januar)
+        val dager = inntektsmelding(22.januar, 5.januar til 20.januar)
 
         assertEquals(5.januar til 20.januar, dager.håndter(vedtaksperiode1))
         assertNull(dager.håndterPeriodeRettFør(vedtaksperiode1))
@@ -75,7 +75,7 @@ internal class InntektsmeldingMatchingTest {
     @Test
     fun `inntektsmelding treffer ingen vedtaksperiode`() {
         val vedtaksperiode1 = 1.januar til 31.januar
-        val dager = inntektsmelding(listOf(vedtaksperiode1), 1.mars, 1.mars til 16.mars)
+        val dager = inntektsmelding(1.mars, 1.mars til 16.mars)
 
         assertNull(dager.håndter(vedtaksperiode1))
         assertNull(dager.håndterPeriodeRettFør(vedtaksperiode1))
@@ -85,12 +85,11 @@ internal class InntektsmeldingMatchingTest {
     fun `oppstykket arbeidsgiverperiode med gjenstående dager`() {
         val vedtaksperiode1 = 1.januar til 20.januar
         val dager = inntektsmelding(
-            listOf(vedtaksperiode1),
             1.januar,
-            1.januar til 5.januar, // mandag - fredag
-            8.januar til 12.januar, // mandag - fredag,
-            15.januar til 19.januar, // mandag - fredag,
-            22.januar.somPeriode() // mandag
+            1.januar til 5.januar // mandag - fredag
+            // mandag - fredag,
+            // mandag - fredag,
+            // mandag
         )
 
         assertEquals(1.januar til 20.januar, dager.håndter(vedtaksperiode1))
@@ -102,10 +101,8 @@ internal class InntektsmeldingMatchingTest {
         val vedtaksperiode1 = 3.januar til 4.januar
         val vedtaksperiode2 = 8.januar til 10.januar
         val vedtaksperiode3 = 11.januar til 22.januar
-        val vedtaksperiode4 = 23.januar til 31.januar
 
         val dager = inntektsmelding(
-            listOf(vedtaksperiode1, vedtaksperiode2, vedtaksperiode3, vedtaksperiode4),
             8.januar,
             3.januar til 4.januar,
             8.januar til 21.januar
@@ -124,7 +121,7 @@ internal class InntektsmeldingMatchingTest {
         val vedtaksperiode1 = 1.januar til 16.januar
         val vedtaksperiode2 = 22.januar til 31.januar
 
-        val dager = inntektsmelding(listOf(vedtaksperiode1, vedtaksperiode2), 20.januar, 1.januar til 16.januar)
+        val dager = inntektsmelding(20.januar, 1.januar til 16.januar)
 
         assertEquals(1.januar til 16.januar, dager.håndter(vedtaksperiode1))
         assertNull(dager.håndterPeriodeRettFør(vedtaksperiode1))
@@ -134,7 +131,7 @@ internal class InntektsmeldingMatchingTest {
     @Test
     fun `Har blitt håndtert av`() {
         val vedtaksperiode1 =  2.januar til 15.januar
-        val dager = inntektsmelding(listOf(vedtaksperiode1), 1.januar, 1.januar til 16.januar)
+        val dager = inntektsmelding(1.januar, 1.januar til 16.januar)
 
         assertTrue(dager.skalHåndteresAv(vedtaksperiode1))
         assertFalse(dager.harBlittHåndtertAv(vedtaksperiode1))
@@ -147,7 +144,7 @@ internal class InntektsmeldingMatchingTest {
     @Test
     fun `arbeidsgiverperiode rett i forkant av vedtaksperiode`() {
         val vedtaksperiode1 = 17.januar til 31.januar
-        val dager = inntektsmelding(listOf(vedtaksperiode1), 1.januar, 1.januar til 16.januar)
+        val dager = inntektsmelding(1.januar, 1.januar til 16.januar)
         assertNull(dager.håndter(vedtaksperiode1))
         assertEquals(1.januar til 16.januar, dager.håndterPeriodeRettFør(vedtaksperiode1))
     }
@@ -155,7 +152,7 @@ internal class InntektsmeldingMatchingTest {
     @Test
     fun `arbeidsgiverperiode rett i forkant av vedtaksperiode med helg mellom`() {
         val vedtaksperiode1 = 22.januar til 31.januar
-        val dager = inntektsmelding(listOf(vedtaksperiode1), 4.januar, 4.januar til 19.januar)
+        val dager = inntektsmelding(4.januar, 4.januar til 19.januar)
         assertNull(dager.håndter(vedtaksperiode1))
         assertEquals(4.januar til 19.januar, dager.håndterPeriodeRettFør(vedtaksperiode1))
     }
@@ -166,7 +163,6 @@ internal class InntektsmeldingMatchingTest {
         val vedtaksperiode2 = 25.januar til 25.januar
 
         val dager = inntektsmelding(
-            listOf(vedtaksperiode1, vedtaksperiode2),
             25.januar,
             25.januar til 25.januar.plusDays(15)
         )
@@ -180,7 +176,6 @@ internal class InntektsmeldingMatchingTest {
         val vedtaksperiode2 = 25.januar til 25.januar
 
         val dager = inntektsmelding(
-            listOf(vedtaksperiode1, vedtaksperiode2),
             26.januar,
             25.januar til 25.januar.plusDays(15)
         )
@@ -194,7 +189,7 @@ internal class InntektsmeldingMatchingTest {
         val vedtaksperiode2 = 8.januar til 9.januar
         val vedtaksperiode3 = 11.januar til 12.januar
 
-        val dager = inntektsmelding(listOf(vedtaksperiode1, vedtaksperiode2, vedtaksperiode3), null, 1.januar til 16.januar)
+        val dager = inntektsmelding(null, 1.januar til 16.januar)
 
         assertEquals(2.januar til 3.januar, dager.håndter(vedtaksperiode1))
         assertEquals(8.januar til 9.januar, dager.håndter(vedtaksperiode2))
@@ -207,7 +202,7 @@ internal class InntektsmeldingMatchingTest {
     @Test
     fun `Må hensynta arbeidsdager før i tillegg til de opprinnelig dagene for å avgjøre om en periode er håndtert`() {
         val vedtaksperiode = 1.januar til 31.januar
-        val dager = inntektsmelding(listOf(vedtaksperiode), 1.januar, 15.januar til 30.januar)
+        val dager = inntektsmelding(1.januar, 15.januar til 30.januar)
         dager.leggTilArbeidsdagerFør(vedtaksperiode.start)
         assertEquals(1.januar til 30.januar, dager.håndter(vedtaksperiode))
         assertFalse(dager.harBlittHåndtertAv(31.desember(2017).somPeriode()))
@@ -217,7 +212,7 @@ internal class InntektsmeldingMatchingTest {
 
     private fun DagerFraInntektsmelding.håndter(periode: Periode): Periode? {
         var håndtertPeriode: Periode? = null
-        håndter(periode) {
+        håndter(periode, { null }) {
             håndtertPeriode = it.sykdomstidslinje().periode()
             Sykdomstidslinje()
         }
@@ -234,7 +229,6 @@ internal class InntektsmeldingMatchingTest {
 
     private companion object {
         private fun inntektsmelding(
-            perioder: List<Periode>,
             førsteFraværsdag: LocalDate?,
             vararg arbeidsgiverperiode: Periode
         ) = Inntektsmelding(

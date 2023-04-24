@@ -3,7 +3,7 @@ package no.nav.helse.hendelser.inntektsmelding
 import java.time.LocalDate
 import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
+import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
@@ -62,34 +62,21 @@ internal class DagerFraInntektsmelding(
 
     internal fun harBlittHåndtertAv(periode: Periode) = håndterteDager.any { it in periode }
 
-    internal fun håndter(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Sykdomstidslinje): Sykdomstidslinje? {
+    internal fun håndter(periode: Periode, arbeidsgiverperiode: () -> Arbeidsgiverperiode?, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Sykdomstidslinje): Sykdomstidslinje? {
         val overlappendeDager = overlappendeDager(periode).takeUnless { it.isEmpty() } ?: return null
         val arbeidsgiverSykedomstidslinje = oppdaterSykdom(BitAvInntektsmelding(inntektsmelding, overlappendeDager.omsluttendePeriode!!))
         gjenståendeDager.removeAll(overlappendeDager)
+        if (gjenståendeDager.isEmpty()) inntektsmelding.validerArbeidsgiverperiode(periode, arbeidsgiverperiode())
         return arbeidsgiverSykedomstidslinje.subset(periode)
     }
 
-    internal fun validerHvis(periode: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?) {
-        inntektsmelding.validerØvrig(periode)
-        // dersom vedtaksperioden håndterer dagene skal vi bare validere dersom gjenstående dager er tom,
-        // dette for å unngå at vi validerer/sammenligner arbeidsgiverperioder som fortsatt mangler grunnlag i beregningen
-        if (gjenståendeDager.isNotEmpty()) return
-        inntektsmelding.validerArbeidsgiverperiode(periode, arbeidsgiverperiode)
+    internal fun valider(periode: Periode) {
+        inntektsmelding.valider(periode, NullObserver)
     }
 
     internal fun valider(periode: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?) {
-        inntektsmelding.validerØvrig(periode)
+        valider(periode)
         inntektsmelding.validerArbeidsgiverperiode(periode, arbeidsgiverperiode)
-    }
-
-    internal fun validerFeilTilVarsler(periode: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?) {
-        // dersom vedtaksperioden håndterer dagene skal vi bare validere dersom gjenstående dager er tom,
-        // dette for å unngå at vi validerer/sammenligner arbeidsgiverperioder som fortsatt mangler grunnlag i beregningen
-        FunksjonelleFeilTilVarsler.wrap(inntektsmelding) {
-            inntektsmelding.validerØvrig(periode)
-            if (gjenståendeDager.isNotEmpty()) return@wrap
-            inntektsmelding.validerArbeidsgiverperiode(periode, arbeidsgiverperiode)
-        }
     }
 
     internal fun noenDagerHåndtert() = håndterteDager.isNotEmpty()
