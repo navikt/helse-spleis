@@ -86,10 +86,10 @@ internal class InntektsmeldingMatchingTest {
         val vedtaksperiode1 = 1.januar til 20.januar
         val dager = inntektsmelding(
             1.januar,
-            1.januar til 5.januar // mandag - fredag
-            // mandag - fredag,
-            // mandag - fredag,
-            // mandag
+            1.januar til 5.januar, // mandag - fredag
+            8.januar til 12.januar, // mandag - fredag,
+            15.januar til 19.januar, // mandag - fredag,
+            22.januar.somPeriode() // mandag
         )
 
         assertEquals(1.januar til 20.januar, dager.håndter(vedtaksperiode1))
