@@ -44,9 +44,11 @@ import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkår
 import no.nav.helse.person.Arbeidsgiver.Companion.trengerInntektsmelding
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Dokumentsporing.Companion.ider
+import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingId
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.Dokumentsporing.Companion.toMap
 import no.nav.helse.person.ForlengelseFraInfotrygd.IKKE_ETTERSPURT
+import no.nav.helse.person.PersonObserver.ArbeidsgiveropplysningerKorrigertEvent.KorrigerendeInntektektsopplysningstype.SAKSBEHANDLER
 import no.nav.helse.person.Sykefraværstilfelleeventyr.Companion.bliMed
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -396,7 +398,19 @@ internal class Vedtaksperiode private constructor(
         if (!hendelse.erRelevant(periode)) return
         kontekst(hendelse)
         hendelse.leggTil(hendelseIder)
+        val arbeidsgiverperiodeFørOverstyring = arbeidsgiver.arbeidsgiverperiode(periode())
         tilstand.håndter(this, hendelse)
+        val arbeidsgiverperiodeEtterOverstyring = arbeidsgiver.arbeidsgiverperiode(periode())
+        if (arbeidsgiverperiodeFørOverstyring != arbeidsgiverperiodeEtterOverstyring) {
+            hendelseIder.sisteInntektsmeldingId()?.let {
+                person.arbeidsgiveropplysningerKorrigert(
+                    PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
+                    korrigerendeInntektsopplysningId = hendelse.meldingsreferanseId(),
+                    korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
+                    korrigertInntektsmeldingId = it
+                ))
+            }
+        }
         hendelse.trimLeft(periode.endInclusive)
     }
 

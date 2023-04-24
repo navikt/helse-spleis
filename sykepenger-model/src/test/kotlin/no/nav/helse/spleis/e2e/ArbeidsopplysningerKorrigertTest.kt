@@ -1,11 +1,14 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
+import no.nav.helse.desember
+import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.PersonObserver.*
+import no.nav.helse.person.PersonObserver.ArbeidsgiveropplysningerKorrigertEvent
 import no.nav.helse.person.PersonObserver.ArbeidsgiveropplysningerKorrigertEvent.KorrigerendeInntektektsopplysningstype.INNTEKTSMELDING
 import no.nav.helse.person.PersonObserver.ArbeidsgiveropplysningerKorrigertEvent.KorrigerendeInntektektsopplysningstype.SAKSBEHANDLER
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -13,7 +16,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class KorrigerteArbeidsgiveropplysningerEventTest : AbstractEndToEndTest() {
+internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
 
     @Test
     fun `Sender ut spisset event ved korrigerende inntektsmelding som endrer inntekt og refusjon`() {
@@ -201,6 +204,51 @@ internal class KorrigerteArbeidsgiveropplysningerEventTest : AbstractEndToEndTes
     }
 
     @Test
+    fun `Sender ut spisset event ved saksbehandleroverstyring som endrer agp`() {
+        nyPeriode(1.januar til 31.januar)
+        val korrigertInntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        val korrigerendeInntektsopplysningId = håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(
+                    31.desember(2017),
+                    Dagtype.Egenmeldingsdag
+                )
+            )
+        ).meldingsreferanseId()
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        val expected = ArbeidsgiveropplysningerKorrigertEvent(
+            korrigertInntektsmeldingId = korrigertInntektsmeldingId,
+            korrigerendeInntektsopplysningId = korrigerendeInntektsopplysningId,
+            korrigerendeInntektektsopplysningstype = SAKSBEHANDLER
+        )
+        val actual = observatør.arbeidsgiveropplysningerKorrigert.single()
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `Sender ikke ut spisset event ved tidslinjeoverstyring som ikke fører til en endring av agp`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(
+                    10.januar,
+                    Dagtype.Feriedag
+                )
+            )
+        ).meldingsreferanseId()
+        håndterYtelser(1.vedtaksperiode)
+        val actual = observatør.arbeidsgiveropplysningerKorrigert
+        assertEquals(0, actual.size)
+    }
+
+    @Test
     fun `Sender ikke ut spisset event ved korrigerende inntektsmelding som ikke fører til endring`() {
         nyPeriode(1.januar til 31.januar)
         håndterInntektsmelding(
@@ -229,4 +277,23 @@ internal class KorrigerteArbeidsgiveropplysningerEventTest : AbstractEndToEndTes
         assertTrue(observatør.arbeidsgiveropplysningerKorrigert.isEmpty())
     }
 
+    @Test
+    fun `Sender ikke ut spisset event ved korrigerende inntektsmelding som korrigerer noe annet enn en inntektsmelding`() {
+        nyttVedtak(1.januar,  31.januar)
+        håndterOverstyrArbeidsgiveropplysninger(
+            1.januar,
+            arbeidsgiveropplysninger = listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    ORGNUMMER,
+                    40000.månedlig,
+                    "forklaring",
+                    null,
+                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
+                )
+            )
+        )
+        assertEquals(1, observatør.arbeidsgiveropplysningerKorrigert.size)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 41000.månedlig)
+        assertEquals(1, observatør.arbeidsgiveropplysningerKorrigert.size)
+    }
 }

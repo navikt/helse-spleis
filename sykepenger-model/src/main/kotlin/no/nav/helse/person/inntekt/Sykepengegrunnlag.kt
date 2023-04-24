@@ -214,8 +214,6 @@ internal class Sykepengegrunnlag(
         return kopierSykepengegrunnlag(resultat, deaktiverteArbeidsforhold)
     }
 
-
-
     private fun kopierSykepengegrunnlag(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>
