@@ -374,7 +374,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             sykepengegrunnlag.validerAvvik(aktivitetslogg, sammenligningsgrunnlag)
             sykepengegrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjening)
             sykepengegrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
-            sammenligningsgrunnlag.sjekkMuligeGhostsUtenArbeidsforhold(aktivitetslogg, sykepengegrunnlag)
         }
 
         override fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, organisasjonsnummerRelevanteArbeidsgivere: List<String>): Boolean {

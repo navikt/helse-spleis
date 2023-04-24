@@ -8,7 +8,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -18,7 +17,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -38,7 +36,6 @@ import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
@@ -49,29 +46,6 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar), orgnummer = a2)
         assertIngenVarsler(1.vedtaksperiode.filter(orgnummer = a2))
-    }
-
-    @Test
-    fun `En arbeidsgiver med inntekter fra flere arbeidsgivere de siste tre månedene - får ikke warning om at det er flere arbeidsgivere, får warning om at det er flere inntektskilder enn arbeidsforhold`() {
-        val periode = 1.januar til 31.januar
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt 1000.månedlig
-                }
-            }
-        ))
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
-
-        assertVarsel(RV_IV_1, AktivitetsloggFilter.person())
-        Assertions.assertFalse(person.personLogg.toString().contains(RV_VV_2.name))
     }
 
     @Test

@@ -37,7 +37,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.omre
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.sjekkForNyArbeidsgiver
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.sjekkMuligeGhostsUtenArbeidsforhold
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.subsummer
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
@@ -154,10 +153,6 @@ internal class Sykepengegrunnlag(
 
     internal fun markerFlereArbeidsgivere(aktivitetslogg: IAktivitetslogg) {
         arbeidsgiverInntektsopplysninger.markerFlereArbeidsgivere(aktivitetslogg)
-    }
-
-    internal fun sjekkMuligeGhostsUtenArbeidsforhold(aktivitetslogg: IAktivitetslogg, sammenligningsgrunnlag: Map<String, List<Skatteopplysning>>) {
-        return arbeidsgiverInntektsopplysninger.sjekkMuligeGhostsUtenArbeidsforhold(aktivitetslogg, skjæringstidspunkt, sammenligningsgrunnlag)
     }
 
     internal fun validerAvvik(aktivitetslogg: IAktivitetslogg, sammenligningsgrunnlag: Sammenligningsgrunnlag, valideringstrategi: IAktivitetslogg.(Varselkode) -> Unit = IAktivitetslogg::funksjonellFeil) {

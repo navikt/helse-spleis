@@ -7,9 +7,6 @@ import java.util.UUID
 import no.nav.helse.etterlevelse.SkattBuilder.Companion.subsumsjonsformat
 import no.nav.helse.etterlevelse.SkatteopplysningPort
 import no.nav.helse.isWithinRangeOf
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.YTELSE_FRA_OFFENTLIGE
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 
@@ -72,11 +69,6 @@ class Skatteopplysning(
 
         fun sisteTreMåneder(dato: LocalDate, inntektsopplysninger: List<Skatteopplysning>) =
             sisteMåneder(dato, 3, inntektsopplysninger)
-
-        fun List<Skatteopplysning>.sjekkMuligeGhostsUtenArbeidsforhold(aktivitetslogg: IAktivitetslogg, dato: LocalDate) {
-            if (sisteTreMåneder(dato, this).filterNot { it.type == YTELSE_FRA_OFFENTLIGE }.isEmpty()) return
-            aktivitetslogg.varsel(Varselkode.RV_IV_1)
-        }
 
         fun omregnetÅrsinntekt(liste: List<Skatteopplysning>) = liste
             .map { it.beløp }

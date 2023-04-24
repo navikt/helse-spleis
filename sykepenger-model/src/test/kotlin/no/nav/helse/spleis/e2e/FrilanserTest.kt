@@ -1,7 +1,9 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDate
 import java.time.YearMonth
 import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -9,11 +11,15 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -27,6 +33,7 @@ import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 internal class FrilanserTest : AbstractEndToEndTest() {
@@ -60,7 +67,7 @@ internal class FrilanserTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertIngenFunksjonelleFeil()
-        assertVarsel(Varselkode.RV_IV_1)
+        assertIngenVarsler()
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
     }
 
@@ -156,4 +163,102 @@ internal class FrilanserTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK
         )
     }
+
+    @Test
+    fun `Frilansere oppdages ikke i Aa-reg, men case med frilanser-ghost skal gi warning`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = INNTEKT, orgnummer = a1)
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH))
+        val sykepengegrunnlag = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(3))
+        )
+        val inntektsvurdering = Inntektsvurdering(
+            listOf(
+                sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12)),
+                sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(12))
+            )
+        )
+
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            orgnummer = a1,
+            inntektsvurdering = inntektsvurdering,
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = sykepengegrunnlag,
+                arbeidsforhold = emptyList()
+            ),
+            arbeidsforhold = arbeidsforhold
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        assertIngenVarsler()
+        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a1)
+    }
+
+    @Test
+    fun `Førstegangsbehandling med ekstra arbeidsforhold som ikke er aktivt - skal ikke få warning hvis det er flere arbeidsforhold`() {
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a1)
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.mars til 16.mars),
+            førsteFraværsdag = 1.mars,
+            beregnetInntekt = 10000.månedlig,
+            orgnummer = a1
+        )
+        val grunnlagForSykepengegrunnlag = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 100.månedlig.repeat(3))
+        )
+        val sammenligningsgrunnlag = listOf(
+            sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(12)),
+            sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 100.månedlig.repeat(12))
+        )
+        val arbeidsforhold = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = 1.februar)
+        )
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(sammenligningsgrunnlag),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = grunnlagForSykepengegrunnlag,
+                arbeidsforhold = emptyList()
+            ),
+            arbeidsforhold = arbeidsforhold,
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        Assertions.assertFalse(person.personLogg.toString().contains(Varselkode.RV_VV_2.name))
+        assertIngenVarsler()
+    }
+
+    @Test
+    fun `En arbeidsgiver med inntekter fra flere arbeidsgivere de siste tre månedene - får ikke warning om at det er flere arbeidsgivere, får warning om at det er flere inntektskilder enn arbeidsforhold`() {
+        val periode = 1.januar til 31.januar
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), orgnummer = a1)
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt 1000.månedlig
+                }
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        assertIngenVarsler()
+        Assertions.assertFalse(person.personLogg.toString().contains(Varselkode.RV_VV_2.name))
+    }
+
 }

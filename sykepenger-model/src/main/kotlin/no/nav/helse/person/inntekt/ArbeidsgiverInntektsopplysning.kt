@@ -10,7 +10,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.person.inntekt.Skatteopplysning.Companion.sjekkMuligeGhostsUtenArbeidsforhold
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -104,15 +103,6 @@ class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.markerFlereArbeidsgivere(aktivitetslogg: IAktivitetslogg) {
             return map { it.inntektsopplysning }.markerFlereArbeidsgivere(aktivitetslogg)
-        }
-
-        // sjekker at det ikke er arbeidsgivere i sammenligningsgrunnlaget siste tre måneder, som ikke inngår i sykepengegrunnlaget
-        internal fun List<ArbeidsgiverInntektsopplysning>.sjekkMuligeGhostsUtenArbeidsforhold(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, sammenligningsgrunnlag: Map<String, List<Skatteopplysning>>) {
-            val arbeidsgivereSisteTreMåneder = map { it.orgnummer }
-            sammenligningsgrunnlag
-                .filterNot { (orgnummer, _) -> orgnummer in arbeidsgivereSisteTreMåneder }
-                .flatMap { it.value }
-                .sjekkMuligeGhostsUtenArbeidsforhold(aktivitetslogg, skjæringstidspunkt)
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.refusjonsopplysninger(organisasjonsnummer: String) =

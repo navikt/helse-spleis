@@ -11,15 +11,12 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -41,49 +38,10 @@ import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
-
-    @Test
-    fun `Førstegangsbehandling med ekstra arbeidsforhold som ikke er aktivt - skal ikke få warning hvis det er flere arbeidsforhold`() {
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(
-            listOf(1.mars til 16.mars),
-            førsteFraværsdag = 1.mars,
-            beregnetInntekt = 10000.månedlig,
-            orgnummer = a1
-        )
-        val grunnlagForSykepengegrunnlag = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 100.månedlig.repeat(3))
-        )
-        val sammenligningsgrunnlag = listOf(
-            sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(12)),
-            sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 100.månedlig.repeat(12))
-        )
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = 1.februar)
-        )
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            inntektsvurdering = Inntektsvurdering(sammenligningsgrunnlag),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = grunnlagForSykepengegrunnlag,
-                arbeidsforhold = emptyList()
-            ),
-            arbeidsforhold = arbeidsforhold,
-            orgnummer = a1
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
-        Assertions.assertFalse(person.personLogg.toString().contains(RV_VV_2.name))
-        assertVarsel(RV_IV_1, 1.vedtaksperiode.filter())
-    }
 
     @Test
     fun `Filtrerer ut irrelevante arbeidsforhold per arbeidsgiver`() {
@@ -590,39 +548,4 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         assertVarsel(RV_VV_1, 1.vedtaksperiode.filter(a1))
     }
 
-    @Test
-    fun `Frilansere oppdages ikke i Aa-reg, men case med frilanser-ghost skal gi warning`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = INNTEKT, orgnummer = a1)
-        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH))
-        val sykepengegrunnlag = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(3))
-        )
-        val inntektsvurdering = Inntektsvurdering(
-            listOf(
-                sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12)),
-                sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(12))
-            )
-        )
-
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            orgnummer = a1,
-            inntektsvurdering = inntektsvurdering,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = sykepengegrunnlag,
-                arbeidsforhold = emptyList()
-            ),
-            arbeidsforhold = arbeidsforhold
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
-
-        assertVarsel(RV_IV_1, 1.vedtaksperiode.filter(a1))
-        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a1)
-    }
 }
