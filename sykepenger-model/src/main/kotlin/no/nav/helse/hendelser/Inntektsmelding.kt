@@ -18,7 +18,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_6
@@ -73,11 +72,13 @@ class Inntektsmelding(
         else -> arbeidsgiverperiode
     }
     private var sykdomstidslinje: Sykdomstidslinje
-
     init {
         if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) logiskFeil("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
         sykdomstidslinje = arbeidsgivertidslinje()
     }
+
+    private var håndtertInntekt = false
+    private val inntektsdato = if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) førsteFraværsdag else this.arbeidsgiverperioder.maxOf { it.start }
 
     private companion object {
         private val ikkeStøttedeBegrunnelserForReduksjon = setOf(
@@ -167,6 +168,7 @@ class Inntektsmelding(
     }
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, alternativInntektsdato: LocalDate) {
+        if (alternativInntektsdato == this.inntektsdato) return
         if (!inntektshistorikk.leggTil(Inntektsmelding(alternativInntektsdato, meldingsreferanseId(), beregnetInntekt))) return
         info("Lagrer inntekt på alternativ inntektsdato $alternativInntektsdato")
     }
@@ -182,8 +184,6 @@ class Inntektsmelding(
     }
 
     internal fun inntektsmeldingsinfo() = InntektsmeldingInfo(id = meldingsreferanseId(), arbeidsforholdId = arbeidsforholdId)
-    private var håndtertInntekt = false
-    private val inntektsdato = if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) førsteFraværsdag else arbeidsgiverperioder.maxOf { it.start }
 
     override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>): Boolean {
         håndtertInntekt = true

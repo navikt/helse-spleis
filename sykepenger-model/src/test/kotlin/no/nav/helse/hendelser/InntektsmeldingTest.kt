@@ -3,6 +3,8 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
+import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.inspectors.inspektør
@@ -429,7 +431,7 @@ internal class InntektsmeldingTest {
     @Test
     fun `førsteFraværsdag kan være null ved lagring av inntekt`() {
         inntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = null)
-        assertDoesNotThrow { inntektsmelding.addInntekt(Inntektshistorikk(), 1.januar) }
+        assertDoesNotThrow { inntektsmelding.addInntekt(Inntektshistorikk(), NullObserver) }
     }
 
     @Test
@@ -439,6 +441,14 @@ internal class InntektsmeldingTest {
         inntektsmelding.addInntekt(inntektshistorikk, 1.februar)
         assertEquals(2000.månedlig, inntektshistorikk.avklarSykepengegrunnlag(1.februar, 1.februar, null)?.inspektør?.beløp)
         assertNull(inntektshistorikk.avklarSykepengegrunnlag(3.februar, 3.februar, null))
+    }
+
+    @Test
+    fun `lagrer inntekt på første dag i arbeidsgiverpeiroden`() {
+        inntektsmelding(listOf(1.januar til 10.januar, 11.januar til 16.januar), refusjonBeløp = 2000.månedlig, beregnetInntekt = 2000.månedlig, førsteFraværsdag = 1.januar)
+        val inntektshistorikk = Inntektshistorikk()
+        inntektsmelding.addInntekt(inntektshistorikk, NullObserver)
+        assertEquals(2000.månedlig, inntektshistorikk.avklarSykepengegrunnlag(1.januar, 1.januar, null)?.inspektør?.beløp)
     }
 
     @Test
