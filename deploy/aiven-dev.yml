@@ -107,6 +107,9 @@ spec:
           application: spenn
           access: readwrite
         - team: tbd
+          application: spenn-mq
+          access: readwrite
+        - team: tbd
           application: spenn-simulering
           access: readwrite
         - team: tbd
