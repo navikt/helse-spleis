@@ -138,4 +138,8 @@ internal class Infotrygdhistorikk private constructor(
 
 
     private fun harHistorikk() = elementer.isNotEmpty()
+    internal fun harUtbetaltI(periode: Periode): Boolean {
+        if (!harHistorikk()) return false
+        return siste.harUtbetaltI(periode)
+    }
 }

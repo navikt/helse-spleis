@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.PersonPåminnelse
 
 internal class PersonHendelsefabrikk(
     private val aktørId: String,
@@ -24,5 +25,11 @@ internal class PersonHendelsefabrikk(
             aktørId = aktørId,
             skjæringstidspunkt = skjæringstidspunkt,
             overstyrteArbeidsforhold = overstyrteArbeidsforhold.toList()
+        )
+    internal fun lagPåminnelse() =
+        PersonPåminnelse(
+            meldingsreferanseId = UUID.randomUUID(),
+            fødselsnummer = personidentifikator.toString(),
+            aktørId = aktørId
         )
 }

@@ -2421,6 +2421,14 @@ internal class Vedtaksperiode private constructor(
             it.tilstand == AvsluttetUtenUtbetaling && it.forventerInntekt()
         }
 
+        internal val IKKE_AUU: VedtaksperiodeFilter = {
+            it.tilstand != AvsluttetUtenUtbetaling
+        }
+
+        internal val AUU_OVERLAPPER_MED_IT = { infotrygdhistorikk: Infotrygdhistorikk ->
+            { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.tilstand == AvsluttetUtenUtbetaling && infotrygdhistorikk.harUtbetaltI(vedtaksperiode.periode) }
+        }
+
         // TODO: denne kan fjernes når speilvendt er over på å hente varsler fra spesialist
         internal fun aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode: Vedtaksperiode): Aktivitetslogg {
             val tidligereUbetalt = if (vedtaksperiode.sykdomstidslinje.periode() != null)
@@ -2437,6 +2445,23 @@ internal class Vedtaksperiode private constructor(
             it.tilstand == AvventerInntektsmelding
         }.filter {
             it.forventerInntekt()
+        }
+
+        internal fun List<Vedtaksperiode>.forkast(hendelse: IAktivitetslogg, ønsketForkastet: Vedtaksperiode){
+            val førsteSomOverlapperEllerErEtter = firstOrNull { it.periode.overlapperMed(ønsketForkastet.periode) || it.periode.starterEtter(ønsketForkastet.periode) }
+            if (førsteSomOverlapperEllerErEtter != null && førsteSomOverlapperEllerErEtter.påvirkerArbeidsgiverperioden(ønsketForkastet))  {
+                hendelse.info("Kan ikke forkaste vedtaksperiode ${ønsketForkastet.id} ved personPåminnelse")
+                sikkerlogg.info(
+                    "Kan ikke forkaste vedtaksperiode ${ønsketForkastet.periode} på ${ønsketForkastet.organisasjonsnummer} fordi vedtaksperiode ${førsteSomOverlapperEllerErEtter.periode} i tilstand ${førsteSomOverlapperEllerErEtter.tilstand.type.name} på ${førsteSomOverlapperEllerErEtter.organisasjonsnummer} fordi den påvirker arbeidsgiverperioden. {} {}",
+                    keyValue("aktørId", ønsketForkastet.aktørId),
+                    keyValue("sammeArbeidsgiver", ønsketForkastet.organisasjonsnummer == førsteSomOverlapperEllerErEtter.organisasjonsnummer)
+                )
+                return
+            }
+            hendelse.info("Forkaster vedtaksperiode ${ønsketForkastet.id} ved personPåminnelse")
+            ønsketForkastet.person.søppelbøtte(hendelse) {
+                it.id == ønsketForkastet.id
+            }
         }
 
         internal fun List<Vedtaksperiode>.venter(nestemann: Vedtaksperiode) {

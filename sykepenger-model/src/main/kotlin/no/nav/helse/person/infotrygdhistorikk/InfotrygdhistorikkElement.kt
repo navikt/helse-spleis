@@ -195,5 +195,8 @@ class InfotrygdhistorikkElement private constructor(
         )
 
     }
+
+    internal fun harUtbetaltI(periode: Periode) = betaltePerioder().any { it.overlapperMed(periode) }
+
 }
 

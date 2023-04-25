@@ -302,6 +302,11 @@ internal class TestPerson(
                 .håndter(Person::håndter)
         }
 
+        internal fun håndterPersonPåminnelse() {
+            personHendelsefabrikk.lagPåminnelse()
+                .håndter(Person::håndter)
+        }
+
         internal fun håndterOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: ArbeidsforholdOverstyrt) {
             personHendelsefabrikk.lagOverstyrArbeidsforhold(skjæringstidspunkt, *overstyrteArbeidsforhold)
                 .håndter(Person::håndter)
