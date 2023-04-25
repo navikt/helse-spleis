@@ -532,6 +532,13 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Skal ikke sende ut forespørsel for en periode som allerede har mottatt inntektsmelding -- selv om håndteringen feiler`() {
+        håndterInntektsmelding(listOf(1.januar til 16.januar), harOpphørAvNaturalytelser = true)
+        nyPeriode(1.januar til 31.januar)
+        assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+    }
+
+    @Test
     fun `Skal sende ut forespørsel for en periode dersom inntektsmeldingReplay ikke bærer noen frukter`() {
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         nyPeriode(1.februar til 28.februar)
