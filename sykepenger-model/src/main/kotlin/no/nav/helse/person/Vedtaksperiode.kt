@@ -2463,6 +2463,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal fun List<Vedtaksperiode>.forkast(hendelse: IAktivitetslogg, ønsketForkastet: Vedtaksperiode){
+            if (!ønsketForkastet.arbeidsgiver.kanForkastes(ønsketForkastet)) return hendelse.info("Kan ikke forkaste vedtaksperiode ${ønsketForkastet.id} ved personPåminnelse")
             val førsteArbeidsdagEtter = ønsketForkastet.periode.endInclusive.nesteArbeidsdag()
             val faresonen = førsteArbeidsdagEtter til førsteArbeidsdagEtter.plusDays(17)
             val overlapperMedFaresonen = filter { it.periode.overlapperMed(faresonen) }

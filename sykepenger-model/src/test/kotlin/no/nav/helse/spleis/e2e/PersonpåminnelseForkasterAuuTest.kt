@@ -14,11 +14,16 @@ import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
 
@@ -281,6 +286,93 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
 
         a1 {
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
+        }
+    }
+
+    @Test
+    fun `Flytter skjæringstidspunkt på annen arbeidsgiver ved forkasting av Auu`() {
+        a1 {
+            nyPeriode(5.januar til 17.januar)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        }
+        a2 {
+            nyttVedtak(1.januar, 31.januar, arbeidsgiverperiode = listOf(10.januar til 25.januar))
+            assertEquals("AAAAARR AASSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
+            assertEquals(5.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            infotrygdUtbetalingUtenFunksjonelleFeil(17.januar til 17.januar)
+            nullstillTilstandsendringer()
+            håndterPersonPåminnelse()
+            assertEquals(10.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+        }
+
+        a1 {
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+        }
+
+        a2 {
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+            assertEquals(10.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+        }
+    }
+
+    @Test
+    fun `Flytter skjæringstidspunkt på annen arbeidsgiver på periode in play ved forkasting av Auu`() {
+        a1 {
+            nyPeriode(5.januar til 17.januar)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        }
+        a2 {
+            nyttVedtak(1.januar, 31.januar, arbeidsgiverperiode = listOf(10.januar til 25.januar))
+            assertEquals("AAAAARR AASSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
+            assertEquals(5.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterYtelser(2.vedtaksperiode)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
+
+            infotrygdUtbetalingUtenFunksjonelleFeil(17.januar til 17.januar)
+            nullstillTilstandsendringer()
+            håndterPersonPåminnelse()
+            assertEquals(10.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+            assertThrows<IllegalArgumentException>{håndterSimulering(2.vedtaksperiode)}
+        }
+
+        a1 {
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
+    fun `Flytter skjæringstidspunkt på annen arbeidsgiver på periode in play ved forkasting av Auu med arbeidsdager`() {
+        a1 {
+            håndterSøknad(Sykdom(5.januar, 17.januar, 100.prosent))
+            håndterInntektsmelding(listOf(10.januar til 25.januar))
+            assertEquals("ARR AASSSHH SSS", inspektør.sykdomstidslinje.toShortString())
+            assertEquals(10.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        }
+        a2 {
+            håndterSøknad(Sykdom(1.januar, 31.januar,100.prosent))
+            håndterInntektsmelding(listOf(12.januar til 27.januar))
+            assertEquals("AAAAARR AAAASHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
+            assertEquals(10.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+
+            infotrygdUtbetalingUtenFunksjonelleFeil(17.januar til 17.januar)
+            nullstillTilstandsendringer()
+            håndterPersonPåminnelse()
+            assertEquals(12.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+
+        }
+
+        a1 {
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
         }
     }
 
