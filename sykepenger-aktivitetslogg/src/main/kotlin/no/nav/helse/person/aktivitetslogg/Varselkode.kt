@@ -73,6 +73,7 @@ enum class Varselkode(
     RV_IM_20("Finner ikke informasjon om refusjon i inntektsmelding og personen har brukerutbetaling", avviklet = true),
     RV_IM_21("Inntektsmeldingen mangler ikke arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode", avviklet = true),
     RV_IM_22("Det er mottatt flere inntektsmeldinger på kort tid for samme arbeidsgiver"),
+    RV_IM_23("Arbeidsgiver har oppgitt hullete arbeidsgiverperiode og begrunnelse for redusert utbetaling i arbeidsgiverperiode"),
 
     // ST: Sykdomstidslinje
     RV_ST_1("Sykdomstidslinjen inneholder ustøttet dag."),

@@ -19,9 +19,13 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_23
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -45,20 +49,19 @@ import org.junit.jupiter.api.Test
 internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
 
     @Test
-    fun `nav utbetaler en hullete arbeidsgiverperiode`() {
+    fun `hullete AGP sammen med begrunnelse for reduksjon blir kastet ut foreløpig`() {
         val søknad = håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
         val im = håndterInntektsmelding(listOf(1.januar til 5.januar, 10.januar til 20.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn", refusjon = Inntektsmelding.Refusjon(INGEN, null))
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
+        assertFunksjonellFeil(RV_IM_23)
         assertEquals(listOf(
             Dokumentsporing.søknad(søknad),
-            Dokumentsporing.inntektsmeldingDager(im),
-            Dokumentsporing.inntektsmeldingInntekt(im)
+            Dokumentsporing.inntektsmeldingDager(im)
         ), inspektør.hendelser(1.vedtaksperiode))
         assertEquals(listOf(
-            im to 1.vedtaksperiode.id(ORGNUMMER),
             im to 1.vedtaksperiode.id(ORGNUMMER)
         ), observatør.inntektsmeldingHåndtert)
-        assertTrue(observatør.inntektsmeldingIkkeHåndtert.isEmpty())
+        assertEquals(1, observatør.inntektsmeldingIkkeHåndtert.size)
     }
 
     @Test
