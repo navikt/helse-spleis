@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
@@ -12,7 +11,7 @@ import org.junit.jupiter.api.Test
 
 internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndMediatorTest() {
     @Test
-    fun `Sender ut arbeidsopplysninger_korrigert når arbeidsgiveropplysninger endres av en korrigerende IM`() = Toggle.Splarbeidsbros.enable {
+    fun `Sender ut arbeidsopplysninger_korrigert når arbeidsgiveropplysninger endres av en korrigerende IM`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))

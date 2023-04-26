@@ -1633,7 +1633,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
-            if(Toggle.Splarbeidsbros.enabled && vedtaksperiode.forventerInntekt() && !vedtaksperiode.erForlengelse()) {
+            if(vedtaksperiode.forventerInntekt() && !vedtaksperiode.erForlengelse()) {
                 vedtaksperiode.trengerArbeidsgiveropplysninger()
             }
             vurderOmKanGåVidere(vedtaksperiode, inntektsmeldingReplayUtført)
