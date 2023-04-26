@@ -39,6 +39,7 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.memoized
+import no.nav.helse.nesteArbeidsdag
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
 import no.nav.helse.person.Arbeidsgiver.Companion.trengerInntektsmelding
@@ -2462,20 +2463,26 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal fun List<Vedtaksperiode>.forkast(hendelse: IAktivitetslogg, ønsketForkastet: Vedtaksperiode){
-            val førsteSomOverlapperEllerErEtter = firstOrNull { it.periode.overlapperMed(ønsketForkastet.periode) || it.periode.starterEtter(ønsketForkastet.periode) }
-            if (førsteSomOverlapperEllerErEtter != null && førsteSomOverlapperEllerErEtter.påvirkerArbeidsgiverperioden(ønsketForkastet))  {
-                hendelse.info("Kan ikke forkaste vedtaksperiode ${ønsketForkastet.id} ved personPåminnelse")
-                sikkerlogg.info(
-                    "Kan ikke forkaste vedtaksperiode ${ønsketForkastet.periode} på ${ønsketForkastet.organisasjonsnummer} fordi vedtaksperiode ${førsteSomOverlapperEllerErEtter.periode} i tilstand ${førsteSomOverlapperEllerErEtter.tilstand.type.name} på ${førsteSomOverlapperEllerErEtter.organisasjonsnummer} fordi den påvirker arbeidsgiverperioden. {} {}",
-                    keyValue("aktørId", ønsketForkastet.aktørId),
-                    keyValue("sammeArbeidsgiver", ønsketForkastet.organisasjonsnummer == førsteSomOverlapperEllerErEtter.organisasjonsnummer)
-                )
+            val førsteArbeidsdagEtter = ønsketForkastet.periode.endInclusive.nesteArbeidsdag()
+            val faresonen = førsteArbeidsdagEtter til førsteArbeidsdagEtter.plusDays(17)
+            val overlapperMedFaresonen = filter { it.periode.overlapperMed(faresonen) }
+            val overlappPåSammeArbeidsgiver = overlapperMedFaresonen.filter { it.organisasjonsnummer == ønsketForkastet.organisasjonsnummer }
+            val tryggOverlappMedFaresonen = overlapperMedFaresonen.filter { it.periode.start <= ønsketForkastet.periode.start }
+            if (overlapperMedFaresonen.isEmpty() || (tryggOverlappMedFaresonen.isNotEmpty() && overlappPåSammeArbeidsgiver.isEmpty())) {
+                hendelse.info("Forkaster vedtaksperiode ${ønsketForkastet.id} ved personPåminnelse")
+                ønsketForkastet.person.søppelbøtte(hendelse) {
+                    it.id == ønsketForkastet.id
+                }
                 return
             }
-            hendelse.info("Forkaster vedtaksperiode ${ønsketForkastet.id} ved personPåminnelse")
-            ønsketForkastet.person.søppelbøtte(hendelse) {
-                it.id == ønsketForkastet.id
+            hendelse.info("Kan ikke forkaste vedtaksperiode ${ønsketForkastet.id} ved personPåminnelse")
+            val vedtaksperioderSomBlokkerer = (overlapperMedFaresonen - tryggOverlappMedFaresonen).map {
+                "${it.periode} på ${it.organisasjonsnummer} "
             }
+            sikkerlogg.info(
+                "Kan ikke forkaste vedtaksperiode ${ønsketForkastet.periode} på ${ønsketForkastet.organisasjonsnummer} fordi $vedtaksperioderSomBlokkerer blokkerer. {}",
+                keyValue("aktørId", ønsketForkastet.aktørId)
+            )
         }
 
         internal fun List<Vedtaksperiode>.venter(nestemann: Vedtaksperiode) {
