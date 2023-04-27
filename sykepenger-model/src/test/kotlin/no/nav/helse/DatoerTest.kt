@@ -143,25 +143,29 @@ internal class DatoerTest {
     }
 
     @Test
-    fun `første og neste arbeidsdag`() {
-        val mandag = 1.januar
-        val tirsdag = 2.januar
-        val fredag = 5.januar
-        val lørdag = 6.januar
-        val søndag = 7.januar
-        val nesteMandag = 8.januar
-        val nesteTirsdag = 9.januar
+    fun `første, første etter og neste arbeidsdag`() {
+        val mandag = mandag(1.januar)
+        val tirsdag = tirsdag(2.januar)
+        val fredag = fredag(5.januar)
+        val lørdag = lørdag(6.januar)
+        val søndag = søndag(7.januar)
+        val nesteMandag = mandag(8.januar)
+        val nesteTirsdag = tirsdag(9.januar)
         assertEquals(mandag, mandag.førsteArbeidsdag())
+        assertEquals(tirsdag, mandag.førsteArbeidsdagEtter)
         assertEquals(tirsdag, mandag.nesteArbeidsdag())
 
         assertEquals(fredag, fredag.førsteArbeidsdag())
+        assertEquals(nesteMandag, fredag.førsteArbeidsdagEtter)
         assertEquals(nesteMandag, fredag.nesteArbeidsdag())
 
-        assertEquals(lørdag.førsteArbeidsdag(), nesteMandag)
-        assertEquals(lørdag.nesteArbeidsdag(), nesteTirsdag)
+        assertEquals(nesteMandag, lørdag.førsteArbeidsdag())
+        assertEquals(nesteMandag, lørdag.førsteArbeidsdagEtter)
+        assertEquals(nesteTirsdag, lørdag.nesteArbeidsdag())
 
-        assertEquals(søndag.førsteArbeidsdag(), nesteMandag)
-        assertEquals(søndag.nesteArbeidsdag(), nesteTirsdag)
+        assertEquals(nesteMandag, søndag.førsteArbeidsdag())
+        assertEquals(nesteMandag, søndag.førsteArbeidsdagEtter)
+        assertEquals(nesteTirsdag, søndag.nesteArbeidsdag())
     }
 
     @Disabled

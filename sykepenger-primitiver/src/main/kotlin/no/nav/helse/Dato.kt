@@ -45,6 +45,7 @@ class Ukedager(private val antallUkedager: Int) {
 val LocalDate.forrigeDag get() = this.minusDays(1)
 val LocalDate.nesteDag get() = this.plusDays(1)
 fun LocalDate.førsteArbeidsdag(): LocalDate = this + 0.ukedager
+val LocalDate.førsteArbeidsdagEtter get() = if (erHelg()) førsteArbeidsdag() else nesteArbeidsdag()
 fun LocalDate.nesteArbeidsdag(): LocalDate = this + 1.ukedager
 
 private val helgedager = listOf(SATURDAY, SUNDAY)

@@ -1,5 +1,13 @@
 package no.nav.helse
 
+import java.time.DayOfWeek
+import java.time.DayOfWeek.FRIDAY
+import java.time.DayOfWeek.MONDAY
+import java.time.DayOfWeek.SATURDAY
+import java.time.DayOfWeek.SUNDAY
+import java.time.DayOfWeek.THURSDAY
+import java.time.DayOfWeek.TUESDAY
+import java.time.DayOfWeek.WEDNESDAY
 import java.time.LocalDate
 import java.time.YearMonth
 import no.nav.helse.hendelser.Periode
@@ -44,3 +52,14 @@ fun desember(år: Int) = YearMonth.of(år, 12)
 
 infix fun LocalDate.i(år: Int) = withYear(år)
 infix fun Periode.i(år: Int) = (start i år) til (endInclusive i år)
+
+fun mandag(dato: LocalDate) = MONDAY.checkDayOfWeek(dato)
+fun tirsdag(dato: LocalDate) = TUESDAY.checkDayOfWeek(dato)
+fun onsdag(dato: LocalDate) = WEDNESDAY.checkDayOfWeek(dato)
+fun torsdag(dato: LocalDate) = THURSDAY.checkDayOfWeek(dato)
+fun fredag(dato: LocalDate) = FRIDAY.checkDayOfWeek(dato)
+fun lørdag(dato: LocalDate) = SATURDAY.checkDayOfWeek(dato)
+fun søndag(dato: LocalDate) = SUNDAY.checkDayOfWeek(dato)
+private fun DayOfWeek.checkDayOfWeek(dato: LocalDate) = dato.also {
+    check(this == dato.dayOfWeek) { "Forventet at $dato skulle være $this, men var ${dato.dayOfWeek}" }
+}
