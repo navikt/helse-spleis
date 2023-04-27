@@ -41,6 +41,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.avklarSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.forkastAUUSomErUtbetaltIInfotrygd
+import no.nav.helse.person.Arbeidsgiver.Companion.forkastAuu
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyrArbeidsgiveropplysninger
@@ -744,5 +745,6 @@ class Person private constructor(
     }
     internal fun venteårsak(vedtaksperiode: Vedtaksperiode) = vedtaksperiode.venteårsak(arbeidsgivere)
     internal fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) = vedtaksperiode.makstid(tilstandsendringstidspunkt, arbeidsgivere)
+    internal fun forkastAuu(hendelse: IAktivitetslogg, auu: Vedtaksperiode) = arbeidsgivere.forkastAuu(hendelse, auu)
 }
 

@@ -31,23 +31,7 @@ internal class ForkasteAuuTest: AbstractDslTest() {
     }
 
     @Test
-    fun `En auu med 17 dager til neste periode forkastes`() {
-        a1 {
-            nyPeriode(1.januar til 16.januar)
-            nyttVedtak(2.februar, 28.februar, 100.prosent)
-            nullstillTilstandsendringer()
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-            håndterAnmodningOmForkasting(1.vedtaksperiode)
-            assertIngenInfo("Kan ikke etterkomme anmodning om forkasting", 1.vedtaksperiode.filter())
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-            assertTilstander(2.vedtaksperiode, AVSLUTTET)
-        }
-    }
-
-
-    @Test
-    fun `En auu med mindre en 17 dager til neste periode forkastes ikke - forkaster heller ikke perioder bak`() {
+    fun `En auu med mindre en 18 dager til neste periode forkastes ikke - forkaster heller ikke perioder bak`() {
         a1 {
             nyPeriode(1.januar til 16.januar)
             nyttVedtak(1.februar, 28.februar, 100.prosent, arbeidsgiverperiode = listOf(1.januar til 16.januar))

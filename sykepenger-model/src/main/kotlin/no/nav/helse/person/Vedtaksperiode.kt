@@ -11,6 +11,7 @@ import no.nav.helse.Alder
 import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.førsteArbeidsdagEtter
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
@@ -39,7 +40,6 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.memoized
-import no.nav.helse.nesteArbeidsdag
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
 import no.nav.helse.person.Arbeidsgiver.Companion.trengerInntektsmelding
@@ -282,10 +282,10 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, anmodningOmForkasting)
     }
 
-    private fun etterkomAnmodningOmForkasting(anmodningOmForkasting: AnmodningOmForkasting, forkastingFilter: VedtaksperiodeFilter = TIDLIGERE_OG_ETTERGØLGENDE(this)) {
+    private fun etterkomAnmodningOmForkasting(anmodningOmForkasting: AnmodningOmForkasting) {
         if (!arbeidsgiver.kanForkastes(this)) return anmodningOmForkasting.info("Kan ikke etterkomme anmodning om forkasting")
         anmodningOmForkasting.info("Etterkommer anmodning om forkasting")
-        person.søppelbøtte(anmodningOmForkasting, forkastingFilter)
+        forkast(anmodningOmForkasting)
     }
 
     internal fun håndter(inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
@@ -2263,11 +2263,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
             if (Toggle.AnmodeOmForkastingIAUU.disabled) return super.håndter(vedtaksperiode, anmodningOmForkasting)
-            vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting) {
-                it.id == vedtaksperiode.id
-            }
+            vedtaksperiode.person.forkastAuu(anmodningOmForkasting, vedtaksperiode)
+            if (vedtaksperiode.tilstand == AvsluttetUtenUtbetaling) return anmodningOmForkasting.info("Kan ikke etterkomme anmodning om forkasting")
+            anmodningOmForkasting.info("Etterkommer anmodning om forkasting")
         }
-
     }
 
     internal object Avsluttet : Vedtaksperiodetilstand {
@@ -2478,8 +2477,8 @@ internal class Vedtaksperiode private constructor(
         private fun List<Vedtaksperiode>.påvirkerForkastingAndreArbeidsgivere(auu: Vedtaksperiode): Boolean {
             val vedtaksperioder = filter { it.organisasjonsnummer != auu.organisasjonsnummer }.takeUnless { it.isEmpty() } ?: return false
             val sykedagerIAuu = auu.periode.filter { auu.sykdomstidslinje[it].syk }.takeUnless { it.isEmpty() } ?: return false
-            val nesteArbeidsdag = sykedagerIAuu.max().nesteArbeidsdag() // TODO: Test søndag -> mandag og ikke tirsdag
-            if (!vedtaksperioder.sykPå(nesteArbeidsdag)) return false
+            val førsteArbeidsdagEtterAuu = sykedagerIAuu.max().førsteArbeidsdagEtter
+            if (!vedtaksperioder.sykPå(førsteArbeidsdagEtterAuu)) return false
             val sykedagerSomMangler = sykedagerIAuu.filterNot { vedtaksperioder.sykPå(it) }
             if (sykedagerSomMangler.isEmpty()) return false
             sikkerlogg.info(
