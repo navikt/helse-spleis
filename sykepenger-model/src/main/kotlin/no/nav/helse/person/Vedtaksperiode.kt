@@ -131,6 +131,7 @@ import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.serde.AktivitetsloggMap
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.syk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.TagBuilder
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -2436,11 +2437,7 @@ internal class Vedtaksperiode private constructor(
             it.tilstand == AvsluttetUtenUtbetaling && it.forventerInntekt()
         }
 
-        internal val IKKE_AUU: VedtaksperiodeFilter = {
-            it.tilstand != AvsluttetUtenUtbetaling
-        }
-
-        internal val AUU_OVERLAPPER_MED_IT = { infotrygdhistorikk: Infotrygdhistorikk ->
+        internal val AUU_UTBETALT_I_INFOTRYGD = { infotrygdhistorikk: Infotrygdhistorikk ->
             { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.tilstand == AvsluttetUtenUtbetaling && infotrygdhistorikk.harUtbetaltI(vedtaksperiode.periode) }
         }
 
@@ -2462,29 +2459,37 @@ internal class Vedtaksperiode private constructor(
             it.forventerInntekt()
         }
 
-        internal fun List<Vedtaksperiode>.forkast(hendelse: IAktivitetslogg, ønsketForkastet: Vedtaksperiode){
-            if (!ønsketForkastet.arbeidsgiver.kanForkastes(ønsketForkastet)) return hendelse.info("Kan ikke forkaste vedtaksperiode ${ønsketForkastet.id} ved personPåminnelse")
-            val førsteArbeidsdagEtter = ønsketForkastet.periode.endInclusive.nesteArbeidsdag()
-            val faresonen = førsteArbeidsdagEtter til førsteArbeidsdagEtter.plusDays(17)
-            val overlapperMedFaresonen = filter { it.periode.overlapperMed(faresonen) }
-            val overlappPåSammeArbeidsgiver = overlapperMedFaresonen.filter { it.organisasjonsnummer == ønsketForkastet.organisasjonsnummer }
-            val tryggOverlappMedFaresonen = overlapperMedFaresonen.filter { it.periode.start <= ønsketForkastet.periode.start }
-            if (overlapperMedFaresonen.isEmpty() || (tryggOverlappMedFaresonen.isNotEmpty() && overlappPåSammeArbeidsgiver.isEmpty())) {
-                hendelse.info("Forkaster vedtaksperiode ${ønsketForkastet.id} ved personPåminnelse")
-                ønsketForkastet.person.søppelbøtte(hendelse) {
-                    it.id == ønsketForkastet.id
-                }
-                return
-            }
-            hendelse.info("Kan ikke forkaste vedtaksperiode ${ønsketForkastet.id} ved personPåminnelse")
-            val vedtaksperioderSomBlokkerer = (overlapperMedFaresonen - tryggOverlappMedFaresonen).map {
-                "${it.periode} på ${it.organisasjonsnummer} "
-            }
-            sikkerlogg.info(
-                "Kan ikke forkaste vedtaksperiode ${ønsketForkastet.periode} på ${ønsketForkastet.organisasjonsnummer} fordi $vedtaksperioderSomBlokkerer blokkerer. {}",
-                keyValue("aktørId", ønsketForkastet.aktørId)
-            )
+        internal fun List<Vedtaksperiode>.forkastAuu(hendelse: IAktivitetslogg, auu: Vedtaksperiode) {
+            auu.kontekst(hendelse)
+            if (auu.tilstand != AvsluttetUtenUtbetaling) return hendelse.info("Forkaste AUU: Kan ikke forkastes, er i tilstand ${auu.tilstand.type.name}")
+            if (!auu.arbeidsgiver.kanForkastes(auu)) return hendelse.info("Forkaste AUU: Kan ikke forkastes, har overlappende utbetalte utbetalinger på samme arbeidsgiver")
+            if (påvirkerForkastingSammeArbeidsgiver(auu)) return hendelse.info("Forkaste AUU: Kan ikke forkastes, påvirker arbeidsgiverperiode på samme arbeidsgiver")
+            if (påvirkerForkastingAndreArbeidsgivere(auu)) return hendelse.info("Forkaste AUU: Kan ikke forkastes, påvirker skjæringstidspunkt på personen")
+            hendelse.info("Forkaste AUU: Vedtaksperioden forkastes")
+            auu.person.søppelbøtte(hendelse) { it.id == auu.id }
         }
+
+        private fun List<Vedtaksperiode>.påvirkerForkastingSammeArbeidsgiver(auu: Vedtaksperiode) = this
+            .filter { it.organisasjonsnummer == auu.organisasjonsnummer }
+            .filter { it.tilstand != AvsluttetUtenUtbetaling }
+            .filter { it.periode.starterEtter(auu.periode) }
+            .any { auu.erVedtaksperiodeRettFør(it) || it.påvirkerArbeidsgiverperioden(auu) }
+
+        private fun List<Vedtaksperiode>.påvirkerForkastingAndreArbeidsgivere(auu: Vedtaksperiode): Boolean {
+            val vedtaksperioder = filter { it.organisasjonsnummer != auu.organisasjonsnummer }.takeUnless { it.isEmpty() } ?: return false
+            val sykedagerIAuu = auu.periode.filter { auu.sykdomstidslinje[it].syk }.takeUnless { it.isEmpty() } ?: return false
+            val nesteArbeidsdag = sykedagerIAuu.max().nesteArbeidsdag() // TODO: Test søndag -> mandag og ikke tirsdag
+            if (!vedtaksperioder.sykPå(nesteArbeidsdag)) return false
+            val sykedagerSomMangler = sykedagerIAuu.filterNot { vedtaksperioder.sykPå(it) }
+            if (sykedagerSomMangler.isEmpty()) return false
+            sikkerlogg.info(
+                "Kan ikke forkaste vedtaksperiode ${auu.periode} på ${auu.organisasjonsnummer} fordi det er den eneste vedtaksperioden som inneholder sykedagene ${sykedagerSomMangler.grupperSammenhengendePerioder()} som er med på å beregne riktig skjæringstidspunkt på personen. {}",
+                keyValue("aktørId", auu.aktørId)
+            )
+            return true
+        }
+
+        private fun List<Vedtaksperiode>.sykPå(dag: LocalDate) = any { it.sykdomstidslinje[dag].syk }
 
         internal fun List<Vedtaksperiode>.venter(nestemann: Vedtaksperiode) {
             forEach { vedtaksperiode ->

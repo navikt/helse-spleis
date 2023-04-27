@@ -33,10 +33,9 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
-import no.nav.helse.person.Vedtaksperiode.Companion.AUU_OVERLAPPER_MED_IT
+import no.nav.helse.person.Vedtaksperiode.Companion.AUU_UTBETALT_I_INFOTRYGD
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
-import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_AUU
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
@@ -45,7 +44,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.PÅGÅENDE_REVURDERING
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
 import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_REFUSJONSOPPLYSNINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.feiletRevurdering
-import no.nav.helse.person.Vedtaksperiode.Companion.forkast
+import no.nav.helse.person.Vedtaksperiode.Companion.forkastAuu
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.sykefraværstilfelle
@@ -127,14 +126,15 @@ internal class Arbeidsgiver private constructor(
             return mapNotNull { it.sykdomstidslinje().periode()?.start }.minOrNull() ?: LocalDate.now()
         }
 
-
         internal fun List<Arbeidsgiver>.forkastAUUSomErUtbetaltIInfotrygd(hendelse: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
-            val alleVedtaksperioder = flatMap { it.vedtaksperioder }.sorted()
-            val ikkeAuuer = alleVedtaksperioder.filter(IKKE_AUU)
-            alleVedtaksperioder.filter(AUU_OVERLAPPER_MED_IT(infotrygdhistorikk)).forEach { auuUtbetaltIInfotrygd ->
-                ikkeAuuer.forkast(hendelse, auuUtbetaltIInfotrygd)
+            flatMap { it.vedtaksperioder }.filter(AUU_UTBETALT_I_INFOTRYGD(infotrygdhistorikk)).forEach { auuUtbetaltIInfotrygd ->
+                forkastAuu(hendelse, auuUtbetaltIInfotrygd)
             }
+        }
 
+        internal fun List<Arbeidsgiver>.forkastAuu(hendelse: IAktivitetslogg, auu: Vedtaksperiode) {
+            val alleVedtaksperioder = flatMap { it.vedtaksperioder }.sorted()
+            alleVedtaksperioder.forkastAuu(hendelse, auu)
         }
 
         internal fun List<Arbeidsgiver>.relevanteArbeidsgivere(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?) =

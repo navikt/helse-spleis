@@ -6,13 +6,16 @@ import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
+import no.nav.helse.fredag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
@@ -21,9 +24,7 @@ import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
 
@@ -86,16 +87,37 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
     }
 
     @Test
-    fun `Auu som har perioder etter på annen ag i avventer inntektsmelding innenfor samme arbeidsgiverperiode`() {
+    fun `Auu som har perioder etter på annen ag i avventer inntektsmelding med gap`() {
         a1 {
             nyPeriode(1.januar til 16.januar)
         }
         a2 {
             nyPeriode(3.februar til 28.februar)
             infotrygdUtbetalingUtenFunksjonelleFeil(1.januar til 16.januar)
+            assertEquals(3.februar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             nullstillTilstandsendringer()
             håndterPersonPåminnelse()
             assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertEquals(3.februar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        }
+        a1 {
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
+    fun `Auu som har perioder etter på annen ag med helgegap`() {
+        a1 {
+            nyPeriode(4.januar til fredag(19.januar))
+        }
+        a2 {
+            nyttVedtak(mandag(22.januar), 22.februar)
+            infotrygdUtbetalingUtenFunksjonelleFeil(4.januar til 19.januar)
+            assertEquals(4.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            nullstillTilstandsendringer()
+            håndterPersonPåminnelse()
+            assertTilstander(1.vedtaksperiode, AVSLUTTET)
+            assertEquals(4.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         }
         a1 {
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -290,7 +312,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
     }
 
     @Test
-    fun `Flytter skjæringstidspunkt på annen arbeidsgiver ved forkasting av Auu`() {
+    fun `Ville flyttet skjæringstidspunkt på annen arbeidsgiver ved forkasting av Auu`() {
         a1 {
             nyPeriode(5.januar til 17.januar)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -302,28 +324,17 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
             infotrygdUtbetalingUtenFunksjonelleFeil(17.januar til 17.januar)
             nullstillTilstandsendringer()
             håndterPersonPåminnelse()
-            assertEquals(10.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-            assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+            assertEquals(5.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
         }
 
         a1 {
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-        }
-
-        a2 {
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-            håndterVilkårsgrunnlag(2.vedtaksperiode)
-            håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-            håndterUtbetalt()
-            assertEquals(10.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-            assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
     @Test
-    fun `Flytter skjæringstidspunkt på annen arbeidsgiver på periode in play ved forkasting av Auu`() {
+    fun `Ville flyttet skjæringstidspunkt på annen arbeidsgiver på periode in play ved forkasting av Auu`() {
         a1 {
             nyPeriode(5.januar til 17.januar)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -339,18 +350,19 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
             infotrygdUtbetalingUtenFunksjonelleFeil(17.januar til 17.januar)
             nullstillTilstandsendringer()
             håndterPersonPåminnelse()
-            assertEquals(10.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-            assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-            assertThrows<IllegalArgumentException>{håndterSimulering(2.vedtaksperiode)}
+            assertEquals(5.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+            håndterSimulering(2.vedtaksperiode)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
         }
 
         a1 {
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
     @Test
-    fun `Flytter skjæringstidspunkt på annen arbeidsgiver på periode in play ved forkasting av Auu med arbeidsdager`() {
+    fun `Ville flyttet skjæringstidspunkt på annen arbeidsgiver på periode in play ved forkasting av Auu med arbeidsdager`() {
         a1 {
             håndterSøknad(Sykdom(5.januar, 17.januar, 100.prosent))
             håndterInntektsmelding(listOf(10.januar til 25.januar))
@@ -367,12 +379,12 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
             infotrygdUtbetalingUtenFunksjonelleFeil(17.januar til 17.januar)
             nullstillTilstandsendringer()
             håndterPersonPåminnelse()
-            assertEquals(12.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertEquals(10.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
 
         }
 
         a1 {
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
