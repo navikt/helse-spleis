@@ -2,12 +2,15 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
@@ -15,6 +18,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 @EnableToggle(Toggle.AnmodeOmForkastingIAUU::class)
@@ -122,6 +126,59 @@ internal class ForkasteAuuTest: AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
             assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
+    fun `AUU 1 januar påvirker AGP for periode i mars`() {
+        a1 {
+            nyPeriode(1.januar til 1.januar)
+            nyPeriode(16.januar til 16.januar)
+            nyPeriode(1.februar til 1.februar)
+            nyPeriode(15.februar til 15.februar)
+            nyPeriode(1.mars til 31.mars)
+
+            val agp = inspektør.arbeidsgiver.arbeidsgiverperiode(1.mars til 31.mars)?.toList()?.grupperSammenhengendePerioder()
+            assertEquals(listOf(
+                1.januar til 1.januar,
+                16.januar til 16.januar,
+                1.februar til 1.februar,
+                15.februar til 15.februar,
+                1.mars til 12.mars
+            ), agp)
+
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(5.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            nullstillTilstandsendringer()
+
+            håndterAnmodningOmForkasting(1.vedtaksperiode)
+            val nyAgp = inspektør.arbeidsgiver.arbeidsgiverperiode(1.mars til 31.mars)?.toList()?.grupperSammenhengendePerioder()
+
+            assertForventetFeil(
+                forklaring = "1.januar påvirker arbeidsgiverperioden for mars-perioden og burde ikke forkastes",
+                nå = {
+                    assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+                    assertEquals(listOf(
+                        16.januar til 16.januar,
+                        1.februar til 1.februar,
+                        15.februar til 15.februar,
+                        1.mars til 13.mars
+                    ), nyAgp)
+                },
+                ønsket = {
+                    assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+                    assertEquals(listOf(
+                        1.januar til 1.januar,
+                        16.januar til 16.januar,
+                        1.februar til 1.februar,
+                        15.februar til 15.februar,
+                        1.mars til 12.mars
+                    ), nyAgp)
+                }
+            )
         }
     }
 }
