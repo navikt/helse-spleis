@@ -116,6 +116,9 @@ spec:
           application: spenn-avstemming
           access: readwrite
         - team: tbd
+          application: spenn-avstemming-cronjob
+          access: readwrite
+        - team: tbd
           application: spenn-opprydding-dev
           access: readwrite
         - team: tbd
