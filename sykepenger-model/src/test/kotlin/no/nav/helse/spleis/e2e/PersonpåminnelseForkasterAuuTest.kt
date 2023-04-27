@@ -64,7 +64,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
     fun `Auu som har perioder etter i avventer inntektsmelding innenfor samme arbeidsgiverperiode`() {
         a1 {
             nyPeriode(1.januar til 16.januar)
-            nyPeriode(3.februar til 28.februar)
+            nyPeriode(1.februar til 28.februar)
             infotrygdUtbetalingUtenFunksjonelleFeil(1.januar til 16.januar)
             nullstillTilstandsendringer()
             håndterPersonPåminnelse()

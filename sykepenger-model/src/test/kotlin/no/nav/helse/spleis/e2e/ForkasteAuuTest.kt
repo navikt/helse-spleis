@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.februar
@@ -157,28 +156,35 @@ internal class ForkasteAuuTest: AbstractDslTest() {
             håndterAnmodningOmForkasting(1.vedtaksperiode)
             val nyAgp = inspektør.arbeidsgiver.arbeidsgiverperiode(1.mars til 31.mars)?.toList()?.grupperSammenhengendePerioder()
 
-            assertForventetFeil(
-                forklaring = "1.januar påvirker arbeidsgiverperioden for mars-perioden og burde ikke forkastes",
-                nå = {
-                    assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-                    assertEquals(listOf(
-                        16.januar til 16.januar,
-                        1.februar til 1.februar,
-                        15.februar til 15.februar,
-                        1.mars til 13.mars
-                    ), nyAgp)
-                },
-                ønsket = {
-                    assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                    assertEquals(listOf(
-                        1.januar til 1.januar,
-                        16.januar til 16.januar,
-                        1.februar til 1.februar,
-                        15.februar til 15.februar,
-                        1.mars til 12.mars
-                    ), nyAgp)
-                }
-            )
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(5.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertEquals(listOf(
+                1.januar til 1.januar,
+                16.januar til 16.januar,
+                1.februar til 1.februar,
+                15.februar til 15.februar,
+                1.mars til 12.mars
+            ), nyAgp)
+        }
+    }
+
+    @Test
+    fun `Forkaster alle AUUer innenfor samme AGP når først en skal forkastes`() {
+        a1 {
+            nyPeriode(1.januar til 1.januar)
+            nyPeriode(16.januar til 16.januar)
+            nyPeriode(1.februar til 1.februar)
+            nyPeriode(15.februar til 15.februar)
+            nullstillTilstandsendringer()
+            håndterAnmodningOmForkasting(2.vedtaksperiode)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+
         }
     }
 }

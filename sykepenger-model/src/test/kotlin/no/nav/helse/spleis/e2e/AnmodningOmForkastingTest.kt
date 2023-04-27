@@ -89,7 +89,7 @@ internal class AnmodningOmForkastingTest: AbstractDslTest() {
     }
 
     @Test
-    fun `Anmodning om å forkaste periode i AUU forkaster kun den éne perioden`() = Toggle.AnmodeOmForkastingIAUU.enable {
+    fun `Anmodning om å forkaste periode i AUU forkaster alle AUU'er innenfor samme AGP`() = Toggle.AnmodeOmForkastingIAUU.enable {
         (a1 og a2).forEach { ag -> ag {
             nyPeriode(1.januar til 4.januar)
             nyPeriode(6.januar til 9.januar)
@@ -104,9 +104,9 @@ internal class AnmodningOmForkastingTest: AbstractDslTest() {
         a1 {
             nullstillTilstandsendringer()
             håndterAnmodningOmForkasting(2.vedtaksperiode)
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-            assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertForkastetPeriodeTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
             assertTilstander(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         }
 
