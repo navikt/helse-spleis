@@ -2467,7 +2467,7 @@ internal class Vedtaksperiode private constructor(
             if (auuer.size > 1) hendelse.info("Forkaste AUU: Vurderer videre om periodene ${auuer.map { it.periode }} kan forkastes")
             if (auuer.any { !it.arbeidsgiver.kanForkastes(it) }) return hendelse.info("Forkaste AUU: Kan ikke forkastes, har overlappende utbetalte utbetalinger på samme arbeidsgiver")
             if (påvirkerForkastingSammeArbeidsgiver(auuer, arbeidsgiverperiode)) return hendelse.info("Forkaste AUU: Kan ikke forkastes, påvirker arbeidsgiverperiode på samme arbeidsgiver")
-            if (påvirkerForkastingAndreArbeidsgivere(auuer)) return hendelse.info("Forkaste AUU: Kan ikke forkastes, påvirker skjæringstidspunkt på personen")
+            if (påvirkerForkastingSkjæringstidspunktPåPerson(auuer)) return hendelse.info("Forkaste AUU: Kan ikke forkastes, påvirker skjæringstidspunkt på personen")
             hendelse.info("Forkaste AUU: Vedtaksperiodene ${auuer.map { it.periode }} forkastes")
             val forkastes = auuer.map { it.id }
             auu.person.søppelbøtte(hendelse) { it.id in forkastes }
@@ -2502,6 +2502,24 @@ internal class Vedtaksperiode private constructor(
             return true
         }
 
+        private fun List<Vedtaksperiode>.påvirkerForkastingSkjæringstidspunktPåPerson(auuer: List<Vedtaksperiode>): Boolean {
+            val auuenesVedtaksperiodeId = auuer.map { it.id }
+            val auuenesSkjæringstidspunkt = auuer.map { it.skjæringstidspunkt }.toSet()
+
+            val andreVedtaksperiodersSkjæringstidspunkt = filterNot { it.id in auuenesVedtaksperiodeId }.map { it.skjæringstidspunkt }.toSet()
+            val skjæringstidspunktDetErOkÅSlette = auuenesSkjæringstidspunkt - andreVedtaksperiodersSkjæringstidspunkt
+
+            val person = auuer.last().person
+            val arbeidsgiver = auuer.last().arbeidsgiver
+
+            val skjæringstidspunktFør = person.skjæringstidspunkter()
+            val skjæringstidspunktViTrenger = skjæringstidspunktFør - skjæringstidspunktDetErOkÅSlette
+            val arbeidsgiversSykdomstidslinjeUtenAuuene = arbeidsgiver.sykdomstidslinjeUten(auuer.map { it.sykdomstidslinje })
+            val skjæringstidspunktEtter = person.skjæringstidspunkter(arbeidsgiver, arbeidsgiversSykdomstidslinjeUtenAuuene)
+
+            return !skjæringstidspunktEtter.containsAll(skjæringstidspunktViTrenger)
+        }
+
         private fun List<Vedtaksperiode>.dagtyper(): Pair<Set<LocalDate>, Set<LocalDate>>? {
             val sykedager = flatMap { it.sykedager }.takeUnless { it.isEmpty() }?.toSet() ?: return null
             val omsluttendePeriode = first().periode.start til last().periode.endInclusive
@@ -2510,7 +2528,8 @@ internal class Vedtaksperiode private constructor(
                 .filterNot { it.erHelg() }
                 .plus(sykedager.max().førsteArbeidsdagEtter)
                 .toSet()
-            return sykedager to skumleArbeidsdager
+            val førsteSkumleArbeidsdag = skumleArbeidsdager.min()
+            return sykedager.filter { it > førsteSkumleArbeidsdag }.toSet() to skumleArbeidsdager
         }
 
         private val Vedtaksperiode.sykedager get() = periode.filter { this.sykdomstidslinje[it].syk }
