@@ -2504,20 +2504,16 @@ internal class Vedtaksperiode private constructor(
 
         private fun List<Vedtaksperiode>.påvirkerForkastingSkjæringstidspunktPåPerson(auuer: List<Vedtaksperiode>): Boolean {
             val auuenesVedtaksperiodeId = auuer.map { it.id }
-            val auuenesSkjæringstidspunkt = auuer.map { it.skjæringstidspunkt }.toSet()
-
-            val andreVedtaksperiodersSkjæringstidspunkt = filterNot { it.id in auuenesVedtaksperiodeId }.map { it.skjæringstidspunkt }.toSet()
-            val skjæringstidspunktDetErOkÅSlette = auuenesSkjæringstidspunkt - andreVedtaksperiodersSkjæringstidspunkt
+            val skjæringstidspunktSomMåBevares = filterNot { it.id in auuenesVedtaksperiodeId }.map { it.skjæringstidspunkt }.toSet()
 
             val person = auuer.last().person
             val arbeidsgiver = auuer.last().arbeidsgiver
 
-            val skjæringstidspunktFør = person.skjæringstidspunkter()
-            val skjæringstidspunktViTrenger = skjæringstidspunktFør - skjæringstidspunktDetErOkÅSlette
             val arbeidsgiversSykdomstidslinjeUtenAuuene = arbeidsgiver.sykdomstidslinjeUten(auuer.map { it.sykdomstidslinje })
-            val skjæringstidspunktEtter = person.skjæringstidspunkter(arbeidsgiver, arbeidsgiversSykdomstidslinjeUtenAuuene)
+            val skjæringstidspunktUtenAuuene = person.skjæringstidspunkter(arbeidsgiver, arbeidsgiversSykdomstidslinjeUtenAuuene)
+            // flere sjekker om vi har laget noen nye skjæringstidspunkt.
 
-            return !skjæringstidspunktEtter.containsAll(skjæringstidspunktViTrenger)
+            return !skjæringstidspunktUtenAuuene.containsAll(skjæringstidspunktSomMåBevares)
         }
 
         private fun List<Vedtaksperiode>.dagtyper(): Pair<Set<LocalDate>, Set<LocalDate>>? {

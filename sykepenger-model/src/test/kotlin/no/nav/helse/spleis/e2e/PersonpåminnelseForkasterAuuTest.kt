@@ -183,7 +183,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
         }
 
         a2 {
-            infotrygdUtbetalingUtenFunksjonelleFeil(1.februar til 16.februar)
+            infotrygdUtbetalingUtenFunksjonelleFeil(6.februar til 16.februar)
             nullstillTilstandsendringer()
             håndterPersonPåminnelse()
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
