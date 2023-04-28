@@ -196,6 +196,17 @@ internal class Arbeidsgiver private constructor(
         internal fun skjæringstidspunkter(arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) =
             infotrygdhistorikk.skjæringstidspunkter(arbeidsgivere.map(Arbeidsgiver::sykdomstidslinje))
 
+        internal fun skjæringstidspunkt(arbeidsgivere: List<Arbeidsgiver>, arbeidsgiver: Arbeidsgiver, sykdomstidslinje: Sykdomstidslinje, periode: Periode, infotrygdhistorikk: Infotrygdhistorikk): LocalDate {
+            // Bruker sykdomstidslinjen fra alle arbeidsgivere, med unntak av den ene som det sendes inn en sykdomstidslinje for 🫠
+            val sykdomstidslinjer = arbeidsgivere
+                .filterNot { it.organisasjonsnummer == arbeidsgiver.organisasjonsnummer }
+                .map { it.sykdomstidslinje() }
+                .toMutableList()
+                .also { it.add(sykdomstidslinje) }
+                .toList()
+            return infotrygdhistorikk.skjæringstidspunkt(periode, sykdomstidslinjer)
+        }
+
         internal fun Iterable<Arbeidsgiver>.validerVilkårsgrunnlag(
             aktivitetslogg: IAktivitetslogg,
             vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
@@ -765,6 +776,10 @@ internal class Arbeidsgiver private constructor(
     private fun sykdomstidslinje(): Sykdomstidslinje {
         if (!sykdomshistorikk.harSykdom()) return Sykdomstidslinje()
         return sykdomshistorikk.sykdomstidslinje()
+    }
+
+    internal fun sykdomstidslinjeUten(sykdomstidslinjer: List<Sykdomstidslinje>) = sykdomstidslinjer.fold(sykdomstidslinje()) { acc, sykdomstidslinje ->
+        acc - sykdomstidslinje
     }
 
     internal fun arbeidsgiverperiode(periode: Periode): Arbeidsgiverperiode? {

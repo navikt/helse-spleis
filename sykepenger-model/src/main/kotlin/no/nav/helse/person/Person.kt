@@ -528,6 +528,8 @@ class Person private constructor(
 
     internal fun skjæringstidspunkter() =
         Arbeidsgiver.skjæringstidspunkter(arbeidsgivere, infotrygdhistorikk)
+    internal fun skjæringstidspunkt(arbeidsgiver: Arbeidsgiver, sykdomstidslinje: Sykdomstidslinje, periode: Periode) =
+        Arbeidsgiver.skjæringstidspunkt(arbeidsgivere, arbeidsgiver, sykdomstidslinje, periode, infotrygdhistorikk)
 
     internal fun trengerHistorikkFraInfotrygd(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode) {
         if (trengerHistorikkFraInfotrygd(hendelse)) return hendelse.info("Må oppfriske Infotrygdhistorikken")

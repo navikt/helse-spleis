@@ -271,7 +271,6 @@ internal class Sykdomstidslinje private constructor(
     internal companion object {
         private fun erEnSykedag(it: Dag) =
             it is Sykedag || it is SykHelgedag || it is Arbeidsgiverdag || it is ArbeidsgiverHelgedag || it is ForeldetSykedag || it is SykedagNav
-        internal val Dag.syk get() = erEnSykedag(this)
 
         internal fun sisteRelevanteSkjæringstidspunktForPerioden(periode: Periode, tidslinjer: List<Sykdomstidslinje>) = samletTidslinje(tidslinjer)
             .fjernDagerFørSisteOppholdsdagFør(periode.start)

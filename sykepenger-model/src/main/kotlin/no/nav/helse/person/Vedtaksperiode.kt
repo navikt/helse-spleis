@@ -9,10 +9,8 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Alder
 import no.nav.helse.Toggle
-import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.førsteArbeidsdagEtter
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
@@ -132,7 +130,6 @@ import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.serde.AktivitetsloggMap
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.syk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.TagBuilder
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -2467,7 +2464,7 @@ internal class Vedtaksperiode private constructor(
             if (auuer.size > 1) hendelse.info("Forkaste AUU: Vurderer videre om periodene ${auuer.map { it.periode }} kan forkastes")
             if (auuer.any { !it.arbeidsgiver.kanForkastes(it) }) return hendelse.info("Forkaste AUU: Kan ikke forkastes, har overlappende utbetalte utbetalinger på samme arbeidsgiver")
             if (påvirkerForkastingSammeArbeidsgiver(auuer, arbeidsgiverperiode)) return hendelse.info("Forkaste AUU: Kan ikke forkastes, påvirker arbeidsgiverperiode på samme arbeidsgiver")
-            if (påvirkerForkastingAndreArbeidsgivere(auuer)) return hendelse.info("Forkaste AUU: Kan ikke forkastes, påvirker skjæringstidspunkt på personen")
+            if (påvirkerForkastingSkjæringstidspunktPåPerson(auuer, hendelse)) return hendelse.info("Forkaste AUU: Kan ikke forkastes, påvirker skjæringstidspunkt på personen")
             hendelse.info("Forkaste AUU: Vedtaksperiodene ${auuer.map { it.periode }} forkastes")
             val forkastes = auuer.map { it.id }
             auu.person.søppelbøtte(hendelse) { it.id in forkastes }
@@ -2488,34 +2485,23 @@ internal class Vedtaksperiode private constructor(
                 .any { it.finnArbeidsgiverperiode() == arbeidsgiverperiode }
         }
 
-        private fun List<Vedtaksperiode>.påvirkerForkastingAndreArbeidsgivere(auuer: List<Vedtaksperiode>): Boolean {
-            val sisteAuu = auuer.last()
-            val vedtaksperioder = filter { it.organisasjonsnummer != sisteAuu.organisasjonsnummer }.takeUnless { it.isEmpty() } ?: return false
-            val (sykedager, skumleArbeidsdager) = auuer.dagtyper() ?: return false
-            if (!vedtaksperioder.sykI(skumleArbeidsdager)) return false
-            val sykedagerSomMangler = sykedager.filterNot { vedtaksperioder.sykPå(it) }
-            if (sykedagerSomMangler.isEmpty()) return false
-            sikkerlogg.info(
-                "Kan ikke forkaste vedtaksperiode ${sisteAuu.periode} på ${sisteAuu.organisasjonsnummer} fordi det er den eneste vedtaksperioden som inneholder sykedagene ${sykedagerSomMangler.grupperSammenhengendePerioder()} som er med på å beregne riktig skjæringstidspunkt på personen. {}",
-                keyValue("aktørId", sisteAuu.aktørId)
-            )
-            return true
-        }
+        private fun List<Vedtaksperiode>.påvirkerForkastingSkjæringstidspunktPåPerson(auuer: List<Vedtaksperiode>, hendelse: IAktivitetslogg): Boolean {
+            val auuenesVedtaksperiodeId = auuer.map { it.id }
+            val vedtaksperioderSomMåBeholdeSkjæringspunkt = filterNot { it.id in auuenesVedtaksperiodeId }
 
-        private fun List<Vedtaksperiode>.dagtyper(): Pair<Set<LocalDate>, Set<LocalDate>>? {
-            val sykedager = flatMap { it.sykedager }.takeUnless { it.isEmpty() }?.toSet() ?: return null
-            val omsluttendePeriode = first().periode.start til last().periode.endInclusive
-            // Arbeidsdager mellom & rett etter auuene er det skummelt om en annen arbeidsgiver har sykedag mtp. skjæringstidspunkt
-            val skumleArbeidsdager = (omsluttendePeriode - sykedager)
-                .filterNot { it.erHelg() }
-                .plus(sykedager.max().førsteArbeidsdagEtter)
-                .toSet()
-            return sykedager to skumleArbeidsdager
-        }
+            val person = auuer.last().person
+            val arbeidsgiver = auuer.last().arbeidsgiver
+            val arbeidsgiversSykdomstidslinjeUtenAuuene = arbeidsgiver.sykdomstidslinjeUten(auuer.map { it.sykdomstidslinje })
 
-        private val Vedtaksperiode.sykedager get() = periode.filter { this.sykdomstidslinje[it].syk }
-        private fun List<Vedtaksperiode>.sykPå(dag: LocalDate) = any { it.sykdomstidslinje[dag].syk }
-        private fun List<Vedtaksperiode>.sykI(dager: Set<LocalDate>) = dager.any { sykPå(it) }
+            vedtaksperioderSomMåBeholdeSkjæringspunkt.forEach { vedtaksperiode ->
+                if (vedtaksperiode.skjæringstidspunkt != person.skjæringstidspunkt(arbeidsgiver, arbeidsgiversSykdomstidslinjeUtenAuuene, vedtaksperiode.periode)) {
+                    hendelse.info("Forkaste AUU: Kan ikke forkaste, vedtaksperioden ${vedtaksperiode.periode} på ${vedtaksperiode.organisasjonsnummer} ville fått endret skjæringstidspunkt")
+                    return true
+                }
+            }
+
+            return false
+        }
 
         internal fun List<Vedtaksperiode>.venter(nestemann: Vedtaksperiode) {
             forEach { vedtaksperiode ->

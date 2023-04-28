@@ -78,7 +78,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
         a1 {
             nyPeriode(1.januar til 16.januar)
             nyPeriode(4.februar til 28.februar)
-            infotrygdUtbetalingUtenFunksjonelleFeil(1.januar til 16.januar)
+            infotrygdUtbetalingUtenFunksjonelleFeil(2.januar til 15.januar)
             nullstillTilstandsendringer()
             håndterPersonPåminnelse()
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
@@ -93,7 +93,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
         }
         a2 {
             nyPeriode(3.februar til 28.februar)
-            infotrygdUtbetalingUtenFunksjonelleFeil(1.januar til 16.januar)
+            infotrygdUtbetalingUtenFunksjonelleFeil(2.januar til 15.januar)
             assertEquals(3.februar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             nullstillTilstandsendringer()
             håndterPersonPåminnelse()
@@ -112,7 +112,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
         }
         a2 {
             nyttVedtak(mandag(22.januar), 22.februar)
-            infotrygdUtbetalingUtenFunksjonelleFeil(4.januar til 19.januar)
+            infotrygdUtbetalingUtenFunksjonelleFeil(5.januar til 18.januar)
             assertEquals(4.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             nullstillTilstandsendringer()
             håndterPersonPåminnelse()
@@ -131,7 +131,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
         }
         a2 {
             nyPeriode(4.februar til 28.februar)
-            infotrygdUtbetalingUtenFunksjonelleFeil(1.januar til 16.januar)
+            infotrygdUtbetalingUtenFunksjonelleFeil(2.januar til 15.januar)
             nullstillTilstandsendringer()
             håndterPersonPåminnelse()
             assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -183,7 +183,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
         }
 
         a2 {
-            infotrygdUtbetalingUtenFunksjonelleFeil(1.februar til 16.februar)
+            infotrygdUtbetalingUtenFunksjonelleFeil(6.februar til 16.februar)
             nullstillTilstandsendringer()
             håndterPersonPåminnelse()
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -214,7 +214,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
         }
 
         a2 {
-            infotrygdUtbetalingUtenFunksjonelleFeil(1.februar til 16.februar)
+            infotrygdUtbetalingUtenFunksjonelleFeil(1.februar til 14.februar)
             nullstillTilstandsendringer()
             håndterPersonPåminnelse()
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -257,7 +257,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
         a2 {
             nyttVedtak(16.januar, 15.februar)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            infotrygdUtbetalingUtenFunksjonelleFeil(1.januar til 16.januar)
+            infotrygdUtbetalingUtenFunksjonelleFeil(2.januar til 15.januar)
             nullstillTilstandsendringer()
             håndterPersonPåminnelse()
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
