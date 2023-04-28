@@ -104,6 +104,9 @@ spec:
           application: speil-redis
           access: readwrite
         - team: tbd
+          application: sprute
+          access: readwrite
+        - team: tbd
           application: spenn
           access: readwrite
         - team: tbd
