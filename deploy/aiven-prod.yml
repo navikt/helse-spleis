@@ -35,6 +35,9 @@ spec:
           application: spennende
           access: readwrite
         - team: tbd
+          application: spissnok
+          access: readwrite
+        - team: tbd
           application: behovsakkumulator
           access: readwrite
         - team: tbd
