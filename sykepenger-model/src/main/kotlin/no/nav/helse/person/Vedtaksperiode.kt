@@ -2349,7 +2349,7 @@ internal class Vedtaksperiode private constructor(
         override val erFerdigBehandlet = true
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            hendelse.info("Sykdom for denne personen kan ikke behandles automatisk.")
+            hendelse.info("Vedtaksperioden kan ikke behandles i Spleis.")
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) = HJELP.utenBegrunnelse
