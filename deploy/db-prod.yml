@@ -13,7 +13,7 @@ spec:
   egress:
     - to:
         - ipBlock:
-            cidr: 34.88.78.0/32
+            cidr: 34.88.78.66/32
   podSelector:
     matchLabels:
       db: spleis
