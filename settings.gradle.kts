@@ -5,15 +5,15 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             version("testcontainers", "1.17.4")
-            version("rapids-and-rivers", "2022111011111668075098.65e508dcde8b")
+            version("rapids-and-rivers", "2023050308441683096263.f5a276d7bd28")
             version("postgres", "42.5.0")
             version("hikari", "5.0.1")
             version("kotliquery", "1.9.0")
             version("cloudsql", "1.7.2")
             version("flyway", "9.7.0")
-            version("logback", "1.4.4")
-            version("logstash", "7.2")
-            version("jackson", "2.14.0")
+            version("logback", "1.4.7")
+            version("logstash", "7.3")
+            version("jackson", "2.15.0")
 
             library("rapids-and-rivers", "com.github.navikt", "rapids-and-rivers").versionRef("rapids-and-rivers")
 

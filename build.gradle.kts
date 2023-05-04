@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.8.10"
+    kotlin("jvm") version "1.8.21"
 }
 
 val junitJupiterVersion = "5.9.2"
@@ -39,7 +39,7 @@ allprojects {
         }
 
         withType<Wrapper> {
-            gradleVersion = "7.4.2"
+            gradleVersion = "8.1.1"
         }
         withType<Jar> {
             duplicatesStrategy = DuplicatesStrategy.EXCLUDE
