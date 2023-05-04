@@ -250,3 +250,6 @@ spec:
         - team: tbd
           application: spoiler
           access: readwrite
+        - team: tbd
+          application: spoogle
+          access: readwrite
