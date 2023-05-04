@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
@@ -89,7 +88,7 @@ internal class AnmodningOmForkastingTest: AbstractDslTest() {
     }
 
     @Test
-    fun `Anmodning om å forkaste periode i AUU forkaster alle AUU'er innenfor samme AGP`() = Toggle.AnmodeOmForkastingIAUU.enable {
+    fun `Anmodning om å forkaste periode i AUU forkaster alle AUU'er innenfor samme AGP`() {
         (a1 og a2).forEach { ag -> ag {
             nyPeriode(1.januar til 4.januar)
             nyPeriode(6.januar til 9.januar)

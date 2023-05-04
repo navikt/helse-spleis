@@ -8,7 +8,6 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Alder
-import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.AnmodningOmForkasting
@@ -2260,7 +2259,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
-            if (Toggle.AnmodeOmForkastingIAUU.disabled) return super.håndter(vedtaksperiode, anmodningOmForkasting)
             vedtaksperiode.person.forkastAuu(anmodningOmForkasting, vedtaksperiode)
             if (vedtaksperiode.tilstand == AvsluttetUtenUtbetaling) return anmodningOmForkasting.info("Kan ikke etterkomme anmodning om forkasting")
             anmodningOmForkasting.info("Etterkommer anmodning om forkasting")

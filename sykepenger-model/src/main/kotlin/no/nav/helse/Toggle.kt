@@ -123,6 +123,5 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     }
 
     object SendFeriepengeOppdrag : Toggle()
-    object AnmodeOmForkastingIAUU: Toggle(false)
     object GraphQLV2: Toggle("GRAPHQL_V2", false)
 }
