@@ -63,3 +63,29 @@ fun søndag(dato: LocalDate) = SUNDAY.checkDayOfWeek(dato)
 private fun DayOfWeek.checkDayOfWeek(dato: LocalDate) = dato.also {
     check(this == dato.dayOfWeek) { "Forventet at $dato skulle være $this, men var ${dato.dayOfWeek}" }
 }
+
+sealed interface Ukedag {
+    // mandag den 1.januar
+    infix fun den(dato: LocalDate) = dato.also {
+        check(it.dayOfWeek == when (this) {
+            mandag -> MONDAY
+            tirsdag -> TUESDAY
+            onsdag -> WEDNESDAY
+            torsdag -> THURSDAY
+            fredag -> FRIDAY
+            lørdag -> SATURDAY
+            søndag -> SUNDAY
+        }) { "Forventet at $dato skulle være $this, men var ${dato.dayOfWeek}" }
+    }
+}
+object mandag : Ukedag
+object tirsdag : Ukedag
+object onsdag : Ukedag
+object torsdag : Ukedag
+object fredag : Ukedag
+object lørdag : Ukedag
+object søndag : Ukedag
+
+// 1.januar til tirsdag den 2.januar
+infix fun LocalDate.til(ukedag: Ukedag) = this to ukedag
+infix fun Pair<LocalDate, Ukedag>.den(other: LocalDate) = this.first til this.second.den(other)
