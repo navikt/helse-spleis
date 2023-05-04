@@ -183,7 +183,7 @@ class Person private constructor(
     }
 
     fun håndter(inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
-        registrer(inntektsmeldingReplayUtført, "Behandler inntektsmeldingReplayUtført")
+        registrer(inntektsmeldingReplayUtført, "Behandler inntektsmelding replay utført")
         finnArbeidsgiver(inntektsmeldingReplayUtført).håndter(inntektsmeldingReplayUtført)
         håndterGjenoppta(inntektsmeldingReplayUtført)
     }
