@@ -388,6 +388,25 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
         }
     }
 
+    @Test
+    fun `Flere arbeidsgivere med auuer og alt kan forkastes`() {
+        a1 {
+            nyPeriode(1.januar til 16.januar)
+        }
+        a2 {
+            nyPeriode(17.januar til 31.januar)
+        }
+        a1 {
+            infotrygdUtbetalingUtenFunksjonelleFeil(16.januar til 17.januar)
+            nullstillTilstandsendringer()
+            håndterPersonPåminnelse()
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+        }
+        a2 {
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+        }
+    }
+
 
     private fun TestPerson.TestArbeidsgiver.infotrygdUtbetalingUtenFunksjonelleFeil(periode: Periode) {
         håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a3, periode.start, periode.endInclusive, 100.prosent, INNTEKT)))

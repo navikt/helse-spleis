@@ -2490,7 +2490,7 @@ internal class Vedtaksperiode private constructor(
 
             private fun List<Vedtaksperiode>.påvirkerForkastingSkjæringstidspunktPåPerson(hendelse: IAktivitetslogg): Boolean {
                 val auuenesVedtaksperiodeId = auuer.map { it.id }
-                val vedtaksperioderSomMåBeholdeSkjæringstidspunkt = filterNot { it.id in auuenesVedtaksperiodeId }
+                val vedtaksperioderSomMåBeholdeSkjæringstidspunkt = filterNot { it.id in auuenesVedtaksperiodeId }.filterNot { it.tilstand == TilInfotrygd }
                 val arbeidsgiversSykdomstidslinjeUtenAuuene =
                     arbeidsgiver.sykdomstidslinjeUten(auuer.map { it.sykdomstidslinje })
 
@@ -2521,6 +2521,7 @@ internal class Vedtaksperiode private constructor(
                                 }
                         }
                         .filter { auuer -> auuer.auuer.any(filter) }
+                        .sortedByDescending { it.sisteAuu }
 
                 internal fun List<Vedtaksperiode>.auuerMedSammeAGP(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode): AuuerMedSammeAGP? {
                     if (vedtaksperiode.tilstand != AvsluttetUtenUtbetaling) return null
