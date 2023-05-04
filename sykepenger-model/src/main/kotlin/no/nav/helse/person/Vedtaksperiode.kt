@@ -2456,6 +2456,49 @@ internal class Vedtaksperiode private constructor(
             it.forventerInntekt()
         }
 
+        internal class Auuer private constructor(
+            private val organisasjonsnummer: String,
+            private val vedtaksperioder: List<Vedtaksperiode>,
+            private val arbeidsgiverperiode: Arbeidsgiverperiode) {
+
+            init {
+                check(vedtaksperioder.isNotEmpty()) { "Må inneholde minst en vedtaksperiode" }
+                check(vedtaksperioder.all { it.tilstand == AvsluttetUtenUtbetaling}) { "Alle vedtaksperioder må være AvsluttetUtenUtbetaling" }
+                check(vedtaksperioder.all { it.organisasjonsnummer == organisasjonsnummer }) { "Alle vedtaksperioder må høre til samme arbeidsgiver" }
+                check(vedtaksperioder.all { it.finnArbeidsgiverperiode() == arbeidsgiverperiode }) { "Alle vedtaksperidoer må ha samme arbeidsgiverperioder" }
+            }
+
+            internal fun forkast(hendelse: IAktivitetslogg, alleVedtaksperioder: List<Vedtaksperiode>) {
+                // TODO
+            }
+
+            internal companion object {
+                internal fun List<Vedtaksperiode>.auuer(filter: (vedtaksperiode: Vedtaksperiode) -> Boolean) = this
+                    .groupBy { it.organisasjonsnummer }
+                    .flatMap { (organisasjonsnummer, vedtaksperioder) -> vedtaksperioder
+                        .filter { it.tilstand == AvsluttetUtenUtbetaling }
+                        .groupBy { it.finnArbeidsgiverperiode() }
+                        .mapNotNull { (arbeidsgiverperiode, vedtaksperioder) ->
+                            if (arbeidsgiverperiode == null || vedtaksperioder.isEmpty()) null
+                            else Auuer(organisasjonsnummer, vedtaksperioder, arbeidsgiverperiode)
+                        }
+                    }
+                    .filter { auuer -> auuer.vedtaksperioder.any(filter) }
+
+                internal fun List<Vedtaksperiode>.auuerOrNull(vedtaksperiode: Vedtaksperiode): Auuer? {
+                    if (vedtaksperiode.tilstand != AvsluttetUtenUtbetaling) return null
+                    val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode() ?: return null
+                    return this
+                        .filter { it.organisasjonsnummer == vedtaksperiode.organisasjonsnummer }
+                        .filter { it.tilstand == AvsluttetUtenUtbetaling }
+                        .filter { it.finnArbeidsgiverperiode() == arbeidsgiverperiode }
+                        .takeUnless { it.isEmpty() }
+                        ?.let { Auuer(vedtaksperiode.organisasjonsnummer, it, arbeidsgiverperiode) }
+
+                }
+            }
+        }
+
         internal fun List<Vedtaksperiode>.forkastAuu(hendelse: IAktivitetslogg, auu: Vedtaksperiode) {
             auu.kontekst(hendelse)
             if (auu.tilstand != AvsluttetUtenUtbetaling) return hendelse.info("Forkaste AUU: Kan ikke forkastes, er i tilstand ${auu.tilstand.type.name}")
