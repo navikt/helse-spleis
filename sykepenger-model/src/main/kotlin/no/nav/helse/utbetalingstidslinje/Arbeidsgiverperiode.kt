@@ -13,6 +13,8 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.erUtbetalt
 
 internal class Arbeidsgiverperiode private constructor(private val perioder: List<Periode>, førsteUtbetalingsdag: LocalDate?) : Iterable<LocalDate>, Comparable<LocalDate> {
     constructor(perioder: List<Periode>) : this(perioder, null)
@@ -127,6 +129,11 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         this.utbetalingsdager.addAll(other.utbetalingsdager)
         this.oppholdsdager.addAll(other.oppholdsdager)
         return this
+    }
+
+    internal fun erUtbetalt(periode: Periode, utbetalinger: List<Utbetaling>): Boolean {
+        val overlappendeUtbetalingsdager = utbetalingsdager.flatten().filter { it in periode }.takeUnless { it.isEmpty() } ?: return false
+        return utbetalinger.erUtbetalt(overlappendeUtbetalingsdager)
     }
 
     internal companion object {

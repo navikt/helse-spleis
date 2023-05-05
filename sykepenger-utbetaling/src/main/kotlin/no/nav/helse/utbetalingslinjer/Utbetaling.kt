@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
@@ -26,6 +27,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_9
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
+import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.erUtbetalt
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.trekkerTilbakePenger
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.valider
 import no.nav.helse.utbetalingslinjer.Utbetalingkladd.Companion.finnKladd
@@ -365,6 +367,14 @@ class Utbetaling private constructor(
                 .filterNot { it.hørerSammen(other) }
                 .filter { it.periode.overlapperMed(other.periode) }
                 .map { it.periode }
+        }
+
+        private fun List<Utbetaling>.erUtbetalt(dag: LocalDate) = any { listOf(it.arbeidsgiverOppdrag, it.personOppdrag).erUtbetalt(dag) }
+
+        fun List<Utbetaling>.erUtbetalt(dager: List<LocalDate>): Boolean {
+            val omsluttendePeriode = dager.omsluttendePeriode ?: return false
+            val aktuelleUtbetalinger = aktive().filter { it.overlapperMed(omsluttendePeriode) }
+            return dager.all { aktuelleUtbetalinger.erUtbetalt(it) }
         }
 
         fun List<Utbetaling>.harId(id: UUID) = any { it.id == id }

@@ -100,6 +100,9 @@ class Utbetalingslinje(
             }
             return result
         }
+
+        // TODO: Skulle vi ha sjekket beløp? 🤔
+        internal fun List<Utbetalingslinje>.erUtbetalt(dag: LocalDate) = filterNot { it.erOpphør() }.any { it.contains(dag) }
     }
 
     private val statuskode get() = datoStatusFom?.let { "OPPH" }

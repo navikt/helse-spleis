@@ -20,6 +20,7 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.FEIL
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.erUtbetalt
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.kjedeSammenLinjer
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.kobleTil
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.normaliserLinjer
@@ -48,6 +49,8 @@ class Oppdrag private constructor(
         }
 
         fun List<Oppdrag>.trekkerTilbakePenger() = sumOf { it.nettoBeløp() } < 0
+
+        internal fun List<Oppdrag>.erUtbetalt(dag: LocalDate) = any { it.erUtbetalt(dag) }
 
         fun stønadsdager(vararg oppdrag: Oppdrag): Int {
             return Utbetalingslinje.stønadsdager(oppdrag.toList().flatten())

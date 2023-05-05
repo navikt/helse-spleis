@@ -2480,6 +2480,12 @@ internal class Vedtaksperiode private constructor(
                 person.søppelbøtte(hendelse) { it.id in forkastes }
             }
 
+            internal fun utbetaltISpleis() {
+                arbeidsgiver.utbetaling()
+                val utbetalt = auuer.firstOrNull { arbeidsgiver.erUtbetalt(arbeidsgiverperiode, it.periode) } ?: return
+                sikkerlogg.info("AUU som allerede er utbetalt i Spleis på {}, {}, {} i perioden ${utbetalt.periode}", keyValue("fødselsnummer", sisteAuu.fødselsnummer), keyValue("organisasjonsnummer", organisasjonsnummer), keyValue("vedtaksperiodeId", utbetalt.id))
+            }
+
             private fun List<Vedtaksperiode>.påvirkerForkastingArbeidsgiverperioden(): Boolean {
                 return this
                     .filter { it.organisasjonsnummer == organisasjonsnummer }
