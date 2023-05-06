@@ -76,6 +76,9 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
             return false
         }
 
+        fun Iterable<Periode>.intersect(other: Iterable<Periode>): List<Periode> =
+            flatten().intersect(other.flatten().toSet()).grupperSammenhengendePerioder()
+
         fun Periode.delvisOverlappMed(other: Periode) = overlapperMed(other) && !inneholder(other)
     }
 
@@ -179,5 +182,4 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
 operator fun List<Periode>.contains(dato: LocalDate) = this.any { dato in it }
 
 infix fun LocalDate.til(tom: LocalDate) = Periode(this, tom)
-infix fun LocalDate.tilOrNull(tom: LocalDate) = if (tom < this) null else this til tom
 fun LocalDate.somPeriode() = Periode(this, this)

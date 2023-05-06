@@ -7,6 +7,7 @@ import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
+import no.nav.helse.hendelser.Periode.Companion.intersect
 import no.nav.helse.hendelser.Periode.Companion.merge
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.overlapper
@@ -370,6 +371,18 @@ internal class PeriodeTest {
         assertEquals(listOf(perioden), emptyList<Periode>().merge(perioden))
         assertEquals(listOf(4.januar.somPeriode(), 5.januar til 10.januar, 11.januar.somPeriode()), listOf(4.januar til 11.januar).merge(perioden))
         assertEquals(listOf(1.januar til 4.januar, 5.januar  til 10.januar, 11.januar til 12.januar), listOf(11.januar til 12.januar, 1.januar til 5.januar).merge(perioden))
+    }
+
+    @Test
+    fun `intersect mellom to lister av perioder`() {
+        val perioder1 = listOf(5.januar til 15.januar, 25.januar til 31.januar)
+        val perioder2 = listOf(1.januar til 6.januar, 16.januar til 2.februar)
+        val iBegge = listOf(5.januar til 6.januar, 25.januar til 31.januar)
+        assertEquals(iBegge, perioder1.intersect(perioder2))
+        assertEquals(iBegge, perioder2.intersect(perioder1))
+        assertEquals(emptyList<Periode>(), emptyList<Periode>().intersect(emptyList()))
+        assertEquals(emptyList<Periode>(), perioder1.intersect(emptyList()))
+        assertEquals(emptyList<Periode>(), emptyList<Periode>().intersect(perioder1))
     }
 
     private fun assertSize(expected: Int, periode: Periode) {

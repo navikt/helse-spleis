@@ -7,6 +7,7 @@ import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.intersect
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -129,10 +130,8 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         return this
     }
 
-    internal fun erUtbetalt(perioder: List<Periode>, utbetalingstidslinje: Utbetalingstidslinje): Boolean {
-        val aktuelleDager = perioder.flatten().intersect(utbetalingsdager.flatten().toSet())
-        return aktuelleDager.all { utbetalingstidslinje[it] is Utbetalingsdag.NavDag }
-    }
+    internal fun erUtbetalt(perioder: List<Periode>, utbetalingstidslinje: Utbetalingstidslinje) =
+        perioder.intersect(utbetalingsdager).flatten().all { utbetalingstidslinje[it] is Utbetalingsdag.NavDag }
 
     internal companion object {
 
