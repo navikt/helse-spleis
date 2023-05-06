@@ -2459,16 +2459,18 @@ internal class Vedtaksperiode private constructor(
             private val auuer: List<Vedtaksperiode>,
             private val arbeidsgiverperiode: Arbeidsgiverperiode) {
 
-            private val sisteAuu = auuer.max()
-            private val arbeidsgiver = sisteAuu.arbeidsgiver
-            private val person = sisteAuu.person
-
             init {
                 check(auuer.isNotEmpty()) { "Må inneholde minst en vedtaksperiode" }
                 check(auuer.all { it.tilstand == AvsluttetUtenUtbetaling }) { "Alle vedtaksperioder må være AvsluttetUtenUtbetaling" }
                 check(auuer.all { it.organisasjonsnummer == organisasjonsnummer }) { "Alle vedtaksperioder må høre til samme arbeidsgiver" }
                 check(auuer.all { it.finnArbeidsgiverperiode() == arbeidsgiverperiode }) { "Alle vedtaksperidoer må ha samme arbeidsgiverperioder" }
             }
+
+            private val førsteAuu = auuer.min()
+            private val sisteAuu = auuer.max()
+            private val perioder = auuer.map { it.periode }
+            private val arbeidsgiver = sisteAuu.arbeidsgiver
+            private val person = sisteAuu.person
 
             internal fun forkast(hendelse: IAktivitetslogg, alleVedtaksperioder: List<Vedtaksperiode>) {
                 if (auuer.size > 1) hendelse.info("Forkaste AUU: Vurderer videre om periodene ${auuer.map { it.periode }} kan forkastes")
@@ -2478,6 +2480,20 @@ internal class Vedtaksperiode private constructor(
                 hendelse.info("Forkaste AUU: Vedtaksperiodene ${auuer.map { it.periode }} forkastes")
                 val forkastes = auuer.map { it.id }
                 person.søppelbøtte(hendelse) { it.id in forkastes }
+            }
+
+            internal fun identifiserAUUSomErUtbetaltISpleis() {
+                if (!arbeidsgiver.erUtbetalt(arbeidsgiverperiode, perioder)) return sikkerLogg("mangler utbetaling på en eller flere utbetalingsdager")
+                sikkerLogg("alle utbetalingsdager er allerede utbetalt")
+            }
+
+            private fun sikkerLogg(melding: String) {
+                val vedtaksperiode = auuer.firstOrNull { it.forventerInntekt() } ?: førsteAuu
+                sikkerlogg.info("AuuerMedSammeAGP som vil utbetales: $melding. {}, {}, perioder=$perioder, {}, fiktivArbeidsgiverperiode=${arbeidsgiverperiode.fiktiv()}",
+                    keyValue("fødselsnummer", vedtaksperiode.fødselsnummer),
+                    keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer),
+                    keyValue("vedtaksperiodeId", "${vedtaksperiode.id}"),
+                )
             }
 
             private fun List<Vedtaksperiode>.påvirkerForkastingArbeidsgiverperioden(): Boolean {
@@ -2514,7 +2530,7 @@ internal class Vedtaksperiode private constructor(
                                 .mapNotNull { (arbeidsgiverperiode, vedtaksperioder) ->
                                     if (arbeidsgiverperiode == null) {
                                         val omsluttendePeriode = vedtaksperioder.first().periode.start til vedtaksperioder.last().periode.endInclusive
-                                        hendelse.info("Forkaste AUU: Kan ikke forkastes for $organisasjonsnummer i perioden $omsluttendePeriode, arbeidsgiverperioden er null")
+                                        hendelse.info("Gruppére auuere med samme AGP: Ignorerer perioden $omsluttendePeriode for $organisasjonsnummer, arbeidsgiverperioden er null")
                                         null
                                     }
                                     else AuuerMedSammeAGP(organisasjonsnummer, vedtaksperioder, arbeidsgiverperiode)

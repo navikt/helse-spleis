@@ -139,6 +139,12 @@ internal class Arbeidsgiver private constructor(
             alleVedtaksperioder.auuerMedSammeAGP(hendelse, auu)?.forkast(hendelse, alleVedtaksperioder)
         }
 
+        internal fun List<Arbeidsgiver>.identifiserAUUSomErUtbetaltISpleis(hendelse: IAktivitetslogg) {
+            flatMap { it.vedtaksperioder }.gruppérAuuerMedSammeAGP(hendelse, AUU_SOM_VIL_UTBETALES).forEach {
+                it.identifiserAUUSomErUtbetaltISpleis()
+            }
+        }
+
         internal fun List<Arbeidsgiver>.relevanteArbeidsgivere(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?) =
            filter { arbeidsgiver ->
                vilkårsgrunnlag?.inngårISykepengegrunnlaget(arbeidsgiver.organisasjonsnummer) == true
@@ -997,6 +1003,11 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.fold(list) { input, vedtaksperiode ->
             vedtaksperiode.sykefraværsfortelling(input)
         }
+
+    internal fun erUtbetalt(arbeidsgiverperiode: Arbeidsgiverperiode, perioder: List<Periode>): Boolean {
+        val utbetalingstidslinje = beregnetUtbetalingstidslinjer.lastOrNull()?.utbetalingstidslinje() ?: return false
+        return arbeidsgiverperiode.erUtbetalt(perioder, utbetalingstidslinje)
+    }
 
     internal class JsonRestorer private constructor() {
         internal companion object {

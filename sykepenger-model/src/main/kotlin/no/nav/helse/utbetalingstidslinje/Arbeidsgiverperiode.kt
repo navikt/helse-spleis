@@ -129,6 +129,11 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         return this
     }
 
+    internal fun erUtbetalt(perioder: List<Periode>, utbetalingstidslinje: Utbetalingstidslinje): Boolean {
+        val aktuelleDager = perioder.flatten().intersect(utbetalingsdager.flatten().toSet())
+        return aktuelleDager.all { utbetalingstidslinje[it] is Utbetalingsdag.NavDag }
+    }
+
     internal companion object {
 
         internal fun fiktiv(førsteUtbetalingsdag: LocalDate) = Arbeidsgiverperiode(emptyList(), førsteUtbetalingsdag)
