@@ -2489,7 +2489,8 @@ internal class Vedtaksperiode private constructor(
 
             private fun sikkerLogg(melding: String) {
                 val vedtaksperiode = auuer.firstOrNull { it.forventerInntekt() } ?: førsteAuu
-                sikkerlogg.info("AuuerMedSammeAGP som vil utbetales: $melding. {}, {}, perioder=$perioder, {}, fiktivArbeidsgiverperiode=${arbeidsgiverperiode.fiktiv()}",
+                val fiktiv = if (arbeidsgiverperiode.fiktiv()) " (fiktiv)" else ""
+                sikkerlogg.info("AuuerMedSammeAGP som vil utbetales: $melding. Perioder=$perioder, arbeidsgiverperiode=${arbeidsgiverperiode.grupperSammenhengendePerioder()}${fiktiv}, {}, {}, {}",
                     keyValue("fødselsnummer", vedtaksperiode.fødselsnummer),
                     keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer),
                     keyValue("vedtaksperiodeId", "${vedtaksperiode.id}"),
