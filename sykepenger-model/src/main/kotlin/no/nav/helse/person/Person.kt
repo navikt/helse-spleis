@@ -336,7 +336,7 @@ class Person private constructor(
         påminnelse.kontekst(this)
         påminnelse.info("Håndterer påminnelse for person")
         arbeidsgivere.forkastAUUSomErUtbetaltIInfotrygd(påminnelse, infotrygdhistorikk)
-        arbeidsgivere.identifiserAUUSomErUtbetaltISpleis(påminnelse)
+        arbeidsgivere.identifiserAUUSomErUtbetaltISpleis()
         håndterGjenoppta(påminnelse)
     }
 

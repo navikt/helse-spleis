@@ -4,6 +4,7 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -16,6 +17,7 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 internal class ForkasteAuuTest: AbstractDslTest() {
@@ -182,6 +184,17 @@ internal class ForkasteAuuTest: AbstractDslTest() {
             assertForkastetPeriodeTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
             assertForkastetPeriodeTilstander(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
 
+        }
+    }
+
+    @Test
+    fun `Forkaste AUU uten agp`() {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), Ferie(1.januar, 16.januar))
+            assertNull(inspektør.arbeidsgiverperiode { 1.vedtaksperiode })
+            nullstillTilstandsendringer()
+            håndterAnmodningOmForkasting(1.vedtaksperiode)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
         }
     }
 }

@@ -2454,35 +2454,93 @@ internal class Vedtaksperiode private constructor(
             it.forventerInntekt()
         }
 
-        internal class AuuerMedSammeAGP private constructor(
-            private val organisasjonsnummer: String,
-            private val auuer: List<Vedtaksperiode>,
-            private val arbeidsgiverperiode: Arbeidsgiverperiode) {
-
+        internal abstract class AuuGruppering protected constructor(
+            protected val organisasjonsnummer: String,
+            protected val auuer: List<Vedtaksperiode>
+        ) {
             init {
                 check(auuer.isNotEmpty()) { "Må inneholde minst en vedtaksperiode" }
                 check(auuer.all { it.tilstand == AvsluttetUtenUtbetaling }) { "Alle vedtaksperioder må være AvsluttetUtenUtbetaling" }
                 check(auuer.all { it.organisasjonsnummer == organisasjonsnummer }) { "Alle vedtaksperioder må høre til samme arbeidsgiver" }
-                check(auuer.all { it.finnArbeidsgiverperiode() == arbeidsgiverperiode }) { "Alle vedtaksperidoer må ha samme arbeidsgiverperioder" }
             }
 
-            private val førsteAuu = auuer.min()
-            private val sisteAuu = auuer.max()
-            private val perioder = auuer.map { it.periode }
-            private val arbeidsgiver = sisteAuu.arbeidsgiver
+            protected val førsteAuu = auuer.min()
+            protected val sisteAuu = auuer.max()
+            protected val perioder = auuer.map { it.periode }
+            protected val arbeidsgiver = sisteAuu.arbeidsgiver
             private val person = sisteAuu.person
 
+            abstract fun påvirkerForkastingArbeidsgiverperioden(alleVedtaksperioder: List<Vedtaksperiode>): Boolean
+
+            abstract fun identifiserAUUSomErUtbetaltISpleis()
+
             internal fun forkast(hendelse: IAktivitetslogg, alleVedtaksperioder: List<Vedtaksperiode>) {
-                if (auuer.size > 1) hendelse.info("Forkaste AUU: Vurderer videre om periodene ${auuer.map { it.periode }} kan forkastes")
+                if (auuer.size > 1) hendelse.info("Forkaste AUU: Vurderer videre om periodene $perioder kan forkastes")
                 if (auuer.any { !it.arbeidsgiver.kanForkastes(it) }) return hendelse.info("Forkaste AUU: Kan ikke forkastes, har overlappende utbetalte utbetalinger på samme arbeidsgiver")
-                if (alleVedtaksperioder.påvirkerForkastingArbeidsgiverperioden()) return hendelse.info("Forkaste AUU: Kan ikke forkastes, påvirker arbeidsgiverperiode på samme arbeidsgiver")
-                if (alleVedtaksperioder.påvirkerForkastingSkjæringstidspunktPåPerson(hendelse)) return hendelse.info("Forkaste AUU: Kan ikke forkastes, påvirker skjæringstidspunkt på personen")
-                hendelse.info("Forkaste AUU: Vedtaksperiodene ${auuer.map { it.periode }} forkastes")
+                if (påvirkerForkastingArbeidsgiverperioden(alleVedtaksperioder)) return hendelse.info("Forkaste AUU: Kan ikke forkastes, påvirker arbeidsgiverperiode på samme arbeidsgiver")
+                if (påvirkerForkastingSkjæringstidspunktPåPerson(hendelse, alleVedtaksperioder)) return hendelse.info("Forkaste AUU: Kan ikke forkastes, påvirker skjæringstidspunkt på personen")
+                hendelse.info("Forkaste AUU: Vedtaksperiodene $perioder forkastes")
                 val forkastes = auuer.map { it.id }
                 person.søppelbøtte(hendelse) { it.id in forkastes }
             }
 
-            internal fun identifiserAUUSomErUtbetaltISpleis() {
+            private fun påvirkerForkastingSkjæringstidspunktPåPerson(hendelse: IAktivitetslogg, alleVedtaksperioder: List<Vedtaksperiode>): Boolean {
+                val auuenesVedtaksperiodeId = auuer.map { it.id }
+                val vedtaksperioderSomMåBeholdeSkjæringstidspunkt = alleVedtaksperioder.filterNot { it.id in auuenesVedtaksperiodeId }.filterNot { it.tilstand == TilInfotrygd }
+                val arbeidsgiversSykdomstidslinjeUtenAuuene = arbeidsgiver.sykdomstidslinjeUten(auuer.map { it.sykdomstidslinje })
+
+                vedtaksperioderSomMåBeholdeSkjæringstidspunkt.forEach { vedtaksperiode ->
+                    if (vedtaksperiode.skjæringstidspunkt != person.skjæringstidspunkt(arbeidsgiver, arbeidsgiversSykdomstidslinjeUtenAuuene, vedtaksperiode.periode)) {
+                        hendelse.info("Forkaste AUU: Kan ikke forkaste, vedtaksperioden ${vedtaksperiode.periode} på ${vedtaksperiode.organisasjonsnummer} ville fått endret skjæringstidspunkt")
+                        return true
+                    }
+                }
+                return false
+            }
+
+            internal companion object {
+                internal fun List<Vedtaksperiode>.gruppérAuuer(filter: (vedtaksperiode: Vedtaksperiode) -> Boolean) =
+                    this
+                        .groupBy { it.organisasjonsnummer }
+                        .flatMap { (organisasjonsnummer, vedtaksperioder) ->
+                            vedtaksperioder
+                                .filter { it.tilstand == AvsluttetUtenUtbetaling }
+                                .groupBy { it.finnArbeidsgiverperiode() }
+                                .flatMap { (arbeidsgiverperiode, vedtaksperioder) ->
+                                    if (arbeidsgiverperiode == null) vedtaksperioder.map { AuuUtenAGP(organisasjonsnummer, it) }
+                                    else listOf(AuuerMedSammeAGP(organisasjonsnummer, vedtaksperioder, arbeidsgiverperiode))
+                                }
+
+                        }
+                        .filter { auuer -> auuer.auuer.any(filter) }
+                        .sortedByDescending { it.sisteAuu }
+                internal fun List<Vedtaksperiode>.auuGruppering(vedtaksperiode: Vedtaksperiode): AuuGruppering? {
+                    if (vedtaksperiode.tilstand != AvsluttetUtenUtbetaling) return null
+                    val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode() ?: return AuuUtenAGP(vedtaksperiode.organisasjonsnummer, vedtaksperiode)
+                    return this
+                        .filter { it.organisasjonsnummer == vedtaksperiode.organisasjonsnummer }
+                        .filter { it.tilstand == AvsluttetUtenUtbetaling }
+                        .filter { it.finnArbeidsgiverperiode() == arbeidsgiverperiode }
+                        .let { AuuerMedSammeAGP(vedtaksperiode.organisasjonsnummer, it, arbeidsgiverperiode) }
+                }
+            }
+        }
+
+        internal class AuuerMedSammeAGP(
+            organisasjonsnummer: String,
+            auuer: List<Vedtaksperiode>,
+            private val arbeidsgiverperiode: Arbeidsgiverperiode
+        ): AuuGruppering(organisasjonsnummer, auuer) {
+            init {
+                check(auuer.all { it.finnArbeidsgiverperiode() == arbeidsgiverperiode }) { "Alle vedtaksperidoer må ha samme arbeidsgiverperioder" }
+            }
+            override fun påvirkerForkastingArbeidsgiverperioden(alleVedtaksperioder: List<Vedtaksperiode>) = alleVedtaksperioder
+                .filter { it.organisasjonsnummer == organisasjonsnummer }
+                .filter { it.tilstand != AvsluttetUtenUtbetaling }
+                .filter { it.periode.starterEtter(sisteAuu.periode) }
+                .any { it.finnArbeidsgiverperiode() == arbeidsgiverperiode }
+
+            override fun identifiserAUUSomErUtbetaltISpleis() {
                 if (!arbeidsgiver.erUtbetalt(arbeidsgiverperiode, perioder)) return sikkerLogg("mangler utbetaling på en eller flere utbetalingsdager")
                 sikkerLogg("alle utbetalingsdager er allerede utbetalt")
             }
@@ -2496,62 +2554,17 @@ internal class Vedtaksperiode private constructor(
                     keyValue("vedtaksperiodeId", "${vedtaksperiode.id}"),
                 )
             }
+        }
 
-            private fun List<Vedtaksperiode>.påvirkerForkastingArbeidsgiverperioden(): Boolean {
-                return this
-                    .filter { it.organisasjonsnummer == organisasjonsnummer }
-                    .filter { it.tilstand != AvsluttetUtenUtbetaling }
-                    .filter { it.periode.starterEtter(sisteAuu.periode) }
-                    .any { it.finnArbeidsgiverperiode() == arbeidsgiverperiode }
+        internal class AuuUtenAGP(
+            organisasjonsnummer: String,
+            auu: Vedtaksperiode
+        ): AuuGruppering(organisasjonsnummer, listOf(auu)) {
+            init {
+                check(auu.finnArbeidsgiverperiode() == null) { "Vedtaksperiodens arbeidsgiverperiode må være null" }
             }
-
-            private fun List<Vedtaksperiode>.påvirkerForkastingSkjæringstidspunktPåPerson(hendelse: IAktivitetslogg): Boolean {
-                val auuenesVedtaksperiodeId = auuer.map { it.id }
-                val vedtaksperioderSomMåBeholdeSkjæringstidspunkt = filterNot { it.id in auuenesVedtaksperiodeId }.filterNot { it.tilstand == TilInfotrygd }
-                val arbeidsgiversSykdomstidslinjeUtenAuuene =
-                    arbeidsgiver.sykdomstidslinjeUten(auuer.map { it.sykdomstidslinje })
-
-                vedtaksperioderSomMåBeholdeSkjæringstidspunkt.forEach { vedtaksperiode ->
-                    if (vedtaksperiode.skjæringstidspunkt != person.skjæringstidspunkt(arbeidsgiver, arbeidsgiversSykdomstidslinjeUtenAuuene, vedtaksperiode.periode)) {
-                        hendelse.info("Forkaste AUU: Kan ikke forkaste, vedtaksperioden ${vedtaksperiode.periode} på ${vedtaksperiode.organisasjonsnummer} ville fått endret skjæringstidspunkt")
-                        return true
-                    }
-                }
-                return false
-            }
-
-            internal companion object {
-                internal fun List<Vedtaksperiode>.gruppérAuuerMedSammeAGP(hendelse: IAktivitetslogg, filter: (vedtaksperiode: Vedtaksperiode) -> Boolean) =
-                    this
-                        .groupBy { it.organisasjonsnummer }
-                        .flatMap { (organisasjonsnummer, vedtaksperioder) ->
-                            vedtaksperioder
-                                .filter { it.tilstand == AvsluttetUtenUtbetaling }
-                                .groupBy { it.finnArbeidsgiverperiode() }
-                                .mapNotNull { (arbeidsgiverperiode, vedtaksperioder) ->
-                                    if (arbeidsgiverperiode == null) {
-                                        val omsluttendePeriode = vedtaksperioder.first().periode.start til vedtaksperioder.last().periode.endInclusive
-                                        hendelse.info("Gruppére auuere med samme AGP: Ignorerer perioden $omsluttendePeriode for $organisasjonsnummer, arbeidsgiverperioden er null")
-                                        null
-                                    }
-                                    else AuuerMedSammeAGP(organisasjonsnummer, vedtaksperioder, arbeidsgiverperiode)
-                                }
-                        }
-                        .filter { auuer -> auuer.auuer.any(filter) }
-                        .sortedByDescending { it.sisteAuu }
-
-                internal fun List<Vedtaksperiode>.auuerMedSammeAGP(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode): AuuerMedSammeAGP? {
-                    if (vedtaksperiode.tilstand != AvsluttetUtenUtbetaling) return null
-                    val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode() ?: return null.also {
-                        hendelse.info("Forkaste AUU: Kan ikke forkastes, arbeidsgiverperioden er null")
-                    }
-                    return this
-                        .filter { it.organisasjonsnummer == vedtaksperiode.organisasjonsnummer }
-                        .filter { it.tilstand == AvsluttetUtenUtbetaling }
-                        .filter { it.finnArbeidsgiverperiode() == arbeidsgiverperiode }
-                        .let { AuuerMedSammeAGP(vedtaksperiode.organisasjonsnummer, it, arbeidsgiverperiode) }
-                }
-            }
+            override fun påvirkerForkastingArbeidsgiverperioden(alleVedtaksperioder: List<Vedtaksperiode>) = false
+            override fun identifiserAUUSomErUtbetaltISpleis() {}
         }
 
         internal fun List<Vedtaksperiode>.venter(nestemann: Vedtaksperiode) {

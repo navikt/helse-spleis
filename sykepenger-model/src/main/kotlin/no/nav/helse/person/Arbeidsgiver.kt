@@ -35,8 +35,8 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_UTBETALT_I_INFOTRYGD
-import no.nav.helse.person.Vedtaksperiode.Companion.AuuerMedSammeAGP.Companion.auuerMedSammeAGP
-import no.nav.helse.person.Vedtaksperiode.Companion.AuuerMedSammeAGP.Companion.gruppérAuuerMedSammeAGP
+import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.gruppérAuuer
+import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.auuGruppering
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
@@ -129,18 +129,18 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.forkastAUUSomErUtbetaltIInfotrygd(hendelse: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
             val alleVedtaksperioder = flatMap { it.vedtaksperioder }
-            alleVedtaksperioder.gruppérAuuerMedSammeAGP(hendelse, AUU_UTBETALT_I_INFOTRYGD(infotrygdhistorikk)).forEach {
+            alleVedtaksperioder.gruppérAuuer(AUU_UTBETALT_I_INFOTRYGD(infotrygdhistorikk)).forEach {
                 it.forkast(hendelse, alleVedtaksperioder)
             }
         }
 
         internal fun List<Arbeidsgiver>.forkastAuu(hendelse: IAktivitetslogg, auu: Vedtaksperiode) {
             val alleVedtaksperioder = flatMap { it.vedtaksperioder }
-            alleVedtaksperioder.auuerMedSammeAGP(hendelse, auu)?.forkast(hendelse, alleVedtaksperioder)
+            alleVedtaksperioder.auuGruppering(auu)?.forkast(hendelse, alleVedtaksperioder)
         }
 
-        internal fun List<Arbeidsgiver>.identifiserAUUSomErUtbetaltISpleis(hendelse: IAktivitetslogg) {
-            flatMap { it.vedtaksperioder }.gruppérAuuerMedSammeAGP(hendelse, AUU_SOM_VIL_UTBETALES).forEach {
+        internal fun List<Arbeidsgiver>.identifiserAUUSomErUtbetaltISpleis() {
+            flatMap { it.vedtaksperioder }.gruppérAuuer(AUU_SOM_VIL_UTBETALES).forEach {
                 it.identifiserAUUSomErUtbetaltISpleis()
             }
         }
