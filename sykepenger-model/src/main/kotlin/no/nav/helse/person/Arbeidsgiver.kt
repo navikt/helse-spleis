@@ -130,7 +130,7 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.forkastAUUSomErUtbetaltIInfotrygd(hendelse: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
             val alleVedtaksperioder = flatMap { it.vedtaksperioder }
             alleVedtaksperioder.gruppérAuuer(AUU_UTBETALT_I_INFOTRYGD(infotrygdhistorikk)).forEach {
-                it.forkast(hendelse, alleVedtaksperioder)
+                it.forkast(hendelse, alleVedtaksperioder, "overlappende utbetaling i Infotrygd")
             }
         }
 

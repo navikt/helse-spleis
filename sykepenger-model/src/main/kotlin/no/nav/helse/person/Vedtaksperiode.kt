@@ -2474,12 +2474,12 @@ internal class Vedtaksperiode private constructor(
 
             abstract fun identifiserAUUSomErUtbetaltISpleis()
 
-            internal fun forkast(hendelse: IAktivitetslogg, alleVedtaksperioder: List<Vedtaksperiode>) {
-                if (auuer.size > 1) hendelse.info("Forkaste AUU: Vurderer videre om periodene $perioder kan forkastes")
+            internal fun forkast(hendelse: IAktivitetslogg, alleVedtaksperioder: List<Vedtaksperiode>, årsak: String = "${hendelse::class.simpleName}") {
+                hendelse.info("Forkaste AUU: Vurderer om periodene $perioder kan forkastes på grunn av $årsak")
                 if (auuer.any { !it.arbeidsgiver.kanForkastes(it) }) return hendelse.info("Forkaste AUU: Kan ikke forkastes, har overlappende utbetalte utbetalinger på samme arbeidsgiver")
                 if (påvirkerForkastingArbeidsgiverperioden(alleVedtaksperioder)) return hendelse.info("Forkaste AUU: Kan ikke forkastes, påvirker arbeidsgiverperiode på samme arbeidsgiver")
                 if (påvirkerForkastingSkjæringstidspunktPåPerson(hendelse, alleVedtaksperioder)) return hendelse.info("Forkaste AUU: Kan ikke forkastes, påvirker skjæringstidspunkt på personen")
-                hendelse.info("Forkaste AUU: Vedtaksperiodene $perioder forkastes")
+                hendelse.info("Forkaste AUU: Vedtaksperiodene $perioder forkastes på grunn av $årsak")
                 val forkastes = auuer.map { it.id }
                 person.søppelbøtte(hendelse) { it.id in forkastes }
             }
