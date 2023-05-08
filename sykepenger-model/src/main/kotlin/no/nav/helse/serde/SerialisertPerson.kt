@@ -165,7 +165,8 @@ import no.nav.helse.serde.migration.V23None
 import no.nav.helse.serde.migration.V240KopiereSykdomstidslinjeTilVedtaksperiodeutbetalinger
 import no.nav.helse.serde.migration.V241DokumenttypeSomListe
 import no.nav.helse.serde.migration.V242None
-import no.nav.helse.serde.migration.V243FinneOverlappendePerioder
+import no.nav.helse.serde.migration.V243None
+import no.nav.helse.serde.migration.V244FinneOverlappendePerioder
 import no.nav.helse.serde.migration.V24None
 import no.nav.helse.serde.migration.V25ManglendeForlengelseFraInfotrygd
 import no.nav.helse.serde.migration.V26SykdomshistorikkMerge
@@ -496,7 +497,8 @@ class SerialisertPerson(val json: String) {
             V240KopiereSykdomstidslinjeTilVedtaksperiodeutbetalinger(),
             V241DokumenttypeSomListe(),
             V242None(),
-            V243FinneOverlappendePerioder()
+            V243None(),
+            V244FinneOverlappendePerioder()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
