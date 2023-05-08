@@ -6,6 +6,7 @@ import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.fredag
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Dagtype.Permisjonsdag
@@ -26,6 +27,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.mai
+import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
@@ -120,6 +122,17 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.januar)
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+    }
+
+    @Test
+    fun `arbeidsgiverperiode slutter på fredag, søknad starter mandag`() {
+        håndterInntektsmelding(listOf(4.januar til fredag(19.januar)))
+        håndterSøknad(Sykdom(mandag(22.januar), 31.januar, 100.prosent))
+        assertEquals(4.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(4.januar til fredag(19.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        assertEquals("UUGG UUUUUGG UUUUU?? SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
     }
 
     @Test
