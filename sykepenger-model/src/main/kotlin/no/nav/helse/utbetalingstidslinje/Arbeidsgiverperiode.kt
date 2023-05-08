@@ -130,10 +130,8 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         return this
     }
 
-    internal fun erUtbetalt(perioder: List<Periode>, utbetalingstidslinje: Utbetalingstidslinje): Boolean {
-        val utbetalingsdagerSomOverlapperMedPerioder = perioder.intersect(utbetalingsdager).flatten().takeUnless { it.isEmpty() } ?: return false
-        return utbetalingsdagerSomOverlapperMedPerioder.all { utbetalingstidslinje[it] is Utbetalingsdag.NavDag }
-    }
+    internal fun erUtbetalt(perioder: List<Periode>, utbetalingstidslinje: Utbetalingstidslinje) =
+        perioder.intersect(utbetalingsdager).flatten().all { utbetalingstidslinje[it] is Utbetalingsdag.NavDag }
 
     internal companion object {
 

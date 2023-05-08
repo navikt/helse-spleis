@@ -85,6 +85,7 @@ import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_REFUSJONSOPPLYSNINGER_PÅ
 import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE
 import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
 import no.nav.helse.person.Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT
+import no.nav.helse.person.Venteårsak.Hvorfor.VIL_AVSLUTTES
 import no.nav.helse.person.Venteårsak.Hvorfor.VIL_UTBETALES
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
@@ -2205,6 +2206,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak {
             if (!vedtaksperiode.forventerInntekt(NullObserver)) return HJELP.utenBegrunnelse
+            if (vedtaksperiode.arbeidsgiver.erUtbetalt(vedtaksperiode.finnArbeidsgiverperiode()!!, listOf(vedtaksperiode.periode))) return HJELP fordi VIL_AVSLUTTES
             return HJELP fordi VIL_UTBETALES
         }
 
