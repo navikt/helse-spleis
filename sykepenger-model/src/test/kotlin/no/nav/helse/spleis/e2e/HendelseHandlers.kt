@@ -6,6 +6,7 @@ import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.dsl.PersonHendelsefabrikk
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.ArbeidstakerHendelse
@@ -40,6 +41,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest
+import no.nav.helse.person.AbstractPersonTest.Companion.AKTØRID
 import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
@@ -701,6 +703,11 @@ internal fun AbstractEndToEndTest.håndterUtbetalingpåminnelse(
 ) {
     utbetalingpåminnelse(inspektør.utbetalingId(utbetalingIndeks), status, tilstandsendringstidspunkt).håndter(Person::håndter)
 }
+
+internal fun AbstractEndToEndTest.håndterPersonPåminnelse(
+    aktørId: String = AKTØRID,
+    fnr: Personidentifikator = UNG_PERSON_FNR_2018,
+) = PersonHendelsefabrikk(aktørId, fnr).lagPåminnelse().håndter(Person::håndter)
 
 internal fun AbstractEndToEndTest.håndterPåminnelse(
     vedtaksperiodeIdInnhenter: IdInnhenter,
