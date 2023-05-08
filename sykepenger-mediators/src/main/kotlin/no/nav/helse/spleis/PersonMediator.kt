@@ -354,7 +354,8 @@ internal class PersonMediator(
             "fom" to event.fom,
             "tom" to event.tom,
             "forlengerPeriode" to event.forlengerPeriode,
-            "harPeriodeInnenfor16Dager" to event.harPeriodeInnenfor16Dager
+            "harPeriodeInnenfor16Dager" to event.harPeriodeInnenfor16Dager,
+            "forlengerSpleisEllerInfotrygd" to event.forlengerSpleisEllerInfotrygd
         )))
     }
 

@@ -142,7 +142,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 fom = 28.januar,
                 tom = 28.februar,
                 forlengerPeriode = true,
-                harPeriodeInnenfor16Dager = false
+                harPeriodeInnenfor16Dager = false,
+                forlengerSpleisEllerInfotrygd = false
             ), observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER))
         )
     }
@@ -168,7 +169,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 fom = 17.januar,
                 tom = 31.januar,
                 forlengerPeriode = false,
-                harPeriodeInnenfor16Dager = false
+                harPeriodeInnenfor16Dager = false,
+                forlengerSpleisEllerInfotrygd = true
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER))
         )
         assertTrue(im in observatør.inntektsmeldingIkkeHåndtert)
@@ -189,7 +191,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 fom = 1.februar,
                 tom = 28.februar,
                 forlengerPeriode = true,
-                harPeriodeInnenfor16Dager = false
+                harPeriodeInnenfor16Dager = false,
+                forlengerSpleisEllerInfotrygd = false
             ), observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER))
         )
     }
@@ -210,7 +213,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 fom = 28.januar,
                 tom = 28.februar,
                 forlengerPeriode = false,
-                harPeriodeInnenfor16Dager = false
+                harPeriodeInnenfor16Dager = false,
+                forlengerSpleisEllerInfotrygd = false
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
     }
     @Test
@@ -230,7 +234,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 fom = 10.februar,
                 tom = 28.februar,
                 forlengerPeriode = false,
-                harPeriodeInnenfor16Dager = false
+                harPeriodeInnenfor16Dager = false,
+                forlengerSpleisEllerInfotrygd = false
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
     }
 
@@ -251,7 +256,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 fom = 15.februar,
                 tom = 28.februar,
                 forlengerPeriode = false,
-                harPeriodeInnenfor16Dager = false
+                harPeriodeInnenfor16Dager = false,
+                forlengerSpleisEllerInfotrygd = false
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
     }
 
@@ -275,7 +281,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 fom = 10.januar,
                 tom = 15.januar,
                 forlengerPeriode = false,
-                harPeriodeInnenfor16Dager = false
+                harPeriodeInnenfor16Dager = false,
+                forlengerSpleisEllerInfotrygd = false
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
     }
 }

@@ -46,7 +46,6 @@ import no.nav.helse.spleis.TestMessageFactory.InstitusjonsoppholdTestdata
 import no.nav.helse.spleis.TestMessageFactory.OmsorgspengerTestdata
 import no.nav.helse.spleis.TestMessageFactory.OpplæringspengerTestdata
 import no.nav.helse.spleis.TestMessageFactory.PleiepengerTestdata
-import no.nav.helse.spleis.TestMessageFactory.Subsumsjon
 import no.nav.helse.spleis.TestMessageFactory.UtbetalingshistorikkForFeriepengerTestdata
 import no.nav.helse.spleis.TestMessageFactory.UtbetalingshistorikkTestdata
 import no.nav.helse.spleis.db.HendelseRepository
@@ -125,7 +124,8 @@ internal abstract class AbstractEndToEndMediatorTest {
         orgnummer: String = ORGNUMMER,
         korrigerer: UUID? = null,
         opprinneligSendt: LocalDateTime? = null,
-        historiskeFolkeregisteridenter: List<String> = emptyList()
+        historiskeFolkeregisteridenter: List<String> = emptyList(),
+        sendTilGosys: Boolean? = false
     ): UUID {
         val (id, message) = meldingsfabrikk.lagSøknadNav(
             fnr = fnr,
@@ -138,6 +138,7 @@ internal abstract class AbstractEndToEndMediatorTest {
             korrigerer = korrigerer,
             opprinneligSendt = opprinneligSendt,
             historiskeFolkeregisteridenter = historiskeFolkeregisteridenter,
+            sendTilGosys = sendTilGosys
         )
 
         val antallVedtaksperioderFørSøknad = testRapid.inspektør.vedtaksperiodeteller

@@ -1,12 +1,8 @@
 package no.nav.helse.person
 
 import java.util.UUID
-import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 
 internal class ForkastetVedtaksperiode(
     private val vedtaksperiode: Vedtaksperiode
@@ -16,6 +12,9 @@ internal class ForkastetVedtaksperiode(
         vedtaksperiode.accept(visitor)
         visitor.postVisitForkastetPeriode(vedtaksperiode)
     }
+
+    fun erVedtaksperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
+        this.vedtaksperiode.erVedtaksperiodeRettFør(vedtaksperiode)
 
     internal companion object {
         private fun Iterable<ForkastetVedtaksperiode>.perioder() = map { it.vedtaksperiode }

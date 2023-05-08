@@ -8,11 +8,12 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
@@ -54,5 +55,133 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `Forlenger spleis`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), sendTilGosys = true)
+
+        assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).forlengerSpleisEllerInfotrygd)
+    }
+
+    @Test
+    fun `Forlenger spleis over helg`() {
+        nyttVedtak(1.januar, 26.januar)
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 28.februar))
+        håndterSøknad(Sykdom(29.januar, 28.februar, 100.prosent), sendTilGosys = true)
+
+        assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).forlengerSpleisEllerInfotrygd)
+    }
+
+    @Test
+    fun `Forlenger forkastet`() {
+        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), sendTilGosys = true)
+
+        assertFalse(observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).forlengerSpleisEllerInfotrygd)
+        assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).forlengerSpleisEllerInfotrygd)
+    }
+
+    @Test
+    fun `Forlenger forkastet over helg`() {
+        tilGodkjenning(1.januar, 26.januar, ORGNUMMER)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 28.februar))
+        håndterSøknad(Sykdom(29.januar, 28.februar, 100.prosent), sendTilGosys = true)
+
+        assertFalse(observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).forlengerSpleisEllerInfotrygd)
+        assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).forlengerSpleisEllerInfotrygd)
+    }
+
+    @Test
+    fun `Forlenger ikke ved kort gap til spleis`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
+        håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent), sendTilGosys = true)
+
+        assertFalse(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).forlengerSpleisEllerInfotrygd)
+    }
+
+    @Test
+    fun `Forlenger ikke ved kort gap til forkastet`() {
+        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+
+        håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
+        håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent), sendTilGosys = true)
+
+
+        assertFalse(observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).forlengerSpleisEllerInfotrygd)
+        assertFalse(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).forlengerSpleisEllerInfotrygd)
+    }
+
+    @Test
+    fun `Forlenger kort spleisperiode, ny periode er fortsatt innenfor AGP`() {
+        nyPeriode(1.januar til 10.januar)
+
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 15.januar))
+        håndterSøknad(Sykdom(11.januar, 15.januar, 100.prosent), sendTilGosys = true)
+
+        assertFalse(observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).forlengerSpleisEllerInfotrygd)
+        assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).forlengerSpleisEllerInfotrygd)
+    }
+
+    @Test
+    fun `Forlenger kort spleisperiode, ny periode går utover AGP`() {
+        nyPeriode(1.januar til 10.januar)
+
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 17.januar))
+        håndterSøknad(Sykdom(11.januar, 17.januar, 100.prosent), sendTilGosys = true)
+
+        assertFalse(observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).forlengerSpleisEllerInfotrygd)
+        assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).forlengerSpleisEllerInfotrygd) // Sort hull, får ikke en forespørsel
+    }
+
+    @Test
+    fun `Forlenger kort forkastet periode, ny periode er fortsatt innenfor AGP`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
+        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent), sendTilGosys = true)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 15.januar))
+        håndterSøknad(Sykdom(11.januar, 15.januar, 100.prosent), sendTilGosys = true)
+
+        assertFalse(observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).forlengerSpleisEllerInfotrygd)
+        assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).forlengerSpleisEllerInfotrygd)
+    }
+
+    @Test
+    fun `Forlenger kort forkastet periode, ny periode går utover AGP`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
+        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent), sendTilGosys = true)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 17.januar))
+        håndterSøknad(Sykdom(11.januar, 17.januar, 100.prosent), sendTilGosys = true)
+
+        assertFalse(observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).forlengerSpleisEllerInfotrygd)
+        assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).forlengerSpleisEllerInfotrygd) // Sort hull, får ingen forespørsel
+    }
+
+    @Test
+    fun `AUU periode regnes ikke som forlengelse  ikke ved forkasting av AUU`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
+        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent), sendTilGosys = true)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+
+
+        val event = observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER))
+        // Her ber vi om arbeidsgiveropplysninger selv om vi egentlig ikke trenger det
+        // Men det "må" vi leve med da vi allerede har slettet historikken og oppdager ikke at perioden er en AUU
+        assertFalse(event.forlengerSpleisEllerInfotrygd)
     }
 }
