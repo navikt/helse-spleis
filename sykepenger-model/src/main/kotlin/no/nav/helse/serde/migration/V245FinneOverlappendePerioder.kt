@@ -12,7 +12,7 @@ import no.nav.helse.nesteDag
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
 
-internal class V244FinneOverlappendePerioder: JsonMigration(244) {
+internal class V245FinneOverlappendePerioder: JsonMigration(245) {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
@@ -42,14 +42,24 @@ internal class V244FinneOverlappendePerioder: JsonMigration(244) {
                         perioder
                     } else if (periode != overlappende.first && periode in overlappende.first) {
                         if (overlappende.first.trim(periode).count() > 1) {
+                            måJustereLåser = true
+                            if (overlappende.first.endInclusive > periode.endInclusive) {
+                                // periode først, så overlappende
+                                (overlappende.second as ObjectNode).put("fom", periode.endInclusive.nesteDag.toString())
+                                (vedtaksperiode as ObjectNode).put("fom", overlappende.first.start.toString())
+                            } else {
+                                // overlappende først, så periode
+                                (overlappende.second as ObjectNode).put("tom", periode.start.forrigeDag.toString())
+                                (vedtaksperiode as ObjectNode).put("fom", overlappende.first.endInclusive.toString())
+                            }
                             sikkerlogg.info(
-                                "V244 {} vedtaksperiode {} ($periode) i {} hos {} overlapper helt med tidligere periode ${overlappende.first} - må justeres manuelt fordi perioden blir spist oppp",
+                                "V244 {} vedtaksperiode {} ($periode) i {} hos {} overlapper med tidligere periode ${overlappende.first} - justerer fom/tom på begge periodene",
                                 keyValue("fødselsnummer", fnr),
                                 keyValue("vedtaksperiodeId", vedtaksperiode.path("id").asText()),
                                 keyValue("tilstand", vedtaksperiode.path("tilstand").asText()),
                                 keyValue("orgnummer", orgnummer)
                             )
-                            perioder
+                            perioder.plusElement(periode to vedtaksperiode)
                         } else if (overlappende.first.start == periode.start) {
                             måJustereLåser = true
                             sikkerlogg.info(

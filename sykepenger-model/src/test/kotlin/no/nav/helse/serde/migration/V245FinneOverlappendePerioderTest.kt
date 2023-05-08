@@ -2,7 +2,7 @@ package no.nav.helse.serde.migration
 
 import org.junit.jupiter.api.Test
 
-internal class V244FinneOverlappendePerioderTest: MigrationTest(V244FinneOverlappendePerioder()) {
+internal class V245FinneOverlappendePerioderTest: MigrationTest(V245FinneOverlappendePerioder()) {
     @Test
     fun `migrerer perioder`() {
         /*
@@ -18,8 +18,8 @@ internal class V244FinneOverlappendePerioderTest: MigrationTest(V244FinneOverlap
             en periode som består av én dag og som overlapper med en periode som strekker seg lengre: korte ned annen periode hvis éndag-perioden er i snute eller hale
          */
         assertMigration(
-            expectedJson = "/migrations/244/expected.json",
-            originalJson = "/migrations/244/original.json"
+            expectedJson = "/migrations/245/expected.json",
+            originalJson = "/migrations/245/original.json"
         )
     }
 }
