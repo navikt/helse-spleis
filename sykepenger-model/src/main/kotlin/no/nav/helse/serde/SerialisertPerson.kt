@@ -167,7 +167,9 @@ import no.nav.helse.serde.migration.V241DokumenttypeSomListe
 import no.nav.helse.serde.migration.V242None
 import no.nav.helse.serde.migration.V243None
 import no.nav.helse.serde.migration.V244None
-import no.nav.helse.serde.migration.V246FinneOverlappendePerioder
+import no.nav.helse.serde.migration.V246None
+import no.nav.helse.serde.migration.V248FinneOverlappendePerioder
+import no.nav.helse.serde.migration.V247ForkasteOverlappende
 import no.nav.helse.serde.migration.V24None
 import no.nav.helse.serde.migration.V25ManglendeForlengelseFraInfotrygd
 import no.nav.helse.serde.migration.V26SykdomshistorikkMerge
@@ -500,7 +502,9 @@ class SerialisertPerson(val json: String) {
             V242None(),
             V243None(),
             V244None(),
-            V246FinneOverlappendePerioder()
+            V246None(),
+            V247ForkasteOverlappende(),
+            V248FinneOverlappendePerioder()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
