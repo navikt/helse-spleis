@@ -10,6 +10,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Alder
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
@@ -885,8 +886,8 @@ internal class Vedtaksperiode private constructor(
 
     private fun finnArbeidsgiverperiode() = arbeidsgiver.arbeidsgiverperiode(periode)
 
-    private fun forventerInntekt(): Boolean {
-        return Arbeidsgiverperiode.forventerInntekt(finnArbeidsgiverperiode(), periode, sykdomstidslinje, jurist())
+    private fun forventerInntekt(subsumsjonObserver: SubsumsjonObserver = jurist()): Boolean {
+        return Arbeidsgiverperiode.forventerInntekt(finnArbeidsgiverperiode(), periode, sykdomstidslinje, subsumsjonObserver)
     }
 
     private fun loggInnenforArbeidsgiverperiode() {
@@ -2203,12 +2204,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak {
-            if (!vedtaksperiode.forventerInntekt()) return HJELP.utenBegrunnelse
+            if (!vedtaksperiode.forventerInntekt(NullObserver)) return HJELP.utenBegrunnelse
             return HJELP fordi VIL_UTBETALES
         }
 
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {
-            if (!vedtaksperiode.forventerInntekt()) return
+            if (!vedtaksperiode.forventerInntekt(NullObserver)) return
             vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
         }
 
@@ -2247,7 +2248,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (!vedtaksperiode.forventerInntekt()) return
+            if (!vedtaksperiode.forventerInntekt(NullObserver)) return
             if (påminnelse.skalReberegnes())
                 return vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
             if (vedtaksperiode.vilkårsgrunnlag == null) return påminnelse.info("AUU-periode som potensielt burde omgjøres og mangler vilkårsgrunnlag")
@@ -2429,7 +2430,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal val AUU_SOM_VIL_UTBETALES: VedtaksperiodeFilter = {
-            it.tilstand == AvsluttetUtenUtbetaling && it.forventerInntekt()
+            it.tilstand == AvsluttetUtenUtbetaling && it.forventerInntekt(NullObserver)
         }
 
         internal val AUU_UTBETALT_I_INFOTRYGD = { infotrygdhistorikk: Infotrygdhistorikk ->
@@ -2546,7 +2547,7 @@ internal class Vedtaksperiode private constructor(
             }
 
             private fun sikkerLogg(melding: String) {
-                val vedtaksperiode = auuer.firstOrNull { it.forventerInntekt() } ?: førsteAuu
+                val vedtaksperiode = auuer.firstOrNull { it.forventerInntekt(NullObserver) } ?: førsteAuu
                 val fiktiv = if (arbeidsgiverperiode.fiktiv()) " (fiktiv)" else ""
                 sikkerlogg.info("AuuerMedSammeAGP som vil utbetales: $melding. Perioder=$perioder, arbeidsgiverperiode=${arbeidsgiverperiode.grupperSammenhengendePerioder()}${fiktiv}, {}, {}, {}",
                     keyValue("fødselsnummer", vedtaksperiode.fødselsnummer),
