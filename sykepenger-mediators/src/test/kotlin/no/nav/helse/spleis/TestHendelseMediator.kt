@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
+import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
@@ -34,6 +35,7 @@ import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.EtterbetalingMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
+import no.nav.helse.spleis.meldinger.model.GjenopplivVilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
@@ -296,4 +298,10 @@ internal class TestHendelseMediator : IHendelseMediator {
     ) {
         lestForkastSykmeldingsperioderMessage = true
     }
+
+    override fun behandle(
+        message: GjenopplivVilkårsgrunnlagMessage,
+        gjenopplivVilkårsgrunnlag: GjenopplivVilkårsgrunnlag,
+        context: MessageContext
+    ) {}
 }

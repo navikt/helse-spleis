@@ -15,6 +15,7 @@ import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.ANMODNING_OM_FORKASTING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.DØDSMELDING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.FORKAST_SYKMELDINGSPERIODER
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.GJENOPPLIV_VILKÅRSGRUNNLAG
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.GRUNNBELØPSREGULERING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSMELDING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.KANSELLER_UTBETALING
@@ -39,6 +40,7 @@ import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.EtterbetalingMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
+import no.nav.helse.spleis.meldinger.model.GjenopplivVilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
@@ -140,6 +142,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is DødsmeldingMessage -> DØDSMELDING
         is ForkastSykmeldingsperioderMessage -> FORKAST_SYKMELDINGSPERIODER
         is AnmodningOmForkastingMessage -> ANMODNING_OM_FORKASTING
+        is GjenopplivVilkårsgrunnlagMessage -> GJENOPPLIV_VILKÅRSGRUNNLAG
         is MigrateMessage,
         is AvstemmingMessage,
         is PersonPåminnelseMessage,
@@ -190,6 +193,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         DØDSMELDING,
         OVERSTYRARBEIDSGIVEROPPLYSNINGER,
         FORKAST_SYKMELDINGSPERIODER,
-        ANMODNING_OM_FORKASTING
+        ANMODNING_OM_FORKASTING,
+        GJENOPPLIV_VILKÅRSGRUNNLAG
     }
 }

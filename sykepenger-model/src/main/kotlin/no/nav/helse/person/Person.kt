@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
+import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
@@ -187,6 +188,12 @@ class Person private constructor(
         registrer(inntektsmeldingReplayUtført, "Behandler inntektsmelding replay utført")
         finnArbeidsgiver(inntektsmeldingReplayUtført).håndter(inntektsmeldingReplayUtført)
         håndterGjenoppta(inntektsmeldingReplayUtført)
+    }
+
+    fun håndter(gjenopplivVilkårsgrunnlag: GjenopplivVilkårsgrunnlag) {
+        gjenopplivVilkårsgrunnlag.gjenoppliv(vilkårsgrunnlagHistorikk)
+        gjenopptaBehandling(gjenopplivVilkårsgrunnlag)
+        håndterGjenoppta(gjenopplivVilkårsgrunnlag)
     }
 
     private fun <Hendelse: SykdomstidslinjeHendelse> håndter(hendelse: Hendelse, hendelsesmelding: String, handle: (Arbeidsgiver, Hendelse) -> Unit) {

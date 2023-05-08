@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -49,6 +50,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         val nytt = Innslag(siste, vilkårsgrunnlag.toList())
         if (nytt == siste) return
         historikk.add(0, nytt)
+    }
+
+    internal fun gjenoppliv(hendelse: IAktivitetslogg, vilkårsgrunnlagId: UUID) {
+        if (sisteInnlag()?.gjennoppliv(hendelse, vilkårsgrunnlagId) != null) return hendelse.info("Kan ikke gjenopplive. Vilkårsgrunnlaget lever!")
+        val gjenopplivet = historikk.firstNotNullOfOrNull { it.gjennoppliv(hendelse, vilkårsgrunnlagId) } ?: return hendelse.info("Fant ikke vilkårsgrunnlag å gjenopplive")
+        lagre(gjenopplivet)
     }
 
     internal fun sisteId() = sisteInnlag()!!.id
@@ -171,6 +178,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return Innslag(gyldigeVilkårsgrunnlag)
         }
 
+        internal fun gjennoppliv(hendelse: IAktivitetslogg, vilkårsgrunnlagId: UUID)  = vilkårsgrunnlag.values.firstNotNullOfOrNull { it.gjenoppliv(hendelse, vilkårsgrunnlagId) }
+
         internal companion object {
             fun gjenopprett(
                 id: UUID,
@@ -249,7 +258,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             val endringsdato = sykepengegrunnlag.finnEndringsdato(this.sykepengegrunnlag)
             val eventyr = Revurderingseventyr.korrigertInntektsmelding(skjæringstidspunkt, endringsdato)
 
-            return kopierMed(inntektsmelding, sykepengegrunnlag, opptjening, SubsumsjonObserver.NullObserver) to eventyr
+            return kopierMed(inntektsmelding, sykepengegrunnlag, opptjening, NullObserver) to eventyr
         }
 
         protected abstract fun vilkårsgrunnlagtype(): String
@@ -297,6 +306,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         internal fun tags(tagBuilder: TagBuilder) = sykepengegrunnlag.tags(tagBuilder)
+
+        internal fun gjenoppliv(hendelse: IAktivitetslogg, vilkårsgrunnlagId: UUID): VilkårsgrunnlagElement? {
+            if (this.vilkårsgrunnlagId != vilkårsgrunnlagId) return null
+            return kopierMed(hendelse, this.sykepengegrunnlag, this.opptjening, NullObserver)
+        }
 
         internal companion object {
             internal fun skjæringstidspunktperioder(elementer: Collection<VilkårsgrunnlagElement>): List<Periode> {
