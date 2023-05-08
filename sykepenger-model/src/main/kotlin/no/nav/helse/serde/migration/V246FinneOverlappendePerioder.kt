@@ -12,7 +12,7 @@ import no.nav.helse.nesteDag
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
 
-internal class V245FinneOverlappendePerioder: JsonMigration(245) {
+internal class V246FinneOverlappendePerioder: JsonMigration(246) {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
@@ -28,12 +28,12 @@ internal class V245FinneOverlappendePerioder: JsonMigration(245) {
                 .path("vedtaksperioder")
                 .fold(emptyList<Pair<Periode, JsonNode>>()) { perioder, vedtaksperiode ->
                     val periode = LocalDate.parse(vedtaksperiode.path("fom").asText()) til LocalDate.parse(vedtaksperiode.path("tom").asText())
-                    val overlappende = perioder.firstOrNull { it.first.overlapperMed(periode) }
+                    val overlappende = perioder.lastOrNull { it.first.overlapperMed(periode) }
                     if (overlappende == null) {
                         perioder.plusElement(periode to vedtaksperiode)
                     } else if (periode.count() == 1 && overlappende.first.count() == 1) {
                         sikkerlogg.info(
-                            "V244 {} vedtaksperiode {} ($periode) i {} hos {} overlapper med tidligere periode ${overlappende.first} - må justeres manuelt fordi periodene består av én dag",
+                            "V246 {} vedtaksperiode {} ($periode) i {} hos {} overlapper med tidligere periode ${overlappende.first} - må justeres manuelt fordi periodene består av én dag",
                             keyValue("fødselsnummer", fnr),
                             keyValue("vedtaksperiodeId", vedtaksperiode.path("id").asText()),
                             keyValue("tilstand", vedtaksperiode.path("tilstand").asText()),
@@ -42,28 +42,42 @@ internal class V245FinneOverlappendePerioder: JsonMigration(245) {
                         perioder
                     } else if (periode != overlappende.first && periode in overlappende.first) {
                         if (overlappende.first.trim(periode).count() > 1) {
-                            måJustereLåser = true
-                            if (overlappende.first.endInclusive > periode.endInclusive) {
-                                // periode først, så overlappende
-                                (overlappende.second as ObjectNode).put("fom", periode.endInclusive.nesteDag.toString())
-                                (vedtaksperiode as ObjectNode).put("fom", overlappende.first.start.toString())
-                            } else {
-                                // overlappende først, så periode
-                                (overlappende.second as ObjectNode).put("tom", periode.start.forrigeDag.toString())
-                                (vedtaksperiode as ObjectNode).put("fom", overlappende.first.endInclusive.toString())
-                            }
                             sikkerlogg.info(
-                                "V244 {} vedtaksperiode {} ($periode) i {} hos {} overlapper med tidligere periode ${overlappende.first} - justerer fom/tom på begge periodene",
+                                "V246 {} vedtaksperiode {} ($periode) i {} hos {} overlapper med tidligere periode ${overlappende.first} - justerer fom/tom på begge periodene",
                                 keyValue("fødselsnummer", fnr),
                                 keyValue("vedtaksperiodeId", vedtaksperiode.path("id").asText()),
                                 keyValue("tilstand", vedtaksperiode.path("tilstand").asText()),
                                 keyValue("orgnummer", orgnummer)
                             )
-                            perioder.plusElement(periode to vedtaksperiode)
+                            måJustereLåser = true
+                            if (overlappende.first.endInclusive > periode.endInclusive) {
+                                //     [---- overlappende periode ----]
+                                //       [---- periode ---- ]
+                                // blir: periode først (fom strekkes tilbake), så overlappende (fom dras frem)
+                                //     [----  periode ------][---- overlappende periode ----]
+                                val nyFomOverlappende = periode.endInclusive.nesteDag
+                                val nyFom = overlappende.first.start
+                                (overlappende.second as ObjectNode).put("fom", nyFomOverlappende.toString())
+                                (vedtaksperiode as ObjectNode).put("fom", nyFom.toString())
+
+                                perioder.filterNot { it == overlappende } + listOf(
+                                    (nyFom til periode.endInclusive) to vedtaksperiode,
+                                    (nyFomOverlappende til overlappende.first.endInclusive) to overlappende.second
+                                )
+                            } else {
+                                sikkerlogg.info(
+                                    "V246 {} vedtaksperiode {} ($periode) i {} hos {} overlapper med tidligere periode ${overlappende.first} - vet ikke hva vi gjør",
+                                    keyValue("fødselsnummer", fnr),
+                                    keyValue("vedtaksperiodeId", vedtaksperiode.path("id").asText()),
+                                    keyValue("tilstand", vedtaksperiode.path("tilstand").asText()),
+                                    keyValue("orgnummer", orgnummer)
+                                )
+                                perioder
+                            }
                         } else if (overlappende.first.start == periode.start) {
                             måJustereLåser = true
                             sikkerlogg.info(
-                                "V244 {} vedtaksperiode {} ($periode) i {} hos {} overlapper helt med tidligere periode ${overlappende.first} - endrer fom på forrige",
+                                "V246 {} vedtaksperiode {} ($periode) i {} hos {} overlapper helt med tidligere periode ${overlappende.first} - endrer fom på forrige",
                                 keyValue("fødselsnummer", fnr),
                                 keyValue("vedtaksperiodeId", vedtaksperiode.path("id").asText()),
                                 keyValue("tilstand", vedtaksperiode.path("tilstand").asText()),
@@ -74,7 +88,7 @@ internal class V245FinneOverlappendePerioder: JsonMigration(245) {
                         } else {
                             måJustereLåser = true
                             sikkerlogg.info(
-                                "V244 {} vedtaksperiode {} ($periode) i {} hos {} overlapper helt med tidligere periode ${overlappende.first} - endrer tom på forrige",
+                                "V246 {} vedtaksperiode {} ($periode) i {} hos {} overlapper helt med tidligere periode ${overlappende.first} - endrer tom på forrige",
                                 keyValue("fødselsnummer", fnr),
                                 keyValue("vedtaksperiodeId", vedtaksperiode.path("id").asText()),
                                 keyValue("tilstand", vedtaksperiode.path("tilstand").asText()),
@@ -86,7 +100,7 @@ internal class V245FinneOverlappendePerioder: JsonMigration(245) {
                     } else {
                         måJustereLåser = true
                         val nyFom = if (overlappende.first == periode) {
-                            sikkerlogg.info("V244 {} vedtaksperiode {} ($periode) i {} hos {} overlapper med tidligere periode ${overlappende.first} - må justere tom på forrige og fom på gjeldende",
+                            sikkerlogg.info("V246 {} vedtaksperiode {} ($periode) i {} hos {} overlapper med tidligere periode ${overlappende.first} - må justere tom på forrige og fom på gjeldende",
                                 keyValue("fødselsnummer", fnr),
                                 keyValue("vedtaksperiodeId", vedtaksperiode.path("id").asText()),
                                 keyValue("tilstand", vedtaksperiode.path("tilstand").asText()),
@@ -95,7 +109,7 @@ internal class V245FinneOverlappendePerioder: JsonMigration(245) {
                             (overlappende.second as ObjectNode).put("tom", overlappende.first.start.toString())
                             overlappende.first.start.nesteDag
                         } else {
-                            sikkerlogg.info("V244 {} vedtaksperiode {} ($periode) i {} hos {} overlapper med tidligere periode ${overlappende.first} - endrer fom på gjeldende",
+                            sikkerlogg.info("V246 {} vedtaksperiode {} ($periode) i {} hos {} overlapper med tidligere periode ${overlappende.first} - endrer fom på gjeldende",
                                 keyValue("fødselsnummer", fnr),
                                 keyValue("vedtaksperiodeId", vedtaksperiode.path("id").asText()),
                                 keyValue("tilstand", vedtaksperiode.path("tilstand").asText()),
