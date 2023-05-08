@@ -125,7 +125,8 @@ internal abstract class AbstractEndToEndMediatorTest {
         orgnummer: String = ORGNUMMER,
         korrigerer: UUID? = null,
         opprinneligSendt: LocalDateTime? = null,
-        historiskeFolkeregisteridenter: List<String> = emptyList()
+        historiskeFolkeregisteridenter: List<String> = emptyList(),
+        sendTilGosys: Boolean? = false
     ): UUID {
         val (id, message) = meldingsfabrikk.lagSøknadNav(
             fnr = fnr,
@@ -138,6 +139,7 @@ internal abstract class AbstractEndToEndMediatorTest {
             korrigerer = korrigerer,
             opprinneligSendt = opprinneligSendt,
             historiskeFolkeregisteridenter = historiskeFolkeregisteridenter,
+            sendTilGosys = sendTilGosys
         )
 
         val antallVedtaksperioderFørSøknad = testRapid.inspektør.vedtaksperiodeteller

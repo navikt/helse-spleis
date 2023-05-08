@@ -435,7 +435,8 @@ class Person private constructor(
     }
 
     internal fun vedtaksperiodeForkastet(event: PersonObserver.VedtaksperiodeForkastetEvent) {
-        observers.forEach { it.vedtaksperiodeForkastet(event) }
+        observers.forEach { it.
+        vedtaksperiodeForkastet(event) }
     }
 
     internal fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretEvent) {

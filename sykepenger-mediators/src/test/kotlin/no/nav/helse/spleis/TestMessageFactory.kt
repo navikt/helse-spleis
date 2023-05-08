@@ -125,7 +125,8 @@ internal class TestMessageFactory(
         orgnummer: String = organisasjonsnummer,
         korrigerer: UUID? = null,
         opprinneligSendt: LocalDateTime? = null,
-        historiskeFolkeregisteridenter: List<String> = emptyList()
+        historiskeFolkeregisteridenter: List<String> = emptyList(),
+        sendTilGosys: Boolean? = false
     ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }
         val sendtSøknad = SykepengesoknadDTO(
@@ -150,7 +151,8 @@ internal class TestMessageFactory(
             merknaderFraSykmelding = listOf(
                 MerknadDTO("EN_MERKANDSTYPE", null),
                 MerknadDTO("EN_ANNEN_MERKANDSTYPE", "tekstlig begrunnelse")
-            )
+            ),
+            sendTilGosys = sendTilGosys
         )
         return nyHendelse("sendt_søknad_nav", sendtSøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
     }

@@ -457,9 +457,12 @@ internal class Vedtaksperiode private constructor(
     internal fun erVedtaksperiodeRettFør(other: Vedtaksperiode) =
         this.sykdomstidslinje.erRettFør(other.sykdomstidslinje)
 
-    private fun erForlengelse() = arbeidsgiver
+    internal fun erForlengelse() = arbeidsgiver
         .finnVedtaksperiodeRettFør(this)
         ?.takeIf { it.forventerInntekt() } != null
+
+    internal fun erForlengelseAvForkastet() = arbeidsgiver
+        .finnForkastetVedtaksperiodeRettFør(this) != null
 
     internal fun erSykeperiodeAvsluttetUtenUtbetalingRettFør(other: Vedtaksperiode) =
         this.sykdomstidslinje.erRettFør(other.sykdomstidslinje) && this.tilstand == AvsluttetUtenUtbetaling
@@ -503,6 +506,7 @@ internal class Vedtaksperiode private constructor(
                     fom = periode.start,
                     tom = periode.endInclusive,
                     forlengerPeriode = person.nåværendeVedtaksperioder { it.tilstand !== AvsluttetUtenUtbetaling && (it.periode.overlapperMed(periode) || it.periode.erRettFør(periode)) }.isNotEmpty(),
+                    trengerArbeidsgiveropplysninger = !erForlengelseAvForkastet() && (!erForlengelse() || forventerInntekt()),
                     harPeriodeInnenfor16Dager = person.nåværendeVedtaksperioder { it.tilstand !== AvsluttetUtenUtbetaling && påvirkerArbeidsgiverperioden(it) }.isNotEmpty()
                 )
             )

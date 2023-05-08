@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -8,11 +9,12 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
@@ -54,5 +56,134 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `Forlenger spleis`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), sendTilGosys = true)
+
+        val event = observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER))
+        assertFalse(event.trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Forlenger spleis over helg`() {
+        nyttVedtak(1.januar, 26.januar)
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 28.februar))
+        håndterSøknad(Sykdom(29.januar, 28.februar, 100.prosent), sendTilGosys = true)
+
+        val event = observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER))
+        assertFalse(event.trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Forlenger forkastet `() {
+        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), sendTilGosys = true)
+
+        val event = observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER))
+        assertFalse(event.trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Forlenger forkastet over helg`() {
+        tilGodkjenning(1.januar, 26.januar, ORGNUMMER)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 28.februar))
+        håndterSøknad(Sykdom(29.januar, 28.februar, 100.prosent), sendTilGosys = true)
+
+        val event = observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER))
+        assertFalse(event.trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Kort gap til spleis`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
+        håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent), sendTilGosys = true)
+
+        val event = observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER))
+        assertTrue(event.trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Kort gap til forkastet`() {
+        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+
+        håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
+        håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent), sendTilGosys = true)
+
+        val event = observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER))
+        assertTrue(event.trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Forlenger kort spleisperiode, ny periode er fortsatt innenfor AGP`() {
+        nyPeriode(1.januar til 10.januar)
+
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 15.januar))
+        håndterSøknad(Sykdom(11.januar, 15.januar, 100.prosent), sendTilGosys = true)
+
+        val event = observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER))
+        assertFalse(event.trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Forlenger kort spleisperiode, ny periode går utover AGP`() {
+        nyPeriode(1.januar til 10.januar)
+
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 17.januar))
+        håndterSøknad(Sykdom(11.januar, 17.januar, 100.prosent), sendTilGosys = true)
+
+        val event = observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER))
+        assertTrue(event.trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Forlenger kort forkastet periode, ny periode er fortsatt innenfor AGP`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
+        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent), sendTilGosys = true)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 15.januar))
+        håndterSøknad(Sykdom(11.januar, 15.januar, 100.prosent), sendTilGosys = true)
+
+        val event = observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER))
+        assertFalse(event.trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Forlenger kort forkastet periode, ny periode går utover AGP`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
+        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent), sendTilGosys = true)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 17.januar))
+        håndterSøknad(Sykdom(11.januar, 17.januar, 100.prosent), sendTilGosys = true)
+
+        val event = observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER))
+
+        // Ber ikke om arbeidsgiveropplysninger selv om vi potensielt trenger, fordi det forlenger infotrygd
+        // TODO: logg?
+        assertFalse(event.trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Trenger ikke arbeidsgiveropplysninger ved forkasting av AUU`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
+        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent), sendTilGosys = true)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+
+        assertFalse(observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
     }
 }
