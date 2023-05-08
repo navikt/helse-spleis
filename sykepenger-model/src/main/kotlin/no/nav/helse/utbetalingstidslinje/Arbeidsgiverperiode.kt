@@ -14,6 +14,9 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.IKKE_UTBETALT
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.INGENTING_Å_UTBETALE
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.UTBETALT
 
 internal class Arbeidsgiverperiode private constructor(private val perioder: List<Periode>, førsteUtbetalingsdag: LocalDate?) : Iterable<LocalDate>, Comparable<LocalDate> {
     constructor(perioder: List<Periode>) : this(perioder, null)
@@ -130,10 +133,20 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         return this
     }
 
-    internal fun erUtbetalt(perioder: List<Periode>, utbetalingstidslinje: Utbetalingstidslinje) =
-        perioder.intersect(utbetalingsdager).flatten().all { utbetalingstidslinje[it] is Utbetalingsdag.NavDag }
+    internal fun utbetalingssituasjon(perioder: List<Periode>, utbetalingstidslinje: Utbetalingstidslinje?): Utbetalingssituasjon {
+        val overlapp = perioder.intersect(utbetalingsdager).flatten()
+        if (overlapp.isEmpty()) return INGENTING_Å_UTBETALE
+        if (utbetalingstidslinje == null) return IKKE_UTBETALT
+        if (overlapp.all { utbetalingstidslinje[it] is Utbetalingsdag.NavDag }) return UTBETALT
+        return IKKE_UTBETALT
+    }
 
     internal companion object {
+        internal enum class Utbetalingssituasjon {
+            UTBETALT,
+            IKKE_UTBETALT,
+            INGENTING_Å_UTBETALE
+        }
 
         internal fun fiktiv(førsteUtbetalingsdag: LocalDate) = Arbeidsgiverperiode(emptyList(), førsteUtbetalingsdag)
 

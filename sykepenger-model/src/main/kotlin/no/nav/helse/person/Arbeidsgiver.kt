@@ -35,8 +35,8 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_UTBETALT_I_INFOTRYGD
-import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.gruppérAuuer
 import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.auuGruppering
+import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.gruppérAuuer
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
@@ -76,6 +76,7 @@ import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Inntekter
@@ -1004,9 +1005,9 @@ internal class Arbeidsgiver private constructor(
             vedtaksperiode.sykefraværsfortelling(input)
         }
 
-    internal fun erUtbetalt(arbeidsgiverperiode: Arbeidsgiverperiode, perioder: List<Periode>): Boolean {
-        val utbetalingstidslinje = beregnetUtbetalingstidslinjer.lastOrNull()?.utbetalingstidslinje() ?: return false
-        return arbeidsgiverperiode.erUtbetalt(perioder, utbetalingstidslinje)
+    internal fun utbetalingssituasjon(arbeidsgiverperiode: Arbeidsgiverperiode, perioder: List<Periode>): Utbetalingssituasjon {
+        val utbetalingstidslinje = beregnetUtbetalingstidslinjer.lastOrNull()?.utbetalingstidslinje()
+        return arbeidsgiverperiode.utbetalingssituasjon(perioder, utbetalingstidslinje)
     }
 
     internal class JsonRestorer private constructor() {

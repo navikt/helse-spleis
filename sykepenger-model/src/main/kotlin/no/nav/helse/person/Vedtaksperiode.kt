@@ -79,6 +79,7 @@ import no.nav.helse.person.Venteårsak.Hva.HJELP
 import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
 import no.nav.helse.person.Venteårsak.Hva.SØKNAD
 import no.nav.helse.person.Venteårsak.Hva.UTBETALING
+import no.nav.helse.person.Venteårsak.Hvorfor.ALLEREDE_UTBETALT
 import no.nav.helse.person.Venteårsak.Hvorfor.HAR_SYKMELDING_SOM_OVERLAPPER_PÅ_ANDRE_ARBEIDSGIVERE
 import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_INNTEKT_FOR_VILKÅRSPRØVING_PÅ_ANDRE_ARBEIDSGIVERE
 import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_REFUSJONSOPPLYSNINGER_PÅ_ANDRE_ARBEIDSGIVERE
@@ -137,6 +138,9 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingPeriodetype
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.IKKE_UTBETALT
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.INGENTING_Å_UTBETALE
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.UTBETALT
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException
 import no.nav.helse.økonomi.Inntekt
@@ -2206,8 +2210,11 @@ internal class Vedtaksperiode private constructor(
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak {
             if (!vedtaksperiode.forventerInntekt(NullObserver)) return HJELP.utenBegrunnelse
-            if (vedtaksperiode.arbeidsgiver.erUtbetalt(vedtaksperiode.finnArbeidsgiverperiode()!!, listOf(vedtaksperiode.periode))) return HJELP fordi VIL_AVSLUTTES
-            return HJELP fordi VIL_UTBETALES
+            return when (vedtaksperiode.arbeidsgiver.utbetalingssituasjon(vedtaksperiode.finnArbeidsgiverperiode()!!, listOf(vedtaksperiode.periode))) {
+                IKKE_UTBETALT -> HJELP fordi VIL_UTBETALES
+                INGENTING_Å_UTBETALE -> HJELP fordi VIL_AVSLUTTES
+                UTBETALT -> HJELP fordi ALLEREDE_UTBETALT
+            }
         }
 
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {
@@ -2542,8 +2549,11 @@ internal class Vedtaksperiode private constructor(
                 .any { it.finnArbeidsgiverperiode() == arbeidsgiverperiode }
 
             override fun identifiserAUUSomErUtbetaltISpleis() {
-                if (!arbeidsgiver.erUtbetalt(arbeidsgiverperiode, perioder)) return sikkerLogg("mangler utbetaling på en eller flere utbetalingsdager")
-                sikkerLogg("alle utbetalingsdager er allerede utbetalt")
+                when (arbeidsgiver.utbetalingssituasjon(arbeidsgiverperiode, perioder)) {
+                    IKKE_UTBETALT -> sikkerLogg("det er utbetalingsdager som ikke er utbetalt")
+                    INGENTING_Å_UTBETALE -> sikkerLogg("det er ingen utbetalingsdager")
+                    UTBETALT -> sikkerLogg("alle utbetalingsdager er allerede utbetalt")
+                }
             }
 
             private fun sikkerLogg(melding: String) {

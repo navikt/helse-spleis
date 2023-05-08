@@ -91,7 +91,8 @@ internal class Venteårsak private constructor(
         MANGLER_REFUSJONSOPPLYSNINGER_PÅ_ANDRE_ARBEIDSGIVERE,
         OVERSTYRING_IGANGSATT,
         VIL_UTBETALES,
-        VIL_AVSLUTTES
+        VIL_AVSLUTTES,
+        ALLEREDE_UTBETALT
     }
 
     internal companion object {
