@@ -1,0 +1,73 @@
+{
+  "aktørId": "12345",
+  "arbeidsgivere": [
+    {
+      "sykdomshistorikk": [
+        {
+          "beregnetSykdomstidslinje": {
+            "låstePerioder": [
+              {
+                "fom": "2018-01-01",
+                "tom": "2018-01-01"
+              },
+              {
+                "fom": "2018-01-01",
+                "tom": "2018-01-01"
+              },
+              {
+                "fom": "2018-02-01",
+                "tom": "2018-02-01"
+              },
+              {
+                "fom": "2018-02-02",
+                "tom": "2018-02-02"
+              },
+              {
+                "fom": "2018-03-01",
+                "tom": "2018-03-16"
+              },
+              {
+                "fom": "2018-03-17",
+                "tom": "2018-04-02"
+              }
+            ]
+          }
+        }
+      ],
+      "organisasjonsnummer": "a",
+      "vedtaksperioder": [
+        {
+          "fom": "2018-01-01",
+          "tom": "2018-01-01",
+          "tilstand": "AVSLUTTET_UTEN_UTBETALING"
+        },
+        {
+          "fom": "2018-01-01",
+          "tom": "2018-01-01",
+          "tilstand": "AVSLUTTET_UTEN_UTBETALING"
+        },
+        {
+          "fom": "2018-02-01",
+          "tom": "2018-02-01",
+          "tilstand": "AVSLUTTET_UTEN_UTBETALING"
+        },
+        {
+          "fom": "2018-02-02",
+          "tom": "2018-02-02",
+          "tilstand": "AVSLUTTET_UTEN_UTBETALING"
+        },
+        {
+          "fom": "2018-03-01",
+          "tom": "2018-03-16",
+          "tilstand": "AVSLUTTET_UTEN_UTBETALING"
+        },
+        {
+          "fom": "2018-03-17",
+          "tom": "2018-04-02",
+          "tilstand": "AVSLUTTET"
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 243
+}
