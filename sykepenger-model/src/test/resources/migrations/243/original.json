@@ -45,6 +45,16 @@
           "fom": "2018-03-01",
           "tom": "2018-04-02",
           "tilstand": "AVSLUTTET"
+        },
+        {
+          "fom": "2018-05-01",
+          "tom": "2018-07-02",
+          "tilstand": "AVSLUTTET"
+        },
+        {
+          "fom": "2018-06-01",
+          "tom": "2018-06-16",
+          "tilstand": "AVSLUTTET_UTEN_UTBETALING"
         }
       ]
     }

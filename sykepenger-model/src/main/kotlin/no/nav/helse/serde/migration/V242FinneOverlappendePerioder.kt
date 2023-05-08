@@ -31,7 +31,16 @@ internal class V243FinneOverlappendePerioder: JsonMigration(243) {
                     if (overlappende == null) {
                         perioder.plusElement(periode to vedtaksperiode)
                     } else if (periode.count() == 1) {
-                        sikkerlogg.info("{} vedtaksperiode {} ($periode) i {} hos {} overlapper med tidligere periode ${overlappende.first} - må justeres manuelt fordi perioden består av én dag",
+                        sikkerlogg.info(
+                            "{} vedtaksperiode {} ($periode) i {} hos {} overlapper med tidligere periode ${overlappende.first} - må justeres manuelt fordi perioden består av én dag",
+                            keyValue("fødselsnummer", fnr),
+                            keyValue("vedtaksperiodeId", vedtaksperiode.path("id").asText()),
+                            keyValue("tilstand", vedtaksperiode.path("tilstand").asText()),
+                            keyValue("orgnummer", orgnummer)
+                        )
+                        perioder
+                    } else if (periode != overlappende.first && periode in overlappende.first) {
+                        sikkerlogg.info("{} vedtaksperiode {} ($periode) i {} hos {} overlapper helt med tidligere periode ${overlappende.first} - må justeres manuelt fordi perioden blir spist oppp",
                             keyValue("fødselsnummer", fnr),
                             keyValue("vedtaksperiodeId", vedtaksperiode.path("id").asText()),
                             keyValue("tilstand", vedtaksperiode.path("tilstand").asText()),
