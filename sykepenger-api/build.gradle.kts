@@ -34,6 +34,7 @@ dependencies {
         exclude(group = "junit")
     }
 
+    testImplementation(project(":sykepenger-mediators")) // for å få  tilgang på db/migrations-filene
     testImplementation(libs.flyway)
     testImplementation(libs.testcontainers) {
         exclude("com.fasterxml.jackson.core")

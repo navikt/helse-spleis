@@ -52,6 +52,7 @@ class HendelseDaoTest {
             .configure()
             .cleanDisabled(false)
             .dataSource(dataSource)
+            .locations("classpath:db/migration")
             .load()
 
     }

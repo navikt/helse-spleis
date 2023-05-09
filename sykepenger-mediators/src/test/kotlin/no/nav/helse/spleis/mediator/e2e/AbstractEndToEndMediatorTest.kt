@@ -6,6 +6,8 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
@@ -64,7 +66,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal abstract class AbstractEndToEndMediatorTest {
+internal abstract class AbstractEndToEndMediatorTest() {
     internal companion object {
         internal const val UNG_PERSON_FNR_2018 = "12029240045"
         internal val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
@@ -86,7 +88,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         hendelseMediator = HendelseMediator(
             rapidsConnection = testRapid,
             hendelseRepository = HendelseRepository(dataSource),
-            personDao = PersonDao(dataSource),
+            personDao = PersonDao(dataSource, STØTTER_IDENTBYTTE = true),
             versjonAvKode = "test-versjon"
         )
 
@@ -101,6 +103,16 @@ internal abstract class AbstractEndToEndMediatorTest {
     internal fun setupEach() {
         resetDatabase()
         testRapid.reset()
+    }
+
+    protected fun antallUnikePersoner() = sessionOf(dataSource).use {
+        it.run(queryOf("SELECT COUNT(1) FROM unike_person").map { it.long(1) }.asSingle) ?: 0
+    }
+    protected fun antallPersoner() = sessionOf(dataSource).use {
+        it.run(queryOf("SELECT COUNT(1) FROM person").map { it.long(1) }.asSingle) ?: 0
+    }
+    protected fun antallPersonalias(fnr: String? = null) = sessionOf(dataSource).use {
+        it.run(queryOf("SELECT COUNT(1) FROM person_alias ${fnr?.let { "WHERE fnr=${fnr.toLong()}" } ?: "" }").map { it.long(1) }.asSingle) ?: 0
     }
 
     protected fun sendNySøknad(
@@ -478,10 +490,7 @@ internal abstract class AbstractEndToEndMediatorTest {
     }
 
     protected fun assertTilstander(vedtaksperiodeIndeks: Int, vararg tilstand: String) {
-        assertEquals(
-            tilstand.toList(),
-            testRapid.inspektør.tilstander(testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks))
-        )
+        assertEquals(tilstand.toList(), testRapid.inspektør.tilstander(testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks)))
     }
 
     protected fun assertTilstand(vedtaksperiodeIndeks: Int, tilstand: String) {

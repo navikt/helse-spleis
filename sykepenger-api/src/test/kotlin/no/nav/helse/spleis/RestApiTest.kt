@@ -107,6 +107,7 @@ internal class RestApiTest {
         flyway = Flyway
             .configure()
             .dataSource(dataSource)
+            .locations("classpath:db/migration")
             .cleanDisabled(false)
             .load()
         app = createApp(
@@ -176,11 +177,14 @@ internal class RestApiTest {
 
     private fun DataSource.lagrePerson(aktørId: String, fødselsnummer: String, person: Person) {
         val serialisertPerson = person.serialize()
-        sessionOf(this).use {
+        sessionOf(this, returnGeneratedKey = true).use {
             it.run(queryOf("INSERT INTO unike_person (aktor_id, fnr) VALUES (?, ?)",
                 aktørId.toLong(), fødselsnummer.toLong()).asExecute)
-            it.run(queryOf("INSERT INTO person (fnr, skjema_versjon, data) VALUES (?, ?, (to_json(?::json)))",
-                fødselsnummer.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json).asExecute)
+            val personId = it.run(queryOf("INSERT INTO person (fnr, skjema_versjon, data) VALUES (?, ?, (to_json(?::json)))",
+                fødselsnummer.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json).asUpdateAndReturnGeneratedKey)
+            it.run(queryOf("INSERT INTO person_alias (fnr, person_id) VALUES (?, ?);",
+                fødselsnummer.toLong(), personId!!).asExecute)
+
         }
     }
 

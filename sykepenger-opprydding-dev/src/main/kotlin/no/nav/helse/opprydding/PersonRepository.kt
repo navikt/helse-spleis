@@ -9,11 +9,17 @@ internal class PersonRepository(private val dataSource: DataSource) {
     internal fun slett(fødselsnummer: String) {
         sessionOf(dataSource).use { session ->
             session.transaction {
+                it.slettPersonAlias(fødselsnummer)
                 it.slettPerson(fødselsnummer)
                 it.slettMeldinger(fødselsnummer)
                 it.slettUnikePerson(fødselsnummer)
             }
         }
+    }
+
+    private fun TransactionalSession.slettPersonAlias(fødselsnummer: String) {
+        val query = "DELETE FROM person_alias WHERE fnr = ?"
+        run(queryOf(query, fødselsnummer.toLong()).asExecute)
     }
 
     private fun TransactionalSession.slettPerson(fødselsnummer: String) {
