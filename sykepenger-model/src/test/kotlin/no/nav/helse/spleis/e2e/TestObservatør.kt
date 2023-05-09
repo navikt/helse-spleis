@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
@@ -130,7 +131,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         arbeidsgiveropplysningerKorrigert.add(event)
     }
 
-    override fun inntektsmeldingReplay(personidentifikator: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, førsteDagIArbeidsgiverperioden: LocalDate?) {
+    override fun inntektsmeldingReplay(personidentifikator: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, sammenhengendePeriode: Periode) {
         inntektsmeldingReplayEventer.add(vedtaksperiodeId)
     }
 

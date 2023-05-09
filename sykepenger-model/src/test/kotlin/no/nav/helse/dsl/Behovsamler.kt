@@ -3,6 +3,7 @@ package no.nav.helse.dsl
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -92,7 +93,7 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
         }
     }
 
-    override fun inntektsmeldingReplay(personidentifikator: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, førsteDagIArbeidsgiverperioden: LocalDate?) {
+    override fun inntektsmeldingReplay(personidentifikator: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, sammenhengendePeriode: Periode) {
         replays.add(vedtaksperiodeId)
     }
 

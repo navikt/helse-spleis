@@ -767,7 +767,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerInntektsmeldingReplay() {
-        person.inntektsmeldingReplay(id, skjæringstidspunkt, organisasjonsnummer, finnArbeidsgiverperiode()?.firstOrNull())
+        val sammenhengende = checkNotNull(arbeidsgiver.finnSammenhengendeVedtaksperioder(this)
+            .map { it.periode }
+            .periode())
+        person.inntektsmeldingReplay(id, skjæringstidspunkt, organisasjonsnummer, sammenhengende)
     }
 
     private fun emitVedtaksperiodeVenter(vedtaksperiodeVenter: VedtaksperiodeVenter) {
