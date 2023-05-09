@@ -139,6 +139,10 @@ internal class Arbeidsgiver private constructor(
             val alleVedtaksperioder = flatMap { it.vedtaksperioder }
             alleVedtaksperioder.auuGruppering(auu)?.forkast(hendelse, alleVedtaksperioder)
         }
+        internal fun List<Arbeidsgiver>.kanForkasteAuu(auu: Vedtaksperiode): Boolean {
+            val alleVedtaksperioder = flatMap { it.vedtaksperioder }
+            return alleVedtaksperioder.auuGruppering(auu)?.kanForkastes(alleVedtaksperioder) == true
+        }
 
         internal fun List<Arbeidsgiver>.identifiserAUUSomErUtbetaltISpleis() {
             flatMap { it.vedtaksperioder }.gruppérAuuer(AUU_SOM_VIL_UTBETALES).forEach {
