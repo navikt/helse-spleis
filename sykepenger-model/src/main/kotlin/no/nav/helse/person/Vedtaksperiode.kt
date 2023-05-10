@@ -2513,8 +2513,30 @@ internal class Vedtaksperiode private constructor(
                 return false
             }
 
+            internal fun identifiserForkastingScenarioer(hendelse: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
+                val auuGrupperingsperiode = førsteAuu.periode.start til sisteAuu.periode.endInclusive
+                val søkefelt = auuGrupperingsperiode.start.minusDays(16) til auuGrupperingsperiode.endInclusive.plusDays(16)
+
+                if (!infotrygdhistorikk.harUtbetaltI(søkefelt)) return
+                if (auuer.any { infotrygdhistorikk.harUtbetaltI(it.periode) }) return
+
+                hendelse.info("Utbetalt i Infotrygd innenfor samme arbeidsgiverperiode.")
+
+                val snute = (auuGrupperingsperiode.start.minusDays(16) til auuGrupperingsperiode.start.minusDays(1)).let { infotrygdhistorikk.harUtbetaltI(it) }
+                val hale = (auuGrupperingsperiode.endInclusive.plusDays(1) til auuGrupperingsperiode.endInclusive.plusDays(16)).let { infotrygdhistorikk.harUtbetaltI(it) }
+                val gapdager = !snute && !hale
+
+                sikkerlogg.info("Kandidat for å forkastes på grunn av utbetaling i Infotrygd innenfor samme arbeidsgiverperiode for {} på $organisasjonsnummer i $perioder, {}, {}, {}",
+                    keyValue("fødselsnummer", førsteAuu.fødselsnummer),
+                    keyValue("snute", snute),
+                    keyValue("gapdager", gapdager),
+                    keyValue("hale", hale)
+                )
+
+            }
+
             internal companion object {
-                internal fun List<Vedtaksperiode>.gruppérAuuer(filter: (vedtaksperiode: Vedtaksperiode) -> Boolean) =
+                internal fun List<Vedtaksperiode>.gruppérAuuer(filter: (vedtaksperiode: Vedtaksperiode) -> Boolean = { true }) =
                     this
                         .groupBy { it.organisasjonsnummer }
                         .flatMap { (organisasjonsnummer, vedtaksperioder) ->

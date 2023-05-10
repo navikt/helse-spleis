@@ -9,6 +9,7 @@ import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mandag
@@ -246,8 +247,6 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
 
     }
 
-
-
     @Test
     fun `Auu med hale på annen arbeidsgiver `() {
         a1 {
@@ -404,6 +403,68 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
         }
         a2 {
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
+    fun `Utbetalt i Infotrygd med 15 dagers snute-gap til AUU`() {
+        a1 {
+            håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent))
+            infotrygdUtbetalingUtenFunksjonelleFeil(1.januar til 4.januar)
+            nullstillTilstandsendringer()
+            håndterPersonPåminnelse()
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertInfo("Utbetalt i Infotrygd innenfor samme arbeidsgiverperiode.")
+        }
+    }
+
+    @Test
+    fun `Utbetalt i Infotrygd med 16 dagers snute-gap til AUU`() {
+        a1 {
+            håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent))
+            infotrygdUtbetalingUtenFunksjonelleFeil(1.januar til 3.januar)
+            nullstillTilstandsendringer()
+            håndterPersonPåminnelse()
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertIngenInfo("Utbetalt i Infotrygd innenfor samme arbeidsgiverperiode.")
+        }
+    }
+
+    @Test
+    fun `Utbetalt i Infotrygd med 15 dagers hale-gap til AUU`() {
+        a1 {
+            håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent))
+            infotrygdUtbetalingUtenFunksjonelleFeil(16.februar til 28.februar)
+            nullstillTilstandsendringer()
+            håndterPersonPåminnelse()
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertInfo("Utbetalt i Infotrygd innenfor samme arbeidsgiverperiode.")
+        }
+    }
+
+    @Test
+    fun `Utbetalt i Infotrygd med 16 dagers hale-gap til AUU`() {
+        a1 {
+            håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent))
+            infotrygdUtbetalingUtenFunksjonelleFeil(17.februar til 28.februar)
+            nullstillTilstandsendringer()
+            håndterPersonPåminnelse()
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertIngenInfo("Utbetalt i Infotrygd innenfor samme arbeidsgiverperiode.")
+        }
+    }
+
+    @Test
+    fun `Utbetalt i Infotrygd mellom auuer med samme AGP`() {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
+            håndterSøknad(Sykdom(11.januar, 15.januar, 100.prosent))
+            infotrygdUtbetalingUtenFunksjonelleFeil(9.januar.somPeriode())
+            nullstillTilstandsendringer()
+            håndterPersonPåminnelse()
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertInfo("Utbetalt i Infotrygd innenfor samme arbeidsgiverperiode.")
         }
     }
 
