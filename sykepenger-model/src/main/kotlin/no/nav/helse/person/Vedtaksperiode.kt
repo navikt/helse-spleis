@@ -138,6 +138,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingPeriodetype
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.IKKE_UTBETALT
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.INGENTING_Å_UTBETALE
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.UTBETALT
@@ -2489,31 +2490,38 @@ internal class Vedtaksperiode private constructor(
 
             abstract fun identifiserAUUSomErUtbetaltISpleis()
 
+            abstract fun utbetalingssituasjon(): Utbetalingssituasjon?
+
             internal fun forkast(hendelse: IAktivitetslogg, alleVedtaksperioder: List<Vedtaksperiode>, årsak: String = "${hendelse::class.simpleName}") {
                 hendelse.info("Forkaste AUU: Vurderer om periodene $perioder kan forkastes på grunn av $årsak")
-                if (auuer.any { !it.arbeidsgiver.kanForkastes(it) }) return hendelse.info("Forkaste AUU: Kan ikke forkastes, har overlappende utbetalte utbetalinger på samme arbeidsgiver")
-                if (påvirkerForkastingArbeidsgiverperioden(alleVedtaksperioder)) return hendelse.info("Forkaste AUU: Kan ikke forkastes, påvirker arbeidsgiverperiode på samme arbeidsgiver")
-                if (påvirkerForkastingSkjæringstidspunktPåPerson(hendelse, alleVedtaksperioder)) return hendelse.info("Forkaste AUU: Kan ikke forkastes, påvirker skjæringstidspunkt på personen")
+                if (!kanForkastes(hendelse, alleVedtaksperioder)) return
                 hendelse.info("Forkaste AUU: Vedtaksperiodene $perioder forkastes på grunn av $årsak")
                 val forkastes = auuer.map { it.id }
                 person.søppelbøtte(hendelse) { it.id in forkastes }
             }
 
-            private fun påvirkerForkastingSkjæringstidspunktPåPerson(hendelse: IAktivitetslogg, alleVedtaksperioder: List<Vedtaksperiode>): Boolean {
+            private fun kanForkastes(hendelse: IAktivitetslogg?, alleVedtaksperioder: List<Vedtaksperiode>): Boolean {
+                if (auuer.any { !it.arbeidsgiver.kanForkastes(it) }) return false.also { hendelse?.info("Forkaste AUU: Kan ikke forkastes, har overlappende utbetalte utbetalinger på samme arbeidsgiver") }
+                if (påvirkerForkastingArbeidsgiverperioden(alleVedtaksperioder)) return false.also { hendelse?.info("Forkaste AUU: Kan ikke forkastes, påvirker arbeidsgiverperiode på samme arbeidsgiver") }
+                if (påvirkerForkastingSkjæringstidspunktPåPerson(hendelse, alleVedtaksperioder)) return false.also { hendelse?.info("Forkaste AUU: Kan ikke forkastes, påvirker skjæringstidspunkt på personen") }
+                return true
+            }
+
+            private fun påvirkerForkastingSkjæringstidspunktPåPerson(hendelse: IAktivitetslogg?, alleVedtaksperioder: List<Vedtaksperiode>): Boolean {
                 val auuenesVedtaksperiodeId = auuer.map { it.id }
                 val vedtaksperioderSomMåBeholdeSkjæringstidspunkt = alleVedtaksperioder.filterNot { it.id in auuenesVedtaksperiodeId }.filterNot { it.tilstand == TilInfotrygd }
                 val arbeidsgiversSykdomstidslinjeUtenAuuene = arbeidsgiver.sykdomstidslinjeUten(auuer.map { it.sykdomstidslinje })
 
                 vedtaksperioderSomMåBeholdeSkjæringstidspunkt.forEach { vedtaksperiode ->
                     if (vedtaksperiode.skjæringstidspunkt != person.skjæringstidspunkt(arbeidsgiver, arbeidsgiversSykdomstidslinjeUtenAuuene, vedtaksperiode.periode)) {
-                        hendelse.info("Forkaste AUU: Kan ikke forkaste, vedtaksperioden ${vedtaksperiode.periode} på ${vedtaksperiode.organisasjonsnummer} ville fått endret skjæringstidspunkt")
+                        hendelse?.info("Forkaste AUU: Kan ikke forkaste, vedtaksperioden ${vedtaksperiode.periode} på ${vedtaksperiode.organisasjonsnummer} ville fått endret skjæringstidspunkt")
                         return true
                     }
                 }
                 return false
             }
 
-            internal fun identifiserForkastingScenarioer(hendelse: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
+            internal fun identifiserForkastingScenarioer(hendelse: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk, alleVedtaksperioder: List<Vedtaksperiode>) {
                 val auuGrupperingsperiode = førsteAuu.periode.start til sisteAuu.periode.endInclusive
                 val søkefelt = auuGrupperingsperiode.start.minusDays(16) til auuGrupperingsperiode.endInclusive.plusDays(16)
 
@@ -2526,13 +2534,14 @@ internal class Vedtaksperiode private constructor(
                 val hale = (auuGrupperingsperiode.endInclusive.plusDays(1) til auuGrupperingsperiode.endInclusive.plusDays(16)).let { infotrygdhistorikk.harUtbetaltI(it) }
                 val gapdager = !snute && !hale
 
-                sikkerlogg.info("Kandidat for å forkastes på grunn av utbetaling i Infotrygd innenfor samme arbeidsgiverperiode for {} på $organisasjonsnummer i $perioder, {}, {}, {}",
+                sikkerlogg.info("Kandidat for å forkastes på grunn av utbetaling i Infotrygd innenfor samme arbeidsgiverperiode for {} på $organisasjonsnummer i $perioder, {}, {}, {}, {}, {}",
                     keyValue("fødselsnummer", førsteAuu.fødselsnummer),
                     keyValue("snute", snute),
                     keyValue("gapdager", gapdager),
-                    keyValue("hale", hale)
+                    keyValue("hale", hale),
+                    keyValue("utbetalingssituasjon", utbetalingssituasjon()),
+                    keyValue("kanForkastes", kanForkastes(null, alleVedtaksperioder))
                 )
-
             }
 
             internal companion object {
@@ -2585,6 +2594,8 @@ internal class Vedtaksperiode private constructor(
                 }
             }
 
+            override fun utbetalingssituasjon() = arbeidsgiver.utbetalingssituasjon(arbeidsgiverperiode, perioder)
+
             private fun sikkerLogg(melding: String) {
                 val vedtaksperiode = auuer.firstOrNull { it.forventerInntekt(NullObserver) } ?: førsteAuu
                 val fiktiv = if (arbeidsgiverperiode.fiktiv()) " (fiktiv)" else ""
@@ -2605,6 +2616,8 @@ internal class Vedtaksperiode private constructor(
             }
             override fun påvirkerForkastingArbeidsgiverperioden(alleVedtaksperioder: List<Vedtaksperiode>) = false
             override fun identifiserAUUSomErUtbetaltISpleis() {}
+
+            override fun utbetalingssituasjon() = null
         }
 
         internal fun List<Vedtaksperiode>.venter(nestemann: Vedtaksperiode) {
