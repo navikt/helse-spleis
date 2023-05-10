@@ -46,6 +46,7 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
 
     private companion object {
         private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {
+            withCreateContainerCmdModifier { command -> command.withName("spleis-api") }
             withReuse(true)
             withLabel("app-navn", "spleis-api")
             start()

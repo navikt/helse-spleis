@@ -56,6 +56,7 @@ internal class RestApiTest {
         private val MELDINGSREFERANSE = UUID.randomUUID()
         private const val AKTØRID = "42"
         private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {
+            withCreateContainerCmdModifier { command -> command.withName("spleis-api2") }
             withReuse(true)
             withLabel("app-navn", "spleis-api")
             start()

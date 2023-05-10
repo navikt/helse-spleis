@@ -22,6 +22,7 @@ class HendelseDaoTest {
 
     private companion object {
         private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {
+            withCreateContainerCmdModifier { command -> command.withName("spleis-api3") }
             withReuse(true)
             withLabel("app-navn", "spleis-api")
             start()

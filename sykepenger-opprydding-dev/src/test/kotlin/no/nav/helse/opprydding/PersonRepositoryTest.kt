@@ -23,6 +23,7 @@ internal class PersonRepositoryTest {
 
     private companion object {
         private val psqlContainer = PostgreSQLContainer<Nothing>("postgres:14").apply {
+            withCreateContainerCmdModifier { command -> command.withName("spleis-opprydding-dev") }
             withReuse(true)
             withLabel("app-navn", "spleis-opprydding-dev")
             start()

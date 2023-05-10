@@ -24,6 +24,7 @@ internal class AppTest {
 
     private companion object {
         private val psqlContainer = PostgreSQLContainer<Nothing>("postgres:14").apply {
+            withCreateContainerCmdModifier { command -> command.withName("spleis-opprydding-dev2") }
             withReuse(true)
             withLabel("app-navn", "spleis-opprydding-dev")
             start()
