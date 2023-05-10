@@ -520,15 +520,15 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun opprettVedtaksperiodeOgHåndter(søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
-        håndter(søknad, Vedtaksperiode::håndter)
+        håndter(søknad) { håndter(søknad, arbeidsgivere) }
         if (søknad.noenHarHåndtert() && !søknad.harFunksjonelleFeilEllerVerre()) return
         val vedtaksperiode = søknad.lagVedtaksperiode(person, this, jurist)
-        if (søknad.harFunksjonelleFeilEllerVerre() || arbeidsgivere.nekterOpprettelseAvPeriode(vedtaksperiode, søknad)) {
+        if (søknad.harFunksjonelleFeilEllerVerre()) {
             registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
             return
         }
         registrerNyVedtaksperiode(vedtaksperiode)
-        vedtaksperiode.håndter(søknad)
+        vedtaksperiode.håndter(søknad, arbeidsgivere)
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID? = null) {
