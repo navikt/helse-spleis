@@ -163,7 +163,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `forkaster ikke etterfølgende perioder som er uferdig`(){
+    fun `forkaster etterfølgende perioder som er uferdig`(){
         nyPeriode(1.januar til 31.januar)
         forkastAlle(hendelselogg)
 
@@ -172,9 +172,9 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         nyPeriode(1.juni til 30.juni)
         nyPeriode(1.februar til 28.februar)
 
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-        assertTilstander(4.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(4.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(5.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
@@ -196,7 +196,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `forkaster ikke alle forlengelser`() {
+    fun `forkaster alle forlengelser`() {
         nyPeriode(1.januar til 31.januar)
         forkastAlle(hendelselogg)
 
@@ -208,27 +208,11 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         nyPeriode(1.februar til 28.februar)
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-        assertTilstander(4.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-        assertTilstander(5.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(4.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(5.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(6.vedtaksperiode, START, TIL_INFOTRYGD)
-    }
-
-    @Test
-    fun `forkaster ikke forlengede vedtak på tvers av arbeidsgivere`() {
-        nyPeriode(1.januar til 31.januar, a1)
-        forkastAlle(hendelselogg)
-
-        nyPeriode(1.mars til 31.mars, a2)
-        nyPeriode(1.april til 30.april, a1)
-
-        nyPeriode(1.februar til 28.februar, a1)
-
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, orgnummer = a1)
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
     }
 
     @Test
@@ -248,7 +232,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
 
 
     @Test
-    fun `forkaster ikke forlengede vedtak på tvers av arbeidsgivere - a2 overlapper med en periode til a1`() {
+    fun `forkaster forlengede og overlappende vedtak på tvers av arbeidsgivere - a2 overlapper med en periode til a1`() {
         nyPeriode(1.januar til 31.januar, a1)
         forkastAlle(hendelselogg)
 
@@ -257,33 +241,9 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         nyPeriode(1.februar til 28.februar, a1)
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, orgnummer = a1)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD, orgnummer = a1)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
-    }
-
-    @Test
-    fun `forkaster ikke senere periode som hverken overlapper eller forlenger`() {
-        nyPeriode(1.januar til 31.januar)
-        forkastAlle(hendelselogg)
-
-        nyPeriode(1.mars til 31.mars)
-        nyPeriode(1.april til 30.april)
-        // En dag gap
-        nyPeriode(2.mai til 31.mai)
-
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-
-        nyPeriode(1.februar til 28.februar)
-
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-        assertTilstander(4.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-        assertForkastetPeriodeTilstander(5.vedtaksperiode, START, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, orgnummer = a2)
     }
 
     @Test

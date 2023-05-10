@@ -179,12 +179,12 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
-        internal fun List<Arbeidsgiver>.nekterOpprettelseAvPeriode(vedtaksperiode: Vedtaksperiode, søknad: Søknad): Boolean {
-            return harForkastetVedtaksperiodeSomBlokkerBehandling(søknad, vedtaksperiode)
+        internal fun List<Arbeidsgiver>.harForkastetVedtaksperiodeSomBlokkererBehandling(vedtaksperiode: Vedtaksperiode, søknad: Søknad): Boolean {
+            return harForkastetVedtaksperiodeSomBlokkererBehandling(søknad, vedtaksperiode)
         }
 
-        private fun Iterable<Arbeidsgiver>.harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode) =
-            any { it.harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse, vedtaksperiode) }
+        private fun Iterable<Arbeidsgiver>.harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode) =
+            any { it.harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse, vedtaksperiode) }
 
         internal fun List<Arbeidsgiver>.håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold) =
             any { it.håndter(overstyrArbeidsforhold) }
@@ -509,7 +509,7 @@ internal class Arbeidsgiver private constructor(
         håndter(anmodningOmForkasting, Vedtaksperiode::håndter)
     }
 
-    private fun harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode): Boolean {
+    private fun harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode): Boolean {
         ForkastetVedtaksperiode.forlengerForkastet(forkastede, hendelse, vedtaksperiode) ||
                 ForkastetVedtaksperiode.harNyereForkastetPeriode(forkastede, hendelse) ||
                 (organisasjonsnummer() == hendelse.organisasjonsnummer() && ForkastetVedtaksperiode.harKortGapTilForkastet(forkastede, hendelse, vedtaksperiode))
@@ -523,15 +523,15 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun opprettVedtaksperiodeOgHåndter(søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
-        håndter(søknad, Vedtaksperiode::håndter)
+        håndter(søknad) { håndter(søknad, arbeidsgivere) }
         if (søknad.noenHarHåndtert() && !søknad.harFunksjonelleFeilEllerVerre()) return
         val vedtaksperiode = søknad.lagVedtaksperiode(person, this, jurist)
-        if (søknad.harFunksjonelleFeilEllerVerre() || arbeidsgivere.nekterOpprettelseAvPeriode(vedtaksperiode, søknad)) {
+        if (søknad.harFunksjonelleFeilEllerVerre()) {
             registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
             return
         }
         registrerNyVedtaksperiode(vedtaksperiode)
-        vedtaksperiode.håndter(søknad)
+        vedtaksperiode.håndter(søknad, arbeidsgivere)
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID? = null) {

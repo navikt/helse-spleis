@@ -13,6 +13,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.forkastAlle
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -284,5 +285,19 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 harPeriodeInnenfor16Dager = false,
                 forlengerSpleisEllerInfotrygd = false
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
+    }
+
+    @Test
+    fun `sender ut søknad håndtert for forlengelse av forkastet periode`(){
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        val søknadId1 = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        forkastAlle(hendelselogg)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        val søknadId2 = håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        assertEquals(listOf(
+            søknadId1 to 1.vedtaksperiode.id(ORGNUMMER),
+            søknadId2 to 2.vedtaksperiode.id(ORGNUMMER)
+        ), observatør.søknadHåndtert)
     }
 }
