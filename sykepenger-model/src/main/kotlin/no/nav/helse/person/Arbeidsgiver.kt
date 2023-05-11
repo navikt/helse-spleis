@@ -133,7 +133,7 @@ internal class Arbeidsgiver private constructor(
             alleVedtaksperioder.gruppérAuuer(AUU_UTBETALT_I_INFOTRYGD(infotrygdhistorikk)).forEach {
                 it.forkast(hendelse, alleVedtaksperioder, "overlappende utbetaling i Infotrygd")
             }
-            alleVedtaksperioder.gruppérAuuer().forEach {
+            alleVedtaksperioder.gruppérAuuer(AUU_SOM_VIL_UTBETALES).forEach {
                 it.identifiserForkastingScenarioer(hendelse, infotrygdhistorikk, alleVedtaksperioder)
             }
         }

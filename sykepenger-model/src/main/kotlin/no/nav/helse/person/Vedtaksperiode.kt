@@ -2535,7 +2535,7 @@ internal class Vedtaksperiode private constructor(
             }
 
             internal companion object {
-                internal fun List<Vedtaksperiode>.gruppérAuuer(filter: (vedtaksperiode: Vedtaksperiode) -> Boolean = { true }) =
+                internal fun List<Vedtaksperiode>.gruppérAuuer(filter: (vedtaksperiode: Vedtaksperiode) -> Boolean) =
                     this
                         .groupBy { it.organisasjonsnummer }
                         .flatMap { (organisasjonsnummer, vedtaksperioder) ->
