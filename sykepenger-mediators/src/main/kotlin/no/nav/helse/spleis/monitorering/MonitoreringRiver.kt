@@ -19,7 +19,7 @@ internal class MonitoreringRiver(
                 it.demandValue("@event_name", "hel_time")
                 it.requireKey("time")
             }
-        }
+        }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
@@ -38,7 +38,10 @@ internal class MonitoreringRiver(
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         private val Pair<Level, String>.slackmelding get(): String {
             val (level, melding) = this
-            return """{"@event_name":  "slackmelding", "melding": "$melding", "level": "${level.name}"}"""
+            return JsonMessage.newMessage("slackmelding", mapOf(
+                "melding" to melding,
+                "level" to level.name
+            )).toJson()
         }
         private val JsonMessage.time get() = get("time").asInt()
     }
