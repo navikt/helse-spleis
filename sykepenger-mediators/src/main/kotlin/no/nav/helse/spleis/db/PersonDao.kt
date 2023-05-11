@@ -84,15 +84,17 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         val statement = """
             SELECT p.id, p.data FROM person p
             INNER JOIN person_alias pa ON pa.person_id = p.id
-            WHERE p.fnr IN (${identer.joinToString { "?" }}) FOR UPDATE
+            WHERE p.fnr IN (${identer.joinToString { "?" }})
+            FOR UPDATE
         """
         // forventer én rad tilbake ellers kastes en exception siden vi da kan knytte
         // flere ulike person-rader til samme person, og personen må merges manuelt
         return session.run(queryOf(statement, *identer.map { it.toLong() }.toTypedArray()).map {
             it.long("id") to SerialisertPerson(it.string("data"))
-        }.asList).singleOrNullOrThrow()?.let { (personId, person) ->
-            Triple(personId, person, emptyList())
-        }
+        }.asList)
+            .distinctBy { (personId, _) -> personId }
+            .singleOrNullOrThrow()
+            ?.let { (personId, person) -> Triple(personId, person, emptyList()) }
     }
 
     private fun knyttPersonTilHistoriskeIdenter(session: Session, personId: Long, personidentifikator: Personidentifikator, historiskeFolkeregisteridenter: Set<Personidentifikator>) {

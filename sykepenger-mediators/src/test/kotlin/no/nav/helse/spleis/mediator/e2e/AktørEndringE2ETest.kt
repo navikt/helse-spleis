@@ -17,16 +17,19 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
     fun `person får nytt fnr - behandling fortsetter på samme personjson`() {
         sendSøknad(fnr = FNR1, perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)), historiskeFolkeregisteridenter = listOf(FNR1))
+        sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)), historiskeFolkeregisteridenter = listOf(FNR1))
 
         assertEquals(1, antallUnikePersoner())
         assertEquals(1, antallPersoner())
         assertEquals(2, antallPersonalias())
         val meldinger = testRapid.inspektør.meldinger("vedtaksperiode_endret")
-        assertEquals(4, meldinger.size)
+        assertEquals(6, meldinger.size)
         assertEquals(FNR1, meldinger[0].path("fødselsnummer").asText())
         assertEquals(FNR1, meldinger[1].path("fødselsnummer").asText())
         assertEquals(FNR2, meldinger[2].path("fødselsnummer").asText())
         assertEquals(FNR2, meldinger[3].path("fødselsnummer").asText())
+        assertEquals(FNR2, meldinger[4].path("fødselsnummer").asText())
+        assertEquals(FNR2, meldinger[5].path("fødselsnummer").asText())
     }
 
     @Test
