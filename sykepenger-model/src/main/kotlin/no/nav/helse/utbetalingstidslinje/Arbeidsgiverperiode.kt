@@ -17,6 +17,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.IKKE_UTBETALT
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.INGENTING_Å_UTBETALE
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.UTBETALT
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 
 internal class Arbeidsgiverperiode private constructor(private val perioder: List<Periode>, førsteUtbetalingsdag: LocalDate?) : Iterable<LocalDate>, Comparable<LocalDate> {
     constructor(perioder: List<Periode>) : this(perioder, null)
@@ -137,8 +138,12 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         val overlapp = perioder.intersect(utbetalingsdager).flatten()
         if (overlapp.isEmpty()) return INGENTING_Å_UTBETALE
         if (utbetalingstidslinje == null) return IKKE_UTBETALT
-        if (overlapp.all { utbetalingstidslinje[it] is Utbetalingsdag.NavDag }) return UTBETALT
+        if (overlapp.all { utbetalingstidslinje.navDagMedBeløp(it) }) return UTBETALT
         return IKKE_UTBETALT
+    }
+
+    private fun Utbetalingstidslinje.navDagMedBeløp(dag: LocalDate) = get(dag).let {
+        it is NavDag && it.økonomi.harBeløp()
     }
 
     internal companion object {
