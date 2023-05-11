@@ -6,6 +6,8 @@ import no.nav.helse.spleis.HendelseMediator
 import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
+import no.nav.helse.spleis.monitorering.MonitoreringRiver
+import no.nav.helse.spleis.monitorering.RegelmessigAvstemming
 
 // Understands how to build our application server
 class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusListener {
@@ -33,6 +35,7 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
             hendelseMediator = hendelseMediator,
             hendelseRepository = hendelseRepository
         )
+        MonitoreringRiver(rapidsConnection, RegelmessigAvstemming(personDao))
     }
 
     fun start() = rapidsConnection.start()

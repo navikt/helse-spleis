@@ -142,6 +142,14 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         session.run(queryOf(statement, mapOf("fnr" to personidentifikator.toLong())).asExecute)
     }
 
+    internal fun manglerAvstemming(): Int {
+        @Language("PostgresSQL")
+        val statement = "SELECT count(1) FROM unike_person WHERE sist_avstemt < now() - interval '32 DAYS'"
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(statement).map { row -> row.int(1) }.asSingle) ?: 0
+        }
+    }
+
     private fun oppdaterPersonversjon(session: Session, personId: Long, skjemaVersjon: Int, personJson: String) {
         @Language("PostgreSQL")
         val statement = """ UPDATE person SET skjema_versjon=:skjemaversjon, data=:data WHERE id=:personId; """
