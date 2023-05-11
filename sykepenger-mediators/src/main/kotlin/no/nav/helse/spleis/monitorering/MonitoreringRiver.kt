@@ -16,14 +16,18 @@ internal class MonitoreringRiver(
     init {
         River(rapidsConnection).apply {
             validate {
-                it.demandValue("@event_name", "midnatt")
+                it.demandValue("@event_name", "hel_time")
+                it.requireKey("time")
             }
         }
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         try {
-            sjekker.mapNotNull { it.sjekk() }.forEach { context.publish(it.slackmelding) }
+            sjekker
+                .filter { packet.time in it.timer() }
+                .mapNotNull { it.sjekk() }
+                .forEach { context.publish(it.slackmelding) }
             sikkerlogg.info("Gjennomført alle monitoreringssjekker")
         } catch (throwable: Throwable) {
             sikkerlogg.error("Feil ved monitoreringssjekker", throwable)
@@ -36,5 +40,6 @@ internal class MonitoreringRiver(
             val (level, melding) = this
             return """{"@event_name":  "slackmelding", "melding": "$melding", "level": "${level.name}"}"""
         }
+        private val JsonMessage.time get() = get("time").asInt()
     }
 }
