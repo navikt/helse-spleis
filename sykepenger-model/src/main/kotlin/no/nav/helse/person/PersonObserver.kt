@@ -70,7 +70,8 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val tom: LocalDate,
         val forlengerPeriode: Boolean,
         val forlengerSpleisEllerInfotrygd: Boolean,
-        val harPeriodeInnenfor16Dager: Boolean
+        val harPeriodeInnenfor16Dager: Boolean,
+        val trengerArbeidsgiveropplysninger: Boolean
     )
     data class InntektsmeldingFørSøknadEvent(
         val inntektsmeldingId: UUID,

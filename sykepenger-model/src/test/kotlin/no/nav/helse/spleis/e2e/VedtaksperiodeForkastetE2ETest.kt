@@ -184,4 +184,142 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         // Men det "må" vi leve med da vi allerede har slettet historikken og oppdager ikke at perioden er en AUU
         assertFalse(event.forlengerSpleisEllerInfotrygd)
     }
+
+    @Test
+    fun `Forventer arbeidsgiveropplysninger for søknad som forkastes pga sendTilGosys = true`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendTilGosys = true)
+
+        assertTrue(observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Forventer ikke arbeidsgiveropplysninger ved forlengelse av spleis`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), sendTilGosys = true)
+
+        assertFalse(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Forventer ikke arbeidsgiveropplysninger ved forlengelse av spleis over helg`() {
+        nyttVedtak(1.januar, 26.januar)
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 28.februar))
+        håndterSøknad(Sykdom(29.januar, 28.februar, 100.prosent), sendTilGosys = true)
+
+        assertFalse(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Forventer ikke arbeidsgiveropplysninger ved forlengelse forkastet periode`() {
+        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), sendTilGosys = true)
+
+        //TODO: fjern denne?
+        assertTrue(observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+        assertFalse(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Forventer ikke arbeidsgiveropplysninger ved forlengelse forkastet periode over helg`() {
+        tilGodkjenning(1.januar, 26.januar, ORGNUMMER)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 28.februar))
+        håndterSøknad(Sykdom(29.januar, 28.februar, 100.prosent), sendTilGosys = true)
+
+        //TODO: fjern denne?
+        assertTrue(observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+        assertFalse(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Forventer arbeidsgiveropplysninger ved kort gap til spleis`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
+        håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent), sendTilGosys = true)
+
+        assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Forventer arbeidsgiveropplysninger ved kort gap til forkastet periode`() {
+        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+
+        håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
+        håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent))
+
+        //TODO: fjern denne?
+        assertTrue(observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+        assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Forventer ikke arbeidsgiveropplysninger ved forkasting av AUU`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
+        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent), sendTilGosys = true)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+
+        val event = observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER))
+        assertFalse(event.trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Forventer ikke arbeidsgiveropplysninger ved forlengelse av kort spleisperiode, ny periode er fortsatt innenfor AGP`() {
+        nyPeriode(1.januar til 10.januar)
+
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 15.januar))
+        håndterSøknad(Sykdom(11.januar, 15.januar, 100.prosent), sendTilGosys = true)
+
+        assertFalse(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Forventer arbeidsgiveropplysninger ved forlengelse av kort spleisperiode, ny periode går utover AGP`() {
+        nyPeriode(1.januar til 10.januar)
+
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 17.januar))
+        håndterSøknad(Sykdom(11.januar, 17.januar, 100.prosent), sendTilGosys = true)
+
+        //TODO: trenger vi denne?
+        assertFalse(observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+        assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Forventer ikke arbeidsgiveropplysninger ved forlengelse av kort forkastet periode, ny periode er fortsatt innenfor AGP`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
+        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent), sendTilGosys = true)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 15.januar))
+        håndterSøknad(Sykdom(11.januar, 15.januar, 100.prosent))
+
+        //TODO: trenger vi denne?
+        assertFalse(observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+        assertFalse(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Forventer arbeidsgiveropplysninger ved forlengelse av kort forkastet periode, ny periode går utover AGP`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
+        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent), sendTilGosys = true)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 17.januar))
+        håndterSøknad(Sykdom(11.januar, 17.januar, 100.prosent))
+
+        //TODO: trenger vi denne?
+        assertFalse(observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+        assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger) // Sort hull, får ingen forespørsel
+    }
+
 }
