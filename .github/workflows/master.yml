@@ -46,19 +46,6 @@ jobs:
           docker login ghcr.io --username "$GITHUB_REPOSITORY" -p ${{ secrets.GITHUB_TOKEN }}
           docker push ${{ needs.set_version.outputs.image }}
 
-  snyk:
-    name: check vulnerabilities
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Gradle vulnerability check
-        uses: snyk/actions/gradle@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --all-sub-projects --org=tbd-ty7 --fail-on=all --configuration-matching='^runtimeClasspath'
-          command: monitor
-
   deployDev:
     name: deploy to dev
     needs: [set_version, build]
