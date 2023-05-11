@@ -1,10 +1,12 @@
 package no.nav.helse.spleis.mediator
 
+import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
+import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
@@ -39,6 +41,7 @@ import no.nav.helse.spleis.meldinger.model.EtterbetalingMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
 import no.nav.helse.spleis.meldinger.model.GjenopplivVilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
+import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayMessage
@@ -158,7 +161,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         message: NySøknadMessage,
         sykmelding: Sykmelding,
         context: MessageContext,
-        historiskeFolkeregisteridenter: List<String>
+        historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
         lestNySøknad = true
     }
@@ -168,7 +171,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         message: SendtSøknadArbeidsgiverMessage,
         søknad: Søknad,
         context: MessageContext,
-        historiskeFolkeregisteridenter: List<String>
+        historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
         lestSendtSøknadArbeidsgiver = true
     }
@@ -178,7 +181,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         message: SendtSøknadNavMessage,
         søknad: Søknad,
         context: MessageContext,
-        historiskeFolkeregisteridenter: List<String>
+        historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
         lestSendtSøknad = true
     }
@@ -194,6 +197,15 @@ internal class TestHendelseMediator : IHendelseMediator {
     override fun behandle(message: DødsmeldingMessage, dødsmelding: Dødsmelding, context: MessageContext) {
         lestDødsmelding = true
     }
+
+    override fun behandle(
+        nyPersonidentifikator: Personidentifikator,
+        message: IdentOpphørtMessage,
+        identOpphørt: IdentOpphørt,
+        nyAktørId: String,
+        gamleIdenter: Set<Personidentifikator>,
+        context: MessageContext
+    ) {}
 
     override fun behandle(
         message: InntektsmeldingReplayUtførtMessage,

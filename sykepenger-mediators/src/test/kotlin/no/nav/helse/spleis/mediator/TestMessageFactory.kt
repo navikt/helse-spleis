@@ -1031,4 +1031,17 @@ internal class TestMessageFactory(
             vedtaksperiodeId?.let { this["vedtaksperiodeId"] = vedtaksperiodeId.toString() }
         }
     )
+
+    fun lagIdentOpphørt(fnr: String, nyttFnr: String) = nyHendelse("ident_opphørt", mapOf(
+        "fødselsnummer" to fnr,
+        "aktørId" to aktørId,
+        "nye_identer" to mapOf(
+            "fødselsnummer" to nyttFnr,
+            "aktørId" to aktørId,
+            "npid" to null
+        ),
+        "gamle_identer" to listOf(
+            mapOf("ident" to fnr, "type" to "FØDSELSNUMMER")
+        )
+    ))
 }

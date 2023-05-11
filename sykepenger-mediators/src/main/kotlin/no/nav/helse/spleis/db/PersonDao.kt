@@ -11,7 +11,6 @@ import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.intellij.lang.annotations.Language
 
 internal class PersonDao(private val dataSource: DataSource, private val STØTTER_IDENTBYTTE: Boolean) {
-    constructor(dataSource: DataSource) : this(dataSource, System.getenv("IDENTBYTTE")?.equals("true", ignoreCase = true) == true)
 
     fun hentEllerOpprettPerson(
         personidentifikator: Personidentifikator,

@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
+import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
@@ -83,8 +84,8 @@ import org.slf4j.LoggerFactory
 import kotlin.math.roundToInt
 
 class Person private constructor(
-    private val aktørId: String,
-    private val personidentifikator: Personidentifikator,
+    private var aktørId: String,
+    private var personidentifikator: Personidentifikator,
     private var alder: Alder,
     private val arbeidsgivere: MutableList<Arbeidsgiver>,
     override val aktivitetslogg: Aktivitetslogg,
@@ -226,6 +227,20 @@ class Person private constructor(
         dødsmelding.info("Registrerer dødsdato")
         alder = dødsmelding.dødsdato(alder)
         håndterGjenoppta(dødsmelding)
+    }
+
+    fun håndter(identOpphørt: IdentOpphørt, nyPersonidentifikator: Personidentifikator, nyAktørId: String) {
+        identOpphørt.kontekst(this)
+        identOpphørt.info("Person har byttet ident til $nyPersonidentifikator")
+        this.personidentifikator = nyPersonidentifikator
+        this.aktørId = nyAktørId
+        håndterGjenoppta(identOpphørt)
+    }
+
+    fun håndter(identOpphørt: IdentOpphørt, nyPersonidentifikator: Personidentifikator) {
+        identOpphørt.kontekst(this)
+        identOpphørt.info("Person har byttet ident til $nyPersonidentifikator, men gjør ingenting med det foreløpig")
+        håndterGjenoppta(identOpphørt)
     }
 
     fun håndter(infotrygdendring: Infotrygdendring) {
