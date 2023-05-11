@@ -5,6 +5,7 @@ import org.slf4j.event.Level
 
 internal interface Sjekk {
     fun sjekk(): Pair<Level, String>?
+    fun timer(): Set<Int>
 }
 
 internal class RegelmessigAvstemming(private val personDao: PersonDao): Sjekk {
@@ -13,4 +14,6 @@ internal class RegelmessigAvstemming(private val personDao: PersonDao): Sjekk {
         if (manglerAvstemming == 0) return null
         return Level.ERROR to "Det er $manglerAvstemming personer som ikke er avstemt på over en måned!"
     }
+
+    override fun timer() = setOf(8, 21)
 }
