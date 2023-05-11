@@ -15,5 +15,5 @@ internal class RegelmessigAvstemming(private val personDao: PersonDao): Sjekk {
         return Level.ERROR to "Det er $manglerAvstemming personer som ikke er avstemt på over en måned!"
     }
 
-    override fun timer() = setOf(8, 21)
+    override fun timer() = setOf(8, 22)
 }
