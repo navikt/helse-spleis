@@ -8,7 +8,7 @@ import no.nav.helse.serde.SerialisertPerson
 
 internal class PersonDao(private val dataSource: DataSource) {
     fun hentPersonFraFnr(fødselsnummer: Long) =
-        hentPerson(queryOf("SELECT data FROM person WHERE fnr=:fnr OR id = (SELECT person_id FROM person_alias WHERE fnr=:fnr);", mapOf(
+        hentPerson(queryOf("SELECT data FROM person WHERE id = (SELECT person_id FROM person_alias WHERE fnr=:fnr);", mapOf(
             "fnr" to fødselsnummer
         )))
 
