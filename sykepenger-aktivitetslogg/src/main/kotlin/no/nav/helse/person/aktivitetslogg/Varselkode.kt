@@ -218,12 +218,12 @@ enum class Varselkode(
 
     // VT: Vedtaksperiodetilstand
     RV_VT_1("Gir opp fordi tilstanden er nådd makstid"),
-    RV_VT_2("Forventet ikke vilkårsgrunnlag"),
-    RV_VT_3("Forventet ikke utbetalingsgodkjenning"),
-    RV_VT_4("Forventet ikke simulering"),
-    RV_VT_5("Forventet ikke utbetaling"),
-    RV_VT_6("Forventet ikke overstyring fra saksbehandler"),
-    RV_VT_7("Forventet ikke ytelsehistorikk"),
+    RV_VT_2("Forventet ikke vilkårsgrunnlag", avviklet = true),
+    RV_VT_3("Forventet ikke utbetalingsgodkjenning", avviklet = true),
+    RV_VT_4("Forventet ikke simulering", avviklet = true),
+    RV_VT_5("Forventet ikke utbetaling", avviklet = true),
+    RV_VT_6("Forventet ikke overstyring fra saksbehandler", avviklet = true),
+    RV_VT_7("Forventet ikke ytelsehistorikk", avviklet = true),
 
     RV_AG_1("Finner ikke arbeidsgiver"),
 
