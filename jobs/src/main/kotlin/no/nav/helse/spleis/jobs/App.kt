@@ -6,8 +6,6 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import javax.sql.DataSource
-import kotliquery.Row
 import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
@@ -19,9 +17,8 @@ import no.nav.helse.serde.serialize
 import no.nav.rapids_and_rivers.cli.AivenConfig
 import no.nav.rapids_and_rivers.cli.ConsumerProducerFactory
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
-import kotlin.math.ceil
-import kotlin.properties.Delegates
 import kotlin.system.measureTimeMillis
 import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
@@ -154,29 +151,27 @@ private fun avstemmingTask(factory: ConsumerProducerFactory, customDayOfMonth: I
     val dayOfMonth = customDayOfMonth ?: LocalDate.now().dayOfMonth
     log.info("Commencing avstemming for dayOfMonth=$dayOfMonth")
     val producer = factory.createProducer()
-    // spørringen funker slik at den putter alle personer opp i 27 (*) ulike "bøtter" (fnr % 27 gir tall mellom 0 og 26, også plusser vi på én slik at vi starter fom. 1)
-    // hvor én bøtte tilsvarer én dag i måneden. Tallet 27 (for februar) ble valgt slik at vi sikrer oss at vi avstemmer
-    // alle personer hver måned. Dag 28, 29, 30, 31 avstemmes 0 personer siden det er umulig å ha disse rest-verdiene
-    //
-    // * det skulle nok vært 28
-    val paginated = PaginatedQuery(
-        "fnr,aktor_id",
-        "unike_person",
-        "(1 + mod(fnr, 27)) = :dayOfMonth AND (sist_avstemt is null or sist_avstemt < now() - interval '1 day')"
-    )
-    val duration = measureTime {
-        paginated.run(ds, mapOf("dayOfMonth" to dayOfMonth)) { row ->
-            val fnr = row.string("fnr").padStart(11, '0')
-            producer.send(ProducerRecord("tbd.rapid.v1", fnr, lagAvstemming(fnr, row.string("aktor_id"))))
+    // spørringen funker slik at den putter alle personer opp i 28 ulike "bøtter" (fnr % 28 gir tall mellom 0 og 27, også plusser vi på én slik at vi starter fom. 1)
+    // hvor én bøtte tilsvarer én dag i måneden. Tallet 28 (pga februar) ble valgt slik at vi sikrer oss at vi avstemmer
+    // alle personer hver måned. Dag 29, 30, 31 avstemmes 0 personer siden det er umulig å ha disse rest-verdiene
+
+    sessionOf(ds).use { session ->
+        @Language("PostgreSQL")
+        val statement = """
+            SELECT fnr, aktor_id
+            FROM unike_person
+            WHERE (1 + mod(fnr, 28)) = :dayOfMonth AND (sist_avstemt is null or sist_avstemt < now() - interval '1 day')
+            """
+        session.run(queryOf(statement, mapOf("dayOfMonth" to dayOfMonth)).map { row ->
+            row.string("aktor_id") to row.string("fnr")
+        }.asList).forEach { (aktørId, fnr) ->
+            val fnrStr = fnr.padStart(11, '0')
+            producer.send(ProducerRecord("tbd.rapid.v1", fnr, lagAvstemming(fnrStr, aktørId)))
         }
     }
+
     producer.flush()
-    log.info(
-        "Avstemming completed after {} hour(s), {} minute(s) and {} second(s)",
-        duration.toInt(DurationUnit.HOURS),
-        duration.toInt(DurationUnit.MINUTES) % 60,
-        duration.toInt(DurationUnit.SECONDS) % 60
-    )
+    log.info("Avstemming completed")
 }
 
 private fun lagMigrate(fnr: String, aktørId: String) = """
@@ -198,35 +193,6 @@ private fun lagAvstemming(fnr: String, aktørId: String) = """
   "fødselsnummer": "$fnr"
 }
 """
-
-private class PaginatedQuery(private val select: String, private val table: String, private val where: String) {
-    private var count by Delegates.notNull<Long>()
-    private val resultsPerPage = 1000
-
-    private fun count(session: Session, params: Map<String, Any>) {
-        this.count =
-            session.run(queryOf("SELECT COUNT(1) FROM $table WHERE $where", params).map { it.long(1) }.asSingle) ?: 0
-    }
-
-    fun run(dataSource: DataSource, params: Map<String, Any>, handler: (Row) -> Unit) {
-        sessionOf(dataSource).use { session ->
-            count(session, params)
-            val pages = ceil(count / resultsPerPage.toDouble()).toInt()
-            log.info("Total of $count records, yielding $pages pages ($resultsPerPage results per page)")
-            var currentPage = 0
-            while (currentPage < pages) {
-                val rows = session.run(
-                    queryOf(
-                        "SELECT $select FROM $table WHERE $where LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}",
-                        params
-                    ).map { row -> handler(row) }.asList
-                ).count()
-                currentPage += 1
-                log.info("Page $currentPage of $pages complete ($rows rows)")
-            }
-        }
-    }
-}
 
 private class DataSourceConfiguration(dbUsername: DbUser) {
     private val env = System.getenv()
