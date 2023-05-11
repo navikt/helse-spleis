@@ -302,10 +302,10 @@ internal class HendelseMediator(
             } else {
                 person.håndter(identOpphørt, nyPersonidentifikator)
             }
+            context.publish(JsonMessage.newMessage("slackmelding", mapOf(
+                "melding" to "Det er en person som har byttet ident."
+            )).toJson())
         }
-        context.publish(JsonMessage.newMessage("slackmelding", mapOf(
-            "melding" to "Det er en person som har byttet ident."
-        )).toJson())
     }
 
     override fun behandle(
