@@ -488,12 +488,13 @@ internal class Vedtaksperiode private constructor(
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
         this.utbetalinger.forkast(hendelse)
-        val vedtaksperiodeForkastetEventBuilder = VedtaksperiodeForkastetEventBuilder(tilstand.type)
+        val trengerArbeidsgiveropplysninger = forventerInntekt() && !erForlengelse() && !erForlengelseAvForkastet()
+        val vedtaksperiodeForkastetEventBuilder = VedtaksperiodeForkastetEventBuilder(tilstand.type, trengerArbeidsgiveropplysninger)
         tilstand(hendelse, TilInfotrygd)
         return vedtaksperiodeForkastetEventBuilder
     }
 
-    internal inner class VedtaksperiodeForkastetEventBuilder(private val gjeldendeTilstand: TilstandType) {
+    internal inner class VedtaksperiodeForkastetEventBuilder(private val gjeldendeTilstand: TilstandType, private val trengerArbeidsgiveropplysninger: Boolean) {
         internal fun buildAndEmit() {
             person.vedtaksperiodeForkastet(
                 PersonObserver.VedtaksperiodeForkastetEvent(
@@ -507,7 +508,8 @@ internal class Vedtaksperiode private constructor(
                     tom = periode.endInclusive,
                     forlengerPeriode = person.nåværendeVedtaksperioder { it.tilstand !== AvsluttetUtenUtbetaling && (it.periode.overlapperMed(periode) || it.periode.erRettFør(periode)) }.isNotEmpty(),
                     forlengerSpleisEllerInfotrygd = erForlengelse() || erForlengelseAvForkastet(),
-                    harPeriodeInnenfor16Dager = person.nåværendeVedtaksperioder { it.tilstand !== AvsluttetUtenUtbetaling && påvirkerArbeidsgiverperioden(it) }.isNotEmpty()
+                    harPeriodeInnenfor16Dager = person.nåværendeVedtaksperioder { it.tilstand !== AvsluttetUtenUtbetaling && påvirkerArbeidsgiverperioden(it) }.isNotEmpty(),
+                    trengerArbeidsgiveropplysninger = trengerArbeidsgiveropplysninger
                 )
             )
         }
