@@ -3,6 +3,7 @@ package no.nav.helse.dsl
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -243,6 +244,8 @@ internal abstract class AbstractDslTest {
         this { håndterUtbetalt(status) }
     protected fun String.håndterAnnullering(fagsystemId: String) =
         this { håndterAnnullering(fagsystemId) }
+    protected fun String.håndterIdentOpphørt(nyttFnr: Personidentifikator, nyAktørId: String) =
+        this { håndterIdentOpphørt(nyttFnr, nyAktørId) }
     protected fun String.håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()) =
         this { håndterPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt) }
     protected fun nullstillTilstandsendringer() = observatør.nullstillTilstandsendringer()
@@ -356,6 +359,8 @@ internal abstract class AbstractDslTest {
         bareÈnArbeidsgiver(a1).håndterUtbetalt(status)
     protected fun håndterAnnullering(fagsystemId: String) =
         bareÈnArbeidsgiver(a1).håndterAnnullering(fagsystemId)
+    protected fun håndterIdentOpphørt(nyttFnr: Personidentifikator, nyAktørId: String) =
+        bareÈnArbeidsgiver(a1).håndterIdentOpphørt(nyttFnr, nyAktørId)
     protected fun håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()) =
         bareÈnArbeidsgiver(a1).håndterPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt)
 

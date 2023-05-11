@@ -60,4 +60,19 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
             assertEquals("FUNKSJONELL_FEIL", error.path("nivå").asText())
         }
     }
+
+    @Test
+    fun `endrer fødselsnummer ved opphørt ident`() {
+        sendSøknad(fnr = FNR1, perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendIdentOpphørt(FNR1, FNR2)
+        assertEquals(1, antallUnikePersoner())
+        assertEquals(1, antallPersoner())
+        assertEquals(2, antallPersonalias())
+        sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)))
+        val meldinger = testRapid.inspektør.meldinger("vedtaksperiode_endret")
+        assertEquals(3, meldinger.size)
+        assertEquals(FNR1, meldinger[0].path("fødselsnummer").asText())
+        assertEquals(FNR1, meldinger[1].path("fødselsnummer").asText())
+        assertEquals(FNR2, meldinger[2].path("fødselsnummer").asText())
+    }
 }

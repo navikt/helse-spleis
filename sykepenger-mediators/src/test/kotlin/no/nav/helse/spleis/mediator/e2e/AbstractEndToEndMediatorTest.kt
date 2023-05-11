@@ -89,7 +89,8 @@ internal abstract class AbstractEndToEndMediatorTest() {
             rapidsConnection = testRapid,
             hendelseRepository = HendelseRepository(dataSource),
             personDao = PersonDao(dataSource, STØTTER_IDENTBYTTE = true),
-            versjonAvKode = "test-versjon"
+            versjonAvKode = "test-versjon",
+            støtterIdentbytte = true
         )
 
         messageMediator = MessageMediator(
@@ -163,6 +164,14 @@ internal abstract class AbstractEndToEndMediatorTest() {
             }
         }
         return id.toUUID()
+    }
+
+    protected fun sendIdentOpphørt(
+        fnr: String = UNG_PERSON_FNR_2018,
+        nyttFnr: String
+    ) {
+        val (_, message) = meldingsfabrikk.lagIdentOpphørt(fnr, nyttFnr)
+        testRapid.sendTestMessage(message)
     }
 
     protected fun sendKorrigerendeSøknad(

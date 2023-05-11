@@ -17,15 +17,18 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
 
     private val dataSource = dataSourceBuilder.getDataSource()
 
+    private val STØTTER_IDENTBYTTE = env["IDENTBYTTE"]?.equals("true", ignoreCase = true) == true
+
     private val hendelseRepository = HendelseRepository(dataSource)
-    private val personDao = PersonDao(dataSource)
+    private val personDao = PersonDao(dataSource, STØTTER_IDENTBYTTE)
     private val rapidsConnection = RapidApplication.create(env)
 
     private val hendelseMediator = HendelseMediator(
         rapidsConnection = rapidsConnection,
         hendelseRepository = hendelseRepository,
         personDao = personDao,
-        versjonAvKode = versjonAvKode(env)
+        versjonAvKode = versjonAvKode(env),
+        støtterIdentbytte = STØTTER_IDENTBYTTE
     )
 
     init {

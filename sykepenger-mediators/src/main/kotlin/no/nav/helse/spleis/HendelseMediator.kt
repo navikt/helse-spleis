@@ -1,11 +1,13 @@
 package no.nav.helse.spleis
 
+import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
+import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
@@ -32,6 +34,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.serde.serialize
@@ -46,6 +49,7 @@ import no.nav.helse.spleis.meldinger.model.EtterbetalingMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
 import no.nav.helse.spleis.meldinger.model.GjenopplivVilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
+import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayMessage
@@ -77,7 +81,8 @@ internal class HendelseMediator(
     private val rapidsConnection: RapidsConnection,
     private val hendelseRepository: HendelseRepository,
     private val personDao: PersonDao,
-    private val versjonAvKode: String
+    private val versjonAvKode: String,
+    private val støtterIdentbytte: Boolean = false
 ) : IHendelseMediator {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     private val behovMediator = BehovMediator(sikkerLogg)
@@ -97,7 +102,7 @@ internal class HendelseMediator(
         message: NySøknadMessage,
         sykmelding: Sykmelding,
         context: MessageContext,
-        historiskeFolkeregisteridenter: List<String>
+        historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
         opprettPersonOgHåndter(personopplysninger, message, sykmelding, context, historiskeFolkeregisteridenter) { person ->
             HendelseProbe.onSykmelding()
@@ -110,7 +115,7 @@ internal class HendelseMediator(
         message: SendtSøknadArbeidsgiverMessage,
         søknad: Søknad,
         context: MessageContext,
-        historiskeFolkeregisteridenter: List<String>
+        historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
         opprettPersonOgHåndter(personopplysninger, message, søknad, context, historiskeFolkeregisteridenter) { person ->
             HendelseProbe.onSøknadArbeidsgiver()
@@ -123,7 +128,7 @@ internal class HendelseMediator(
         message: SendtSøknadNavMessage,
         søknad: Søknad,
         context: MessageContext,
-        historiskeFolkeregisteridenter: List<String>
+        historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
         opprettPersonOgHåndter(personopplysninger, message, søknad, context, historiskeFolkeregisteridenter) { person ->
             HendelseProbe.onSøknadNav()
@@ -132,7 +137,7 @@ internal class HendelseMediator(
     }
 
     override fun behandle(personopplysninger: Personopplysninger, message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext) {
-        opprettPersonOgHåndter(personopplysninger, message, inntektsmelding, context) { person ->
+        opprettPersonOgHåndter(personopplysninger, message, inntektsmelding, context, emptySet()) { person ->
             HendelseProbe.onInntektsmelding()
             person.håndter(inntektsmelding)
         }
@@ -284,6 +289,26 @@ internal class HendelseMediator(
     }
 
     override fun behandle(
+        nyPersonidentifikator: Personidentifikator,
+        message: IdentOpphørtMessage,
+        identOpphørt: IdentOpphørt,
+        nyAktørId: String,
+        gamleIdenter: Set<Personidentifikator>,
+        context: MessageContext
+    ) {
+        hentPersonOgHåndter(nyPersonidentifikator, null, message, identOpphørt, context, gamleIdenter) { person ->
+            if (støtterIdentbytte) {
+                person.håndter(identOpphørt, nyPersonidentifikator, nyAktørId)
+            } else {
+                person.håndter(identOpphørt, nyPersonidentifikator)
+            }
+        }
+        context.publish(JsonMessage.newMessage("slackmelding", mapOf(
+            "melding" to "Det er en person som har byttet ident."
+        )).toJson())
+    }
+
+    override fun behandle(
         message: InfotrygdendringMessage,
         infotrygdEndring: Infotrygdendring,
         context: MessageContext
@@ -331,34 +356,36 @@ internal class HendelseMediator(
         message: HendelseMessage,
         hendelse: Hendelse,
         context: MessageContext,
-        historiskeFolkeregisteridenter: List<String> = emptyList(),
+        historiskeFolkeregisteridenter: Set<Personidentifikator>,
         handler: (Person) -> Unit
     ) {
-        hentPersonOgHåndter(personopplysninger, message, hendelse, context, historiskeFolkeregisteridenter, handler)
+        val personidentifikator = hendelse.fødselsnummer().somPersonidentifikator()
+        hentPersonOgHåndter(personidentifikator, personopplysninger, message, hendelse, context, historiskeFolkeregisteridenter, handler)
     }
 
     private fun <Hendelse : PersonHendelse> hentPersonOgHåndter(
         message: HendelseMessage,
         hendelse: Hendelse,
         context: MessageContext,
-        historiskeFolkeregisteridenter: List<String> = emptyList(),
         handler: (Person) -> Unit
     ) {
-        hentPersonOgHåndter(null, message, hendelse, context, historiskeFolkeregisteridenter, handler)
+        val personidentifikator = hendelse.fødselsnummer().somPersonidentifikator()
+        hentPersonOgHåndter(personidentifikator, null, message, hendelse, context, handler = handler)
     }
     private fun <Hendelse : PersonHendelse> hentPersonOgHåndter(
+        personidentifikator: Personidentifikator,
         personopplysninger: Personopplysninger?,
         message: HendelseMessage,
         hendelse: Hendelse,
         context: MessageContext,
-        historiskeFolkeregisteridenter: List<String> = emptyList(),
+        historiskeFolkeregisteridenter: Set<Personidentifikator> = emptySet(),
         handler: (Person) -> Unit
     ) {
         val jurist = MaskinellJurist()
         val personMediator = PersonMediator(message, hendelse, hendelseRepository)
         val datadelingMediator = DatadelingMediator(hendelse)
         val subsumsjonMediator = SubsumsjonMediator(jurist, hendelse.fødselsnummer(), message, versjonAvKode)
-        person(message, hendelse, historiskeFolkeregisteridenter, jurist, personopplysninger) { person  ->
+        person(personidentifikator, message, hendelse, historiskeFolkeregisteridenter, jurist, personopplysninger) { person  ->
             person.addObserver(personMediator)
             person.addObserver(VedtaksperiodeProbe)
             handler(person)
@@ -366,10 +393,8 @@ internal class HendelseMediator(
         finalize(context, personMediator, subsumsjonMediator, datadelingMediator, hendelse)
     }
 
-    private fun person(message: HendelseMessage, hendelse: PersonHendelse, historiskeFolkeregisteridenter: List<String>, jurist: MaskinellJurist, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
-        val personidentifikator = hendelse.fødselsnummer().somPersonidentifikator()
-
-        personDao.hentEllerOpprettPerson(personidentifikator, historiskeFolkeregisteridenter.map { it.somPersonidentifikator() }.toSet(), hendelse.aktørId(), message, {
+    private fun person(personidentifikator: Personidentifikator, message: HendelseMessage, hendelse: PersonHendelse, historiskeFolkeregisteridenter: Set<Personidentifikator>, jurist: MaskinellJurist, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
+        personDao.hentEllerOpprettPerson(personidentifikator, historiskeFolkeregisteridenter, hendelse.aktørId(), message, {
             personopplysninger?.person(jurist)?.serialize()
         }) { serialisertPerson, tidligereBehandlinger ->
             val tidligerePersoner = tidligereBehandlinger.map { it -> it.deserialize(jurist) }
@@ -401,21 +426,21 @@ internal interface IHendelseMediator {
         message: NySøknadMessage,
         sykmelding: Sykmelding,
         context: MessageContext,
-        historiskeFolkeregisteridenter: List<String>
+        historiskeFolkeregisteridenter: Set<Personidentifikator>
     )
     fun behandle(
         personopplysninger: Personopplysninger,
         message: SendtSøknadArbeidsgiverMessage,
         søknad: Søknad,
         context: MessageContext,
-        historiskeFolkeregisteridenter: List<String>
+        historiskeFolkeregisteridenter: Set<Personidentifikator>
     )
     fun behandle(
         personopplysninger: Personopplysninger,
         message: SendtSøknadNavMessage,
         søknad: Søknad,
         context: MessageContext,
-        historiskeFolkeregisteridenter: List<String>
+        historiskeFolkeregisteridenter: Set<Personidentifikator>
     )
     fun behandle(personopplysninger: Personopplysninger, message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext)
     fun behandle(message: InntektsmeldingReplayMessage, inntektsmelding: InntektsmeldingReplay, context: MessageContext)
@@ -440,6 +465,7 @@ internal interface IHendelseMediator {
     fun behandle(message: EtterbetalingMessage, grunnbeløpsregulering: Grunnbeløpsregulering, context: MessageContext)
     fun behandle(message: InfotrygdendringMessage, infotrygdEndring: Infotrygdendring, context: MessageContext)
     fun behandle(message: DødsmeldingMessage, dødsmelding: Dødsmelding, context: MessageContext)
+    fun behandle(nyPersonidentifikator: Personidentifikator, message: IdentOpphørtMessage, identOpphørt: IdentOpphørt, nyAktørId: String, gamleIdenter: Set<Personidentifikator>, context: MessageContext)
     fun behandle(message: UtbetalingshistorikkEtterInfotrygdendringMessage, utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring, context: MessageContext)
     fun behandle(message: ForkastSykmeldingsperioderMessage, forkastSykmeldingsperioder: ForkastSykmeldingsperioder, context: MessageContext)
     fun behandle(message: GjenopplivVilkårsgrunnlagMessage, gjenopplivVilkårsgrunnlag: GjenopplivVilkårsgrunnlag, context: MessageContext)

@@ -297,6 +297,12 @@ internal class TestPerson(
             arbeidsgiverHendelsefabrikk.lagAnnullering(fagsystemId).håndter(Person::håndter)
         }
 
+        internal fun håndterIdentOpphørt(nyttFnr: Personidentifikator, nyAktørId: String) {
+            arbeidsgiverHendelsefabrikk.lagIdentOpphørt().håndter {
+                håndter(it, nyttFnr, nyAktørId)
+            }
+        }
+
         internal fun håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()) {
             arbeidsgiverHendelsefabrikk.lagPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt)
                 .håndter(Person::håndter)
