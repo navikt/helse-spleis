@@ -71,9 +71,9 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
         val nyttFnr = "111"
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), fnr = historiskFnr)
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
-            historiskeFolkeregisteridenter = listOf(nyttFnr),
-            fnr = historiskFnr
+            historiskFnr,
+            listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            historiskeFolkeregisteridenter = emptyList()
         )
 
         sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100), fnr = nyttFnr)

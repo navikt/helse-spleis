@@ -62,13 +62,14 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         val statement = """
             SELECT p.id, p.fnr, p.data FROM person p
             INNER JOIN person_alias pa ON pa.person_id = p.id
-            WHERE p.fnr IN (${historiskeFolkeregisteridenter.joinToString { "?" }}) 
+            WHERE pa.fnr IN (${historiskeFolkeregisteridenter.joinToString { "?" }}) 
             FOR UPDATE
         """
         // forventer én rad tilbake ellers kastes en exception siden vi da kan knytte
         // flere ulike person-rader til samme person, og personen må merges manuelt
         return session.run(queryOf(statement, *historiskeFolkeregisteridenter.map { it.toLong() }.toTypedArray())
             .map { it.long("id") to SerialisertPerson(it.string("data")) }.asList)
+            .distinctBy { (id, _) -> id }
             .filterNot { (id, _) -> id == personId }
             .map { (_, person) -> person }
     }
@@ -90,7 +91,7 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         val statement = """
             SELECT p.id, p.data FROM person p
             INNER JOIN person_alias pa ON pa.person_id = p.id
-            WHERE p.fnr IN (${identer.joinToString { "?" }})
+            WHERE pa.fnr IN (${identer.joinToString { "?" }})
             FOR UPDATE
         """
         // forventer én rad tilbake ellers kastes en exception siden vi da kan knytte

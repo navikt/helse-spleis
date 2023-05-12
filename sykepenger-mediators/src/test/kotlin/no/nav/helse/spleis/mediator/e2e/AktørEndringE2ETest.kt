@@ -2,7 +2,10 @@ package no.nav.helse.spleis.mediator.e2e
 
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.spleis.mediator.TestMessageFactory
+import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -15,21 +18,29 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `person får nytt fnr - behandling fortsetter på samme personjson`() {
+        val meldingsfabrikkFNR2 = TestMessageFactory(FNR2, AKTØRID, ORGNUMMER, INNTEKT, UNG_PERSON_FØDSELSDATO)
         sendSøknad(fnr = FNR1, perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)), historiskeFolkeregisteridenter = listOf(FNR1))
         sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)), historiskeFolkeregisteridenter = listOf(FNR1))
+
+        meldingsfabrikkFNR2.lagInnteksmelding(listOf(Periode(3.januar, 18.januar)), 3.januar).also { (_, melding) ->
+            testRapid.sendTestMessage(melding)
+        }
 
         assertEquals(1, antallUnikePersoner())
         assertEquals(1, antallPersoner())
         assertEquals(2, antallPersonalias())
         val meldinger = testRapid.inspektør.meldinger("vedtaksperiode_endret")
-        assertEquals(6, meldinger.size)
+        assertEquals(10, meldinger.size)
         assertEquals(FNR1, meldinger[0].path("fødselsnummer").asText())
         assertEquals(FNR1, meldinger[1].path("fødselsnummer").asText())
         assertEquals(FNR2, meldinger[2].path("fødselsnummer").asText())
         assertEquals(FNR2, meldinger[3].path("fødselsnummer").asText())
         assertEquals(FNR2, meldinger[4].path("fødselsnummer").asText())
         assertEquals(FNR2, meldinger[5].path("fødselsnummer").asText())
+
+        assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING")
+        assertTilstander(1, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING", "AVVENTER_BLOKKERENDE_PERIODE")
     }
 
     @Test
@@ -70,9 +81,10 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
         assertEquals(2, antallPersonalias())
         sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)))
         val meldinger = testRapid.inspektør.meldinger("vedtaksperiode_endret")
-        assertEquals(3, meldinger.size)
+        assertEquals(4, meldinger.size)
         assertEquals(FNR1, meldinger[0].path("fødselsnummer").asText())
         assertEquals(FNR1, meldinger[1].path("fødselsnummer").asText())
         assertEquals(FNR2, meldinger[2].path("fødselsnummer").asText())
+        assertEquals(FNR2, meldinger[3].path("fødselsnummer").asText())
     }
 }
