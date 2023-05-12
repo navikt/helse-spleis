@@ -2718,7 +2718,7 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.ugyldigUtbetalingstidslinje(dager: Set<LocalDate>) {
             val vedtaksperiode = firstOrNull() ?: return
-            sikkerlogg.warn("Ugyldig utbetalingstidslinje: utbetalingsdager med kilde Sykmelding: ${dager.grupperSammenhengendePerioder()}. {}, {}, {}",
+            sikkerlogg.warn("Ugyldig utbetalingstidslinje: utbetalingsdager med kilde Sykmelding: ${dager.grupperSammenhengendePerioder()} {}, {}, {}",
                 keyValue("aktørId", vedtaksperiode.aktørId),
                 keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer),
                 keyValue("antallDager", dager.size)
