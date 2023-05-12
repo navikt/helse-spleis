@@ -16,23 +16,12 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class PersonRepositoryTest {
+internal class PersonRepositoryTest: DBTest() {
 
-    private lateinit var dataSource: DataSource
     private lateinit var personRepository: PersonRepository
-
-    private companion object {
-        private val psqlContainer = PostgreSQLContainer<Nothing>("postgres:14").apply {
-            withCreateContainerCmdModifier { command -> command.withName("spleis-opprydding-dev") }
-            withReuse(true)
-            withLabel("app-navn", "spleis-opprydding-dev")
-            start()
-        }
-    }
 
     @BeforeEach
     fun `start postgres`() {
-        dataSource = runMigration(psqlContainer)
         personRepository = PersonRepository(dataSource)
     }
 
@@ -72,12 +61,6 @@ internal class PersonRepositoryTest {
             initializationFailTimeout = 5000
             maxLifetime = 30001
         }
-
-    @Language("SQL")
-    private val dropTables = """
-    DROP SCHEMA public CASCADE;
-    CREATE SCHEMA public;
-""".trimIndent()
 
     private fun finnPerson(fødselsnummer: String): Int {
         return sessionOf(dataSource).use { session ->
