@@ -20,44 +20,50 @@ class Refusjonsopplysning(
     private val tom: LocalDate?,
     private val beløp: Inntekt
 ) {
-
     init {
-        validerRefusjonsopplysning(tom)
+        check(tom == null || tom <= tom) { "fom ($fom) kan ikke være etter tom ($tom) "}
     }
 
-    private fun validerRefusjonsopplysning(tom: LocalDate?) {
-        tom?.let {
-            fom til tom
-        }
+    private val periode = fom til (tom ?: LocalDate.MAX)
+
+    private fun merge(other: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
+        if (other.isEmpty()) return listOf(this)
+        val førsteFom = other.minBy { it.fom }.fom
+        // begrenser refusjonsopplysningen slik at den ikke kan strekke tilbake i tid
+        if (fom < førsteFom) return begrensTil(førsteFom, other)
+        // bevarer eksisterende opplysning hvis *this* finnes fra før (dvs. vi bevarer meldingsreferanseId på forrige)
+        if (other.any(::funksjoneltLik)) return other
+        return other
+            .flatMap { it.merge(this) }
+            .plusElement(this)
     }
 
-    private val periode get() = fom til (tom ?: LocalDate.MAX)
+    private fun begrensTil(førsteFom: LocalDate, other: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
+        if (periode.endInclusive < førsteFom) return other
+        return Refusjonsopplysning(meldingsreferanseId, førsteFom, tom, beløp).merge(other)
+    }
+
+    private fun merge(ny: Refusjonsopplysning): List<Refusjonsopplysning> {
+        return this.periode
+            .trim(ny.periode)
+            .map {
+                Refusjonsopplysning(
+                    fom = it.start,
+                    tom = it.endInclusive.takeUnless { tom -> tom == LocalDate.MAX },
+                    beløp = this.beløp,
+                    meldingsreferanseId = this.meldingsreferanseId
+                )
+            }
+    }
 
     internal fun fom() = fom
     internal fun tom() = tom
     internal fun beløp() = beløp
 
-    private fun oppdatertFom(nyFom: LocalDate) = if (tom != null && nyFom > tom) null else Refusjonsopplysning(meldingsreferanseId, nyFom, tom, beløp)
-    private fun oppdatertTom(nyTom: LocalDate) = if (nyTom < fom) null else Refusjonsopplysning(meldingsreferanseId, fom, nyTom, beløp)
-    private fun erEtter(other: Refusjonsopplysning) = other.tom != null && fom > other.tom
-
-    private fun minus(nyOpplysning: Refusjonsopplysning): List<Refusjonsopplysning> {
-        // Om den nye opplysningen ligger etter oss er vi fortsatt gjeldende i vår helhet
-        if (nyOpplysning.erEtter(this)) return listOf(this)
-        // Om den nye opplysningen ikke har tom er det kun en eventuell snute som fortsatt er gjeldende
-        if (nyOpplysning.tom == null) return listOfNotNull(oppdatertTom(nyOpplysning.fom.forrigeDag))
-        // Om vi ikke har tom er det eventuelt snuten før og halen etter den nye opplysningen som fortsatt er gjeldende
-        if (tom == null) return listOfNotNull(oppdatertTom(nyOpplysning.fom.forrigeDag), oppdatertFom(nyOpplysning.tom.nesteDag))
-
-        // Nå vet vi at hverken vi eller den nye opplysningen har tom == null og kan jobbe med perioden
-        // Finner den overlappende perioden som den nye opplysningen skal erstatte. Om det ikke noe overlapp returnerer vi oss selv
-        val overlapp = periode.overlappendePeriode(nyOpplysning.periode)?: return listOf(this)
-
-        // Finner den eventuelle delen foran & bak den nye opplysningen som fortsatt er gjeldende
-        val snute = oppdatertTom(overlapp.start.forrigeDag)
-        val hale = oppdatertFom(overlapp.endInclusive.nesteDag)
-        return listOfNotNull(snute, hale)
+    private fun oppdatertFom(nyFom: LocalDate) = periode.beholdDagerEtter(nyFom.forrigeDag)?.let {
+        Refusjonsopplysning(meldingsreferanseId, it.start, tom, beløp)
     }
+    private fun oppdatertTom(nyTom: LocalDate) = if (nyTom < fom) null else Refusjonsopplysning(meldingsreferanseId, fom, nyTom, beløp)
 
     private fun begrensTil(dato: LocalDate): Refusjonsopplysning? {
         return if (dekker(dato)) oppdatertTom(dato.forrigeDag)
@@ -74,35 +80,31 @@ class Refusjonsopplysning(
     }
 
     override fun equals(other: Any?): Boolean {
+        if (this === other) return true
         if (other !is Refusjonsopplysning) return false
-        return meldingsreferanseId == other.meldingsreferanseId && fom == other.fom && tom == other.tom && beløp == other.beløp
+        if (fom != other.fom) return false
+        if (tom != other.tom) return false
+        if (beløp != other.beløp) return false
+        return meldingsreferanseId == other.meldingsreferanseId
     }
 
     private fun funksjoneltLik(other: Refusjonsopplysning) =
-        fom == other.fom && tom == other.tom && beløp == other.beløp
+        this.periode == other.periode && this.beløp == other.beløp
 
-    override fun toString() = "$fom - $tom, ${beløp.reflection { _, _, dagligDouble, _ -> dagligDouble }} ($meldingsreferanseId)"
+    override fun toString() = "$periode, ${beløp.reflection { _, _, daglig, _ -> daglig }} ($meldingsreferanseId)"
 
     override fun hashCode(): Int {
-        var result = meldingsreferanseId.hashCode()
-        result = 31 * result + fom.hashCode()
-        result = 31 * result + (tom?.hashCode() ?: 0)
+        var result = periode.hashCode()
         result = 31 * result + beløp.hashCode()
+        result = 31 * result + meldingsreferanseId.hashCode()
         return result
     }
 
     internal companion object {
         private fun List<Refusjonsopplysning>.merge(nyeOpplysninger: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
-            if (nyeOpplysninger.isEmpty()) return this
-            return nyeOpplysninger.fold(this, ::mergeNyOpplysning).sortedBy { it.fom }
-        }
-
-        private fun mergeNyOpplysning(eksisterendeOpplysninger: List<Refusjonsopplysning>, nyOpplysning: Refusjonsopplysning) : List<Refusjonsopplysning> {
-            val eksisterendeSomIkkeHarBlittErstattet = mutableListOf<Refusjonsopplysning>()
-            eksisterendeOpplysninger.forEach { eksisterendeRefusjonsopplysning ->
-                eksisterendeSomIkkeHarBlittErstattet.addAll(eksisterendeRefusjonsopplysning.minus(nyOpplysning))
-            }
-            return eksisterendeSomIkkeHarBlittErstattet + nyOpplysning
+            return nyeOpplysninger
+                .fold(this) { result, opplysning -> opplysning.merge(result) }
+                .sortedBy { it.fom }
         }
     }
 
@@ -140,20 +142,14 @@ class Refusjonsopplysning(
         }
 
         internal fun merge(other: Refusjonsopplysninger): Refusjonsopplysninger {
-            val nyeRefusjonsopplysninger = this - other
-            if (nyeRefusjonsopplysninger.validerteRefusjonsopplysninger.isEmpty()) return this // Ingen endring
-            return Refusjonsopplysninger(validerteRefusjonsopplysninger.merge(nyeRefusjonsopplysninger.validerteRefusjonsopplysninger))
+            return Refusjonsopplysninger(validerteRefusjonsopplysninger.merge(other.validerteRefusjonsopplysninger))
         }
-        private fun funksjoneltInneholder(other: Refusjonsopplysning) = validerteRefusjonsopplysninger.any { it.funksjoneltLik(other) }
 
         private fun begrens(other: Refusjonsopplysninger): Refusjonsopplysninger {
             if (this.validerteRefusjonsopplysninger.isEmpty()) return other
             val førsteFom = this.validerteRefusjonsopplysninger.minOf { it.fom }
             return Refusjonsopplysninger(other.validerteRefusjonsopplysninger.mapNotNull { it.oppdatertFom(maxOf(førsteFom, it.fom)) })
         }
-
-        internal operator fun minus(other: Refusjonsopplysninger) =
-            Refusjonsopplysninger(begrens(other).validerteRefusjonsopplysninger.filterNot { funksjoneltInneholder(it) })
 
         override fun equals(other: Any?): Boolean {
             if (other !is Refusjonsopplysninger) return false

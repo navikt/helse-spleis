@@ -20,6 +20,7 @@ import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Com
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.harNødvendigeRefusjonsopplysninger
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -33,24 +34,46 @@ import org.junit.jupiter.api.assertThrows
 internal class RefusjonsopplysningerTest {
 
     @Test
+    fun `flere opplysninger med åpen hale`() {
+        val id1 = UUID.randomUUID()
+        val refusjonsopplysninger = listOf(
+            Refusjonsopplysning(id1, 1.januar, null, 500.daglig),
+            Refusjonsopplysning(id1, 10.januar, null, INGEN),
+            Refusjonsopplysning(id1, 1.mars, null, 250.daglig),
+        ).refusjonsopplysninger()
+
+        assertEquals(listOf(
+            Refusjonsopplysning(id1, 1.januar, 9.januar, 500.daglig),
+            Refusjonsopplysning(id1, 10.januar, 28.februar, INGEN),
+            Refusjonsopplysning(id1, 1.mars, null, 250.daglig),
+        ).refusjonsopplysninger(), refusjonsopplysninger)
+    }
+
+    @Test
+    fun `flere overlappende opplysninger`() {
+        val id1 = UUID.randomUUID()
+        val refusjonsopplysninger = listOf(
+            Refusjonsopplysning(id1, 1.januar, 10.januar, 500.daglig),
+            Refusjonsopplysning(id1, 5.januar, 15.januar, INGEN),
+            Refusjonsopplysning(id1, 13.januar, null, 250.daglig),
+        ).refusjonsopplysninger()
+
+        assertEquals(listOf(
+            Refusjonsopplysning(id1, 1.januar, 4.januar, 500.daglig),
+            Refusjonsopplysning(id1, 5.januar, 12.januar, INGEN),
+            Refusjonsopplysning(id1, 13.januar, null, 250.daglig),
+        ).refusjonsopplysninger(), refusjonsopplysninger)
+    }
+
+    @Test
     fun `ny refusjonsopplysning i midten av eksisterende`() {
         val meldingsreferanseId1 = UUID.randomUUID()
         val refusjonsopplysninger = listOf(
-            Refusjonsopplysning(
-                meldingsreferanseId1,
-                1.januar,
-                31.januar,
-                2000.daglig
-            )
+            Refusjonsopplysning(meldingsreferanseId1, 1.januar, 31.januar, 2000.daglig)
         ).refusjonsopplysninger()
         val meldingsreferanseId2 = UUID.randomUUID()
         val nyeRefusjonsopplysninger = listOf(
-            Refusjonsopplysning(
-                meldingsreferanseId2,
-                15.januar,
-                20.januar,
-                1000.daglig
-            )
+            Refusjonsopplysning(meldingsreferanseId2, 15.januar, 20.januar, 1000.daglig)
         ).refusjonsopplysninger()
 
         assertEquals(15.januar, nyeRefusjonsopplysninger.finnFørsteDatoForEndring(refusjonsopplysninger))
@@ -85,23 +108,25 @@ internal class RefusjonsopplysningerTest {
     fun `feilende test for merge av refusjonsopplysninger - tror feilaktig at det overlapper`() {
         val gammelId = UUID.fromString("00000000-0000-0000-0000-000000000001")
         val gamleRefusjonsopplysninger = listOf(
-            Refusjonsopplysning(gammelId, 6.mars, 20.april, 0.månedlig),
-            Refusjonsopplysning(gammelId, 21.april, 8.mai, 58305.månedlig),
-            Refusjonsopplysning(gammelId, 9.mai, null, 0.månedlig) // <-
+            Refusjonsopplysning(gammelId, 6.mars, 20.april, INGEN),
+            Refusjonsopplysning(gammelId, 21.april, 8.mai, 2000.daglig),
+            Refusjonsopplysning(gammelId, 9.mai, null, INGEN) // <-
         ).refusjonsopplysninger()
 
         val nyId = UUID.fromString("00000000-0000-0000-0000-000000000002")
         val nyeRefusjonsopplysninger = listOf(
-            Refusjonsopplysning(nyId, 6.mars, 16.april, 58305.månedlig), // <-
-            Refusjonsopplysning(nyId, 17.april, 20.april, 0.månedlig),
-            Refusjonsopplysning(nyId, 21.april, 8.mai, 58305.månedlig),
-            Refusjonsopplysning(nyId, 9.mai, null, 0.månedlig)
+            Refusjonsopplysning(nyId, 6.mars, 16.april, 2000.daglig), // <-
+            Refusjonsopplysning(nyId, 17.april, 20.april, INGEN),
+            Refusjonsopplysning(nyId, 21.april, 8.mai, 2000.daglig),
+            Refusjonsopplysning(nyId, 9.mai, null, INGEN)
         ).refusjonsopplysninger()
 
-        // Hvorfoe blir (9.mai til null) minus (6.mars til 16. april) = (17.april til null)?
-        assertThrows<IllegalStateException> {
-            gamleRefusjonsopplysninger.merge(nyeRefusjonsopplysninger)
-        }
+        assertEquals(listOf(
+            Refusjonsopplysning(nyId, 6.mars, 16.april, 2000.daglig),
+            Refusjonsopplysning(gammelId, 17.april, 20.april, INGEN),
+            Refusjonsopplysning(gammelId, 21.april, 8.mai, 2000.daglig),
+            Refusjonsopplysning(gammelId, 9.mai, null, INGEN) // <-
+        ).refusjonsopplysninger(), gamleRefusjonsopplysninger.merge(nyeRefusjonsopplysninger))
     }
 
     @Test
@@ -192,7 +217,7 @@ internal class RefusjonsopplysningerTest {
         val nyeRefusjonsopplysninger = listOf(
             Refusjonsopplysning(meldingsreferanseId4, 2.januar, 4.januar, 5000.daglig),
             Refusjonsopplysning(meldingsreferanseId5, 7.januar, 10.januar, 6000.daglig),
-            Refusjonsopplysning(meldingsreferanseId6, 13.januar, 16.januar, 7000.daglig),
+            Refusjonsopplysning(meldingsreferanseId6, 13.januar, 16.januar, 7000.daglig)
         ).refusjonsopplysninger()
 
         assertEquals(2.januar, nyeRefusjonsopplysninger.finnFørsteDatoForEndring(refusjonsopplysninger))
@@ -270,7 +295,6 @@ internal class RefusjonsopplysningerTest {
             .leggTil(eksisterende, eksisterendeTidspunkt).leggTil(ny, nyttTidspunkt).build()
         assertEquals(1.mars, refusjonsopplysning.finnFørsteDatoForEndring(RefusjonsopplysningerBuilder().leggTil(eksisterende).build()))
         assertEquals(listOf(ny, Refusjonsopplysning(eksisterendeId, 2.mars, 31.mars, 2000.daglig)), refusjonsopplysning.inspektør.refusjonsopplysninger)
-
     }
 
     @Test
@@ -400,39 +424,6 @@ internal class RefusjonsopplysningerTest {
         val refusjonsopplysning = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 1000.daglig)
         assertDoesNotThrow { refusjonsopplysning.hashCode() }
         assertDoesNotThrow { refusjonsopplysning.refusjonsopplysninger.hashCode() }
-    }
-
-    @Test
-    fun `Trekke to funksjonelt like refusjonsopplysninger fra hverandre gir tomme Refusjonsopplysninger`() {
-        val eksisterendeRefusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 1000.daglig).refusjonsopplysninger
-        val ønskedeRefusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 1000.daglig).refusjonsopplysninger
-        assertEquals(Refusjonsopplysninger(), eksisterendeRefusjonsopplysninger - ønskedeRefusjonsopplysninger)
-    }
-
-    @Test
-    fun `Identifisere nye refusjonsopplysninger`() {
-        val eksisterendeRefusjonsopplysninger = RefusjonsopplysningerBuilder()
-            .leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, 31.januar, 1500.daglig))
-            .leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.februar, 28.februar, 1200.daglig))
-            .leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.mars, 31.mars, 0.daglig))
-            .leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.april, 30.april, 1600.daglig))
-            .leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.mai, null, 1700.daglig))
-            .build()
-
-        val overstyringId = UUID.randomUUID()
-        val ønskedeRefusjonsopplysninger = RefusjonsopplysningerBuilder()
-            .leggTil(Refusjonsopplysning(overstyringId, 1.januar, 31.januar, 1500.daglig))
-            .leggTil(Refusjonsopplysning(overstyringId, 1.februar, 27.februar, 1200.daglig)) // 28.februar -> 27.februar
-            .leggTil(Refusjonsopplysning(overstyringId, 28.februar, 31.mars, 10.daglig)) // 1.mars -> 28.februar
-            .leggTil(Refusjonsopplysning(overstyringId, 1.april, 30.april, 1599.daglig)) // 1600.daglig -> 1599.dalig
-            .leggTil(Refusjonsopplysning(overstyringId, 1.mai, null, 1700.daglig))
-            .build()
-
-        assertEquals(listOf(
-            Refusjonsopplysning(overstyringId, 1.februar, 27.februar, 1200.daglig),
-            Refusjonsopplysning(overstyringId, 28.februar, 31.mars, 10.daglig),
-            Refusjonsopplysning(overstyringId, 1.april, 30.april, 1599.daglig)
-        ), (eksisterendeRefusjonsopplysninger - ønskedeRefusjonsopplysninger).inspektør.refusjonsopplysninger)
     }
 
     @Test
