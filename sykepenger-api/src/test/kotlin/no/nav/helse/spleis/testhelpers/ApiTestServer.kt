@@ -3,8 +3,6 @@ package no.nav.helse.spleis.testhelpers
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
@@ -24,6 +22,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.person.Person
 import no.nav.helse.serde.serialize
+import no.nav.helse.spleis.DB
 import no.nav.helse.spleis.Issuer
 import no.nav.helse.spleis.JwtStub
 import no.nav.helse.spleis.config.AzureAdAppConfig
@@ -37,22 +36,11 @@ import no.nav.helse.spleis.randomPort
 import no.nav.helse.spleis.responseBody
 import no.nav.helse.økonomi.Inntekt
 import org.awaitility.Awaitility
-import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.Assertions
-import org.testcontainers.containers.PostgreSQLContainer
 
 internal class ApiTestServer(private val port: Int = randomPort()) {
 
-    private companion object {
-        private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {
-            withCreateContainerCmdModifier { command -> command.withName("spleis-api") }
-            withReuse(true)
-            withLabel("app-navn", "spleis-api")
-            start()
-        }
-    }
     private lateinit var dataSource: DataSource
-    private lateinit var flyway: Flyway
 
     private val wireMockServer: WireMockServer = WireMockServer(WireMockConfiguration.options().dynamicPort())
     private lateinit var jwtStub: JwtStub
@@ -62,8 +50,8 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
     private val teller = AtomicInteger()
 
     internal fun clean() {
-        flyway.clean()
-        flyway.migrate()
+        DB.clean()
+        dataSource = DB.migrate()
         teller.set(0)
     }
 
@@ -93,25 +81,6 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
         WireMock.stubFor(jwtStub.stubbedConfigProvider())
 
         appBaseUrl = "http://localhost:$port"
-
-        dataSource = HikariDataSource(HikariConfig().apply {
-            jdbcUrl = postgres.jdbcUrl
-            username = postgres.username
-            password = postgres.password
-            initializationFailTimeout = 5000
-            maximumPoolSize = 3
-            minimumIdle = 1
-            idleTimeout = 10001
-            connectionTimeout = 1000
-            maxLifetime = 30001
-        })
-
-        flyway = Flyway
-            .configure()
-            .dataSource(dataSource)
-            .locations("classpath:db/migration")
-            .cleanDisabled(false)
-            .load()
         app = createApp(
             KtorConfig(httpPort = port),
             AzureAdAppConfig(
@@ -119,9 +88,9 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
                 configurationUrl = "${wireMockServer.baseUrl()}/config"
             ),
             DataSourceConfiguration(
-                jdbcUrl = postgres.jdbcUrl,
-                databaseUsername = postgres.username,
-                databasePassword = postgres.password
+                jdbcUrl = DB.instance.jdbcUrl,
+                databaseUsername = DB.instance.username,
+                databasePassword = DB.instance.password
             ),
             teller
         )
