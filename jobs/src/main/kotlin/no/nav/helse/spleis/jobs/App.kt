@@ -160,7 +160,7 @@ private fun avstemmingTask(factory: ConsumerProducerFactory, customDayOfMonth: I
         val statement = """
             SELECT fnr, aktor_id
             FROM unike_person
-            WHERE (1 + mod(fnr, 28)) = :dayOfMonth AND (sist_avstemt is null or sist_avstemt < now() - interval '1 day')
+            WHERE ((1 + mod(fnr, 28)) = :dayOfMonth AND (sist_avstemt is null or sist_avstemt < now() - interval '1 day')) OR sist_avstemt < now() - interval '32 DAYS'
             """
         session.run(queryOf(statement, mapOf("dayOfMonth" to dayOfMonth)).map { row ->
             row.string("aktor_id") to row.string("fnr")
