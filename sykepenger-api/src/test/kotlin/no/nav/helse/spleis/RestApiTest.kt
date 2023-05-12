@@ -3,14 +3,11 @@ package no.nav.helse.spleis
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
 import io.ktor.http.HttpHeaders.Authorization
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.engine.ApplicationEngine
 import io.prometheus.client.CollectorRegistry
-import io.prometheus.client.Counter
 import java.net.Socket
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -18,7 +15,6 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.atomic.AtomicInteger
 import javax.sql.DataSource
-import kotlinx.coroutines.flow.DEFAULT_CONCURRENCY
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Alder.Companion.alder
@@ -37,7 +33,6 @@ import no.nav.helse.spleis.config.KtorConfig
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.awaitility.Awaitility.await
-import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -45,7 +40,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
-import org.testcontainers.containers.PostgreSQLContainer
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class RestApiTest {
@@ -55,15 +49,8 @@ internal class RestApiTest {
         private const val ORGNUMMER = "987654321"
         private val MELDINGSREFERANSE = UUID.randomUUID()
         private const val AKTØRID = "42"
-        private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {
-            withCreateContainerCmdModifier { command -> command.withName("spleis-api2") }
-            withReuse(true)
-            withLabel("app-navn", "spleis-api")
-            start()
-        }
     }
     private lateinit var dataSource: DataSource
-    private lateinit var flyway: Flyway
 
     private val wireMockServer: WireMockServer = WireMockServer(WireMockConfiguration.options().dynamicPort())
     private lateinit var jwtStub: JwtStub
@@ -92,24 +79,6 @@ internal class RestApiTest {
         val randomPort = randomPort()
         appBaseUrl = "http://localhost:$randomPort"
 
-        dataSource = HikariDataSource(HikariConfig().apply {
-            jdbcUrl = postgres.jdbcUrl
-            username = postgres.username
-            password = postgres.password
-            maximumPoolSize = 3
-            minimumIdle = 1
-            initializationFailTimeout = 5000
-            idleTimeout = 10001
-            connectionTimeout = 1000
-            maxLifetime = 30001
-        })
-
-        flyway = Flyway
-            .configure()
-            .dataSource(dataSource)
-            .locations("classpath:db/migration")
-            .cleanDisabled(false)
-            .load()
         app = createApp(
             KtorConfig(httpPort = randomPort),
             AzureAdAppConfig(
@@ -117,9 +86,9 @@ internal class RestApiTest {
                 configurationUrl = "${wireMockServer.baseUrl()}/config"
             ),
             DataSourceConfiguration(
-                jdbcUrl = postgres.jdbcUrl,
-                databaseUsername = postgres.username,
-                databasePassword = postgres.password
+                jdbcUrl = DB.instance.jdbcUrl,
+                databaseUsername = DB.instance.username,
+                databasePassword = DB.instance.password
             ),
             teller
         )
@@ -136,8 +105,8 @@ internal class RestApiTest {
 
     @BeforeEach
     internal fun setup() {
-        flyway.clean()
-        flyway.migrate()
+        DB.clean()
+        dataSource = DB.migrate()
 
         val fom = LocalDate.of(2018, 9, 10)
         val tom = fom.plusDays(16)
