@@ -41,10 +41,7 @@ internal class MonitoreringRiver(
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         private val Pair<Level, String>.slackmelding get(): String {
             val (level, melding) = this
-            return JsonMessage.newMessage("slackmelding", mapOf(
-                "melding" to melding,
-                "level" to level.name
-            )).toJson()
+            return """{"@event_name": "slackmelding", "melding": "$melding", "level": "${level.name}"}"""
         }
     }
 }
