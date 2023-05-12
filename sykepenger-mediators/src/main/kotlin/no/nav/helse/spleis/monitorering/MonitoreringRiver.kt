@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.monitorering
 
+import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -19,18 +20,22 @@ internal class MonitoreringRiver(
         River(rapidsConnection).apply {
             validate {
                 it.demandValue("@event_name", "minutt")
-                it.require("@opprettet") { node -> LocalDateTime.parse(node.asText())}
+                it.require("@opprettet") { node -> LocalDateTime.parse(node.asText()) }
+                it.requireKey("system_participating_services")
             }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val nå = packet["@opprettet"].asLocalDateTime()
+        val systemParticipatingServices = packet["system_participating_services"]
         try {
             sjekker
                 .filter { it.skalSjekke(nå) }
                 .mapNotNull { it.sjekk() }
-                .forEach { context.publish(it.slackmelding) }
+                .forEach { (level, melding) ->
+                    context.publish(slackmelding(melding, level, systemParticipatingServices))
+                }
             sikkerlogg.info("Gjennomført alle monitoreringssjekker $nå")
         } catch (throwable: Throwable) {
             sikkerlogg.error("Feil ved monitoreringssjekker $nå", throwable)
@@ -39,9 +44,12 @@ internal class MonitoreringRiver(
 
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-        private val Pair<Level, String>.slackmelding get(): String {
-            val (level, melding) = this
-            return """{"@event_name": "slackmelding", "melding": "$melding", "level": "${level.name}"}"""
+        private fun slackmelding(melding: String, level: Level, systemParticipatingServices: JsonNode): String {
+            return JsonMessage.newMessage("slackmelding", mapOf(
+                "melding" to melding,
+                "level" to level,
+                "system_participating_services" to systemParticipatingServices
+            )).toJson()
         }
     }
 }
