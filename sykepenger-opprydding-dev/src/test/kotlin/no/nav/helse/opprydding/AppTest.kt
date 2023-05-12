@@ -17,24 +17,14 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class AppTest {
+internal class AppTest: DBTest() {
     private lateinit var testRapid: TestRapid
-    private lateinit var dataSource: DataSource
-    private lateinit var personRepository: PersonRepository
 
-    private companion object {
-        private val psqlContainer = PostgreSQLContainer<Nothing>("postgres:14").apply {
-            withCreateContainerCmdModifier { command -> command.withName("spleis-opprydding-dev2") }
-            withReuse(true)
-            withLabel("app-navn", "spleis-opprydding-dev")
-            start()
-        }
-    }
+    private lateinit var personRepository: PersonRepository
 
     @BeforeEach
     fun beforeEach() {
         testRapid = TestRapid()
-        dataSource = runMigration(psqlContainer)
         personRepository = PersonRepository(dataSource)
         SlettPersonRiver(testRapid, personRepository)
     }
@@ -111,29 +101,5 @@ internal class AppTest {
         }
     }
 
-    private fun runMigration(psql: PostgreSQLContainer<Nothing>): DataSource {
-        val dataSource = HikariDataSource(createHikariConfig(psql))
-        Flyway.configure()
-            .cleanDisabled(false)
-            .dataSource(dataSource)
-            .locations("classpath:db/migration")
-            .load()
-            .also { it.clean() }
-            .migrate()
-        return dataSource
-    }
 
-
-    private fun createHikariConfig(psql: PostgreSQLContainer<Nothing>) =
-        HikariConfig().apply {
-            this.jdbcUrl = psql.jdbcUrl
-            this.username = psql.username
-            this.password = psql.password
-            maximumPoolSize = 3
-            minimumIdle = 1
-            idleTimeout = 10001
-            connectionTimeout = 1000
-            initializationFailTimeout = 5000
-            maxLifetime = 30001
-        }
 }

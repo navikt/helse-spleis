@@ -84,9 +84,10 @@ fun List<String>.lagDockerOppgaver() = map { it.lagDockerOppgave() }
 
 tasks.create("nukular_docker_option") {
     val oppgaver = listOf(
-        "spleis-opprydding-dev2",
+        "spleis-opprydding-dev",
         "spleis-mediators",
         "spleis-api",
+        "spleis-api2",
         "spleis-api3",
         ).lagDockerOppgaver()
     this.dependsOn(oppgaver)
