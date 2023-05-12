@@ -38,7 +38,7 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
             hendelseMediator = hendelseMediator,
             hendelseRepository = hendelseRepository
         )
-        MonitoreringRiver(rapidsConnection, RegelmessigAvstemming(personDao))
+        MonitoreringRiver(rapidsConnection, RegelmessigAvstemming { personDao.manglerAvstemming() })
     }
 
     fun start() = rapidsConnection.start()
