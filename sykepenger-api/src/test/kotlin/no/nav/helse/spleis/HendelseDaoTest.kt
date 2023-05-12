@@ -14,19 +14,20 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
 
 @TestInstance(Lifecycle.PER_CLASS)
-internal class HendelseDaoTest: DBTest() {
+internal class HendelseDaoTest {
 
     private val UNG_PERSON_FNR = "12029240045"
     private val meldingsReferanse = UUID.randomUUID()
+    private lateinit var dataSource: DataSource
 
     @BeforeAll
-    internal fun `start embedded environment`() {
+    fun setupDB() {
+        dataSource = DB.migrate()
     }
-
     @BeforeEach
     internal fun setup() {
-        clean()
-        migrate()
+        DB.clean()
+        dataSource = DB.migrate()
         dataSource.lagreHendelse(meldingsReferanse)
     }
 
