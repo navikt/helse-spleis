@@ -82,6 +82,29 @@ internal class RefusjonsopplysningerTest {
     }
 
     @Test
+    fun `feilende test for merge av refusjonsopplysninger - tror feilaktig at det overlapper`() {
+        val gammelId = UUID.fromString("00000000-0000-0000-0000-000000000001")
+        val gamleRefusjonsopplysninger = listOf(
+            Refusjonsopplysning(gammelId, 6.mars, 20.april, 0.månedlig),
+            Refusjonsopplysning(gammelId, 21.april, 8.mai, 58305.månedlig),
+            Refusjonsopplysning(gammelId, 9.mai, null, 0.månedlig) // <-
+        ).refusjonsopplysninger()
+
+        val nyId = UUID.fromString("00000000-0000-0000-0000-000000000002")
+        val nyeRefusjonsopplysninger = listOf(
+            Refusjonsopplysning(nyId, 6.mars, 16.april, 58305.månedlig), // <-
+            Refusjonsopplysning(nyId, 17.april, 20.april, 0.månedlig),
+            Refusjonsopplysning(nyId, 21.april, 8.mai, 58305.månedlig),
+            Refusjonsopplysning(nyId, 9.mai, null, 0.månedlig)
+        ).refusjonsopplysninger()
+
+        // Hvorfoe blir (9.mai til null) minus (6.mars til 16. april) = (17.april til null)?
+        assertThrows<IllegalStateException> {
+            gamleRefusjonsopplysninger.merge(nyeRefusjonsopplysninger)
+        }
+    }
+
+    @Test
     fun `ny refusjonsopplysning erstatter gamle`() {
         val meldingsreferanseId1 = UUID.randomUUID()
         val refusjonsopplysninger = listOf(Refusjonsopplysning(meldingsreferanseId1, 2.januar, 30.januar, 2000.daglig)).refusjonsopplysninger()
