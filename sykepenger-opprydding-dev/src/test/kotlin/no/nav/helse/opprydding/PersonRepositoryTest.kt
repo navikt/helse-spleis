@@ -8,7 +8,6 @@ import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.flywaydb.core.Flyway
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

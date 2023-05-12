@@ -34,7 +34,6 @@ import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.handleRequest
 import no.nav.helse.spleis.nais
 import no.nav.helse.spleis.randomPort
-import no.nav.helse.spleis.requestResponseTracing
 import no.nav.helse.spleis.responseBody
 import no.nav.helse.økonomi.Inntekt
 import org.awaitility.Awaitility
