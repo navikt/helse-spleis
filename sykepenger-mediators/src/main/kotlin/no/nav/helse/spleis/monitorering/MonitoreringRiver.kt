@@ -1,9 +1,11 @@
 package no.nav.helse.spleis.monitorering
 
+import java.time.LocalDateTime
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 
@@ -16,21 +18,22 @@ internal class MonitoreringRiver(
     init {
         River(rapidsConnection).apply {
             validate {
-                it.demandValue("@event_name", "hel_time")
-                it.requireKey("time")
+                it.demandValue("@event_name", "minutt")
+                it.require("@opprettet") { node -> LocalDateTime.parse(node.asText())}
             }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
+        val nå = packet["@opprettet"].asLocalDateTime()
         try {
             sjekker
-                .filter { packet.time in it.timer() }
+                .filter { it.skalSjekke(nå) }
                 .mapNotNull { it.sjekk() }
                 .forEach { context.publish(it.slackmelding) }
-            sikkerlogg.info("Gjennomført alle monitoreringssjekker")
+            sikkerlogg.info("Gjennomført alle monitoreringssjekker $nå")
         } catch (throwable: Throwable) {
-            sikkerlogg.error("Feil ved monitoreringssjekker", throwable)
+            sikkerlogg.error("Feil ved monitoreringssjekker $nå", throwable)
         }
     }
 
@@ -43,6 +46,5 @@ internal class MonitoreringRiver(
                 "level" to level.name
             )).toJson()
         }
-        private val JsonMessage.time get() = get("time").asInt()
     }
 }
