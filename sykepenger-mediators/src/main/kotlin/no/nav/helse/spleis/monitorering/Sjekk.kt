@@ -18,6 +18,6 @@ internal class RegelmessigAvstemming(private val manglerAvstemming: () -> Int): 
 
     override fun skalSjekke(nå: LocalDateTime): Boolean {
         if (nå.toLocalDate().erHelg()) return false
-        return nå.minute % 15 == 0
+        return nå.hour == 8 && nå.minute == 45
     }
 }
