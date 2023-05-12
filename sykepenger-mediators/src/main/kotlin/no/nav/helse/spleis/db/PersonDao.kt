@@ -9,9 +9,12 @@ import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.intellij.lang.annotations.Language
+import org.slf4j.LoggerFactory
 
 internal class PersonDao(private val dataSource: DataSource, private val STØTTER_IDENTBYTTE: Boolean) {
-
+    private companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+    }
     fun hentEllerOpprettPerson(
         personidentifikator: Personidentifikator,
         historiskeFolkeregisteridenter: Set<Personidentifikator>,
@@ -40,13 +43,17 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
                 val (personId, serialisertPerson, tidligerePersoner) = hentPersonOgLåsPersonForBehandling(txSession, personidentifikator, historiskeFolkeregisteridenter)
                     ?: hentPersonFraHistoriskeIdenter(txSession, personidentifikator, historiskeFolkeregisteridenter)
                     ?: opprettNyPerson(txSession, personidentifikator, aktørId, lagNyPerson)
-                    ?: return
+                    ?: return fantIkkePerson(personidentifikator)
                 knyttPersonTilHistoriskeIdenter(txSession, personId, personidentifikator, historiskeFolkeregisteridenter)
                 val oppdatertPerson = håndterPerson(serialisertPerson, tidligerePersoner)
                 oppdaterAvstemmingtidspunkt(txSession, message, personidentifikator)
                 oppdaterPersonversjon(txSession, personId, oppdatertPerson.skjemaVersjon, oppdatertPerson.json)
             }
         }
+    }
+
+    private fun fantIkkePerson(personidentifikator: Personidentifikator) {
+        sikkerlogg.info("fant ikke person $personidentifikator, oppretter heller ingen ny person")
     }
 
     private fun hentTidligereBehandledeIdenter(session: Session, personId: Long, historiskeFolkeregisteridenter: Set<Personidentifikator>): List<SerialisertPerson> {
