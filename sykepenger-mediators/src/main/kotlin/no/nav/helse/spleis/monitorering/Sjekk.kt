@@ -1,11 +1,13 @@
 package no.nav.helse.spleis.monitorering
 
+import java.time.LocalDateTime
+import no.nav.helse.erHelg
 import no.nav.helse.spleis.db.PersonDao
 import org.slf4j.event.Level
 
 internal interface Sjekk {
     fun sjekk(): Pair<Level, String>?
-    fun timer(): Set<Int>
+    fun skalSjekke(nå: LocalDateTime): Boolean
 }
 
 internal class RegelmessigAvstemming(private val personDao: PersonDao): Sjekk {
@@ -15,5 +17,8 @@ internal class RegelmessigAvstemming(private val personDao: PersonDao): Sjekk {
         return Level.ERROR to "Det er $manglerAvstemming personer som ikke er avstemt på over en måned!"
     }
 
-    override fun timer() = setOf(8, 22)
+    override fun skalSjekke(nå: LocalDateTime): Boolean {
+        if (nå.toLocalDate().erHelg()) return false
+        return nå.minute % 15 == 0
+    }
 }
