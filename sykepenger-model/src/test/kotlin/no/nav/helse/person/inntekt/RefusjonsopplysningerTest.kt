@@ -137,12 +137,9 @@ internal class RefusjonsopplysningerTest {
         val nyeRefusjonsopplysninger = listOf(Refusjonsopplysning(meldingsreferanseId2, 1.januar, 31.januar, 1000.daglig)).refusjonsopplysninger()
 
         val forventet = listOf(Refusjonsopplysning(meldingsreferanseId2, 2.januar, 31.januar, 1000.daglig)).refusjonsopplysninger()
-
-        assertEquals(2.januar, nyeRefusjonsopplysninger.finnFørsteDatoForEndring(refusjonsopplysninger))
-        assertEquals(
-            forventet.inspektør.refusjonsopplysninger,
-            refusjonsopplysninger.merge(nyeRefusjonsopplysninger).inspektør.refusjonsopplysninger
-        )
+        val resultat = refusjonsopplysninger.merge(nyeRefusjonsopplysninger)
+        assertEquals(forventet.inspektør.refusjonsopplysninger, resultat.inspektør.refusjonsopplysninger)
+        assertEquals(2.januar, resultat.finnFørsteDatoForEndring(refusjonsopplysninger))
     }
 
     @Test
@@ -577,30 +574,20 @@ internal class RefusjonsopplysningerTest {
     fun `ny refusjonsopplysning midt i forrige med samme beløp`() {
         val meldingsreferanseId1 = UUID.randomUUID()
         val refusjonsopplysninger = listOf(
-            Refusjonsopplysning(
-                meldingsreferanseId1,
-                1.januar,
-                null,
-                2000.daglig
-            )
+            Refusjonsopplysning(meldingsreferanseId1, 1.januar, null, 2000.daglig)
         ).refusjonsopplysninger()
         val meldingsreferanseId2 = UUID.randomUUID()
         val nyeRefusjonsopplysninger = listOf(
-            Refusjonsopplysning(
-                meldingsreferanseId2,
-                1.januar,
-                10.januar,
-                2000.daglig
-            ),
-            Refusjonsopplysning(
-                meldingsreferanseId2,
-                11.januar,
-                null,
-                2000.daglig)
-
+            Refusjonsopplysning(meldingsreferanseId2, 1.januar, 10.januar, 2000.daglig),
+            Refusjonsopplysning(meldingsreferanseId2, 11.januar, null, 2000.daglig)
         ).refusjonsopplysninger()
 
-        assertEquals(11.januar, nyeRefusjonsopplysninger.finnFørsteDatoForEndring(refusjonsopplysninger))
+        val resultat = refusjonsopplysninger.merge(nyeRefusjonsopplysninger)
+        assertEquals(listOf(
+            Refusjonsopplysning(meldingsreferanseId2, 1.januar, 10.januar, 2000.daglig),
+            Refusjonsopplysning(meldingsreferanseId1, 11.januar, null, 2000.daglig)
+        ).refusjonsopplysninger(), resultat)
+        assertEquals(1.januar, resultat.finnFørsteDatoForEndring(refusjonsopplysninger))
     }
 
     internal companion object {

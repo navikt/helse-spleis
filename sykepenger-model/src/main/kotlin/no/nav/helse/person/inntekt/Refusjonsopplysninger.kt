@@ -9,7 +9,6 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.til
-import no.nav.helse.nesteDag
 import no.nav.helse.person.RefusjonsopplysningerVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.økonomi.Inntekt
@@ -60,9 +59,6 @@ class Refusjonsopplysning(
     internal fun tom() = tom
     internal fun beløp() = beløp
 
-    private fun oppdatertFom(nyFom: LocalDate) = periode.beholdDagerEtter(nyFom.forrigeDag)?.let {
-        Refusjonsopplysning(meldingsreferanseId, it.start, tom, beløp)
-    }
     private fun oppdatertTom(nyTom: LocalDate) = if (nyTom < fom) null else Refusjonsopplysning(meldingsreferanseId, fom, nyTom, beløp)
 
     private fun begrensTil(dato: LocalDate): Refusjonsopplysning? {
@@ -145,12 +141,6 @@ class Refusjonsopplysning(
             return Refusjonsopplysninger(validerteRefusjonsopplysninger.merge(other.validerteRefusjonsopplysninger))
         }
 
-        private fun begrens(other: Refusjonsopplysninger): Refusjonsopplysninger {
-            if (this.validerteRefusjonsopplysninger.isEmpty()) return other
-            val førsteFom = this.validerteRefusjonsopplysninger.minOf { it.fom }
-            return Refusjonsopplysninger(other.validerteRefusjonsopplysninger.mapNotNull { it.oppdatertFom(maxOf(førsteFom, it.fom)) })
-        }
-
         override fun equals(other: Any?): Boolean {
             if (other !is Refusjonsopplysninger) return false
             return validerteRefusjonsopplysninger == other.validerteRefusjonsopplysninger
@@ -196,42 +186,16 @@ class Refusjonsopplysning(
 
         // finner første dato hvor refusjonsbeløpet for dagen er ulikt beløpet i forrige versjon
         internal fun finnFørsteDatoForEndring(other: Refusjonsopplysninger): LocalDate? {
-            val sorterteOpplysninger = other.begrens(this).validerteRefusjonsopplysninger
-            return førsteDatoMedUliktBeløp(sorterteOpplysninger, other.validerteRefusjonsopplysninger)
-                ?: førsteUlikeFom(sorterteOpplysninger, other.validerteRefusjonsopplysninger)
-                ?: førsteUlikeTom(sorterteOpplysninger, other.validerteRefusjonsopplysninger)
-        }
-
-        private fun førsteDatoMedUliktBeløp(
-            nyeOpplysninger: List<Refusjonsopplysning>,
-            gamleOpplysninger: List<Refusjonsopplysning>
-        ): LocalDate? {
-            return nyeOpplysninger.firstOrNull { refusjonsopplysning ->
-                val overlappende = gamleOpplysninger.filter { refusjonsopplysning.periode.overlapperMed(it.periode) }
-                overlappende.isEmpty() || overlappende.any { it.beløp != refusjonsopplysning.beløp }
-            }?.fom
-        }
-
-        private fun førsteUlikeFom(
-            nyeOpplysninger: List<Refusjonsopplysning>,
-            gamleOpplysninger: List<Refusjonsopplysning>
-        ): LocalDate? {
-            return nyeOpplysninger.firstOrNull{ refusjonsopplysning ->
-                gamleOpplysninger.any {
-                    it.fom != refusjonsopplysning.fom
-                }
-            }?.fom
-        }
-
-        private fun førsteUlikeTom(
-            nyeOpplysninger: List<Refusjonsopplysning>,
-            gamleOpplysninger: List<Refusjonsopplysning>
-        ): LocalDate? {
-            return nyeOpplysninger.firstOrNull{ refusjonsopplysning ->
-                gamleOpplysninger.any {
-                    it.fom == refusjonsopplysning.fom && it.tom != refusjonsopplysning.tom
-                }
-            }?.tom?.nesteDag
+            // finner alle nye
+            val nye = this.validerteRefusjonsopplysninger.filter { opplysning ->
+                other.validerteRefusjonsopplysninger.none { it.meldingsreferanseId == opplysning.meldingsreferanseId }
+            }
+            // fjerner de hvor perioden og beløpet dekkes av forrige
+            val nyeUlik = nye.filterNot { opplysning -> other.validerteRefusjonsopplysninger.any {
+                opplysning.periode in it.periode && opplysning.beløp == it.beløp
+            } }
+            // første nye ulike opplysning eller bare første nye opplysning
+            return nyeUlik.firstOrNull()?.fom ?: nye.firstOrNull()?.fom
         }
 
         internal fun overlappendeEllerSenereRefusjonsopplysninger(periode: Periode): List<Refusjonsopplysning> =

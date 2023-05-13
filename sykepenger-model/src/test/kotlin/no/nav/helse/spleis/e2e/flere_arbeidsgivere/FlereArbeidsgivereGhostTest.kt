@@ -140,9 +140,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, orgnummer = a1)
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a2)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
     }
 
     @Test
