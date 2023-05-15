@@ -58,10 +58,10 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     internal fun forventerInntekt(
         periode: Periode,
         sykdomstidslinje: Sykdomstidslinje,
-        subsumsjonObserver: SubsumsjonObserver
+        subsumsjonObserver: SubsumsjonObserver?
     ): Boolean {
         if (!dekkesAvArbeidsgiver(periode)) return erFørsteUtbetalingsdagFørEllerLik(periode)
-        subsumsjonObserver.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(this, sykdomstidslinje.subsumsjonsformat())
+        subsumsjonObserver?.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(this, sykdomstidslinje.subsumsjonsformat())
         return false
     }
 
@@ -159,7 +159,7 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
             arbeidsgiverperiode: Arbeidsgiverperiode?,
             periode: Periode,
             sykdomstidslinje: Sykdomstidslinje,
-            subsumsjonObserver: SubsumsjonObserver
+            subsumsjonObserver: SubsumsjonObserver?
         ) =
             arbeidsgiverperiode?.forventerInntekt(periode, sykdomstidslinje, subsumsjonObserver) ?: false
 

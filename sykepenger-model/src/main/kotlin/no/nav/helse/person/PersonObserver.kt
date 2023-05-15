@@ -69,7 +69,6 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val fom: LocalDate,
         val tom: LocalDate,
         val forlengerPeriode: Boolean,
-        val forlengerSpleisEllerInfotrygd: Boolean,
         val harPeriodeInnenfor16Dager: Boolean,
         val trengerArbeidsgiveropplysninger: Boolean
     )

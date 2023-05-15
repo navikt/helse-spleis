@@ -33,6 +33,7 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
+import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomstidslinjer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_UTBETALT_I_INFOTRYGD
 import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.auuGruppering
@@ -62,6 +63,7 @@ import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -790,12 +792,20 @@ internal class Arbeidsgiver private constructor(
         return sykdomshistorikk.sykdomstidslinje()
     }
 
+    private fun sykdomstidslinjeInkludertForkastet(): Sykdomstidslinje {
+        return  forkastede.slåSammenSykdomstidslinjer().merge(sykdomstidslinje(), replace)
+    }
+
     internal fun sykdomstidslinjeUten(sykdomstidslinjer: List<Sykdomstidslinje>) = sykdomstidslinjer.fold(sykdomstidslinje()) { acc, sykdomstidslinje ->
         acc - sykdomstidslinje
     }
 
     internal fun arbeidsgiverperiode(periode: Periode): Arbeidsgiverperiode? {
         val arbeidsgiverperioder = person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomstidslinje(), null)
+        return arbeidsgiverperioder.finn(periode)
+    }
+    internal fun arbeidsgiverperiodeInkludertForkastet(periode: Periode): Arbeidsgiverperiode? {
+        val arbeidsgiverperioder = person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomstidslinjeInkludertForkastet(), null)
         return arbeidsgiverperioder.finn(periode)
     }
 

@@ -13,7 +13,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.SykefraværstilfelleeventyrObserver
@@ -360,7 +359,7 @@ internal class PersonMediator(
             "tom" to event.tom,
             "forlengerPeriode" to event.forlengerPeriode,
             "harPeriodeInnenfor16Dager" to event.harPeriodeInnenfor16Dager,
-            "forlengerSpleisEllerInfotrygd" to event.forlengerSpleisEllerInfotrygd
+            "trengerArbeidsgiveropplysninger" to event.trengerArbeidsgiveropplysninger
         )))
     }
 
