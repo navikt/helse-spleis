@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.util.UUID
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
+import no.nav.helse.person.Vedtaksperiode.Companion.slåSammenSykdomstidslinjer
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 
 internal class ForkastetVedtaksperiode(
@@ -16,6 +17,8 @@ internal class ForkastetVedtaksperiode(
     fun erVedtaksperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
         this.vedtaksperiode.erVedtaksperiodeRettFør(vedtaksperiode)
 
+    fun forventerInntektHensyntarForkastede() = this.vedtaksperiode.forventerInntektHensyntarForkastede()
+
     internal companion object {
         private fun Iterable<ForkastetVedtaksperiode>.perioder() = map { it.vedtaksperiode }
 
@@ -24,6 +27,8 @@ internal class ForkastetVedtaksperiode(
 
         internal fun forlengerForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode) =
             Vedtaksperiode.forlengerForkastet(forkastede.perioder(), hendelse, vedtaksperiode)
+
+        internal fun Iterable<ForkastetVedtaksperiode>.slåSammenSykdomstidslinjer() = perioder().slåSammenSykdomstidslinjer()
 
         internal fun harKortGapTilForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode) =
             Vedtaksperiode.harKortGapTilForkastet(forkastede.perioder(), hendelse, vedtaksperiode)

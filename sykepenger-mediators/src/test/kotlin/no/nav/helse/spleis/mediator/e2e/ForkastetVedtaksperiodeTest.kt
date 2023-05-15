@@ -41,7 +41,7 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "tom" : "2018-01-26",
               "forlengerPeriode" : false,
               "harPeriodeInnenfor16Dager" : false,
-              "forlengerSpleisEllerInfotrygd": false,
+              "trengerArbeidsgiveropplysninger": true,
               "hendelser": ["$søknadId", "$søknadId2"]
             }
         """
@@ -58,7 +58,7 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "tom" : "2018-01-27",
               "forlengerPeriode" : false,
               "harPeriodeInnenfor16Dager" : false,
-              "forlengerSpleisEllerInfotrygd": false,
+              "trengerArbeidsgiveropplysninger": true,
               "hendelser": ["$søknadId2"]
             }
         """
@@ -97,15 +97,16 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "tom" : "2018-03-31",
               "forlengerPeriode" : false,
               "harPeriodeInnenfor16Dager" : false,
-              "forlengerSpleisEllerInfotrygd": false,
+              "trengerArbeidsgiveropplysninger": false,  
               "hendelser": ["$søknadId2"]
             }
         """
+        // TODO: denne skal være true
         assertVedtaksperiodeForkastet(forventet, 0)
     }
 
     @Test
-    fun `vedtaksperide_forkastet sender med forlengelses flagg når vi forlenger en forkastet vedtaksperiode`() {
+    fun `vedtaksperide_forkastet sender med flagg om den forkastede vedtaksperiode skal be om arbeidsgiveropplysninger`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         val søknadId1 = sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
@@ -120,12 +121,12 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
 
         testRapid.assertAntallUtgåendeMeldinger("vedtaksperiode_forkastet", 2)
 
-        assertVedtaksperiodeForkastet(forventet(søknadId1, 1.januar, 31.januar,false), 0)
-        assertVedtaksperiodeForkastet(forventet(søknadId2, 1.februar, 28.februar, true), 1)
+        assertVedtaksperiodeForkastet(forventet(søknadId1, 1.januar, 31.januar, true), 0)
+        assertVedtaksperiodeForkastet(forventet(søknadId2, 1.februar, 28.februar, false), 1)
     }
 
     @Language("JSON")
-    private fun forventet(søknadId: UUID, fom: LocalDate, tom: LocalDate, forlengerSpleisEllerInfotrygd: Boolean) = """
+    private fun forventet(søknadId: UUID, fom: LocalDate, tom: LocalDate, trengerArbeidsgiveropplysninger: Boolean) = """
             {
               "@event_name": "vedtaksperiode_forkastet",
               "aktørId": "$AKTØRID",
@@ -136,7 +137,7 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "tom" : "$tom",
               "forlengerPeriode" : false,
               "harPeriodeInnenfor16Dager" : false,
-              "forlengerSpleisEllerInfotrygd": $forlengerSpleisEllerInfotrygd, 
+              "trengerArbeidsgiveropplysninger": $trengerArbeidsgiveropplysninger, 
               "hendelser": ["$søknadId"]
             }
         """

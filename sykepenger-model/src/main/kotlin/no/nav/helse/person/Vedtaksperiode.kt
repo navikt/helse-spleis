@@ -126,6 +126,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.serde.AktivitetsloggMap
+import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.TagBuilder
@@ -461,8 +462,9 @@ internal class Vedtaksperiode private constructor(
         .finnVedtaksperiodeRettFør(this)
         ?.takeIf { it.forventerInntekt() } != null
 
-    internal fun erForlengelseAvForkastet() = arbeidsgiver
-        .finnForkastetVedtaksperiodeRettFør(this) != null
+    private fun erForlengelseAvForkastet() = arbeidsgiver
+        .finnForkastetVedtaksperiodeRettFør(this)
+        ?.takeIf { it.forventerInntektHensyntarForkastede() } != null
 
     internal fun erSykeperiodeAvsluttetUtenUtbetalingRettFør(other: Vedtaksperiode) =
         this.sykdomstidslinje.erRettFør(other.sykdomstidslinje) && this.tilstand == AvsluttetUtenUtbetaling
@@ -488,7 +490,7 @@ internal class Vedtaksperiode private constructor(
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
         this.utbetalinger.forkast(hendelse)
-        val trengerArbeidsgiveropplysninger = forventerInntekt() && !erForlengelse() && !erForlengelseAvForkastet()
+        val trengerArbeidsgiveropplysninger = forventerInntektHensyntarForkastede() && !erForlengelse() && !erForlengelseAvForkastet()
         val vedtaksperiodeForkastetEventBuilder = VedtaksperiodeForkastetEventBuilder(tilstand.type, trengerArbeidsgiveropplysninger)
         tilstand(hendelse, TilInfotrygd)
         return vedtaksperiodeForkastetEventBuilder
@@ -507,7 +509,6 @@ internal class Vedtaksperiode private constructor(
                     fom = periode.start,
                     tom = periode.endInclusive,
                     forlengerPeriode = person.nåværendeVedtaksperioder { it.tilstand !== AvsluttetUtenUtbetaling && (it.periode.overlapperMed(periode) || it.periode.erRettFør(periode)) }.isNotEmpty(),
-                    forlengerSpleisEllerInfotrygd = erForlengelse() || erForlengelseAvForkastet(),
                     harPeriodeInnenfor16Dager = person.nåværendeVedtaksperioder { it.tilstand !== AvsluttetUtenUtbetaling && påvirkerArbeidsgiverperioden(it) }.isNotEmpty(),
                     trengerArbeidsgiveropplysninger = trengerArbeidsgiveropplysninger
                 )
@@ -895,8 +896,14 @@ internal class Vedtaksperiode private constructor(
 
     private fun finnArbeidsgiverperiode() = arbeidsgiver.arbeidsgiverperiode(periode)
 
+    private fun finnArbeidsgiverperiodeHensyntarForkastede() = arbeidsgiver.arbeidsgiverperiodeInkludertForkastet(periode)
+
     private fun forventerInntekt(subsumsjonObserver: SubsumsjonObserver = jurist()): Boolean {
         return Arbeidsgiverperiode.forventerInntekt(finnArbeidsgiverperiode(), periode, sykdomstidslinje, subsumsjonObserver)
+    }
+
+    internal fun forventerInntektHensyntarForkastede(): Boolean {
+        return Arbeidsgiverperiode.forventerInntekt(finnArbeidsgiverperiodeHensyntarForkastede(), periode, sykdomstidslinje, null)
     }
 
     private fun loggInnenforArbeidsgiverperiode() {
@@ -2644,6 +2651,9 @@ internal class Vedtaksperiode private constructor(
                     hendelse.info("Søknad forlenger forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
                 }
                 .isNotEmpty()
+
+        internal fun List<Vedtaksperiode>.slåSammenSykdomstidslinjer(): Sykdomstidslinje =
+            fold(Sykdomstidslinje()) { acc, vedtaksperiode -> acc.merge(vedtaksperiode.sykdomstidslinje, replace) }
 
         internal fun List<Vedtaksperiode>.iderMedUtbetaling(utbetalingId: UUID) =
             filter { it.utbetalinger.harId(utbetalingId) }.map { it.id }
