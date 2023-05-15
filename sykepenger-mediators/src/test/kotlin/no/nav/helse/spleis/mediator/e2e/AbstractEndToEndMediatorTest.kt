@@ -32,6 +32,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.toUUID
 import no.nav.helse.spleis.HendelseMediator
@@ -52,6 +53,7 @@ import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkForFe
 import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkTestdata
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
+import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel
 import no.nav.helse.spleis.mediator.e2e.SpleisDataSource.migratedDb
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
@@ -60,6 +62,7 @@ import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -525,6 +528,20 @@ internal abstract class AbstractEndToEndMediatorTest() {
             tilstand.toList(),
             testRapid.inspektør.forkastedeTilstander(testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks))
         )
+    }
+
+    protected fun assertVarsel(vedtaksperiodeIndeks: Int, varselkode: Varselkode) {
+        val vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks)
+        assertNotNull(testRapid.inspektør.varsel(vedtaksperiodeId, varselkode))
+    }
+
+    protected fun assertIngenVarsler(vedtaksperiodeIndeks: Int) {
+        val vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks)
+        assertNotNull(testRapid.inspektør.varsler(vedtaksperiodeId))
+    }
+
+    protected fun assertIngenVarsler() {
+        assertEquals(emptyList<Varsel>(), testRapid.inspektør.varsler())
     }
 }
 

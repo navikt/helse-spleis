@@ -7,7 +7,10 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.util.UUID
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel.Companion.finn
+import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.varsler
 import org.junit.jupiter.api.fail
 import org.slf4j.LoggerFactory
 
@@ -97,6 +100,9 @@ internal class TestRapid : RapidsConnection() {
                 }
             }
 
+        private val varsler
+            get() = meldinger("aktivitetslogg_ny_aktivitet").varsler
+
         private val forkastedeTilstander
             get() = tilstander.filter { it.key in forkastedeVedtaksperiodeIder }
 
@@ -174,5 +180,9 @@ internal class TestRapid : RapidsConnection() {
 
         fun tilstandForEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitet.Behov.Behovtype) =
             behov.getValue(vedtaksperiodeId(vedtaksperiodeIndeks)).last { it.first == behovtype }.second
+
+        fun varsel(vedtaksperiodeId: UUID, varselkode: Varselkode) = varsler.finn(vedtaksperiodeId, varselkode)
+        fun varsler() = varsler
+        fun varsler(vedtaksperiodeId: UUID) = varsler.finn(vedtaksperiodeId)
     }
 }
