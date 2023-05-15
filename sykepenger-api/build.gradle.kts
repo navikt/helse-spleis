@@ -1,3 +1,9 @@
+import com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer
+
+plugins {
+    id("com.bmuschko.docker-remote-api") version "9.3.1"
+}
+
 val micrometerRegistryPrometheusVersion = "1.10.4"
 val ktorVersion = "2.3.0"
 val wireMockVersion = "2.35.0"
@@ -67,5 +73,16 @@ tasks.named<Jar>("jar") {
             if (!file.exists())
                 it.copyTo(file)
         }
+    }
+    finalizedBy(":sykepenger-api:remove_spleis_api_db_container")
+}
+
+tasks.create("remove_spleis_api_db_container", DockerRemoveContainer::class) {
+    targetContainerId("spleis-api")
+    dependsOn(":sykepenger-api:test")
+    setProperty("force", true)
+    onError {
+        if (!this.message!!.contains("No such container"))
+            throw this
     }
 }
