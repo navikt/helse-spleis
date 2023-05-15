@@ -151,7 +151,7 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
 
     internal fun manglerAvstemming(): Int {
         @Language("PostgresSQL")
-        val statement = "SELECT count(1) FROM unike_person WHERE sist_avstemt < now() - interval '32 DAYS'"
+        val statement = "SELECT count(1) FROM unike_person WHERE sist_avstemt::date < now()::date - interval '31 DAYS'"
         return sessionOf(dataSource).use { session ->
             session.run(queryOf(statement).map { row -> row.int(1) }.asSingle) ?: 0
         }
