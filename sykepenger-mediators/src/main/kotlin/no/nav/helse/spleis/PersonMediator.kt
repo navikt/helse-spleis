@@ -82,6 +82,7 @@ internal class PersonMediator(
         // i begge retninger for å hensynta evt. helg-forskyvning
         val søkeområde = sammenhengendePeriode.start.minusDays(2) til sammenhengendePeriode.endInclusive.plusDays(2)
         hendelseRepository.finnInntektsmeldinger(personidentifikator)
+            .filter { it.path("virksomhetsnummer").asText() == organisasjonsnummer }
             .filter { inntektsmelding ->
                 val førsteFraværsdag = inntektsmelding.path("foersteFravaersdag").asOptionalLocalDate()
                 val redusertUtbetaling = inntektsmelding.path("begrunnelseForReduksjonEllerIkkeUtbetalt").asText().isNotBlank()

@@ -5,7 +5,6 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import org.junit.jupiter.api.Test
 import no.nav.inntektsmeldingkontrakt.Periode as IMPeriode
 
@@ -35,17 +34,12 @@ internal class InntektsmeldingReplayTest: AbstractEndToEndMediatorTest() {
         nyPeriode(24.april til 30.april, a2)
 
         assertTilstand(0, "AVSLUTTET_UTEN_UTBETALING")
-        assertIngenVarsler(0)
         assertTilstand(1, "AVSLUTTET_UTEN_UTBETALING")
-        assertIngenVarsler(1)
         assertTilstand(2, "AVVENTER_BLOKKERENDE_PERIODE")
-        assertIngenVarsler(2)
         assertTilstand(3, "AVVENTER_INNTEKTSMELDING")
-        assertIngenVarsler(3)
         assertTilstand(4, "AVVENTER_BLOKKERENDE_PERIODE")
-        assertVarsel(4, RV_IM_4)
         assertTilstand(5, "AVVENTER_INNTEKTSMELDING")
-        assertIngenVarsler(5)
+        assertIngenVarsler()
     }
 
     private fun nyPeriode(periode: Periode, orgnr: String) {
