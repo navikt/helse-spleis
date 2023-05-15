@@ -1,3 +1,10 @@
+import com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer
+
+plugins {
+    id("com.bmuschko.docker-remote-api") version "9.3.1"
+}
+
+
 val mainClass = "no.nav.helse.opprydding.AppKt"
 
 repositories {
@@ -33,5 +40,17 @@ tasks.named<Jar>("jar") {
             if (!file.exists())
                 it.copyTo(file)
         }
+    }
+    finalizedBy(":sykepenger-opprydding-dev:remove_spleis_opprydding_db_container")
+
+}
+
+tasks.create("remove_spleis_opprydding_db_container", DockerRemoveContainer::class) {
+    targetContainerId("spleis-opprydding-dev")
+    dependsOn(":sykepenger-opprydding-dev:test")
+    setProperty("force", true)
+    onError {
+        if (!this.message!!.contains("No such container"))
+            throw this
     }
 }

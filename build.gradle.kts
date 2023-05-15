@@ -1,8 +1,5 @@
-import com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer
-
 plugins {
     kotlin("jvm") version "1.8.21"
-    id("com.bmuschko.docker-remote-api") version "6.7.0"
 }
 
 val junitJupiterVersion = "5.9.2"
@@ -65,30 +62,4 @@ subprojects {
             }
         }
     }
-}
-
-fun String.lagDockerOppgave(): String {
-    val containerId = this
-    tasks.create("remove_$containerId", DockerRemoveContainer::class) {
-        targetContainerId(containerId)
-        setProperty("force", true)
-        //dependsOn("shut_down_$containerId")
-        onError {
-            if (!this.message!!.contains("No such container"))
-                throw this
-        }
-    }
-    return "remove_$containerId"
-}
-fun List<String>.lagDockerOppgaver() = map { it.lagDockerOppgave() }
-
-tasks.create("nukular_docker_option") {
-    val oppgaver = listOf(
-        "spleis-opprydding-dev",
-        "spleis-mediators",
-        "spleis-api",
-        "spleis-api2",
-        "spleis-api3",
-        ).lagDockerOppgaver()
-    this.dependsOn(oppgaver)
 }

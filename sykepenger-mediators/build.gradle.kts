@@ -1,3 +1,9 @@
+import com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer
+
+plugins {
+    id("com.bmuschko.docker-remote-api") version "9.3.1"
+}
+
 val mainClass = "no.nav.helse.AppKt"
 
 val innteksmeldingKontraktVersion = "2020.04.06-ab8f786"
@@ -40,5 +46,16 @@ tasks {
                     it.copyTo(file)
             }
         }
+        finalizedBy(":sykepenger-mediators:remove_spleis_mediators_db_container")
+    }
+}
+
+tasks.create("remove_spleis_mediators_db_container", DockerRemoveContainer::class) {
+    targetContainerId("spleis-mediators")
+    dependsOn(":sykepenger-mediators:test")
+    setProperty("force", true)
+    onError {
+        if (!this.message!!.contains("No such container"))
+            throw this
     }
 }
