@@ -70,6 +70,7 @@ import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.Vedtaksperiode.Companion.slåSammenForkastedeSykdomstidslinjer
 import no.nav.helse.person.Venteårsak.Companion.fordi
 import no.nav.helse.person.Venteårsak.Companion.utenBegrunnelse
 import no.nav.helse.person.Venteårsak.Companion.venterPåInntektsmelding
@@ -128,6 +129,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.serde.AktivitetsloggMap
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.slåSammenForkastedeSykdomstidslinjer
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.TagBuilder
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -2661,8 +2663,8 @@ internal class Vedtaksperiode private constructor(
                 }
                 .isNotEmpty()
 
-        internal fun List<Vedtaksperiode>.slåSammenSykdomstidslinjer(): Sykdomstidslinje =
-            fold(Sykdomstidslinje()) { acc, vedtaksperiode -> acc.merge(vedtaksperiode.sykdomstidslinje, replace) }
+        internal fun List<Vedtaksperiode>.slåSammenForkastedeSykdomstidslinjer(): Sykdomstidslinje =
+            map { it.sykdomstidslinje }.slåSammenForkastedeSykdomstidslinjer()
 
         internal fun List<Vedtaksperiode>.iderMedUtbetaling(utbetalingId: UUID) =
             filter { it.utbetalinger.harId(utbetalingId) }.map { it.id }
