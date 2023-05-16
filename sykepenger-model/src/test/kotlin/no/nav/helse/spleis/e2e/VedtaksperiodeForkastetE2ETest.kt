@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -232,5 +233,51 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar))
         håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent))
         assertTrue(observatør.forkastet(3.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+    }
+
+    @Test
+    fun `Forventer ikke arbeidsgiveropplysninger fra periode der arbeidsgiver har sendt inntektsmelding før vi mottar søknad`() {
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        nyPeriode(1.januar til 31.januar)
+        person.søppelbøtte(hendelselogg) { true }
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+        assertForventetFeil(
+            forklaring = "Falsk positiv",
+            nå = {
+                assertTrue(observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+            },
+            ønsket = {
+                assertFalse(observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+            }
+        )
+
+    }
+
+    @Test
+    fun `Forventer ikke arbeidsgiveropplysninger fra periode med utbetaling som mottar overlappende søknad`() {
+        nyPeriode(1.januar til 31.januar)
+        person.søppelbøtte(hendelselogg) { true }
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+
+        nyPeriode(31.januar til 31.januar)
+        assertForventetFeil(
+            forklaring = "Falsk positiv",
+            nå = {
+                assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+            },
+            ønsket = {
+                assertFalse(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+            }
+        )
+    }
+
+    @Test
+    fun `Forventer arbeidsgiveropplysninger fra kort periode som mottar overlappende søknad som gjør at perioden går utover AGP`() {
+        nyPeriode(1.januar til 1.januar)
+        person.søppelbøtte(hendelselogg) { true }
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+
+        nyPeriode(1.januar til 31.januar)
+        assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
     }
 }
