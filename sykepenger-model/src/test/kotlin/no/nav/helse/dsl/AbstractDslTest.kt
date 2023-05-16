@@ -157,6 +157,14 @@ internal abstract class AbstractDslTest {
     protected fun TestPerson.TestArbeidsgiver.assertSisteTilstand(id: UUID, tilstand: TilstandType, orgnummer: String = a1) {
         testArbeidsgiverAsserter.assertSisteTilstand(id, tilstand)
     }
+    protected fun TestPerson.TestArbeidsgiver.assertUtbetalingsbeløp(
+        vedtaksperiodeId: UUID,
+        forventetArbeidsgiverbeløp: Int,
+        forventetArbeidsgiverRefusjonsbeløp: Int,
+        subset: Periode? = null
+    ) {
+        testArbeidsgiverAsserter.assertUtbetalingsbeløp(vedtaksperiodeId, forventetArbeidsgiverbeløp, forventetArbeidsgiverRefusjonsbeløp, subset)
+    }
     protected fun TestPerson.TestArbeidsgiver.assertForkastetPeriodeTilstander(id: UUID, vararg tilstand: TilstandType, orgnummer: String = a1) {
         testArbeidsgiverAsserter.assertForkastetPeriodeTilstander(id, *tilstand)
     }

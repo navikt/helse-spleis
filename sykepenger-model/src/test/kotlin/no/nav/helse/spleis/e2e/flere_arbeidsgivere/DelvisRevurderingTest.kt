@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate.EPOCH
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -13,11 +12,19 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.START
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
 import no.nav.helse.serde.api.dto.Utbetalingtype
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -64,15 +71,7 @@ internal class DelvisRevurderingTest : AbstractDslTest() {
             .single()
             .perioder
             .single()
-        assertForventetFeil(
-            forklaring = "ag2 har ikke fått laget utbetaling, og har dermed ingen utbetalingstidslinjedager",
-            nå = {
-                assertTrue(ag2Periode.sammenslåttTidslinje.all { it.utbetalingstidslinjedagtype == UtbetalingstidslinjedagType.UkjentDag })
-            },
-            ønsket = {
-                assertTrue(ag2Periode.sammenslåttTidslinje.none { it.utbetalingstidslinjedagtype == UtbetalingstidslinjedagType.UkjentDag })
-            }
-        )
+        assertTrue(ag2Periode.sammenslåttTidslinje.none { it.utbetalingstidslinjedagtype == UtbetalingstidslinjedagType.UkjentDag })
     }
 
     @Test
@@ -122,17 +121,8 @@ internal class DelvisRevurderingTest : AbstractDslTest() {
             .single()
             .perioder
             .single()
-        assertForventetFeil(
-            forklaring = "ag2 har ikke fått laget utbetaling, og har dermed ingen utbetalingstidslinjedager",
-            nå = {
-                assertEquals(SykdomstidslinjedagType.SYKEDAG, ag2Periode.sammenslåttTidslinje.single { it.dagen == 31.januar }.sykdomstidslinjedagtype)
-                assertTrue(ag2Periode.sammenslåttTidslinje.all { it.utbetalingstidslinjedagtype == UtbetalingstidslinjedagType.UkjentDag })
-            },
-            ønsket = {
-                assertEquals(SykdomstidslinjedagType.FERIEDAG, ag2Periode.sammenslåttTidslinje.single { it.dagen == 31.januar }.sykdomstidslinjedagtype)
-                assertTrue(ag2Periode.sammenslåttTidslinje.none { it.utbetalingstidslinjedagtype == UtbetalingstidslinjedagType.UkjentDag })
-            }
-        )
+        assertEquals(SykdomstidslinjedagType.FERIEDAG, ag2Periode.sammenslåttTidslinje.single { it.dagen == 31.januar }.sykdomstidslinjedagtype)
+        assertTrue(ag2Periode.sammenslåttTidslinje.none { it.utbetalingstidslinjedagtype == UtbetalingstidslinjedagType.UkjentDag })
     }
 
     @Test
@@ -176,21 +166,102 @@ internal class DelvisRevurderingTest : AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
         }
         val speil = serializeForSpeil()
-        val ag1Periode = speil.arbeidsgivere
+        val ag2Periode = speil.arbeidsgivere
             .single { it.organisasjonsnummer == a2 }
             .generasjoner
-            .single()
+            .first()
             .perioder
             .first() as BeregnetPeriode
-        assertEquals(SykdomstidslinjedagType.FERIEDAG, ag1Periode.sammenslåttTidslinje.single { it.dagen == 31.januar }.sykdomstidslinjedagtype)
-        assertForventetFeil(
-            forklaring = "ag2 har ikke fått laget revurdering, og har dermed ingen utbetalingstidslinjedager",
-            nå = {
-                assertEquals(Utbetalingtype.UTBETALING, ag1Periode.utbetaling.type)
-            },
-            ønsket = {
-                assertEquals(Utbetalingtype.REVURDERING, ag1Periode.utbetaling.type)
-            }
-        )
+        assertEquals(SykdomstidslinjedagType.FERIEDAG, ag2Periode.sammenslåttTidslinje.single { it.dagen == 31.januar }.sykdomstidslinjedagtype)
+        assertEquals(Utbetalingtype.REVURDERING, ag2Periode.utbetaling.type)
+    }
+
+    @Test
+    fun `To arbeidsgivere gikk inn i en bar - og første arbeidsgiver ble ferdig behandlet før vi mottok sykmelding på neste arbeidsgiver`() {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 30000.månedlig)
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(a1 to 30000.månedlig, a2 to 35000.månedlig), 1.januar),
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to 30000.månedlig, a2 to 35000.månedlig), 1.januar),
+                arbeidsforhold = listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, EPOCH),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH)
+                )
+            )
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertUtbetalingsbeløp(
+                1.vedtaksperiode,
+                forventetArbeidsgiverbeløp = 997,
+                forventetArbeidsgiverRefusjonsbeløp = 1385,
+                subset = 17.januar til 31.januar
+            )
+        }
+
+        assertEquals(1, inspektør(a1).arbeidsgiverOppdrag.size)
+        assertEquals(0, inspektør(a2).arbeidsgiverOppdrag.size)
+
+        nullstillTilstandsendringer()
+
+        a2 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 30000.månedlig)
+        }
+
+        a1 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING) }
+        a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
+
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            val speil = serializeForSpeil()
+            val ag2Periode = speil.arbeidsgivere
+                .single { it.organisasjonsnummer == a2 }
+                .generasjoner
+                .single()
+                .perioder
+                .single()
+            assertTrue(ag2Periode.sammenslåttTidslinje.none { it.utbetalingstidslinjedagtype == UtbetalingstidslinjedagType.UkjentDag })
+        }
+        a1 {
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        a1 { assertSisteTilstand(1.vedtaksperiode, AVSLUTTET) }
+        a2 { assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK) }
+
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        a2 { assertSisteTilstand(1.vedtaksperiode, AVSLUTTET) }
+
+        a1 {
+            assertUtbetalingsbeløp(
+                1.vedtaksperiode,
+                forventetArbeidsgiverbeløp = 1081,
+                forventetArbeidsgiverRefusjonsbeløp = 1385,
+                subset = 17.januar til 31.januar
+            )
+        }
+        a2 {
+            assertUtbetalingsbeløp(
+                1.vedtaksperiode,
+                forventetArbeidsgiverbeløp = 1080,
+                forventetArbeidsgiverRefusjonsbeløp = 1385,
+                subset = 17.januar til 31.januar
+            )
+        }
+        assertEquals(2, inspektør(a1).utbetalinger.size)
+        assertEquals(2, inspektør(a2).utbetalinger.size)
     }
 }

@@ -1039,15 +1039,35 @@ internal class Vedtaksperiode private constructor(
             this.kontekst(kopi)
         }
 
+    private fun utbetalingsperioder(strategi: Utbetalingstrategi): List<Pair<Vedtaksperiode, Utbetalingstrategi>> {
+        val skjæringstidspunktet = this.skjæringstidspunkt
+        val revurderinger = person.nåværendeVedtaksperioder {
+            // perioder som er sist på skjæringstidspunktet per arbeidsgiver (hensyntatt pingpong)
+            it.arbeidsgiver !== this.arbeidsgiver
+                    && it.tilstand == AvventerRevurdering
+                    && it.arbeidsgiver.finnVedtaksperiodeRettEtter(it) == null
+                    && it.skjæringstidspunkt == skjæringstidspunktet
+        }
+        val førstegangsvurderinger = person.nåværendeVedtaksperioder {
+                it.arbeidsgiver !== this.arbeidsgiver
+                        && it.tilstand == AvventerBlokkerendePeriode
+                        && this.periode.overlapperMed(it.periode)
+                        && skjæringstidspunktet == it.skjæringstidspunkt
+            }
+        return listOf(this to strategi) +
+                revurderinger.map { it to Vedtaksperiode::lagRevurdering } +
+                førstegangsvurderinger.map { it to Vedtaksperiode::lagUtbetaling }
+    }
+
     private fun beregnUtbetalinger(
         hendelse: PersonHendelse,
         arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger,
         beregningsperiode: Periode,
         beregningsperioder: List<Triple<Periode, IAktivitetslogg, SubsumsjonObserver>>,
-        utbetalingsperioder: List<Vedtaksperiode>,
-        utbetalingStrategy: (Vedtaksperiode, IAktivitetslogg, Vedtaksperiode, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, Alder.MaksimumSykepenger, Utbetalingstidslinje) -> Unit
+        segSelvUtbetalingstrategi: Utbetalingstrategi
     ): Boolean {
-        check(utbetalingsperioder.all { it.skjæringstidspunkt == this.skjæringstidspunkt }) {
+        val utbetalingsperioder = utbetalingsperioder(segSelvUtbetalingstrategi)
+        check(utbetalingsperioder.all { (it) -> it.skjæringstidspunkt == this.skjæringstidspunkt }) {
             "ugyldig situasjon: skal beregne utbetaling for vedtaksperioder med ulike skjæringstidspunkter"
         }
         val grunnlagsdata = checkNotNull(vilkårsgrunnlag) {
@@ -1055,9 +1075,9 @@ internal class Vedtaksperiode private constructor(
         }
         try {
             val (maksimumSykepenger, tidslinjerPerArbeidsgiver) = arbeidsgiverUtbetalinger.beregn(skjæringstidspunkt, beregningsperiode, beregningsperioder)
-            utbetalingsperioder.forEach {
-                val utbetalingstidslinje = tidslinjerPerArbeidsgiver.getValue(it.arbeidsgiver)
-                utbetalingStrategy(it, it.aktivitetsloggkopi(hendelse), this, grunnlagsdata, maksimumSykepenger, utbetalingstidslinje)
+            utbetalingsperioder.forEach { (other, utbetalingStrategy) ->
+                val utbetalingstidslinje = tidslinjerPerArbeidsgiver.getValue(other.arbeidsgiver)
+                utbetalingStrategy(other, other.aktivitetsloggkopi(hendelse), this, grunnlagsdata, maksimumSykepenger, utbetalingstidslinje)
             }
         } catch (err: UtbetalingstidslinjeBuilderException) {
             err.logg(hendelse)
@@ -1494,22 +1514,12 @@ internal class Vedtaksperiode private constructor(
                 val beregningsperiode = utvalg.periode()
                 val beregningsperioder = utvalg.map { Triple(it.periode, it.aktivitetsloggkopi(ytelser), it.jurist) }
 
-                // utbetalingsperioder brukes for å lage revurderinger
-                val utbetalingsperioder = listOf(vedtaksperiode) + person.nåværendeVedtaksperioder {
-                    // perioder som er sist på skjæringstidspunktet per arbeidsgiver (hensyntatt pingpong)
-                    it.arbeidsgiver !== vedtaksperiode.arbeidsgiver
-                            && it.tilstand == AvventerRevurdering
-                            && it.arbeidsgiver.finnVedtaksperiodeRettEtter(it) == null
-                            && it.skjæringstidspunkt == vedtaksperiode.skjæringstidspunkt
-                }
-
                 val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
                 vedtaksperiode.beregnUtbetalinger(
                     ytelser,
                     arbeidsgiverUtbetalinger,
                     beregningsperiode,
                     beregningsperioder,
-                    utbetalingsperioder,
                     Vedtaksperiode::lagRevurdering
                 )
                 utvalg.forEach {
@@ -1911,17 +1921,12 @@ internal class Vedtaksperiode private constructor(
                         arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
                         val beregningsperiode = vedtaksperiode.finnArbeidsgiverperiode()?.periode(vedtaksperiode.periode.endInclusive) ?: vedtaksperiode.periode
                         val beregningsperioder = listOf(Triple(vedtaksperiode.periode, this, vedtaksperiode.jurist()))
-                        val utbetalingsperioder = person
-                            .nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET)
-                            .filter { vedtaksperiode.periode.overlapperMed(it.periode)
-                                    && vedtaksperiode.skjæringstidspunkt == it.skjæringstidspunkt }
 
                         vedtaksperiode.beregnUtbetalinger(
                             ytelser,
                             arbeidsgiverUtbetalinger,
                             beregningsperiode,
                             beregningsperioder,
-                            utbetalingsperioder,
                             Vedtaksperiode::lagUtbetaling
                         )
                     }
@@ -2758,6 +2763,7 @@ internal class Vedtaksperiode private constructor(
     }
 }
 
+private typealias Utbetalingstrategi = (Vedtaksperiode, IAktivitetslogg, Vedtaksperiode, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, Alder.MaksimumSykepenger, Utbetalingstidslinje) -> Unit
 
 enum class ForlengelseFraInfotrygd {
     IKKE_ETTERSPURT,

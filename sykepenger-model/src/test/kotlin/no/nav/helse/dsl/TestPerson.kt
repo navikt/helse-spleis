@@ -7,11 +7,9 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
-import no.nav.helse.desember
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
-import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -28,7 +26,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
-import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonVisitor

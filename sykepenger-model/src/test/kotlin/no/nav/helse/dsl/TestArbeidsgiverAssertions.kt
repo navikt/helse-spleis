@@ -1,6 +1,9 @@
 package no.nav.helse.dsl
 
 import java.util.UUID
+import no.nav.helse.erHelg
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.inspectors.AvrundetØkonomiAsserter
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.TilstandType
@@ -36,6 +39,23 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
     }
     internal fun assertHarIkkeHendelseIder(vedtaksperiodeId: UUID, vararg hendelseIder: UUID) {
         assertEquals(emptySet<UUID>(), inspektør.hendelseIder(vedtaksperiodeId).intersect(hendelseIder.toSet()))
+    }
+
+    internal fun assertUtbetalingsbeløp(
+        vedtaksperiodeId: UUID,
+        forventetArbeidsgiverbeløp: Int,
+        forventetArbeidsgiverRefusjonsbeløp: Int,
+        subset: Periode? = null
+    ) {
+        val utbetalingstidslinje = inspektør.utbetalingstidslinjer(vedtaksperiodeId).let { subset?.let(it::subset) ?: it }
+
+        utbetalingstidslinje.filterNot { it.dato.erHelg() }.forEach { utbetalingsdag ->
+            utbetalingsdag.økonomi.accept(AvrundetØkonomiAsserter { _, arbeidsgiverRefusjonsbeløp, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
+                assertEquals(forventetArbeidsgiverbeløp, arbeidsgiverbeløp) { "feil arbeidsgiverbeløp for dag ${utbetalingsdag.dato} "}
+                assertEquals(forventetArbeidsgiverRefusjonsbeløp, arbeidsgiverRefusjonsbeløp)
+                assertEquals(0, personbeløp)
+            })
+        }
     }
 
     internal fun assertInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {
