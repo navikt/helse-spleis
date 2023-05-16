@@ -26,12 +26,14 @@ internal sealed class Dag(
             require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
             when (venstre) {
                 is Sykedag,
+                is SykedagNav,
                 is SykHelgedag,
                 is Arbeidsgiverdag,
                 is ArbeidsgiverHelgedag -> venstre
                 is Feriedag,
                 is Permisjonsdag -> when (høyre) {
                     is Sykedag,
+                    is SykedagNav,
                     is SykHelgedag,
                     is Arbeidsgiverdag,
                     is ArbeidsgiverHelgedag -> høyre
