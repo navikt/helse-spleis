@@ -2391,7 +2391,12 @@ internal class Vedtaksperiode private constructor(
             // forkaster perioder som er før/overlapper med oppgitt periode, eller som er sammenhengende med
             // perioden som overlapper (per skjæringstidpunkt!).
             val skjæringstidspunkt = segSelv.skjæringstidspunkt
-            return fun(other: Vedtaksperiode) = other.periode.start >= segSelv.periode.start || other.skjæringstidspunkt == skjæringstidspunkt
+            val arbeidsgiverperiode = segSelv.finnArbeidsgiverperiode()
+            return fun (other: Vedtaksperiode): Boolean {
+                if (other.periode.start >= segSelv.periode.start) return true // Forkaster nyere perioder på tvers av arbeidsgivere
+                if (arbeidsgiverperiode != null && other.arbeidsgiver === segSelv.arbeidsgiver && other.periode in arbeidsgiverperiode) return true // Forkaster samme arbeidsgiverperiode (kun for samme arbeidsgiver)
+                return other.skjæringstidspunkt == skjæringstidspunkt // Forkaster alt med samme skjæringstidspunkt på tvers av arbeidsgivere
+            }
         }
 
         internal val IKKE_FERDIG_REVURDERT: VedtaksperiodeFilter = { it.tilstand == AvventerGjennomførtRevurdering }

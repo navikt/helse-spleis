@@ -73,14 +73,14 @@ internal class ForkasteAuuTest: AbstractDslTest() {
     }
 
     @Test
-    fun `En auu nesten vegg i vegg til neste periode forkastes ikke`() {
+    fun `En auu nesten vegg i vegg til neste periode forkastes også`() {
         a1 {
             nyPeriode(1.januar til 16.januar)
             nyPeriode(18.januar til 31.januar)
             nullstillTilstandsendringer()
             håndterAnmodningOmForkasting(2.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
         }
     }
 
