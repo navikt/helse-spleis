@@ -405,6 +405,8 @@ internal abstract class AbstractDslTest {
     ) =
         bareÈnArbeidsgiver(a1).nyttVedtak(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, inntekterBlock)
 
+    protected fun serializeForSpeil() = testperson.serializeForSpeil()
+
     protected fun medFødselsdato(fødselsdato: LocalDate) {
         testperson = TestPerson(observatør = observatør, fødselsdato = fødselsdato, deferredLog = deferredLog, jurist = jurist)
     }

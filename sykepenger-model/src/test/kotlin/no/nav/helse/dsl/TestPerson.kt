@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
+import no.nav.helse.desember
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
@@ -27,6 +28,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
+import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonVisitor
@@ -49,10 +51,13 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.serde.api.dto.PersonDTO
+import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.lagInntektperioder
 import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -135,6 +140,10 @@ internal class TestPerson(
 
     operator fun <R> invoke(testblokk: TestPerson.() -> R): R {
         return testblokk(this)
+    }
+
+    fun serializeForSpeil(): PersonDTO {
+        return serializePersonForSpeil(person)
     }
 
     inner class TestArbeidsgiver(internal val orgnummer: String) {
@@ -353,58 +362,37 @@ internal class TestPerson(
     }
 }
 
-private fun lagStandardSammenligningsgrunnlag(orgnummer: String, inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
+internal fun lagStandardSammenligningsgrunnlag(orgnummer: String, inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
+    lagStandardSammenligningsgrunnlag(listOf(orgnummer to inntekt), skjæringstidspunkt)
+
+internal fun lagStandardSammenligningsgrunnlag(arbeidsgivere: List<Pair<String, Inntekt>>, skjæringstidspunkt: LocalDate) =
     Inntektsvurdering(
         inntekter = inntektperioderForSammenligningsgrunnlag {
             skjæringstidspunkt.minusMonths(12L).withDayOfMonth(1) til skjæringstidspunkt.minusMonths(1L).withDayOfMonth(1) inntekter {
-                orgnummer inntekt inntekt
+                arbeidsgivere.forEach { (orgnummer, inntekt) -> orgnummer inntekt inntekt }
             }
         }
     )
 
 internal fun List<String>.lagStandardSammenligningsgrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
-    Inntektsvurdering(
-        inntekter = inntektperioderForSammenligningsgrunnlag {
-            skjæringstidspunkt.minusMonths(12L).withDayOfMonth(1) til skjæringstidspunkt.minusMonths(1L).withDayOfMonth(1) inntekter {
-                forEach { orgnummer ->
-                    orgnummer inntekt inntekt
-                }
+    lagStandardSammenligningsgrunnlag(map { it to inntekt }, skjæringstidspunkt)
+
+internal fun lagStandardSykepengegrunnlag(orgnummer: String, inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
+    lagStandardSykepengegrunnlag(listOf(orgnummer to inntekt), skjæringstidspunkt)
+internal fun lagStandardSykepengegrunnlag(arbeidsgivere: List<Pair<String, Inntekt>>, skjæringstidspunkt: LocalDate) =
+    InntektForSykepengegrunnlag(
+        inntekter = inntektperioderForSykepengegrunnlag {
+            val måned = YearMonth.from(skjæringstidspunkt)
+            val periode = måned.minusMonths(3L).atDay(1) til måned.minusMonths(1).atDay(1)
+            periode inntekter {
+                arbeidsgivere.forEach { (orgnummer, inntekt) -> orgnummer inntekt inntekt }
             }
-        }
-    )
-
-private fun lagStandardSykepengegrunnlag(orgnummer: String, inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
-    InntektForSykepengegrunnlag(
-        inntekter = listOf(
-            ArbeidsgiverInntekt(orgnummer, (0..2).map {
-                val yearMonth = YearMonth.from(skjæringstidspunkt).minusMonths(3L - it)
-                ArbeidsgiverInntekt.MånedligInntekt(
-                    yearMonth = yearMonth,
-                    type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-                    inntekt = inntekt,
-                    fordel = "fordel",
-                    beskrivelse = "beskrivelse"
-                )
-            })
-        ), arbeidsforhold = emptyList()
-    )
-
-internal fun List<String>.lagStandardSykepengegrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
-    InntektForSykepengegrunnlag(
-        inntekter = map { orgnummer ->
-            ArbeidsgiverInntekt(orgnummer, (0..2).map {
-                val yearMonth = YearMonth.from(skjæringstidspunkt).minusMonths(3L - it)
-                ArbeidsgiverInntekt.MånedligInntekt(
-                    yearMonth = yearMonth,
-                    type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-                    inntekt = inntekt,
-                    fordel = "fordel",
-                    beskrivelse = "beskrivelse"
-                )
-            })
         },
         arbeidsforhold = emptyList()
     )
+
+internal fun List<String>.lagStandardSykepengegrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
+    lagStandardSykepengegrunnlag(map { it to inntekt }, skjæringstidspunkt)
 
 internal fun standardSimuleringsresultat(orgnummer: String) = SimuleringResultat(
     totalbeløp = 2000,
