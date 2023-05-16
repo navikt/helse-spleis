@@ -33,6 +33,7 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -62,10 +63,34 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.fail
 import kotlin.reflect.KClass
 
 internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `arbeidsgiver endrer arbeidsgiverperioden tilbake - må overstyre tidslinje for å fikse`() {
+        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
+        nyttVedtak(11.februar, 28.februar, arbeidsgiverperiode = listOf(1.februar til 4.februar, 7.februar til 18.februar))
+        assertEquals(Dag.Arbeidsdag::class, inspektør.sykdomstidslinje[5.februar]::class)
+        assertEquals(Dag.Arbeidsdag::class, inspektør.sykdomstidslinje[6.februar]::class)
+        håndterInntektsmelding(listOf(16.januar til 31.januar))
+
+        val errormelding = assertThrows<IllegalStateException> { håndterYtelser(1.vedtaksperiode) }.message ?: fail { "forventer exception!" }
+        assertTrue(errormelding.contains("Fant ikke vilkårsgrunnlag for 2018-02-01"))
+
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(5.februar, Dagtype.Sykedag, 100),
+            ManuellOverskrivingDag(6.februar, Dagtype.Sykedag, 100),
+        ))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        assertEquals(Dag.Sykedag::class, inspektør.sykdomstidslinje[5.februar]::class)
+        assertEquals(Dag.Sykedag::class, inspektør.sykdomstidslinje[6.februar]::class)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+    }
 
     @Test
     fun `overstyre ferie til sykdom`() {
