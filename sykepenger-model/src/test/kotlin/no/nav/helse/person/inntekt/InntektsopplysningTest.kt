@@ -22,7 +22,7 @@ internal class InntektsopplysningTest {
     fun overstyres() {
         val im1 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
         val im2 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
-        val saksbehandler1 = Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
+        val saksbehandler1 = im1.overstyresAv(Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now()))
         val saksbehandler2 = Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val saksbehandler3 = Saksbehandler(20.januar, UUID.randomUUID(), 30000.månedlig, "", null, LocalDateTime.now())
         val saksbehandler4 = Saksbehandler(20.januar, UUID.randomUUID(), INGEN, "", null, LocalDateTime.now())

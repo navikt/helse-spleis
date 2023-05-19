@@ -17,7 +17,9 @@ internal class Infotrygd(
     }
 
     override fun kanOverstyresAv(ny: Inntektsopplysning) = false
-
+    override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
+        throw IllegalStateException("Infotrygd kan ikke bli overstyrt")
+    }
 
     override fun omregnetÅrsinntekt(): Inntekt = beløp
 

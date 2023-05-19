@@ -26,14 +26,19 @@ abstract class Inntektsopplysning protected constructor(
     internal abstract fun omregnetÅrsinntekt(): Inntekt
     internal fun overstyresAv(ny: Inntektsopplysning): Inntektsopplysning {
         if (!kanOverstyresAv(ny)) return this
-        return ny.overstyrer(this)
+        return blirOverstyrtAv(ny)
     }
 
-    protected open fun kanOverstyresAv(ny: Inntektsopplysning): Boolean {
-        return ny.omregnetÅrsinntekt() != this.omregnetÅrsinntekt()
-    }
+    protected abstract fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning
 
-    protected open fun overstyrer(gammel: Inntektsopplysning?) = this
+    protected open fun kanOverstyresAv(ny: Inntektsopplysning) = true
+
+    internal open fun overstyrer(gammel: IkkeRapportert) = this
+    internal open fun overstyrer(gammel: SkattSykepengegrunnlag) = this
+    internal open fun overstyrer(gammel: no.nav.helse.person.inntekt.Inntektsmelding) = this
+    internal open fun overstyrer(gammel: Saksbehandler, overstyrtInntekt: Inntektsopplysning): Inntektsopplysning {
+        throw IllegalStateException("Kan ikke overstyre saksbehandler-inntekt")
+    }
 
     final override fun equals(other: Any?) = other is Inntektsopplysning && erSamme(other)
 

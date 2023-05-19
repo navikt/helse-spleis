@@ -53,14 +53,21 @@ class Saksbehandler internal constructor(
     }
 
     override fun kanOverstyresAv(ny: Inntektsopplysning): Boolean {
-        if (ny !is Saksbehandler) return false
-        if (ny.beløp == this.beløp) return false
-        return true
+        // kun saksbehandlerinntekt kan bare endre en annen saksbehandlerinntekt
+        return ny is Saksbehandler
     }
 
-    override fun overstyrer(gammel: Inntektsopplysning?): Inntektsopplysning {
-        return Saksbehandler(id, dato, hendelseId, beløp, forklaring, subsumsjon, if (gammel is Saksbehandler) gammel.overstyrtInntekt else gammel, tidsstempel)
+    override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
+        return ny.overstyrer(this, checkNotNull(overstyrtInntekt) { "overstyrt inntekt skal ikke være null" })
     }
+
+    override fun overstyrer(gammel: Saksbehandler, overstyrtInntekt: Inntektsopplysning) = kopierMed(overstyrtInntekt)
+    override fun overstyrer(gammel: IkkeRapportert) = kopierMed(gammel)
+    override fun overstyrer(gammel: SkattSykepengegrunnlag) = kopierMed(gammel)
+    override fun overstyrer(gammel: Inntektsmelding) = kopierMed(gammel)
+
+    private fun kopierMed(overstyrtInntekt: Inntektsopplysning) =
+        Saksbehandler(id, dato, hendelseId, beløp, forklaring, subsumsjon, overstyrtInntekt, tidsstempel)
 
     override fun omregnetÅrsinntekt(): Inntekt = beløp
 

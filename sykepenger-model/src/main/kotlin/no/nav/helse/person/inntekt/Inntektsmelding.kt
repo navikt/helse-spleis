@@ -54,10 +54,19 @@ internal class Inntektsmelding(
     }
 
     override fun kanOverstyresAv(ny: Inntektsopplysning): Boolean {
-        if (ny !is Saksbehandler && ny !is Inntektsmelding) return false
+        // kun saksbehandlerinntekt eller annen inntektsmelding kan overstyre inntektsmelding-inntekt
+        if (ny is Saksbehandler) return ny.omregnetÅrsinntekt() != this.beløp
+        if (ny !is Inntektsmelding) return false
         val måned = this.dato.withDayOfMonth(1) til this.dato.withDayOfMonth(this.dato.lengthOfMonth())
-        if (ny is Inntektsmelding && ny.dato !in måned) return false
-        return super.kanOverstyresAv(ny)
+        if (ny.dato !in måned) return false
+        // unngår å endre inntekt dersom beløpet er det samme da det ville
+        // trigget endel unødvendig null-revurderinger av skjæringstidspunktet (inntektsmeldinger kommer jo inn med
+        // inntekt og refusjon selv om det egentlig kun er endring i refusjonen)
+        return this.beløp != ny.beløp
+    }
+
+    override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
+        return ny.overstyrer(this)
     }
 
     override fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): AvklarbarSykepengegrunnlag? {

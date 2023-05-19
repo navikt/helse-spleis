@@ -83,6 +83,10 @@ internal class SkattSykepengegrunnlag private constructor(
         return beløp
     }
 
+    override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
+        return ny.overstyrer(this)
+    }
+
     override fun subsumerSykepengegrunnlag(subsumsjonObserver: SubsumsjonObserver, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) {
         subsumsjonObserver.`§ 8-28 ledd 3 bokstav a`(
             organisasjonsnummer = organisasjonsnummer,
