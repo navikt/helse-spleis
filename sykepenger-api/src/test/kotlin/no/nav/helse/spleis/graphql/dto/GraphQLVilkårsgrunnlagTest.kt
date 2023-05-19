@@ -58,7 +58,7 @@ internal class GraphQLVilkårsgrunnlagTest {
         skjæringstidpunkt: LocalDate = 1.januar(2018),
         avviksprosent: Double?) = SpleisVilkårsgrunnlag(
         skjæringstidspunkt = skjæringstidpunkt,
-        omregnetÅrsinntekt = 500000.0,
+        beregningsgrunnlag = 500000.0,
         sammenligningsgrunnlag = 500000.0,
         sykepengegrunnlag = 500000.0,
         inntekter = emptyList(),

@@ -398,7 +398,7 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: Vilkårsgrunnlag) =
             is SpleisVilkårsgrunnlag -> GraphQLSpleisVilkarsgrunnlag(
                 id = id,
                 skjaeringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt,
-                omregnetArsinntekt = vilkårsgrunnlag.omregnetÅrsinntekt,
+                omregnetArsinntekt = vilkårsgrunnlag.beregningsgrunnlag,
                 sammenligningsgrunnlag = vilkårsgrunnlag.sammenligningsgrunnlag,
                 sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag,
                 inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) },
@@ -415,7 +415,7 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: Vilkårsgrunnlag) =
             is InfotrygdVilkårsgrunnlag -> GraphQLInfotrygdVilkarsgrunnlag(
                 id = id,
                 skjaeringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt,
-                omregnetArsinntekt = vilkårsgrunnlag.omregnetÅrsinntekt,
+                omregnetArsinntekt = vilkårsgrunnlag.beregningsgrunnlag,
                 sammenligningsgrunnlag = vilkårsgrunnlag.sammenligningsgrunnlag,
                 sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag,
                 inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) },
@@ -424,7 +424,7 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: Vilkårsgrunnlag) =
             else -> object : GraphQLVilkarsgrunnlag {
                 override val id = id
                 override val skjaeringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt
-                override val omregnetArsinntekt = vilkårsgrunnlag.omregnetÅrsinntekt
+                override val omregnetArsinntekt = vilkårsgrunnlag.beregningsgrunnlag
                 override val sammenligningsgrunnlag = vilkårsgrunnlag.sammenligningsgrunnlag
                 override val sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag
                 override val inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) }

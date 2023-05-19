@@ -30,6 +30,29 @@ internal interface InntektsopplysningVisitor : InntektsmeldingVisitor, Skatteopp
     ) {
     }
 
+    fun preVisitSkjønnsmessigFastsatt(
+        saksbehandler: SkjønnsmessigFastsatt,
+        id: UUID,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        forklaring: String?,
+        subsumsjon: Subsumsjon?,
+        tidsstempel: LocalDateTime
+    ) {
+    }
+    fun postVisitSkjønnsmessigFastsatt(
+        saksbehandler: SkjønnsmessigFastsatt,
+        id: UUID,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        forklaring: String?,
+        subsumsjon: Subsumsjon?,
+        tidsstempel: LocalDateTime
+    ) {
+    }
+
     fun visitIkkeRapportert(
         ikkeRapportert: IkkeRapportert,
         id: UUID,

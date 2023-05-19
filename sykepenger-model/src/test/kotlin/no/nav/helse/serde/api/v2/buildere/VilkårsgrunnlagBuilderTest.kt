@@ -383,7 +383,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         assertEquals(93634, vilkårsgrunnlag.grunnbeløp)
         assertEquals(true, vilkårsgrunnlag.oppfyllerKravOmMinstelønn)
         assertEquals(avviksprosent, BigDecimal(vilkårsgrunnlag.avviksprosent!!).setScale(2, RoundingMode.HALF_DOWN).toDouble())
-        assertEquals(omregnetÅrsinntekt, vilkårsgrunnlag.omregnetÅrsinntekt)
+        assertEquals(omregnetÅrsinntekt, vilkårsgrunnlag.beregningsgrunnlag)
         assertEquals(skjæringstidspunkt, vilkårsgrunnlag.skjæringstidspunkt)
         assertEquals(sykepengegrunnlag, vilkårsgrunnlag.sykepengegrunnlag)
         assertEquals(true, vilkårsgrunnlag.oppfyllerKravOmOpptjening)

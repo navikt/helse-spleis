@@ -1954,7 +1954,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
 
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(30000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+            assertEquals(30000.månedlig, it.inntektsopplysning.fastsattÅrsinntekt())
             assertEquals(no.nav.helse.person.inntekt.Inntektsmelding::class, it.inntektsopplysning::class)
         }
 
@@ -1979,7 +1979,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
 
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(30000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+            assertEquals(30000.månedlig, it.inntektsopplysning.fastsattÅrsinntekt())
             assertEquals(no.nav.helse.person.inntekt.Inntektsmelding::class, it.inntektsopplysning::class)
         }
 

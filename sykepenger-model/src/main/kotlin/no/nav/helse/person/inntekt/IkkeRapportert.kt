@@ -24,8 +24,6 @@ internal class IkkeRapportert(
         visitor.visitIkkeRapportert(this, id, hendelseId, dato, tidsstempel)
     }
 
-    override fun omregnetÅrsinntekt() = Inntekt.INGEN
-
     override fun subsumerArbeidsforhold(
         subsumsjonObserver: SubsumsjonObserver,
         organisasjonsnummer: String,

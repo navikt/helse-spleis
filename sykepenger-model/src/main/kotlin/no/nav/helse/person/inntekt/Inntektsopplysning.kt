@@ -9,8 +9,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.ArbeidsgiveropplysningerKorrigertEvent
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.økonomi.Inntekt
@@ -23,7 +21,8 @@ abstract class Inntektsopplysning protected constructor(
     protected val tidsstempel: LocalDateTime
 ) {
     internal abstract fun accept(visitor: InntektsopplysningVisitor)
-    internal abstract fun omregnetÅrsinntekt(): Inntekt
+    internal fun fastsattÅrsinntekt() = beløp
+    internal open fun omregnetÅrsinntekt() = beløp
     internal fun overstyresAv(ny: Inntektsopplysning): Inntektsopplysning {
         if (!kanOverstyresAv(ny)) return this
         return blirOverstyrtAv(ny)
@@ -38,6 +37,9 @@ abstract class Inntektsopplysning protected constructor(
     internal open fun overstyrer(gammel: no.nav.helse.person.inntekt.Inntektsmelding) = this
     internal open fun overstyrer(gammel: Saksbehandler, overstyrtInntekt: Inntektsopplysning): Inntektsopplysning {
         throw IllegalStateException("Kan ikke overstyre saksbehandler-inntekt")
+    }
+    internal open fun overstyrer(gammel: SkjønnsmessigFastsatt, overstyrtInntekt: Inntektsopplysning): Inntektsopplysning {
+        throw IllegalStateException("Kan ikke overstyre skjønnsmessig fastsatt-inntekt")
     }
 
     final override fun equals(other: Any?) = other is Inntektsopplysning && erSamme(other)

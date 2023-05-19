@@ -54,7 +54,7 @@ class Saksbehandler internal constructor(
 
     override fun kanOverstyresAv(ny: Inntektsopplysning): Boolean {
         // kun saksbehandlerinntekt kan bare endre en annen saksbehandlerinntekt
-        return ny is Saksbehandler
+        return ny is Saksbehandler || ny is SkjønnsmessigFastsatt
     }
 
     override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
@@ -68,8 +68,6 @@ class Saksbehandler internal constructor(
 
     private fun kopierMed(overstyrtInntekt: Inntektsopplysning) =
         Saksbehandler(id, dato, hendelseId, beløp, forklaring, subsumsjon, overstyrtInntekt, tidsstempel)
-
-    override fun omregnetÅrsinntekt(): Inntekt = beløp
 
     override fun erSamme(other: Inntektsopplysning) =
         other is Saksbehandler && this.dato == other.dato && this.beløp == other.beløp
@@ -88,7 +86,7 @@ class Saksbehandler internal constructor(
                 overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
                 skjæringstidspunkt = dato,
                 forklaring = forklaring,
-                grunnlagForSykepengegrunnlag = omregnetÅrsinntekt()
+                grunnlagForSykepengegrunnlag = fastsattÅrsinntekt()
             )
         } else if (subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref
             && subsumsjon.ledd == Ledd.LEDD_3.nummer
@@ -99,7 +97,7 @@ class Saksbehandler internal constructor(
                 overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
                 skjæringstidspunkt = dato,
                 forklaring = forklaring,
-                grunnlagForSykepengegrunnlag = omregnetÅrsinntekt()
+                grunnlagForSykepengegrunnlag = fastsattÅrsinntekt()
             )
         } else if (subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref && subsumsjon.ledd == Ledd.LEDD_5.nummer) {
             subsumsjonObserver.`§ 8-28 ledd 5`(
@@ -107,7 +105,7 @@ class Saksbehandler internal constructor(
                 overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
                 skjæringstidspunkt = dato,
                 forklaring = forklaring,
-                grunnlagForSykepengegrunnlag = omregnetÅrsinntekt()
+                grunnlagForSykepengegrunnlag = fastsattÅrsinntekt()
             )
         } else {
             sikkerLogg.warn("Overstyring av ghost: inntekt ble overstyrt med ukjent årsak: $forklaring")

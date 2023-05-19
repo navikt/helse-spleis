@@ -55,7 +55,8 @@ internal class Inntektsmelding(
 
     override fun kanOverstyresAv(ny: Inntektsopplysning): Boolean {
         // kun saksbehandlerinntekt eller annen inntektsmelding kan overstyre inntektsmelding-inntekt
-        if (ny is Saksbehandler) return ny.omregnetÅrsinntekt() != this.beløp
+        if (ny is SkjønnsmessigFastsatt) return true
+        if (ny is Saksbehandler) return ny.fastsattÅrsinntekt() != this.beløp
         if (ny !is Inntektsmelding) return false
         val måned = this.dato.withDayOfMonth(1) til this.dato.withDayOfMonth(this.dato.lengthOfMonth())
         if (ny.dato !in måned) return false
@@ -74,8 +75,6 @@ internal class Inntektsmelding(
         if (førsteFraværsdag == null || dato != førsteFraværsdag) return null
         return this
     }
-
-    override fun omregnetÅrsinntekt(): Inntekt = beløp
 
     internal fun kanLagres(other: Inntektsmelding) = this.hendelseId != other.hendelseId || this.dato != other.dato
 

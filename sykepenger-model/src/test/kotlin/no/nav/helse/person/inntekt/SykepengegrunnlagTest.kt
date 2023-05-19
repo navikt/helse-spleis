@@ -312,7 +312,6 @@ internal class SykepengegrunnlagTest {
         assertNotEquals(sykepengegrunnlag.inspektør.`6G`, justert.inspektør.`6G`)
         assertTrue(sykepengegrunnlag.inspektør.`6G` < justert.inspektør.`6G`)
         assertTrue(sykepengegrunnlag.inspektør.sykepengegrunnlag < justert.inspektør.sykepengegrunnlag)
-        assertNull(sykepengegrunnlag.inspektør.skjønnsmessigFastsattÅrsinntekt)
     }
 
     @Test
@@ -326,25 +325,6 @@ internal class SykepengegrunnlagTest {
         val daglig = 255.5.daglig
         val sykepengegrunnlag = daglig.sykepengegrunnlag
         assertEquals(daglig, sykepengegrunnlag.inspektør.sykepengegrunnlag)
-    }
-
-    @Test
-    fun `overstyrt sykepengegrunnlag`() {
-        val inntekt = 10000.månedlig
-        val overstyrt = 15000.månedlig
-        val sykepengegrunnlag = Sykepengegrunnlag(
-            alder = UNG_PERSON_FØDSELSDATO.alder,
-            skjæringstidspunkt = 1.januar,
-            arbeidsgiverInntektsopplysninger = listOf(
-                ArbeidsgiverInntektsopplysning("orgnr", Inntektsmelding(1.januar, UUID.randomUUID(), inntekt, LocalDateTime.now()), Refusjonsopplysninger())
-            ),
-            deaktiverteArbeidsforhold = emptyList(),
-            vurdertInfotrygd = false,
-            skjønnsmessigFastsattBeregningsgrunnlag = overstyrt
-        )
-        assertNotEquals(inntekt, sykepengegrunnlag.inspektør.sykepengegrunnlag)
-        assertEquals(overstyrt, sykepengegrunnlag.inspektør.sykepengegrunnlag)
-        assertEquals(overstyrt, sykepengegrunnlag.inspektør.skjønnsmessigFastsattÅrsinntekt)
     }
 
     @Test
@@ -791,87 +771,7 @@ internal class SykepengegrunnlagTest {
             vurdertInfotrygd = false
         )
 
-        assertEquals(
-            sykepengegrunnlag1,
-            Sykepengegrunnlag(
-                alder = UNG_PERSON_FØDSELSDATO.alder,
-                skjæringstidspunkt = 1.januar,
-                arbeidsgiverInntektsopplysninger = listOf(
-                    ArbeidsgiverInntektsopplysning(
-                        orgnummer = "orgnummer",
-                        inntektsopplysning = Infotrygd(
-                            id = inntektID,
-                            dato = 1.januar,
-                            hendelseId = hendelseId,
-                            beløp = 25000.månedlig,
-                            tidsstempel = tidsstempel
-                        ),
-                        refusjonsopplysninger = Refusjonsopplysninger()
-                    )
-                ),
-                deaktiverteArbeidsforhold = emptyList(),
-                vurdertInfotrygd = false,
-                skjønnsmessigFastsattBeregningsgrunnlag = 25000.månedlig
-            )
-        )
         assertEquals(sykepengegrunnlag1, sykepengegrunnlag1.justerGrunnbeløp()) { "grunnbeløpet trenger ikke justering" }
-        assertNotEquals(
-            sykepengegrunnlag1,
-            Sykepengegrunnlag(
-                alder = UNG_PERSON_FØDSELSDATO.alder,
-                skjæringstidspunkt = 1.januar,
-                arbeidsgiverInntektsopplysninger = emptyList(),
-                deaktiverteArbeidsforhold = emptyList(),
-                vurdertInfotrygd = false,
-                skjønnsmessigFastsattBeregningsgrunnlag = 25000.månedlig
-            )
-        )
-        assertNotEquals(
-            sykepengegrunnlag1,
-            Sykepengegrunnlag(
-                alder = UNG_PERSON_FØDSELSDATO.alder,
-                skjæringstidspunkt = 1.januar,
-                arbeidsgiverInntektsopplysninger = listOf(
-                    ArbeidsgiverInntektsopplysning(
-                        orgnummer = "orgnummer",
-                        inntektsopplysning = Infotrygd(
-                            id = inntektID,
-                            dato = 1.januar,
-                            hendelseId = hendelseId,
-                            beløp = 25000.månedlig,
-                            tidsstempel = tidsstempel
-                        ),
-                        refusjonsopplysninger = Refusjonsopplysninger()
-                    )
-                ),
-                deaktiverteArbeidsforhold = emptyList(),
-                vurdertInfotrygd = false,
-                skjønnsmessigFastsattBeregningsgrunnlag = 20000.månedlig
-            )
-        )
-        assertNotEquals(
-            sykepengegrunnlag1,
-            Sykepengegrunnlag(
-                alder = UNG_PERSON_FØDSELSDATO.alder,
-                skjæringstidspunkt = 1.januar,
-                arbeidsgiverInntektsopplysninger = listOf(
-                    ArbeidsgiverInntektsopplysning(
-                        orgnummer = "orgnummer",
-                        inntektsopplysning = Infotrygd(
-                            id = inntektID,
-                            dato = 1.januar,
-                            hendelseId = hendelseId,
-                            beløp = 25000.månedlig,
-                            tidsstempel = tidsstempel
-                        ),
-                        refusjonsopplysninger = Refusjonsopplysninger()
-                    )
-                ),
-                deaktiverteArbeidsforhold = emptyList(),
-                vurdertInfotrygd = true,
-                skjønnsmessigFastsattBeregningsgrunnlag = 25000.månedlig
-            )
-        )
         assertNotEquals(
             sykepengegrunnlag1,
             Sykepengegrunnlag(

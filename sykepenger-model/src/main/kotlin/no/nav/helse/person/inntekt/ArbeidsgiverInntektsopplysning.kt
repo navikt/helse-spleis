@@ -8,7 +8,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver.ArbeidsgiveropplysningerKorrigertEvent
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.VedtakFattetBuilder
@@ -24,6 +23,9 @@ class ArbeidsgiverInntektsopplysning(
     private val inntektsopplysning: Inntektsopplysning,
     private val refusjonsopplysninger: Refusjonsopplysninger
 ) {
+    private fun fastsattÅrsinntekt(acc: Inntekt): Inntekt {
+        return acc + inntektsopplysning.fastsattÅrsinntekt()
+    }
     private fun omregnetÅrsinntekt(acc: Inntekt): Inntekt {
         return acc + inntektsopplysning.omregnetÅrsinntekt()
     }
@@ -130,10 +132,10 @@ class ArbeidsgiverInntektsopplysning(
             singleOrNull{it.gjelder(organisasjonsnummer)}?.refusjonsopplysninger ?: Refusjonsopplysninger()
 
         internal fun List<ArbeidsgiverInntektsopplysning>.inntekt(organisasjonsnummer: String) =
-            firstOrNull { it.orgnummer == organisasjonsnummer }?.inntektsopplysning?.omregnetÅrsinntekt()
+            firstOrNull { it.orgnummer == organisasjonsnummer }?.inntektsopplysning?.fastsattÅrsinntekt()
 
         internal fun List<ArbeidsgiverInntektsopplysning>.subsummer(subsumsjonObserver: SubsumsjonObserver, opptjening: Opptjening? = null) {
-            subsumsjonObserver.`§ 8-30 ledd 1`(omregnetÅrsinntektPerArbeidsgiver(), omregnetÅrsinntekt())
+            subsumsjonObserver.`§ 8-30 ledd 1`(omregnetÅrsinntektPerArbeidsgiver(), fastsattÅrsinntekt())
             forEach { it.subsummer(subsumsjonObserver, opptjening) }
         }
 
@@ -142,7 +144,7 @@ class ArbeidsgiverInntektsopplysning(
         }
 
         private fun List<ArbeidsgiverInntektsopplysning>.omregnetÅrsinntektPerArbeidsgiver() =
-            associate { it.orgnummer to it.inntektsopplysning.omregnetÅrsinntekt() }
+            associate { it.orgnummer to it.inntektsopplysning.fastsattÅrsinntekt() }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.harInntekt(organisasjonsnummer: String) =
             singleOrNull { it.orgnummer == organisasjonsnummer } != null
@@ -152,12 +154,15 @@ class ArbeidsgiverInntektsopplysning(
             return refusjonsopplysninger.erTom
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.omregnetÅrsinntekt() =
+        internal fun List<ArbeidsgiverInntektsopplysning>.fastsattÅrsinntekt() =
+            fold(INGEN) { acc, item -> item.fastsattÅrsinntekt(acc)}
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.totalOmregnetÅrsinntekt() =
             fold(INGEN) { acc, item -> item.omregnetÅrsinntekt(acc)}
 
         internal fun List<ArbeidsgiverInntektsopplysning>.medInntekt(organisasjonsnummer: String, `6G`: Inntekt, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi? {
             return singleOrNull { it.orgnummer == organisasjonsnummer }?.let { arbeidsgiverInntektsopplysning ->
-                val inntekt = arbeidsgiverInntektsopplysning.inntektsopplysning.omregnetÅrsinntekt()
+                val inntekt = arbeidsgiverInntektsopplysning.inntektsopplysning.fastsattÅrsinntekt()
                 val refusjonsbeløp = arbeidsgiverInntektsopplysning.refusjonsopplysninger.refusjonsbeløpOrNull(dato) ?: inntekt
                 økonomi.inntekt(
                     aktuellDagsinntekt = inntekt,
@@ -176,7 +181,7 @@ class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.medUtbetalingsopplysninger(organisasjonsnummer: String, `6G`: Inntekt, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
             val arbeidsgiverInntektsopplysning = arbeidsgiverInntektsopplysning(organisasjonsnummer, dato)
-            val inntekt = arbeidsgiverInntektsopplysning.inntektsopplysning.omregnetÅrsinntekt()
+            val inntekt = arbeidsgiverInntektsopplysning.inntektsopplysning.fastsattÅrsinntekt()
             val refusjonsbeløp = checkNotNull(arbeidsgiverInntektsopplysning.refusjonsopplysninger.refusjonsbeløpOrNull(dato)) {
                 "Har ingen refusjonsopplysninger på vilkårsgrunnlag med skjæringstidspunkt $skjæringstidspunkt for utbetalingsdag $dato"
             }

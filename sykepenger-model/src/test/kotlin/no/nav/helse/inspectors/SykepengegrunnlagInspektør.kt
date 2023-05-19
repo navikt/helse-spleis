@@ -15,7 +15,6 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
     var oppfyllerMinsteinntektskrav: Boolean by Delegates.notNull<Boolean>()
     lateinit var sykepengegrunnlag: Inntekt
     lateinit var beregningsgrunnlag: Inntekt
-    var skjønnsmessigFastsattÅrsinntekt: Inntekt? = null
     lateinit var `6G`: Inntekt
     lateinit var deaktiverteArbeidsforhold: List<String>
     internal val arbeidsgiverInntektsopplysningerPerArbeidsgiver: MutableMap<String, ArbeidsgiverInntektsopplysning> = mutableMapOf()
@@ -33,7 +32,7 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
         sykepengegrunnlag1: Sykepengegrunnlag,
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Inntekt,
-        skjønnsmessigFastsattÅrsinntekt: Inntekt?,
+        totalOmregnetÅrsinntekt: Inntekt,
         beregningsgrunnlag: Inntekt,
         `6G`: Inntekt,
         begrensning: Sykepengegrunnlag.Begrensning,
@@ -45,7 +44,6 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
         this.oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav
         this.`6G` = `6G`
         this.sykepengegrunnlag = sykepengegrunnlag
-        this.skjønnsmessigFastsattÅrsinntekt = skjønnsmessigFastsattÅrsinntekt
         this.beregningsgrunnlag = beregningsgrunnlag
         this.inntektskilde = sykepengegrunnlag1.inntektskilde()
     }

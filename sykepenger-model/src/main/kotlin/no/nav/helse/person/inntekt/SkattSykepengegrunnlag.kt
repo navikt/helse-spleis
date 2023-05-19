@@ -79,10 +79,6 @@ internal class SkattSykepengegrunnlag private constructor(
     private fun ansattVedSkjæringstidspunkt(dato: LocalDate) =
         ansattPerioder.any { ansattPeriode -> ansattPeriode.gjelder(dato) }
 
-    override fun omregnetÅrsinntekt(): Inntekt {
-        return beløp
-    }
-
     override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
         return ny.overstyrer(this)
     }
@@ -92,9 +88,9 @@ internal class SkattSykepengegrunnlag private constructor(
             organisasjonsnummer = organisasjonsnummer,
             skjæringstidspunkt = dato,
             inntekterSisteTreMåneder = inntektsopplysninger.subsumsjonsformat(),
-            grunnlagForSykepengegrunnlag = omregnetÅrsinntekt()
+            grunnlagForSykepengegrunnlag = fastsattÅrsinntekt()
         )
-        subsumsjonObserver.`§ 8-29`(dato, omregnetÅrsinntekt(), inntektsopplysninger.subsumsjonsformat(), organisasjonsnummer)
+        subsumsjonObserver.`§ 8-29`(dato, fastsattÅrsinntekt(), inntektsopplysninger.subsumsjonsformat(), organisasjonsnummer)
     }
 
     override fun subsumerArbeidsforhold(

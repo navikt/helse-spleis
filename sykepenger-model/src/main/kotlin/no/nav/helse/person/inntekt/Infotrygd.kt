@@ -21,8 +21,6 @@ internal class Infotrygd(
         throw IllegalStateException("Infotrygd kan ikke bli overstyrt")
     }
 
-    override fun omregnetÅrsinntekt(): Inntekt = beløp
-
     override fun erSamme(other: Inntektsopplysning): Boolean {
         if (other !is Infotrygd) return false
         return this.dato == other.dato && this.beløp == other.beløp

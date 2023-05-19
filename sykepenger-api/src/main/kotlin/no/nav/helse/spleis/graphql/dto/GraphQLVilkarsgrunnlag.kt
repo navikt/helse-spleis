@@ -35,7 +35,7 @@ interface GraphQLVilkarsgrunnlag {
 data class GraphQLSpleisVilkarsgrunnlag(
     override val id: UUID,
     override val skjaeringstidspunkt: LocalDate,
-    override val omregnetArsinntekt: Double,
+    override val omregnetArsinntekt: Double, // TODO: det heter 'beregningsgrunnlag'. Omregnet årsinntekt er noe annet etter skjønnsmessig fastsetting
     override val sammenligningsgrunnlag: Double?,
     override val sykepengegrunnlag: Double,
     override val inntekter: List<GraphQLArbeidsgiverinntekt>,

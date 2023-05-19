@@ -35,7 +35,7 @@ internal class ISykepengegrunnlag(
     val inntekterPerArbeidsgiver: List<IArbeidsgiverinntekt>,
     val sykepengegrunnlag: Double,
     val oppfyllerMinsteinntektskrav: Boolean,
-    val omregnetÅrsinntekt: Double,
+    val beregningsgrunnlag: Double,
     val begrensning: SykepengegrunnlagsgrenseDTO,
     val refusjonsopplysningerPerArbeidsgiver: List<IArbeidsgiverrefusjon>
 )
@@ -48,7 +48,7 @@ internal class IInntekt(
 
 internal abstract class IVilkårsgrunnlag(
     val skjæringstidspunkt: LocalDate,
-    val omregnetÅrsinntekt: Double,
+    val beregningsgrunnlag: Double,
     val sammenligningsgrunnlag: Double?,
     val sykepengegrunnlag: Double,
     val inntekter: List<IArbeidsgiverinntekt>,
@@ -88,7 +88,7 @@ internal abstract class IVilkårsgrunnlag(
 
 internal class ISpleisGrunnlag(
     skjæringstidspunkt: LocalDate,
-    omregnetÅrsinntekt: Double,
+    beregningsgrunnlag: Double,
     sammenligningsgrunnlag: Double,
     inntekter: List<IArbeidsgiverinntekt>,
     sykepengegrunnlag: Double,
@@ -102,7 +102,7 @@ internal class ISpleisGrunnlag(
     val oppfyllerKravOmMinstelønn: Boolean,
     val oppfyllerKravOmOpptjening: Boolean,
     val oppfyllerKravOmMedlemskap: Boolean?
-) : IVilkårsgrunnlag(skjæringstidspunkt, omregnetÅrsinntekt, sammenligningsgrunnlag, sykepengegrunnlag, inntekter, refusjonsopplysningerPerArbeidsgiver, id) {
+) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sammenligningsgrunnlag, sykepengegrunnlag, inntekter, refusjonsopplysningerPerArbeidsgiver, id) {
     override fun utledPeriodetype(førstePeriodeMedUtbetaling: Boolean): Tidslinjeperiodetype {
         return when (førstePeriodeMedUtbetaling) {
             true -> Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING
@@ -113,7 +113,7 @@ internal class ISpleisGrunnlag(
     override fun toDTO(): Vilkårsgrunnlag {
         return SpleisVilkårsgrunnlag(
             skjæringstidspunkt = skjæringstidspunkt,
-            omregnetÅrsinntekt = omregnetÅrsinntekt,
+            beregningsgrunnlag = beregningsgrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag!!,
             sykepengegrunnlag = sykepengegrunnlag,
             inntekter = inntekter.map { it.toDTO() },
@@ -149,13 +149,13 @@ class SykepengegrunnlagsgrenseDTO(
 
 internal class IInfotrygdGrunnlag(
     skjæringstidspunkt: LocalDate,
-    omregnetÅrsinntekt: Double,
+    beregningsgrunnlag: Double,
     sammenligningsgrunnlag: Double?,
     inntekter: List<IArbeidsgiverinntekt>,
     refusjonsopplysningerPerArbeidsgiver: List<IArbeidsgiverrefusjon>,
     sykepengegrunnlag: Double,
     id: UUID
-) : IVilkårsgrunnlag(skjæringstidspunkt, omregnetÅrsinntekt, sammenligningsgrunnlag, sykepengegrunnlag, inntekter, refusjonsopplysningerPerArbeidsgiver, id) {
+) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sammenligningsgrunnlag, sykepengegrunnlag, inntekter, refusjonsopplysningerPerArbeidsgiver, id) {
     override fun utledPeriodetype(førstePeriodeMedUtbetaling: Boolean): Tidslinjeperiodetype {
         return when (førstePeriodeMedUtbetaling) {
             true -> Tidslinjeperiodetype.OVERGANG_FRA_IT
@@ -166,7 +166,7 @@ internal class IInfotrygdGrunnlag(
     override fun toDTO(): Vilkårsgrunnlag {
         return no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag(
             skjæringstidspunkt = skjæringstidspunkt,
-            omregnetÅrsinntekt = omregnetÅrsinntekt,
+            beregningsgrunnlag = beregningsgrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             sykepengegrunnlag = sykepengegrunnlag,
             inntekter = inntekter.map { it.toDTO() },
@@ -249,7 +249,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 }
                 ISpleisGrunnlag(
                     skjæringstidspunkt = skjæringstidspunkt,
-                    omregnetÅrsinntekt = compositeSykepengegrunnlag.omregnetÅrsinntekt,
+                    beregningsgrunnlag = compositeSykepengegrunnlag.beregningsgrunnlag,
                     sammenligningsgrunnlag = sammenligningsgrunnlagBuilder.total(),
                     inntekter = compositeSykepengegrunnlag.inntekterPerArbeidsgiver,
                     refusjonsopplysningerPerArbeidsgiver = compositeSykepengegrunnlag.refusjonsopplysningerPerArbeidsgiver,
@@ -277,7 +277,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 ).build()
                 IInfotrygdGrunnlag(
                     skjæringstidspunkt = skjæringstidspunkt,
-                    omregnetÅrsinntekt = byggetSykepengegrunnlag.omregnetÅrsinntekt,
+                    beregningsgrunnlag = byggetSykepengegrunnlag.beregningsgrunnlag,
                     sammenligningsgrunnlag = null,
                     inntekter = byggetSykepengegrunnlag.inntekterPerArbeidsgiver,
                     refusjonsopplysningerPerArbeidsgiver = byggetSykepengegrunnlag.refusjonsopplysningerPerArbeidsgiver,
@@ -331,7 +331,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         private val inntekterPerArbeidsgiver = mutableListOf<IArbeidsgiverinntekt>()
         private val refusjonsopplysningerPerArbeidsgiver = mutableListOf<IArbeidsgiverrefusjon>()
         private lateinit var sykepengegrunnlag: IInntekt
-        private var omregnetÅrsinntekt by Delegates.notNull<Double>()
+        private var beregningsgrunnlag by Delegates.notNull<Double>()
         private var oppfyllerMinsteinntektskrav by Delegates.notNull<Boolean>()
 
         init {
@@ -343,7 +343,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 inntekterPerArbeidsgiver = inntekterPerArbeidsgiver.toList() + arbeidsgivereUtenSykepengegrunnlag(),
                 sykepengegrunnlag = sykepengegrunnlag.årlig,
                 oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav,
-                omregnetÅrsinntekt = omregnetÅrsinntekt,
+                beregningsgrunnlag = beregningsgrunnlag,
                 begrensning = SykepengegrunnlagsgrenseDTO.fra6GBegrensning(this.`6G`),
                 refusjonsopplysningerPerArbeidsgiver = refusjonsopplysningerPerArbeidsgiver.toList()
             )
@@ -357,7 +357,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             sykepengegrunnlag1: Sykepengegrunnlag,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
-            skjønnsmessigFastsattÅrsinntekt: Inntekt?,
+            totalOmregnetÅrsinntekt: Inntekt,
             beregningsgrunnlag: Inntekt,
             `6G`: Inntekt,
             begrensning: Sykepengegrunnlag.Begrensning,
@@ -367,7 +367,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         ) {
             this.sykepengegrunnlag = InntektBuilder(sykepengegrunnlag).build()
             this.oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav
-            this.omregnetÅrsinntekt = InntektBuilder(beregningsgrunnlag).build().årlig
+            this.beregningsgrunnlag = InntektBuilder(beregningsgrunnlag).build().årlig
             this.`6G` = `6G`
         }
 
@@ -508,7 +508,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         }
 
         class SkattBuilder(skattComposite: SkattSykepengegrunnlag) : InntektsopplysningVisitor {
-            private val inntekt = InntektBuilder(skattComposite.omregnetÅrsinntekt()).build()
+            private val inntekt = InntektBuilder(skattComposite.fastsattÅrsinntekt()).build()
             private val inntekterFraAOrdningen = mutableMapOf<YearMonth, Double>()
 
             init {

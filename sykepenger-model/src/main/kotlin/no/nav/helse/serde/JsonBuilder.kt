@@ -838,7 +838,7 @@ internal class JsonBuilder : AbstractBuilder() {
             sykepengegrunnlag1: Sykepengegrunnlag,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
-            skjønnsmessigFastsattÅrsinntekt: Inntekt?,
+            totalOmregnetÅrsinntekt: Inntekt,
             beregningsgrunnlag: Inntekt,
             `6G`: Inntekt,
             begrensning: Sykepengegrunnlag.Begrensning,
@@ -876,7 +876,7 @@ internal class JsonBuilder : AbstractBuilder() {
             sykepengegrunnlag1: Sykepengegrunnlag,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
-            skjønnsmessigFastsattÅrsinntekt: Inntekt?,
+            totalOmregnetÅrsinntekt: Inntekt,
             beregningsgrunnlag: Inntekt,
             `6G`: Inntekt,
             begrensning: Sykepengegrunnlag.Begrensning,
@@ -945,7 +945,7 @@ internal class JsonBuilder : AbstractBuilder() {
             sykepengegrunnlag1: Sykepengegrunnlag,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
-            skjønnsmessigFastsattÅrsinntekt: Inntekt?,
+            totalOmregnetÅrsinntekt: Inntekt,
             inntektsgrunnlag: Inntekt,
             `6G`: Inntekt,
             begrensning: Sykepengegrunnlag.Begrensning,
@@ -954,7 +954,7 @@ internal class JsonBuilder : AbstractBuilder() {
             oppfyllerMinsteinntektskrav: Boolean
         ) {
             this.sykepengegrunnlag.putAll(
-                mutableMapOf(
+                mapOf(
                     "sykepengegrunnlag" to sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "inntektsgrunnlag" to inntektsgrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "grunnbeløp" to `6G`.reflection { årlig, _, _, _ -> årlig },
@@ -964,9 +964,7 @@ internal class JsonBuilder : AbstractBuilder() {
                     "vurdertInfotrygd" to vurdertInfotrygd,
                     "minsteinntekt" to minsteinntekt.reflection { årlig, _, _, _ -> årlig },
                     "oppfyllerMinsteinntektskrav" to oppfyllerMinsteinntektskrav
-                ).apply {
-                    compute("skjønnsmessigFastsattÅrsinntekt") { _, _ -> skjønnsmessigFastsattÅrsinntekt?.reflection { årlig, _, _, _ -> årlig } }
-                }
+                )
             )
             popState()
         }

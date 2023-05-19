@@ -7,7 +7,7 @@ import no.nav.helse.serde.api.speil.builders.SykepengegrunnlagsgrenseDTO
 
 interface Vilkårsgrunnlag {
     val skjæringstidspunkt: LocalDate
-    val omregnetÅrsinntekt: Double
+    val beregningsgrunnlag: Double
     val sammenligningsgrunnlag: Double?
     val sykepengegrunnlag: Double
     val inntekter: List<Arbeidsgiverinntekt>
@@ -22,7 +22,7 @@ enum class Vilkårsgrunnlagtype {
 
 data class SpleisVilkårsgrunnlag(
     override val skjæringstidspunkt: LocalDate,
-    override val omregnetÅrsinntekt: Double,
+    override val beregningsgrunnlag: Double,
     override val sammenligningsgrunnlag: Double,
     override val sykepengegrunnlag: Double,
     override val inntekter: List<Arbeidsgiverinntekt>,
@@ -41,7 +41,7 @@ data class SpleisVilkårsgrunnlag(
 
 data class InfotrygdVilkårsgrunnlag(
     override val skjæringstidspunkt: LocalDate,
-    override val omregnetÅrsinntekt: Double,
+    override val beregningsgrunnlag: Double,
     override val sammenligningsgrunnlag: Double?,
     override val sykepengegrunnlag: Double,
     override val inntekter: List<Arbeidsgiverinntekt>,

@@ -35,11 +35,12 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.mark
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medUtbetalingsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.måHaRegistrertOpptjeningForArbeidsgivere
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.omregnetÅrsinntekt
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.sjekkForNyArbeidsgiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.subsummer
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.totalOmregnetÅrsinntekt
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
@@ -60,11 +61,13 @@ internal class Sykepengegrunnlag(
     private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
     private val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
     private val vurdertInfotrygd: Boolean,
-    private val skjønnsmessigFastsattBeregningsgrunnlag: Inntekt? = null,
     `6G`: Inntekt? = null
 ) : Comparable<Inntekt> {
     private val `6G`: Inntekt = `6G` ?: Grunnbeløp.`6G`.beløp(skjæringstidspunkt, LocalDate.now())
-    private val beregningsgrunnlag: Inntekt = skjønnsmessigFastsattBeregningsgrunnlag ?: arbeidsgiverInntektsopplysninger.omregnetÅrsinntekt()
+    // sum av alle inntekter foruten skjønnsmessig fastsatt beløp; da brukes inntekten den fastsatte
+    private val omregnetÅrsinntekt = arbeidsgiverInntektsopplysninger.totalOmregnetÅrsinntekt()
+    // summen av alle inntekter
+    private val beregningsgrunnlag = arbeidsgiverInntektsopplysninger.fastsattÅrsinntekt()
     private val sykepengegrunnlag = beregningsgrunnlag.coerceAtMost(this.`6G`)
     private val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (beregningsgrunnlag > this.`6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
 
@@ -223,8 +226,7 @@ internal class Sykepengegrunnlag(
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
             deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
-            vurdertInfotrygd = vurdertInfotrygd,
-            skjønnsmessigFastsattBeregningsgrunnlag = skjønnsmessigFastsattBeregningsgrunnlag
+            vurdertInfotrygd = vurdertInfotrygd
         )
 
     internal fun justerGrunnbeløp() = kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold)
@@ -233,7 +235,7 @@ internal class Sykepengegrunnlag(
             this,
             skjæringstidspunkt,
             sykepengegrunnlag,
-            skjønnsmessigFastsattBeregningsgrunnlag,
+            omregnetÅrsinntekt,
             beregningsgrunnlag,
             `6G`,
             begrensning,
@@ -252,7 +254,7 @@ internal class Sykepengegrunnlag(
             this,
             skjæringstidspunkt,
             sykepengegrunnlag,
-            skjønnsmessigFastsattBeregningsgrunnlag,
+            omregnetÅrsinntekt,
             beregningsgrunnlag,
             `6G`,
             begrensning,

@@ -321,7 +321,6 @@ internal data class PersonData(
             private val sykepengegrunnlag: Double,
             private val grunnbeløp: Double?,
             private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
-            private val skjønnsmessigFastsattBeregningsgrunnlag: Double?,
             private val begrensning: Sykepengegrunnlag.Begrensning,
             private val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningData>,
             private val vurdertInfotrygd: Boolean?, // TODO: migrere denne i json
@@ -336,7 +335,6 @@ internal data class PersonData(
                 arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger.parseArbeidsgiverInntektsopplysninger(builder),
                 deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.parseArbeidsgiverInntektsopplysninger(builder),
                 vurdertInfotrygd = this.vurdertInfotrygd ?: (begrensning == Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD), // TODO: migrere denne til boolean i json
-                skjønnsmessigFastsattBeregningsgrunnlag = skjønnsmessigFastsattBeregningsgrunnlag?.årlig,
                 `6G` = grunnbeløp?.årlig
             )
         }
