@@ -38,6 +38,7 @@ import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
+import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.person.serde.AktivitetsloggMap
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType
@@ -1040,6 +1041,19 @@ internal class JsonBuilder : AbstractBuilder() {
             pushState(SaksbehandlerInntektState { inntektsopplysning -> tilstand.lagreInntekt(this, inntektsopplysning) })
         }
 
+        override fun preVisitSkjønnsmessigFastsatt(
+            saksbehandler: SkjønnsmessigFastsatt,
+            id: UUID,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            forklaring: String?,
+            subsumsjon: Subsumsjon?,
+            tidsstempel: LocalDateTime
+        ) {
+            pushState(SkjønnsmessigFastsattInntektState { inntektsopplysning -> tilstand.lagreInntekt(this, inntektsopplysning) })
+        }
+
         override fun visitInntektsmelding(
             inntektsmelding: Inntektsmelding,
             id: UUID,
@@ -1173,6 +1187,19 @@ internal class JsonBuilder : AbstractBuilder() {
             overstyrtInntektId = id
         }
 
+        override fun preVisitSkjønnsmessigFastsatt(
+            saksbehandler: SkjønnsmessigFastsatt,
+            id: UUID,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            forklaring: String?,
+            subsumsjon: Subsumsjon?,
+            tidsstempel: LocalDateTime
+        ) {
+            overstyrtInntektId = id
+        }
+
         override fun postVisitSaksbehandler(
             saksbehandler: Saksbehandler,
             id: UUID,
@@ -1190,6 +1217,95 @@ internal class JsonBuilder : AbstractBuilder() {
                 "hendelseId" to hendelseId,
                 "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
                 "kilde" to Inntektsopplysningskilde.SAKSBEHANDLER,
+                "forklaring" to forklaring,
+                "subsumsjon" to subsumsjon?.let {
+                    mapOf(
+                        "paragraf" to subsumsjon.paragraf,
+                        "ledd" to subsumsjon.ledd,
+                        "bokstav" to subsumsjon.bokstav
+                    )
+                },
+                "tidsstempel" to tidsstempel
+            )
+            lagreInntekt(inntektDetaljer)
+            popState()
+        }
+    }
+    class SkjønnsmessigFastsattInntektState(private val lagreInntekt: (Map<String, Any?>) -> Unit): BuilderState() {
+        private var overstyrtInntektId: UUID? = null
+        override fun visitIkkeRapportert(
+            ikkeRapportert: IkkeRapportert,
+            id: UUID,
+            hendelseId: UUID,
+            dato: LocalDate,
+            tidsstempel: LocalDateTime
+        ) {
+            overstyrtInntektId = id
+        }
+
+        override fun visitInntektsmelding(
+            inntektsmelding: Inntektsmelding,
+            id: UUID,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            tidsstempel: LocalDateTime
+        ) {
+            overstyrtInntektId = id
+        }
+
+        override fun visitInfotrygd(
+            infotrygd: Infotrygd,
+            id: UUID,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            tidsstempel: LocalDateTime
+        ) {
+            overstyrtInntektId = id
+        }
+
+        override fun preVisitSkattSykepengegrunnlag(
+            skattSykepengegrunnlag: SkattSykepengegrunnlag,
+            id: UUID,
+            hendelseId: UUID,
+            dato: LocalDate,
+            beløp: Inntekt,
+            tidsstempel: LocalDateTime
+        ) {
+            overstyrtInntektId = id
+        }
+
+        override fun preVisitSaksbehandler(
+            saksbehandler: Saksbehandler,
+            id: UUID,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            forklaring: String?,
+            subsumsjon: Subsumsjon?,
+            tidsstempel: LocalDateTime
+        ) {
+            overstyrtInntektId = id
+        }
+
+        override fun postVisitSkjønnsmessigFastsatt(
+            saksbehandler: SkjønnsmessigFastsatt,
+            id: UUID,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            forklaring: String?,
+            subsumsjon: Subsumsjon?,
+            tidsstempel: LocalDateTime
+        ) {
+            val inntektDetaljer = mutableMapOf(
+                "id" to id,
+                "dato" to dato,
+                "overstyrtInntektId" to checkNotNull(overstyrtInntektId) { "En skjønnsmessig inntekt skal peke til en overstyrt inntekt!" },
+                "hendelseId" to hendelseId,
+                "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
+                "kilde" to Inntektsopplysningskilde.SKJØNNSMESSIG_FASTSATT,
                 "forklaring" to forklaring,
                 "subsumsjon" to subsumsjon?.let {
                     mapOf(

@@ -50,6 +50,7 @@ import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
+import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingInfoHistorikkElementData.Companion.finn
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingInfoHistorikkElementData.Companion.tilInntektsmeldingInfoHistorikk
@@ -409,6 +410,7 @@ internal data class PersonData(
                             Inntektsopplysningskilde.INNTEKTSMELDING -> somInntektsmelding()
                             Inntektsopplysningskilde.IKKE_RAPPORTERT -> somIkkeRapportert()
                             Inntektsopplysningskilde.SAKSBEHANDLER -> somSaksbehandler(builder)
+                            Inntektsopplysningskilde.SKJØNNSMESSIG_FASTSATT -> somSkjønnsmessigFastsatt(builder)
                             Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG -> somSkattSykepengegrunnlag()
                             else -> error("Fant ${kilde}. Det er ugyldig for sykepengegrunnlag")
                         }
@@ -418,6 +420,17 @@ internal data class PersonData(
 
                 private fun somSaksbehandler(builder: VilkårsgrunnlaghistorikkBuilder) =
                     Saksbehandler(
+                        id = id,
+                        dato = dato,
+                        hendelseId = ekteHendelseId,
+                        beløp = requireNotNull(beløp).månedlig,
+                        forklaring = forklaring,
+                        subsumsjon = subsumsjon?.tilModellobjekt(),
+                        overstyrtInntekt = builder.hentInntekt(requireNotNull(overstyrtInntektId)),
+                        tidsstempel = tidsstempel
+                    )
+                private fun somSkjønnsmessigFastsatt(builder: VilkårsgrunnlaghistorikkBuilder) =
+                    SkjønnsmessigFastsatt(
                         id = id,
                         dato = dato,
                         hendelseId = ekteHendelseId,
