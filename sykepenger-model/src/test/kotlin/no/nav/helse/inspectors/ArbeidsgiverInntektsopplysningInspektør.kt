@@ -13,6 +13,7 @@ import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.økonomi.Inntekt
 
 internal val ArbeidsgiverInntektsopplysning.inspektør get() = ArbeidsgiverInntektsopplysningInspektør(this)
@@ -42,6 +43,19 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
 
     override fun preVisitSaksbehandler(
         saksbehandler: Saksbehandler,
+        id: UUID,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        forklaring: String?,
+        subsumsjon: Subsumsjon?,
+        tidsstempel: LocalDateTime
+    ) {
+        this.tilstand.lagreInntekt(this, saksbehandler)
+    }
+
+    override fun preVisitSkjønnsmessigFastsatt(
+        saksbehandler: SkjønnsmessigFastsatt,
         id: UUID,
         dato: LocalDate,
         hendelseId: UUID,

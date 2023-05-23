@@ -15,6 +15,7 @@ class Dokumentsporing private constructor(private val id: UUID, private val doku
         internal fun overstyrRefusjon(id: UUID) = Dokumentsporing(id, DokumentType.OverstyrRefusjon)
         internal fun overstyrArbeidsgiveropplysninger(id: UUID) = Dokumentsporing(id, DokumentType.OverstyrArbeidsgiveropplysninger)
         internal fun overstyrArbeidsforhold(id: UUID) = Dokumentsporing(id, DokumentType.OverstyrArbeidsforhold)
+        internal fun skjønnsmessigFastsettelse(id: UUID) = Dokumentsporing(id, DokumentType.SkjønnsmessigFastsettelse)
 
         // overskriver potensielt dersom en vedtaksperiode har håndtert en hendelse to ganger (les: InntektsmeldingDager/InntektsmeldingInntekt)
         internal fun Iterable<Dokumentsporing>.toMap() = associate { it.id to it.dokumentType }

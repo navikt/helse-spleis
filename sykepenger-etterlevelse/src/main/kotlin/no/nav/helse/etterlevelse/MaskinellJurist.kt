@@ -960,6 +960,7 @@ class MaskinellJurist private constructor(
         DokumentType.OverstyrRefusjon -> KontekstType.OverstyrRefusjon
         DokumentType.OverstyrArbeidsgiveropplysninger -> KontekstType.OverstyrArbeidsgiveropplysninger
         DokumentType.OverstyrArbeidsforhold -> KontekstType.OverstyrArbeidsforhold
+        DokumentType.SkjønnsmessigFastsettelse -> KontekstType.SkjønnsmessigFastsettelse
     }
 
 }

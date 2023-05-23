@@ -18,6 +18,7 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
@@ -193,6 +194,10 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.håndterOverstyrArbeidsgiveropplysninger(overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger) =
             any { it.håndter(overstyrArbeidsgiveropplysninger) }
+
+        internal fun List<Arbeidsgiver>.håndterSkjønnsmessigFastsettelse(skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse) {
+            skjønnsmessigFastsettelse.håndter(flatMap { it.vedtaksperioder })
+        }
 
         internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
             mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode(filter) }

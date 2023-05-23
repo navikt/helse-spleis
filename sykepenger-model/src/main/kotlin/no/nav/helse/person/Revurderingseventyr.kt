@@ -25,6 +25,7 @@ class Revurderingseventyr private constructor(
         fun reberegning(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Reberegning, skjæringstidspunkt, periodeForEndring)
         fun sykdomstidslinje(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Sykdomstidslinje, skjæringstidspunkt, periodeForEndring)
         fun arbeidsgiveropplysninger(skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(Arbeidsgiveropplysninger, skjæringstidspunkt, endringsdato.somPeriode())
+        fun skjønnsmessigFastsettelse(skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(SkjønssmessigFastsettelse, skjæringstidspunkt, endringsdato.somPeriode())
         fun arbeidsgiverperiode(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Arbeidsgiverperiode, skjæringstidspunkt, periodeForEndring)
         fun korrigertInntektsmelding(skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(KorrigertInntektsmelding, skjæringstidspunkt, endringsdato.somPeriode())
     }
@@ -99,6 +100,10 @@ class Revurderingseventyr private constructor(
 
         object Arbeidsgiveropplysninger : RevurderingÅrsak {
             override fun navn() = "ARBEIDSGIVEROPPLYSNINGER"
+        }
+
+        object SkjønssmessigFastsettelse : RevurderingÅrsak {
+            override fun navn() = "SKJØNNSMESSIG_FASTSETTELSE"
         }
 
         object Arbeidsforhold : RevurderingÅrsak {

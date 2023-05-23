@@ -27,6 +27,7 @@ import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
@@ -47,6 +48,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.forkastAuu
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyrArbeidsgiveropplysninger
+import no.nav.helse.person.Arbeidsgiver.Companion.håndterSkjønnsmessigFastsettelse
 import no.nav.helse.person.Arbeidsgiver.Companion.identifiserAUUSomErUtbetaltISpleis
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
@@ -395,6 +397,13 @@ class Person private constructor(
         håndterGjenoppta(hendelse)
     }
 
+    fun håndter(hendelse: SkjønnsmessigFastsettelse) {
+        hendelse.kontekst(this)
+        arbeidsgivere.håndterSkjønnsmessigFastsettelse(hendelse)
+        hendelse.vilkårsprøvEtterNyInformasjonFraSaksbehandler(this, jurist)
+        håndterGjenoppta(hendelse)
+    }
+
     fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold) {
         overstyrArbeidsforhold.kontekst(this)
         if (!arbeidsgivere.håndter(overstyrArbeidsforhold)) {
@@ -701,7 +710,19 @@ class Person private constructor(
         subsumsjonObserver: SubsumsjonObserver
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
-        val (nyttGrunnlag, eventyr) = (grunnlag.overstyrArbeidsgiveropplysninger(this, hendelse, subsumsjonObserver) ?: return)
+        val (nyttGrunnlag, eventyr) = grunnlag.overstyrArbeidsgiveropplysninger(this, hendelse, subsumsjonObserver)
+        nyttVilkårsgrunnlag(hendelse, nyttGrunnlag)
+        igangsettOverstyring(hendelse, eventyr)
+    }
+
+
+    internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
+        hendelse: SkjønnsmessigFastsettelse,
+        skjæringstidspunkt: LocalDate,
+        subsumsjonObserver: SubsumsjonObserver
+    ) {
+        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
+        val (nyttGrunnlag, eventyr) = grunnlag.skjønnsmessigFastsettelse(hendelse, subsumsjonObserver)
         nyttVilkårsgrunnlag(hendelse, nyttGrunnlag)
         igangsettOverstyring(hendelse, eventyr)
     }

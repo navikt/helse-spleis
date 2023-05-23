@@ -375,6 +375,9 @@ internal abstract class AbstractDslTest {
     protected fun håndterOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: OverstyrArbeidsforhold.ArbeidsforholdOverstyrt) =
         testperson { håndterOverstyrArbeidsforhold(skjæringstidspunkt, *overstyrteArbeidsforhold) }
 
+    protected fun håndterSkjønnsmessigFastsettelse(skjæringstidspunkt: LocalDate, arbeidsgiveropplysninger: List<no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning>, meldingsreferanseId: UUID = UUID.randomUUID()) =
+        testperson { håndterSkjønnsmessigFastsettelse(skjæringstidspunkt, arbeidsgiveropplysninger, meldingsreferanseId) }
+
     protected fun assertTilstander(id: UUID, vararg tilstander: TilstandType) =
         bareÈnArbeidsgiver(a1).assertTilstander(id, *tilstander)
     protected fun assertSisteTilstand(id: UUID, tilstand: TilstandType, orgnummer: String = a1) =

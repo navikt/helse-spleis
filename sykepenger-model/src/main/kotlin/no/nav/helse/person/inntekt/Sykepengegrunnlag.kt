@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
@@ -189,6 +190,13 @@ internal class Sykepengegrunnlag(
         hendelse.overstyr(builder)
         val resultat = builder.resultat() ?: return null
         arbeidsgiverInntektsopplysninger.forEach { it.arbeidsgiveropplysningerKorrigert(person, hendelse) }
+        return kopierSykepengegrunnlag(resultat, deaktiverteArbeidsforhold)
+    }
+
+    internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, opptjening: Opptjening?, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag? {
+        val builder = ArbeidsgiverInntektsopplysningerOverstyringer(arbeidsgiverInntektsopplysninger, opptjening, subsumsjonObserver)
+        hendelse.overstyr(builder)
+        val resultat = builder.resultat() ?: return null
         return kopierSykepengegrunnlag(resultat, deaktiverteArbeidsforhold)
     }
 

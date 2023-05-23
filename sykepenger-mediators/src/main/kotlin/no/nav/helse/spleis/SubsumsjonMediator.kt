@@ -71,5 +71,6 @@ internal class SubsumsjonMediator(
         KontekstType.OverstyrInntekt -> "overstyrinntekt"
         KontekstType.OverstyrRefusjon -> "overstyrrefusjon"
         KontekstType.OverstyrArbeidsforhold -> "overstyrarbeidsforhold"
+        KontekstType.SkjønnsmessigFastsettelse -> "skjønnsmessigfastsettelse"
     }
 }

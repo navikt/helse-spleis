@@ -131,6 +131,11 @@ internal class TestPerson(
             .håndter(Person::håndter)
     }
 
+    internal fun håndterSkjønnsmessigFastsettelse(skjæringstidspunkt: LocalDate, arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>, meldingsreferanseId: UUID) {
+        personHendelsefabrikk.lagSkjønnsmessigFastsettelse(skjæringstidspunkt, arbeidsgiveropplysninger, meldingsreferanseId)
+            .håndter(Person::håndter)
+    }
+
     internal fun håndterDødsmelding(dødsdato: LocalDate) {
         personHendelsefabrikk.lagDødsmelding(dødsdato).håndter(Person::håndter)
     }

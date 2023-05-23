@@ -46,6 +46,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.trengerInntektsmelding
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingId
+import no.nav.helse.person.Dokumentsporing.Companion.skjønnsmessigFastsettelse
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.Dokumentsporing.Companion.toMap
 import no.nav.helse.person.ForlengelseFraInfotrygd.IKKE_ETTERSPURT
@@ -70,7 +71,6 @@ import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.Vedtaksperiode.Companion.slåSammenForkastedeSykdomstidslinjer
 import no.nav.helse.person.Venteårsak.Companion.fordi
 import no.nav.helse.person.Venteårsak.Companion.utenBegrunnelse
 import no.nav.helse.person.Venteårsak.Companion.venterPåInntektsmelding
@@ -127,7 +127,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.serde.AktivitetsloggMap
-import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.slåSammenForkastedeSykdomstidslinjer
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -1087,6 +1086,11 @@ internal class Vedtaksperiode private constructor(
 
     internal fun sykefraværsfortelling(list: List<Sykefraværstilfelleeventyr>) =
         list.bliMed(this.id, this.organisasjonsnummer, this.periode)
+
+    internal fun skjønsmessigFastsettelse(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) {
+        if (this.skjæringstidspunkt != skjæringstidspunkt) return
+        hendelseIder.add(skjønnsmessigFastsettelse(meldingsreferanseId))
+    }
 
     // Gang of four State pattern
     internal sealed interface Vedtaksperiodetilstand : Aktivitetskontekst {

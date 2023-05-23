@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
@@ -224,11 +225,19 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         )
 
         internal fun overstyrArbeidsgiveropplysninger(person: Person, hendelse: OverstyrArbeidsgiveropplysninger, subsumsjonObserver: SubsumsjonObserver): Pair<VilkårsgrunnlagElement?, Revurderingseventyr> {
-            // TODO: gir ikke mening å starte revurdering når sykepengegrunnlaget er lik det forrige
             val sykepengegrunnlag = sykepengegrunnlag.overstyrArbeidsgiveropplysninger(person, hendelse, opptjening, subsumsjonObserver)
             if (sykepengegrunnlag == null) hendelse.info("Endringene hensyntas ikke fordi de er funksjonelt lik sykepengegrunnlaget.")
             val endringsdato = sykepengegrunnlag?.finnEndringsdato(this.sykepengegrunnlag)
             val eventyr = Revurderingseventyr.arbeidsgiveropplysninger(skjæringstidspunkt, endringsdato ?: skjæringstidspunkt)
+            return sykepengegrunnlag?.let {
+                kopierMed(hendelse, sykepengegrunnlag, opptjening, subsumsjonObserver)
+            } to eventyr
+        }
+        internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, subsumsjonObserver: SubsumsjonObserver): Pair<VilkårsgrunnlagElement?, Revurderingseventyr> {
+            val sykepengegrunnlag = sykepengegrunnlag.skjønnsmessigFastsettelse(hendelse, opptjening, subsumsjonObserver)
+            if (sykepengegrunnlag == null) hendelse.info("Endringene hensyntas ikke fordi de er funksjonelt lik sykepengegrunnlaget.")
+            val endringsdato = sykepengegrunnlag?.finnEndringsdato(this.sykepengegrunnlag)
+            val eventyr = Revurderingseventyr.skjønnsmessigFastsettelse(skjæringstidspunkt, endringsdato ?: skjæringstidspunkt)
             return sykepengegrunnlag?.let {
                 kopierMed(hendelse, sykepengegrunnlag, opptjening, subsumsjonObserver)
             } to eventyr
