@@ -144,7 +144,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 tom = 28.februar,
                 forlengerPeriode = true,
                 harPeriodeInnenfor16Dager = false,
-                trengerArbeidsgiveropplysninger = true
+                trengerArbeidsgiveropplysninger = true,
+                sykmeldingsperioder = listOf(28.januar til 28.februar)
             ), observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER))
         )
     }
@@ -171,7 +172,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 tom = 31.januar,
                 forlengerPeriode = false,
                 harPeriodeInnenfor16Dager = false,
-                trengerArbeidsgiveropplysninger = true
+                trengerArbeidsgiveropplysninger = true,
+                sykmeldingsperioder = listOf(1.januar til 16.januar, 17.januar til 31.januar)
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER))
         )
         assertTrue(im in observatør.inntektsmeldingIkkeHåndtert)
@@ -193,7 +195,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 tom = 28.februar,
                 forlengerPeriode = true,
                 harPeriodeInnenfor16Dager = false,
-                trengerArbeidsgiveropplysninger = true
+                trengerArbeidsgiveropplysninger = true,
+                sykmeldingsperioder = listOf(1.februar til 28.februar)
             ), observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER))
         )
     }
@@ -215,7 +218,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 tom = 28.februar,
                 forlengerPeriode = false,
                 harPeriodeInnenfor16Dager = false,
-                trengerArbeidsgiveropplysninger = true
+                trengerArbeidsgiveropplysninger = true,
+                sykmeldingsperioder = listOf(1.januar til 31.januar, 28.januar til 28.februar)
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
     }
     @Test
@@ -236,7 +240,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 tom = 28.februar,
                 forlengerPeriode = false,
                 harPeriodeInnenfor16Dager = false,
-                trengerArbeidsgiveropplysninger = true
+                trengerArbeidsgiveropplysninger = true,
+                sykmeldingsperioder = listOf(1.januar til 31.januar, 10.februar til 28.februar)
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
     }
 
@@ -258,7 +263,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 tom = 28.februar,
                 forlengerPeriode = false,
                 harPeriodeInnenfor16Dager = false,
-                trengerArbeidsgiveropplysninger = true
+                trengerArbeidsgiveropplysninger = true,
+                sykmeldingsperioder = listOf(1.januar til 31.januar, 15.februar til 28.februar)
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
     }
 
@@ -283,7 +289,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 tom = 15.januar,
                 forlengerPeriode = false,
                 harPeriodeInnenfor16Dager = false,
-                trengerArbeidsgiveropplysninger = false
+                trengerArbeidsgiveropplysninger = false,
+                sykmeldingsperioder = listOf(11.januar til 16.januar, 10.januar til 15.januar)
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
     }
 
