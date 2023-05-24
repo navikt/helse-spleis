@@ -126,6 +126,42 @@ internal class OppdragTest {
     }
 
     @Test
+    fun `begrense oppdrag tar ikke med opphørslinjer`() {
+        val oppdrag1 = Oppdrag("", Fagområde.SykepengerRefusjon, listOf(
+            Utbetalingslinje(
+                fom = 19.januar,
+                tom = 25.januar,
+                endringskode = Endringskode.ENDR,
+                aktuellDagsinntekt = 1000,
+                datoStatusFom = 16.januar,
+                beløp = 1000,
+                grad = 100,
+                delytelseId = 1,
+                refDelytelseId = null,
+                refFagsystemId = null
+            ),
+            Utbetalingslinje(
+                fom = 26.januar,
+                tom = 29.januar,
+                endringskode = Endringskode.NY,
+                aktuellDagsinntekt = 1000,
+                beløp = 500,
+                grad = 50,
+                delytelseId = 2,
+                refDelytelseId = null,
+                refFagsystemId = null
+            )
+        ), sisteArbeidsgiverdag = 18.januar)
+
+        oppdrag1.begrensFra(19.januar).also { result ->
+            assertEquals(1, result.size)
+            assertEquals(26.januar, result.single().inspektør.fom)
+            assertEquals(29.januar, result.single().inspektør.tom)
+            assertEquals(2, result.single().inspektør.delytelseId)
+        }
+    }
+
+    @Test
     fun `prepende tomme oppdrag`() {
         val oppdrag1 = Oppdrag("", Fagområde.SykepengerRefusjon)
         val oppdrag2 = Oppdrag("", Fagområde.SykepengerRefusjon)

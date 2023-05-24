@@ -242,7 +242,9 @@ class Oppdrag private constructor(
         )
 
     fun begrensFra(førsteDag: LocalDate): Oppdrag {
-        val (senereLinjer, tidligereLinjer) = this.linjer.partition { it.fom >= førsteDag }
+        val (senereLinjer, tidligereLinjer) = this.linjer
+            .filterNot { it.erOpphør() }
+            .partition { it.fom >= førsteDag }
         val delvisOverlappendeFørsteLinje = tidligereLinjer
             .lastOrNull()
             ?.takeIf { it.tom >= førsteDag }
