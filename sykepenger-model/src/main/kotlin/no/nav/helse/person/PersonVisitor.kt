@@ -124,11 +124,12 @@ interface RefusjonsopplysningerVisitor {
     fun postVisitRefusjonsopplysninger(refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger) {}
 }
 
-internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisitor {
+internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisitor, SammenligningsgrunnlagVisitor {
     fun preVisitSykepengegrunnlag(
         sykepengegrunnlag1: Sykepengegrunnlag,
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Inntekt,
+        avviksprosent: Prosent,
         totalOmregnetÅrsinntekt: Inntekt,
         beregningsgrunnlag: Inntekt,
         `6G`: Inntekt,
@@ -149,6 +150,7 @@ internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisi
         sykepengegrunnlag1: Sykepengegrunnlag,
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Inntekt,
+        avviksprosent: Prosent,
         totalOmregnetÅrsinntekt: Inntekt,
         inntektsgrunnlag: Inntekt,
         `6G`: Inntekt,
@@ -183,7 +185,7 @@ internal interface OpptjeningVisitor {
     fun postVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {}
 }
 
-internal interface VilkårsgrunnlagHistorikkVisitor : OpptjeningVisitor, SykepengegrunnlagVisitor, SammenligningsgrunnlagVisitor {
+internal interface VilkårsgrunnlagHistorikkVisitor : OpptjeningVisitor, SykepengegrunnlagVisitor {
     fun preVisitVilkårsgrunnlagHistorikk() {}
     fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {}
     fun postVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {}
@@ -192,8 +194,6 @@ internal interface VilkårsgrunnlagHistorikkVisitor : OpptjeningVisitor, Sykepen
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Sammenligningsgrunnlag,
-        avviksprosent: Prosent?,
         opptjening: Opptjening,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,
@@ -204,8 +204,6 @@ internal interface VilkårsgrunnlagHistorikkVisitor : OpptjeningVisitor, Sykepen
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Sammenligningsgrunnlag,
-        avviksprosent: Prosent?,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,

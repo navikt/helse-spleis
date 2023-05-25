@@ -1,0 +1,459 @@
+{
+  "aktørId": "12345",
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "id": "1c1b4f1a-8566-4295-a923-93a90909da34",
+      "opprettet": "2023-05-25T15:20:17.321447",
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-01-01",
+          "type": "Vilkårsprøving",
+          "avviksprosent": 0.0,
+          "sammenligningsgrunnlag": {
+            "sammenligningsgrunnlag": 372000.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "987654321",
+                "skatteopplysninger": [
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247742",
+                    "måned": "2017-01",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247771",
+                    "måned": "2017-02",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.24778",
+                    "måned": "2017-03",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247786",
+                    "måned": "2017-04",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247792",
+                    "måned": "2017-05",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247798",
+                    "måned": "2017-06",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247803",
+                    "måned": "2017-07",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247808",
+                    "måned": "2017-08",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247814",
+                    "måned": "2017-09",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247819",
+                    "måned": "2017-10",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247824",
+                    "måned": "2017-11",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247829",
+                    "måned": "2017-12",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  }
+                ]
+              }
+            ]
+          },
+          "sykepengegrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "987654321",
+                "inntektsopplysning": {
+                  "id": "18df5935-7c60-4c71-8809-1f2fc9f2a233",
+                  "dato": "2018-01-01",
+                  "hendelseId": "8c2dd1de-3548-4363-b8ef-6a0f2db8beee",
+                  "beløp": 31000.0,
+                  "kilde": "INNTEKTSMELDING",
+                  "tidsstempel": "2023-05-25T15:20:17.195628"
+                },
+                "refusjonsopplysninger": [
+                  {
+                    "meldingsreferanseId": "8c2dd1de-3548-4363-b8ef-6a0f2db8beee",
+                    "fom": "2018-01-01",
+                    "tom": null,
+                    "beløp": 31000.0
+                  }
+                ]
+              }
+            ]
+          },
+          "vilkårsgrunnlagId": "2cc7d950-9f6d-4663-a29b-4cc27a9b43c1"
+        },
+        {
+          "skjæringstidspunkt": "2018-01-02",
+          "type": "Vilkårsprøving",
+          "avviksprosent": 0.0,
+          "sammenligningsgrunnlag": {
+            "sammenligningsgrunnlag": 372000.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "987654321",
+                "skatteopplysninger": [
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247742",
+                    "måned": "2017-01",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247771",
+                    "måned": "2017-02",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.24778",
+                    "måned": "2017-03",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247786",
+                    "måned": "2017-04",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247792",
+                    "måned": "2017-05",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247798",
+                    "måned": "2017-06",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247803",
+                    "måned": "2017-07",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247808",
+                    "måned": "2017-08",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247814",
+                    "måned": "2017-09",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247819",
+                    "måned": "2017-10",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247824",
+                    "måned": "2017-11",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247829",
+                    "måned": "2017-12",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  }
+                ]
+              }
+            ]
+          },
+          "sykepengegrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "987654321",
+                "inntektsopplysning": {
+                  "id": "18df5935-7c60-4c71-8809-1f2fc9f2a233",
+                  "dato": "2018-01-01",
+                  "hendelseId": "8c2dd1de-3548-4363-b8ef-6a0f2db8beee",
+                  "beløp": 31000.0,
+                  "kilde": "INNTEKTSMELDING",
+                  "tidsstempel": "2023-05-25T15:20:17.195628"
+                },
+                "refusjonsopplysninger": [
+                  {
+                    "meldingsreferanseId": "8c2dd1de-3548-4363-b8ef-6a0f2db8beee",
+                    "fom": "2018-01-01",
+                    "tom": null,
+                    "beløp": 31000.0
+                  }
+                ]
+              }
+            ]
+          },
+          "vilkårsgrunnlagId": "3cc7d950-9f6d-4663-a29b-4cc27a9b43c1"
+        }
+      ]
+    },
+    {
+      "id": "2c1b4f1a-8566-4295-a923-93a90909da34",
+      "opprettet": "2023-05-24T15:20:17.321447",
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-01-01",
+          "type": "Vilkårsprøving",
+          "avviksprosent": 0.0,
+          "sammenligningsgrunnlag": {
+            "sammenligningsgrunnlag": 372000.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "987654321",
+                "skatteopplysninger": [
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247742",
+                    "måned": "2017-01",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247771",
+                    "måned": "2017-02",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.24778",
+                    "måned": "2017-03",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247786",
+                    "måned": "2017-04",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247792",
+                    "måned": "2017-05",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247798",
+                    "måned": "2017-06",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247803",
+                    "måned": "2017-07",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247808",
+                    "måned": "2017-08",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247814",
+                    "måned": "2017-09",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247819",
+                    "måned": "2017-10",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247824",
+                    "måned": "2017-11",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  },
+                  {
+                    "hendelseId": "a6e98563-0427-4035-bb4f-cea62658d965",
+                    "beløp": 31000.0,
+                    "tidsstempel": "2023-05-25T15:20:17.247829",
+                    "måned": "2017-12",
+                    "type": "LØNNSINNTEKT",
+                    "fordel": "kontantytelse",
+                    "beskrivelse": "fastloenn"
+                  }
+                ]
+              }
+            ]
+          },
+          "sykepengegrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "987654321",
+                "inntektsopplysning": {
+                  "id": "18df5935-7c60-4c71-8809-1f2fc9f2a233",
+                  "dato": "2018-01-01",
+                  "hendelseId": "8c2dd1de-3548-4363-b8ef-6a0f2db8beee",
+                  "beløp": 31000.0,
+                  "kilde": "INNTEKTSMELDING",
+                  "tidsstempel": "2023-05-25T15:20:17.195628"
+                },
+                "refusjonsopplysninger": [
+                  {
+                    "meldingsreferanseId": "8c2dd1de-3548-4363-b8ef-6a0f2db8beee",
+                    "fom": "2018-01-01",
+                    "tom": null,
+                    "beløp": 31000.0
+                  }
+                ]
+              }
+            ]
+          },
+          "vilkårsgrunnlagId": "1cc7d950-9f6d-4663-a29b-4cc27a9b43c1"
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 248
+}

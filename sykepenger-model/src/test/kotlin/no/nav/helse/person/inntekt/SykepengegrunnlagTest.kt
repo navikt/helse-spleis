@@ -8,6 +8,8 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.erHelg
+import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -19,9 +21,9 @@ import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.*
-import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
@@ -504,6 +506,7 @@ internal class SykepengegrunnlagTest {
                     refusjonsopplysninger = Refusjonsopplysninger()
                 )
             ),
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             deaktiverteArbeidsforhold = emptyList(),
             vurdertInfotrygd = false
         )
@@ -579,6 +582,7 @@ internal class SykepengegrunnlagTest {
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             vurdertInfotrygd = false
         )
 
@@ -622,6 +626,7 @@ internal class SykepengegrunnlagTest {
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             vurdertInfotrygd = false
         )
 
@@ -663,6 +668,7 @@ internal class SykepengegrunnlagTest {
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             vurdertInfotrygd = false
         )
 
@@ -736,6 +742,7 @@ internal class SykepengegrunnlagTest {
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             vurdertInfotrygd = false
         )
 
@@ -768,6 +775,7 @@ internal class SykepengegrunnlagTest {
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             vurdertInfotrygd = false
         )
 
@@ -790,6 +798,7 @@ internal class SykepengegrunnlagTest {
                         refusjonsopplysninger = Refusjonsopplysninger()
                     )
                 ),
+                sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
                 deaktiverteArbeidsforhold = listOf(
                     ArbeidsgiverInntektsopplysning(
                         orgnummer = "orgnummer",

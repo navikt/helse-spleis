@@ -2,7 +2,12 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.desember
+import no.nav.helse.etterlevelse.Ledd.Companion.ledd
+import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_2
+import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -15,14 +20,12 @@ import no.nav.helse.inspectors.Vilkårgrunnlagsinspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
-import no.nav.helse.etterlevelse.Ledd.Companion.ledd
-import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_2
+import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
-import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.somPersonidentifikator
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
@@ -30,16 +33,11 @@ import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.Alder.Companion.alder
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Prosent.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -74,8 +72,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 skjæringstidspunkt = skjæringstidspunkt,
                 sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
-                sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
-                avviksprosent = 0.prosent,
                 opptjening = Opptjening(arbeidsforholdFraHistorikk, skjæringstidspunkt, NullObserver),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 vurdertOk = true,
@@ -104,8 +100,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = gammeltSkjæringstidspunkt,
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
-            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
-            avviksprosent = 0.prosent,
             opptjening = Opptjening(arbeidsforholdFraHistorikk, gammeltSkjæringstidspunkt, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
@@ -133,8 +127,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
-            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
-            avviksprosent = 0.prosent,
             opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
@@ -151,8 +143,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
-            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
-            avviksprosent = 0.prosent,
             opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
@@ -170,8 +160,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR, skjæringstidspunkt, skjæringstidspunkt),
-            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
-            avviksprosent = 0.prosent,
             opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
@@ -195,8 +183,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
-            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
-            avviksprosent = 0.prosent,
             opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
@@ -206,8 +192,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 3.januar,
             sykepengegrunnlag = inntekt2.sykepengegrunnlag(ORGNR),
-            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
-            avviksprosent = 0.prosent,
             opptjening = Opptjening(arbeidsforholdFraHistorikk, 3.januar, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
@@ -224,8 +208,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         val grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
-            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt * 1.35, emptyList()),
-            avviksprosent = 30.prosent,
             opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = false,
@@ -247,8 +229,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
-            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
-            avviksprosent = 0.prosent,
             opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
@@ -266,8 +246,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = inntekt.sykepengegrunnlag("et annet orgnr"),
-            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
-            avviksprosent = 0.prosent,
             opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,

@@ -5,13 +5,14 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import java.util.UUID
+import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.harInntektFor
 import no.nav.helse.person.Opptjening
+import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.somAnsattPerioder
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.somAnsattPerioder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
+import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
@@ -37,7 +38,15 @@ class ArbeidsgiverInntekt(
         )
 
     internal companion object {
-        internal fun List<ArbeidsgiverInntekt>.avklarSykepengegrunnlag(hendelse: IAktivitetslogg, person: Person, opptjening: Map<String, List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold>>, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
+        internal fun List<ArbeidsgiverInntekt>.avklarSykepengegrunnlag(
+            hendelse: IAktivitetslogg,
+            person: Person,
+            opptjening: Map<String, List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold>>,
+            skjæringstidspunkt: LocalDate,
+            sammenligningsgrunnlag: Sammenligningsgrunnlag,
+            meldingsreferanseId: UUID,
+            subsumsjonObserver: SubsumsjonObserver
+        ): Sykepengegrunnlag {
             val rapporteArbeidsforhold = opptjening.mapValues { (_, ansattPerioder) ->
                 SkattSykepengegrunnlag(
                     hendelseId = meldingsreferanseId,
@@ -52,6 +61,7 @@ class ArbeidsgiverInntekt(
             return person.avklarSykepengegrunnlag(
                 hendelse,
                 skjæringstidspunkt,
+                sammenligningsgrunnlag,
                 inntekterMedOpptjening,
                 subsumsjonObserver
             )

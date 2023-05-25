@@ -168,8 +168,9 @@ import no.nav.helse.serde.migration.V242None
 import no.nav.helse.serde.migration.V243None
 import no.nav.helse.serde.migration.V244None
 import no.nav.helse.serde.migration.V246None
-import no.nav.helse.serde.migration.V248FinneOverlappendePerioder
 import no.nav.helse.serde.migration.V247ForkasteOverlappende
+import no.nav.helse.serde.migration.V248FinneOverlappendePerioder
+import no.nav.helse.serde.migration.V249FlytteSammenligningsgrunnlagOgAvviksprosentInnISykepengegrunnlag
 import no.nav.helse.serde.migration.V24None
 import no.nav.helse.serde.migration.V25ManglendeForlengelseFraInfotrygd
 import no.nav.helse.serde.migration.V26SykdomshistorikkMerge
@@ -255,6 +256,7 @@ import no.nav.helse.serde.migration.V98SletterITCacheMedUtbetalingsperioder
 import no.nav.helse.serde.migration.V99LeggerTilSatstypePåUtbetalingslinjene
 import no.nav.helse.serde.migration.V9FjernerGamleSykdomstidslinjer
 import no.nav.helse.serde.migration.migrate
+
 class SerialisertPerson(val json: String) {
     internal companion object {
         private val migrations = listOf(
@@ -504,7 +506,8 @@ class SerialisertPerson(val json: String) {
             V244None(),
             V246None(),
             V247ForkasteOverlappende(),
-            V248FinneOverlappendePerioder()
+            V248FinneOverlappendePerioder(),
+            V249FlytteSammenligningsgrunnlagOgAvviksprosentInnISykepengegrunnlag()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)

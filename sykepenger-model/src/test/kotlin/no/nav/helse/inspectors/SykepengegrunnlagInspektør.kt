@@ -1,11 +1,12 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDate
+import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
-import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosent
 import kotlin.properties.Delegates
 
 internal val Sykepengegrunnlag.inspektør get() = SykepengegrunnlagInspektør(this)
@@ -32,6 +33,7 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
         sykepengegrunnlag1: Sykepengegrunnlag,
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Inntekt,
+        avviksprosent: Prosent,
         totalOmregnetÅrsinntekt: Inntekt,
         beregningsgrunnlag: Inntekt,
         `6G`: Inntekt,

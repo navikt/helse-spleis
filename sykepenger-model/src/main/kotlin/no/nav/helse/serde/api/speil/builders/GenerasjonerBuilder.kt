@@ -17,7 +17,6 @@ import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
-import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.serde.api.dto.AnnullertUtbetaling
 import no.nav.helse.serde.api.dto.BeregnetPeriode
@@ -45,7 +44,6 @@ import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Prosent
 
 // Besøker hele arbeidsgiver-treet
 internal class GenerasjonerBuilder(
@@ -129,8 +127,6 @@ internal class GenerasjonerBuilder(
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Sammenligningsgrunnlag,
-        avviksprosent: Prosent?,
         opptjening: Opptjening,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,

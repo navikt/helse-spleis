@@ -154,8 +154,7 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.relevanteArbeidsgivere(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?) =
            filter { arbeidsgiver ->
-               vilkårsgrunnlag?.inngårISykepengegrunnlaget(arbeidsgiver.organisasjonsnummer) == true
-                       || vilkårsgrunnlag?.inngårISammenligningsgrunnlaget(arbeidsgiver.organisasjonsnummer) == true
+               vilkårsgrunnlag?.erArbeidsgiverRelevant(arbeidsgiver.organisasjonsnummer) == true
                        || arbeidsgiver.vedtaksperioder.nåværendeVedtaksperiode(KLAR_TIL_BEHANDLING) != null
            }.map { it.organisasjonsnummer }
 
@@ -960,7 +959,7 @@ internal class Arbeidsgiver private constructor(
             vedtaksperioder = vedtaksperioder
         )
         return { skjæringstidspunkt, periode ->
-            if (vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)!!.inngårISykepengegrunnlaget(this.organisasjonsnummer))
+            if (vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)!!.erArbeidsgiverRelevant(this.organisasjonsnummer))
                 sykdomshistorikk.fyllUtGhosttidslinje(skjæringstidspunkt til periode.endInclusive)
 
             val sykdomstidslinje = sykdomstidslinje()
