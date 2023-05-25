@@ -869,7 +869,6 @@ internal class JsonBuilder : AbstractBuilder() {
 
     class GrunnlagsdataState(private val vilkårsgrunnlagElement: MutableList<Map<String, Any?>>) : BuilderState() {
         private val sykepengegrunnlagMap = mutableMapOf<String, Any>()
-        private val sammenligningsgrunnlagMap = mutableMapOf<String, Any>()
         private val opptjeningMap = mutableMapOf<String, Any>()
 
         override fun preVisitSykepengegrunnlag(
@@ -886,10 +885,6 @@ internal class JsonBuilder : AbstractBuilder() {
             oppfyllerMinsteinntektskrav: Boolean
         ) {
             pushState(SykepengegrunnlagState(sykepengegrunnlagMap))
-        }
-
-        override fun preVisitSammenligningsgrunnlag(sammenligningsgrunnlag1: Sammenligningsgrunnlag, sammenligningsgrunnlag: Inntekt) {
-            pushState(SammenlingningsgrunnlagState(sammenligningsgrunnlagMap))
         }
 
         override fun preVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {
@@ -910,7 +905,6 @@ internal class JsonBuilder : AbstractBuilder() {
                     "skjæringstidspunkt" to skjæringstidspunkt,
                     "type" to "Vilkårsprøving",
                     "sykepengegrunnlag" to sykepengegrunnlagMap,
-                    "sammenligningsgrunnlag" to sammenligningsgrunnlagMap,
                     "opptjening" to opptjeningMap,
                     "medlemskapstatus" to when (medlemskapstatus) {
                         Medlemskapsvurdering.Medlemskapstatus.Ja -> JsonMedlemskapstatus.JA
@@ -930,9 +924,14 @@ internal class JsonBuilder : AbstractBuilder() {
     class SykepengegrunnlagState(private val sykepengegrunnlag: MutableMap<String, Any>) : BuilderState() {
         private val arbeidsgiverInntektsopplysninger = mutableListOf<Map<String, Any>>()
         private val deaktiverteArbeidsgiverInntektsopplysninger = mutableListOf<Map<String, Any>>()
+        private val sammenligningsgrunnlagMap = mutableMapOf<String, Any>()
 
         override fun preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
             pushState(ArbeidsgiverInntektsopplysningerState(arbeidsgiverInntektsopplysninger))
+        }
+
+        override fun preVisitSammenligningsgrunnlag(sammenligningsgrunnlag1: Sammenligningsgrunnlag, sammenligningsgrunnlag: Inntekt) {
+            pushState(SammenlingningsgrunnlagState(sammenligningsgrunnlagMap))
         }
 
         override fun preVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
@@ -956,6 +955,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 mapOf(
                     "sykepengegrunnlag" to sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "avviksprosent" to avviksprosent.ratio(),
+                    "sammenligningsgrunnlag" to sammenligningsgrunnlagMap,
                     "inntektsgrunnlag" to inntektsgrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "grunnbeløp" to `6G`.reflection { årlig, _, _, _ -> årlig },
                     "arbeidsgiverInntektsopplysninger" to arbeidsgiverInntektsopplysninger,
