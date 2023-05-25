@@ -55,3 +55,5 @@ spec:
     value: earliest
   - name: IDENTBYTTE
     value: "true"
+  - name: FORENKLE_REVURDERING
+    value: "true"
