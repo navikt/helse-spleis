@@ -2598,17 +2598,24 @@ internal class Vedtaksperiode private constructor(
 
                 hendelse.info("Utbetalt i Infotrygd innenfor samme arbeidsgiverperiode.")
 
-                val snute = (auuGrupperingsperiode.start.minusDays(16) til auuGrupperingsperiode.start.minusDays(1)).let { infotrygdhistorikk.harUtbetaltI(it) }
+                val snute = arbeidsgiverperiode.fiktiv() || (auuGrupperingsperiode.start.minusDays(16) til auuGrupperingsperiode.start.minusDays(1)).let { infotrygdhistorikk.harUtbetaltI(it) }
                 val hale = (auuGrupperingsperiode.endInclusive.plusDays(1) til auuGrupperingsperiode.endInclusive.plusDays(16)).let { infotrygdhistorikk.harUtbetaltI(it) }
                 val gapdager = !snute && !hale
+
+                val kanForkastes = kanForkastes(null, alleVedtaksperioder)
+                val utbetalingssituasjon = arbeidsgiver.utbetalingssituasjon(arbeidsgiverperiode, perioder)
+                val skalForkastes = kanForkastes && !snute && hale && utbetalingssituasjon != UTBETALT
+                if (skalForkastes) {
+                    return forkast(hendelse, alleVedtaksperioder, "Utbetalt i Infotrygd i etterkant innenfor samme agp")
+                }
 
                 sikkerlogg.info("Kandidat for å forkastes på grunn av utbetaling i Infotrygd innenfor samme arbeidsgiverperiode for {} på $organisasjonsnummer i $perioder med arbeidsgiverperiode = ${arbeidsgiverperiode.grupperSammenhengendePerioder()}, {}, {}, {}, {}, {}",
                     keyValue("fødselsnummer", førsteAuu.fødselsnummer),
                     keyValue("snute", snute),
                     keyValue("gapdager", gapdager),
                     keyValue("hale", hale),
-                    keyValue("utbetalingssituasjon", arbeidsgiver.utbetalingssituasjon(arbeidsgiverperiode, perioder)),
-                    keyValue("kanForkastes", kanForkastes(null, alleVedtaksperioder))
+                    keyValue("utbetalingssituasjon", utbetalingssituasjon),
+                    keyValue("kanForkastes", kanForkastes)
                 )
             }
 
