@@ -1,6 +1,7 @@
 package no.nav.helse.tournament
 
 import no.nav.helse.fredag
+import no.nav.helse.lørdag
 import no.nav.helse.mandag
 import no.nav.helse.onsdag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
@@ -8,6 +9,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.TestEvent.Companion.inntektsmelding
 import no.nav.helse.testhelpers.TestEvent.Companion.søknad
+import no.nav.helse.testhelpers.TestEvent.Inntektsmelding
 import no.nav.helse.torsdag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -50,5 +52,55 @@ internal class DagturneringTest {
 
         assertTrue(tidslinje[1.mandag] is Arbeidsdag)
     }
+    @Test
+    fun `arbeidsgiverdag fra inntektsmelding vinner over arbeidsgiverdag fra søknad`() {
+        val søknadArbeidsgiverdag = Sykdomstidslinje.arbeidsgiverdager(1.mandag, 1.mandag, 100.prosent, søknad)
+        val inntektsmeldingArbeidsgiverdag = Sykdomstidslinje.arbeidsgiverdager(1.mandag, 1.mandag, 100.prosent, inntektsmelding)
+
+        val tidslinje = søknadArbeidsgiverdag.merge(inntektsmeldingArbeidsgiverdag, Dagturnering.TURNERING::beste)
+
+        assertTrue(tidslinje[1.mandag].kommerFra(hendelse = Inntektsmelding::class))
+    }
+
+    @Test
+    fun `arbeidsgiverdag fra søknad taper for arbeidsgiverdag fra inntektsmelding`() {
+        val søknadArbeidsgiverdag = Sykdomstidslinje.arbeidsgiverdager(1.mandag, 1.mandag, 100.prosent, søknad)
+        val inntektsmeldingArbeidsgiverdag = Sykdomstidslinje.arbeidsgiverdager(1.mandag, 1.mandag, 100.prosent, inntektsmelding)
+
+        val tidslinje = inntektsmeldingArbeidsgiverdag.merge(søknadArbeidsgiverdag, Dagturnering.TURNERING::beste)
+
+        assertTrue(tidslinje[1.mandag].kommerFra(hendelse = Inntektsmelding::class))
+    }
+
+    @Test
+    fun `arbeidsgiverdag_helgedag fra inntektsmelding vinner over arbeidsgiverdag fra søknad`() {
+        val søknadArbeidsgiverdag = Sykdomstidslinje.arbeidsgiverdager(1.lørdag, 1.lørdag, 100.prosent, søknad)
+        val inntektsmeldingArbeidsgiverHelgedag = Sykdomstidslinje.arbeidsgiverdager(1.lørdag, 1.lørdag, 100.prosent, inntektsmelding)
+
+        val tidslinje = søknadArbeidsgiverdag.merge(inntektsmeldingArbeidsgiverHelgedag, Dagturnering.TURNERING::beste)
+
+        assertTrue(tidslinje[1.lørdag].kommerFra(hendelse = Inntektsmelding::class))
+    }
+
+    @Test
+    fun `arbeidsgiverdag_helgedag fra søknad taper for arbeidsgiverdag_helgedag fra inntektsmelding`() {
+        val søknadArbeidsgiverHelgedag = Sykdomstidslinje.arbeidsgiverdager(1.lørdag, 1.lørdag, 100.prosent, søknad)
+        val inntektsmeldingArbeidsgiverHelgedag = Sykdomstidslinje.arbeidsgiverdager(1.lørdag, 1.lørdag, 100.prosent, inntektsmelding)
+
+        val tidslinje = inntektsmeldingArbeidsgiverHelgedag.merge(søknadArbeidsgiverHelgedag, Dagturnering.TURNERING::beste)
+
+        assertTrue(tidslinje[1.lørdag].kommerFra(hendelse = Inntektsmelding::class))
+    }
+
+    @Test
+    fun `arbeidsgiverdag fra søknad taper over arbeidsgiverdag fra inntektsmelding selvom søknad kom sist`() {
+        val inntektsmeldingArbeidsgiverdag = Sykdomstidslinje.arbeidsgiverdager(1.mandag, 1.mandag, 100.prosent, inntektsmelding)
+        val søknadArbeidsgiverdag = Sykdomstidslinje.arbeidsgiverdager(1.mandag, 1.mandag, 100.prosent, søknad)
+
+        val tidslinje1 = inntektsmeldingArbeidsgiverdag.merge(søknadArbeidsgiverdag, Dagturnering.TURNERING::beste)
+
+        assertTrue(tidslinje1[1.mandag].kommerFra(hendelse = Inntektsmelding::class))
+    }
+
 }
 
