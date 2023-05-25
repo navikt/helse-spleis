@@ -156,14 +156,14 @@ internal class Feriepengeutbetaling private constructor(
         private val tidligereFeriepengeutbetalinger: List<Feriepengeutbetaling>
     ) {
         private fun oppdrag(fagområde: Fagområde, forrigeOppdrag: Oppdrag?, beløp: Int): Oppdrag {
-            val klassekode = when (fagområde) {
-                Fagområde.SykepengerRefusjon -> Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig
-                Fagområde.Sykepenger -> Klassekode.SykepengerArbeidstakerFeriepenger
+            val (klassekode, mottaker) = when (fagområde) {
+                Fagområde.SykepengerRefusjon -> Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig to orgnummer
+                Fagområde.Sykepenger -> Klassekode.SykepengerArbeidstakerFeriepenger to personidentifikator.toString()
             }
             val fagsystemId = forrigeOppdrag?.fagsystemId() ?: genererUtbetalingsreferanse(UUID.randomUUID())
 
             val nyttOppdrag = Oppdrag(
-                mottaker = personidentifikator.toString(),
+                mottaker = mottaker,
                 fagområde = fagområde,
                 linjer = listOf(
                     Utbetalingslinje(
