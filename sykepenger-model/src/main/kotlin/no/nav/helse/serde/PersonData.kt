@@ -89,7 +89,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
-import no.nav.helse.økonomi.Prosent.Companion.ratio
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 
@@ -293,8 +292,6 @@ internal data class PersonData(
                 GrunnlagsdataType.Vilkårsprøving -> VilkårsgrunnlagHistorikk.Grunnlagsdata(
                     skjæringstidspunkt = skjæringstidspunkt,
                     sykepengegrunnlag = sykepengegrunnlag.parseSykepengegrunnlag(builder, alder, skjæringstidspunkt),
-                    sammenligningsgrunnlag = sammenligningsgrunnlag!!.parseSammenligningsgrunnlag(),
-                    avviksprosent = avviksprosent?.ratio,
                     opptjening = opptjening!!.tilOpptjening(skjæringstidspunkt),
                     medlemskapstatus = when (medlemskapstatus!!) {
                         JsonMedlemskapstatus.JA -> Medlemskapsvurdering.Medlemskapstatus.Ja
@@ -322,6 +319,7 @@ internal data class PersonData(
             private val sykepengegrunnlag: Double,
             private val grunnbeløp: Double?,
             private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
+            private val sammenligningsgrunnlag: SammenligningsgrunnlagData,
             private val begrensning: Sykepengegrunnlag.Begrensning,
             private val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningData>,
             private val vurdertInfotrygd: Boolean?, // TODO: migrere denne i json
@@ -334,6 +332,7 @@ internal data class PersonData(
                 alder = alder,
                 skjæringstidspunkt = skjæringstidspunkt,
                 arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger.parseArbeidsgiverInntektsopplysninger(builder),
+                sammenligningsgrunnlag = sammenligningsgrunnlag.parseSammenligningsgrunnlag(),
                 deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.parseArbeidsgiverInntektsopplysninger(builder),
                 vurdertInfotrygd = this.vurdertInfotrygd ?: (begrensning == Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD), // TODO: migrere denne til boolean i json
                 `6G` = grunnbeløp?.årlig

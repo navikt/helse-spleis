@@ -1372,7 +1372,7 @@ internal class Vedtaksperiode private constructor(
 
         private fun loggDersomStuckRevurdering(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) {
             val vilkårsgrunnlag = vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) ?: return
-            val arbeidsgivereISykepengegrunnlag = arbeidsgivere.filter { vilkårsgrunnlag.inngårISykepengegrunnlaget(it.organisasjonsnummer()) }
+            val arbeidsgivereISykepengegrunnlag = arbeidsgivere.filter { vilkårsgrunnlag.erArbeidsgiverRelevant(it.organisasjonsnummer()) }
             if (harNødvendigInntektForVilkårsprøving(vedtaksperiode, arbeidsgivere = arbeidsgivereISykepengegrunnlag)) {
                 sikkerlogg.info("Periode sitter fast i revurdering pga ny arbeidsgiver som ikke er i sykepengegrunnlaget. {}, {}", kv("vedtaksperiodeId", "${vedtaksperiode.id}"), kv("fødselsnummer", vedtaksperiode.fødselsnummer))
             }

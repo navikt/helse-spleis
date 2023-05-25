@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
-import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
@@ -26,9 +25,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.arbeidsgiver
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.sykepengegrunnlag
@@ -40,9 +36,7 @@ import no.nav.helse.testhelpers.UTELATE
 import no.nav.helse.testhelpers.Utbetalingsdager
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -92,8 +86,6 @@ internal class ArbeidsgiverUtbetalingerTest {
         val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = 1000.månedlig.sykepengegrunnlag,
-            sammenligningsgrunnlag = sammenligningsgrunnlag(1000.månedlig),
-            avviksprosent = Prosent.prosent(0.0),
             opptjening = Opptjening(emptyList(), 1.januar, SubsumsjonObserver.NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = false,
@@ -323,8 +315,6 @@ internal class ArbeidsgiverUtbetalingerTest {
             grunnlagsdata ?: VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 skjæringstidspunkt = 1.januar,
                 sykepengegrunnlag = 30000.månedlig.sykepengegrunnlag(fødselsdato.alder),
-                sammenligningsgrunnlag = sammenligningsgrunnlag(30000.månedlig),
-                avviksprosent = Prosent.prosent(0.0),
                 opptjening = Opptjening(
                     listOf(
                         Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
@@ -374,22 +364,4 @@ internal class ArbeidsgiverUtbetalingerTest {
             .value
             .inspektør
     }
-
-    private fun sammenligningsgrunnlag(inntekt: Inntekt) = Sammenligningsgrunnlag(
-        arbeidsgiverInntektsopplysninger = listOf(
-            ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag("orgnummer",
-                (0 until 12).map {
-                    Skatteopplysning(
-                        hendelseId = UUID.randomUUID(),
-                        beløp = inntekt,
-                        måned = YearMonth.of(2017, it + 1),
-                        type = Skatteopplysning.Inntekttype.LØNNSINNTEKT,
-                        fordel = "fordel",
-                        beskrivelse = "beskrivelse"
-                    )
-                }
-            )
-        ),
-    )
-
 }

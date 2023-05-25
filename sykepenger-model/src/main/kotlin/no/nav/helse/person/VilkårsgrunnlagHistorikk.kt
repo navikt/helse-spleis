@@ -20,7 +20,6 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_11
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.Refusjonsopplysning
-import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.TagBuilder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
@@ -28,7 +27,6 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
-import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Økonomi
 
 internal class VilkårsgrunnlagHistorikk private constructor(private val historikk: MutableList<Innslag>) {
@@ -203,8 +201,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal open fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, organisasjonsnummerRelevanteArbeidsgivere: List<String>) = true
 
         internal abstract fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
-        internal open fun inngårISammenligningsgrunnlaget(organisasjonsnummer: String): Boolean = false
-        internal fun inngårISykepengegrunnlaget(organisasjonsnummer: String) =sykepengegrunnlag.inngårISykepengegrunnlaget(organisasjonsnummer)
+        internal fun erArbeidsgiverRelevant(organisasjonsnummer: String) = sykepengegrunnlag.erArbeidsgiverRelevant(organisasjonsnummer)
 
         internal fun build(builder: VedtakFattetBuilder) {
             sykepengegrunnlag.build(builder)
@@ -266,7 +263,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             ) ?: return null
             val endringsdato = sykepengegrunnlag.finnEndringsdato(this.sykepengegrunnlag)
             val eventyr = Revurderingseventyr.korrigertInntektsmelding(skjæringstidspunkt, endringsdato)
-
             return kopierMed(inntektsmelding, sykepengegrunnlag, opptjening, NullObserver) to eventyr
         }
 
@@ -391,8 +387,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal class Grunnlagsdata(
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Sykepengegrunnlag,
-        private val sammenligningsgrunnlag: Sammenligningsgrunnlag,
-        private val avviksprosent: Prosent?,
         internal val opptjening: Opptjening,
         private val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         private val vurdertOk: Boolean,
@@ -400,7 +394,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         vilkårsgrunnlagId: UUID
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag, opptjening) {
         internal fun validerFørstegangsvurdering(aktivitetslogg: IAktivitetslogg) {
-            sykepengegrunnlag.validerAvvik(aktivitetslogg, sammenligningsgrunnlag)
+            sykepengegrunnlag.validerAvvik(aktivitetslogg)
             sykepengegrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjening)
             sykepengegrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
         }
@@ -416,8 +410,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 skjæringstidspunkt,
                 this,
                 sykepengegrunnlag,
-                sammenligningsgrunnlag,
-                avviksprosent,
                 opptjening,
                 vurdertOk,
                 meldingsreferanseId,
@@ -425,23 +417,17 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 medlemskapstatus
             )
             sykepengegrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
-            sammenligningsgrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
             opptjening.accept(vilkårsgrunnlagHistorikkVisitor)
             vilkårsgrunnlagHistorikkVisitor.postVisitGrunnlagsdata(
                 skjæringstidspunkt,
                 this,
                 sykepengegrunnlag,
-                sammenligningsgrunnlag,
-                avviksprosent,
                 medlemskapstatus,
                 vurdertOk,
                 meldingsreferanseId,
                 vilkårsgrunnlagId
             )
         }
-
-        override fun inngårISammenligningsgrunnlaget(organisasjonsnummer: String) =
-            sammenligningsgrunnlag.erRelevant(organisasjonsnummer)
 
         override fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode): List<Utbetalingstidslinje> {
             val foreløpigAvvist = sykepengegrunnlag.avvis(tidslinjer, skjæringstidspunktperiode)
@@ -466,12 +452,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         ): VilkårsgrunnlagElement {
             val sykepengegrunnlagOk = sykepengegrunnlag.valider(hendelse)
             val opptjeningOk = opptjening?.valider(hendelse)
-            sykepengegrunnlag.validerAvvik(hendelse, sammenligningsgrunnlag, IAktivitetslogg::varsel)
             return Grunnlagsdata(
                 skjæringstidspunkt = skjæringstidspunkt,
                 sykepengegrunnlag = sykepengegrunnlag,
-                sammenligningsgrunnlag = sammenligningsgrunnlag,
-                avviksprosent = sykepengegrunnlag.avviksprosent(this.sammenligningsgrunnlag, subsumsjonObserver),
                 opptjening = opptjening ?: this.opptjening,
                 medlemskapstatus = medlemskapstatus,
                 vurdertOk = vurdertOk && sykepengegrunnlagOk && (opptjeningOk ?: true),

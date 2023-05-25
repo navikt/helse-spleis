@@ -72,6 +72,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -632,12 +633,19 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
 
-    internal fun avklarSykepengegrunnlag(hendelse: IAktivitetslogg, skjæringstidspunkt: LocalDate, skatteopplysninger: Map<String, SkattSykepengegrunnlag>, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
+    internal fun avklarSykepengegrunnlag(
+        hendelse: IAktivitetslogg,
+        skjæringstidspunkt: LocalDate,
+        sammenligningsgrunnlag: Sammenligningsgrunnlag,
+        skatteopplysninger: Map<String, SkattSykepengegrunnlag>,
+        subsumsjonObserver: SubsumsjonObserver
+    ): Sykepengegrunnlag {
         skatteopplysninger.keys.forEach { orgnr -> finnEllerOpprettArbeidsgiver(orgnr, hendelse) } // oppretter evt. nye arbeidsgivere
         return Sykepengegrunnlag.opprett(
             alder,
             arbeidsgivere.avklarSykepengegrunnlag(hendelse, skjæringstidspunkt, skatteopplysninger),
             skjæringstidspunkt,
+            sammenligningsgrunnlag,
             subsumsjonObserver
         )
     }

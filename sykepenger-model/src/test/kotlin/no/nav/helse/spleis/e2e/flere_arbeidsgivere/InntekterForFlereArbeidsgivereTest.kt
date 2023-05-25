@@ -25,6 +25,7 @@ import no.nav.helse.oktober
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
@@ -134,29 +135,39 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
         nyPeriode(1.januar til 31.januar, a1, INNTEKT)
 
+        val inntekterForSammenligningsgrunnlag = inntektperioderForSammenligningsgrunnlag {
+            1.januar(2017) til 1.desember(2017) inntekter {
+                a1 inntekt 15000
+            }
+            1.januar(2017) til 1.juni(2017) inntekter {
+                a2 inntekt 5000
+                a3 inntekt 3000
+                a4 inntekt 2000
+            }
+            1.juli(2017) til 1.desember(2017) inntekter {
+                a3 inntekt 7500
+                a4 inntekt 2500
+            }
+        }
+        val uuid = UUID.randomUUID()
+
         val vilkårsgrunnlag = vilkårsgrunnlag(
             1.vedtaksperiode,
             skjæringstidspunkt = 1.januar,
             orgnummer = a1,
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt 15000
-                }
-                1.januar(2017) til 1.juni(2017) inntekter {
-                    a2 inntekt 5000
-                    a3 inntekt 3000
-                    a4 inntekt 2000
-                }
-                1.juli(2017) til 1.desember(2017) inntekter {
-                    a3 inntekt 7500
-                    a4 inntekt 2500
-                }
-            },
+            inntekter = inntekterForSammenligningsgrunnlag,
             inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
-            arbeidsforhold = arbeidsforhold
+            arbeidsforhold = arbeidsforhold,
+            meldingsreferanseId = uuid
         )
         vilkårsgrunnlag.valider(
-            Sykepengegrunnlag(1.januar.alder, emptyList(), 1.januar, NullObserver, false),
+            Sykepengegrunnlag(
+                1.januar.alder,
+                emptyList(),
+                1.januar,
+                Sammenligningsgrunnlag(inntekterForSammenligningsgrunnlag.map { it.tilSammenligningsgrunnlag(uuid) }),
+                NullObserver
+            ),
             NullObserver
         )
         assertEquals(300000.årlig, vilkårsgrunnlag.grunnlagsdata().inspektør.sammenligningsgrunnlag.inspektør.sammenligningsgrunnlag)
@@ -317,12 +328,13 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
+        meldingsreferanseId: UUID = UUID.randomUUID(),
         inntekter: List<ArbeidsgiverInntekt>,
         inntekterForSykepengegrunnlag: List<ArbeidsgiverInntekt>
 
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = meldingsreferanseId,
             vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
             skjæringstidspunkt = skjæringstidspunkt,
             aktørId = AKTØRID,

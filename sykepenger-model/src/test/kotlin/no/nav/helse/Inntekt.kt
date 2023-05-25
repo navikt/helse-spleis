@@ -4,13 +4,14 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
-import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
+import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 
@@ -31,6 +32,7 @@ internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringsti
                 Refusjonsopplysninger()
             )
         ),
+        sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
         skjæringstidspunkt = skjæringstidspunkt,
         subsumsjonObserver = subsumsjonObserver
     )
@@ -45,6 +47,7 @@ internal fun Inntekt.sykepengegrunnlag(orgnr: String, skjæringstidspunkt: Local
                 Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, this).refusjonsopplysninger
             )
         ),
+        sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
         deaktiverteArbeidsforhold = emptyList(),
         vurdertInfotrygd = false,
         `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningstidspunkt)

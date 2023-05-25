@@ -1,13 +1,13 @@
 package no.nav.helse.person.inntekt
 
-import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag.Companion.sammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 
 internal class Sammenligningsgrunnlag(
-    private val sammenligningsgrunnlag: Inntekt,
+    internal val sammenligningsgrunnlag: Inntekt,
     private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>,
 ) {
 

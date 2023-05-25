@@ -5,6 +5,7 @@ import java.math.MathContext
 import java.time.LocalDate
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.memoize
+import no.nav.helse.økonomi.Prosent.Companion.prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.average
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
@@ -94,8 +95,11 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
         return "[Årlig: $årlig, Månedlig: ${tilMånedligDouble()}, Daglig: ${tilDagligDouble()}]"
     }
 
-    fun avviksprosent(other: Inntekt) =
-        Prosent.ratio((this.årlig - other.årlig).absoluteValue / other.årlig)
+    fun avviksprosent(other: Inntekt): Prosent {
+        if (other == INGEN) return 100.prosent
+        return Prosent.ratio((this.årlig - other.årlig).absoluteValue / other.årlig)
+    }
+
 }
 
 interface DekningsgradKilde {

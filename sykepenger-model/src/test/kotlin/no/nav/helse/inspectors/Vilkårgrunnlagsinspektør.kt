@@ -11,6 +11,7 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import org.junit.jupiter.api.fail
 import kotlin.properties.Delegates
@@ -47,8 +48,6 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Sammenligningsgrunnlag,
-        avviksprosent: Prosent?,
         opptjening: Opptjening,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,
@@ -89,8 +88,6 @@ internal class VilkårgrunnlagInnslagInspektør(innslag: VilkårsgrunnlagHistori
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Sammenligningsgrunnlag,
-        avviksprosent: Prosent?,
         opptjening: Opptjening,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,
@@ -146,8 +143,6 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Sammenligningsgrunnlag,
-        avviksprosent: Prosent?,
         opptjening: Opptjening,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,
@@ -155,8 +150,6 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
     ) {
         this.sykepengegrunnlag = sykepengegrunnlag
-        this.sammenligningsgrunnlag = sammenligningsgrunnlag
-        this.avviksprosent = avviksprosent
         this.opptjening = opptjening
         this.meldingsreferanseId = meldingsreferanseId
         this.harMinimumInntekt = harMinimumInntekt
@@ -181,5 +174,28 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
     override fun preVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {
         this.antallOpptjeningsdagerErMinst = opptjening.opptjeningsdager()
         this.harOpptjening = opptjening.erOppfylt()
+    }
+
+    override fun preVisitSykepengegrunnlag(
+        sykepengegrunnlag1: Sykepengegrunnlag,
+        skjæringstidspunkt: LocalDate,
+        sykepengegrunnlag: Inntekt,
+        avviksprosent: Prosent,
+        totalOmregnetÅrsinntekt: Inntekt,
+        beregningsgrunnlag: Inntekt,
+        `6G`: Inntekt,
+        begrensning: Sykepengegrunnlag.Begrensning,
+        vurdertInfotrygd: Boolean,
+        minsteinntekt: Inntekt,
+        oppfyllerMinsteinntektskrav: Boolean
+    ) {
+        this.avviksprosent = avviksprosent
+    }
+
+    override fun preVisitSammenligningsgrunnlag(
+        sammenligningsgrunnlag1: Sammenligningsgrunnlag,
+        sammenligningsgrunnlag: Inntekt
+    ) {
+        this.sammenligningsgrunnlag = sammenligningsgrunnlag1
     }
 }
