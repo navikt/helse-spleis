@@ -196,6 +196,7 @@ data class BeregnetPeriode(
     }
 
     internal fun sammeUtbetaling(other: BeregnetPeriode) = this.utbetaling.id == other.utbetaling.id
+            || (Toggle.ForenkleRevurdering.enabled && this.utbetaling.korrelasjonsId == other.utbetaling.korrelasjonsId)
 
     internal fun somAnnullering(annulleringer: List<AnnullertUtbetaling>): AnnullertPeriode? {
         val annulleringen = annulleringer.firstOrNull { it.annullerer(this.utbetaling.korrelasjonsId) } ?: return null
