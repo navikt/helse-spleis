@@ -75,4 +75,6 @@ spec:
     value: "spleis"
   - name: GRAPHQL_V2
     value: "true"
+  - name: FORENKLE_REVURDERING
+    value: "true"
 
