@@ -362,8 +362,9 @@ data class BeregnetPeriode(
                     periodetilstand in setOf(Vedtaksperiode.AvventerSimulering, Vedtaksperiode.AvventerSimuleringRevurdering) -> ForberederGodkjenning
                     else -> VenterPåAnnenPeriode
                 }
-                Utbetalingstatus.GodkjentUtenUtbetaling -> when (utbetalingDTO.type) {
-                    Utbetalingtype.REVURDERING -> Utbetalt
+                Utbetalingstatus.GodkjentUtenUtbetaling -> when {
+                    periodetilstand == Vedtaksperiode.AvventerRevurdering -> Periodetilstand.UtbetaltVenterPåAnnenPeriode
+                    utbetalingDTO.type == Utbetalingtype.REVURDERING -> Utbetalt
                     else -> Periodetilstand.IngenUtbetaling
                 }
                 Utbetalingstatus.Godkjent,
