@@ -1538,7 +1538,7 @@ internal class Vedtaksperiode private constructor(
                         arbeidsgiverUtbetalinger,
                         beregningsperiode,
                         beregningsperioder,
-                        Vedtaksperiode::lagUtbetaling
+                        Vedtaksperiode::lagRevurdering
                     )
 
                     infotrygdhistorikk.valider(ytelser, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
