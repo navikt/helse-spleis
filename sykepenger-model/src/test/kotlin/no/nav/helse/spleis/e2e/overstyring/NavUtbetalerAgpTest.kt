@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.overstyring
 
+import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.erHelg
 import no.nav.helse.februar
@@ -12,6 +13,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.mai
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -262,5 +264,24 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
 
         assertEquals("Tom tidslinje", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+    }
+
+    @Test
+    fun `To korte perioder mottar to inntektsmeldinger som er uenige om hvem som skal betale AGP - da blir ting litt sprøtt`() {
+        nyPeriode(7.april(2023) til 9.april(2023))
+        nyPeriode(10.april(2023) til 13.april(2023))
+
+        håndterInntektsmelding(listOf(7.april(2023) til 22.april(2023)))
+        håndterInntektsmelding(listOf(7.april(2023) til 22.april(2023)), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel", førsteFraværsdag = 1.mai(2023))
+
+        assertForventetFeil(
+            forklaring = "To inntektsmeldinger krangler om hvem som skal betale AGP, i en perfekt verden skulle AGP i begge perioder blitt betalt av NAV",
+            nå = {
+                assertEquals("NHH SSSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            },
+            ønsket = {
+                assertEquals("NHH NNNN", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            }
+        )
     }
 }
