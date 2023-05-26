@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.Vedtaksperiode
@@ -195,6 +196,7 @@ data class BeregnetPeriode(
     }
 
     internal fun sammeUtbetaling(other: BeregnetPeriode) = this.utbetaling.id == other.utbetaling.id
+            || (Toggle.ForenkleRevurdering.enabled && this.utbetaling.korrelasjonsId == other.utbetaling.korrelasjonsId)
 
     internal fun somAnnullering(annulleringer: List<AnnullertUtbetaling>): AnnullertPeriode? {
         val annulleringen = annulleringer.firstOrNull { it.annullerer(this.utbetaling.korrelasjonsId) } ?: return null
