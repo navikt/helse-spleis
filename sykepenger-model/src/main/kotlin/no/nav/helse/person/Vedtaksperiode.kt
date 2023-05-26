@@ -1527,28 +1527,46 @@ internal class Vedtaksperiode private constructor(
             }
 
             håndterRevurdering(ytelser) {
-                // beregningsperiode brukes for å avgjøre hvilke perioder vi skal -kreve- inntekt for
-                // beregningsperioder brukes for å lage varsel
-                val utvalg = beregningsperioder(person, vedtaksperiode)
+                if (Toggle.ForenkleRevurdering.enabled) {
+                    // når toggle er enabled er det samme kode som førstegangsvurderinger
+                    val beregningsperiode = vedtaksperiode.finnArbeidsgiverperiode()?.periode(vedtaksperiode.periode.endInclusive) ?: vedtaksperiode.periode
+                    val beregningsperioder = listOf(Triple(vedtaksperiode.periode, ytelser, vedtaksperiode.jurist()))
 
-                person.valider(ytelser, vilkårsgrunnlag, vedtaksperiode.organisasjonsnummer, vedtaksperiode.skjæringstidspunkt)
+                    val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
+                    vedtaksperiode.beregnUtbetalinger(
+                        ytelser,
+                        arbeidsgiverUtbetalinger,
+                        beregningsperiode,
+                        beregningsperioder,
+                        Vedtaksperiode::lagUtbetaling
+                    )
 
-                val beregningsperiode = utvalg.periode()
-                val beregningsperioder = utvalg.map { Triple(it.periode, it.aktivitetsloggkopi(ytelser), it.jurist) }
+                    infotrygdhistorikk.valider(ytelser, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
+                    ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, arbeidsgiverUtbetalinger.maksimumSykepenger.sisteDag())
+                } else {
+                    // beregningsperiode brukes for å avgjøre hvilke perioder vi skal -kreve- inntekt for
+                    // beregningsperioder brukes for å lage varsel
+                    val utvalg = beregningsperioder(person, vedtaksperiode)
 
-                val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
-                vedtaksperiode.beregnUtbetalinger(
-                    ytelser,
-                    arbeidsgiverUtbetalinger,
-                    beregningsperiode,
-                    beregningsperioder,
-                    Vedtaksperiode::lagRevurdering
-                )
-                utvalg.forEach {
-                    infotrygdhistorikk.valider(it.aktivitetsloggkopi(ytelser), it.periode, it.skjæringstidspunkt, it.organisasjonsnummer)
-                    it.kontekst(ytelser) // overskriver kontekst for ytelser-hendelsen
-                    ytelser.valider(it.periode, it.skjæringstidspunkt, arbeidsgiverUtbetalinger.maksimumSykepenger.sisteDag())
-                    vedtaksperiode.kontekst(ytelser) // endre kontekst tilbake for ytelser-hendelsen
+                    person.valider(ytelser, vilkårsgrunnlag, vedtaksperiode.organisasjonsnummer, vedtaksperiode.skjæringstidspunkt)
+
+                    val beregningsperiode = utvalg.periode()
+                    val beregningsperioder = utvalg.map { Triple(it.periode, it.aktivitetsloggkopi(ytelser), it.jurist) }
+
+                    val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
+                    vedtaksperiode.beregnUtbetalinger(
+                        ytelser,
+                        arbeidsgiverUtbetalinger,
+                        beregningsperiode,
+                        beregningsperioder,
+                        Vedtaksperiode::lagRevurdering
+                    )
+                    utvalg.forEach {
+                        infotrygdhistorikk.valider(it.aktivitetsloggkopi(ytelser), it.periode, it.skjæringstidspunkt, it.organisasjonsnummer)
+                        it.kontekst(ytelser) // overskriver kontekst for ytelser-hendelsen
+                        ytelser.valider(it.periode, it.skjæringstidspunkt, arbeidsgiverUtbetalinger.maksimumSykepenger.sisteDag())
+                        vedtaksperiode.kontekst(ytelser) // endre kontekst tilbake for ytelser-hendelsen
+                    }
                 }
                 vedtaksperiode.høstingsresultater(ytelser, AvventerSimuleringRevurdering, AvventerGodkjenningRevurdering)
             }
