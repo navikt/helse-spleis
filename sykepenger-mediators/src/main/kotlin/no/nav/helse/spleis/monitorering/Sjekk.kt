@@ -13,7 +13,7 @@ internal class RegelmessigAvstemming(private val manglerAvstemming: () -> Int): 
     override fun sjekk(): Pair<Level, String>? {
         val mangler = manglerAvstemming()
         if (mangler == 0) return null
-        return Level.ERROR to "Det er $mangler personer som ikke er avstemt på over en måned!"
+        return Level.ERROR to "\nDet er $mangler personer som ikke er avstemt på over en måned!\n\n- Deres erbødig SPleis :bender_dance:"
     }
 
     override fun skalSjekke(nå: LocalDateTime): Boolean {
