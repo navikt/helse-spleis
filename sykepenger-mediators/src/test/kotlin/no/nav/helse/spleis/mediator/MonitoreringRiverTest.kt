@@ -27,7 +27,7 @@ internal class MonitoreringRiverTest {
         val slackMelding = sprute.inspektør.message(0)
         assertEquals("slackmelding", slackMelding.path("@event_name").asText())
         assertEquals("ERROR", slackMelding.path("level").asText())
-        assertEquals("Det er 2 personer som ikke er avstemt på over en måned!", slackMelding.path("melding").asText())
+        assertEquals("\nDet er 2 personer som ikke er avstemt på over en måned!\n\n- Deres erbødig SPleis :bender_dance:", slackMelding.path("melding").asText())
         val systemParticipatingServices = slackMelding.path("system_participating_services").size()
         assertEquals(2, systemParticipatingServices)
     }
