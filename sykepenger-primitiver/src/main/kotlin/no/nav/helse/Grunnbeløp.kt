@@ -6,7 +6,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 
 class Grunnbeløp private constructor(private val multiplier: Double) {
     private val grunnbeløp = listOf(
-        118620.årlig.gyldigFra(1.mai(2023), gyldigSomMinsteinntektKrav = 26.mai(2023)),
+        118620.årlig.gyldigFra(1.mai(2023), gyldigSomMinsteinntektKrav = 29.mai(2023)),
         111477.årlig.gyldigFra(1.mai(2022), gyldigSomMinsteinntektKrav = 23.mai(2022)),
         106399.årlig.gyldigFra(1.mai(2021), gyldigSomMinsteinntektKrav = 24.mai(2021) ),
         101351.årlig.gyldigFra(1.mai(2020), virkningsdato = 21.september(2020), gyldigSomMinsteinntektKrav = 21.september(2020) ),
