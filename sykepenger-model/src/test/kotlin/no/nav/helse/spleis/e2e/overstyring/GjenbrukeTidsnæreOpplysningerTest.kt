@@ -725,6 +725,67 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertEquals(hendelseIdFør, hendelseIdEtter)
         }
     }
+    @Test
+    fun `gjenbruker saksbehandlerinntekt som overstyrer annen saksbehandler`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør
+
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar, listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        a1, INNTEKT - 50.daglig, "overstyring", null,
+                        listOf(
+                            Triple(1.januar, null, INNTEKT)
+                        )
+                    )
+                )
+            )
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar, listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        a1, INNTEKT - 500.daglig, "overstyring", null,
+                        listOf(
+                            Triple(1.januar, null, INNTEKT)
+                        )
+                    )
+                )
+            )
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(20.januar, 31.januar))
+
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterYtelser(2.vedtaksperiode)
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
+            val sykepengegrunnlag = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør
+            val arbeidsgiverInntektsopplysning = sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.inntektsopplysning.inspektør
+            assertEquals(INNTEKT - 500.daglig, arbeidsgiverInntektsopplysning.beløp)
+            val hendelseIdFør = sykepengegrunnlagFør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.inntektsopplysning.inspektør.hendelseId
+            val hendelseIdEtter = arbeidsgiverInntektsopplysning.hendelseId
+            assertEquals(hendelseIdFør, hendelseIdEtter)
+        }
+    }
 
     @Test
     fun `ikke varsel når det er hull i agp`() {

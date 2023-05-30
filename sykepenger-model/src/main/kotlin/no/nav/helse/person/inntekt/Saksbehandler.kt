@@ -48,7 +48,7 @@ class Saksbehandler internal constructor(
             oppholdsperiodeMellom,
             refusjonsopplysninger,
             orgnummer,
-            this.beløp
+            beløp ?: this.beløp
         )
     }
 
@@ -58,14 +58,14 @@ class Saksbehandler internal constructor(
     }
 
     override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
-        return ny.overstyrer(this, checkNotNull(overstyrtInntekt) { "overstyrt inntekt skal ikke være null" })
+        return ny.overstyrer(this)
     }
 
-    override fun overstyrer(gammel: Saksbehandler, overstyrtInntekt: Inntektsopplysning) = kopierMed(overstyrtInntekt)
+    override fun overstyrer(gammel: Saksbehandler) = kopierMed(gammel)
     override fun overstyrer(gammel: IkkeRapportert) = kopierMed(gammel)
     override fun overstyrer(gammel: SkattSykepengegrunnlag) = kopierMed(gammel)
     override fun overstyrer(gammel: Inntektsmelding) = kopierMed(gammel)
-    override fun overstyrer(gammel: SkjønnsmessigFastsatt, overstyrtInntekt: Inntektsopplysning) = kopierMed(gammel)
+    override fun overstyrer(gammel: SkjønnsmessigFastsatt) = kopierMed(gammel)
 
     private fun kopierMed(overstyrtInntekt: Inntektsopplysning) =
         Saksbehandler(id, dato, hendelseId, beløp, forklaring, subsumsjon, overstyrtInntekt, tidsstempel)

@@ -3,16 +3,12 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.etterlevelse.Bokstav
-import no.nav.helse.etterlevelse.Ledd
-import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.økonomi.Inntekt
-import org.slf4j.LoggerFactory
 
 class SkjønnsmessigFastsatt internal constructor(
     id: UUID,
@@ -54,11 +50,11 @@ class SkjønnsmessigFastsatt internal constructor(
     }
 
     override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
-        return ny.overstyrer(this, checkNotNull(overstyrtInntekt) { "overstyrt inntekt skal ikke være null" })
+        return ny.overstyrer(this)
     }
 
-    override fun overstyrer(gammel: Saksbehandler, overstyrtInntekt: Inntektsopplysning) = kopierMed(gammel) // skal vi peke til saksbehandlerinntekten eller den saksbehandler overstyrte?
-    override fun overstyrer(gammel: SkjønnsmessigFastsatt, overstyrtInntekt: Inntektsopplysning) = kopierMed(overstyrtInntekt)
+    override fun overstyrer(gammel: Saksbehandler) = kopierMed(gammel) // skal vi peke til saksbehandlerinntekten eller den saksbehandler overstyrte?
+    override fun overstyrer(gammel: SkjønnsmessigFastsatt) = kopierMed(gammel)
     override fun overstyrer(gammel: IkkeRapportert) = kopierMed(gammel)
     override fun overstyrer(gammel: SkattSykepengegrunnlag) = kopierMed(gammel)
     override fun overstyrer(gammel: Inntektsmelding) = kopierMed(gammel)

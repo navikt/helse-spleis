@@ -35,10 +35,10 @@ abstract class Inntektsopplysning protected constructor(
     internal open fun overstyrer(gammel: IkkeRapportert) = this
     internal open fun overstyrer(gammel: SkattSykepengegrunnlag) = this
     internal open fun overstyrer(gammel: no.nav.helse.person.inntekt.Inntektsmelding) = this
-    internal open fun overstyrer(gammel: Saksbehandler, overstyrtInntekt: Inntektsopplysning): Inntektsopplysning {
+    internal open fun overstyrer(gammel: Saksbehandler): Inntektsopplysning {
         throw IllegalStateException("Kan ikke overstyre saksbehandler-inntekt")
     }
-    internal open fun overstyrer(gammel: SkjønnsmessigFastsatt, overstyrtInntekt: Inntektsopplysning): Inntektsopplysning {
+    internal open fun overstyrer(gammel: SkjønnsmessigFastsatt): Inntektsopplysning {
         throw IllegalStateException("Kan ikke overstyre skjønnsmessig fastsatt-inntekt")
     }
 
