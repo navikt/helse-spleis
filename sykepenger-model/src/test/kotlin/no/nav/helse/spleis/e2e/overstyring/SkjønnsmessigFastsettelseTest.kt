@@ -23,8 +23,11 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
         )))
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        val inntektsopplysning = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single().inspektør.inntektsopplysning
+        val sykepengegrunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør
+        val inntektsopplysning = sykepengegrunnlag.arbeidsgiverInntektsopplysninger.single().inspektør.inntektsopplysning
         assertTrue(inntektsopplysning is SkjønnsmessigFastsatt)
-        assertEquals(0, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.avviksprosent)
+        assertEquals(0, sykepengegrunnlag.avviksprosent)
+        assertEquals(INNTEKT * 2, sykepengegrunnlag.beregningsgrunnlag)
+        assertEquals(INNTEKT, sykepengegrunnlag.omregnetÅrsinntekt)
     }
 }
