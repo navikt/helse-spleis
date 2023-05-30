@@ -40,8 +40,7 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.tilGodkjenning
-import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
-import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde.*
+import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -71,7 +70,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
             assertEquals(480000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
             assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
             assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-            assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+            assertEquals(0, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
             assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
             sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                 assertEquals(20000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -107,7 +106,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
             assertEquals(480000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
             assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
             assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-            assertEquals(3, vilkårsgrunnlag.avviksprosent?.roundToInt())
+            assertEquals(3, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
             assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
             sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                 assertEquals(19000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -147,7 +146,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         assertEquals(480000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(3, vilkårsgrunnlag.avviksprosent?.roundToInt())
+        assertEquals(3, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(20000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -188,7 +187,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         assertEquals(480000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(3, vilkårsgrunnlag.avviksprosent?.roundToInt())
+        assertEquals(3, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(20000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -229,7 +228,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         assertEquals(372000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(3, vilkårsgrunnlag.avviksprosent?.roundToInt())
+        assertEquals(3, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(29000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -281,7 +280,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         assertEquals(372000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(65, vilkårsgrunnlag.avviksprosent?.roundToInt())
+        assertEquals(65, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(10000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -320,7 +319,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         assertEquals(480000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(25, vilkårsgrunnlag.avviksprosent?.roundToInt())
+        assertEquals(25, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(9999.månedlig, it.inntektsopplysning.inspektør.beløp)

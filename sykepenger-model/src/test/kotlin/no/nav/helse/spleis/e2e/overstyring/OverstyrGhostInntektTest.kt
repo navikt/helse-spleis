@@ -41,8 +41,7 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
-import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
-import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde.*
+import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -81,7 +80,7 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         assertEquals(372000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(2, vilkårsgrunnlag.avviksprosent?.roundToInt())
+        assertEquals(2, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -151,7 +150,7 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         assertEquals(360000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(5, vilkårsgrunnlag.avviksprosent?.roundToInt())
+        assertEquals(5, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -225,7 +224,7 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         assertEquals(720000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(48, vilkårsgrunnlag.avviksprosent?.roundToInt())
+        assertEquals(48, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)

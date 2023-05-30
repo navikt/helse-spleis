@@ -13,7 +13,12 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.november
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
@@ -40,8 +45,8 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
-import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
-import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde.*
+import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde.EN_ARBEIDSGIVER
+import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -110,7 +115,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         assertEquals(372000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
         assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+        assertEquals(0, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
         assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -177,7 +182,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         assertEquals(372000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
         assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+        assertEquals(0, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
         assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -322,7 +327,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         assertEquals(745000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+        assertEquals(0, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -382,7 +387,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
         assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a2).inntektskilde(1.vedtaksperiode))
-        assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+        assertEquals(0, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
         assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -481,7 +486,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         assertEquals(49200.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
         assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(7, vilkårsgrunnlag.avviksprosent?.roundToInt())
+        assertEquals(7, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
         assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(3800.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -537,7 +542,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
         assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(50, vilkårsgrunnlag.avviksprosent?.roundToInt())
+        assertEquals(50, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
         assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -605,7 +610,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         assertEquals(372000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
         assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+        assertEquals(0, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
         assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)

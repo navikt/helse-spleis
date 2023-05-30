@@ -632,7 +632,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertEquals(300000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
             assertEquals(300000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
             assertEquals(372000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
-            assertEquals(19, vilkårsgrunnlag.avviksprosent?.roundToInt())
+            assertEquals(19, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
             assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
             sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                 assertEquals(25000.månedlig, it.inntektsopplysning.inspektør.beløp)

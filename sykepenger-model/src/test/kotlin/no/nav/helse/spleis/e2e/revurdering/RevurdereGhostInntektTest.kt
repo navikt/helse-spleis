@@ -29,8 +29,7 @@ import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
-import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
-import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde.*
+import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -64,7 +63,7 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
                 assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
                 assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
                 assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
-                assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(0, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -103,7 +102,7 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
                 assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
                 assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
                 assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
-                assertEquals(26, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(26, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -145,7 +144,7 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
                 assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
                 assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
                 assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
-                assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(0, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -184,7 +183,7 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
                 assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
                 assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
                 assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
-                assertEquals(15, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(15, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -226,7 +225,7 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
                 assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
                 assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
                 assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
-                assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(0, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -265,7 +264,7 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
                 assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
                 assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
                 assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
-                assertEquals(50, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(50, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -342,7 +341,7 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
                 assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
                 assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
                 assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
-                assertEquals(24, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(24, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -369,7 +368,7 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
                 assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
                 assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
                 assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(2.vedtaksperiode))
-                assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(0, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)

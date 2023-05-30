@@ -12,7 +12,6 @@ import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosent
 import org.junit.jupiter.api.fail
 import kotlin.properties.Delegates
 
@@ -114,8 +113,6 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         private set
     internal lateinit var sammenligningsgrunnlag: Sammenligningsgrunnlag
         private set
-    internal var avviksprosent: Prosent? = null
-        private set
     internal var antallOpptjeningsdagerErMinst by Delegates.notNull<Int>()
         private set
     internal var harOpptjening by Delegates.notNull<Boolean>()
@@ -174,22 +171,6 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
     override fun preVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {
         this.antallOpptjeningsdagerErMinst = opptjening.opptjeningsdager()
         this.harOpptjening = opptjening.erOppfylt()
-    }
-
-    override fun preVisitSykepengegrunnlag(
-        sykepengegrunnlag1: Sykepengegrunnlag,
-        skjæringstidspunkt: LocalDate,
-        sykepengegrunnlag: Inntekt,
-        avviksprosent: Prosent,
-        totalOmregnetÅrsinntekt: Inntekt,
-        beregningsgrunnlag: Inntekt,
-        `6G`: Inntekt,
-        begrensning: Sykepengegrunnlag.Begrensning,
-        vurdertInfotrygd: Boolean,
-        minsteinntekt: Inntekt,
-        oppfyllerMinsteinntektskrav: Boolean
-    ) {
-        this.avviksprosent = avviksprosent
     }
 
     override fun preVisitSammenligningsgrunnlag(

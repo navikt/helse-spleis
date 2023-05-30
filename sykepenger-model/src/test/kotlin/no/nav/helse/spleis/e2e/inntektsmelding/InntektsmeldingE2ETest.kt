@@ -1121,7 +1121,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
         assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+        assertEquals(0, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
         assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(INNTEKT, it.inntektsopplysning.inspektør.beløp)
