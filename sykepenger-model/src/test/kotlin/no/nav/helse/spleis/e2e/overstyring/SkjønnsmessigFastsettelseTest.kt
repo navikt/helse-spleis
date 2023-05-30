@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
 internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
 
     @Test
-    fun `skjønnsmessig fastsettelse`() {
+    fun `skjønnsmessig fastsatt inntekt skal ikke ha avviksvurdering`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(
             orgnummer = a1,
@@ -25,5 +25,6 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         val inntektsopplysning = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single().inspektør.inntektsopplysning
         assertTrue(inntektsopplysning is SkjønnsmessigFastsatt)
+        assertEquals(0, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.avviksprosent)
     }
 }
