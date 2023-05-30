@@ -44,7 +44,7 @@ private typealias UtbetaltDagSelector = (Feriepengeberegner.UtbetaltDag) -> Bool
 
 internal class Feriepengeberegner(
     private val alder: Alder,
-    private val opptjeningsår: Year,
+    internal val opptjeningsår: Year,
     private val utbetalteDager: List<UtbetaltDag>
 ) {
     internal companion object {

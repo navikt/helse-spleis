@@ -14,6 +14,7 @@ import no.nav.helse.person.FeriepengeutbetalingVisitor
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import org.slf4j.LoggerFactory
@@ -36,7 +37,15 @@ internal class Feriepengeutbetaling private constructor(
 
     companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+        private val Opptjening2022 = Year.of(2022)
         fun List<Feriepengeutbetaling>.gjelderFeriepengeutbetaling(hendelse: UtbetalingHendelse) = any { hendelse.erRelevant(it.oppdrag.fagsystemId()) || hendelse.erRelevant(it.personoppdrag.fagsystemId()) }
+        internal fun List<Feriepengeutbetaling>.rekjørFeriepengerTilArbeidsgiver2022(hendelse: IAktivitetslogg) =
+            firstOrNull { it.feriepengeberegner.opptjeningsår == Opptjening2022 }
+            ?.takeIf { it.sendTilOppdrag }
+            ?.oppdrag
+            ?.overfør(hendelse, null, "SPLEIS")
+            ?.also { hendelse.info("Overfører arbeidsigiveroppdrag for feriepenger 2022 på nytt") }
+
         internal fun ferdigFeriepengeutbetaling(
             feriepengeberegner: Feriepengeberegner,
             infotrygdFeriepengebeløpPerson: Double,

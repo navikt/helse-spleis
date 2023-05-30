@@ -54,6 +54,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
+import no.nav.helse.person.Arbeidsgiver.Companion.rekjørFeriepengerTilArbeidsgiver2022
 import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.sykefraværstilfelle
 import no.nav.helse.person.Arbeidsgiver.Companion.tidligsteDato
@@ -266,6 +267,12 @@ class Person private constructor(
         utbetalingshistorikk.oppdaterHistorikk(infotrygdhistorikk)
         finnArbeidsgiver(utbetalingshistorikk).håndter(utbetalingshistorikk, infotrygdhistorikk)
         håndterGjenoppta(utbetalingshistorikk)
+    }
+
+    private fun rekjørFeriepengerTilArbeidsgiver2022(hendelse: IAktivitetslogg) {
+        hendelse.kontekst(this)
+        hendelse.info("Rekjører feriepenger til arbeidsgiver for 2022")
+        arbeidsgivere.rekjørFeriepengerTilArbeidsgiver2022(hendelse)
     }
 
     fun håndter(utbetalingshistorikk: UtbetalingshistorikkForFeriepenger) {
