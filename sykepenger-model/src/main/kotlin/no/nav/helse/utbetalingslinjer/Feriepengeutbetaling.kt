@@ -41,10 +41,11 @@ internal class Feriepengeutbetaling private constructor(
         fun List<Feriepengeutbetaling>.gjelderFeriepengeutbetaling(hendelse: UtbetalingHendelse) = any { hendelse.erRelevant(it.oppdrag.fagsystemId()) || hendelse.erRelevant(it.personoppdrag.fagsystemId()) }
         internal fun List<Feriepengeutbetaling>.rekjørFeriepengerTilArbeidsgiver2022(hendelse: IAktivitetslogg) =
             firstOrNull { it.feriepengeberegner.opptjeningsår == Opptjening2022 }
-            ?.takeIf { it.sendTilOppdrag }
-            ?.oppdrag
-            ?.overfør(hendelse, null, "SPLEIS")
-            ?.also { hendelse.info("Overfører arbeidsigiveroppdrag for feriepenger 2022 på nytt") }
+                ?.takeIf { it.sendTilOppdrag }
+                ?.also { hendelse.kontekst(it) }
+                ?.oppdrag
+                ?.overfør(hendelse, null, "SPLEIS")
+                ?.also { hendelse.info("Overfører arbeidsigiveroppdrag for feriepenger 2022 på nytt") }
 
         internal fun ferdigFeriepengeutbetaling(
             feriepengeberegner: Feriepengeberegner,
