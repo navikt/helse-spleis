@@ -2,6 +2,7 @@ package no.nav.helse.dsl
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Year
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -357,6 +358,17 @@ internal class TestPerson(
         ) =
             arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikkEtterInfotrygdendring(utbetalinger, inntektshistorikk, besvart)
                 .håndter(Person::håndter)
+
+        internal fun håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår: Year
+        ) =
+            personHendelsefabrikk.lagUtbetalingshistorikkForFeriepenger(opptjeningsår)
+                .håndter(Person::håndter)
+
+        internal fun antallFeriepengeutbetalingerTilArbeidsgiver() = behovsamler.detaljerFor(orgnummer, Utbetaling)
+            .count { (behov, _) ->
+                behov["linjer"].toString().contains("SPREFAGFER-IOP")
+            }
 
         operator fun <R> invoke(testblokk: TestArbeidsgiver.() -> R): R {
             return testblokk(this)

@@ -1,6 +1,7 @@
 package no.nav.helse.dsl
 
 import java.time.LocalDate
+import java.time.Year
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning.Companion.tilSkjønnsmessigFastsatt
@@ -8,6 +9,7 @@ import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 
 internal class PersonHendelsefabrikk(
     private val aktørId: String,
@@ -42,5 +44,17 @@ internal class PersonHendelsefabrikk(
             aktørId = aktørId,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiveropplysninger = arbeidsgiveropplysninger.tilSkjønnsmessigFastsatt(meldingsreferanseId, skjæringstidspunkt)
+        )
+
+    internal fun lagUtbetalingshistorikkForFeriepenger(opptjeningsår: Year) =
+        UtbetalingshistorikkForFeriepenger(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = aktørId,
+            fødselsnummer = personidentifikator.toString(),
+            utbetalinger = emptyList(),
+            feriepengehistorikk = emptyList(),
+            arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(emptyList()),
+            opptjeningsår = opptjeningsår,
+            skalBeregnesManuelt = false
         )
 }

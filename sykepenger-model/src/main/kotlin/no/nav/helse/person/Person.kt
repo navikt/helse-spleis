@@ -369,6 +369,7 @@ class Person private constructor(
         påminnelse.info("Håndterer påminnelse for person")
         arbeidsgivere.forkastAUUSomErUtbetaltIInfotrygd(påminnelse, infotrygdhistorikk)
         arbeidsgivere.identifiserAUUSomErUtbetaltISpleis()
+        rekjørFeriepengerTilArbeidsgiver2022(påminnelse)
         håndterGjenoppta(påminnelse)
     }
 
