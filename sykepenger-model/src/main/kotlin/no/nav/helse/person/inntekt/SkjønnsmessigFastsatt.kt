@@ -41,7 +41,7 @@ class SkjønnsmessigFastsatt internal constructor(
         orgnummer: String,
         beløp: Inntekt?
     ) {
-        /* todo: skal vi lagre tidsnær? */
+        checkNotNull(overstyrtInntekt) { "overstyrt inntekt kan ikke være null" }.lagreTidsnærInntekt(skjæringstidspunkt, arbeidsgiver, hendelse, oppholdsperiodeMellom, refusjonsopplysninger, orgnummer, beløp)
     }
 
     override fun kanOverstyresAv(ny: Inntektsopplysning): Boolean {

@@ -125,4 +125,5 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object SendFeriepengeOppdrag : Toggle("SEND_FERIEPENGEOPPDRAG")
     object GraphQLV2: Toggle("GRAPHQL_V2", false)
     object ForenkleRevurdering: Toggle("FORENKLE_REVURDERING", false)
+    object TjuefemprosentAvvik : Toggle(false)
 }

@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.forrigeDag
@@ -394,7 +395,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         vilkårsgrunnlagId: UUID
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag, opptjening) {
         internal fun validerFørstegangsvurdering(aktivitetslogg: IAktivitetslogg) {
-            sykepengegrunnlag.validerAvvik(aktivitetslogg)
+            sykepengegrunnlag.validerAvvik(aktivitetslogg, if (Toggle.TjuefemprosentAvvik.enabled) IAktivitetslogg::varsel else IAktivitetslogg::funksjonellFeil)
             sykepengegrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjening)
             sykepengegrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
         }

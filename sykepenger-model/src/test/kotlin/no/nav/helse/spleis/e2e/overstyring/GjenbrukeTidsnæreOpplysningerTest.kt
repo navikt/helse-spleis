@@ -1,11 +1,13 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson
+import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -36,7 +38,6 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -787,6 +788,62 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
         }
     }
 
+    @Test
+    fun `gjenbruker grunnlaget for skjønnsmessig fastsettelse`() = Toggle.TjuefemprosentAvvik.enable {
+        a1 {
+            val beregnetInntektIM = INNTEKT * 2
+            val inntektSkatt = INNTEKT
+            val skjønnsmessigFastsattInntekt = INNTEKT * 1.5
+
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntektIM)
+            håndterVilkårsgrunnlag(1.vedtaksperiode, inntektSkatt)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(
+                orgnummer = a1,
+                inntekt = skjønnsmessigFastsattInntekt,
+                forklaring = "Denne kan vi vel fjerne?",
+                subsumsjon = null,
+                refusjonsopplysninger = listOf(Triple(1.januar, null, skjønnsmessigFastsattInntekt))
+            )))
+
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør
+
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(20.januar, 31.januar))
+
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterYtelser(2.vedtaksperiode)
+            håndterVilkårsgrunnlag(2.vedtaksperiode, inntektSkatt)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
+            val sykepengegrunnlag = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør
+
+            val arbeidsgiverInntektsopplysning = sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.inntektsopplysning.inspektør
+            assertEquals(beregnetInntektIM, arbeidsgiverInntektsopplysning.beløp)
+            val hendelseIdFør = sykepengegrunnlagFør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.inntektsopplysning.inspektør.hendelseId
+            val hendelseIdEtter = arbeidsgiverInntektsopplysning.hendelseId
+            assertEquals(hendelseIdFør, hendelseIdEtter)
+        }
+    }
     @Test
     fun `ikke varsel når det er hull i agp`() {
         a1 {
