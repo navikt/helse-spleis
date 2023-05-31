@@ -88,5 +88,9 @@ abstract class Inntektsopplysning protected constructor(
             if (distinctBy { it.dato }.size <= 1 && none { it is SkattSykepengegrunnlag || it is IkkeRapportert }) return
             aktivitetslogg.varsel(Varselkode.RV_VV_2)
         }
+
+        internal fun List<Inntektsopplysning>.validerSkjønnsmessigAltEllerIntet() {
+            check(all { it is SkjønnsmessigFastsatt } || none { it is SkjønnsmessigFastsatt }) {"Enten så må alle inntektsopplysninger var skjønnsmessig fastsatt, eller så må ingen være det"}
+        }
     }
 }
