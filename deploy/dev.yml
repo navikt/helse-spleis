@@ -55,4 +55,4 @@ spec:
   - name: IDENTBYTTE
     value: "true"
   - name: FORENKLE_REVURDERING
-    value: "true"
+    value: "false"
