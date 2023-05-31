@@ -1,11 +1,15 @@
 package no.nav.helse.spleis.e2e.overstyring
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finn
+import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -51,5 +55,135 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
                 )
             }
         }
+    }
+
+    @Test
+    fun `saksbehandler-inntekt overstyres av en skjønnsmessig med samme beløp`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterOverstyrArbeidsgiveropplysninger(
+            1.januar, listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a1,
+                    inntekt = INNTEKT * 2,
+                    forklaring = "Denne kan vi vel fjerne?",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
+                )
+            )
+        )
+        assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single().inspektør.inntektsopplysning is Saksbehandler)
+        håndterSkjønnsmessigFastsettelse(
+            1.januar, listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a1,
+                    inntekt = INNTEKT * 2,
+                    forklaring = "Denne kan vi vel fjerne?",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
+                )
+            )
+        )
+        assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+        assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single().inspektør.inntektsopplysning is SkjønnsmessigFastsatt)
+    }
+
+    @Test
+    fun `skjønnsmessig fastsettelse overstyres av en skjønnsmessig med samme beløp`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSkjønnsmessigFastsettelse(
+            1.januar, listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a1,
+                    inntekt = INNTEKT * 2,
+                    forklaring = "Denne kan vi vel fjerne?",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
+                )
+            )
+        )
+        håndterSkjønnsmessigFastsettelse(
+            1.januar, listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a1,
+                    inntekt = INNTEKT * 2,
+                    forklaring = "Denne kan vi vel fjerne?",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
+                )
+            )
+        )
+        assertForventetFeil(
+            forklaring = "TODO. Morten sa tre",
+            nå = {
+                assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            },
+            ønsket = {
+                assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            }
+        )
+    }
+
+    @Test
+    fun `skjønnsmessig fastsettelse overstyres av en inntektmelding med samme beløp`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSkjønnsmessigFastsettelse(
+            1.januar, listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a1,
+                    inntekt = INNTEKT * 2,
+                    forklaring = "Denne kan vi vel fjerne?",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
+                )
+            )
+        )
+        assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT * 2)
+        assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+
+        assertForventetFeil(
+            forklaring = "TODO",
+            nå = {
+                inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.finn(
+                    a1
+                )?.let { assertTrue(it.inspektør.inntektsopplysning is SkjønnsmessigFastsatt) }
+            },
+            ønsket = {
+                inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.finn(
+                    a1
+                )?.let { assertTrue(it.inspektør.inntektsopplysning is Inntektsmelding) }
+            }
+        )
+    }
+
+    @Test
+    fun `skjønnsmessig fastsettelse overstyres av en inntektmelding med ulikt beløp`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSkjønnsmessigFastsettelse(
+            1.januar, listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a1,
+                    inntekt = INNTEKT * 2,
+                    forklaring = "Denne kan vi vel fjerne?",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
+                )
+            )
+        )
+        assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT * 3)
+        assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+
+        assertForventetFeil(
+            forklaring = "TODO",
+            nå = {
+                inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.finn(a1)
+                    ?.let { assertTrue(it.inspektør.inntektsopplysning is SkjønnsmessigFastsatt) }
+            },
+            ønsket = {
+                inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.finn(a1)
+                    ?.let { assertTrue(it.inspektør.inntektsopplysning is Inntektsmelding) }
+            }
+        )
     }
 }
