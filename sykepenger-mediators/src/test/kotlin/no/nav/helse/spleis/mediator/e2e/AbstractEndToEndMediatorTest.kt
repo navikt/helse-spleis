@@ -489,6 +489,17 @@ internal abstract class AbstractEndToEndMediatorTest() {
         testRapid.sendTestMessage(message)
     }
 
+    protected fun sendSkjønnsmessigFastsettelse(
+        skjæringstidspunkt: LocalDate,
+        arbeidsgiveropplysninger: List<Arbeidsgiveropplysning>
+    ) {
+        val (_, message) = meldingsfabrikk.lagSkjønnsmessigFastsettelse(
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidsgiveropplysninger = arbeidsgiveropplysninger
+        )
+        testRapid.sendTestMessage(message)
+    }
+
     protected fun sendInfotrygdendring() {
         val (_, message) = meldingsfabrikk.lagInfotrygdendringer()
         testRapid.sendTestMessage(message)

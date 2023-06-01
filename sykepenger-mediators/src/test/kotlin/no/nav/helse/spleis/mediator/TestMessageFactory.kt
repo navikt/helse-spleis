@@ -485,8 +485,8 @@ internal class TestMessageFactory(
     data class Arbeidsgiveropplysning(
         val organisasjonsnummer: String,
         val månedligInntekt: Double?,
-        val forklaring: String?,
-        val subsumsjon: Subsumsjon?,
+        val forklaring: String? = null,
+        val subsumsjon: Subsumsjon? = null,
         val refusjonsopplysninger: List<Refusjonsopplysning>?
     )
 
@@ -993,6 +993,23 @@ internal class TestMessageFactory(
                         this["subsumsjon"] = it.toMap
                     }
                 }
+            }
+        )
+    )
+    fun lagSkjønnsmessigFastsettelse(
+        skjæringstidspunkt: LocalDate,
+        arbeidsgiveropplysninger: List<Arbeidsgiveropplysning>
+    ) = nyHendelse(
+        "skjønnsmessig_fastsettelse", mutableMapOf(
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "arbeidsgivere" to arbeidsgiveropplysninger.map { arbeidgiver ->
+                mutableMapOf(
+                    "organisasjonsnummer" to arbeidgiver.organisasjonsnummer,
+                    "månedligInntekt" to arbeidgiver.månedligInntekt,
+                    "refusjonsopplysninger" to arbeidgiver.refusjonsopplysninger?.map { it.toMap }
+                )
             }
         )
     )
