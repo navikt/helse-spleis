@@ -21,13 +21,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     @Test
     fun `skjønnsmessig fastsatt inntekt skal ikke ha avviksvurdering`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(
-            orgnummer = a1,
-            inntekt = INNTEKT * 2,
-            forklaring = "Denne kan vi vel fjerne?",
-            subsumsjon = null,
-            refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
-        )))
+        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         val sykepengegrunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør
         val inntektsopplysning = sykepengegrunnlag.arbeidsgiverInntektsopplysninger.single().inspektør.inntektsopplysning
@@ -42,17 +36,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
         (a1 og a2).nyeVedtak(1.januar til 31.januar)
         a1 {
             assertThrows<IllegalStateException> {
-                håndterSkjønnsmessigFastsettelse(
-                    1.januar, listOf(
-                        OverstyrtArbeidsgiveropplysning(
-                            orgnummer = a1,
-                            inntekt = INNTEKT * 2,
-                            forklaring = "Denne kan vi vel fjerne?",
-                            subsumsjon = null,
-                            refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
-                        )
-                    )
-                )
+                håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
             }
         }
     }
@@ -60,29 +44,9 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     @Test
     fun `saksbehandler-inntekt overstyres av en skjønnsmessig med samme beløp`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterOverstyrArbeidsgiveropplysninger(
-            1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a1,
-                    inntekt = INNTEKT * 2,
-                    forklaring = "Denne kan vi vel fjerne?",
-                    subsumsjon = null,
-                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
-                )
-            )
-        )
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2, forklaring = "forklaring")))
         assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single().inspektør.inntektsopplysning is Saksbehandler)
-        håndterSkjønnsmessigFastsettelse(
-            1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a1,
-                    inntekt = INNTEKT * 2,
-                    forklaring = "Denne kan vi vel fjerne?",
-                    subsumsjon = null,
-                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
-                )
-            )
-        )
+        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
         assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single().inspektør.inntektsopplysning is SkjønnsmessigFastsatt)
     }
@@ -90,28 +54,8 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     @Test
     fun `skjønnsmessig fastsettelse overstyres av en skjønnsmessig med samme beløp`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterSkjønnsmessigFastsettelse(
-            1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a1,
-                    inntekt = INNTEKT * 2,
-                    forklaring = "Denne kan vi vel fjerne?",
-                    subsumsjon = null,
-                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
-                )
-            )
-        )
-        håndterSkjønnsmessigFastsettelse(
-            1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a1,
-                    inntekt = INNTEKT * 2,
-                    forklaring = "Denne kan vi vel fjerne?",
-                    subsumsjon = null,
-                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
-                )
-            )
-        )
+        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
+        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
         assertForventetFeil(
             forklaring = "TODO. Morten sa tre",
             nå = {
@@ -126,20 +70,10 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     @Test
     fun `skjønnsmessig fastsettelse overstyres av en inntektmelding med samme beløp`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterSkjønnsmessigFastsettelse(
-            1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a1,
-                    inntekt = INNTEKT * 2,
-                    forklaring = "Denne kan vi vel fjerne?",
-                    subsumsjon = null,
-                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
-                )
-            )
-        )
+        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT * 2)
-        assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+        assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
         assertForventetFeil(
             forklaring = "TODO",
@@ -159,17 +93,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     @Test
     fun `skjønnsmessig fastsettelse overstyres av en inntektmelding med ulikt beløp`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterSkjønnsmessigFastsettelse(
-            1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a1,
-                    inntekt = INNTEKT * 2,
-                    forklaring = "Denne kan vi vel fjerne?",
-                    subsumsjon = null,
-                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
-                )
-            )
-        )
+        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT * 3)
         assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)

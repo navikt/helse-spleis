@@ -353,7 +353,7 @@ internal class TestPerson(
             overstyringer: List<OverstyrtArbeidsgiveropplysning>,
             hendelseId: UUID = UUID.randomUUID(),
         ) =
-            arbeidsgiverHendelsefabrikk.lagOverstyrArbeidsgiveropplysninger(hendelseId, skjæringstidspunkt, overstyringer)
+            personHendelsefabrikk.lagOverstyrArbeidsgiveropplysninger(skjæringstidspunkt, overstyringer, hendelseId)
                 .håndter(Person::håndter)
 
         internal fun håndterUtbetalingshistorikkEtterInfotrygdendring(

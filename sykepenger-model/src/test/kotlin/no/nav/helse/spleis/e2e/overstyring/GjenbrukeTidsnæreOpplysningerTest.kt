@@ -801,13 +801,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(
-                orgnummer = a1,
-                inntekt = skjønnsmessigFastsattInntekt,
-                forklaring = "Denne kan vi vel fjerne?",
-                subsumsjon = null,
-                refusjonsopplysninger = listOf(Triple(1.januar, null, skjønnsmessigFastsattInntekt))
-            )))
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = skjønnsmessigFastsattInntekt)))
 
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

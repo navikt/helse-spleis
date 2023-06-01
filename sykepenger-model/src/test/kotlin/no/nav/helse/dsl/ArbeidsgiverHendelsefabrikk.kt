@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning.Companion.tilOverstyrt
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
@@ -21,14 +20,12 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.Opplæringspenger
-import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
-import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -44,10 +41,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.inntekt.Refusjonsopplysning
-import no.nav.helse.person.inntekt.Saksbehandler
-import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
 
@@ -387,42 +380,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         )
 
     internal fun lagOverstyrInntekt(hendelseId: UUID, skjæringstidspunkt: LocalDate, inntekt: Inntekt, orgnummer: String) =
-        lagOverstyrArbeidsgiveropplysninger(hendelseId, skjæringstidspunkt, listOf(
+        PersonHendelsefabrikk(aktørId, personidentifikator).lagOverstyrArbeidsgiveropplysninger(skjæringstidspunkt, listOf(
             OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, "forklaring", null, emptyList())
-        ))
-
-    internal fun lagOverstyrArbeidsgiveropplysninger(hendelseId: UUID, skjæringstidspunkt: LocalDate, opplysninger: List<OverstyrtArbeidsgiveropplysning>) =
-        OverstyrArbeidsgiveropplysninger(
-            meldingsreferanseId = hendelseId,
-            fødselsnummer = personidentifikator.toString(),
-            aktørId = aktørId,
-            skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgiveropplysninger = opplysninger.tilOverstyrt(hendelseId, skjæringstidspunkt)
-        )
-}
-
-
-internal class OverstyrtArbeidsgiveropplysning(
-    private val orgnummer: String,
-    private val inntekt: Inntekt,
-    private val forklaring: String,
-    private val subsumsjon: Subsumsjon?,
-    private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>
-) {
-    internal companion object {
-        internal fun List<OverstyrtArbeidsgiveropplysning>.tilOverstyrt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) =
-            map {
-                ArbeidsgiverInntektsopplysning(it.orgnummer, Saksbehandler(skjæringstidspunkt, meldingsreferanseId, it.inntekt, it.forklaring, it.subsumsjon, LocalDateTime.now()), Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder()
-                    .apply {
-                        it.refusjonsopplysninger.forEach { (fom, tom, refusjonsbeløp) -> leggTil(Refusjonsopplysning(meldingsreferanseId, fom, tom, refusjonsbeløp), LocalDateTime.now())}
-                    }.build())
-            }
-        internal fun List<OverstyrtArbeidsgiveropplysning>.tilSkjønnsmessigFastsatt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) =
-            map {
-                ArbeidsgiverInntektsopplysning(it.orgnummer, SkjønnsmessigFastsatt(skjæringstidspunkt, meldingsreferanseId, it.inntekt, it.forklaring, it.subsumsjon, LocalDateTime.now()), Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder()
-                    .apply {
-                        it.refusjonsopplysninger.forEach { (fom, tom, refusjonsbeløp) -> leggTil(Refusjonsopplysning(meldingsreferanseId, fom, tom, refusjonsbeløp), LocalDateTime.now())}
-                    }.build())
-            }
-    }
+        ), meldingsreferanseId = hendelseId)
 }
