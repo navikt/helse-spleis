@@ -986,7 +986,8 @@ internal data class PersonData(
                 OverstyrInntekt(Dokumentsporing::overstyrInntekt),
                 OverstyrRefusjon(Dokumentsporing::overstyrRefusjon),
                 OverstyrArbeidsgiveropplysninger(Dokumentsporing::overstyrArbeidsgiveropplysninger),
-                OverstyrArbeidsforhold(Dokumentsporing::overstyrArbeidsforhold);
+                OverstyrArbeidsforhold(Dokumentsporing::overstyrArbeidsforhold),
+                SkjønnsmessigFastsettelse(Dokumentsporing::skjønnsmessigFastsettelse);
 
                 fun tilModelltype(dokumentId: UUID) = modelltype(dokumentId)
             }

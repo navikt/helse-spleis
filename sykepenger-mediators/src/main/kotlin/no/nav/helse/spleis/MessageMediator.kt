@@ -30,6 +30,7 @@ import no.nav.helse.spleis.meldinger.PåminnelserRiver
 import no.nav.helse.spleis.meldinger.SendtArbeidsgiverSøknaderRiver
 import no.nav.helse.spleis.meldinger.SendtNavSøknaderRiver
 import no.nav.helse.spleis.meldinger.SimuleringerRiver
+import no.nav.helse.spleis.meldinger.SkjønnsmessigFastsettelseRiver
 import no.nav.helse.spleis.meldinger.UtbetalingerRiver
 import no.nav.helse.spleis.meldinger.UtbetalingpåminnelserRiver
 import no.nav.helse.spleis.meldinger.UtbetalingsgodkjenningerRiver
@@ -84,6 +85,7 @@ internal class MessageMediator(
             AnmodningOmForkastingRiver(it, this)
             GjenopplivVilkårsgrunnlagRiver(it, this)
             IdentOpphørtRiver(it, this)
+            SkjønnsmessigFastsettelseRiver(it, this)
         }
     }
 

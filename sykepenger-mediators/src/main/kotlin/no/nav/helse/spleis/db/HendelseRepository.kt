@@ -28,6 +28,7 @@ import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRTIDSLINJE
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_ARBEIDSGIVER
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_NAV
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SIMULERING
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGPÅMINNELSE
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSGODKJENNING
@@ -57,6 +58,7 @@ import no.nav.helse.spleis.meldinger.model.PåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsgiverMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
+import no.nav.helse.spleis.meldinger.model.SkjønnsmessigFastsettelseMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingpåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
@@ -146,6 +148,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is AnmodningOmForkastingMessage -> ANMODNING_OM_FORKASTING
         is GjenopplivVilkårsgrunnlagMessage -> GJENOPPLIV_VILKÅRSGRUNNLAG
         is IdentOpphørtMessage -> IDENT_OPPHØRT
+        is SkjønnsmessigFastsettelseMessage -> SKJØNNSMESSIG_FASTSETTELSE
         is MigrateMessage,
         is AvstemmingMessage,
         is PersonPåminnelseMessage,
@@ -198,6 +201,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         FORKAST_SYKMELDINGSPERIODER,
         ANMODNING_OM_FORKASTING,
         GJENOPPLIV_VILKÅRSGRUNNLAG,
-        IDENT_OPPHØRT
+        IDENT_OPPHØRT,
+        SKJØNNSMESSIG_FASTSETTELSE
     }
 }

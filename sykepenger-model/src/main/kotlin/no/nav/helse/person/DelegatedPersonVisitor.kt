@@ -29,6 +29,7 @@ import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
+import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -923,6 +924,32 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         tidsstempel: LocalDateTime
     ) {
         delegatee.postVisitSaksbehandler(saksbehandler, id, dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
+    }
+
+    override fun preVisitSkjønnsmessigFastsatt(
+        saksbehandler: SkjønnsmessigFastsatt,
+        id: UUID,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        forklaring: String?,
+        subsumsjon: Subsumsjon?,
+        tidsstempel: LocalDateTime
+    ) {
+        delegatee.preVisitSkjønnsmessigFastsatt(saksbehandler, id, dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
+    }
+
+    override fun postVisitSkjønnsmessigFastsatt(
+        saksbehandler: SkjønnsmessigFastsatt,
+        id: UUID,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        forklaring: String?,
+        subsumsjon: Subsumsjon?,
+        tidsstempel: LocalDateTime
+    ) {
+        delegatee.postVisitSkjønnsmessigFastsatt(saksbehandler, id, dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
     }
 
     override fun visitInntektsmelding(

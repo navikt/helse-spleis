@@ -20,6 +20,7 @@ import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
@@ -64,6 +65,7 @@ import no.nav.helse.spleis.meldinger.model.PåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsgiverMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
+import no.nav.helse.spleis.meldinger.model.SkjønnsmessigFastsettelseMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingpåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
@@ -351,6 +353,16 @@ internal class HendelseMediator(
         }
     }
 
+    override fun behandle(
+        message: SkjønnsmessigFastsettelseMessage,
+        skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse,
+        context: MessageContext
+    ) {
+        hentPersonOgHåndter(message, skjønnsmessigFastsettelse, context) { person ->
+            person.håndter(skjønnsmessigFastsettelse)
+        }
+    }
+
     private fun <Hendelse : PersonHendelse> opprettPersonOgHåndter(
         personopplysninger: Personopplysninger,
         message: HendelseMessage,
@@ -469,4 +481,5 @@ internal interface IHendelseMediator {
     fun behandle(message: UtbetalingshistorikkEtterInfotrygdendringMessage, utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring, context: MessageContext)
     fun behandle(message: ForkastSykmeldingsperioderMessage, forkastSykmeldingsperioder: ForkastSykmeldingsperioder, context: MessageContext)
     fun behandle(message: GjenopplivVilkårsgrunnlagMessage, gjenopplivVilkårsgrunnlag: GjenopplivVilkårsgrunnlag, context: MessageContext)
+    fun behandle(message: SkjønnsmessigFastsettelseMessage, skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse, context: MessageContext)
 }

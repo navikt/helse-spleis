@@ -1,6 +1,8 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
@@ -42,7 +44,7 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage) : He
 
         val saksbehandlerinntekt =
             Saksbehandler(skjæringstidspunkt, id, månedligInntekt, forklaring, subsumsjon, opprettet)
-        val refusjonsopplysninger = arbeidsgiveropplysning["refusjonsopplysninger"].asRefusjonsopplysninger()
+        val refusjonsopplysninger = arbeidsgiveropplysning["refusjonsopplysninger"].asRefusjonsopplysninger(id, opprettet)
 
         ArbeidsgiverInntektsopplysning(orgnummer, saksbehandlerinntekt, refusjonsopplysninger)
     }
@@ -55,18 +57,19 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage) : He
         )
     }
 
-    private fun JsonNode.asRefusjonsopplysninger() = RefusjonsopplysningerBuilder().also { builder ->
-        this.map { refusjonsopplysning ->
-            builder.leggTil(
-                Refusjonsopplysning(
-                    meldingsreferanseId = id,
-                    fom = refusjonsopplysning.path("fom").asLocalDate(),
-                    tom = refusjonsopplysning.path("tom").asOptionalLocalDate(),
-                    beløp = refusjonsopplysning.path("beløp").asDouble().månedlig
-                ), opprettet)
-        }
-    }.build()
-
+    internal companion object {
+        internal fun JsonNode.asRefusjonsopplysninger(meldingsreferanseId: UUID, opprettet: LocalDateTime) = RefusjonsopplysningerBuilder().also { builder ->
+            this.map { refusjonsopplysning ->
+                builder.leggTil(
+                    Refusjonsopplysning(
+                        meldingsreferanseId = meldingsreferanseId,
+                        fom = refusjonsopplysning.path("fom").asLocalDate(),
+                        tom = refusjonsopplysning.path("tom").asOptionalLocalDate(),
+                        beløp = refusjonsopplysning.path("beløp").asDouble().månedlig
+                    ), opprettet)
+            }
+        }.build()
+    }
 }
 
 

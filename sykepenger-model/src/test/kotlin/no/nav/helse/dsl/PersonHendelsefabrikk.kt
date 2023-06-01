@@ -103,8 +103,7 @@ internal class OverstyrtArbeidsgiveropplysning(
         internal fun List<OverstyrtArbeidsgiveropplysning>.medSkjønnsmessigFastsattInntekt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) = tilArbeidsgiverInntektsopplysning(meldingsreferanseId, skjæringstidspunkt) {
             check(it.forklaring == null) { "Skal ikke sette forklaring på Skjønnsmessig fastsatt inntekt" }
             check(it.subsumsjon == null) { "Skal ikke sette subsumsjon på Skjønssmessig fastsatt inntekt" }
-            val FJERN_MEG: Subsumsjon? = null
-            SkjønnsmessigFastsatt(skjæringstidspunkt, meldingsreferanseId, it.inntekt, "FJERN MEG", FJERN_MEG, LocalDateTime.now())
+            SkjønnsmessigFastsatt(skjæringstidspunkt, meldingsreferanseId, it.inntekt, LocalDateTime.now())
         }
     }
 }
