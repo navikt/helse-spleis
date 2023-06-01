@@ -1,0 +1,28 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    commit-message:
+      prefix: "⬆️ "
+    schedule:
+      interval: "daily"
+    # Lager kun pull requests ved sikkerhetsoppdateringer
+    open-pull-requests-limit: 0
+
+  - package-ecosystem: "docker"
+    directory: "/"
+    commit-message:
+      prefix: "⬆️ "
+    schedule:
+      interval: "daily"
+    # Lager kun pull requests ved sikkerhetsoppdateringer
+    open-pull-requests-limit: 0
+
+  - package-ecosystem: "gradle"
+    directory: "/"
+    commit-message:
+      prefix: "⬆️ "
+    schedule:
+      interval: "daily"
+    # Lager kun pull requests ved sikkerhetsoppdateringer
+    open-pull-requests-limit: 0
