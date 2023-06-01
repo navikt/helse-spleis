@@ -851,7 +851,7 @@ internal class Arbeidsgiver private constructor(
             inntektsmelding.addInntekt(inntektshistorikk, it)
         }
         if (lagtTilNå) person.nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt, inntektsmelding, subsumsjonObserver)
-        vedtaksperioder.forEach { it.håndtertInntektPåSkjæringstidspunktet(skjæringstidspunkt, inntektsmelding) }
+        håndter(inntektsmelding) { håndtertInntektPåSkjæringstidspunktet(skjæringstidspunkt, inntektsmelding) }
     }
 
     internal fun lagreTidsnærInntektsmelding(

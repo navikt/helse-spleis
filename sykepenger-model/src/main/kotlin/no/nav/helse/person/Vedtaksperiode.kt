@@ -1708,6 +1708,10 @@ internal class Vedtaksperiode private constructor(
 
         private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             if (!vedtaksperiode.forventerInntekt()) return vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
+            if (vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) {
+                hendelse.funksjonellFeil(RV_SV_2)
+                return vedtaksperiode.forkast(hendelse)
+            }
             if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse)) return
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
