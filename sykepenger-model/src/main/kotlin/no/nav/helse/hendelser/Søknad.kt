@@ -4,7 +4,9 @@ import java.io.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.Alder
+import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode.Companion.delvisOverlappMed
@@ -22,12 +24,15 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
+import org.slf4j.LoggerFactory
 
 class Søknad(
     meldingsreferanseId: UUID,
@@ -45,14 +50,19 @@ class Søknad(
     private val arbeidUtenforNorge: Boolean,
     private val sendTilGosys: Boolean,
     private val yrkesskade: Boolean,
+    private val egenmeldinger: List<Søknadsperiode.Arbeidsgiverdag>,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class, aktivitetslogg) {
 
     private val sykdomsperiode: Periode
     private val sykdomstidslinje: Sykdomstidslinje
+    private val egenmeldingsperiode: Periode?
+    private val egenmeldingstidslinje: Sykdomstidslinje
+    private var egenmeldingsstart: LocalDate?
 
     internal companion object {
         internal const val tidslinjegrense = 40L
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
     init {
@@ -64,11 +74,55 @@ class Søknad(
             .filter { it.periode()?.start?.isAfter(sykdomsperiode.start.minusDays(tidslinjegrense)) ?: false }
             .merge(Dagturnering.SØKNAD::beste)
             .subset(sykdomsperiode)
+
+        egenmeldingsperiode = Søknadsperiode.egenmeldingsperiode(egenmeldinger)
+        egenmeldingsstart = egenmeldingsperiode?.start
+        egenmeldingstidslinje = egenmeldingsperiode?.let {
+            egenmeldinger
+                .map { it.sykdomstidslinje(egenmeldingsperiode, avskjæringsdato(), kilde) }
+                .merge(Dagturnering.SØKNAD::beste)
+                .subset(egenmeldingsperiode)
+        } ?: Sykdomstidslinje()
+
     }
 
     internal fun erRelevant(other: Periode) = other.overlapperMed(sykdomsperiode)
 
-    override fun sykdomstidslinje() = sykdomstidslinje
+    override fun sykdomstidslinje(): Sykdomstidslinje {
+        val egenmeldingCutoff = egenmeldingsstart
+        val egenmeldingTom = egenmeldingstidslinje.periode()?.endInclusive
+        if (Toggle.Egenmelding.enabled) {
+            if (egenmeldingCutoff == null) {
+                return egenmeldingstidslinje.merge(sykdomstidslinje, replace)
+            } else if (egenmeldingTom != null && egenmeldingCutoff <= egenmeldingTom) {
+                return egenmeldingstidslinje.subset(egenmeldingCutoff til egenmeldingTom)
+                    .merge(sykdomstidslinje, replace)
+            }
+            return sykdomstidslinje
+        }
+        return sykdomstidslinje
+    }
+
+    fun loggEgenmeldingsstrekking()  {
+        if(egenmeldingstidslinje.periode() != null) {
+            val egenmeldingCutoff = egenmeldingsstart
+            val egenmeldingTom = egenmeldingstidslinje.periode()?.endInclusive
+            var nySykdomstidslinje = Sykdomstidslinje()
+            if (egenmeldingCutoff == null) {
+                nySykdomstidslinje = egenmeldingstidslinje.merge(sykdomstidslinje, replace)
+            } else if (egenmeldingTom != null && egenmeldingCutoff <= egenmeldingTom) {
+                nySykdomstidslinje = egenmeldingstidslinje.subset(egenmeldingCutoff til egenmeldingTom)
+                    .merge(sykdomstidslinje, replace)
+            }
+
+            sikkerlogg.info("Sykdomstidslinjen ble strukket av egenmelding med {}.\n{}\n{}\n{}",
+                StructuredArguments.keyValue("dager", nySykdomstidslinje.toShortString().count() - sykdomstidslinje.toShortString().count()),
+                StructuredArguments.keyValue("gammelSykdomstidslinje", sykdomstidslinje),
+                StructuredArguments.keyValue("egenmeldingstidslinje", egenmeldingstidslinje),
+                StructuredArguments.keyValue("nySykdomstidslinje", nySykdomstidslinje)
+            )
+        }
+    }
 
     internal fun harArbeidsdager() = perioder.filterIsInstance<Søknadsperiode.Arbeid>().isNotEmpty()
     internal fun delvisOverlappende(other: Periode) = other.delvisOverlappMed(sykdomsperiode)
@@ -143,6 +197,12 @@ class Søknad(
         arbeidsgiveren.fjern(sykdomsperiode)
     }
 
+    internal fun trimEgenmeldingsdager(dato: LocalDate) {
+        if(egenmeldingsperiode != null && egenmeldingsperiode.start <= dato) {
+            egenmeldingsstart = dato.plusDays(1)
+        }
+    }
+
     class Merknad(private val type: String) {
         internal fun valider(aktivitetslogg: IAktivitetslogg) {
             if (type == "UGYLDIG_TILBAKEDATERING" || type == "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER") {
@@ -157,6 +217,9 @@ class Søknad(
         internal companion object {
             fun sykdomsperiode(liste: List<Søknadsperiode>) =
                 søknadsperiode(liste.filterIsInstance<Sykdom>())
+
+            fun egenmeldingsperiode(liste: List<Søknadsperiode>) =
+                søknadsperiode(liste.filterIsInstance<Arbeidsgiverdag>())
 
             fun List<Søknadsperiode>.inneholderDagerEtter(sisteSykdomsdato: LocalDate) =
                 any { it.periode.endInclusive > sisteSykdomsdato }
@@ -189,6 +252,7 @@ class Søknad(
 
         internal open fun subsumsjon(søknadsperioder: List<Map<String, Serializable>>, subsumsjonObserver: SubsumsjonObserver) {}
 
+        // TODO: trenger en søknadsperiode for arbeidsgiverdag
         class Sykdom(
             fom: LocalDate,
             tom: LocalDate,
@@ -209,6 +273,11 @@ class Søknad(
         class Ferie(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "ferie") {
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.feriedager(periode.start, periode.endInclusive, kilde).subset(sykdomsperiode.oppdaterTom(periode))
+        }
+
+        class Arbeidsgiverdag(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "arbeidsgiverdag") {
+            override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
+                Sykdomstidslinje.arbeidsgiverdager(periode.start, periode.endInclusive, 100.prosent, kilde).subset(sykdomsperiode.oppdaterTom(periode))
         }
 
         class Papirsykmelding(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "papirsykmelding") {

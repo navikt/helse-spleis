@@ -1,11 +1,11 @@
 package no.nav.helse.spleis.mediator.meldinger
 
+import java.util.*
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
+import no.nav.helse.spleis.meldinger.SendtArbeidsgiverSøknaderRiver
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
-import java.util.*
-import no.nav.helse.spleis.meldinger.SendtArbeidsgiverSøknaderRiver
 
 internal class SendtArbeidsgiverSøknaderRiverTest : RiverTest() {
 
@@ -65,6 +65,7 @@ internal class SendtArbeidsgiverSøknaderRiverTest : RiverTest() {
   "soktUtenlandsopphold": null,
   "arbeidsgiverForskutterer": null,
   "merknaderFraSykmelding": null,
-  "fødselsdato": "1992-12-02"
+  "fødselsdato": "1992-12-02",
+  "egenmeldingsdagerFraSykmelding": ["2019-12-31"]
 }""".trimIndent()
 }

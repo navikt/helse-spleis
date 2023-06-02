@@ -27,6 +27,7 @@ internal class SendtNavSøknaderRiver(
             interestedIn("tom") { it.asLocalDate() }
         }
         message.require("sendtNav", JsonNode::asLocalDateTime)
+        message.interestedIn("egenmeldingsdagerFraSykmelding") { egenmeldinger -> egenmeldinger.map { it.asLocalDate() } }
         message.interestedIn("arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys")
     }
 

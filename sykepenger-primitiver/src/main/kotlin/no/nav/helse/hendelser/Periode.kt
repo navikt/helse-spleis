@@ -31,7 +31,7 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
         fun Iterable<LocalDate>.grupperSammenhengendePerioder() = map(LocalDate::somPeriode).merge(
             mergeKantIKant
         )
-        private fun Iterable<LocalDate>.grupperSammenhengendePerioderMedHensynTilHelg() = map(LocalDate::somPeriode).merge(
+        fun Iterable<LocalDate>.grupperSammenhengendePerioderMedHensynTilHelg() = map(LocalDate::somPeriode).merge(
             mergeOverHelg
         )
         fun List<Periode>.grupperSammenhengendePerioder() = merge(mergeKantIKant)

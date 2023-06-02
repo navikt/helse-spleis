@@ -84,7 +84,8 @@ internal class ArbeidsgiverHendelsefabrikk(
         sendTilGosys: Boolean = false,
         opprinneligSendt: LocalDate? = null,
         yrkesskade: Boolean = false,
-        aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+        aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
+        egenmeldinger: List<Søknad.Søknadsperiode.Arbeidsgiverdag> = emptyList()
     ): Søknad {
         val innsendt = sendtTilNAVEllerArbeidsgiver ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive
         return Søknad(
@@ -103,7 +104,8 @@ internal class ArbeidsgiverHendelsefabrikk(
             arbeidUtenforNorge = arbeidUtenforNorge,
             sendTilGosys = sendTilGosys,
             aktivitetslogg = aktivitetslogg,
-            yrkesskade = yrkesskade
+            yrkesskade = yrkesskade,
+            egenmeldinger = egenmeldinger
         ).apply {
             søknader.add(this)
         }

@@ -37,7 +37,8 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         utenlandskSykmelding = utenlandskSykmelding,
         arbeidUtenforNorge = arbeidUtenforNorge,
         sendTilGosys = sendTilGosys,
-        yrkesskade = yrkesskade
+        yrkesskade = yrkesskade,
+        egenmeldinger = egenmeldinger
     )
 
     override fun inntektskilde(andreInntektskilder: Boolean) = apply {
