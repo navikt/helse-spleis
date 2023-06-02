@@ -353,7 +353,7 @@ private fun mapInntekt(inntekt: Arbeidsgiverinntekt) = GraphQLArbeidsgiverinntek
                 Inntektkilde.Infotrygd -> GraphQLInntektskilde.Infotrygd
                 Inntektkilde.AOrdningen -> GraphQLInntektskilde.AOrdningen
                 Inntektkilde.IkkeRapportert -> GraphQLInntektskilde.IkkeRapportert
-                Inntektkilde.SkjønnsmessigFastsatt -> GraphQLInntektskilde.SkjønnsmessigFastsatt
+                Inntektkilde.SkjønnsmessigFastsatt -> GraphQLInntektskilde.SkjonnsmessigFastsatt
             },
             belop = omregnetÅrsinntekt.beløp,
             manedsbelop = omregnetÅrsinntekt.månedsbeløp,

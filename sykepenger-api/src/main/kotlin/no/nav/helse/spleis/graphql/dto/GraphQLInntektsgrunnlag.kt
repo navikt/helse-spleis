@@ -20,7 +20,7 @@ enum class GraphQLInntektskilde {
     Infotrygd,
     AOrdningen,
     IkkeRapportert,
-    SkjønnsmessigFastsatt
+    SkjonnsmessigFastsatt
 }
 
 data class GraphQLInntekterFraAOrdningen(
