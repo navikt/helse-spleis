@@ -1032,7 +1032,7 @@ internal class JsonBuilder : AbstractBuilder() {
             subsumsjon: Subsumsjon?,
             tidsstempel: LocalDateTime
         ) {
-            pushState(SaksbehandlerInntektState { inntektsopplysning -> tilstand.lagreInntekt(this, inntektsopplysning) })
+            pushState(SaksbehandlerInntektState(id) { inntektsopplysning -> tilstand.lagreInntekt(this, inntektsopplysning) })
         }
 
         override fun preVisitSkjønnsmessigFastsatt(
@@ -1045,7 +1045,7 @@ internal class JsonBuilder : AbstractBuilder() {
             subsumsjon: Subsumsjon?,
             tidsstempel: LocalDateTime
         ) {
-            pushState(SkjønnsmessigFastsattInntektState { inntektsopplysning -> tilstand.lagreInntekt(this, inntektsopplysning) })
+            pushState(SkjønnsmessigFastsattInntektState(id) { inntektsopplysning -> tilstand.lagreInntekt(this, inntektsopplysning) })
         }
 
         override fun visitInntektsmelding(
@@ -1136,8 +1136,14 @@ internal class JsonBuilder : AbstractBuilder() {
         }
     }
 
-    class SaksbehandlerInntektState(private val lagreInntekt: (Map<String, Any?>) -> Unit): BuilderState() {
+    class SaksbehandlerInntektState(private val saksbehandlerinntektId: UUID, private val lagreInntekt: (Map<String, Any?>) -> Unit): BuilderState() {
         private var overstyrtInntektId: UUID? = null
+
+        private fun lagreId(id: UUID) {
+            if (overstyrtInntektId != null) return // har allerede registrert id
+            overstyrtInntektId = id
+        }
+
         override fun visitIkkeRapportert(
             ikkeRapportert: IkkeRapportert,
             id: UUID,
@@ -1145,7 +1151,7 @@ internal class JsonBuilder : AbstractBuilder() {
             dato: LocalDate,
             tidsstempel: LocalDateTime
         ) {
-            overstyrtInntektId = id
+            lagreId(id)
         }
 
         override fun visitInntektsmelding(
@@ -1156,7 +1162,7 @@ internal class JsonBuilder : AbstractBuilder() {
             beløp: Inntekt,
             tidsstempel: LocalDateTime
         ) {
-            overstyrtInntektId = id
+            lagreId(id)
         }
 
         override fun visitInfotrygd(
@@ -1167,7 +1173,7 @@ internal class JsonBuilder : AbstractBuilder() {
             beløp: Inntekt,
             tidsstempel: LocalDateTime
         ) {
-            overstyrtInntektId = id
+            lagreId(id)
         }
 
         override fun preVisitSkattSykepengegrunnlag(
@@ -1178,7 +1184,7 @@ internal class JsonBuilder : AbstractBuilder() {
             beløp: Inntekt,
             tidsstempel: LocalDateTime
         ) {
-            overstyrtInntektId = id
+            lagreId(id)
         }
 
         override fun preVisitSkjønnsmessigFastsatt(
@@ -1191,7 +1197,20 @@ internal class JsonBuilder : AbstractBuilder() {
             subsumsjon: Subsumsjon?,
             tidsstempel: LocalDateTime
         ) {
-            overstyrtInntektId = id
+            lagreId(id)
+        }
+
+        override fun preVisitSaksbehandler(
+            saksbehandler: Saksbehandler,
+            id: UUID,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            forklaring: String?,
+            subsumsjon: Subsumsjon?,
+            tidsstempel: LocalDateTime
+        ) {
+            lagreId(id)
         }
 
         override fun postVisitSaksbehandler(
@@ -1204,6 +1223,8 @@ internal class JsonBuilder : AbstractBuilder() {
             subsumsjon: Subsumsjon?,
             tidsstempel: LocalDateTime
         ) {
+            if (id !== saksbehandlerinntektId) return
+
             val inntektDetaljer = mutableMapOf(
                 "id" to id,
                 "dato" to dato,
@@ -1225,8 +1246,14 @@ internal class JsonBuilder : AbstractBuilder() {
             popState()
         }
     }
-    class SkjønnsmessigFastsattInntektState(private val lagreInntekt: (Map<String, Any?>) -> Unit): BuilderState() {
+    class SkjønnsmessigFastsattInntektState(private val skjønnsmessigFastsattId: UUID, private val lagreInntekt: (Map<String, Any?>) -> Unit): BuilderState() {
         private var overstyrtInntektId: UUID? = null
+
+        private fun lagreId(id: UUID) {
+            if (overstyrtInntektId != null) return // har allerede registrert id
+            overstyrtInntektId = id
+        }
+
         override fun visitIkkeRapportert(
             ikkeRapportert: IkkeRapportert,
             id: UUID,
@@ -1234,7 +1261,7 @@ internal class JsonBuilder : AbstractBuilder() {
             dato: LocalDate,
             tidsstempel: LocalDateTime
         ) {
-            overstyrtInntektId = id
+            lagreId(id)
         }
 
         override fun visitInntektsmelding(
@@ -1245,7 +1272,7 @@ internal class JsonBuilder : AbstractBuilder() {
             beløp: Inntekt,
             tidsstempel: LocalDateTime
         ) {
-            overstyrtInntektId = id
+            lagreId(id)
         }
 
         override fun visitInfotrygd(
@@ -1256,7 +1283,7 @@ internal class JsonBuilder : AbstractBuilder() {
             beløp: Inntekt,
             tidsstempel: LocalDateTime
         ) {
-            overstyrtInntektId = id
+            lagreId(id)
         }
 
         override fun preVisitSkattSykepengegrunnlag(
@@ -1267,7 +1294,20 @@ internal class JsonBuilder : AbstractBuilder() {
             beløp: Inntekt,
             tidsstempel: LocalDateTime
         ) {
-            overstyrtInntektId = id
+            lagreId(id)
+        }
+
+        override fun preVisitSkjønnsmessigFastsatt(
+            saksbehandler: SkjønnsmessigFastsatt,
+            id: UUID,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            forklaring: String?,
+            subsumsjon: Subsumsjon?,
+            tidsstempel: LocalDateTime
+        ) {
+            lagreId(id)
         }
 
         override fun preVisitSaksbehandler(
@@ -1280,7 +1320,7 @@ internal class JsonBuilder : AbstractBuilder() {
             subsumsjon: Subsumsjon?,
             tidsstempel: LocalDateTime
         ) {
-            overstyrtInntektId = id
+            lagreId(id)
         }
 
         override fun postVisitSkjønnsmessigFastsatt(
@@ -1293,6 +1333,7 @@ internal class JsonBuilder : AbstractBuilder() {
             subsumsjon: Subsumsjon?,
             tidsstempel: LocalDateTime
         ) {
+            if (id != skjønnsmessigFastsattId) return
             val inntektDetaljer = mutableMapOf(
                 "id" to id,
                 "dato" to dato,
