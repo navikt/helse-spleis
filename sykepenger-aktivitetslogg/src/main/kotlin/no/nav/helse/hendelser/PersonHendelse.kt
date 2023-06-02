@@ -3,11 +3,11 @@ package no.nav.helse.hendelser
 import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggMappingPort
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggObserver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Subaktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 
 class FunksjonelleFeilTilVarsler(private val other: IAktivitetslogg) : IAktivitetslogg by other {
@@ -73,7 +73,7 @@ abstract class PersonHendelse protected constructor(
     override fun behov() = aktivitetslogg.behov()
     override fun barn() = aktivitetslogg.barn()
     override fun kontekst(kontekst: Aktivitetskontekst) = aktivitetslogg.kontekst(kontekst)
-    override fun kontekst(kontekst: Subaktivitetskontekst) = aktivitetslogg.kontekst(kontekst)
+    override fun kontekst(parent: Aktivitetslogg, kontekst: Aktivitetskontekst) = aktivitetslogg.kontekst(parent, kontekst)
     override fun kontekster() = aktivitetslogg.kontekster()
     override fun toMap(mapper: AktivitetsloggMappingPort) = aktivitetslogg.toMap(mapper)
 

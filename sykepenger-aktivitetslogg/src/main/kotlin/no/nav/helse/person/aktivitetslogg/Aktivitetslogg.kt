@@ -81,9 +81,9 @@ class Aktivitetslogg(
         repeat(antall) { kontekster.removeLast() }
     }
 
-    override fun kontekst(kontekst: Subaktivitetskontekst) {
-        forelder = kontekst.aktivitetslogg
-        kontekst(kontekst as Aktivitetskontekst)
+    override fun kontekst(parent: Aktivitetslogg, kontekst: Aktivitetskontekst) {
+        forelder = parent
+        kontekst(kontekst)
     }
 
     override fun toMap(mapper: AktivitetsloggMappingPort): Map<String, List<Map<String, Any>>> = mapper.map(this)

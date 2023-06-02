@@ -16,13 +16,9 @@ interface IAktivitetslogg {
     fun behov(): List<Aktivitet.Behov>
     fun barn(): IAktivitetslogg
     fun kontekst(kontekst: Aktivitetskontekst)
-    fun kontekst(kontekst: Subaktivitetskontekst)
+    fun kontekst(parent: Aktivitetslogg, kontekst: Aktivitetskontekst)
     fun kontekster(): List<IAktivitetslogg>
     fun toMap(mapper: AktivitetsloggMappingPort): Map<String, List<Map<String, Any>>>
 
     fun register(observer: AktivitetsloggObserver)
-}
-
-interface Subaktivitetskontekst: Aktivitetskontekst {
-    val aktivitetslogg: Aktivitetslogg
 }

@@ -167,22 +167,22 @@ internal fun AbstractEndToEndTest.assertSisteForkastetPeriodeTilstand(orgnummer:
     assertFalse(inspektør(orgnummer).periodeErIkkeForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er ikke forkastet" }
 }
 
-internal fun AbstractPersonTest.assertInfo(forventet: String, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertInfo(forventet, *filtre)
-internal fun AbstractPersonTest.assertIngenInfo(forventet: String, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertIngenInfo(forventet, *filtre)
-internal fun AbstractPersonTest.assertIngenVarsler(vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertIngenVarsler(*filtre)
-internal fun AbstractPersonTest.assertVarsler(vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertVarsler(*filtre)
-internal fun AbstractPersonTest.assertVarsler(warnings: List<String>, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertVarsler(warnings, *filtre)
-internal fun AbstractPersonTest.assertVarsel(warning: String, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertVarsel(warning, *filtre)
-internal fun AbstractPersonTest.assertVarsel(varsel: Varselkode, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertVarsel(varsel, *filtre)
-internal fun AbstractPersonTest.assertIngenVarsel(warning: String, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertIngenVarsel(warning, *filtre)
-internal fun AbstractPersonTest.assertIngenVarsel(varselkode: Varselkode, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertIngenVarsel(varselkode, *filtre)
-internal fun AbstractPersonTest.assertFunksjonellFeil(error: String, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertFunksjonellFeil(error, *filtre)
-internal fun AbstractPersonTest.assertFunksjonellFeil(varselkode: Varselkode, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertFunksjonellFeil(varselkode.funksjonellFeilTekst, *filtre)
-internal fun AbstractPersonTest.assertFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertFunksjonelleFeil(*filtre)
-internal fun AbstractPersonTest.assertIngenFunksjonellFeil(varselkode: Varselkode, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertIngenFunksjonellFeil(varselkode, *filtre)
+internal fun AbstractPersonTest.assertInfo(forventet: String, vararg filtre: AktivitetsloggFilter) = person.personLogg.assertInfo(forventet, *filtre)
+internal fun AbstractPersonTest.assertIngenInfo(forventet: String, vararg filtre: AktivitetsloggFilter) = person.personLogg.assertIngenInfo(forventet, *filtre)
+internal fun AbstractPersonTest.assertIngenVarsler(vararg filtre: AktivitetsloggFilter) = person.personLogg.assertIngenVarsler(*filtre)
+internal fun AbstractPersonTest.assertVarsler(vararg filtre: AktivitetsloggFilter) = person.personLogg.assertVarsler(*filtre)
+internal fun AbstractPersonTest.assertVarsler(warnings: List<String>, vararg filtre: AktivitetsloggFilter) = person.personLogg.assertVarsler(warnings, *filtre)
+internal fun AbstractPersonTest.assertVarsel(warning: String, vararg filtre: AktivitetsloggFilter) = person.personLogg.assertVarsel(warning, *filtre)
+internal fun AbstractPersonTest.assertVarsel(varsel: Varselkode, vararg filtre: AktivitetsloggFilter) = person.personLogg.assertVarsel(varsel, *filtre)
+internal fun AbstractPersonTest.assertIngenVarsel(warning: String, vararg filtre: AktivitetsloggFilter) = person.personLogg.assertIngenVarsel(warning, *filtre)
+internal fun AbstractPersonTest.assertIngenVarsel(varselkode: Varselkode, vararg filtre: AktivitetsloggFilter) = person.personLogg.assertIngenVarsel(varselkode, *filtre)
+internal fun AbstractPersonTest.assertFunksjonellFeil(error: String, vararg filtre: AktivitetsloggFilter) = person.personLogg.assertFunksjonellFeil(error, *filtre)
+internal fun AbstractPersonTest.assertFunksjonellFeil(varselkode: Varselkode, vararg filtre: AktivitetsloggFilter) = person.personLogg.assertFunksjonellFeil(varselkode.funksjonellFeilTekst, *filtre)
+internal fun AbstractPersonTest.assertFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) = person.personLogg.assertFunksjonelleFeil(*filtre)
+internal fun AbstractPersonTest.assertIngenFunksjonellFeil(varselkode: Varselkode, vararg filtre: AktivitetsloggFilter) = person.personLogg.assertIngenFunksjonellFeil(varselkode, *filtre)
 
-internal fun AbstractPersonTest.assertIngenFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertIngenFunksjonelleFeil(*filtre)
-internal fun AbstractPersonTest.assertLogiskFeil(severe: String, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertLogiskFeil(severe, *filtre)
+internal fun AbstractPersonTest.assertIngenFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) = person.personLogg.assertIngenFunksjonelleFeil(*filtre)
+internal fun AbstractPersonTest.assertLogiskFeil(severe: String, vararg filtre: AktivitetsloggFilter) = person.personLogg.assertLogiskFeil(severe, *filtre)
 
 internal fun Aktivitetslogg.assertInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {
     val info = collectInfo(*filtre)

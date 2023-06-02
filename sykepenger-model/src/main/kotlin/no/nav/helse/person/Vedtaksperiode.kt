@@ -104,7 +104,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenge
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -127,7 +126,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.serde.AktivitetsloggMap
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.slåSammenForkastedeSykdomstidslinjer
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -576,7 +574,7 @@ internal class Vedtaksperiode private constructor(
         block()
 
         event.kontekst(tilstand)
-        emitVedtaksperiodeEndret(event, previousState)
+        emitVedtaksperiodeEndret(previousState)
         tilstand.entering(this, event)
     }
 
@@ -777,24 +775,14 @@ internal class Vedtaksperiode private constructor(
         person.vedtaksperiodeVenter(vedtaksperiodeVenter.event(aktørId, fødselsnummer))
     }
 
-    private fun emitVedtaksperiodeEndret(
-        aktivitetslogg: IAktivitetslogg,
-        previousState: Vedtaksperiodetilstand = tilstand
-    ) {
-        val event = PersonObserver.
-        VedtaksperiodeEndretEvent(
+    private fun emitVedtaksperiodeEndret(previousState: Vedtaksperiodetilstand) {
+        val event = PersonObserver.VedtaksperiodeEndretEvent(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = id,
             gjeldendeTilstand = tilstand.type,
             forrigeTilstand = previousState.type,
-            aktivitetslogg = when (aktivitetslogg) {
-                is Aktivitetslogg -> AktivitetsloggMap().map(aktivitetslogg)
-                else -> emptyMap()
-            },
-            harVedtaksperiodeWarnings = person.aktivitetslogg.logg(this)
-                .let { it.harVarslerEllerVerre() && !it.harFunksjonelleFeilEllerVerre() },
             hendelser = hendelseIder(),
             makstid = person.makstid(this, LocalDateTime.now()),
             fom = periode.start,

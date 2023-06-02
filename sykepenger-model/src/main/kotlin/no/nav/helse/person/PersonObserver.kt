@@ -29,8 +29,6 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val vedtaksperiodeId: UUID,
         val gjeldendeTilstand: TilstandType,
         val forrigeTilstand: TilstandType,
-        val aktivitetslogg: Map<String, List<Map<String, Any>>>,
-        val harVedtaksperiodeWarnings: Boolean,
         val hendelser: Set<UUID>,
         val makstid: LocalDateTime,
         val fom: LocalDate,

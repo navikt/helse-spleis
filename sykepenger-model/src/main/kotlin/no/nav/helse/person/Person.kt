@@ -63,10 +63,10 @@ import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.venter
 import no.nav.helse.person.Sykefraværstilfelleeventyr.Companion.varsleObservers
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
+import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Subaktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AG_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
@@ -92,14 +92,14 @@ class Person private constructor(
     private var personidentifikator: Personidentifikator,
     private var alder: Alder,
     private val arbeidsgivere: MutableList<Arbeidsgiver>,
-    override val aktivitetslogg: Aktivitetslogg,
+    private val aktivitetslogg: Aktivitetslogg,
     private val opprettet: LocalDateTime,
     private val infotrygdhistorikk: Infotrygdhistorikk,
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private val jurist: MaskinellJurist,
     private val tidligereBehandlinger: List<Person> = emptyList(),
     private val regler: ArbeidsgiverRegler = NormalArbeidstaker
-) : Subaktivitetskontekst {
+) : Aktivitetskontekst {
     companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         internal fun ferdigPerson(
@@ -227,14 +227,14 @@ class Person private constructor(
     private fun vedtaksperioderEtter(dato: LocalDate) = arbeidsgivere.flatMap { it.vedtaksperioderEtter(dato) }
 
     fun håndter(dødsmelding: Dødsmelding) {
-        dødsmelding.kontekst(this)
+        dødsmelding.kontekst(aktivitetslogg, this)
         dødsmelding.info("Registrerer dødsdato")
         alder = dødsmelding.dødsdato(alder)
         håndterGjenoppta(dødsmelding)
     }
 
     fun håndter(identOpphørt: IdentOpphørt, nyPersonidentifikator: Personidentifikator, nyAktørId: String) {
-        identOpphørt.kontekst(this)
+        identOpphørt.kontekst(aktivitetslogg, this)
         identOpphørt.info("Person har byttet ident til $nyPersonidentifikator")
         this.personidentifikator = nyPersonidentifikator
         this.aktørId = nyAktørId
@@ -242,20 +242,20 @@ class Person private constructor(
     }
 
     fun håndter(identOpphørt: IdentOpphørt, nyPersonidentifikator: Personidentifikator) {
-        identOpphørt.kontekst(this)
+        identOpphørt.kontekst(aktivitetslogg, this)
         identOpphørt.info("Person har byttet ident til $nyPersonidentifikator, men gjør ingenting med det foreløpig")
         håndterGjenoppta(identOpphørt)
     }
 
     fun håndter(infotrygdendring: Infotrygdendring) {
-        infotrygdendring.kontekst(this)
+        infotrygdendring.kontekst(aktivitetslogg, this)
         val tidligsteDato = arbeidsgivere.tidligsteDato()
         infotrygdhistorikk.oppfrisk(infotrygdendring, tidligsteDato)
         håndterGjenoppta(infotrygdendring)
     }
 
     fun håndter(utbetalingshistorikk: UtbetalingshistorikkEtterInfotrygdendring) {
-        utbetalingshistorikk.kontekst(this)
+        utbetalingshistorikk.kontekst(aktivitetslogg, this)
         if(!utbetalingshistorikk.oppdaterHistorikk(infotrygdhistorikk)) return
         arbeidsgivere.håndter(utbetalingshistorikk, infotrygdhistorikk)
         gjenopptaBehandling(utbetalingshistorikk)
@@ -263,20 +263,20 @@ class Person private constructor(
     }
 
     fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
-        utbetalingshistorikk.kontekst(this)
+        utbetalingshistorikk.kontekst(aktivitetslogg, this)
         utbetalingshistorikk.oppdaterHistorikk(infotrygdhistorikk)
         finnArbeidsgiver(utbetalingshistorikk).håndter(utbetalingshistorikk, infotrygdhistorikk)
         håndterGjenoppta(utbetalingshistorikk)
     }
 
     private fun rekjørFeriepengerTilArbeidsgiver2022(hendelse: IAktivitetslogg) {
-        hendelse.kontekst(this)
+        hendelse.kontekst(aktivitetslogg, this)
         hendelse.info("Rekjører feriepenger til arbeidsgiver for 2022")
         arbeidsgivere.rekjørFeriepengerTilArbeidsgiver2022(hendelse)
     }
 
     fun håndter(utbetalingshistorikk: UtbetalingshistorikkForFeriepenger) {
-        utbetalingshistorikk.kontekst(this)
+        utbetalingshistorikk.kontekst(aktivitetslogg, this)
 
         if (Toggle.SendFeriepengeOppdrag.enabled) {
             utbetalingshistorikk.info("Starter beregning av feriepenger")
@@ -359,13 +359,13 @@ class Person private constructor(
     }
 
     fun håndter(påminnelse: Utbetalingpåminnelse) {
-        påminnelse.kontekst(this)
+        påminnelse.kontekst(aktivitetslogg, this)
         finnArbeidsgiver(påminnelse).håndter(påminnelse)
         håndterGjenoppta(påminnelse)
     }
 
     fun håndter(påminnelse: PersonPåminnelse) {
-        påminnelse.kontekst(this)
+        påminnelse.kontekst(aktivitetslogg, this)
         påminnelse.info("Håndterer påminnelse for person")
         arbeidsgivere.forkastAUUSomErUtbetaltIInfotrygd(påminnelse, infotrygdhistorikk)
         arbeidsgivere.identifiserAUUSomErUtbetaltISpleis()
@@ -375,7 +375,7 @@ class Person private constructor(
 
     fun håndter(påminnelse: Påminnelse) {
         try {
-            påminnelse.kontekst(this)
+            påminnelse.kontekst(aktivitetslogg, this)
             if (finnArbeidsgiver(påminnelse).håndter(påminnelse)) return håndterGjenoppta(påminnelse)
         } catch (err: Aktivitetslogg.AktivitetException) {
             påminnelse.funksjonellFeil(RV_AG_1)
@@ -385,7 +385,7 @@ class Person private constructor(
     }
 
     fun håndter(avstemming: Avstemming) {
-        avstemming.kontekst(this)
+        avstemming.kontekst(aktivitetslogg, this)
         avstemming.info("Avstemmer utbetalinger og vedtaksperioder")
         val result = Avstemmer(this).toMap()
         observers.forEach { it.avstemt(result) }
@@ -393,13 +393,13 @@ class Person private constructor(
     }
 
     fun håndter(hendelse: OverstyrTidslinje) {
-        hendelse.kontekst(this)
+        hendelse.kontekst(aktivitetslogg, this)
         finnArbeidsgiver(hendelse).håndter(hendelse)
         håndterGjenoppta(hendelse)
     }
 
     fun håndter(hendelse: OverstyrArbeidsgiveropplysninger) {
-        hendelse.kontekst(this)
+        hendelse.kontekst(aktivitetslogg, this)
         check(arbeidsgivere.håndterOverstyrArbeidsgiveropplysninger(hendelse)) {
             "Ingen vedtaksperioder håndterte overstyringen av arbeidsgiveropplysninger"
         }
@@ -407,14 +407,14 @@ class Person private constructor(
     }
 
     fun håndter(hendelse: SkjønnsmessigFastsettelse) {
-        hendelse.kontekst(this)
+        hendelse.kontekst(aktivitetslogg, this)
         arbeidsgivere.håndterSkjønnsmessigFastsettelse(hendelse)
         hendelse.vilkårsprøvEtterNyInformasjonFraSaksbehandler(this, jurist)
         håndterGjenoppta(hendelse)
     }
 
     fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold) {
-        overstyrArbeidsforhold.kontekst(this)
+        overstyrArbeidsforhold.kontekst(aktivitetslogg, this)
         if (!arbeidsgivere.håndter(overstyrArbeidsforhold)) {
             overstyrArbeidsforhold.logiskFeil("Kan ikke overstyre arbeidsforhold fordi ingen vedtaksperioder håndterte hendelsen")
         }
@@ -422,14 +422,14 @@ class Person private constructor(
     }
 
     fun håndter(hendelse: AnnullerUtbetaling) {
-        hendelse.kontekst(this)
+        hendelse.kontekst(aktivitetslogg, this)
         arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(hendelse)
             ?: hendelse.funksjonellFeil(RV_AG_1)
         håndterGjenoppta(hendelse)
     }
 
     fun håndter(hendelse: Grunnbeløpsregulering) {
-        hendelse.kontekst(this)
+        hendelse.kontekst(aktivitetslogg, this)
         håndterGjenoppta(hendelse)
     }
 
@@ -601,7 +601,7 @@ class Person private constructor(
     }
 
     private fun registrer(hendelse: PersonHendelse, melding: String) {
-        hendelse.kontekst(this)
+        hendelse.kontekst(aktivitetslogg, this)
         hendelse.info(melding)
     }
 

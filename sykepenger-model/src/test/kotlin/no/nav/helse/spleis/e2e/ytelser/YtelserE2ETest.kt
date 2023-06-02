@@ -24,6 +24,7 @@ import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterInntektsmeldingMedValidering
@@ -47,9 +48,9 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(3.januar til 18.januar), 3.januar)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         assertFalse(hendelselogg.harFunksjonelleFeilEllerVerre())
-        assertFalse(person.aktivitetslogg.logg(inspektør.vedtaksperioder(1.vedtaksperiode)).harVarslerEllerVerre())
+        assertIngenVarsler()
         håndterYtelser(1.vedtaksperiode, dagpenger = listOf(3.januar.minusDays(14) til 5.januar.minusDays(15)))
-        assertTrue(person.aktivitetslogg.logg(inspektør.vedtaksperioder(1.vedtaksperiode)).harVarslerEllerVerre())
+        assertVarsler(1.vedtaksperiode.filter())
         assertIngenFunksjonelleFeil()
         assertActivities(person)
     }
@@ -62,7 +63,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), 3.januar)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         assertFalse(hendelselogg.harFunksjonelleFeilEllerVerre())
-        assertFalse(person.aktivitetslogg.logg(inspektør.vedtaksperioder(1.vedtaksperiode)).harVarslerEllerVerre())
+        assertIngenVarsler(1.vedtaksperiode.filter())
         håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60)))
         assertVarsel(Varselkode.RV_AY_3, 1.vedtaksperiode.filter())
         assertIngenFunksjonelleFeil()

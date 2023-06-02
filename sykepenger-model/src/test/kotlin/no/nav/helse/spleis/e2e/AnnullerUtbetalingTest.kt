@@ -77,7 +77,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         val behovTeller = person.personLogg.behov().size
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre()) { "${person.aktivitetslogg}"}
+        assertIngenFunksjonelleFeil()
         val behov = person.personLogg.sisteBehov(Behovtype.Utbetaling)
         @Suppress("UNCHECKED_CAST")
         val statusForUtbetaling = (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["statuskode"]
