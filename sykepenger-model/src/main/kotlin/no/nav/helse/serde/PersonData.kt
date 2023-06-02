@@ -27,10 +27,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeUtbetalinger
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -97,14 +94,12 @@ internal data class PersonData(
     private val fødselsnummer: String,
     private val fødselsdato: LocalDate,
     private val arbeidsgivere: List<ArbeidsgiverData>,
-    private val aktivitetslogg: AktivitetsloggData?,
     private val opprettet: LocalDateTime,
     private val infotrygdhistorikk: List<InfotrygdhistorikkElementData>,
     private val vilkårsgrunnlagHistorikk: List<VilkårsgrunnlagInnslagData>,
     private val dødsdato: LocalDate?
 ) {
     private val arbeidsgivereliste = mutableListOf<Arbeidsgiver>()
-    private val modelAktivitetslogg get() = aktivitetslogg?.konverterTilAktivitetslogg() ?: Aktivitetslogg()
     private val fnr by lazy { fødselsnummer.somPersonidentifikator() }
     private val alder by lazy { Alder(fødselsdato, dødsdato) }
     private val vilkårsgrunnlaghistorikkBuilder = VilkårsgrunnlaghistorikkBuilder(vilkårsgrunnlagHistorikk)
@@ -114,7 +109,7 @@ internal data class PersonData(
         personidentifikator = fnr,
         alder = alder,
         arbeidsgivere = arbeidsgivereliste,
-        aktivitetslogg = modelAktivitetslogg,
+        aktivitetslogg = Aktivitetslogg(),
         opprettet = opprettet,
         infotrygdhistorikk = infotrygdhistorikk.tilModellObjekt(),
         vilkårsgrunnlaghistorikk = vilkårsgrunnlaghistorikkBuilder.build(alder),
@@ -563,54 +558,6 @@ internal data class PersonData(
                         }
                 }
             }
-        }
-    }
-
-    internal data class AktivitetsloggData(
-        private val aktiviteter: List<AktivitetData>,
-        private val kontekster: List<SpesifikkKontekstData>
-    ) {
-        internal fun konverterTilAktivitetslogg(): Aktivitetslogg {
-            val aktivitetslogg = Aktivitetslogg()
-            val modellkontekst = kontekster.map { it.parseKontekst() }
-            aktivitetslogg.aktiviteter.apply {
-                addAll(aktiviteter.mapNotNull { it.parseAktivitet(modellkontekst) })
-            }
-            return aktivitetslogg
-        }
-
-        data class AktivitetData(
-            private val alvorlighetsgrad: AlvorlighetsgradData,
-            private val kode: Varselkode?,
-            private val melding: String,
-            private val id: UUID,
-            private val tidsstempel: String,
-            private val kontekster: List<Int>
-        ) {
-            internal fun parseAktivitet(spesifikkKontekster: List<SpesifikkKontekst>): Aktivitet? {
-                val kontekster = kontekster.map { index -> spesifikkKontekster[index] }
-                return when (alvorlighetsgrad) {
-                    AlvorlighetsgradData.WARN -> Aktivitet.Varsel.gjennopprett(id, kontekster, kode, melding, tidsstempel)
-                    else -> null
-                }
-            }
-
-        }
-
-        data class SpesifikkKontekstData(
-            private val kontekstType: String,
-            private val kontekstMap: Map<String, String>
-        ) {
-            internal fun parseKontekst() =
-                SpesifikkKontekst(kontekstType, kontekstMap)
-        }
-
-        enum class AlvorlighetsgradData {
-            INFO,
-            WARN,
-            BEHOV,
-            ERROR,
-            SEVERE
         }
     }
 

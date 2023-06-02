@@ -16,16 +16,14 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeUtbetalinger
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
-import no.nav.helse.person.serde.AktivitetsloggMap
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Prosentdel
 import org.junit.jupiter.api.Assertions
 
-@JsonIgnoreProperties("jurist")
+@JsonIgnoreProperties("jurist", "aktivitetslogg")
 private class PersonMixin
 
 @JsonIgnoreProperties("person", "jurist")
@@ -46,18 +44,9 @@ private class BegrunnelseMixin
 @JsonIgnoreProperties("oppslag", "utbetalingstidslinjeoppslag", "arbeidsgiverperiodecache")
 private class InfotrygdhistorikkElementMixin
 
-@JsonSerialize(using = AktivitetsloggSerializer::class)
-private class AktivitetsloggMixin
-
 @JsonIgnoreProperties("ansattPerioder")
 private class SkattSykepengegrunnlagMixin
 
-internal class AktivitetsloggSerializer : JsonSerializer<Aktivitetslogg>() {
-    override fun serialize(value: Aktivitetslogg?, gen: JsonGenerator, serializers: SerializerProvider?) {
-        if (value == null) return
-        gen.writeObject(AktivitetsloggMap().map(value).toString())
-    }
-}
 internal class BigDecimalSerializer : JsonSerializer<BigDecimal>() {
     private companion object {
         private const val PRECISION = 15
@@ -85,7 +74,6 @@ private val objectMapper = jacksonObjectMapper()
             Begrunnelse::class.java to BegrunnelseMixin::class.java,
             InfotrygdhistorikkElement::class.java to InfotrygdhistorikkElementMixin::class.java,
             Prosentdel::class.java to ProsentdelMixin::class.java,
-            Aktivitetslogg::class.java to AktivitetsloggMixin::class.java,
             SkattSykepengegrunnlag::class.java to SkattSykepengegrunnlagMixin::class.java
         )
     )
