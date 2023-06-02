@@ -25,7 +25,6 @@ import no.nav.helse.serde.api.dto.Utbetalingstatus
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
 import no.nav.helse.serde.api.speil.builders.SykepengegrunnlagsgrenseDTO
-import no.nav.helse.spleis.graphql.dto.GraphQLAktivitet
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiverinntekt
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiverrefusjon
 import no.nav.helse.spleis.graphql.dto.GraphQLBegrunnelse

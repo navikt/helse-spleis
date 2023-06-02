@@ -32,7 +32,6 @@ internal fun SchemaBuilder.tidslinjeperiodeTypes() {
     type<GraphQLDag>()
     type<GraphQLTidslinjeperiode>()
     type<GraphQLUberegnetPeriode>()
-    type<GraphQLAktivitet>()
     type<GraphQLPeriodevilkar>()
     type<GraphQLPeriodevilkar.Sykepengedager>()
     type<GraphQLPeriodevilkar.Alder>()
@@ -242,13 +241,6 @@ data class GraphQLUberegnetPeriode(
     ) : GraphQLTidslinjeperiode {
     override val id: UUID = UUID.randomUUID()
 }
-
-data class GraphQLAktivitet(
-    val vedtaksperiodeId: UUID,
-    val alvorlighetsgrad: String,
-    val melding: String,
-    val tidsstempel: String
-)
 
 data class GraphQLPeriodevilkar(
     val sykepengedager: Sykepengedager,
