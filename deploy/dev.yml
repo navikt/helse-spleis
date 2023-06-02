@@ -56,3 +56,5 @@ spec:
     value: "true"
   - name: FORENKLE_REVURDERING
     value: "false"
+  - name: AVVIKSAKER
+    value: "true"
