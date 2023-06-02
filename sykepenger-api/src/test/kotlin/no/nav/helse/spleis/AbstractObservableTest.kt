@@ -81,7 +81,8 @@ abstract class AbstractObservableTest {
         sendtTilNAVEllerArbeidsgiver: LocalDate = TOM.plusDays(1),
         orgnummer: String = ORGNUMMER,
         sykmeldingSkrevet: LocalDateTime = FOM.atStartOfDay(),
-        fnr: String = UNG_PERSON_FNR
+        fnr: String = UNG_PERSON_FNR,
+        egenmeldinger: List<Søknadsperiode.Arbeidsgiverdag> = emptyList()
     ): Søknad = Søknad(
         meldingsreferanseId = id,
         fnr = fnr,
@@ -97,7 +98,8 @@ abstract class AbstractObservableTest {
         utenlandskSykmelding = false,
         arbeidUtenforNorge = false,
         sendTilGosys = false,
-        yrkesskade = false
+        yrkesskade = false,
+        egenmeldinger = egenmeldinger
     )
 
     protected fun utbetalinghistorikk() = UtbetalingshistorikkEtterInfotrygdendring(

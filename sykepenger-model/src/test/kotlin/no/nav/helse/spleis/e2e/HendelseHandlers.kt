@@ -414,7 +414,8 @@ internal fun AbstractEndToEndTest.håndterSøknad(
     sendTilGosys: Boolean = false,
     opprinneligSendt: LocalDate? = null,
     merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
-    permittert: Boolean = false
+    permittert: Boolean = false,
+    egenmeldinger: List<Søknadsperiode.Arbeidsgiverdag> = emptyList()
 ): UUID {
     håndterOgReplayInntektsmeldinger(orgnummer) {
         søknad(
@@ -430,7 +431,8 @@ internal fun AbstractEndToEndTest.håndterSøknad(
             sendTilGosys = sendTilGosys,
             opprinneligSendt = opprinneligSendt,
             merknaderFraSykmelding = merknaderFraSykmelding,
-            permittert = permittert
+            permittert = permittert,
+            egenmeldinger = egenmeldinger
         ).håndter(Person::håndter)
         søknader[id] = Triple(sendtTilNAVEllerArbeidsgiver, andreInntektskilder, perioder)
         val vedtaksperiodeId: IdInnhenter = observatør.sisteVedtaksperiode()

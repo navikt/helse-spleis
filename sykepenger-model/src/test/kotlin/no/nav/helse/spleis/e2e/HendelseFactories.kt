@@ -131,7 +131,8 @@ internal fun AbstractEndToEndTest.søknad(
     korrigerer: UUID? = null,
     opprinneligSendt: LocalDate? = null,
     merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
-    permittert: Boolean = false
+    permittert: Boolean = false,
+    egenmeldinger: List<Søknadsperiode.Arbeidsgiverdag> = emptyList()
 ) = ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer).lagSøknad(
     id = id,
     perioder = perioder,
@@ -143,7 +144,8 @@ internal fun AbstractEndToEndTest.søknad(
     sendTilGosys = sendTilGosys,
     opprinneligSendt = opprinneligSendt,
     merknaderFraSykmelding = merknaderFraSykmelding,
-    permittert = permittert
+    permittert = permittert,
+    egenmeldinger = egenmeldinger
 ).apply {
     hendelselogg = this
 }

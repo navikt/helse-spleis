@@ -37,6 +37,8 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.toUUID
 import no.nav.helse.spleis.HendelseMediator
 import no.nav.helse.spleis.MessageMediator
+import no.nav.helse.spleis.db.HendelseRepository
+import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.mediator.TestMessageFactory.ArbeidsavklaringspengerTestdata
 import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsforhold
@@ -51,8 +53,6 @@ import no.nav.helse.spleis.mediator.TestMessageFactory.OpplæringspengerTestdata
 import no.nav.helse.spleis.mediator.TestMessageFactory.PleiepengerTestdata
 import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkForFeriepengerTestdata
 import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkTestdata
-import no.nav.helse.spleis.db.HendelseRepository
-import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel
 import no.nav.helse.spleis.mediator.e2e.SpleisDataSource.migratedDb
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
@@ -134,27 +134,27 @@ internal abstract class AbstractEndToEndMediatorTest() {
         fnr: String = UNG_PERSON_FNR_2018,
         perioder: List<SoknadsperiodeDTO>,
         fravær: List<FravarDTO> = emptyList(),
-        egenmeldinger: List<PeriodeDTO> = emptyList(),
         andreInntektskilder: List<InntektskildeDTO>? = null,
         sendtNav: LocalDateTime? = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
         orgnummer: String = ORGNUMMER,
         korrigerer: UUID? = null,
         opprinneligSendt: LocalDateTime? = null,
         historiskeFolkeregisteridenter: List<String> = emptyList(),
-        sendTilGosys: Boolean? = false
+        sendTilGosys: Boolean? = false,
+        egenmeldingerFraSykmelding: List<LocalDate> = emptyList()
     ): UUID {
         val (id, message) = meldingsfabrikk.lagSøknadNav(
             fnr = fnr,
             perioder = perioder,
             fravær = fravær,
-            egenmeldinger = egenmeldinger,
             andreInntektskilder = andreInntektskilder,
             sendtNav = sendtNav,
             orgnummer = orgnummer,
             korrigerer = korrigerer,
             opprinneligSendt = opprinneligSendt,
             historiskeFolkeregisteridenter = historiskeFolkeregisteridenter,
-            sendTilGosys = sendTilGosys
+            sendTilGosys = sendTilGosys,
+            egenmeldingerFraSykmelding = egenmeldingerFraSykmelding
         )
 
         val antallVedtaksperioderFørSøknad = testRapid.inspektør.vedtaksperiodeteller
@@ -180,24 +180,21 @@ internal abstract class AbstractEndToEndMediatorTest() {
     protected fun sendKorrigerendeSøknad(
         perioder: List<SoknadsperiodeDTO>,
         fravær: List<FravarDTO> = emptyList(),
-        egenmeldinger: List<PeriodeDTO> = emptyList()
     ) {
         val (_, message) = meldingsfabrikk.lagSøknadNav(
             fnr = UNG_PERSON_FNR_2018,
             perioder = perioder,
-            fravær = fravær,
-            egenmeldinger = egenmeldinger,
+            fravær = fravær
         )
         testRapid.sendTestMessage(message)
     }
 
     protected fun sendSøknadArbeidsgiver(
         vedtaksperiodeIndeks: Int,
-        perioder: List<SoknadsperiodeDTO>,
-        egenmeldinger: List<PeriodeDTO> = emptyList()
+        perioder: List<SoknadsperiodeDTO>
     ) {
         assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
-        val (_, message) = meldingsfabrikk.lagSøknadArbeidsgiver(perioder, egenmeldinger)
+        val (_, message) = meldingsfabrikk.lagSøknadArbeidsgiver(perioder)
         testRapid.sendTestMessage(message)
     }
 

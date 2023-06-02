@@ -8,9 +8,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.desember
-import no.nav.helse.januar
-import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverForskuttererDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
@@ -23,7 +20,11 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsstatusDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykmeldingstypeDTO
+import no.nav.helse.januar
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.SendtNavSøknaderRiver
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 
 internal class SendtNavSøknaderRiverTest : RiverTest() {
@@ -70,7 +71,7 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
         sendtNav = LocalDateTime.now(),
         sykmeldingSkrevet = LocalDateTime.now(),
         sendtArbeidsgiver = LocalDateTime.now(),
-        egenmeldinger = listOf(PeriodeDTO(fom = LocalDate.now(), tom = LocalDate.now())),
+        egenmeldinger = emptyList(),
         soknadsperioder = soknadsperioder,
         papirsykmeldinger = emptyList(),
         fravar = fravar
@@ -164,6 +165,15 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
     }
 
     @Test
+    fun `parser søknad med egenmeldingsdager`() {
+        assertNoErrors(validSøknad().copy(egenmeldingsdagerFraSykmelding = emptyList()).toJson())
+        assertNoErrors(validSøknad().copy(egenmeldingsdagerFraSykmelding = null).toJson())
+        assertNoErrors(validSøknad().copy(egenmeldingsdagerFraSykmelding = listOf(1.januar, 2.januar)).toJson())
+        assertNoErrors(validSøknad().copy(egenmeldingsdagerFraSykmelding = listOf()).toJson())
+        assertIgnored(søknadMedRareEgenmeldinger)
+    }
+
+    @Test
     fun `parser søknad med merknader (fra sykmelding)`() {
         assertNoErrors(validSøknad().copy(merknaderFraSykmelding = emptyList()).toJson())
         assertNoErrors(validSøknad().copy(merknaderFraSykmelding = null).toJson())
@@ -184,3 +194,71 @@ private fun SykepengesoknadDTO.asObjectNode(): ObjectNode = objectMapper.valueTo
     put("@event_name", if (this["status"].asText() == "SENDT") "sendt_søknad_nav" else "ukjent")
     put("@opprettet", LocalDateTime.now().toString())
 }
+
+@Language("JSON")
+private val søknadMedRareEgenmeldinger = """
+    {
+      "id": "36275131-8fea-4173-aee3-94ca91dd69c0",
+      "type": "ARBEIDSTAKERE",
+      "status": "SENDT",
+      "fnr": "fødselsnummer",
+      "sykmeldingId": "a7d705ad-7c30-4d0a-b7e5-a80621801735",
+      "arbeidsgiver": {
+        "navn": "arbeidsgiver",
+        "orgnummer": "orgnr"
+      },
+      "arbeidssituasjon": "ARBEIDSTAKER",
+      "korrigerer": "korrigerer",
+      "korrigertAv": null,
+      "soktUtenlandsopphold": null,
+      "arbeidsgiverForskutterer": "JA",
+      "fom": "2023-06-05",
+      "tom": "2023-06-05",
+      "dodsdato": null,
+      "startSyketilfelle": "2023-06-05",
+      "arbeidGjenopptatt": "2023-06-05",
+      "sykmeldingSkrevet": "2023-06-05T10:57:56.15885",
+      "opprettet": "2023-06-05T10:57:56.158845",
+      "opprinneligSendt": null,
+      "sendtNav": "2023-06-05T10:57:56.158849",
+      "sendtArbeidsgiver": "2023-06-05T10:57:56.158856",
+      "egenmeldinger": null,
+      "fravarForSykmeldingen": null,
+      "papirsykmeldinger": [],
+      "fravar": [],
+      "andreInntektskilder": null,
+      "soknadsperioder": [
+        {
+          "fom": "2023-06-05",
+          "tom": "2023-06-05",
+          "sykmeldingsgrad": 100,
+          "faktiskGrad": 100,
+          "avtaltTimer": 4.9E-324,
+          "faktiskTimer": 1.7976931348623157E308,
+          "sykmeldingstype": "AKTIVITET_IKKE_MULIG",
+          "grad": null
+        }
+      ],
+      "sporsmal": null,
+      "avsendertype": null,
+      "ettersending": false,
+      "mottaker": null,
+      "egenmeldtSykmelding": null,
+      "yrkesskade": null,
+      "arbeidUtenforNorge": null,
+      "harRedusertVenteperiode": null,
+      "behandlingsdager": null,
+      "permitteringer": null,
+      "merknaderFraSykmelding": null,
+      "egenmeldingsdagerFraSykmelding": ["første januar", "andre januar"],
+      "merknader": null,
+      "sendTilGosys": null,
+      "utenlandskSykmelding": null,
+      "@id": "19b951d6-d24e-4b99-8963-b25fbe714b3b",
+      "@event_name": "sendt_søknad_nav",
+      "@opprettet": "2023-06-05T10:57:56.171373",
+      "fødselsdato": "1995-12-12",
+      "aktorId": "42"
+    }
+"""
+

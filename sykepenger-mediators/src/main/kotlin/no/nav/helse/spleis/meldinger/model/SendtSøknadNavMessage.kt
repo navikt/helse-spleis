@@ -2,7 +2,9 @@ package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
-import java.util.UUID
+import java.time.LocalDate
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -25,6 +27,13 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, private val builder: 
     internal companion object {
         internal fun byggSendtSøknad(builder: SendtSøknadBuilder, packet: JsonMessage) {
             builder.permittert(packet["permitteringer"].takeIf(JsonNode::isArray)?.takeUnless { it.isEmpty }?.let { true } ?: false)
+            builder.egenmeldinger(packet["egenmeldingsdagerFraSykmelding"]
+                .takeIf(JsonNode::isArray)
+                ?.map { LocalDate.parse(it.asText()) }
+                ?.grupperSammenhengendePerioderMedHensynTilHelg()
+                ?.map { Søknad.Søknadsperiode.Arbeidsgiverdag(it.start, it.endInclusive) }
+                ?: emptyList()
+            )
             packet["merknaderFraSykmelding"].takeIf(JsonNode::isArray)?.forEach {
                 builder.merknader(it.path("type").asText(), it.path("beskrivelse").takeUnless { it.isMissingOrNull() }?.asText())
             }
@@ -36,10 +45,10 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, private val builder: 
                 else -> builder.inntektskilde(false)
             }
 
-            packet["fravar"].forEach {
-                val fraværstype = it["type"].asText()
-                val fom = it.path("fom").asLocalDate()
-                val tom = it.path("tom").takeUnless { it.isMissingOrNull() }?.asLocalDate()
+            packet["fravar"].forEach { fravær ->
+                val fraværstype = fravær["type"].asText()
+                val fom = fravær.path("fom").asLocalDate()
+                val tom = fravær.path("tom").takeUnless { it.isMissingOrNull() }?.asLocalDate()
                 builder.fravær(fraværstype, fom, tom)
             }
             packet["opprinneligSendt"].takeUnless(JsonNode::isMissingOrNull)?.let {

@@ -259,6 +259,10 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
         if (!søknad.erRelevant(this.periode)) return
         kontekst(søknad)
+        val sisteTomFør = arbeidsgiver.finnTidligereVedtaksperioder(periode().start).maxOfOrNull { it.periode().endInclusive }
+        if (sisteTomFør != null) {
+            søknad.trimEgenmeldingsdager(sisteTomFør)
+        }
         søknadHåndtert(søknad)
         tilstand.håndter(this, søknad, arbeidsgivere)
         søknad.trimLeft(periode.endInclusive)
@@ -605,6 +609,7 @@ internal class Vedtaksperiode private constructor(
         if (søknad.harFunksjonelleFeilEllerVerre()) {
             return forkast(søknad)
         }
+        søknad.loggEgenmeldingsstrekking()
         nesteTilstand()?.also { tilstand(søknad, it) }
     }
 

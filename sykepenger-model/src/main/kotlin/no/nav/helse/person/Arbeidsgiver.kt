@@ -905,6 +905,10 @@ internal class Arbeidsgiver private constructor(
             vedtaksperiode.erVedtaksperiodeRettFør(other)
         }
 
+    internal fun finnTidligereVedtaksperioder(dato: LocalDate): List<Vedtaksperiode> = vedtaksperioder.filter {
+        dato > it.periode().endInclusive
+    }
+
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return SpesifikkKontekst("Arbeidsgiver", mapOf("organisasjonsnummer" to organisasjonsnummer))
     }

@@ -2,7 +2,9 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Merknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
@@ -18,7 +20,6 @@ import no.nav.helse.mai
 import no.nav.helse.november
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.AktivitetException
-import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
@@ -26,7 +27,6 @@ import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
-import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -286,7 +286,8 @@ internal class SøknadTest {
         permittert: Boolean = false,
         merknaderFraSykmelding: List<Merknad> = emptyList(),
         hendelsefabrikk: ArbeidsgiverHendelsefabrikk = ungPersonFnr2018Hendelsefabrikk,
-        sendtTilNAVEllerArbeidsgiver: LocalDate? = null
+        sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
+        egenmeldinger: List<Søknadsperiode.Arbeidsgiverdag> = emptyList()
     ) {
         aktivitetslogg = Aktivitetslogg()
         søknad = hendelsefabrikk.lagSøknad(
@@ -296,7 +297,8 @@ internal class SøknadTest {
             permittert = permittert,
             merknaderFraSykmelding = merknaderFraSykmelding,
             sykmeldingSkrevet = LocalDateTime.now(),
-            aktivitetslogg = aktivitetslogg
+            aktivitetslogg = aktivitetslogg,
+            egenmeldinger = egenmeldinger
         )
     }
 }
