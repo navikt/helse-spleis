@@ -20,6 +20,7 @@ import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
+import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.serde.api.dto.GhostPeriodeDTO
 import no.nav.helse.serde.api.dto.Refusjonselement
@@ -437,6 +438,20 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         override fun visitInfotrygd(infotrygd: Infotrygd, id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) {
             val inntekt = InntektBuilder(beløp).build()
             this.tilstand.lagreInntekt(this, nyArbeidsgiverInntekt(IInntektkilde.Infotrygd, inntekt))
+        }
+
+        override fun preVisitSkjønnsmessigFastsatt(
+            saksbehandler: SkjønnsmessigFastsatt,
+            id: UUID,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            forklaring: String?,
+            subsumsjon: Subsumsjon?,
+            tidsstempel: LocalDateTime
+        ) {
+            val inntekt = InntektBuilder(beløp).build()
+            this.tilstand.lagreInntekt(this, nyArbeidsgiverInntekt(IInntektkilde.SkjønnsmessigFastsatt, inntekt))
         }
 
         override fun preVisitSaksbehandler(

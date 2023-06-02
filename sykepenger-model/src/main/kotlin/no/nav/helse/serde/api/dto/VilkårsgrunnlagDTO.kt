@@ -70,7 +70,7 @@ data class Refusjonselement(
 )
 
 enum class Inntektkilde {
-    Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen, IkkeRapportert
+    Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen, IkkeRapportert, SkjønnsmessigFastsatt
 }
 
 data class OmregnetÅrsinntekt(

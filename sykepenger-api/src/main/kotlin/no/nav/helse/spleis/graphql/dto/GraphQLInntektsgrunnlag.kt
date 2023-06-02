@@ -19,7 +19,8 @@ enum class GraphQLInntektskilde {
     Inntektsmelding,
     Infotrygd,
     AOrdningen,
-    IkkeRapportert
+    IkkeRapportert,
+    SkjønnsmessigFastsatt
 }
 
 data class GraphQLInntekterFraAOrdningen(
