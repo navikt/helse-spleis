@@ -186,13 +186,6 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
-        internal fun List<Arbeidsgiver>.harForkastetVedtaksperiodeSomBlokkererBehandling(vedtaksperiode: Vedtaksperiode, søknad: Søknad): Boolean {
-            return harForkastetVedtaksperiodeSomBlokkererBehandling(søknad, vedtaksperiode)
-        }
-
-        private fun Iterable<Arbeidsgiver>.harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode) =
-            any { it.harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse, vedtaksperiode) }
-
         internal fun List<Arbeidsgiver>.håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold) =
             any { it.håndter(overstyrArbeidsforhold) }
 
@@ -520,11 +513,13 @@ internal class Arbeidsgiver private constructor(
         håndter(anmodningOmForkasting, Vedtaksperiode::håndter)
     }
 
+    internal fun harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Boolean {
+        return arbeidsgivere.any { it.harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse, vedtaksperiode) } || ForkastetVedtaksperiode.harKortGapTilForkastet(forkastede, hendelse, vedtaksperiode)
+    }
     private fun harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode): Boolean {
-        ForkastetVedtaksperiode.forlengerForkastet(forkastede, hendelse, vedtaksperiode) ||
-                ForkastetVedtaksperiode.harNyereForkastetPeriode(forkastede, hendelse) ||
-                (organisasjonsnummer() == hendelse.organisasjonsnummer() && ForkastetVedtaksperiode.harKortGapTilForkastet(forkastede, hendelse, vedtaksperiode))
-        return hendelse.harFunksjonelleFeilEllerVerre()
+        return ForkastetVedtaksperiode.forlengerForkastet(forkastede, hendelse, vedtaksperiode)
+                || ForkastetVedtaksperiode.harNyereForkastetPeriode(forkastede, vedtaksperiode, hendelse)
+                || ForkastetVedtaksperiode.harOverlappendeForkastetPeriode(forkastede, vedtaksperiode, hendelse)
     }
 
     internal fun håndter(søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {

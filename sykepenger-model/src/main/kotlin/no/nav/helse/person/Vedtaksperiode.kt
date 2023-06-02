@@ -41,7 +41,6 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.memoized
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
-import no.nav.helse.person.Arbeidsgiver.Companion.harForkastetVedtaksperiodeSomBlokkererBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
 import no.nav.helse.person.Arbeidsgiver.Companion.trengerInntektsmelding
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
@@ -106,20 +105,25 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad som delvis overlapper`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_33
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_19
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_20
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_28
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_29
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_30
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_31
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_32
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_33
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_34
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_35
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_36
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_16
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
@@ -465,9 +469,6 @@ internal class Vedtaksperiode private constructor(
     private fun erForlengelseAvForkastet() = arbeidsgiver
         .finnForkastetVedtaksperiodeRettFør(this)
         ?.takeIf { it.forventerInntektHensyntarForkastede() } != null
-
-    internal fun erSykeperiodeAvsluttetUtenUtbetalingRettFør(other: Vedtaksperiode) =
-        this.sykdomstidslinje.erRettFør(other.sykdomstidslinje) && this.tilstand == AvsluttetUtenUtbetaling
 
     private fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() =
         person.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt)
@@ -1253,7 +1254,7 @@ internal class Vedtaksperiode private constructor(
             if (harSenereUtbetalinger || harSenereAUU) {
                 søknad.varsel(RV_OO_1)
             }
-            arbeidsgivere.harForkastetVedtaksperiodeSomBlokkererBehandling(vedtaksperiode, søknad)
+            vedtaksperiode.arbeidsgiver.harForkastetVedtaksperiodeSomBlokkererBehandling(søknad, vedtaksperiode, arbeidsgivere)
             vedtaksperiode.håndterSøknad(søknad) {
                 val rettFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)
                 when {
@@ -1934,7 +1935,7 @@ internal class Vedtaksperiode private constructor(
 
                     // skal ikke mangle vilkårsgrunnlag her med mindre skjæringstidspunktet har endret seg som følge
                     // av historikk fra IT
-                    valider(Varselkode.RV_IT_33) {
+                    valider(RV_IT_33) {
                         (vedtaksperiode.vilkårsgrunnlag != null).also {
                             if (!it) info("Mangler vilkårsgrunnlag for ${vedtaksperiode.skjæringstidspunkt}")
                         }
@@ -2675,12 +2676,30 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        internal fun harNyereForkastetPeriode(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) =
+        internal fun harNyereForkastetPeriode(forkastede: Iterable<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) =
             forkastede
-                .filter { it.periode().endInclusive >= hendelse.periode().start }
+                .filter { it.periode.start > vedtaksperiode.periode.endInclusive }
                 .onEach {
-                    hendelse.funksjonellFeil(RV_SØ_20)
-                    hendelse.info("Søknad overlapper med, eller er før, en forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
+                    val sammeArbeidsgiver = it.organisasjonsnummer == vedtaksperiode.organisasjonsnummer
+                    hendelse.funksjonellFeil(if (sammeArbeidsgiver) RV_SØ_31 else RV_SØ_32)
+                    hendelse.info("Søknaden ${vedtaksperiode.periode} er før en forkastet vedtaksperiode ${it.id} (${it.periode})")
+                }
+                .isNotEmpty()
+
+        internal fun harOverlappendeForkastetPeriode(forkastede: Iterable<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) =
+            forkastede
+                .filter { it.periode.overlapperMed(vedtaksperiode.periode()) }
+                .onEach {
+                    val delvisOverlappende = !it.periode.inneholder(vedtaksperiode.periode) // hvorvidt vedtaksperioden strekker seg utenfor den forkastede
+                    val sammeArbeidsgiver = it.organisasjonsnummer == vedtaksperiode.organisasjonsnummer
+                    hendelse.funksjonellFeil(when {
+                        delvisOverlappende && sammeArbeidsgiver -> RV_SØ_35
+                        delvisOverlappende && !sammeArbeidsgiver -> RV_SØ_36
+                        !delvisOverlappende && sammeArbeidsgiver -> RV_SØ_33
+                        !delvisOverlappende && !sammeArbeidsgiver -> RV_SØ_34
+                        else -> throw IllegalStateException("dette er ikke mulig med mindre noen har tullet til noe")
+                    })
+                    hendelse.info("Søknad ${vedtaksperiode.periode} overlapper med en forkastet vedtaksperiode ${it.id} (${it.periode})")
                 }
                 .isNotEmpty()
 

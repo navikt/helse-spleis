@@ -22,6 +22,7 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_19
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_20
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_28
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_33
 import no.nav.helse.serde.serialize
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -307,7 +308,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
 
         nyPeriode(22.januar til 31.januar)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
-        assertFunksjonellFeil(RV_SØ_20)
+        assertFunksjonellFeil(RV_SØ_33)
         assertIngenFunksjonellFeil(RV_SØ_28)
     }
 

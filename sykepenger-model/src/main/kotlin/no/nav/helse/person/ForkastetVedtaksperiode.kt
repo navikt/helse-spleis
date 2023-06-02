@@ -22,8 +22,11 @@ internal class ForkastetVedtaksperiode(
     internal companion object {
         private fun Iterable<ForkastetVedtaksperiode>.perioder() = map { it.vedtaksperiode }
 
-        internal fun harNyereForkastetPeriode(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse) =
-            Vedtaksperiode.harNyereForkastetPeriode(forkastede.perioder(), hendelse)
+        internal fun harNyereForkastetPeriode(forkastede: Iterable<ForkastetVedtaksperiode>, vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) =
+            Vedtaksperiode.harNyereForkastetPeriode(forkastede.perioder(), vedtaksperiode, hendelse)
+
+        internal fun harOverlappendeForkastetPeriode(forkastede: Iterable<ForkastetVedtaksperiode>, vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) =
+            Vedtaksperiode.harOverlappendeForkastetPeriode(forkastede.perioder(), vedtaksperiode, hendelse)
 
         internal fun forlengerForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode) =
             Vedtaksperiode.forlengerForkastet(forkastede.perioder(), hendelse, vedtaksperiode)
