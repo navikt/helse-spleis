@@ -294,7 +294,6 @@ data class GraphQLBeregnetPeriode(
     val maksdato: LocalDate,
     val utbetaling: GraphQLUtbetaling,
     val periodevilkar: GraphQLPeriodevilkar,
-    val aktivitetslogg: List<GraphQLAktivitet>,
     val vilkarsgrunnlagId: UUID?
 ) : GraphQLTidslinjeperiode {
     override val id: UUID = UUID.randomUUID()

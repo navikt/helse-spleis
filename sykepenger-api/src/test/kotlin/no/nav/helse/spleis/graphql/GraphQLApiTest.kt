@@ -175,12 +175,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                                             soknadTom,
                                             oppfylt
                                         }
-                                    },
-                                    aktivitetslogg {
-                                        vedtaksperiodeId,
-                                        alvorlighetsgrad,
-                                        melding,
-                                        tidsstempel
                                     }
                                 }
                             }
@@ -395,12 +389,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                                             soknadTom,
                                             oppfylt
                                         }
-                                    },
-                                    aktivitetslogg {
-                                        vedtaksperiodeId,
-                                        alvorlighetsgrad,
-                                        melding,
-                                        tidsstempel
                                     }
                                 }
                             }
@@ -1197,14 +1185,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                   ],
                   "vedtaksperiodeId": "00000000-0000-0000-0000-000000000000",
                   "id": "00000000-0000-0000-0000-000000000000",
-                  "aktivitetslogg": [
-                    {
-                      "alvorlighetsgrad": "W",
-                      "melding": "Inntektsmeldingen og vedtaksløsningen er uenige om beregningen av arbeidsgiverperioden. Undersøk hva som er riktig arbeidsgiverperiode.",
-                      "tidsstempel": "2018-01-01 00:00:00.000",
-                      "vedtaksperiodeId": "00000000-0000-0000-0000-000000000000"
-                    }
-                  ],
                   "beregningId": "00000000-0000-0000-0000-000000000000",
                   "forbrukteSykedager": 10,
                   "gjenstaendeSykedager": 238,

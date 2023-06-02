@@ -316,7 +316,6 @@ internal class GenerasjonerTest {
             BeregnetPeriode.Alder(30, true),
             BeregnetPeriode.Søknadsfrist(LocalDateTime.now(), periode.start, periode.endInclusive, true)
         ),
-        aktivitetslogg = emptyList(),
         vilkårsgrunnlagId = UUID.randomUUID()
     )
 

@@ -298,14 +298,6 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
             utbetaling = mapUtbetaling(periode.utbetaling),
             hendelser = periode.hendelser.map { mapHendelse(it) },
             periodevilkar = mapPeriodevilkår(periode.periodevilkår),
-            aktivitetslogg = periode.aktivitetslogg.map {
-                GraphQLAktivitet(
-                    vedtaksperiodeId = it.vedtaksperiodeId,
-                    alvorlighetsgrad = it.alvorlighetsgrad,
-                    melding = it.melding,
-                    tidsstempel = it.tidsstempel
-                )
-            },
             periodetilstand = mapTilstand(periode.periodetilstand),
             vilkarsgrunnlagId = periode.vilkårsgrunnlagId
         )

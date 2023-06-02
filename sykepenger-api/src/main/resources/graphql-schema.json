@@ -3798,29 +3798,6 @@
         "name" : "GraphQLBeregnetPeriode",
         "description" : "",
         "fields" : [ {
-          "name" : "aktivitetslogg",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "LIST",
-              "name" : null,
-              "ofType" : {
-                "kind" : "NON_NULL",
-                "name" : null,
-                "ofType" : {
-                  "kind" : "OBJECT",
-                  "name" : "GraphQLAktivitet",
-                  "ofType" : null
-                }
-              }
-            }
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
           "name" : "beregningId",
           "description" : null,
           "args" : [ ],

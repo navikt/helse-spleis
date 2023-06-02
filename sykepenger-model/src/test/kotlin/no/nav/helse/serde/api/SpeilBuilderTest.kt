@@ -119,30 +119,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode, simuleringsresultat = standardSimuleringsresultat(ORGNUMMER, totalbeløp = -1))
         assertVarsel(RV_SI_3)
-
-        val personDto = speilApi()
-        val periode: BeregnetPeriode = personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode
-        val warnings = periode.aktivitetslogg.filter { it.alvorlighetsgrad ==  "W" }
-        val errors = periode.aktivitetslogg.filter { it.alvorlighetsgrad ==  "E" }
-
-        assertTrue(errors.isEmpty())
-        assertEquals(warnings.size, 1)
-        assertTrue(warnings.map { it.melding }.contains("Det er simulert et negativt beløp."))
-    }
-
-    @Test
-    fun `Skal ikke ha varsel om flere inntektsmeldinger ved replay av samme IM`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-
-        val personDto = speilApi()
-        val periode: BeregnetPeriode = personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode
-        val warnings = periode.aktivitetslogg.filter { it.alvorlighetsgrad ==  "W" }
-        assertTrue(warnings.isEmpty())
     }
 
     @Test

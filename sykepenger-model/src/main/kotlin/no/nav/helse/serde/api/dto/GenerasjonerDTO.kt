@@ -15,7 +15,6 @@ import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
 import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
 import no.nav.helse.serde.api.speil.Generasjoner
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
-import no.nav.helse.serde.api.speil.builders.PeriodeVarslerBuilder
 import no.nav.helse.serde.api.speil.merge
 import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
 
@@ -179,7 +178,6 @@ data class BeregnetPeriode(
     val maksdato: LocalDate,
     val utbetaling: Utbetaling,
     val periodevilkår: Vilkår,
-    val aktivitetslogg: List<AktivitetDTO>,
     val vilkårsgrunnlagId: UUID? // dette feltet er i != for beregnede perioder, men må være nullable så lenge annullerte perioder mappes til beregnet periode
 ) : Tidslinjeperiode() {
     override val sorteringstidspunkt = beregnet
@@ -307,8 +305,6 @@ data class BeregnetPeriode(
 
         fun build(alder: no.nav.helse.Alder): BeregnetPeriode? {
             val utbetalingtype = this.utbetalingtype ?: return null
-            val aktivetsloggForPeriode = Vedtaksperiode.aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode)
-            val varsler = PeriodeVarslerBuilder(aktivetsloggForPeriode).build()
 
             val avgrensetUtbetalingstidslinje = utbetalingstidslinje.filter { it.dato in periode }
             val utbetalingDTO = Utbetaling(
@@ -343,7 +339,6 @@ data class BeregnetPeriode(
                 forbrukteSykedager = forbrukteSykedager,
                 utbetaling = utbetalingDTO,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
-                aktivitetslogg = varsler,
                 periodetilstand = utledePeriodetilstand(utbetalingDTO, avgrensetUtbetalingstidslinje),
             )
         }
@@ -544,7 +539,6 @@ data class AnnullertPeriode(
             maksdato = LocalDate.MAX,
             utbetaling = utbetaling,
             periodevilkår = vilkår,
-            aktivitetslogg = emptyList(),
             vilkårsgrunnlagId = null
         )
     }
