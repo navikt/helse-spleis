@@ -152,7 +152,7 @@ internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisi
         sykepengegrunnlag: Inntekt,
         avviksprosent: Prosent,
         totalOmregnetÅrsinntekt: Inntekt,
-        inntektsgrunnlag: Inntekt,
+        beregningsgrunnlag: Inntekt,
         `6G`: Inntekt,
         begrensning: Sykepengegrunnlag.Begrensning,
         vurdertInfotrygd: Boolean,

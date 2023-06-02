@@ -316,11 +316,9 @@ internal data class PersonData(
         }
 
         data class SykepengegrunnlagData(
-            private val sykepengegrunnlag: Double,
             private val grunnbeløp: Double?,
             private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
             private val sammenligningsgrunnlag: SammenligningsgrunnlagData?,
-            private val begrensning: Sykepengegrunnlag.Begrensning,
             private val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningData>,
             private val vurdertInfotrygd: Boolean,
         ) {
