@@ -22,7 +22,9 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_19
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_20
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_28
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_31
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_33
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_37
 import no.nav.helse.serde.serialize
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -110,7 +112,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSykmelding(Sykmeldingsperiode(18.januar, 31.januar))
         håndterSøknad(Sykdom(18.januar, 31.januar, 100.prosent))
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TIL_INFOTRYGD)
-        assertFunksjonellFeil("Søknad forlenger en forkastet periode", 2.vedtaksperiode.filter())
+        assertFunksjonellFeil(RV_SØ_37, 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -120,7 +122,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar))
         håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TIL_INFOTRYGD)
-        assertFunksjonellFeil("Søknad forlenger en forkastet periode", 2.vedtaksperiode.filter())
+        assertFunksjonellFeil(RV_SØ_37, 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -140,11 +142,11 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSykmelding(Sykmeldingsperiode(19.januar, 31.januar))
         håndterSøknad(Sykdom(19.januar, 31.januar, 100.prosent))
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TIL_INFOTRYGD)
-        assertFunksjonellFeil("Søknad forlenger en forkastet periode", 2.vedtaksperiode.filter())
+        assertFunksjonellFeil(RV_SØ_37, 2.vedtaksperiode.filter())
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
-        assertFunksjonellFeil("Søknad forlenger en forkastet periode", 3.vedtaksperiode.filter())
+        assertFunksjonellFeil(RV_SØ_37, 3.vedtaksperiode.filter())
         håndterSykmelding(Sykmeldingsperiode(21.mars, 21.april))
         håndterSøknad(Sykdom(21.mars, 21.april, 100.prosent))
         assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -296,7 +298,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
 
         nyPeriode(22.januar til 31.januar)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
-        assertFunksjonellFeil(RV_SØ_19)
+        assertFunksjonellFeil(RV_SØ_37)
         assertIngenFunksjonellFeil(RV_SØ_28)
     }
 
@@ -319,8 +321,8 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         person.søppelbøtte(hendelselogg, 1.januar til 31.mars)
 
         nyPeriode(1.februar til 17.februar)
-        assertFunksjonellFeil(RV_SØ_19)
-        assertIngenFunksjonellFeil(RV_SØ_20)
+        assertFunksjonellFeil(RV_SØ_37)
+        assertIngenFunksjonellFeil(RV_SØ_31)
     }
 
     private fun Periode.forkast() {

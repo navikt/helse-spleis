@@ -124,6 +124,8 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_33
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_34
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_35
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_36
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_37
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_38
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_16
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
@@ -2716,7 +2718,8 @@ internal class Vedtaksperiode private constructor(
             forkastede
                 .filter { it.periode.erRettFør(vedtaksperiode.periode) }
                 .onEach {
-                    hendelse.funksjonellFeil(RV_SØ_19)
+                    val sammeArbeidsgiver = it.organisasjonsnummer == vedtaksperiode.organisasjonsnummer
+                    hendelse.funksjonellFeil(if (sammeArbeidsgiver) RV_SØ_37 else RV_SØ_38)
                     hendelse.info("Søknad forlenger forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
                 }
                 .isNotEmpty()

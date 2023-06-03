@@ -33,7 +33,7 @@ enum class Varselkode(
     RV_SØ_16("Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass", avviklet = true),
     RV_SØ_17("Søker er ikke gammel nok på søknadstidspunktet til å søke sykepenger uten fullmakt fra verge"),
     RV_SØ_18("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD", avviklet = true),
-    RV_SØ_19("Søknad forlenger en forkastet periode"),
+    RV_SØ_19("Søknad forlenger en forkastet periode", avviklet = true),
     RV_SØ_20("Søknad overlapper med, eller er før, en forkastet vedtaksperiode", avviklet = true),
     RV_SØ_21("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier", avviklet = true),
     RV_SØ_22("Søknaden inneholder en Papirsykmeldingsperiode"),
@@ -51,6 +51,8 @@ enum class Varselkode(
     RV_SØ_34("Søknad overlapper med en forkastet periode hos annen arbeidsgiver"),
     RV_SØ_35("Søknad overlapper delvis med en forkastet periode hos samme arbeidsgiver"),
     RV_SØ_36("Søknad overlapper delvis med en forkastet periode hos annen arbeidsgiver"),
+    RV_SØ_37("Søknad forlenger en forkastet periode hos samme arbeidsgiver"),
+    RV_SØ_38("Søknad forlenger en forkastet periode hos annen arbeidsgiver"),
 
     // OO: Out-of-order
     RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne."),
