@@ -1,13 +1,13 @@
 package no.nav.helse.spleis.e2e.overstyring
 
-import no.nav.helse.assertForventetFeil
+import java.time.LocalDate
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finn
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
@@ -24,7 +24,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         val sykepengegrunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør
-        val inntektsopplysning = sykepengegrunnlag.arbeidsgiverInntektsopplysninger.single().inspektør.inntektsopplysning
+        val inntektsopplysning = inspektør.inntektsopplysningISykepengegrunnlaget(1.januar)
         assertTrue(inntektsopplysning is SkjønnsmessigFastsatt)
         assertEquals(0, sykepengegrunnlag.avviksprosent)
         assertEquals(INNTEKT * 2, sykepengegrunnlag.beregningsgrunnlag)
@@ -45,10 +45,10 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     fun `saksbehandler-inntekt overstyres av en skjønnsmessig med samme beløp`() {
         nyttVedtak(1.januar, 31.januar)
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2, forklaring = "forklaring")))
-        assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single().inspektør.inntektsopplysning is Saksbehandler)
+        assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Saksbehandler)
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
         assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single().inspektør.inntektsopplysning is SkjønnsmessigFastsatt)
+        assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is SkjønnsmessigFastsatt)
     }
 
     @Test
@@ -56,15 +56,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
         nyttVedtak(1.januar, 31.januar)
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
-        assertForventetFeil(
-            forklaring = "TODO. Morten sa tre",
-            nå = {
-                assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            },
-            ønsket = {
-                assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            }
-        )
+        assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
     }
 
     @Test
@@ -74,30 +66,42 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT * 2)
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+        assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is SkjønnsmessigFastsatt)
+    }
 
-        assertForventetFeil(
-            forklaring = "TODO",
-            nå = {
-                inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.finn(
-                    a1
-                )?.let { assertTrue(it.inspektør.inntektsopplysning is SkjønnsmessigFastsatt) }
-            },
-            ønsket = {
-                inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.finn(
-                    a1
-                )?.let { assertTrue(it.inspektør.inntektsopplysning is Inntektsmelding) }
-            }
+    @Test
+    fun `korrigert IM etter skjønnsfastsettelse på flere AG`() {
+        (a1 og a2 og a3).nyeVedtak(1.januar til 31.januar)
+        håndterSkjønnsmessigFastsettelse(
+            1.januar,
+            listOf(
+                OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2),
+                OverstyrtArbeidsgiveropplysning(orgnummer = a2, inntekt = INNTEKT * 2),
+                OverstyrtArbeidsgiveropplysning(orgnummer = a3, inntekt = INNTEKT * 2)
+            )
         )
+        a1 { assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a1) is SkjønnsmessigFastsatt) }
+        a2 { assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a2) is SkjønnsmessigFastsatt) }
+        a3 { assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a3) is SkjønnsmessigFastsatt) }
+        a1 {
+            assertThrows<IllegalStateException> {håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT) }
+        }
+
     }
 
     @Test
     fun `skjønnsmessig fastsettelse overstyres av en inntektmelding med ulikt beløp`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
+        håndterSkjønnsmessigFastsettelse(
+            1.januar,
+            listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2))
+        )
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT * 3)
         assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.finn(a1)
-            ?.let { assertTrue(it.inspektør.inntektsopplysning is Inntektsmelding) }
+        assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Inntektsmelding)
     }
+
+    private fun TestArbeidsgiverInspektør.inntektsopplysningISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = a1) =
+        vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.inntektsopplysning
 }
