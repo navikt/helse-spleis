@@ -70,7 +70,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling.Companion.gjelderFeriepengeutbetaling
-import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling.Companion.rekjørFeriepengerTilArbeidsgiver2022
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
@@ -126,10 +125,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal companion object {
-        internal fun List<Arbeidsgiver>.rekjørFeriepengerTilArbeidsgiver2022(hendelse: IAktivitetslogg) = forEach { arbeidsgiver ->
-            hendelse.kontekst(arbeidsgiver)
-            arbeidsgiver.feriepengeutbetalinger.rekjørFeriepengerTilArbeidsgiver2022(hendelse)
-        }
         internal fun List<Arbeidsgiver>.finn(orgnr: String) = find { it.organisasjonsnummer() == orgnr }
 
         internal fun List<Arbeidsgiver>.tidligsteDato(): LocalDate {
