@@ -23,7 +23,7 @@ abstract class Inntektsopplysning protected constructor(
 ) {
     internal abstract fun accept(visitor: InntektsopplysningVisitor)
     internal fun fastsattÅrsinntekt() = beløp
-    internal open fun omregnetÅrsinntekt() = beløp
+    internal open fun omregnetÅrsinntekt() = this
     internal fun overstyresAv(ny: Inntektsopplysning): Inntektsopplysning {
         if (!kanOverstyresAv(ny)) return this
         return blirOverstyrtAv(ny)

@@ -28,7 +28,7 @@ class SkjønnsmessigFastsatt internal constructor(
         visitor.postVisitSkjønnsmessigFastsatt(this, id, dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
     }
 
-    override fun omregnetÅrsinntekt(): Inntekt {
+    override fun omregnetÅrsinntekt(): Inntektsopplysning {
         return checkNotNull(overstyrtInntekt) { "overstyrt inntekt kan ikke være null" }.omregnetÅrsinntekt()
     }
 

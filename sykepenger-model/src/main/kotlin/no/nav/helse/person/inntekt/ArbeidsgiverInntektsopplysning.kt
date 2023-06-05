@@ -28,7 +28,7 @@ class ArbeidsgiverInntektsopplysning(
         return acc + inntektsopplysning.fastsattÅrsinntekt()
     }
     private fun omregnetÅrsinntekt(acc: Inntekt): Inntekt {
-        return acc + inntektsopplysning.omregnetÅrsinntekt()
+        return acc + inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt()
     }
 
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
@@ -41,7 +41,8 @@ class ArbeidsgiverInntektsopplysning(
     }
 
     private fun overstyr(overstyringer: List<ArbeidsgiverInntektsopplysning>): ArbeidsgiverInntektsopplysning {
-        val overstyring = overstyringer.singleOrNull { it.orgnummer == this.orgnummer } ?: return this
+        val overstyring = overstyringer.singleOrNull { it.orgnummer == this.orgnummer }
+            ?: return ArbeidsgiverInntektsopplysning(this.orgnummer, this.inntektsopplysning.omregnetÅrsinntekt(), refusjonsopplysninger)
         return overstyring.overstyrer(this)
     }
 

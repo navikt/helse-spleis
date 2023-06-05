@@ -36,6 +36,24 @@ internal class InntektsopplysningTest {
         assertEquals(im1, ikkeRapportert.overstyresAv(im1))
     }
 
+    @Test
+    fun `opphøre, gjøre om, avvikle, tilbakestille eller kansellere`() {
+        val im = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
+        val saksbehandler = im.overstyresAv(Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now()))
+        val skjønnsmessigFastsatt1 = im.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()))
+        val skjønnsmessigFastsatt2 = saksbehandler.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()))
+        val skjønnsmessigFastsatt3 = skjønnsmessigFastsatt2.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()))
+        val ikkeRapportert = IkkeRapportert(1.januar, UUID.randomUUID(), LocalDateTime.now())
+        val skatt = SkattSykepengegrunnlag(UUID.randomUUID(), 1.februar, emptyList(), emptyList())
+
+        assertEquals(im, im.omregnetÅrsinntekt())
+        assertEquals(saksbehandler, saksbehandler.omregnetÅrsinntekt())
+        assertEquals(im, skjønnsmessigFastsatt1.omregnetÅrsinntekt())
+        assertEquals(saksbehandler, skjønnsmessigFastsatt2.omregnetÅrsinntekt())
+        assertEquals(saksbehandler, skjønnsmessigFastsatt3.omregnetÅrsinntekt())
+        assertEquals(ikkeRapportert, ikkeRapportert.omregnetÅrsinntekt())
+        assertEquals(skatt, skatt.omregnetÅrsinntekt())
+    }
 
     @Test
     fun `inntektsmelding-likhet`() {

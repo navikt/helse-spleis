@@ -18,7 +18,7 @@ internal class SkjønnsmessigFastsattTest {
         val skjønnsmessigFastsatt = original.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), skjønnsmessigFastsattBeløp, LocalDateTime.now()))
 
         assertEquals(skjønnsmessigFastsattBeløp, skjønnsmessigFastsatt.fastsattÅrsinntekt())
-        assertEquals(originalBeløp, skjønnsmessigFastsatt.omregnetÅrsinntekt())
+        assertEquals(originalBeløp, skjønnsmessigFastsatt.omregnetÅrsinntekt().fastsattÅrsinntekt())
     }
 
     @Test
@@ -33,7 +33,7 @@ internal class SkjønnsmessigFastsattTest {
         assertTrue(skjønnsmessigFastsatt is SkjønnsmessigFastsatt)
         assertTrue(saksbehandler is Saksbehandler)
         assertEquals(skjønnsmessigFastsattBeløp, skjønnsmessigFastsatt.fastsattÅrsinntekt())
-        assertEquals(saksbehandlerbeløp, skjønnsmessigFastsatt.omregnetÅrsinntekt())
+        assertEquals(saksbehandlerbeløp, skjønnsmessigFastsatt.omregnetÅrsinntekt().fastsattÅrsinntekt())
     }
 
     @Test
@@ -48,6 +48,6 @@ internal class SkjønnsmessigFastsattTest {
         assertTrue(skjønnsmessigFastsatt1 is SkjønnsmessigFastsatt)
         assertTrue(skjønnsmessigFastsatt2 is SkjønnsmessigFastsatt)
         assertEquals(skjønnsmessigFastsattBeløp2, skjønnsmessigFastsatt2.fastsattÅrsinntekt())
-        assertEquals(originalBeløp, skjønnsmessigFastsatt2.omregnetÅrsinntekt())
+        assertEquals(originalBeløp, skjønnsmessigFastsatt2.omregnetÅrsinntekt().fastsattÅrsinntekt())
     }
 }

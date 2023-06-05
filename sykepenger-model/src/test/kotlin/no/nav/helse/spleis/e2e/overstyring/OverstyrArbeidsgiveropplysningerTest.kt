@@ -651,6 +651,36 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `g`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+        håndterOverstyrArbeidsgiveropplysninger(
+            skjæringstidspunkt = 1.januar,
+            meldingsreferanseId = UUID.randomUUID(),
+            arbeidsgiveropplysninger = listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a1,
+                    inntekt = INNTEKT*1.5,
+                    forklaring = "endring",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT*1.5))
+                ),
+                OverstyrtArbeidsgiveropplysning(
+                    orgnummer = a2,
+                    inntekt = INNTEKT*1.5,
+                    forklaring = "endring",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT*1.5))
+                )
+            )
+        )
+        assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a1) is Saksbehandler)
+        assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a2) is Saksbehandler)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, orgnummer = a1)
+        assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a1) is Inntektsmelding)
+        assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a2) is Saksbehandler)
+    }
+
+    @Test
     fun `Legge til refusjonsopplysninger tilbake i tid`() {
         nyttVedtak(1.januar, 31.januar)
 

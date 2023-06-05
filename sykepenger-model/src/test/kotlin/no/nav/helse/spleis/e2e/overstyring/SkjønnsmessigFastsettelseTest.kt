@@ -72,6 +72,11 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     @Test
     fun `korrigert IM etter skjønnsfastsettelse på flere AG`() {
         (a1 og a2 og a3).nyeVedtak(1.januar til 31.januar)
+        håndterOverstyrArbeidsgiveropplysninger(
+            1.januar,
+            listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a3, inntekt = INNTEKT * 3, forklaring = "ogga bogga"))
+        )
+        a3 { assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a3) is Saksbehandler) }
         håndterSkjønnsmessigFastsettelse(
             1.januar,
             listOf(
@@ -83,10 +88,12 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
         a1 { assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a1) is SkjønnsmessigFastsatt) }
         a2 { assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a2) is SkjønnsmessigFastsatt) }
         a3 { assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a3) is SkjønnsmessigFastsatt) }
-        a1 {
-            assertThrows<IllegalStateException> {håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT) }
-        }
 
+        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT) }
+
+        a1 { assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a1) is Inntektsmelding) }
+        a2 { assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a2) is Inntektsmelding) }
+        a3 { assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a3) is Saksbehandler) }
     }
 
     @Test
