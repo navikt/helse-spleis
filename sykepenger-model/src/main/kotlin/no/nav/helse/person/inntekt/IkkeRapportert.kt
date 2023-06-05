@@ -16,6 +16,8 @@ internal class IkkeRapportert(
     override fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
         takeIf { this.dato == skjæringstidspunkt }
 
+    override fun kanOverstyresAv(ny: Inntektsopplysning) = true
+
     override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
         return ny.overstyrer(this)
     }

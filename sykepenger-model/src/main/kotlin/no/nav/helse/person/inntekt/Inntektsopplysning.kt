@@ -4,14 +4,15 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.hendelser.Inntektsmelding as InntektsmeldingHendelse
 
 abstract class Inntektsopplysning protected constructor(
     protected val id: UUID,
@@ -30,11 +31,23 @@ abstract class Inntektsopplysning protected constructor(
 
     protected abstract fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning
 
-    protected open fun kanOverstyresAv(ny: Inntektsopplysning) = true
+    protected open fun kanOverstyresAv(ny: Inntektsopplysning): Boolean {
+        // kun saksbehandlerinntekt eller annen inntektsmelding kan overstyre inntektsmelding-inntekt
+        if (ny is SkjønnsmessigFastsatt) return true
+        if (ny is Saksbehandler) return ny.fastsattÅrsinntekt() != this.beløp
+        if (ny !is Inntektsmelding) return false
+        val måned = this.dato.withDayOfMonth(1) til this.dato.withDayOfMonth(this.dato.lengthOfMonth())
+        if (ny.dato !in måned) return false
+        // unngår å endre inntekt dersom beløpet er det samme da det ville
+        // trigget endel unødvendig null-revurderinger av skjæringstidspunktet (inntektsmeldinger kommer jo inn med
+        // inntekt og refusjon selv om det egentlig kun er endring i refusjonen)
+        return this.beløp != ny.beløp
+
+    }
 
     internal open fun overstyrer(gammel: IkkeRapportert) = this
     internal open fun overstyrer(gammel: SkattSykepengegrunnlag) = this
-    internal open fun overstyrer(gammel: no.nav.helse.person.inntekt.Inntektsmelding) = this
+    internal open fun overstyrer(gammel: Inntektsmelding) = this
     internal open fun overstyrer(gammel: Saksbehandler): Inntektsopplysning {
         throw IllegalStateException("Kan ikke overstyre saksbehandler-inntekt")
     }
@@ -73,7 +86,7 @@ abstract class Inntektsopplysning protected constructor(
 
     internal open fun arbeidsgiveropplysningerKorrigert(
         person: Person,
-        inntektsmelding: Inntektsmelding
+        inntektsmelding: InntektsmeldingHendelse
     ) {}
 
     internal open fun arbeidsgiveropplysningerKorrigert(

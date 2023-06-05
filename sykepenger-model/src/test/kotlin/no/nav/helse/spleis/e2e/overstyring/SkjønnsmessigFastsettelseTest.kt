@@ -97,17 +97,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT * 3)
         assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-
-        assertForventetFeil(
-            forklaring = "TODO",
-            nå = {
-                inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.finn(a1)
-                    ?.let { assertTrue(it.inspektør.inntektsopplysning is SkjønnsmessigFastsatt) }
-            },
-            ønsket = {
-                inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.finn(a1)
-                    ?.let { assertTrue(it.inspektør.inntektsopplysning is Inntektsmelding) }
-            }
-        )
+        inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.finn(a1)
+            ?.let { assertTrue(it.inspektør.inntektsopplysning is Inntektsmelding) }
     }
 }

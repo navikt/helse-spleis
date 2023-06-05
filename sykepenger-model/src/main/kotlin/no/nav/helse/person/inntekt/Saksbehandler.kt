@@ -52,11 +52,6 @@ class Saksbehandler internal constructor(
         )
     }
 
-    override fun kanOverstyresAv(ny: Inntektsopplysning): Boolean {
-        // kun saksbehandlerinntekt kan bare endre en annen saksbehandlerinntekt
-        return ny is Saksbehandler || ny is SkjønnsmessigFastsatt
-    }
-
     override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
         return ny.overstyrer(this)
     }

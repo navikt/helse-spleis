@@ -44,16 +44,11 @@ class SkjønnsmessigFastsatt internal constructor(
         checkNotNull(overstyrtInntekt) { "overstyrt inntekt kan ikke være null" }.lagreTidsnærInntekt(skjæringstidspunkt, arbeidsgiver, hendelse, oppholdsperiodeMellom, refusjonsopplysninger, orgnummer, beløp)
     }
 
-    override fun kanOverstyresAv(ny: Inntektsopplysning): Boolean {
-        // kun SkjønnsmessigFastsatt kan bare endre en annen SkjønnsmessigFastsatt
-        return ny is SkjønnsmessigFastsatt
-    }
-
     override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
         return ny.overstyrer(this)
     }
 
-    override fun overstyrer(gammel: Saksbehandler) = kopierMed(gammel) // skal vi peke til saksbehandlerinntekten eller den saksbehandler overstyrte?
+    override fun overstyrer(gammel: Saksbehandler) = kopierMed(gammel)
     override fun overstyrer(gammel: SkjønnsmessigFastsatt) = kopierMed(gammel)
     override fun overstyrer(gammel: IkkeRapportert) = kopierMed(gammel)
     override fun overstyrer(gammel: SkattSykepengegrunnlag) = kopierMed(gammel)

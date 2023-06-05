@@ -6,7 +6,6 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
@@ -53,22 +52,13 @@ internal class Inntektsmelding(
         visitor.visitInntektsmelding(this, id, dato, hendelseId, beløp, tidsstempel)
     }
 
-    override fun kanOverstyresAv(ny: Inntektsopplysning): Boolean {
-        // kun saksbehandlerinntekt eller annen inntektsmelding kan overstyre inntektsmelding-inntekt
-        if (ny is SkjønnsmessigFastsatt) return true
-        if (ny is Saksbehandler) return ny.fastsattÅrsinntekt() != this.beløp
-        if (ny !is Inntektsmelding) return false
-        val måned = this.dato.withDayOfMonth(1) til this.dato.withDayOfMonth(this.dato.lengthOfMonth())
-        if (ny.dato !in måned) return false
-        // unngår å endre inntekt dersom beløpet er det samme da det ville
-        // trigget endel unødvendig null-revurderinger av skjæringstidspunktet (inntektsmeldinger kommer jo inn med
-        // inntekt og refusjon selv om det egentlig kun er endring i refusjonen)
-        return this.beløp != ny.beløp
-    }
-
     override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
         return ny.overstyrer(this)
     }
+
+    override fun overstyrer(gammel: Saksbehandler) = this
+
+    override fun overstyrer(gammel: SkjønnsmessigFastsatt) = this
 
     override fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): AvklarbarSykepengegrunnlag? {
         if (dato == skjæringstidspunkt) return this
