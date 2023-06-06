@@ -117,7 +117,7 @@ class Søknad(
             }
 
             sikkerlogg.info("Sykdomstidslinjen ble strukket av egenmelding med {}.\n{}\n{}\n{}",
-                StructuredArguments.keyValue("dager", if(nySykdomstidslinje.periode() != null) ChronoUnit.DAYS.between(nySykdomstidslinje.førsteDag(), sykdomstidslinje.førsteDag()) else "N/A"),
+                StructuredArguments.keyValue("dager", if(nySykdomstidslinje.periode() != null && sykdomstidslinje.periode() != null) ChronoUnit.DAYS.between(nySykdomstidslinje.førsteDag(), sykdomstidslinje.førsteDag()) else "N/A"),
                 StructuredArguments.keyValue("gammelSykdomstidslinje", sykdomstidslinje),
                 StructuredArguments.keyValue("egenmeldingstidslinje", egenmeldingstidslinje),
                 StructuredArguments.keyValue("nySykdomstidslinje", nySykdomstidslinje)
