@@ -22,6 +22,7 @@ import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
+import no.nav.helse.testhelpers.S
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -429,7 +430,7 @@ internal class InntektsmeldingTest {
     @Test
     fun `førsteFraværsdag kan være null ved lagring av inntekt`() {
         inntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = null)
-        assertDoesNotThrow { inntektsmelding.addInntekt(Inntektshistorikk(), NullObserver) }
+        assertDoesNotThrow { inntektsmelding.addInntekt(Inntektshistorikk(), NullObserver, 16.S) }
     }
 
     @Test
@@ -445,7 +446,7 @@ internal class InntektsmeldingTest {
     fun `lagrer inntekt på første dag i arbeidsgiverpeiroden`() {
         inntektsmelding(listOf(1.januar til 10.januar, 11.januar til 16.januar), refusjonBeløp = 2000.månedlig, beregnetInntekt = 2000.månedlig, førsteFraværsdag = 1.januar)
         val inntektshistorikk = Inntektshistorikk()
-        inntektsmelding.addInntekt(inntektshistorikk, NullObserver)
+        inntektsmelding.addInntekt(inntektshistorikk, NullObserver, inntektsmelding.sykdomstidslinje())
         assertEquals(2000.månedlig, inntektshistorikk.avklarSykepengegrunnlag(1.januar, 1.januar, null)?.inspektør?.beløp)
     }
 

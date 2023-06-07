@@ -834,16 +834,14 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding: Inntektsmelding,
         subsumsjonObserver: SubsumsjonObserver
     ) {
-        val (inntektsdato, lagtTilNå) = inntektsmelding.addInntekt(inntektshistorikk, subsumsjonObserver)
+        val (inntektsdato, lagtTilNå) = inntektsmelding.addInntekt(inntektshistorikk, subsumsjonObserver, sykdomstidslinje())
         inntektsmelding.leggTilRefusjon(refusjonshistorikk)
-        val sykdomstidslinjeperiode = sykdomstidslinje().periode()
-        if (sykdomstidslinjeperiode != null && inntektsdato !in sykdomstidslinjeperiode)
-            return inntektsmelding.info("Lagrer ikke inntekt på skjæringstidspunkt fordi inntektdato er oppgitt til å være utenfor den perioden arbeidsgiver har sykdom for")
+        if (!lagtTilNå) return
         val skjæringstidspunkt = person.skjæringstidspunkt(inntektsdato.somPeriode())
         finnAlternativInntektsdato(inntektsdato, skjæringstidspunkt)?.let {
             inntektsmelding.addInntekt(inntektshistorikk, it)
         }
-        if (lagtTilNå) person.nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt, inntektsmelding, subsumsjonObserver)
+        person.nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt, inntektsmelding, subsumsjonObserver)
         håndter(inntektsmelding) { håndtertInntektPåSkjæringstidspunktet(skjæringstidspunkt, inntektsmelding) }
     }
 

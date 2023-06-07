@@ -16,7 +16,11 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.*
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_23
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmelding
@@ -166,10 +170,25 @@ class Inntektsmelding(
         info("Lagrer inntekt på alternativ inntektsdato $alternativInntektsdato")
     }
 
-    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, subsumsjonObserver: SubsumsjonObserver): Pair<LocalDate, Boolean> {
+    internal fun addInntekt(
+        inntektshistorikk: Inntektshistorikk,
+        subsumsjonObserver: SubsumsjonObserver,
+        sykdomstidslinje: Sykdomstidslinje
+    ): Pair<LocalDate, Boolean> {
+        val sykdomstidslinjeperiode = sykdomstidslinje.periode()
+        if (sykdomstidslinjeperiode == null || inntektsdato !in sykdomstidslinjeperiode) {
+            info("Lagrer ikke inntekt på skjæringstidspunkt fordi inntektdato er oppgitt til å være utenfor den perioden arbeidsgiver har sykdom for")
+            return inntektsdato to false
+        }
         val (årligInntekt, dagligInntekt) = beregnetInntekt.reflection { årlig, _, daglig, _ -> årlig to daglig }
         subsumsjonObserver.`§ 8-10 ledd 3`(årligInntekt, dagligInntekt)
-        return inntektsdato to inntektshistorikk.leggTil(Inntektsmelding(inntektsdato, meldingsreferanseId(), beregnetInntekt))
+        return inntektsdato to inntektshistorikk.leggTil(
+            Inntektsmelding(
+                inntektsdato,
+                meldingsreferanseId(),
+                beregnetInntekt
+            )
+        )
     }
 
     internal fun leggTilRefusjon(refusjonshistorikk: Refusjonshistorikk) {
