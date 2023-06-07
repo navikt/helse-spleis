@@ -116,11 +116,12 @@ class Søknad(
                     .merge(sykdomstidslinje, replace)
             }
 
-            sikkerlogg.info("Sykdomstidslinjen ble strukket av egenmelding med {}.\n{}\n{}\n{}",
+            sikkerlogg.info("Sykdomstidslinjen ble strukket av egenmelding med {}.\n{}\n{}\n{}\n{}",
                 StructuredArguments.keyValue("dager", if(nySykdomstidslinje.periode() != null && sykdomstidslinje.periode() != null) ChronoUnit.DAYS.between(nySykdomstidslinje.førsteDag(), sykdomstidslinje.førsteDag()) else "N/A"),
                 StructuredArguments.keyValue("gammelSykdomstidslinje", sykdomstidslinje),
                 StructuredArguments.keyValue("egenmeldingstidslinje", egenmeldingstidslinje),
-                StructuredArguments.keyValue("nySykdomstidslinje", nySykdomstidslinje)
+                StructuredArguments.keyValue("nySykdomstidslinje", nySykdomstidslinje),
+                StructuredArguments.keyValue("søknadId", meldingsreferanseId())
             )
         }
     }
