@@ -35,10 +35,10 @@ import no.nav.helse.spleis.nyObjectmapper
 import no.nav.helse.spleis.objectMapper
 import org.slf4j.LoggerFactory
 
-internal object ApiV2 {
-    private val logger = LoggerFactory.getLogger(ApiV2::class.java)
+internal object Api {
+    private val logger = LoggerFactory.getLogger(Api::class.java)
     private val sikkerlogger = LoggerFactory.getLogger("tjenestekall")
-    private val schema = ApiV2::class.java.getResource("/graphql-schema.json")!!.readText()
+    private val schema = Api::class.java.getResource("/graphql-schema.json")!!.readText()
     private val fraQueryRegex = "person\\(fnr:\"(\\d+)\"\\)".toRegex()
     private val sifferRegex = "\\d+".toRegex()
     private val String.fnr get() = objectMapper.readTree(this.replace(" ", "").replace("\n", "")).let { body ->
@@ -64,7 +64,7 @@ internal object ApiV2 {
         ))
     }
 
-    internal fun Application.installGraphQLApiV2(dataSource: DataSource) {
+    internal fun Application.installGraphQLApi(dataSource: DataSource) {
         val personDao = PersonDao(dataSource)
         val hendelseDao = HendelseDao(dataSource)
 
