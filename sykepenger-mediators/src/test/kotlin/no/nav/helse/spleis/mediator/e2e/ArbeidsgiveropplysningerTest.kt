@@ -3,6 +3,7 @@ package no.nav.helse.spleis.mediator.e2e
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
+import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
@@ -18,10 +19,11 @@ import org.skyscreamer.jsonassert.JSONCompareMode
 internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    fun `sender ut forventet event TrengerArbeidsgiveropplysninger ved en enkel førstegangsbehandling`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+    fun `sender ut forventet event TrengerArbeidsgiveropplysninger ved en enkel førstegangsbehandling`() = Toggle.Egenmelding.enable {
+        sendNySøknad(SoknadsperiodeDTO(fom = 2.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 2.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            egenmeldingerFraSykmelding = listOf(1.januar)
         )
         Assertions.assertEquals(1, testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver").size)
         val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
@@ -31,6 +33,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             "organisasjonsnummer",
             "skjæringstidspunkt",
             "sykmeldingsperioder",
+            "egenmeldingsperioder",
             "forespurteOpplysninger",
             "aktørId",
             "fødselsnummer"
@@ -61,6 +64,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
                 "organisasjonsnummer",
                 "skjæringstidspunkt",
                 "sykmeldingsperioder",
+                "egenmeldingsperioder",
                 "forespurteOpplysninger",
                 "aktørId",
                 "fødselsnummer"
@@ -148,6 +152,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "tom": "2018-03-31"
             }
           ],
+          "egenmeldingsperioder": [],
           "forespurteOpplysninger": [
             {
               "opplysningstype": "FastsattInntekt",
@@ -185,8 +190,14 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
           "skjæringstidspunkt": "2018-01-01",
           "sykmeldingsperioder": [
             {
-              "fom": "2018-01-01",
+              "fom": "2018-01-02",
               "tom": "2018-01-31"
+            }
+          ],
+          "egenmeldingsperioder": [
+            {
+              "fom": "2018-01-01",
+              "tom": "2018-01-01"
             }
           ],
           "forespurteOpplysninger": [

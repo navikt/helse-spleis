@@ -114,7 +114,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_19
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_28
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_29
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_30
@@ -689,7 +688,7 @@ internal class Vedtaksperiode private constructor(
         val fastsattInntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntekt(arbeidsgiver.organisasjonsnummer())
         val arbeidsgiverperiode = finnArbeidsgiverperiode()
         val relevanteSykmeldingsperioder =
-            arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).map { it.periode() }
+            arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).map { it.sykmeldingsperiode }
 
         val forespurteOpplysninger = listOfNotNull(
             forespurtInntekt(fastsattInntekt),
@@ -704,6 +703,7 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiodeId = id,
                 skjæringstidspunkt = skjæringstidspunkt,
                 sykmeldingsperioder = relevanteSykmeldingsperioder,
+                egenmeldingsperioder = sykdomstidslinje.egenmeldingerFraSøknad(),
                 forespurteOpplysninger = forespurteOpplysninger
             )
         )

@@ -11,6 +11,8 @@ import no.nav.helse.etterlevelse.SykdomstidslinjeBuilder
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -268,6 +270,11 @@ internal class Sykdomstidslinje private constructor(
         val sisteIkkeOppholdsdag = førsteOppholdsdagEtterSkjæringstidspunkt ?: this.periode?.start ?: return null
         return sisteIkkeOppholdsdag.somPeriode().periodeMellom(førsteSykedag)
     }
+
+    internal fun egenmeldingerFraSøknad() = dager
+        .filter { it.value.kommerFra(Søknad::class) && ( it.value is Arbeidsgiverdag || it.value is ArbeidsgiverHelgedag) }
+        .map { it.key }
+        .grupperSammenhengendePerioderMedHensynTilHelg()
 
     internal companion object {
         internal fun List<Sykdomstidslinje>.slåSammenForkastedeSykdomstidslinjer() =
