@@ -1,14 +1,6 @@
 package no.nav.helse.spleis.graphql.dto
 
-import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
 import java.time.LocalDate
-
-internal fun SchemaBuilder.simuleringTypes() {
-    type<GraphQLSimuleringsdetaljer>()
-    type<GraphQLSimuleringsutbetaling>()
-    type<GraphQLSimuleringsperiode>()
-    type<GraphQLSimulering>()
-}
 
 data class GraphQLSimuleringsdetaljer(
     val faktiskFom: LocalDate,

@@ -103,15 +103,12 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             }
         """.trimIndent()
 
-        requestBådeV1ogV2(
-            body = """{"query": "$query"}""",
-            assertBlock = {
-                objectMapper.readTree(this).get("data").get("person").get("arbeidsgivere").let { arbeidsgivere ->
-                    assertEquals(1, arbeidsgivere.size())
-                    assertEquals(3, arbeidsgivere.get(0).size())
-                }
+        request("""{"query": "$query"}""") {
+            objectMapper.readTree(this).get("data").get("person").get("arbeidsgivere").let { arbeidsgivere ->
+                assertEquals(1, arbeidsgivere.size())
+                assertEquals(3, arbeidsgivere.get(0).size())
             }
-        )
+        }
     }
 
     @Test
@@ -283,9 +280,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             }
         """.trimIndent()
 
-        requestBådeV1ogV2(
-            body = """{"query": "$query"}"""
-        ) {
+        request("""{"query": "$query"}""") {
             objectMapper.readTree(this).get("data").get("person").get("arbeidsgivere").get(0).get("generasjoner").get(0).let { generasjon ->
                 assertEquals(2, generasjon.size())
                 assertEquals(1, generasjon.get("perioder").size())
@@ -327,9 +322,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             }
         """.trimIndent()
 
-        requestBådeV1ogV2(
-            body = """{"query": "$query"}"""
-        ) {
+        request("""{"query": "$query"}""") {
             objectMapper.readTree(this).get("data").get("person").let { person ->
                 val vilkårsgrunnlagId: String =
                     person.get("arbeidsgivere").get(0).get("generasjoner").get(0).get("perioder").get(0).get("vilkarsgrunnlagId").asText()
@@ -372,9 +365,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             }
         """.trimIndent()
 
-        requestBådeV1ogV2(
-            body = """{"query": "$query"}"""
-        ) {
+        request("""{"query": "$query"}""") {
             objectMapper.readTree(this).get("data").get("person").let { person ->
                 val vilkårsgrunnlagId: String =
                     person.get("arbeidsgivere").get(0).get("generasjoner").get(0).get("perioder").get(0).get("vilkarsgrunnlagId").asText()
@@ -404,9 +395,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             }
         """.trimIndent()
 
-        requestBådeV1ogV2(
-            body = """{"query": "$query"}"""
-        ) {
+        request("""{"query": "$query"}""") {
             @Language("JSON")
             val forventet = """
                 {
@@ -415,7 +404,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                   }
                 }
             """
-            JSONAssert.assertEquals(forventet, this, STRICT)
+            assertHeltLike(forventet, this)
         }
     }
 
@@ -439,28 +428,16 @@ internal class GraphQLApiTest : AbstractObservableTest() {
 
         val annenIssuer = Issuer("annen")
 
-        requestBådeV1ogV2(body = body, accesToken = null, forventetHttpStatusCode = HttpStatusCode.Unauthorized)
-        requestBådeV1ogV2(body = body, accesToken = testServer.createToken(), forventetHttpStatusCode = HttpStatusCode.OK)
-        requestBådeV1ogV2(body = body, accesToken = testServer.createToken("feil_audience"), forventetHttpStatusCode = HttpStatusCode.Unauthorized)
-        requestBådeV1ogV2(body = body, accesToken = annenIssuer.createToken(), forventetHttpStatusCode = HttpStatusCode.Unauthorized)
+        request(body = body, accesToken = null, forventetHttpStatusCode = HttpStatusCode.Unauthorized)
+        request(body = body, accesToken = testServer.createToken(), forventetHttpStatusCode = HttpStatusCode.OK)
+        request(body = body, accesToken = testServer.createToken("feil_audience"), forventetHttpStatusCode = HttpStatusCode.Unauthorized)
+        request(body = body, accesToken = annenIssuer.createToken(), forventetHttpStatusCode = HttpStatusCode.Unauthorized)
     }
 
     @Test
-    fun `response på introspection fra API og API V2 skal være like`() {
-        val (v1Response, v2Response) = requestBådeV1ogV2(
-            v1Path = "/graphql",
-            v2Path = "/v2/graphql/introspection",
-            body = IntrospectionQuery
-        )
-
-        JSONAssert.assertEquals(v1Response, v2Response, STRICT)
-
-        testServer.httpPost(
-            path = "/v2/graphql",
-            body = IntrospectionQuery,
-            accessToken = null,
-        ) {
-            JSONAssert.assertEquals(v1Response, this, STRICT)
+    fun `response på introspection`() {
+        request(IntrospectionQuery) {
+            assertHeltLike("/graphql-schema.json".readResource(), this)
         }
     }
 
@@ -478,46 +455,29 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             }
         """
 
-        val (v1response, v2response) = requestBådeV1ogV2(
-            body = requestBody
-        ).let { it.first.utenVariableVerdier to it.second.utenVariableVerdier }
-
-        JSONAssert.assertEquals(detSpesialistFaktiskForventer, v1response, CustomComparator(STRICT, Customization("data.person.versjon") { _, _ -> true }))
-        JSONAssert.assertEquals(detSpesialistFaktiskForventer, v2response, CustomComparator(STRICT, Customization("data.person.versjon") { _, _ -> true }))
+        request(requestBody) {
+            assertHeltLikeUtenomVersjon(detSpesialistFaktiskForventer, this.utenVariableVerdier)
+        }
     }
 
-    private fun requestBådeV1ogV2(
-        v1Path: String = "/graphql",
-        v2Path: String = "/v2/graphql",
+    private fun request(
         body: String,
         accesToken: String? = testServer.createToken(),
         forventetHttpStatusCode: HttpStatusCode = HttpStatusCode.OK,
-        assertBlock: String.() -> Unit = {},
-        v2AssertBlock: String.() -> Unit = assertBlock,
-    ): Pair<String, String> {
+        assertBlock: String.() -> Unit = {}
+    ){
         lateinit var v1Response: String
-        lateinit var v2Response: String
 
         testServer.httpPost(
-            path = v1Path,
+            path = "/graphql",
             body = body,
             accessToken = accesToken,
             expectedStatus = forventetHttpStatusCode
         ) { v1Response = this }
 
-        testServer.httpPost(
-            path = v2Path,
-            body = body,
-            accessToken = accesToken,
-            expectedStatus = forventetHttpStatusCode
-        ) { v2Response = this }
 
         assertBlock(v1Response)
-        v2AssertBlock(v2Response)
-
-        return v1Response to v2Response
     }
-
 
     private companion object {
         private val UUIDRegex = "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b".toRegex()
@@ -529,11 +489,12 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         private val TidsstempelMandagsfrø = "2018-01-01 00:00:00.000"
         private val FagsystemIdRegex = "[A-Z,2-7]{26}".toRegex()
         private val FagsystemId = "ZZZZZZZZZZZZZZZZZZZZZZZZZZ"
-        private val String.utenVariableVerdier get() = replace(UUIDRegex, NullUUID)
-            .replace(LocalDateTimeRegex, LocalDateTimeMandagsfrø)
-            .replace(LocalDateTimePrecisionRegex, LocalDateTimeMandagsfrø)
-            .replace(TidsstempelRegex, TidsstempelMandagsfrø)
-            .replace(FagsystemIdRegex, FagsystemId)
+        private val String.utenVariableVerdier
+            get() = replace(UUIDRegex, NullUUID)
+                .replace(LocalDateTimeRegex, LocalDateTimeMandagsfrø)
+                .replace(LocalDateTimePrecisionRegex, LocalDateTimeMandagsfrø)
+                .replace(TidsstempelRegex, TidsstempelMandagsfrø)
+                .replace(FagsystemIdRegex, FagsystemId)
 
         @Language("JSON")
         private val detSpesialistFaktiskForventer = """
@@ -1160,5 +1121,14 @@ internal class GraphQLApiTest : AbstractObservableTest() {
   }
 }
         """
+
+        private fun assertHeltLike(forventet: String, faktisk: String) =
+            JSONAssert.assertEquals(forventet, faktisk, STRICT)
+
+        private fun assertHeltLikeUtenomVersjon(forventet: String, faktisk: String) =
+            JSONAssert.assertEquals(forventet, faktisk, CustomComparator(STRICT, Customization("data.person.versjon") { _, _ -> true }))
+
+        private fun String.readResource() =
+            object {}.javaClass.getResource(this)?.readText(Charsets.UTF_8) ?: throw RuntimeException("Fant ikke filen på $this")
     }
 }

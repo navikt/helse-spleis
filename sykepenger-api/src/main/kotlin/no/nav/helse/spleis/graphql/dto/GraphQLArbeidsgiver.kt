@@ -1,46 +1,7 @@
 package no.nav.helse.spleis.graphql.dto
 
-import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
 import java.time.LocalDate
 import java.util.*
-
-internal fun SchemaBuilder.arbeidsgiverTypes() {
-    type<GraphQLGenerasjon> {
-        property<List<GraphQLTidslinjeperiode>>("perioderSlice") {
-            resolver { generasjon: GraphQLGenerasjon, first: Int?, from: Int? ->
-                generasjon.perioder.safeSlice(first, from)
-            }
-        }
-        property<GraphQLTidslinjeperiode?>("periode") {
-            resolver { generasjon: GraphQLGenerasjon, index: Int ->
-                generasjon.perioder.getOrNull(index)
-            }
-        }
-        property<GraphQLTidslinjeperiode?>("sistePeriode") {
-            resolver { generasjon: GraphQLGenerasjon ->
-                generasjon.perioder.firstOrNull()
-            }
-        }
-    }
-
-    type<GraphQLArbeidsgiver> {
-        property<List<GraphQLGenerasjon>>("generasjonerSlice") {
-            resolver { arbeidsgiver: GraphQLArbeidsgiver, first: Int?, from: Int? ->
-                arbeidsgiver.generasjoner.safeSlice(first, from)
-            }
-        }
-        property<GraphQLGenerasjon?>("generasjon") {
-            resolver { arbeidsgiver: GraphQLArbeidsgiver, index: Int ->
-                arbeidsgiver.generasjoner.getOrNull(index)
-            }
-        }
-        property<GraphQLGenerasjon?>("sisteGenerasjon") {
-            resolver { arbeidsgiver: GraphQLArbeidsgiver ->
-                arbeidsgiver.generasjoner.firstOrNull()
-            }
-        }
-    }
-}
 
 data class GraphQLGenerasjon(
     val id: UUID,

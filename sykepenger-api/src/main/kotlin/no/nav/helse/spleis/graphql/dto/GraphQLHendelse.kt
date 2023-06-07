@@ -1,19 +1,8 @@
 package no.nav.helse.spleis.graphql.dto
 
-import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
 import java.time.LocalDateTime
-
-internal fun SchemaBuilder.hendelseTypes() {
-    enum<GraphQLHendelsetype>()
-
-    type<GraphQLHendelse>()
-    type<GraphQLInntektsmelding>()
-    type<GraphQLSoknadNav>()
-    type<GraphQLSoknadArbeidsgiver>()
-    type<GraphQLSykmelding>()
-}
 
 enum class GraphQLHendelsetype {
     Inntektsmelding,

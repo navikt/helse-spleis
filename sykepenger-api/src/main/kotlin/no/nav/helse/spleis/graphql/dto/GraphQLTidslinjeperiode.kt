@@ -1,64 +1,10 @@
 package no.nav.helse.spleis.graphql.dto
 
-import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.serde.api.dto.Utbetalingtype
-
-internal fun SchemaBuilder.tidslinjeperiodeTypes() {
-    enum<GraphQLInntektstype>()
-    enum<GraphQLPeriodetype>()
-    enum<GraphQLSykdomsdagtype>()
-    enum<GraphQLUtbetalingsdagType>()
-    enum<GraphQLSykdomsdagkildetype>()
-    enum<GraphQLBegrunnelse>()
-    enum<GraphQLPeriodetilstand>()
-    enum<Utbetalingtype>()
-    enum<GraphQLUtbetalingstatus>()
-
-    type<GraphQLSykdomsdagkilde>()
-    type<GraphQLUtbetalingsinfo>()
-    type<GraphQLVurdering>()
-    type<GraphQLUtbetaling>() {
-        property(GraphQLUtbetaling::type) {
-            deprecate("Burde bruke enum \"typeEnum\"")
-        }
-        property(GraphQLUtbetaling::status) {
-            deprecate("Burde bruke enum \"statusEnum\"")
-        }
-    }
-    type<GraphQLDag>()
-    type<GraphQLTidslinjeperiode>()
-    type<GraphQLUberegnetPeriode>()
-    type<GraphQLPeriodevilkar>()
-    type<GraphQLPeriodevilkar.Sykepengedager>()
-    type<GraphQLPeriodevilkar.Alder>()
-    type<GraphQLPeriodevilkar.Soknadsfrist>()
-    type<GraphQLBeregnetPeriode>() {
-        property<List<GraphQLInntektsmelding>>("inntektsmeldinger") {
-            resolver { periode ->
-                periode.hendelser.filterIsInstance<GraphQLInntektsmelding>()
-            }
-        }
-        property<List<GraphQLSoknadNav>>("soknaderNav") {
-            resolver { periode ->
-                periode.hendelser.filterIsInstance<GraphQLSoknadNav>()
-            }
-        }
-        property<List<GraphQLSoknadArbeidsgiver>>("soknaderArbeidsgiver") {
-            resolver { periode ->
-                periode.hendelser.filterIsInstance<GraphQLSoknadArbeidsgiver>()
-            }
-        }
-        property<List<GraphQLSykmelding>>("sykmeldinger") {
-            resolver { periode ->
-                periode.hendelser.filterIsInstance<GraphQLSykmelding>()
-            }
-        }
-    }
-}
 
 enum class GraphQLInntektstype {
     EnArbeidsgiver,

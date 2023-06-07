@@ -1,18 +1,8 @@
 package no.nav.helse.spleis.graphql.dto
 
-import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
 import java.util.UUID
-
-internal fun SchemaBuilder.vilkarsgrunnlagTypes() {
-    enum<GraphQLVilkarsgrunnlagtype>()
-
-    type<GraphQLVilkarsgrunnlag>()
-    type<GraphQLSpleisVilkarsgrunnlag>()
-    type<GraphQLInfotrygdVilkarsgrunnlag>()
-    type<GraphQLVilkarsgrunnlaghistorikk>()
-}
 
 enum class GraphQLVilkarsgrunnlagtype {
     Infotrygd,

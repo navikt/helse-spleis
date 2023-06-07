@@ -1,18 +1,8 @@
 package no.nav.helse.spleis.graphql.dto
 
-import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
-
-internal fun SchemaBuilder.inntektsgrunnlagTypes() {
-    enum<GraphQLInntektskilde>()
-
-    type<GraphQLInntekterFraAOrdningen>()
-    type<GraphQLOmregnetArsinntekt>()
-    type<GraphQLSammenligningsgrunnlag>()
-    type<GraphQLArbeidsgiverinntekt>()
-}
 
 enum class GraphQLInntektskilde {
     Saksbehandler,

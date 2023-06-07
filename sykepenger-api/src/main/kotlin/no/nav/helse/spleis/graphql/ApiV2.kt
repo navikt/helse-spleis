@@ -64,14 +64,13 @@ internal object ApiV2 {
         ))
     }
 
-    internal fun Application.installGraphQLApiV2(dataSource: DataSource, path: String = "/v2/graphql") {
-        logger.info("Tilgjengeliggjør GraphQL V2 på under path $path")
+    internal fun Application.installGraphQLApiV2(dataSource: DataSource) {
         val personDao = PersonDao(dataSource)
         val hendelseDao = HendelseDao(dataSource)
 
         routing {
             authenticate(optional = true) {
-                post("$path{...}") {
+                post("/graphql{...}") {
                     val fødselsnummer = call.receiveText().fnr ?: return@post call.respondText(schema, Json)
                     call.principal<JWTPrincipal>() ?: return@post call.respond(HttpStatusCode.Unauthorized)
                     try {

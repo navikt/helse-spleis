@@ -27,9 +27,6 @@ dependencies {
     implementation(libs.cloudsql)
     implementation("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryPrometheusVersion")
 
-    implementation("com.apurebase:kgraphql:$kGraphQLVersion")
-    implementation("com.apurebase:kgraphql-ktor:$kGraphQLVersion")
-
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-server-metrics-micrometer:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
@@ -40,7 +37,7 @@ dependencies {
         exclude(group = "junit")
     }
 
-    testImplementation(project(":sykepenger-mediators")) // for å få  tilgang på db/migrations-filene
+    testImplementation(project(":sykepenger-mediators")) // for å få tilgang på db/migrations-filene
     testImplementation(libs.flyway)
     testImplementation(libs.testcontainers) {
         exclude("com.fasterxml.jackson.core")
@@ -54,7 +51,8 @@ dependencies {
     testImplementation("io.mockk:mockk:$mockVersion")
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
 
-
+    testImplementation("com.apurebase:kgraphql:$kGraphQLVersion")
+    testImplementation("com.apurebase:kgraphql-ktor:$kGraphQLVersion")
 }
 
 tasks.named<Jar>("jar") {
