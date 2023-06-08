@@ -11,7 +11,9 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -67,7 +69,13 @@ internal class EgenmeldingerFraSøknadTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `finn ut hvordan vi skal håndtere at vi har egenmeldinger fra søknaden etter at vi har mottatt inntektsmelding`() {}
+    fun `kort periode blir lang pga egenmeldingsdager fra søknad, men blir kort igjen pga inntektsmelding - skal gå til Avsluttet Uten Utbetaling`() {
+        håndterSykmelding(Sykmeldingsperiode(2.januar, 17.januar))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(2.januar, 17.januar, 100.prosent), egenmeldinger = listOf(Søknad.Søknadsperiode.Arbeidsgiverdag(1.januar, 1.januar)))
+        håndterInntektsmelding(listOf(2.januar til 17.januar))
+
+        assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
+    }
 
     @Test
     fun `egenmeldingsdager fra inntektsmelding vinner over søknad`() {
