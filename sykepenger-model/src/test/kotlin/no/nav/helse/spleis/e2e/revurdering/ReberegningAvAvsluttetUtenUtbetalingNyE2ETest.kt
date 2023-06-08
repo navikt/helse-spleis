@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
+import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -22,6 +23,7 @@ import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -93,6 +95,31 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `omgjøre kort periode får referanse til inntektsmeldingen som inneholder inntekten som er lagt til grunn`() {
+        val søknad1 = håndterSøknad(Sykdom(29.mars(2023), 19.april(2023), 100.prosent))
+        val inntektsmelding1 = håndterInntektsmelding(listOf(20.april(2023) til 5.mai(2023)))
+        val søknad2 = håndterSøknad(Sykdom(20.april(2023), 7.mai(2023), 100.prosent))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        val inntektsmelding2 = håndterInntektsmelding(listOf(29.mars(2023) til 13.april(2023)))
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        assertEquals(listOf(Dokumentsporing.søknad(søknad1), Dokumentsporing.inntektsmeldingDager(inntektsmelding1), Dokumentsporing.inntektsmeldingDager(inntektsmelding2)), inspektør.hendelser(1.vedtaksperiode))
+
+        assertForventetFeil(
+            forklaring = "Omgjøring som får eget skjæringstidspunkt. Inntektsmelding som forårsaker at den skal omgjøres er ikke den vi bruker inntekt fra. Vi ender opp uten dokumentsporing til inntektsmeldingInntekt",
+            nå = {
+                assertEquals(listOf(Dokumentsporing.søknad(søknad2), Dokumentsporing.inntektsmeldingDager(inntektsmelding1)), inspektør.hendelser(2.vedtaksperiode))
+            },
+            ønsket = {
+                assertEquals(listOf(Dokumentsporing.søknad(søknad2), Dokumentsporing.inntektsmeldingDager(inntektsmelding1), Dokumentsporing.inntektsmeldingInntekt(inntektsmelding1)), inspektør.hendelser(2.vedtaksperiode))
+            }
+        )
+    }
 
     @Test
     fun `omgjøre kort periode etter mottatt im - med eldre utbetalt periode`() {
