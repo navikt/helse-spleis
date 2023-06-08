@@ -15,6 +15,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
@@ -99,16 +100,21 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     @Test
     fun `omgjøre kort periode får referanse til inntektsmeldingen som inneholder inntekten som er lagt til grunn`() {
         val søknad1 = håndterSøknad(Sykdom(29.mars(2023), 19.april(2023), 100.prosent))
-        val inntektsmelding1 = håndterInntektsmelding(listOf(20.april(2023) til 5.mai(2023)))
+        val inntektsmeldingbeløp1 = INNTEKT
+        val inntektsmelding1 = håndterInntektsmelding(listOf(20.april(2023) til 5.mai(2023)), beregnetInntekt = inntektsmeldingbeløp1)
         val søknad2 = håndterSøknad(Sykdom(20.april(2023), 7.mai(2023), 100.prosent))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
-        val inntektsmelding2 = håndterInntektsmelding(listOf(29.mars(2023) til 13.april(2023)))
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        val inntektsmeldingbeløp2 = INNTEKT*1.1
+        val inntektsmelding2 = håndterInntektsmelding(listOf(29.mars(2023) til 13.april(2023)), beregnetInntekt = inntektsmeldingbeløp2)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
 
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         assertEquals(listOf(Dokumentsporing.søknad(søknad1), Dokumentsporing.inntektsmeldingDager(inntektsmelding1), Dokumentsporing.inntektsmeldingDager(inntektsmelding2)), inspektør.hendelser(1.vedtaksperiode))
+        assertEquals(29.mars(2023), inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(20.april(2023), inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(inntektsmeldingbeløp1, inspektør.inntektISykepengegrunnlaget(20.april(2023)))
 
         assertForventetFeil(
             forklaring = "Omgjøring som får eget skjæringstidspunkt. Inntektsmelding som forårsaker at den skal omgjøres er ikke den vi bruker inntekt fra. Vi ender opp uten dokumentsporing til inntektsmeldingInntekt",
@@ -1295,4 +1301,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertVarsel(RV_IV_2, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
     }
+
+    private fun TestArbeidsgiverInspektør.inntektISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =
+        vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.inntektsopplysning.inspektør.beløp
 }
