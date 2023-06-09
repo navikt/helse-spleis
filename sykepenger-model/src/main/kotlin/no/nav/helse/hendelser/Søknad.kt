@@ -60,6 +60,7 @@ class Søknad(
     private val egenmeldingsperiode: Periode?
     private val egenmeldingstidslinje: Sykdomstidslinje
     private var egenmeldingsstart: LocalDate?
+    private var egenmeldingsslutt: LocalDate?
 
     internal companion object {
         internal const val tidslinjegrense = 40L
@@ -78,6 +79,7 @@ class Søknad(
 
         egenmeldingsperiode = Søknadsperiode.egenmeldingsperiode(egenmeldinger)
         egenmeldingsstart = egenmeldingsperiode?.start
+        egenmeldingsslutt = egenmeldingsperiode?.endInclusive
         egenmeldingstidslinje = egenmeldingsperiode?.let {
             egenmeldinger
                 .map { it.sykdomstidslinje(egenmeldingsperiode, avskjæringsdato(), kilde) }
@@ -90,37 +92,32 @@ class Søknad(
     internal fun erRelevant(other: Periode) = other.overlapperMed(sykdomsperiode)
 
     override fun sykdomstidslinje(): Sykdomstidslinje {
-        val egenmeldingCutoff = egenmeldingsstart
-        val egenmeldingTom = egenmeldingstidslinje.periode()?.endInclusive
+        val egenmeldingCutoffStart = egenmeldingsstart
+        val egenmeldingCutoffEnd = egenmeldingsslutt
         if (Toggle.Egenmelding.enabled) {
-            if (egenmeldingCutoff == null) {
-                return egenmeldingstidslinje.merge(sykdomstidslinje, replace)
-            } else if (egenmeldingTom != null && egenmeldingCutoff <= egenmeldingTom) {
-                return egenmeldingstidslinje.subset(egenmeldingCutoff til egenmeldingTom)
+            return if (egenmeldingCutoffStart != null && egenmeldingCutoffEnd != null) {
+                egenmeldingstidslinje.subset(egenmeldingCutoffStart til egenmeldingCutoffEnd)
                     .merge(sykdomstidslinje, replace)
+            } else {
+                sykdomstidslinje
             }
-            return sykdomstidslinje
         }
         return sykdomstidslinje
     }
 
     fun loggEgenmeldingsstrekking()  {
         if(egenmeldingstidslinje.periode() != null) {
-            val egenmeldingCutoff = egenmeldingsstart
-            val egenmeldingTom = egenmeldingstidslinje.periode()?.endInclusive
-            var nySykdomstidslinje = Sykdomstidslinje()
-            if (egenmeldingCutoff == null) {
-                nySykdomstidslinje = egenmeldingstidslinje.merge(sykdomstidslinje, replace)
-            } else if (egenmeldingTom != null && egenmeldingCutoff <= egenmeldingTom) {
-                nySykdomstidslinje = egenmeldingstidslinje.subset(egenmeldingCutoff til egenmeldingTom)
+            val egenmeldingCutoffStart = egenmeldingsstart
+            val egenmeldingCutoffEnd = egenmeldingsslutt
+            val nySykdomstidslinje = if (egenmeldingCutoffStart != null && egenmeldingCutoffEnd != null) {
+                egenmeldingstidslinje.subset(egenmeldingCutoffStart til egenmeldingCutoffEnd)
                     .merge(sykdomstidslinje, replace)
+            } else {
+                sykdomstidslinje
             }
 
-            sikkerlogg.info("Sykdomstidslinjen ble strukket av egenmelding med {}.\n{}\n{}\n{}\n{}",
+            sikkerlogg.info("Sykdomstidslinjen ble strukket av egenmelding med {}.\ngammelSykdomstidslinje=$sykdomstidslinje\negenmeldingstidslinje=$egenmeldingstidslinje\nnySykdomstidslinje=$nySykdomstidslinje\n{}",
                 StructuredArguments.keyValue("dager", if(nySykdomstidslinje.periode() != null && sykdomstidslinje.periode() != null) ChronoUnit.DAYS.between(nySykdomstidslinje.førsteDag(), sykdomstidslinje.førsteDag()) else "N/A"),
-                StructuredArguments.keyValue("gammelSykdomstidslinje", sykdomstidslinje),
-                StructuredArguments.keyValue("egenmeldingstidslinje", egenmeldingstidslinje),
-                StructuredArguments.keyValue("nySykdomstidslinje", nySykdomstidslinje),
                 StructuredArguments.keyValue("søknadId", meldingsreferanseId())
             )
         }
@@ -199,9 +196,26 @@ class Søknad(
         arbeidsgiveren.fjern(sykdomsperiode)
     }
 
-    internal fun trimEgenmeldingsdager(dato: LocalDate) {
-        if(egenmeldingsperiode != null && egenmeldingsperiode.start <= dato) {
-            egenmeldingsstart = dato.plusDays(1)
+    internal fun trimEgenmeldingsdager(trimFør: LocalDate?, trimEtter: LocalDate) {
+        if (trimFør != null) trimEgenmeldingsdagerFør(trimFør)
+        trimEgenmeldingsdagerEtter(trimEtter)
+    }
+
+    private fun trimEgenmeldingsdagerFør(dato: LocalDate) {
+        if (egenmeldingsperiode != null && egenmeldingsperiode.endInclusive <= dato) {
+            egenmeldingsstart = null
+            egenmeldingsslutt = null
+        } else if (egenmeldingsperiode != null && egenmeldingsperiode.start <= dato) {
+            egenmeldingsstart = egenmeldingstidslinje.førsteArbeidsgiverdagEtter(dato)
+        }
+    }
+
+    private fun trimEgenmeldingsdagerEtter(dato: LocalDate) {
+        if(egenmeldingsperiode != null && egenmeldingsperiode.start >= dato) {
+            egenmeldingsstart = null
+            egenmeldingsslutt = null
+        } else if (egenmeldingsperiode != null && egenmeldingsperiode.endInclusive >= dato) {
+            egenmeldingsslutt = dato.minusDays(1)
         }
     }
 

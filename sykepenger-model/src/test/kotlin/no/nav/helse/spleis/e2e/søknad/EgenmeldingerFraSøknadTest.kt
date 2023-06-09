@@ -42,9 +42,10 @@ internal class EgenmeldingerFraSøknadTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar, 21.januar)
 
         håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(25.januar, 31.januar, 100.prosent), egenmeldinger = listOf(Søknad.Søknadsperiode.Arbeidsgiverdag(1.januar, 2.januar)))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(25.januar, 31.januar, 100.prosent), egenmeldinger = listOf(Søknad.Søknadsperiode.Arbeidsgiverdag(1.januar, 2.januar), Søknad.Søknadsperiode.Arbeidsgiverdag(24.januar, 24.januar)))
 
-        assertEquals(25.januar til 31.januar, inspektør(ORGNUMMER).periode(2.vedtaksperiode))
+        assertEquals(24.januar til 31.januar, inspektør(ORGNUMMER).periode(2.vedtaksperiode))
+        assertTrue(inspektør.sykdomstidslinje[24.januar] is Dag.Arbeidsgiverdag)
     }
 
     @Test
@@ -52,9 +53,27 @@ internal class EgenmeldingerFraSøknadTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar, 21.januar)
 
         håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(25.januar, 31.januar, 100.prosent), egenmeldinger = listOf(Søknad.Søknadsperiode.Arbeidsgiverdag(1.januar, 4.januar)))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(25.januar, 31.januar, 100.prosent), egenmeldinger = listOf(Søknad.Søknadsperiode.Arbeidsgiverdag(1.januar, 4.januar), Søknad.Søknadsperiode.Arbeidsgiverdag(20.januar, 24.januar)))
 
-        assertEquals(25.januar til 31.januar, inspektør(ORGNUMMER).periode(2.vedtaksperiode) )
+        assertEquals(22.januar til 31.januar, inspektør(ORGNUMMER).periode(2.vedtaksperiode) )
+        assertTrue(inspektør.sykdomstidslinje[21.januar] is Dag.SykHelgedag)
+        assertTrue(inspektør.sykdomstidslinje[22.januar] is Dag.Arbeidsgiverdag)
+        assertTrue(inspektør.sykdomstidslinje[23.januar] is Dag.Arbeidsgiverdag)
+        assertTrue(inspektør.sykdomstidslinje[24.januar] is Dag.Arbeidsgiverdag)
+    }
+
+    @Test
+    fun `fjerner egenmeldingsdager fra søknad som er etter starten av sykmeldingsperioden`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+            egenmeldinger = listOf(Søknad.Søknadsperiode.Arbeidsgiverdag(31.desember(2017), 1.februar))
+        )
+
+        assertEquals(31.desember(2017) til 31.januar, inspektør(ORGNUMMER).periode(1.vedtaksperiode))
+        assertTrue(inspektør.sykdomstidslinje[31.desember(2017)] is Dag.ArbeidsgiverHelgedag)
+        assertTrue(inspektør.sykdomstidslinje[1.januar] is Dag.Sykedag)
+        assertTrue(inspektør.sykdomstidslinje[1.februar] is Dag.UkjentDag)
     }
 
     @Test
@@ -119,7 +138,7 @@ internal class EgenmeldingerFraSøknadTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `skal kutte bort egenmeldingsdager ikke påvirker arbeidsgiverperioden`() {
+    fun `skal kutte bort egenmeldingsdager som ikke påvirker arbeidsgiverperioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(
             Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent),

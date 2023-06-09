@@ -186,6 +186,9 @@ internal class Sykdomstidslinje private constructor(
     internal fun førsteSykedagEtter(dato: LocalDate) =
         periode?.firstOrNull { it > dato && erEnSykedag(this[it]) }
 
+    internal fun førsteArbeidsgiverdagEtter(dato: LocalDate) =
+        periode?.firstOrNull { it > dato && erEnArbeidsgiverdag(this[it]) }
+
     internal fun erRettFør(other: Sykdomstidslinje): Boolean {
         return this.sisteDag().erRettFør(other.førsteDag()) && !this.erSisteDagArbeidsdag() && !other.erFørsteDagArbeidsdag()
     }
@@ -284,6 +287,8 @@ internal class Sykdomstidslinje private constructor(
             }
         private fun erEnSykedag(it: Dag) =
             it is Sykedag || it is SykHelgedag || it is Arbeidsgiverdag || it is ArbeidsgiverHelgedag || it is ForeldetSykedag || it is SykedagNav
+
+        private fun erEnArbeidsgiverdag(it: Dag) = it is Arbeidsgiverdag || it is ArbeidsgiverHelgedag
 
         internal fun sisteRelevanteSkjæringstidspunktForPerioden(periode: Periode, tidslinjer: List<Sykdomstidslinje>) = samletTidslinje(tidslinjer)
             .fjernDagerFørSisteOppholdsdagFør(periode.start)
