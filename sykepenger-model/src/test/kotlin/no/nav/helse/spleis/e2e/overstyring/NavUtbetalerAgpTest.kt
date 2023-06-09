@@ -21,7 +21,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
@@ -50,7 +49,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
@@ -78,19 +76,11 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
         assertFunksjonellFeil(RV_IM_23, 3.vedtaksperiode.filter())
 
-        assertForventetFeil(
-            forklaring = "skal aldri foreslå sykedag NAV ved en hullete arbedisgiverperiode og begrunnelse for reduksjon satt",
-            nå = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-                assertEquals("HR AANNNHH NNNNNHH NSSSSHH SSSSSHH S", inspektør.sykdomstidslinje.toShortString())
-                assertTrue(observatør.inntektsmeldingHåndtert.toMap().keys.contains(innteksmeldingId))
-            },
-            ønsket = {
-                fail("""\_(ツ)_/¯""")
-            }
-        )
+        assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S", inspektør.sykdomstidslinje.toShortString())
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
+        assertTrue(observatør.inntektsmeldingIkkeHåndtert.contains(innteksmeldingId))
     }
 
     @Test
@@ -99,14 +89,9 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         val im = håndterInntektsmelding(listOf(1.januar til 5.januar, 10.januar til 20.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn", refusjon = Inntektsmelding.Refusjon(INGEN, null))
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
         assertFunksjonellFeil(RV_IM_23)
-        assertEquals(listOf(
-            Dokumentsporing.søknad(søknad),
-            Dokumentsporing.inntektsmeldingDager(im)
-        ), inspektør.hendelser(1.vedtaksperiode))
-        assertEquals(listOf(
-            im to 1.vedtaksperiode.id(ORGNUMMER)
-        ), observatør.inntektsmeldingHåndtert)
-        assertEquals(1, observatør.inntektsmeldingIkkeHåndtert.size)
+        assertEquals(Dokumentsporing.søknad(søknad), inspektør.hendelser(1.vedtaksperiode).single())
+        assertTrue(observatør.inntektsmeldingHåndtert.isEmpty())
+        assertEquals(im, observatør.inntektsmeldingIkkeHåndtert.single())
     }
 
     @Test
@@ -300,8 +285,8 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(2.januar til 4.januar, 14.januar til 26.januar), førsteFraværsdag = 8.februar, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
 
         assertEquals("Tom tidslinje", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())

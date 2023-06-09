@@ -88,6 +88,7 @@ class Inntektsmelding(
     }
 
     private fun arbeidsgivertidslinje(): Sykdomstidslinje {
+        if (ignorerDager) return Sykdomstidslinje()
         val periodeMellom = førsteFraværsdag?.let{
             arbeidsgiverperiode?.periodeMellom(it)
         }
@@ -101,8 +102,16 @@ class Inntektsmelding(
         return arbeidsdager.merge(lagArbeidsgivertidslinje(), replace).merge(friskHelg)
     }
 
+    private val ignorerDager get(): Boolean {
+        if (begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank()) return false
+        if (begrunnelseForReduksjonEllerIkkeUtbetalt in ikkeStøttedeBegrunnelserForReduksjon) return true
+        if (arbeidsgiverperioder.size > 1) return true
+        return false
+    }
+
     private fun lagArbeidsgivertidslinje(): Sykdomstidslinje {
-        if (begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank() || begrunnelseForReduksjonEllerIkkeUtbetalt in ikkeStøttedeBegrunnelserForReduksjon) return arbeidsgiverperioder.map(::arbeidsgiverdager).merge()
+        check(!ignorerDager) { "Skal ikke brukes når vi ignorerer dager fra inntektsmelding" }
+        if (begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank()) return arbeidsgiverperioder.map(::arbeidsgiverdager).merge()
         return arbeidsgiverperiodeNavSkalUtbetale().map(::sykedagerNav).merge()
     }
 
