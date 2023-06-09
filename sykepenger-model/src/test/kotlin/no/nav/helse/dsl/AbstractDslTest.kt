@@ -24,6 +24,7 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
@@ -298,6 +299,29 @@ internal abstract class AbstractDslTest {
         inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(this@tilGodkjenning, fom, beregnetInntekt) }
     ) =
         this { tilGodkjenning(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, inntekterBlock) }
+
+    protected fun String.tilAvventerSaksbehandler(
+        fom: LocalDate,
+        tom: LocalDate,
+        fordi: Vedtaksperiode.AvventerSaksbehandler.AvventerSaksbehandlerÅrsak,
+        grad: Prosentdel = 100.prosent,
+        førsteFraværsdag: LocalDate = fom,
+        beregnetInntekt: Inntekt = INNTEKT,
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+        arbeidsgiverperiode: List<Periode> = emptyList(),
+        status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
+        inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(this@tilAvventerSaksbehandler, fom, beregnetInntekt) }
+    ) =
+        this { tilAvventerSaksbehandler(
+            fom,
+            tom,
+            fordi,
+            grad,
+            førsteFraværsdag,
+            beregnetInntekt,
+            refusjon,
+            arbeidsgiverperiode
+        ) }
 
 
     /* dsl for å gå direkte på arbeidsgiver1, eksempelvis i tester for det ikke er andre arbeidsgivere */

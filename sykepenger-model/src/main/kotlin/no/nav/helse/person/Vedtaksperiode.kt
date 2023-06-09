@@ -1990,6 +1990,11 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerSaksbehandler : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_SAKSBEHANDLER
+
+        enum class AvventerSaksbehandlerÅrsak {
+            MÅ_SKJØNNSMESSIG_FASTSETTE_SYKEPENGEGRUNNLAG
+        }
+
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
             return null
         }

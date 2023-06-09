@@ -31,6 +31,8 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.Vedtaksperiode.AvventerSaksbehandler.AvventerSaksbehandlerÅrsak.MÅ_SKJØNNSMESSIG_FASTSETTE_SYKEPENGEGRUNNLAG
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
@@ -472,6 +474,33 @@ internal fun TestPerson.TestArbeidsgiver.tilGodkjenning(
     håndterSimulering(vedtaksperiode)
     return vedtaksperiode
 }
+
+internal fun TestPerson.TestArbeidsgiver.tilAvventerSaksbehandler(
+    fom: LocalDate,
+    tom: LocalDate,
+    fordi: Vedtaksperiode.AvventerSaksbehandler.AvventerSaksbehandlerÅrsak,
+    grad: Prosentdel = 100.prosent,
+    førsteFraværsdag: LocalDate = fom,
+    beregnetInntekt: Inntekt = INNTEKT,
+    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+    arbeidsgiverperiode: List<Periode> = emptyList()
+): UUID {
+    when (fordi) {
+        MÅ_SKJØNNSMESSIG_FASTSETTE_SYKEPENGEGRUNNLAG -> {
+            val vedtaksperiode = nyPeriode(fom til tom, grad)
+            val inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom, beregnetInntekt * 2) }
+            håndterInntektsmelding(arbeidsgiverperiode, beregnetInntekt, førsteFraværsdag, refusjon)
+            håndterVilkårsgrunnlag(
+                vedtaksperiode, beregnetInntekt, inntektsvurdering = Inntektsvurdering(
+                    inntekter = inntektperioderForSammenligningsgrunnlag(inntekterBlock)
+                )
+            )
+            return vedtaksperiode
+        }
+        else -> fail { "Du må legge inn DSL-støtte for $fordi" }
+    }
+}
+
 internal fun TestPerson.TestArbeidsgiver.nyttVedtak(
     fom: LocalDate,
     tom: LocalDate,
