@@ -15,11 +15,13 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
@@ -48,9 +50,48 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
+
+    @Test
+    fun `skal aldri foreslå sykedag NAV ved en hullete arbedisgiverperiode og begrunnelse for reduksjon satt`() {
+        håndterSøknad(Sykdom(18.april, 30.april, 100.prosent))
+        håndterSøknad(Sykdom(1.mai, 14.mai, 100.prosent))
+        håndterInntektsmelding(listOf(14.april til 14.april, 18.april til 2.mai))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+        håndterSøknad(Sykdom(22.mai, 26.mai, 100.prosent))
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+
+        assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S?????? ?SSSSH", inspektør.sykdomstidslinje.toShortString())
+
+        val innteksmeldingId = håndterInntektsmelding(listOf(14.april til 14.april, 18.april til 2.mai), førsteFraværsdag = 22.mai, begrunnelseForReduksjonEllerIkkeUtbetalt = "EnBegrunnelse")
+
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
+        assertFunksjonellFeil(RV_IM_23, 3.vedtaksperiode.filter())
+
+        assertForventetFeil(
+            forklaring = "skal aldri foreslå sykedag NAV ved en hullete arbedisgiverperiode og begrunnelse for reduksjon satt",
+            nå = {
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+                assertEquals("HR AANNNHH NNNNNHH NSSSSHH SSSSSHH S", inspektør.sykdomstidslinje.toShortString())
+                assertTrue(observatør.inntektsmeldingHåndtert.toMap().keys.contains(innteksmeldingId))
+            },
+            ønsket = {
+                fail("""\_(ツ)_/¯""")
+            }
+        )
+
+    }
 
     @Test
     fun `hullete AGP sammen med begrunnelse for reduksjon blir kastet ut foreløpig`() {
