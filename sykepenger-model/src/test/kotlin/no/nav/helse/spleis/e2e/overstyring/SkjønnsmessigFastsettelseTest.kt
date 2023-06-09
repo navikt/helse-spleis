@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -8,6 +9,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.person.TilstandType.AVVENTER_SAKSBEHANDLER
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
@@ -107,6 +109,17 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT * 3)
         assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Inntektsmelding)
+    }
+
+    @Test
+    fun `førstegangsbehandling med mer enn 25% avvik`() = Toggle.TjuefemprosentAvvik.enable {
+        a1 {
+            nyPeriode(1.januar til 31.januar, a1)
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 2)
+            håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = INNTEKT)
+        }
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SAKSBEHANDLER)
+
     }
 
     private fun TestArbeidsgiverInspektør.inntektsopplysningISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = a1) =

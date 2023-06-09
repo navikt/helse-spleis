@@ -463,6 +463,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 vilkårsgrunnlagId = UUID.randomUUID()
             )
         }
+
+        internal fun harAkseptabelAvvik() = sykepengegrunnlag.harAkseptabeltAvvik()
     }
 
     internal class InfotrygdVilkårsgrunnlag(

@@ -63,6 +63,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_SAKSBEHANDLER
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
@@ -639,7 +640,7 @@ internal class Vedtaksperiode private constructor(
         person.igangsettOverstyring(søknad, Revurderingseventyr.korrigertSøknad(skjæringstidspunkt, periode))
     }
 
-    private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand, block: (VilkårsgrunnlagHistorikk.Grunnlagsdata) -> Unit = {}) {
+    private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, erRevurdering: Boolean, block: (VilkårsgrunnlagHistorikk.Grunnlagsdata) -> Unit = {}) {
         val grunnlagForSykepengegrunnlag = vilkårsgrunnlag.avklarSykepengegrunnlag(person, jurist())
         vilkårsgrunnlag.valider(grunnlagForSykepengegrunnlag, jurist())
         val grunnlagsdata = vilkårsgrunnlag.grunnlagsdata()
@@ -649,7 +650,9 @@ internal class Vedtaksperiode private constructor(
             return forkast(vilkårsgrunnlag)
         }
         vilkårsgrunnlag.info("Vilkårsgrunnlag vurdert")
-        tilstand(vilkårsgrunnlag, nesteTilstand)
+        if (erRevurdering) return tilstand(vilkårsgrunnlag, AvventerHistorikkRevurdering)
+        if (!grunnlagsdata.harAkseptabelAvvik() && Toggle.TjuefemprosentAvvik.enabled) return tilstand(vilkårsgrunnlag, AvventerSaksbehandler)
+        tilstand(vilkårsgrunnlag, AvventerHistorikk)
     }
 
     private fun håndterUtbetalingHendelse(hendelse: UtbetalingHendelse, onUtbetalt: () -> Unit) {
@@ -1596,7 +1599,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            håndterRevurdering(vilkårsgrunnlag) { vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikkRevurdering) }
+            håndterRevurdering(vilkårsgrunnlag) { vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, erRevurdering = true) }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
@@ -1868,7 +1871,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             håndterFørstegangsbehandling(vilkårsgrunnlag, vedtaksperiode) {
-                vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikk) { grunnlagsdata ->
+                vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, erRevurdering = false) { grunnlagsdata ->
                     grunnlagsdata.validerFørstegangsvurdering(vilkårsgrunnlag)
                 }
             }
@@ -1980,6 +1983,30 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
+            revurdering.inngåSomEndring(hendelse, vedtaksperiode)
+            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
+        }
+    }
+
+    internal object AvventerSaksbehandler : Vedtaksperiodetilstand {
+        override val type: TilstandType = AVVENTER_SAKSBEHANDLER
+        override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
+            return null
+        }
+
+        override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {
+
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
+
+        }
+
+        override fun igangsettOverstyring(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            revurdering: Revurderingseventyr
+        ) {
             revurdering.inngåSomEndring(hendelse, vedtaksperiode)
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }

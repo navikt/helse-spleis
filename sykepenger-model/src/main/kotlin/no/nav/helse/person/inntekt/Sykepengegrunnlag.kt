@@ -150,6 +150,8 @@ internal class Sykepengegrunnlag(
         return oppfyllerMinsteinntektskrav && !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
+    internal fun harAkseptabeltAvvik() = harAkseptabeltAvvik(avviksprosent)
+
     internal fun harNødvendigInntektForVilkårsprøving(organisasjonsnummer: String) =
         arbeidsgiverInntektsopplysninger.harInntekt(organisasjonsnummer)
 

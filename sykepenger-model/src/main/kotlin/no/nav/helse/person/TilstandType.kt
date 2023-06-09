@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 enum class TilstandType {
     AVVENTER_HISTORIKK,
+    AVVENTER_SAKSBEHANDLER,
     AVVENTER_GODKJENNING,
     AVVENTER_SIMULERING,
     TIL_UTBETALING,
