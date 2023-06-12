@@ -63,9 +63,9 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_SAKSBEHANDLER
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
@@ -651,7 +651,7 @@ internal class Vedtaksperiode private constructor(
         }
         vilkårsgrunnlag.info("Vilkårsgrunnlag vurdert")
         if (erRevurdering) return tilstand(vilkårsgrunnlag, AvventerHistorikkRevurdering)
-        if (!grunnlagsdata.harAkseptabelAvvik() && Toggle.TjuefemprosentAvvik.enabled) return tilstand(vilkårsgrunnlag, AvventerSaksbehandler)
+        if (!grunnlagsdata.harAkseptabelAvvik() && Toggle.TjuefemprosentAvvik.enabled) return tilstand(vilkårsgrunnlag, AvventerSkjønnsmessigFastsettelse)
         tilstand(vilkårsgrunnlag, AvventerHistorikk)
     }
 
@@ -1988,8 +1988,8 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal object AvventerSaksbehandler : Vedtaksperiodetilstand {
-        override val type: TilstandType = AVVENTER_SAKSBEHANDLER
+    internal object AvventerSkjønnsmessigFastsettelse : Vedtaksperiodetilstand {
+        override val type: TilstandType = AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
             return null
         }
