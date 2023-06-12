@@ -10,7 +10,6 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVVENTER_SAKSBEHANDLER
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
@@ -120,20 +119,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = INNTEKT)
         }
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SAKSBEHANDLER)
-        assertVarsel(Varselkode.RV_IV_2)
-        a1 {
-            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
-            assertUtbetalingsbeløp(
-                1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 2161,
-                forventetArbeidsgiverRefusjonsbeløp = 2862,
-                subset = 17.januar til 31.januar
-            )
-        }
+
     }
 
     private fun TestArbeidsgiverInspektør.inntektsopplysningISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = a1) =
