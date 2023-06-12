@@ -794,8 +794,11 @@ internal class Arbeidsgiver private constructor(
         return sykdomshistorikk.sykdomstidslinje()
     }
 
-    private fun sykdomstidslinjeInkludertForkastet(): Sykdomstidslinje {
-        return  forkastede.slåSammenSykdomstidslinjer().merge(sykdomstidslinje(), replace)
+    private fun sykdomstidslinjeInkludertForkastet(sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
+        return  forkastede
+            .slåSammenSykdomstidslinjer()
+            .merge(sykdomstidslinje(), replace)
+            .merge(sykdomstidslinje, replace)
     }
 
     internal fun sykdomstidslinjeUten(sykdomstidslinjer: List<Sykdomstidslinje>) = sykdomstidslinjer.fold(sykdomstidslinje()) { acc, sykdomstidslinje ->
@@ -806,8 +809,8 @@ internal class Arbeidsgiver private constructor(
         val arbeidsgiverperioder = person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomstidslinje(), null)
         return arbeidsgiverperioder.finn(periode)
     }
-    internal fun arbeidsgiverperiodeInkludertForkastet(periode: Periode): Arbeidsgiverperiode? {
-        val arbeidsgiverperioder = person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomstidslinjeInkludertForkastet(), null)
+    internal fun arbeidsgiverperiodeInkludertForkastet(periode: Periode, sykdomstidslinje: Sykdomstidslinje): Arbeidsgiverperiode? {
+        val arbeidsgiverperioder = person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomstidslinjeInkludertForkastet(sykdomstidslinje), null)
         return arbeidsgiverperioder.finn(periode)
     }
 
@@ -997,6 +1000,11 @@ internal class Arbeidsgiver private constructor(
         return vedtaksperioder.filter {
             arbeidsgiverperiode.hørerTil(it.periode())
         }
+    }
+
+    fun vedtaksperioderKnyttetTilArbeidsgiverperiodeInkludertForkastede(arbeidsgiverperiode: Arbeidsgiverperiode?): List<Vedtaksperiode> {
+        if (arbeidsgiverperiode == null) return emptyList()
+        return ForkastetVedtaksperiode.hørerTilArbeidsgiverperiode(forkastede, vedtaksperioder, arbeidsgiverperiode)
     }
 
     fun erFørsteSykedagEtter(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?): Boolean {

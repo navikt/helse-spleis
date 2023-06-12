@@ -4,6 +4,8 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertAntallUtgåendeMeldinger
@@ -42,7 +44,8 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "forlengerPeriode" : false,
               "harPeriodeInnenfor16Dager" : false,
               "trengerArbeidsgiveropplysninger": true,
-              "hendelser": ["$søknadId", "$søknadId2"]
+              "hendelser": ["$søknadId", "$søknadId2"],
+              "sykmeldingsperioder": [{"fom": "2018-01-03", "tom": "2018-01-26"}]
             }
         """
         assertVedtaksperiodeForkastet(forventet1, 0)
@@ -59,7 +62,8 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "forlengerPeriode" : false,
               "harPeriodeInnenfor16Dager" : false,
               "trengerArbeidsgiveropplysninger": true,
-              "hendelser": ["$søknadId2"]
+              "hendelser": ["$søknadId2"],
+              "sykmeldingsperioder": [{"fom": "2018-01-03", "tom": "2018-01-26"}, {"fom": "2018-01-03", "tom": "2018-01-27"}]
             }
         """
         assertVedtaksperiodeForkastet(forventet2, 1)
@@ -97,11 +101,11 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "tom" : "2018-03-31",
               "forlengerPeriode" : false,
               "harPeriodeInnenfor16Dager" : false,
-              "trengerArbeidsgiveropplysninger": false,  
-              "hendelser": ["$søknadId2"]
+              "trengerArbeidsgiveropplysninger": true,  
+              "hendelser": ["$søknadId2"],
+              "sykmeldingsperioder": [{"fom": "2018-03-01", "tom": "2018-03-31"}]
             }
         """
-        // TODO: denne skal være true
         assertVedtaksperiodeForkastet(forventet, 0)
     }
 
@@ -122,11 +126,25 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
         testRapid.assertAntallUtgåendeMeldinger("vedtaksperiode_forkastet", 2)
 
         assertVedtaksperiodeForkastet(forventet(søknadId1, 1.januar, 31.januar, true), 0)
-        assertVedtaksperiodeForkastet(forventet(søknadId2, 1.februar, 28.februar, false), 1)
+        assertVedtaksperiodeForkastet(
+            forventet(
+                søknadId2,
+                1.februar,
+                28.februar,
+                false,
+                listOf(1.januar til 31.januar, 1.februar til 28.februar)
+            ), 1
+        )
     }
 
     @Language("JSON")
-    private fun forventet(søknadId: UUID, fom: LocalDate, tom: LocalDate, trengerArbeidsgiveropplysninger: Boolean) = """
+    private fun forventet(
+        søknadId: UUID,
+        fom: LocalDate,
+        tom: LocalDate,
+        trengerArbeidsgiveropplysninger: Boolean,
+        sykmeldingsperioder: List<Periode> = listOf(fom til tom)
+    ) = """
             {
               "@event_name": "vedtaksperiode_forkastet",
               "aktørId": "$AKTØRID",
@@ -138,7 +156,8 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "forlengerPeriode" : false,
               "harPeriodeInnenfor16Dager" : false,
               "trengerArbeidsgiveropplysninger": $trengerArbeidsgiveropplysninger, 
-              "hendelser": ["$søknadId"]
+              "hendelser": ["$søknadId"], 
+              "sykmeldingsperioder": [${sykmeldingsperioder.joinToString(transform = Periode::hardcodedJson)}]
             }
         """
 
@@ -148,3 +167,11 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
         }
     }
 }
+
+private fun Periode.hardcodedJson(): String =
+    """
+    {
+        "fom": "$start",
+        "tom": "$endInclusive"
+    }
+    """

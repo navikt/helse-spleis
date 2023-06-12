@@ -496,12 +496,18 @@ internal class Vedtaksperiode private constructor(
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
         this.utbetalinger.forkast(hendelse)
         val trengerArbeidsgiveropplysninger = forventerInntektHensyntarForkastede() && !erForlengelse() && !erForlengelseAvForkastet()
-        val vedtaksperiodeForkastetEventBuilder = VedtaksperiodeForkastetEventBuilder(tilstand.type, trengerArbeidsgiveropplysninger)
+        val sykmeldingsperioder = sykmeldingsperioderKnyttetTilArbeidsgiverperiode()
+        val vedtaksperiodeForkastetEventBuilder = VedtaksperiodeForkastetEventBuilder(tilstand.type, trengerArbeidsgiveropplysninger, sykmeldingsperioder)
         tilstand(hendelse, TilInfotrygd)
         return vedtaksperiodeForkastetEventBuilder
     }
 
-    internal inner class VedtaksperiodeForkastetEventBuilder(private val gjeldendeTilstand: TilstandType, private val trengerArbeidsgiveropplysninger: Boolean) {
+    private fun sykmeldingsperioderKnyttetTilArbeidsgiverperiode(): List<Periode> {
+        val forkastedeVedtaksperioder = arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiodeInkludertForkastede(finnArbeidsgiverperiodeHensyntarForkastede())
+        return (forkastedeVedtaksperioder.map { it.sykmeldingsperiode } + listOf(sykmeldingsperiode)).distinct()
+    }
+
+    internal inner class VedtaksperiodeForkastetEventBuilder(private val gjeldendeTilstand: TilstandType, private val trengerArbeidsgiveropplysninger: Boolean, private val sykmeldingsperioder: List<Periode>) {
         internal fun buildAndEmit() {
             person.vedtaksperiodeForkastet(
                 PersonObserver.VedtaksperiodeForkastetEvent(
@@ -515,7 +521,8 @@ internal class Vedtaksperiode private constructor(
                     tom = periode.endInclusive,
                     forlengerPeriode = person.nåværendeVedtaksperioder { it.tilstand !== AvsluttetUtenUtbetaling && (it.periode.overlapperMed(periode) || it.periode.erRettFør(periode)) }.isNotEmpty(),
                     harPeriodeInnenfor16Dager = person.nåværendeVedtaksperioder { it.tilstand !== AvsluttetUtenUtbetaling && påvirkerArbeidsgiverperioden(it) }.isNotEmpty(),
-                    trengerArbeidsgiveropplysninger = trengerArbeidsgiveropplysninger
+                    trengerArbeidsgiveropplysninger = trengerArbeidsgiveropplysninger,
+                    sykmeldingsperioder = sykmeldingsperioder
                 )
             )
         }
@@ -899,7 +906,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun finnArbeidsgiverperiode() = arbeidsgiver.arbeidsgiverperiode(periode)
 
-    private fun finnArbeidsgiverperiodeHensyntarForkastede() = arbeidsgiver.arbeidsgiverperiodeInkludertForkastet(periode)
+    private fun finnArbeidsgiverperiodeHensyntarForkastede() = arbeidsgiver.arbeidsgiverperiodeInkludertForkastet(periode, sykdomstidslinje)
 
     private fun forventerInntekt(subsumsjonObserver: SubsumsjonObserver = jurist()): Boolean {
         return Arbeidsgiverperiode.forventerInntekt(finnArbeidsgiverperiode(), periode, sykdomstidslinje, subsumsjonObserver)

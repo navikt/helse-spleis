@@ -4,6 +4,7 @@ import java.util.UUID
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.slåSammenForkastedeSykdomstidslinjer
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 
 internal class ForkastetVedtaksperiode(
     private val vedtaksperiode: Vedtaksperiode
@@ -36,8 +37,16 @@ internal class ForkastetVedtaksperiode(
         internal fun harKortGapTilForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode) =
             Vedtaksperiode.harKortGapTilForkastet(forkastede.perioder(), hendelse, vedtaksperiode)
 
+        internal fun hørerTilArbeidsgiverperiode(
+            forkastede: List<ForkastetVedtaksperiode>,
+            vedtaksperioder: List<Vedtaksperiode>,
+            arbeidsgiverperiode: Arbeidsgiverperiode
+        ): List<Vedtaksperiode> =
+            (forkastede.map { it.vedtaksperiode } + vedtaksperioder)
+                .sorted()
+                .filter { arbeidsgiverperiode.hørerTil(it.periode()) }
+
         internal fun List<ForkastetVedtaksperiode>.iderMedUtbetaling(utbetalingId: UUID) =
             map { it.vedtaksperiode }.iderMedUtbetaling(utbetalingId)
-
     }
 }

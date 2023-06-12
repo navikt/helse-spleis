@@ -68,8 +68,28 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val tom: LocalDate,
         val forlengerPeriode: Boolean,
         val harPeriodeInnenfor16Dager: Boolean,
-        val trengerArbeidsgiveropplysninger: Boolean
-    )
+        val trengerArbeidsgiveropplysninger: Boolean,
+        val sykmeldingsperioder: List<Periode>
+    ) {
+        fun toJsonMap(): Map<String, Any> =
+            mapOf(
+                "organisasjonsnummer" to organisasjonsnummer,
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "tilstand" to gjeldendeTilstand,
+                "hendelser" to hendelser,
+                "fom" to fom,
+                "tom" to tom,
+                "forlengerPeriode" to forlengerPeriode,
+                "harPeriodeInnenfor16Dager" to harPeriodeInnenfor16Dager,
+                "trengerArbeidsgiveropplysninger" to trengerArbeidsgiveropplysninger,
+                "sykmeldingsperioder" to sykmeldingsperioder.map {
+                    mapOf(
+                        "fom" to it.start,
+                        "tom" to it.endInclusive
+                    )
+                }
+            )
+    }
     data class InntektsmeldingFørSøknadEvent(
         val inntektsmeldingId: UUID,
         val overlappendeSykmeldingsperioder: List<Periode>,
