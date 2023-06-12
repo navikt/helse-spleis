@@ -2,13 +2,19 @@ package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
 import no.nav.helse.Toggle
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.mars
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Saksbehandler
@@ -17,6 +23,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.fail
 
 internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
 
@@ -119,6 +126,35 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = INNTEKT)
         }
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE)
+
+    }
+
+    @Test
+    fun `Tidligere perioder revurderes mens nyere skjønnsmessig fastsettes `() = Toggle.TjuefemprosentAvvik.enable {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            nyPeriode(1.mars til 31.mars, a1)
+            håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = INNTEKT * 2)
+            håndterVilkårsgrunnlag(2.vedtaksperiode, inntekt = INNTEKT)
+            nullstillTilstandsendringer()
+            håndterOverstyrTidslinje(
+                listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag, 100))
+            )
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            assertForventetFeil(
+                forklaring = "Vi må finne ut av hva vi skal gjøre",
+                nå = {
+                    assertTilstander(2.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+                },
+                ønsket = {
+                    fail { "Vi må finne ut av hva vi skal gjøre"}
+                }
+            )
+        }
 
     }
 
