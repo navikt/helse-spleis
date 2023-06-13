@@ -6,7 +6,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.til
 import org.slf4j.LoggerFactory
 
-internal class V251SykdomstidslinjeForForkastedeUtenSykdomstidslinje: JsonMigration(251) {
+internal class V252SykdomstidslinjeForForkastedeUtenSykdomstidslinje: JsonMigration(252) {
 
     override val description = "Fikse sykdomstidslinje for forkastede vedtaksperioder som ikke har."
 
@@ -25,7 +25,7 @@ internal class V251SykdomstidslinjeForForkastedeUtenSykdomstidslinje: JsonMigrat
                 val periode = periodeFom til periodeTom
                 val dager = sykdomstidslinje.path("dager") as ArrayNode
 
-                val søknadId = vedtaksperiode.path("hendelser").firstOrNull {
+                val søknadId = vedtaksperiode.path("hendelseIder").firstOrNull {
                     it.path("dokumenttype").asText() == "Søknad"
                 }?.path("dokumentId")?.asText()
 
@@ -34,15 +34,15 @@ internal class V251SykdomstidslinjeForForkastedeUtenSykdomstidslinje: JsonMigrat
                 }
 
                 if (søknadId == null) {
-                    sikkerLogg.error("[V251] fant ikke søknadId for forkastet vedtaksperiode ${vedtaksperiode.path("id").asText()}",
+                    sikkerLogg.error("[V252] fant ikke søknadId for forkastet vedtaksperiode ${vedtaksperiode.path("id").asText()}",
                         keyValue("fødselsnummer", fødselsnummer)
                     )
                 } else if (historikkElement == null) {
-                    sikkerLogg.error("[V251] fant ikke historikkElement for forkastet vedtaksperiode ${vedtaksperiode.path("id").asText()}",
+                    sikkerLogg.error("[V252] fant ikke historikkElement for forkastet vedtaksperiode ${vedtaksperiode.path("id").asText()}",
                         keyValue("fødselsnummer", fødselsnummer)
                     )
                 } else {
-                    sikkerLogg.info("[V251] migrerer sykdomstidslinje for forkastet vedtaksperiode ${vedtaksperiode.path("id").asText()} med periode=$periode",
+                    sikkerLogg.info("[V252] migrerer sykdomstidslinje for forkastet vedtaksperiode ${vedtaksperiode.path("id").asText()} med periode=$periode",
                         keyValue("fødselsnummer", fødselsnummer)
                     )
                     val hendelsedager = (historikkElement.path("hendelseSykdomstidslinje").path("dager") as ArrayNode).deepCopy().filter {
