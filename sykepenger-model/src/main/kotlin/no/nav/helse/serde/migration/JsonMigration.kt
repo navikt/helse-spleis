@@ -2,7 +2,10 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.hendelser.somPeriode
+import no.nav.helse.hendelser.til
 import org.slf4j.LoggerFactory
 
 fun interface MeldingerSupplier {
@@ -33,6 +36,13 @@ internal abstract class JsonMigration(private val version: Int) {
         private val log = LoggerFactory.getLogger(JsonMigration::class.java)
         private const val SkjemaversjonKey = "skjemaVersjon"
         private const val InitialVersion = 0
+
+        internal val String.dato get() = LocalDate.parse(this)
+        internal val String.uuid get() = UUID.fromString(this)
+        internal val JsonNode.periode get() = when (has("fom") && has("tom")) {
+            true -> LocalDate.parse(path("fom").asText()) til LocalDate.parse(path("tom").asText())
+            false -> LocalDate.parse(path("dato").asText()).somPeriode()
+        }
 
         internal fun migrate(
             migrations: List<JsonMigration>,
