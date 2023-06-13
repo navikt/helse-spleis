@@ -175,12 +175,22 @@ class Person private constructor(
         håndterGjenoppta(anmodningOmForkasting)
     }
 
-    fun håndter(søknad: Søknad) = håndter(søknad, "søknad") { arbeidsgiver, _ ->
+    fun håndter(søknad: Søknad) {
+        registrer(søknad, "Behandler søknad")
+        tidligereBehandlinger(søknad, søknad.periode())
+        val arbeidsgiver = finnEllerOpprettArbeidsgiver(søknad)
         søknad.forUng(alder)
         arbeidsgiver.håndter(søknad, arbeidsgivere.toList())
+        håndterGjenoppta(søknad)
     }
 
-    fun håndter(inntektsmelding: Inntektsmelding) = håndter(inntektsmelding, "inntektsmelding", Arbeidsgiver::håndter)
+    fun håndter(inntektsmelding: Inntektsmelding) {
+        registrer(inntektsmelding, "Behandler inntektsmelding")
+        tidligereBehandlinger(inntektsmelding, inntektsmelding.periode())
+        val arbeidsgiver = finnEllerOpprettArbeidsgiver(inntektsmelding)
+        arbeidsgiver.håndter(inntektsmelding)
+        håndterGjenoppta(inntektsmelding)
+    }
 
     fun håndter(inntektsmelding: InntektsmeldingReplay) {
         registrer(inntektsmelding, "Behandler replay av inntektsmelding")
@@ -198,14 +208,6 @@ class Person private constructor(
         gjenopplivVilkårsgrunnlag.gjenoppliv(vilkårsgrunnlagHistorikk)
         gjenopptaBehandling(gjenopplivVilkårsgrunnlag)
         håndterGjenoppta(gjenopplivVilkårsgrunnlag)
-    }
-
-    private fun <Hendelse: SykdomstidslinjeHendelse> håndter(hendelse: Hendelse, hendelsesmelding: String, handle: (Arbeidsgiver, Hendelse) -> Unit) {
-        registrer(hendelse, "Behandler $hendelsesmelding")
-        tidligereBehandlinger(hendelse, hendelse.periode())
-        val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
-        handle(arbeidsgiver, hendelse)
-        håndterGjenoppta(hendelse)
     }
 
     private fun tidligereBehandlinger(hendelse: ArbeidstakerHendelse, periode: Periode) {
