@@ -2055,4 +2055,25 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
     }
 
+    @Test
+    fun `Spleis bruker feilaktig en ugyldig egenmeldingsdag i gap-beregning`() {
+        nyttVedtak(1.januar, 31.januar)
+        nyPeriode(20.februar til 20.mars)
+        håndterInntektsmelding(listOf(8.februar til 8.februar, 20.februar til 6.mars))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+
+        val vedtaksperiode = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør
+
+        assertForventetFeil("Arbeidsgiver oppgir en egenmeldingsdag som er innenfor 16 dager til forrige periode. Da anser ikke vi det som Arbeidsgiverdag. Spleis bruker feilaktig 8. februar i gap-beregning og tror 2. vedtaksperiode ikke skal få ny AGP.",
+            nå = {
+                assertTrue(vedtaksperiode.utbetalingstidslinje[8.februar] is Utbetalingsdag.AvvistDag)
+                assertTrue((20.februar til 7.mars).all { vedtaksperiode.utbetalingstidslinje[it] is Utbetalingsdag.NavDag || vedtaksperiode.utbetalingstidslinje[it] is Utbetalingsdag.NavHelgDag })
+            },
+            ønsket = {
+                assertTrue(vedtaksperiode.utbetalingstidslinje[8.februar] is Utbetalingsdag.AvvistDag)
+                assertTrue((20.februar til 7.mars).all { vedtaksperiode.utbetalingstidslinje[it] is Utbetalingsdag.ArbeidsgiverperiodeDag })
+            })
+    }
+
 }
