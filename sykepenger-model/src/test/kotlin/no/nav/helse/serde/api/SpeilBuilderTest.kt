@@ -24,6 +24,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SI_3
+import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.GhostPeriodeDTO
@@ -334,16 +335,19 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
     @Test
     fun `legger ved skjønnsmessig fastsatt sykepengegrunnlag`() = Toggle.TjuefemprosentAvvik.enable {
+        val inntektIm = 31000.0
+        val inntektSkatt = 31000.0 * 2
+        val inntektSkjønnsfastsatt = 31000 * 1.5
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 31000.månedlig)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = 32000.månedlig * 2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntektIm.månedlig)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = inntektSkatt.månedlig)
         nullstillTilstandsendringer()
         assertTilstander(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE)
         håndterSkjønnsmessigFastsettelse(
             1.januar, listOf(
                 OverstyrtArbeidsgiveropplysning(
                     orgnummer = ORGNUMMER,
-                    inntekt = 31000.månedlig,
+                    inntekt = inntektSkjønnsfastsatt.månedlig,
                     forklaring = "",
                     subsumsjon = null,
                     refusjonsopplysninger = listOf(
@@ -355,13 +359,17 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
+        assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+        assertTrue(inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(ORGNUMMER) }.inspektør.inntektsopplysning is SkjønnsmessigFastsatt)
 
         val personDto = speilApi()
         val vilkårsgrunnlagId = (personDto.arbeidsgivere.single().generasjoner.single().perioder.single() as BeregnetPeriode).vilkårsgrunnlagId!!
         val vilkårsgrunnlag = (personDto.vilkårsgrunnlag[vilkårsgrunnlagId] as SpleisVilkårsgrunnlag)
-        assertEquals(31000.0 * 12, vilkårsgrunnlag.skjønnsmessigFastsattÅrlig)
-        assertEquals(31000.månedlig, vilkårsgrunnlag.inntekter.single().skjønnsmessigFastsatt!!.beløp)
-        assertEquals(31000.månedlig * 2, vilkårsgrunnlag.inntekter.single().omregnetÅrsinntekt!!.beløp)
+        assertEquals(inntektSkjønnsfastsatt * 12, vilkårsgrunnlag.skjønnsmessigFastsattÅrlig)
+        assertEquals(inntektSkjønnsfastsatt * 12, vilkårsgrunnlag.inntekter.single().skjønnsmessigFastsatt!!.beløp)
+        assertEquals(inntektSkjønnsfastsatt, vilkårsgrunnlag.inntekter.single().skjønnsmessigFastsatt!!.månedsbeløp)
+        assertEquals(inntektIm * 12, vilkårsgrunnlag.inntekter.single().omregnetÅrsinntekt!!.beløp)
+        assertEquals(inntektIm, vilkårsgrunnlag.inntekter.single().omregnetÅrsinntekt!!.månedsbeløp)
     }
 
 }
