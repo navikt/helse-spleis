@@ -25,6 +25,7 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -834,6 +835,21 @@ internal fun AbstractEndToEndTest.håndterOverstyrArbeidsgiveropplysninger(
     meldingsreferanseId: UUID = UUID.randomUUID()
 ): UUID {
     OverstyrArbeidsgiveropplysninger(
+        meldingsreferanseId = meldingsreferanseId,
+        fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+        aktørId = AbstractPersonTest.AKTØRID,
+        skjæringstidspunkt = skjæringstidspunkt,
+        arbeidsgiveropplysninger = arbeidsgiveropplysninger.tilOverstyrt(meldingsreferanseId, skjæringstidspunkt)
+    ).håndter(Person::håndter)
+    return meldingsreferanseId
+}
+
+internal fun AbstractEndToEndTest.håndterSkjønnsmessigFastsettelse(
+    skjæringstidspunkt: LocalDate,
+    arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>,
+    meldingsreferanseId: UUID = UUID.randomUUID()
+): UUID {
+    SkjønnsmessigFastsettelse(
         meldingsreferanseId = meldingsreferanseId,
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),
         aktørId = AbstractPersonTest.AKTØRID,

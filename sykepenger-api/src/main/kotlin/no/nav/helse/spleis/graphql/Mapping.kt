@@ -345,7 +345,7 @@ private fun mapArbeidsgiverRefusjon(arbeidsgiverrefusjon: Arbeidsgiverrefusjon) 
 
 private fun mapInntekt(inntekt: Arbeidsgiverinntekt) = GraphQLArbeidsgiverinntekt(
     arbeidsgiver = inntekt.organisasjonsnummer,
-    omregnetArsinntekt = inntekt.omregnetÅrsinntekt?.let { omregnetÅrsinntekt ->
+    omregnetArsinntekt = inntekt.inntekt?.let { omregnetÅrsinntekt ->
         GraphQLOmregnetArsinntekt(
             kilde = when (omregnetÅrsinntekt.kilde) {
                 Inntektkilde.Saksbehandler -> GraphQLInntektskilde.Saksbehandler

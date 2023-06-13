@@ -27,6 +27,7 @@ import no.nav.helse.serde.api.dto.Refusjonselement
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
+import no.nav.helse.serde.api.speil.builders.IArbeidsgiverinntekt.Companion.skjønnsmessigFastsattÅrlig
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import kotlin.properties.Delegates
@@ -39,7 +40,8 @@ internal class ISykepengegrunnlag(
     val begrensning: SykepengegrunnlagsgrenseDTO,
     val refusjonsopplysningerPerArbeidsgiver: List<IArbeidsgiverrefusjon>,
     val avviksprosent: Double,
-    val sammenligningsgrunnlagTotal: Double
+    val sammenligningsgrunnlagTotal: Double,
+    val skjønnsmessigFastsattÅrlig: Double?
 )
 
 internal class IInntekt(
@@ -96,6 +98,7 @@ internal class ISpleisGrunnlag(
     sykepengegrunnlag: Double,
     id: UUID,
     refusjonsopplysningerPerArbeidsgiver: List<IArbeidsgiverrefusjon>,
+    val skjønnsmessigFastsattÅrlig: Double?,
     val avviksprosent: Double?,
     val grunnbeløp: Int,
     val sykepengegrunnlagsgrense: SykepengegrunnlagsgrenseDTO,
@@ -120,6 +123,7 @@ internal class ISpleisGrunnlag(
             sykepengegrunnlag = sykepengegrunnlag,
             inntekter = inntekter.map { it.toDTO() },
             arbeidsgiverrefusjoner = refusjonsopplysningerPerArbeidsgiver.map { it.toDTO() },
+            skjønnsmessigFastsattÅrlig = skjønnsmessigFastsattÅrlig,
             avviksprosent = avviksprosent,
             grunnbeløp = grunnbeløp,
             sykepengegrunnlagsgrense = sykepengegrunnlagsgrense,
@@ -253,6 +257,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                     inntekter = compositeSykepengegrunnlag.inntekterPerArbeidsgiver,
                     refusjonsopplysningerPerArbeidsgiver = compositeSykepengegrunnlag.refusjonsopplysningerPerArbeidsgiver,
                     sykepengegrunnlag = compositeSykepengegrunnlag.sykepengegrunnlag,
+                    skjønnsmessigFastsattÅrlig = compositeSykepengegrunnlag.skjønnsmessigFastsattÅrlig,
                     avviksprosent = compositeSykepengegrunnlag.avviksprosent,
                     grunnbeløp = compositeSykepengegrunnlag.begrensning.grunnbeløp,
                     sykepengegrunnlagsgrense = compositeSykepengegrunnlag.begrensning,
@@ -310,7 +315,8 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 begrensning = SykepengegrunnlagsgrenseDTO.fra6GBegrensning(this.`6G`),
                 refusjonsopplysningerPerArbeidsgiver = refusjonsopplysningerPerArbeidsgiver.toList(),
                 avviksprosent = avviksprosent,
-                sammenligningsgrunnlagTotal = sammenligningsgrunnlagTotal
+                sammenligningsgrunnlagTotal = sammenligningsgrunnlagTotal,
+                skjønnsmessigFastsattÅrlig = inntekterPerArbeidsgiver.skjønnsmessigFastsattÅrlig()
             )
         }
 
@@ -371,7 +377,8 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 arbeidsgiver = orgnummer,
                 omregnetÅrsinntekt = null,
                 sammenligningsgrunnlag = InntektBuilder(rapportertInntekt).build().årlig,
-                deaktivert = false
+                skjønnsmessigFastsatt = null,
+                 deaktivert = false
             ))
         }
 
@@ -432,7 +439,20 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             organisasjonsnummer,
             IOmregnetÅrsinntekt(kilde, inntekt.årlig, inntekt.månedlig, inntekterFraAOrdningen),
             sammenligningsgrunnlag = null,
-            deaktivert = deaktivert
+            deaktivert = deaktivert,
+            skjønnsmessigFastsatt = null
+        )
+
+        private fun nyArbeidsgiverInntektSkjønnsmessigfastsatt(
+            kilde: IInntektkilde,
+            inntekt: IInntekt,
+            inntekterFraAOrdningen: List<IInntekterFraAOrdningen>? = null,
+        ) = IArbeidsgiverinntekt(
+            organisasjonsnummer,
+            IOmregnetÅrsinntekt(kilde, inntekt.årlig, inntekt.månedlig, inntekterFraAOrdningen),
+            sammenligningsgrunnlag = null,
+            deaktivert = deaktivert,
+            skjønnsmessigFastsatt = IOmregnetÅrsinntekt(kilde, inntekt.årlig, inntekt.månedlig, inntekterFraAOrdningen)
         )
 
         override fun visitInfotrygd(infotrygd: Infotrygd, id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) {
@@ -451,7 +471,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             tidsstempel: LocalDateTime
         ) {
             val inntekt = InntektBuilder(beløp).build()
-            this.tilstand.lagreInntekt(this, nyArbeidsgiverInntekt(IInntektkilde.SkjønnsmessigFastsatt, inntekt))
+            this.tilstand.lagreInntekt(this, nyArbeidsgiverInntektSkjønnsmessigfastsatt(IInntektkilde.SkjønnsmessigFastsatt, inntekt))
         }
 
         override fun preVisitSaksbehandler(
