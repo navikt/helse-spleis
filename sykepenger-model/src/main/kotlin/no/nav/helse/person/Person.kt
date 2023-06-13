@@ -186,7 +186,6 @@ class Person private constructor(
 
     fun håndter(inntektsmelding: Inntektsmelding) {
         registrer(inntektsmelding, "Behandler inntektsmelding")
-        tidligereBehandlinger(inntektsmelding, inntektsmelding.periode())
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(inntektsmelding)
         arbeidsgiver.håndter(inntektsmelding)
         håndterGjenoppta(inntektsmelding)
