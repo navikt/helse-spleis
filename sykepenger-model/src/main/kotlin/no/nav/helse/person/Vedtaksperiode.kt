@@ -9,7 +9,6 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Alder
 import no.nav.helse.Toggle
-import no.nav.helse.august
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
@@ -108,6 +107,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad som delvis overlapper`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_10
@@ -650,19 +650,16 @@ internal class Vedtaksperiode private constructor(
         person.igangsettOverstyring(søknad, Revurderingseventyr.korrigertSøknad(skjæringstidspunkt, periode))
     }
 
-    private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, erRevurdering: Boolean, block: (VilkårsgrunnlagHistorikk.Grunnlagsdata) -> Unit = {}) {
-        val grunnlagForSykepengegrunnlag = vilkårsgrunnlag.avklarSykepengegrunnlag(person, jurist())
-        vilkårsgrunnlag.valider(grunnlagForSykepengegrunnlag, jurist())
+    private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, tilstandUtenAvvik: Vedtaksperiodetilstand, tilstandMedAvvik: Vedtaksperiodetilstand) {
+        val sykepengegrunnlag = vilkårsgrunnlag.avklarSykepengegrunnlag(person, jurist())
+        vilkårsgrunnlag.valider(sykepengegrunnlag, jurist())
         val grunnlagsdata = vilkårsgrunnlag.grunnlagsdata()
-        block(grunnlagsdata)
+        grunnlagsdata.validerFørstegangsvurdering(vilkårsgrunnlag)
         person.lagreVilkårsgrunnlag(grunnlagsdata)
-        if (vilkårsgrunnlag.harFunksjonelleFeilEllerVerre()) {
-            return forkast(vilkårsgrunnlag)
-        }
         vilkårsgrunnlag.info("Vilkårsgrunnlag vurdert")
-        if (erRevurdering) return tilstand(vilkårsgrunnlag, AvventerHistorikkRevurdering)
-        if (!grunnlagsdata.harAkseptabelAvvik() && Toggle.TjuefemprosentAvvik.enabled) return tilstand(vilkårsgrunnlag, AvventerSkjønnsmessigFastsettelse)
-        tilstand(vilkårsgrunnlag, AvventerHistorikk)
+        if (vilkårsgrunnlag.harFunksjonelleFeilEllerVerre()) return forkast(vilkårsgrunnlag)
+        if (!sykepengegrunnlag.harAkseptabeltAvvik()) return tilstand(vilkårsgrunnlag, tilstandMedAvvik)
+        tilstand(vilkårsgrunnlag, tilstandUtenAvvik)
     }
 
     private fun håndterUtbetalingHendelse(hendelse: UtbetalingHendelse, onUtbetalt: () -> Unit) {
@@ -1609,7 +1606,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            håndterRevurdering(vilkårsgrunnlag) { vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, erRevurdering = true) }
+            håndterRevurdering(vilkårsgrunnlag) { vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikkRevurdering, AvventerSkjønnsmessigFastsettelseRevurdering) }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
@@ -1881,9 +1878,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             håndterFørstegangsbehandling(vilkårsgrunnlag, vedtaksperiode) {
-                vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, erRevurdering = false) { grunnlagsdata ->
-                    grunnlagsdata.validerFørstegangsvurdering(vilkårsgrunnlag)
-                }
+                vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikk, AvventerSkjønnsmessigFastsettelse)
             }
         }
 
@@ -2000,17 +1995,20 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerSkjønnsmessigFastsettelse : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            if (Toggle.TjuefemprosentAvvik.enabled) return
+            // omgjøringer må enn så lenge gå til godkjenning :/
+            if (!vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode)) return vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+            hendelse.funksjonellFeil(Varselkode.RV_IV_2)
+            vedtaksperiode.forkast(hendelse)
+        }
+
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
             return null
         }
 
-        override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {
-
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
-
-        }
+        override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {}
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {}
 
         override fun igangsettOverstyring(
             vedtaksperiode: Vedtaksperiode,
@@ -2020,6 +2018,29 @@ internal class Vedtaksperiode private constructor(
             revurdering.inngåSomEndring(hendelse, vedtaksperiode)
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
+    }
+
+    internal object AvventerSkjønnsmessigFastsettelseRevurdering : Vedtaksperiodetilstand {
+        override val type: TilstandType = TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            // TODO: fjerne denne når skjønnsmessig fastsettelse funker i revurdering
+            vedtaksperiode.person.gjenopptaBehandling(hendelse)
+        }
+
+        override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
+            return null
+        }
+
+        override fun gjenopptaBehandling(
+            vedtaksperiode: Vedtaksperiode,
+            arbeidsgivere: Iterable<Arbeidsgiver>,
+            hendelse: IAktivitetslogg
+        ) {
+            vedtaksperiode.tilstand(hendelse, AvventerHistorikkRevurdering)
+        }
+
+        override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {}
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {}
     }
 
     internal object AvventerSimulering : Vedtaksperiodetilstand {

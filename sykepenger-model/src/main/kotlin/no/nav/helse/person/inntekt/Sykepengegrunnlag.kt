@@ -18,7 +18,6 @@ import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.SykepengegrunnlagVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
@@ -177,8 +176,8 @@ internal class Sykepengegrunnlag(
         arbeidsgiverInntektsopplysninger.markerFlereArbeidsgivere(aktivitetslogg)
     }
 
-    internal fun validerAvvik(aktivitetslogg: IAktivitetslogg, valideringstrategi: IAktivitetslogg.(Varselkode) -> Unit = IAktivitetslogg::funksjonellFeil) {
-        if (!harAkseptabeltAvvik(avviksprosent)) return valideringstrategi(aktivitetslogg, RV_IV_2)
+    internal fun validerAvvik(aktivitetslogg: IAktivitetslogg) {
+        if (!harAkseptabeltAvvik(avviksprosent)) return aktivitetslogg.varsel(RV_IV_2)
         aktivitetslogg.info("Har %.0f %% eller mindre avvik i inntekt (%.2f %%)", Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent(), avviksprosent.prosent())
     }
 
@@ -198,7 +197,7 @@ internal class Sykepengegrunnlag(
 
     internal fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
         return hendelse.overstyr(this, subsumsjonObserver).apply {
-            validerAvvik(hendelse, IAktivitetslogg::varsel)
+            validerAvvik(hendelse)
             subsumsjonObserver.`§ 8-30 ledd 2 punktum 1`(Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, omregnetÅrsinntekt, sammenligningsgrunnlag.sammenligningsgrunnlag, avviksprosent)
         }
     }
@@ -249,7 +248,7 @@ internal class Sykepengegrunnlag(
         subsumsjonObserver: SubsumsjonObserver
     ): Sykepengegrunnlag {
         return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold).apply {
-            validerAvvik(hendelse, IAktivitetslogg::varsel)
+            validerAvvik(hendelse)
             subsumsjonObserver.`§ 8-30 ledd 2 punktum 1`(Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, omregnetÅrsinntekt, sammenligningsgrunnlag.sammenligningsgrunnlag, avviksprosent)
         }
     }

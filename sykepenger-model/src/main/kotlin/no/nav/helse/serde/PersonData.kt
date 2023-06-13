@@ -995,6 +995,7 @@ internal data class PersonData(
             private fun parseTilstand(tilstand: TilstandType) = when (tilstand) {
                 TilstandType.AVVENTER_HISTORIKK -> Vedtaksperiode.AvventerHistorikk
                 TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE -> Vedtaksperiode.AvventerSkjønnsmessigFastsettelse
+                TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING -> Vedtaksperiode.AvventerSkjønnsmessigFastsettelseRevurdering
                 TilstandType.AVVENTER_GODKJENNING -> Vedtaksperiode.AvventerGodkjenning
                 TilstandType.AVVENTER_SIMULERING -> Vedtaksperiode.AvventerSimulering
                 TilstandType.TIL_UTBETALING -> Vedtaksperiode.TilUtbetaling

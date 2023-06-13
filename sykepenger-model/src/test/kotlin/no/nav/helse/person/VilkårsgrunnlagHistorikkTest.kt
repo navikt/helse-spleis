@@ -26,6 +26,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
@@ -220,7 +221,7 @@ internal class VilkårsgrunnlagHistorikkTest {
 
         val aktivitetslogg = Aktivitetslogg()
         grunnlagsdata.validerFørstegangsvurdering(aktivitetslogg)
-        aktivitetslogg.assertFunksjonellFeil(Varselkode.RV_IV_2)
+        aktivitetslogg.assertVarsel(Varselkode.RV_IV_2)
     }
 
     @Test
