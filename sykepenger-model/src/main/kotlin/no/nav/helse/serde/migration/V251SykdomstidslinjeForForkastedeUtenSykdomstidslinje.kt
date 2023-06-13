@@ -18,7 +18,7 @@ internal class V251SykdomstidslinjeForForkastedeUtenSykdomstidslinje: JsonMigrat
                 vedtaksperiode.path("sykdomstidslinje").path("dager").isEmpty
             }.forEach { forkastet ->
                 val vedtaksperiode = forkastet.path("vedtaksperiode")
-                val sykdomstidslinje = vedtaksperiode.path("sykdomstidslinje").path("dager")
+                val sykdomstidslinje = vedtaksperiode.path("sykdomstidslinje")
 
                 val periodeFom = vedtaksperiode.path("fom").asText().dato
                 val periodeTom = vedtaksperiode.path("tom").asText().dato
