@@ -59,6 +59,7 @@ internal class GraphQLVilkårsgrunnlagTest {
         avviksprosent: Double?) = SpleisVilkårsgrunnlag(
         skjæringstidspunkt = skjæringstidpunkt,
         beregningsgrunnlag = 500000.0,
+        omregnetÅrsinntekt = 500000.0,
         sammenligningsgrunnlag = 500000.0,
         sykepengegrunnlag = 500000.0,
         inntekter = emptyList(),
@@ -70,7 +71,8 @@ internal class GraphQLVilkårsgrunnlagTest {
         opptjeningFra = skjæringstidpunkt,
         oppfyllerKravOmMinstelønn = true,
         oppfyllerKravOmOpptjening = true,
-        oppfyllerKravOmMedlemskap = true
+        oppfyllerKravOmMedlemskap = true,
+        skjønnsmessigFastsattÅrlig = null
     )
 
     private fun assertAvviksprosent(avviksprosent: Double?, historikk: GraphQLVilkarsgrunnlaghistorikk){

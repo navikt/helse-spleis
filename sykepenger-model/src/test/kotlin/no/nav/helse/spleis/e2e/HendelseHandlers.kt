@@ -25,6 +25,7 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -54,9 +55,11 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.person.inntekt.Saksbehandler
+import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.tilOverstyrt
+import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.tilSkjønnsmessigFastsatt
 import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -843,6 +846,21 @@ internal fun AbstractEndToEndTest.håndterOverstyrArbeidsgiveropplysninger(
     return meldingsreferanseId
 }
 
+internal fun AbstractEndToEndTest.håndterSkjønnsmessigFastsettelse(
+    skjæringstidspunkt: LocalDate,
+    arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>,
+    meldingsreferanseId: UUID = UUID.randomUUID()
+): UUID {
+    SkjønnsmessigFastsettelse(
+        meldingsreferanseId = meldingsreferanseId,
+        fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+        aktørId = AbstractPersonTest.AKTØRID,
+        skjæringstidspunkt = skjæringstidspunkt,
+        arbeidsgiveropplysninger = arbeidsgiveropplysninger.tilSkjønnsmessigFastsatt(meldingsreferanseId, skjæringstidspunkt)
+    ).håndter(Person::håndter)
+    return meldingsreferanseId
+}
+
 internal class OverstyrtArbeidsgiveropplysning(
     private val orgnummer: String,
     private val inntekt: Inntekt,
@@ -854,6 +872,13 @@ internal class OverstyrtArbeidsgiveropplysning(
         internal fun List<OverstyrtArbeidsgiveropplysning>.tilOverstyrt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) =
             map {
                 ArbeidsgiverInntektsopplysning(it.orgnummer, Saksbehandler(skjæringstidspunkt, meldingsreferanseId, it.inntekt, it.forklaring, it.subsumsjon, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
+                    it.refusjonsopplysninger.forEach { (fom, tom, refusjonsbeløp) -> leggTil(Refusjonsopplysning(meldingsreferanseId, fom, tom, refusjonsbeløp), LocalDateTime.now())}
+                }.build())
+            }
+
+        internal fun List<OverstyrtArbeidsgiveropplysning>.tilSkjønnsmessigFastsatt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) =
+            map {
+                ArbeidsgiverInntektsopplysning(it.orgnummer, SkjønnsmessigFastsatt(skjæringstidspunkt, meldingsreferanseId, it.inntekt, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
                     it.refusjonsopplysninger.forEach { (fom, tom, refusjonsbeløp) -> leggTil(Refusjonsopplysning(meldingsreferanseId, fom, tom, refusjonsbeløp), LocalDateTime.now())}
                 }.build())
             }

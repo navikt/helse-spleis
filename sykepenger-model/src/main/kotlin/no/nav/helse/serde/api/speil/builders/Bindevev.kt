@@ -3,15 +3,16 @@ package no.nav.helse.serde.api.speil.builders
 import java.time.YearMonth
 import no.nav.helse.serde.api.dto.Arbeidsgiverinntekt
 import no.nav.helse.serde.api.dto.Arbeidsgiverrefusjon
+import no.nav.helse.serde.api.dto.Inntekt
 import no.nav.helse.serde.api.dto.InntekterFraAOrdningen
 import no.nav.helse.serde.api.dto.Inntektkilde
-import no.nav.helse.serde.api.dto.OmregnetÅrsinntekt
 import no.nav.helse.serde.api.dto.Refusjonselement
 
 internal data class IArbeidsgiverinntekt(
     val arbeidsgiver: String,
     val omregnetÅrsinntekt: IOmregnetÅrsinntekt?,
     val sammenligningsgrunnlag: Double? = null,
+    val skjønnsmessigFastsatt: IOmregnetÅrsinntekt?,
     val deaktivert: Boolean
 ) {
     internal fun toDTO(): Arbeidsgiverinntekt {
@@ -19,8 +20,13 @@ internal data class IArbeidsgiverinntekt(
             organisasjonsnummer = arbeidsgiver,
             omregnetÅrsinntekt = omregnetÅrsinntekt?.toDTO(),
             sammenligningsgrunnlag = sammenligningsgrunnlag,
+            skjønnsmessigFastsatt = skjønnsmessigFastsatt?.toDTO(),
             deaktivert = deaktivert
         )
+    }
+
+    companion object {
+        internal fun List<IArbeidsgiverinntekt>.harSkjønnsmessigFastsatt() = mapNotNull { arbeidsgiver -> arbeidsgiver.skjønnsmessigFastsatt }.isNotEmpty()
     }
 }
 
@@ -42,8 +48,8 @@ internal data class IOmregnetÅrsinntekt(
     val månedsbeløp: Double,
     val inntekterFraAOrdningen: List<IInntekterFraAOrdningen>? = null //kun gyldig for A-ordningen
 ) {
-    internal fun toDTO(): OmregnetÅrsinntekt {
-        return OmregnetÅrsinntekt(
+    internal fun toDTO(): Inntekt {
+        return Inntekt(
             kilde = kilde.toDTO(),
             beløp = beløp,
             månedsbeløp = månedsbeløp,

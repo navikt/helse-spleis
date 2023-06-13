@@ -390,7 +390,7 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: Vilkårsgrunnlag) =
             is SpleisVilkårsgrunnlag -> GraphQLSpleisVilkarsgrunnlag(
                 id = id,
                 skjaeringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt,
-                omregnetArsinntekt = vilkårsgrunnlag.beregningsgrunnlag,
+                omregnetArsinntekt = vilkårsgrunnlag.omregnetÅrsinntekt,
                 sammenligningsgrunnlag = vilkårsgrunnlag.sammenligningsgrunnlag,
                 sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag,
                 inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) },
@@ -402,12 +402,13 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: Vilkårsgrunnlag) =
                 oppfyllerKravOmMinstelonn = vilkårsgrunnlag.oppfyllerKravOmMinstelønn,
                 oppfyllerKravOmOpptjening = vilkårsgrunnlag.oppfyllerKravOmOpptjening,
                 oppfyllerKravOmMedlemskap = vilkårsgrunnlag.oppfyllerKravOmMedlemskap,
-                arbeidsgiverrefusjoner = vilkårsgrunnlag.arbeidsgiverrefusjoner.map{ refusjon -> mapArbeidsgiverRefusjon(refusjon)}
+                arbeidsgiverrefusjoner = vilkårsgrunnlag.arbeidsgiverrefusjoner.map{ refusjon -> mapArbeidsgiverRefusjon(refusjon)},
+                skjonnsmessigFastsattAarlig = vilkårsgrunnlag.skjønnsmessigFastsattÅrlig
             )
             is InfotrygdVilkårsgrunnlag -> GraphQLInfotrygdVilkarsgrunnlag(
                 id = id,
                 skjaeringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt,
-                omregnetArsinntekt = vilkårsgrunnlag.beregningsgrunnlag,
+                omregnetArsinntekt = vilkårsgrunnlag.beregningsgrunnlag, // For infotrygd har vi ikke noe konsept for hvorvidt en inntekt er skjønnsfastsatt
                 sammenligningsgrunnlag = vilkårsgrunnlag.sammenligningsgrunnlag,
                 sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag,
                 inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) },

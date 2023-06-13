@@ -27,6 +27,8 @@ data class SpleisVilkårsgrunnlag(
     override val sykepengegrunnlag: Double,
     override val inntekter: List<Arbeidsgiverinntekt>,
     override val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>,
+    val skjønnsmessigFastsattÅrlig: Double?,
+    val omregnetÅrsinntekt: Double,
     val avviksprosent: Double?,
     val grunnbeløp: Int,
     val sykepengegrunnlagsgrense: SykepengegrunnlagsgrenseDTO,
@@ -52,8 +54,9 @@ data class InfotrygdVilkårsgrunnlag(
 
 data class Arbeidsgiverinntekt(
     val organisasjonsnummer: String,
-    val omregnetÅrsinntekt: OmregnetÅrsinntekt?,
+    val omregnetÅrsinntekt: Inntekt?,
     val sammenligningsgrunnlag: Double? = null,
+    val skjønnsmessigFastsatt: Inntekt? = null,
     val deaktivert: Boolean
 )
 
@@ -73,7 +76,7 @@ enum class Inntektkilde {
     Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen, IkkeRapportert, SkjønnsmessigFastsatt
 }
 
-data class OmregnetÅrsinntekt(
+data class Inntekt(
     val kilde: Inntektkilde,
     val beløp: Double,
     val månedsbeløp: Double,

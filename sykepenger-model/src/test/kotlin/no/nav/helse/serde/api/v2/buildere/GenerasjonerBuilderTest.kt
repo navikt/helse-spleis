@@ -48,8 +48,8 @@ import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.GenerasjonDTO
+import no.nav.helse.serde.api.dto.Inntekt
 import no.nav.helse.serde.api.dto.Inntektkilde
-import no.nav.helse.serde.api.dto.OmregnetÅrsinntekt
 import no.nav.helse.serde.api.dto.Periodetilstand
 import no.nav.helse.serde.api.dto.Periodetilstand.Annullert
 import no.nav.helse.serde.api.dto.Periodetilstand.ForberederGodkjenning
@@ -280,7 +280,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             val vilkårsgrunnlag = beregnetPeriode(0).vilkårsgrunnlag()
             val inntektsgrunnlag = vilkårsgrunnlag.inntekter.firstOrNull { it.organisasjonsnummer == a2 }
             assertEquals(
-                OmregnetÅrsinntekt(
+                Inntekt(
                     Inntektkilde.IkkeRapportert,
                     0.0,
                     0.0,

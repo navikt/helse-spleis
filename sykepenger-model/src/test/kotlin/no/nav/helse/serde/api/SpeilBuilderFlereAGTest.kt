@@ -3,7 +3,6 @@ package no.nav.helse.serde.api
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
-import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -25,9 +24,9 @@ import no.nav.helse.september
 import no.nav.helse.serde.api.dto.Arbeidsgiverinntekt
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.GhostPeriodeDTO
+import no.nav.helse.serde.api.dto.Inntekt
 import no.nav.helse.serde.api.dto.InntekterFraAOrdningen
 import no.nav.helse.serde.api.dto.Inntektkilde
-import no.nav.helse.serde.api.dto.OmregnetÅrsinntekt
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -426,7 +425,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         assertEquals(
             Arbeidsgiverinntekt(
                 organisasjonsnummer = a2,
-                omregnetÅrsinntekt = OmregnetÅrsinntekt(
+                omregnetÅrsinntekt = Inntekt(
                     kilde = Inntektkilde.AOrdningen,
                     beløp = 12000.0,
                     månedsbeløp = 1000.0,
@@ -517,7 +516,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         assertEquals(listOf(
             Arbeidsgiverinntekt(
                 organisasjonsnummer = a1,
-                omregnetÅrsinntekt = OmregnetÅrsinntekt(
+                omregnetÅrsinntekt = Inntekt(
                     kilde = Inntektkilde.Inntektsmelding,
                     beløp = 372000.0,
                     månedsbeløp = 31000.0,
@@ -569,7 +568,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         val forventet = listOf(
             Arbeidsgiverinntekt(
                 organisasjonsnummer = a1,
-                omregnetÅrsinntekt = OmregnetÅrsinntekt(
+                omregnetÅrsinntekt = Inntekt(
                     kilde = Inntektkilde.Inntektsmelding,
                     beløp = 372000.0,
                     månedsbeløp = 31000.0,
@@ -580,7 +579,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
             ),
             Arbeidsgiverinntekt(
                 organisasjonsnummer = a2,
-                omregnetÅrsinntekt = OmregnetÅrsinntekt(
+                omregnetÅrsinntekt = Inntekt(
                     kilde = Inntektkilde.IkkeRapportert,
                     beløp = 0.0,
                     månedsbeløp = 0.0,
