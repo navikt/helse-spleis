@@ -28,7 +28,7 @@ internal data class IArbeidsgiverinntekt(
     companion object {
         internal fun List<IArbeidsgiverinntekt>.skjønnsmessigFastsattÅrlig(): Double? {
             val skjønnsmessigFastsatteInntekter = mapNotNull { arbeidsgiver ->
-                arbeidsgiver.omregnetÅrsinntekt?.beløp
+                arbeidsgiver.skjønnsmessigFastsatt?.beløp
             }
             if (skjønnsmessigFastsatteInntekter.isEmpty()) return null
             return skjønnsmessigFastsatteInntekter.sum()

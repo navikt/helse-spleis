@@ -445,14 +445,15 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
 
         private fun nyArbeidsgiverInntektSkjønnsmessigfastsatt(
             kilde: IInntektkilde,
-            inntekt: IInntekt,
+            skjønnsmessigFastsattInntekt: IInntekt,
+            omregnetÅrsinntekt: IInntekt,
             inntekterFraAOrdningen: List<IInntekterFraAOrdningen>? = null,
         ) = IArbeidsgiverinntekt(
             organisasjonsnummer,
-            IOmregnetÅrsinntekt(kilde, inntekt.årlig, inntekt.månedlig, inntekterFraAOrdningen),
+            IOmregnetÅrsinntekt(kilde, omregnetÅrsinntekt.årlig, omregnetÅrsinntekt.månedlig, inntekterFraAOrdningen),
             sammenligningsgrunnlag = null,
             deaktivert = deaktivert,
-            skjønnsmessigFastsatt = IOmregnetÅrsinntekt(kilde, inntekt.årlig, inntekt.månedlig, inntekterFraAOrdningen)
+            skjønnsmessigFastsatt = IOmregnetÅrsinntekt(kilde, skjønnsmessigFastsattInntekt.årlig, skjønnsmessigFastsattInntekt.månedlig, inntekterFraAOrdningen)
         )
 
         override fun visitInfotrygd(infotrygd: Infotrygd, id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) {
@@ -470,8 +471,13 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             subsumsjon: Subsumsjon?,
             tidsstempel: LocalDateTime
         ) {
-            val inntekt = InntektBuilder(beløp).build()
-            this.tilstand.lagreInntekt(this, nyArbeidsgiverInntektSkjønnsmessigfastsatt(IInntektkilde.SkjønnsmessigFastsatt, inntekt))
+            val skjønnsmessigFastsattInntekt = InntektBuilder(beløp).build()
+            val omregnetÅrsinntekt = InntektBuilder(saksbehandler.omregnetÅrsinntekt().fastsattÅrsinntekt()).build()
+            this.tilstand.lagreInntekt(this, nyArbeidsgiverInntektSkjønnsmessigfastsatt(
+                IInntektkilde.SkjønnsmessigFastsatt,
+                skjønnsmessigFastsattInntekt,
+                omregnetÅrsinntekt
+            ))
         }
 
         override fun preVisitSaksbehandler(
