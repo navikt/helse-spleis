@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.DisableToggle
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -26,6 +28,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
+@DisableToggle(Toggle.STOPPE_TILSIG_AUU::class)
 internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
 
     @Test

@@ -13,10 +13,13 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_9
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_13
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_33
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_36
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_3
@@ -130,9 +133,9 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 9.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)
         ))
-        håndterYtelser(2.vedtaksperiode)
-        assertFunksjonellFeil(RV_IT_33, 2.vedtaksperiode.filter(ORGNUMMER))
-        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
+        assertFunksjonellFeil(RV_IT_14, 1.vedtaksperiode.filter(ORGNUMMER))
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
     }
 
     @Test
@@ -145,7 +148,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         ))
         håndterYtelser(2.vedtaksperiode)
         assertFunksjonellFeil(RV_IT_33, 2.vedtaksperiode.filter(ORGNUMMER))
-        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TIL_INFOTRYGD)
     }
 
 }

@@ -148,37 +148,6 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
     }
 
     @Test
-    fun `En periode i Avsluttet Uten Utbetaling som eneste periode får en Infotrygd-utbetaling foran seg vil nå utbetales` () {
-        a1 {
-            val søknadId = UUID.randomUUID()
-            nyPeriode(16.januar til 31.januar, søknadId = søknadId)
-            val søknadId2 = UUID.randomUUID()
-            håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), søknadId = søknadId2)
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
-            val infotrygdUtbetaling = ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 16.januar, 100.prosent, INNTEKT)
-            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(infotrygdUtbetaling))
-            val forventet = PersonObserver.VedtaksperiodeVenterEvent(
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                aktørId = AKTØRID,
-                organisasjonsnummer = a1,
-                vedtaksperiodeId = 1.vedtaksperiode,
-                hendelser = setOf(søknadId, søknadId2),
-                ventetSiden = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert,
-                venterTil = LocalDateTime.MAX,
-                venterPå = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
-                    vedtaksperiodeId = 1.vedtaksperiode,
-                    organisasjonsnummer = a1,
-                    venteårsak = PersonObserver.VedtaksperiodeVenterEvent.Venteårsak(
-                        hva = "HJELP",
-                        hvorfor = "VIL_UTBETALES"
-                    )
-                )
-            )
-            assertEquals(forventet, observatør.vedtaksperiodeVenter.last())
-        }
-    }
-
-    @Test
     fun `En periode i Avsluttet Uten Utbetaling som eneste periode som fortsatt ikke skal utbetales skriker ikke om hjelp`() {
         a1 {
             nyPeriode(16.januar til 31.januar)

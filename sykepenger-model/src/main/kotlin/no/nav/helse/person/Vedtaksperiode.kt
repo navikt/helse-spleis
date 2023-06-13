@@ -9,6 +9,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Alder
 import no.nav.helse.Toggle
+import no.nav.helse.august
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
@@ -39,6 +40,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.januar
 import no.nav.helse.memoized
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
@@ -111,6 +113,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_33
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_36
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
@@ -2346,6 +2349,30 @@ internal class Vedtaksperiode private constructor(
                 dager,
                 Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
             )
+        }
+
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: UtbetalingshistorikkEtterInfotrygdendring,
+            infotrygdhistorikk: Infotrygdhistorikk
+        ) {
+            super.håndter(vedtaksperiode, hendelse, infotrygdhistorikk)
+            // for å hindre at eldre AUUer som vi har tenkt å omgjøre forkaster seg før vi har fått sjanse til å ta stilling til dem
+            val tilfeldigValgtDato = 1.januar(2023) // (litt tilfeldig valgt dato, men for å stoppe -NYE- ting)
+            if (Toggle.STOPPE_TILSIG_AUU.disabled && vedtaksperiode.periode.endInclusive < tilfeldigValgtDato) return
+            // stoppe tilsig av vedtaksperioder i AUU som ender opp med å ville utbetale seg selv
+            validation(hendelse) {
+                onValidationFailed { vedtaksperiode.forkast(hendelse) }
+                valider { infotrygdhistorikk.valider(this, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer) }
+                valider(RV_IT_36) { erUpåvirketAvInfotrygdendringer(vedtaksperiode) }
+            }
+        }
+
+        private fun erUpåvirketAvInfotrygdendringer(vedtaksperiode: Vedtaksperiode): Boolean {
+            if (!vedtaksperiode.forventerInntekt()) return true
+            val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode() ?: return true
+            val situasjon = vedtaksperiode.arbeidsgiver.utbetalingssituasjon(arbeidsgiverperiode, listOf(vedtaksperiode.periode))
+            return situasjon != IKKE_UTBETALT
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
