@@ -241,6 +241,9 @@ spec:
         - team: tbd
           application: sondre-halvorsen
           access: read
+        - team: tbd
+          application: spre-styringsinfo
+          access: read
         - team: flex
           application: sykepengesoknad-sak-status-metrikk
           access: read
