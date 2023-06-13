@@ -29,9 +29,9 @@ internal class Arbeidsgiverperiodesubsumsjon(
         other.foreldetDag(dato, økonomi)
     }
 
-    override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse) {
+    override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse, økonomi: Økonomi) {
         tilstand.oppholdsdag(this, dato)
-        other.avvistDag(dato, begrunnelse)
+        other.avvistDag(dato, begrunnelse, økonomi)
     }
 
     override fun fridag(dato: LocalDate) {

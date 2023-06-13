@@ -142,15 +142,15 @@ internal class ØkonomiTest {
     }
 
     @Test
-    fun `låst økonomi fungerer som arbeidsdag`() {
+    fun `låst økonomi fungerer ikke som arbeidsdag ved total sykdomsgrad`() {
         assertEquals(
-            19.prosent,
+            49.prosent,
             listOf(
                 50.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6G`.beløp(1.januar)),
                 20.prosent.sykdomsgrad.inntekt(800.daglig, 800.daglig, `6G` = `6G`.beløp(1.januar)),
                 60.prosent.sykdomsgrad.inntekt(2000.daglig, 2000.daglig, `6G` = `6G`.beløp(1.januar)).lås()
             ).totalSykdomsgrad().also {
-                assertTrue(it.erUnderGrensen())
+                assertFalse(it.erUnderGrensen())
             }
         )
     }

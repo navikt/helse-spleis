@@ -607,8 +607,8 @@ internal class UtbetalingstidslinjeBuilderTest {
             mediators.forEach { it.foreldetDag(dato, økonomi) }
         }
 
-        override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse) {
-            mediators.forEach { it.avvistDag(dato, begrunnelse) }
+        override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse, økonomi: Økonomi) {
+            mediators.forEach { it.avvistDag(dato, begrunnelse, økonomi) }
         }
     }
 

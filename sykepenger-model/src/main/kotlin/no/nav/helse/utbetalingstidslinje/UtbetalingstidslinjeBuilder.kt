@@ -6,7 +6,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_3
-import no.nav.helse.person.inntekt.ManglerRefusjonsopplysning
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.økonomi.Økonomi
@@ -84,7 +83,7 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
         builder.addForeldetDag(dato, inntekter.medInntekt(dato, økonomi))
     }
 
-    override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse) {
-        builder.addAvvistDag(dato, inntekter.medInntekt(dato, Økonomi.ikkeBetalt()), listOf(begrunnelse))
+    override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse, økonomi: Økonomi) {
+        builder.addAvvistDag(dato, inntekter.medInntekt(dato, økonomi.ikkeBetalt()), listOf(begrunnelse))
     }
 }

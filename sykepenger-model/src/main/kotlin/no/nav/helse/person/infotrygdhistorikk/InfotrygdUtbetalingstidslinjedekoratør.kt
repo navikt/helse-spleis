@@ -43,8 +43,8 @@ internal class InfotrygdUtbetalingstidslinjedekoratør(
         leggTil(dato) { other.foreldetDag(dato, økonomi) }
     }
 
-    override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse) {
-        leggTil(dato) { other.avvistDag(dato, begrunnelse) }
+    override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse, økonomi: Økonomi) {
+        leggTil(dato) { other.avvistDag(dato, begrunnelse, økonomi) }
     }
 
     private fun leggTil(dato: LocalDate, block: () -> Unit) {

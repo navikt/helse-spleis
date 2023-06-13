@@ -273,7 +273,7 @@ internal class ArbeidsgiverperiodeBuilder(
         }
 
         override fun egenmeldingsdag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
-            builder.mediator.avvistDag(dato, Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode)
+            builder.mediator.avvistDag(dato, Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode, økonomi)
         }
 
         override fun feriedag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate) {

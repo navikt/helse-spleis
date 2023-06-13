@@ -289,7 +289,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
             foreldetdager += 1
         }
 
-        override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse) {
+        override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse, økonomi: Økonomi) {
             avvistdager += 1
         }
     }

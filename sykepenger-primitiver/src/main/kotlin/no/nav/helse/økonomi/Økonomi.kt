@@ -327,7 +327,6 @@ class Økonomi private constructor(
 
         object Låst : Tilstand() {
             override fun utbetalingsgrad(økonomi: Økonomi) = 0.prosent
-            override fun sykdomsgrad(økonomi: Økonomi) = 0.prosent
             override fun lås(økonomi: Økonomi) = økonomi
             override fun betal(økonomi: Økonomi) = økonomi.kopierMed(
                 arbeidsgiverbeløp = INGEN,
@@ -337,7 +336,6 @@ class Økonomi private constructor(
         }
 
         object LåstMedBeløp : Tilstand() {
-            override fun sykdomsgrad(økonomi: Økonomi) = 0.prosent
             override fun utbetalingsgrad(økonomi: Økonomi) = 0.prosent
             override fun lås(økonomi: Økonomi) = økonomi
             override fun er6GBegrenset(økonomi: Økonomi) = false

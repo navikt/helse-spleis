@@ -18,7 +18,7 @@ internal interface ArbeidsgiverperiodeMediator {
     fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde)
     fun ukjentDag(dato: LocalDate) {}
     fun foreldetDag(dato: LocalDate, økonomi: Økonomi)
-    fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse)
+    fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse, økonomi: Økonomi)
     fun arbeidsgiverperiodeAvbrutt() {}
     fun arbeidsgiverperiodeFerdig() {}
     fun arbeidsgiverperiodeSistedag() {}
