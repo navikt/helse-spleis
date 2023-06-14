@@ -373,6 +373,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(inntektSkjønnsfastsatt, vilkårsgrunnlag.inntekter.single().skjønnsmessigFastsatt!!.månedsbeløp)
 
         assertEquals(Inntektkilde.SkjønnsmessigFastsatt.name, vilkårsgrunnlag.inntekter.single().skjønnsmessigFastsatt!!.kilde.name)
+        assertEquals(Inntektkilde.Inntektsmelding.name, vilkårsgrunnlag.inntekter.single().omregnetÅrsinntekt!!.kilde.name)
         assertEquals(inntektIm * 12, vilkårsgrunnlag.inntekter.single().omregnetÅrsinntekt!!.beløp)
         assertEquals(inntektIm, vilkårsgrunnlag.inntekter.single().omregnetÅrsinntekt!!.månedsbeløp)
     }

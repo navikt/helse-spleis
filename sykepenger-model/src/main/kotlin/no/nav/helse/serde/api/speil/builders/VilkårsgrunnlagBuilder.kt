@@ -451,16 +451,16 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         )
 
         private fun nyArbeidsgiverInntektSkjønnsmessigfastsatt(
-            kilde: IInntektkilde,
+            omregnetÅrsinntektKilde: IInntektkilde,
             skjønnsmessigFastsattInntekt: IInntekt,
             omregnetÅrsinntekt: IInntekt,
             inntekterFraAOrdningen: List<IInntekterFraAOrdningen>? = null,
         ) = IArbeidsgiverinntekt(
             organisasjonsnummer,
-            IOmregnetÅrsinntekt(kilde, omregnetÅrsinntekt.årlig, omregnetÅrsinntekt.månedlig, inntekterFraAOrdningen),
+            omregnetÅrsinntekt = IOmregnetÅrsinntekt(omregnetÅrsinntektKilde, omregnetÅrsinntekt.årlig, omregnetÅrsinntekt.månedlig, inntekterFraAOrdningen),
             sammenligningsgrunnlag = null,
             deaktivert = deaktivert,
-            skjønnsmessigFastsatt = IOmregnetÅrsinntekt(kilde, skjønnsmessigFastsattInntekt.årlig, skjønnsmessigFastsattInntekt.månedlig, inntekterFraAOrdningen)
+            skjønnsmessigFastsatt = IOmregnetÅrsinntekt(IInntektkilde.SkjønnsmessigFastsatt, skjønnsmessigFastsattInntekt.årlig, skjønnsmessigFastsattInntekt.månedlig, inntekterFraAOrdningen)
         )
 
         override fun visitInfotrygd(infotrygd: Infotrygd, id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) {
@@ -479,9 +479,17 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             tidsstempel: LocalDateTime
         ) {
             val skjønnsmessigFastsattInntekt = InntektBuilder(beløp).build()
-            val omregnetÅrsinntekt = InntektBuilder(saksbehandler.omregnetÅrsinntekt().fastsattÅrsinntekt()).build()
+            val foregående = saksbehandler.omregnetÅrsinntekt()
+            val omregnetÅrsinntekt = InntektBuilder(foregående.fastsattÅrsinntekt()).build()
+            val omregnetÅrsinntektKilde = when (foregående) {
+                is Saksbehandler -> IInntektkilde.Saksbehandler
+                is Infotrygd -> IInntektkilde.Infotrygd
+                is SkattSykepengegrunnlag -> IInntektkilde.AOrdningen
+                is IkkeRapportert -> IInntektkilde.IkkeRapportert
+                else -> IInntektkilde.Inntektsmelding
+            }
             this.tilstand.lagreInntekt(this, nyArbeidsgiverInntektSkjønnsmessigfastsatt(
-                IInntektkilde.SkjønnsmessigFastsatt,
+                omregnetÅrsinntektKilde,
                 skjønnsmessigFastsattInntekt,
                 omregnetÅrsinntekt
             ))
