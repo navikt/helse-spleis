@@ -366,8 +366,12 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val vilkårsgrunnlagId = (personDto.arbeidsgivere.single().generasjoner.single().perioder.single() as BeregnetPeriode).vilkårsgrunnlagId!!
         val vilkårsgrunnlag = (personDto.vilkårsgrunnlag[vilkårsgrunnlagId] as SpleisVilkårsgrunnlag)
         assertEquals(inntektSkjønnsfastsatt * 12, vilkårsgrunnlag.skjønnsmessigFastsattÅrlig)
+        assertEquals(inntektSkjønnsfastsatt * 12, vilkårsgrunnlag.beregningsgrunnlag)
         assertEquals(inntektSkjønnsfastsatt * 12, vilkårsgrunnlag.inntekter.single().skjønnsmessigFastsatt!!.beløp)
+
         assertEquals(inntektSkjønnsfastsatt, vilkårsgrunnlag.inntekter.single().skjønnsmessigFastsatt!!.månedsbeløp)
+
+        assertEquals(Inntektkilde.SkjønnsmessigFastsatt.name, vilkårsgrunnlag.inntekter.single().skjønnsmessigFastsatt!!.kilde.name)
         assertEquals(inntektIm * 12, vilkårsgrunnlag.inntekter.single().omregnetÅrsinntekt!!.beløp)
         assertEquals(inntektIm, vilkårsgrunnlag.inntekter.single().omregnetÅrsinntekt!!.månedsbeløp)
     }
