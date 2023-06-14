@@ -33,6 +33,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
@@ -452,51 +453,33 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `out of order periode uten utbetaling trigger ikke revurdering`() {
+    fun `kort out of order-periode medfører at senere kort periode skal omgjøres`() {
+        nyPeriode(16.januar til 30.januar)
+        nullstillTilstandsendringer()
+        nyPeriode(1.januar til 15.januar)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
+    fun `out of order periode uten utbetaling trigger revurdering`() {
         nyttVedtak(1.mai, 31.mai)
         forlengVedtak(1.juni, 30.juni)
         nullstillTilstandsendringer()
         nyPeriode(1.januar til 15.januar)
-        assertTilstander(
-            3.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVSLUTTET_UTEN_UTBETALING
-        )
-        assertTilstander(
-            1.vedtaksperiode,
-            AVSLUTTET
-        )
-        assertTilstander(
-            2.vedtaksperiode,
-            AVSLUTTET
-        )
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
     }
 
     @Test
-    fun `out of order periode uten utbetaling trigger ikke revurdering -- flere ag`() {
+    fun `out of order periode uten utbetaling trigger revurdering -- flere ag`() {
         nyeVedtak(1.mai, 31.mai, a1, a2)
         nullstillTilstandsendringer()
         nyPeriode(1.januar til 15.januar, a1)
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVSLUTTET_UTEN_UTBETALING,
-            orgnummer = a1
-        )
-        assertTilstander(
-            1.vedtaksperiode,
-            AVSLUTTET,
-            orgnummer = a1
-        )
-        assertTilstander(
-            1.vedtaksperiode,
-            AVSLUTTET,
-            orgnummer = a2
-        )
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a2)
     }
 
     @Test
@@ -1171,17 +1154,11 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     @Test
     fun `en kort out-of-order søknad som flytter skjæringstidspunkt skal trigge revurdering`() {
         nyttVedtak(1.februar, 28.februar)
+        nullstillTilstandsendringer()
         nyPeriode(20.januar til 31.januar)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertForventetFeil(
-            forklaring = "skal revurderes fordi skjæringstidspunktet flyttes",
-            nå = {
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            },
-            ønsket = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
-            }
-        )
+        håndterYtelser(1.vedtaksperiode)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING)
     }
 
     @Test

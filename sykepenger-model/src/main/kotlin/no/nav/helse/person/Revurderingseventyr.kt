@@ -17,8 +17,8 @@ class Revurderingseventyr private constructor(
     private val periodeForEndring: Periode
 ) {
     internal companion object {
-        fun nyPeriode(skjæringstidspunkt: LocalDate, periodeForEndring: Periode, overstyrtForventerInntekt: Boolean) =
-            Revurderingseventyr(NyPeriode(overstyrtForventerInntekt), skjæringstidspunkt, periodeForEndring)
+        fun nyPeriode(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) =
+            Revurderingseventyr(NyPeriode, skjæringstidspunkt, periodeForEndring)
 
         fun arbeidsforhold(skjæringstidspunkt: LocalDate) = Revurderingseventyr(Arbeidsforhold, skjæringstidspunkt, skjæringstidspunkt.somPeriode())
         fun korrigertSøknad(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(KorrigertSøknad, skjæringstidspunkt, periodeForEndring)
@@ -135,17 +135,10 @@ class Revurderingseventyr private constructor(
             override fun navn() = "KORRIGERT_INNTEKTSMELDING"
         }
 
-        class NyPeriode(private val overstyrtForventerInntekt: Boolean) : RevurderingÅrsak {
+        object NyPeriode : RevurderingÅrsak {
             override fun ikkeRelevant(periodeForEndring: Periode, otherPeriode: Periode): Boolean {
                 // hvis endringen treffer en nyere nyopprettet periode, da trenger vi ikke bli med
                 return periodeForEndring.starterEtter(otherPeriode)
-            }
-
-            override fun kanInngå(hendelse: IAktivitetslogg): Boolean {
-                // orker ikke trigger revurdering dersom perioden er innenfor agp
-                // TODO: dersom f.eks. Spesialist godkjenner revurderinger uten endringer automatisk så ville ikke det
-                // lengre vært problematisk å opprette revurderinger i slike tilfeller
-                return overstyrtForventerInntekt
             }
 
             override fun dersomInngått(hendelse: IAktivitetslogg) {

@@ -1278,12 +1278,8 @@ internal class Vedtaksperiode private constructor(
                 }
             }
             søknad.info("Fullført behandling av søknad")
-            if (!søknad.harFunksjonelleFeilEllerVerre()) {
-                vedtaksperiode.person.igangsettOverstyring(
-                    søknad,
-                    Revurderingseventyr.nyPeriode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, vedtaksperiode.forventerInntekt())
-                )
-            }
+            if (søknad.harFunksjonelleFeilEllerVerre()) return
+            vedtaksperiode.person.igangsettOverstyring(søknad, Revurderingseventyr.nyPeriode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {

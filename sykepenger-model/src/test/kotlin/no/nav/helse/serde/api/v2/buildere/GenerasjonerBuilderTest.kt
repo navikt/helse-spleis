@@ -29,12 +29,14 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
@@ -1844,7 +1846,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.mars, 31.mars, orgnummer = a1)
         nyPeriode(1.januar til 15.januar, orgnummer = a1)
 
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         assertEquals(1, generasjoner.size)
@@ -1882,17 +1884,19 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     fun `out of order som er innenfor agp - så nyere perioder`() {
         nyttVedtak(1.mars, 31.mars, orgnummer = a1)
         nyPeriode(1.januar til 15.januar, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         forlengVedtak(1.april, 10.april, orgnummer = a1)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
 
-        assertEquals(1, generasjoner.size)
+        assertEquals(2, generasjoner.size)
         0.generasjon {
             assertEquals(3, perioder.size)
             beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.april til 10.april) medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+            beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.mars til 31.mars) medTilstand Utbetalt
             uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
         }
 
@@ -1900,17 +1904,17 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
         håndterSimulering(3.vedtaksperiode, orgnummer = a1)
 
-        assertEquals(2, generasjoner.size)
+        assertEquals(3, generasjoner.size)
         0.generasjon {
             assertEquals(3, perioder.size)
             beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.april til 10.april) medTilstand TilGodkjenning
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+            beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.mars til 31.mars) medTilstand Utbetalt
             uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
         }
         1.generasjon {
             assertEquals(3, perioder.size)
             beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.april til 10.april) medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+            beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.mars til 31.mars) medTilstand Utbetalt
             uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
         }
     }

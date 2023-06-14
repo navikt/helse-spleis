@@ -15,9 +15,11 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mandag
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
@@ -208,6 +210,9 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         }
         a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
             håndterSøknad(Sykdom(16.februar, 15.mars, 100.prosent))
             håndterInntektsmelding(listOf(16.februar til 4.mars))
             håndterYtelser(2.vedtaksperiode)
@@ -244,9 +249,8 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
         }
         a1 {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET)
+            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         }
-
     }
 
     @Test
@@ -308,7 +312,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
         }
 
         a1 {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET)
+            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         }
     }
 
