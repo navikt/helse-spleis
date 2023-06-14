@@ -7,6 +7,7 @@ import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag
+import no.nav.helse.serde.api.dto.Inntekt
 import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.serde.api.dto.InntektsmeldingDTO
 import no.nav.helse.serde.api.dto.Periodetilstand
@@ -345,26 +346,8 @@ private fun mapArbeidsgiverRefusjon(arbeidsgiverrefusjon: Arbeidsgiverrefusjon) 
 
 private fun mapInntekt(inntekt: Arbeidsgiverinntekt) = GraphQLArbeidsgiverinntekt(
     arbeidsgiver = inntekt.organisasjonsnummer,
-    omregnetArsinntekt = inntekt.omregnetÅrsinntekt?.let { omregnetÅrsinntekt ->
-        GraphQLOmregnetArsinntekt(
-            kilde = when (omregnetÅrsinntekt.kilde) {
-                Inntektkilde.Saksbehandler -> GraphQLInntektskilde.Saksbehandler
-                Inntektkilde.Inntektsmelding -> GraphQLInntektskilde.Inntektsmelding
-                Inntektkilde.Infotrygd -> GraphQLInntektskilde.Infotrygd
-                Inntektkilde.AOrdningen -> GraphQLInntektskilde.AOrdningen
-                Inntektkilde.IkkeRapportert -> GraphQLInntektskilde.IkkeRapportert
-                Inntektkilde.SkjønnsmessigFastsatt -> GraphQLInntektskilde.SkjonnsmessigFastsatt
-            },
-            belop = omregnetÅrsinntekt.beløp,
-            manedsbelop = omregnetÅrsinntekt.månedsbeløp,
-            inntekterFraAOrdningen = omregnetÅrsinntekt.inntekterFraAOrdningen?.map {
-                GraphQLInntekterFraAOrdningen(
-                    maned = it.måned,
-                    sum = it.sum
-                )
-            }
-        )
-    },
+    omregnetArsinntekt = inntekt.omregnetÅrsinntekt?.tilGraphQLOmregnetArsinntekt(),
+    skjonnsmessigFastsatt = inntekt.skjønnsmessigFastsatt?.tilGraphQLOmregnetArsinntekt(),
     sammenligningsgrunnlag = inntekt.sammenligningsgrunnlag?.let {
         GraphQLSammenligningsgrunnlag(
             belop = it,
@@ -372,6 +355,25 @@ private fun mapInntekt(inntekt: Arbeidsgiverinntekt) = GraphQLArbeidsgiverinntek
         )
     },
     deaktivert = inntekt.deaktivert
+)
+
+private fun Inntekt.tilGraphQLOmregnetArsinntekt() = GraphQLOmregnetArsinntekt(
+    kilde = when (this.kilde) {
+        Inntektkilde.Saksbehandler -> GraphQLInntektskilde.Saksbehandler
+        Inntektkilde.Inntektsmelding -> GraphQLInntektskilde.Inntektsmelding
+        Inntektkilde.Infotrygd -> GraphQLInntektskilde.Infotrygd
+        Inntektkilde.AOrdningen -> GraphQLInntektskilde.AOrdningen
+        Inntektkilde.IkkeRapportert -> GraphQLInntektskilde.IkkeRapportert
+        Inntektkilde.SkjønnsmessigFastsatt -> GraphQLInntektskilde.SkjonnsmessigFastsatt
+    },
+    belop = this.beløp,
+    manedsbelop = this.månedsbeløp,
+    inntekterFraAOrdningen = this.inntekterFraAOrdningen?.map {
+        GraphQLInntekterFraAOrdningen(
+            maned = it.måned,
+            sum = it.sum
+        )
+    }
 )
 
 private fun Double?.mapAvviksprosent() =
