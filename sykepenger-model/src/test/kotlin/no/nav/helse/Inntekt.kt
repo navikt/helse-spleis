@@ -37,7 +37,7 @@ internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringsti
         subsumsjonObserver = subsumsjonObserver
     )
 internal fun Inntekt.sykepengegrunnlag(orgnr: String, skjæringstidspunkt: LocalDate, virkningstidspunkt: LocalDate) =
-    Sykepengegrunnlag(
+    Sykepengegrunnlag.ferdigSykepengegrunnlag(
         alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
         skjæringstidspunkt = skjæringstidspunkt,
         arbeidsgiverInntektsopplysninger = listOf(
@@ -50,5 +50,6 @@ internal fun Inntekt.sykepengegrunnlag(orgnr: String, skjæringstidspunkt: Local
         sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
         deaktiverteArbeidsforhold = emptyList(),
         vurdertInfotrygd = false,
-        `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningstidspunkt)
+        `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningstidspunkt),
+        tilstand = Sykepengegrunnlag.Fastsatt
     )

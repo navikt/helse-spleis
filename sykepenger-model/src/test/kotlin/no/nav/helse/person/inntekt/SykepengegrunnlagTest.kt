@@ -471,7 +471,7 @@ internal class SykepengegrunnlagTest {
         val sluttdatoA1 = skjæringstidspunkt.minusMonths(1).withDayOfMonth(1)
         val startdatoA2 = skjæringstidspunkt
 
-        val sykepengegrunnlag = Sykepengegrunnlag(
+        val sykepengegrunnlag = Sykepengegrunnlag.ferdigSykepengegrunnlag(
             alder = UNG_PERSON_FØDSELSDATO.alder,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiverInntektsopplysninger = listOf(
@@ -508,7 +508,8 @@ internal class SykepengegrunnlagTest {
             ),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             deaktiverteArbeidsforhold = emptyList(),
-            vurdertInfotrygd = false
+            vurdertInfotrygd = false,
+            tilstand = Sykepengegrunnlag.Fastsatt
         )
 
         val opptjening = Opptjening(listOf(
@@ -546,7 +547,7 @@ internal class SykepengegrunnlagTest {
         val skjæringstidspunkt = 1.mars
         val førsteFraværsdagAG1 = skjæringstidspunkt
         val førsteFraværsdagAG2 = skjæringstidspunkt.nesteDag
-        val sykepengegrunnlag = Sykepengegrunnlag(
+        val sykepengegrunnlag = Sykepengegrunnlag.ferdigSykepengegrunnlag(
             alder = UNG_PERSON_FØDSELSDATO.alder,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiverInntektsopplysninger = listOf(
@@ -583,7 +584,8 @@ internal class SykepengegrunnlagTest {
             ),
             deaktiverteArbeidsforhold = emptyList(),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
-            vurdertInfotrygd = false
+            vurdertInfotrygd = false,
+            tilstand = Sykepengegrunnlag.Fastsatt
         )
 
 
@@ -600,7 +602,7 @@ internal class SykepengegrunnlagTest {
         val skjæringstidspunkt = 1.mars
         val førsteFraværsdagAG1 = skjæringstidspunkt
         val førsteFraværsdagAG2 = skjæringstidspunkt.nesteDag
-        val sykepengegrunnlag = Sykepengegrunnlag(
+        val sykepengegrunnlag = Sykepengegrunnlag.ferdigSykepengegrunnlag(
             alder = UNG_PERSON_FØDSELSDATO.alder,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiverInntektsopplysninger = listOf(
@@ -627,7 +629,8 @@ internal class SykepengegrunnlagTest {
             ),
             deaktiverteArbeidsforhold = emptyList(),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
-            vurdertInfotrygd = false
+            vurdertInfotrygd = false,
+            tilstand = Sykepengegrunnlag.Fastsatt
         )
 
 
@@ -642,7 +645,7 @@ internal class SykepengegrunnlagTest {
         val a1 = "a1"
         val a2 = "a2"
         val skjæringstidspunkt = 1.mars
-        val sykepengegrunnlag = Sykepengegrunnlag(
+        val sykepengegrunnlag = Sykepengegrunnlag.ferdigSykepengegrunnlag(
             alder = UNG_PERSON_FØDSELSDATO.alder,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiverInntektsopplysninger = listOf(
@@ -669,7 +672,8 @@ internal class SykepengegrunnlagTest {
             ),
             deaktiverteArbeidsforhold = emptyList(),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
-            vurdertInfotrygd = false
+            vurdertInfotrygd = false,
+            tilstand = Sykepengegrunnlag.Fastsatt
         )
 
         val opptjeningUtenA2 = Opptjening(listOf(
@@ -716,7 +720,7 @@ internal class SykepengegrunnlagTest {
         val skjæringstidspunkt = 1.mars
         val førsteFraværsdagAG1 = skjæringstidspunkt
         val førsteFraværsdagAG2 = skjæringstidspunkt
-        val sykepengegrunnlag = Sykepengegrunnlag(
+        val sykepengegrunnlag = Sykepengegrunnlag.ferdigSykepengegrunnlag(
             alder = UNG_PERSON_FØDSELSDATO.alder,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiverInntektsopplysninger = listOf(
@@ -743,7 +747,8 @@ internal class SykepengegrunnlagTest {
             ),
             deaktiverteArbeidsforhold = emptyList(),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
-            vurdertInfotrygd = false
+            vurdertInfotrygd = false,
+            tilstand = Sykepengegrunnlag.Fastsatt
         )
 
 
@@ -758,7 +763,7 @@ internal class SykepengegrunnlagTest {
         val inntektID = UUID.randomUUID()
         val hendelseId = UUID.randomUUID()
         val tidsstempel = LocalDateTime.now()
-        val sykepengegrunnlag1 = Sykepengegrunnlag(
+        val sykepengegrunnlag1 = Sykepengegrunnlag.ferdigSykepengegrunnlag(
             alder = UNG_PERSON_FØDSELSDATO.alder,
             skjæringstidspunkt = 1.januar,
             arbeidsgiverInntektsopplysninger = listOf(
@@ -776,13 +781,14 @@ internal class SykepengegrunnlagTest {
             ),
             deaktiverteArbeidsforhold = emptyList(),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
-            vurdertInfotrygd = false
+            vurdertInfotrygd = false,
+            tilstand = Sykepengegrunnlag.Fastsatt
         )
 
         assertEquals(sykepengegrunnlag1, sykepengegrunnlag1.justerGrunnbeløp()) { "grunnbeløpet trenger ikke justering" }
         assertNotEquals(
             sykepengegrunnlag1,
-            Sykepengegrunnlag(
+            Sykepengegrunnlag.ferdigSykepengegrunnlag(
                 alder = UNG_PERSON_FØDSELSDATO.alder,
                 skjæringstidspunkt = 1.januar,
                 arbeidsgiverInntektsopplysninger = listOf(
@@ -812,7 +818,8 @@ internal class SykepengegrunnlagTest {
                         refusjonsopplysninger = Refusjonsopplysninger()
                     )
                 ),
-                vurdertInfotrygd = false
+                vurdertInfotrygd = false,
+                tilstand = Sykepengegrunnlag.Fastsatt
             )
         )
     }

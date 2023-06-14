@@ -44,7 +44,8 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
         begrensning: Sykepengegrunnlag.Begrensning,
         vurdertInfotrygd: Boolean,
         minsteinntekt: Inntekt,
-        oppfyllerMinsteinntektskrav: Boolean
+        oppfyllerMinsteinntektskrav: Boolean,
+        tilstand: Sykepengegrunnlag.Tilstand
     ) {
         this.minsteinntekt = minsteinntekt
         this.oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav

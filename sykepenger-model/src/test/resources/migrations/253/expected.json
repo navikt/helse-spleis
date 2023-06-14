@@ -1,0 +1,31 @@
+{
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "vilkårsgrunnlag": [
+        {
+          "sykepengegrunnlag": {
+            "foo": "bar",
+            "tilstand": "FASTSATT"
+          }
+        }
+      ]
+    },
+    {
+      "vilkårsgrunnlag": [
+        {
+          "sykepengegrunnlag": {
+            "foo": "bar",
+            "tilstand": "FASTSATT"
+          }
+        },
+        {
+          "sykepengegrunnlag": {
+            "foo": "bar",
+            "tilstand": "FASTSATT"
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 253
+}

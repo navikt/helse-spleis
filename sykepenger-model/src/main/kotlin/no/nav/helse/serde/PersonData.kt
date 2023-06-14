@@ -316,33 +316,44 @@ internal data class PersonData(
             private val sammenligningsgrunnlag: SammenligningsgrunnlagData?,
             private val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningData>,
             private val vurdertInfotrygd: Boolean,
+            private val tilstand: TilstandData
         ) {
+            enum class TilstandData {
+                AVVENTER_FASTSETTELSE,
+                FASTSATT
+            }
+
             internal fun parseSykepengegrunnlag(
                 builder: VilkårsgrunnlaghistorikkBuilder,
                 alder: Alder,
                 skjæringstidspunkt: LocalDate
-            ) = Sykepengegrunnlag(
+            ) = Sykepengegrunnlag.ferdigSykepengegrunnlag(
                 alder = alder,
                 skjæringstidspunkt = skjæringstidspunkt,
                 arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger.parseArbeidsgiverInntektsopplysninger(builder),
                 sammenligningsgrunnlag = sammenligningsgrunnlag!!.parseSammenligningsgrunnlag(),
                 deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.parseArbeidsgiverInntektsopplysninger(builder),
                 vurdertInfotrygd = vurdertInfotrygd,
-                `6G` = grunnbeløp?.årlig
+                `6G` = grunnbeløp?.årlig,
+                tilstand = when (tilstand) {
+                    TilstandData.AVVENTER_FASTSETTELSE -> Sykepengegrunnlag.AvventerFastsettelse
+                    TilstandData.FASTSATT -> Sykepengegrunnlag.Fastsatt
+                }
             )
 
             internal fun parseSykepengegrunnlagInfotrygd(
                 builder: VilkårsgrunnlaghistorikkBuilder,
                 alder: Alder,
                 skjæringstidspunkt: LocalDate
-            ) = Sykepengegrunnlag(
+            ) = Sykepengegrunnlag.ferdigSykepengegrunnlag(
                 alder = alder,
                 skjæringstidspunkt = skjæringstidspunkt,
                 arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger.parseArbeidsgiverInntektsopplysninger(builder),
                 sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
                 deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.parseArbeidsgiverInntektsopplysninger(builder),
                 vurdertInfotrygd = vurdertInfotrygd,
-                `6G` = grunnbeløp?.årlig
+                `6G` = grunnbeløp?.årlig,
+                tilstand = Sykepengegrunnlag.Fastsatt
             )
         }
 

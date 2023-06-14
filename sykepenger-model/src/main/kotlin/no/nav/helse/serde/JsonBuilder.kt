@@ -838,7 +838,8 @@ internal class JsonBuilder : AbstractBuilder() {
             begrensning: Sykepengegrunnlag.Begrensning,
             vurdertInfotrygd: Boolean,
             minsteinntekt: Inntekt,
-            oppfyllerMinsteinntektskrav: Boolean
+            oppfyllerMinsteinntektskrav: Boolean,
+            tilstand: Sykepengegrunnlag.Tilstand
         ) {
             pushState(SykepengegrunnlagState(sykepengegrunnlagMap))
         }
@@ -876,7 +877,8 @@ internal class JsonBuilder : AbstractBuilder() {
             begrensning: Sykepengegrunnlag.Begrensning,
             vurdertInfotrygd: Boolean,
             minsteinntekt: Inntekt,
-            oppfyllerMinsteinntektskrav: Boolean
+            oppfyllerMinsteinntektskrav: Boolean,
+            tilstand: Sykepengegrunnlag.Tilstand
         ) {
             pushState(SykepengegrunnlagState(sykepengegrunnlagMap))
         }
@@ -943,7 +945,8 @@ internal class JsonBuilder : AbstractBuilder() {
             begrensning: Sykepengegrunnlag.Begrensning,
             vurdertInfotrygd: Boolean,
             minsteinntekt: Inntekt,
-            oppfyllerMinsteinntektskrav: Boolean
+            oppfyllerMinsteinntektskrav: Boolean,
+            tilstand: Sykepengegrunnlag.Tilstand
         ) {
             this.sykepengegrunnlag.putAll(
                 mapOf(
@@ -958,7 +961,11 @@ internal class JsonBuilder : AbstractBuilder() {
                     "deaktiverteArbeidsforhold" to deaktiverteArbeidsgiverInntektsopplysninger,
                     "vurdertInfotrygd" to vurdertInfotrygd,
                     "minsteinntekt" to minsteinntekt.reflection { årlig, _, _, _ -> årlig },
-                    "oppfyllerMinsteinntektskrav" to oppfyllerMinsteinntektskrav
+                    "oppfyllerMinsteinntektskrav" to oppfyllerMinsteinntektskrav,
+                    "tilstand" to when (tilstand) {
+                        is Sykepengegrunnlag.AvventerFastsettelse -> PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData.TilstandData.AVVENTER_FASTSETTELSE
+                        is Sykepengegrunnlag.Fastsatt -> PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData.TilstandData.FASTSATT
+                    }
                 )
             )
             popState()

@@ -118,7 +118,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         begrensning: Sykepengegrunnlag.Begrensning,
         vurdertInfotrygd: Boolean,
         minsteinntekt: Inntekt,
-        oppfyllerMinsteinntektskrav: Boolean
+        oppfyllerMinsteinntektskrav: Boolean,
+        tilstand: Sykepengegrunnlag.Tilstand
     ) {
         delegatee.preVisitSykepengegrunnlag(
             sykepengegrunnlag1,
@@ -132,6 +133,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             vurdertInfotrygd,
             minsteinntekt,
             oppfyllerMinsteinntektskrav,
+            tilstand,
         )
     }
 
@@ -146,7 +148,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         begrensning: Sykepengegrunnlag.Begrensning,
         vurdertInfotrygd: Boolean,
         minsteinntekt: Inntekt,
-        oppfyllerMinsteinntektskrav: Boolean
+        oppfyllerMinsteinntektskrav: Boolean,
+        tilstand: Sykepengegrunnlag.Tilstand
     ) {
         delegatee.postVisitSykepengegrunnlag(
             sykepengegrunnlag1,
@@ -159,7 +162,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             begrensning,
             vurdertInfotrygd,
             minsteinntekt,
-            oppfyllerMinsteinntektskrav
+            oppfyllerMinsteinntektskrav,
+            tilstand
         )
     }
 

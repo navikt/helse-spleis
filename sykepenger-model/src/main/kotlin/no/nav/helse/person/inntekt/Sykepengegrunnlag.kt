@@ -56,14 +56,15 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Økonomi
 
-internal class Sykepengegrunnlag(
+internal class Sykepengegrunnlag private constructor(
     private val alder: Alder,
     private val skjæringstidspunkt: LocalDate,
     private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
     private val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
     private val vurdertInfotrygd: Boolean,
     private val sammenligningsgrunnlag: Sammenligningsgrunnlag,
-    `6G`: Inntekt? = null
+    `6G`: Inntekt? = null,
+    tilstand: Tilstand? = null
 ) : Comparable<Inntekt> {
 
     init {
@@ -83,7 +84,7 @@ internal class Sykepengegrunnlag(
     private val oppfyllerMinsteinntektskrav = beregningsgrunnlag >= minsteinntekt
     private val avviksprosent = sammenligningsgrunnlag.avviksprosent(omregnetÅrsinntekt, SubsumsjonObserver.NullObserver)
 
-    internal fun kandidatForSkjønnsmessigFastsettelse() = arbeidsgiverInntektsopplysninger.size == 1
+    private var tilstand: Tilstand = tilstand ?: Fastsatt // TODO: utlede starttilstand basert på avviksprosent
 
     internal constructor(
         alder: Alder,
@@ -112,6 +113,8 @@ internal class Sykepengegrunnlag(
         }
     }
 
+    internal fun kandidatForSkjønnsmessigFastsettelse() = arbeidsgiverInntektsopplysninger.size == 1
+
     internal companion object {
         fun opprett(
             alder: Alder,
@@ -121,6 +124,19 @@ internal class Sykepengegrunnlag(
             subsumsjonObserver: SubsumsjonObserver
         ): Sykepengegrunnlag {
             return Sykepengegrunnlag(alder, arbeidsgiverInntektsopplysninger, skjæringstidspunkt, sammenligningsgrunnlag, subsumsjonObserver)
+        }
+
+        fun ferdigSykepengegrunnlag(
+            alder: Alder,
+            skjæringstidspunkt: LocalDate,
+            arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
+            deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
+            vurdertInfotrygd: Boolean,
+            sammenligningsgrunnlag: Sammenligningsgrunnlag,
+            `6G`: Inntekt? = null,
+            tilstand: Tilstand
+        ): Sykepengegrunnlag {
+            return Sykepengegrunnlag(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, vurdertInfotrygd, sammenligningsgrunnlag, `6G`, tilstand)
         }
     }
 
@@ -264,7 +280,8 @@ internal class Sykepengegrunnlag(
             arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
             deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
             vurdertInfotrygd = vurdertInfotrygd,
-            sammenligningsgrunnlag = sammenligningsgrunnlag
+            sammenligningsgrunnlag = sammenligningsgrunnlag,
+            tilstand = tilstand
         )
 
     internal fun justerGrunnbeløp() = kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold)
@@ -281,6 +298,7 @@ internal class Sykepengegrunnlag(
             vurdertInfotrygd,
             minsteinntekt,
             oppfyllerMinsteinntektskrav,
+            tilstand,
         )
         visitor.preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektsopplysninger)
         arbeidsgiverInntektsopplysninger.forEach { it.accept(visitor) }
@@ -300,7 +318,8 @@ internal class Sykepengegrunnlag(
             begrensning,
             vurdertInfotrygd,
             minsteinntekt,
-            oppfyllerMinsteinntektskrav
+            oppfyllerMinsteinntektskrav,
+            tilstand
         )
     }
 
@@ -396,5 +415,19 @@ internal class Sykepengegrunnlag(
         }
     }
 
+    internal sealed interface Tilstand {
+        fun fastsatt(sykepengegrunnlag: Sykepengegrunnlag) {
+            throw IllegalStateException("kan ikke fastsette i ${this::class.simpleName}")
+        }
+    }
+
+    object AvventerFastsettelse : Tilstand {
+        override fun fastsatt(sykepengegrunnlag: Sykepengegrunnlag) {
+            sykepengegrunnlag.tilstand = Fastsatt
+        }
+    }
+    object Fastsatt : Tilstand {
+
+    }
 }
 
