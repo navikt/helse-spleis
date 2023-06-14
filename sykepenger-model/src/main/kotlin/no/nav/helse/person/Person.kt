@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
@@ -51,6 +52,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyrArbeidsgiverop
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterSkjønnsmessigFastsettelse
 import no.nav.helse.person.Arbeidsgiver.Companion.identifiserAUUSomErUtbetaltISpleis
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
+import no.nav.helse.person.Arbeidsgiver.Companion.kandidatForSkjønnsmessigFastsettelse
 import no.nav.helse.person.Arbeidsgiver.Companion.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
@@ -76,7 +78,6 @@ import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
@@ -802,5 +803,11 @@ class Person private constructor(
     internal fun venteårsak(vedtaksperiode: Vedtaksperiode) = vedtaksperiode.venteårsak(arbeidsgivere)
     internal fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) = vedtaksperiode.makstid(tilstandsendringstidspunkt, arbeidsgivere)
     internal fun forkastAuu(hendelse: IAktivitetslogg, auu: Vedtaksperiode) = arbeidsgivere.forkastAuu(hendelse, auu)
+    internal fun kandidatForSkjønnsmessigFastsettelse(vilkårsgrunnlag: VilkårsgrunnlagElement) {
+        if (!arbeidsgivere.kandidatForSkjønnsmessigFastsettelse()) return
+        if (!vilkårsgrunnlag.kandidatForSkjønnsmessigFastsettelse()) return
+        if (!alder.kandidatForSkjønnsmessigFastsettelse()) return
+        sikkerLogg.info("Kandidat for skjønnsmessig fastsettelse {}", keyValue("fødselsnummer", "$personidentifikator"))
+    }
 }
 

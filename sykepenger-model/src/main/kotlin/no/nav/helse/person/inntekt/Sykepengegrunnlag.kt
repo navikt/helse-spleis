@@ -83,6 +83,8 @@ internal class Sykepengegrunnlag(
     private val oppfyllerMinsteinntektskrav = beregningsgrunnlag >= minsteinntekt
     private val avviksprosent = sammenligningsgrunnlag.avviksprosent(omregnetÅrsinntekt, SubsumsjonObserver.NullObserver)
 
+    internal fun kandidatForSkjønnsmessigFastsettelse() = arbeidsgiverInntektsopplysninger.size == 1
+
     internal constructor(
         alder: Alder,
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,

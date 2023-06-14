@@ -1995,6 +1995,7 @@ internal class Vedtaksperiode private constructor(
             if (Toggle.TjuefemprosentAvvik.enabled) return
             // omgjøringer må enn så lenge gå til godkjenning :/
             if (!vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode)) return vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+            vedtaksperiode.person.kandidatForSkjønnsmessigFastsettelse(vedtaksperiode.vilkårsgrunnlag!!)
             hendelse.funksjonellFeil(Varselkode.RV_IV_2)
             vedtaksperiode.forkast(hendelse)
         }

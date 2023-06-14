@@ -317,6 +317,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return kopierMed(hendelse, this.sykepengegrunnlag, this.opptjening, NullObserver)
         }
 
+        internal fun kandidatForSkjønnsmessigFastsettelse() = sykepengegrunnlag.kandidatForSkjønnsmessigFastsettelse()
+
         internal companion object {
             internal fun skjæringstidspunktperioder(elementer: Collection<VilkårsgrunnlagElement>): List<Periode> {
                 val skjæringstidspunkter = elementer
