@@ -22,10 +22,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
-import org.skyscreamer.jsonassert.Customization
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode.STRICT
-import org.skyscreamer.jsonassert.comparator.CustomComparator
+import org.skyscreamer.jsonassert.JSONCompareMode.STRICT_ORDER
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class GraphQLApiTest : AbstractObservableTest() {
@@ -456,7 +455,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         """
 
         request(requestBody) {
-            assertHeltLikeUtenomVersjon(detSpesialistFaktiskForventer, this.utenVariableVerdier)
+            assertIngenFærreFelt(detSpesialistFaktiskForventer, this.utenVariableVerdier)
         }
     }
 
@@ -1064,7 +1063,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
       ],
       "dodsdato": null,
       "fodselsnummer": "12029240045",
-      "versjon": 48,
       "vilkarsgrunnlag": [
         {
           "vilkarsgrunnlagtype": "Spleis",
@@ -1125,9 +1123,8 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         private fun assertHeltLike(forventet: String, faktisk: String) =
             JSONAssert.assertEquals(forventet, faktisk, STRICT)
 
-        private fun assertHeltLikeUtenomVersjon(forventet: String, faktisk: String) =
-            JSONAssert.assertEquals(forventet, faktisk, CustomComparator(STRICT, Customization("data.person.versjon") { _, _ -> true }))
-
+        private fun assertIngenFærreFelt(forventet: String, faktisk: String) =
+            JSONAssert.assertEquals(forventet, faktisk, STRICT_ORDER) 
         private fun String.readResource() =
             object {}.javaClass.getResource(this)?.readText(Charsets.UTF_8) ?: throw RuntimeException("Fant ikke filen på $this")
     }
