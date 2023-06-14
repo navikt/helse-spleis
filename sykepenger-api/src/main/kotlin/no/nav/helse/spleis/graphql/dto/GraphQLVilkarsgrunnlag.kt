@@ -26,6 +26,7 @@ data class GraphQLSpleisVilkarsgrunnlag(
     override val id: UUID,
     override val skjaeringstidspunkt: LocalDate,
     override val omregnetArsinntekt: Double, // TODO: det heter 'beregningsgrunnlag'. Omregnet årsinntekt er noe annet etter skjønnsmessig fastsetting
+    // skjønnsmessigFastsattÅrlig er lik beregningsgrunnlag hvis det er skjønnsmessig fastastt
     override val sammenligningsgrunnlag: Double?,
     override val sykepengegrunnlag: Double,
     override val inntekter: List<GraphQLArbeidsgiverinntekt>,
