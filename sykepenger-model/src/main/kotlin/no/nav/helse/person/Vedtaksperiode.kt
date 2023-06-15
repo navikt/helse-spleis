@@ -2816,6 +2816,8 @@ internal class Vedtaksperiode private constructor(
         internal fun List<Vedtaksperiode>.iderMedUtbetaling(utbetalingId: UUID) =
             filter { it.utbetalinger.harId(utbetalingId) }.map { it.id }
 
+        internal fun List<Vedtaksperiode>.inneholder(id: UUID) = any { id == it.id }
+
         internal fun List<Vedtaksperiode>.periode(): Periode {
             val fom = minOf { it.periode.start }
             val tom = maxOf { it.periode.endInclusive }
