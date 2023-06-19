@@ -14,20 +14,20 @@ internal class HåndtertInntektsmelding(private val inntektsmelding: Inntektsmel
     internal fun håndtertNå(vedtaksperiodeId: UUID) = apply { håndtertInntektsmeldingNå.add(vedtaksperiodeId) }
 
     internal companion object {
-        private fun Person.signaliserInntektmeldingHåndtert(
+        private fun Person.inntektmeldingHåndtert(
             inntektsmelding: Inntektsmelding,
             vedtaksperioder: List<Vedtaksperiode>,
             håndtertInntektsmeldingNå: Set<UUID>
         ) {
             // Nå vet vi at minst én aktiv vedtaksperiode har håndtert en del av inntektsmeldingen. Enten tidligere, nå, eller en kombinasjon.
-            // Om det er noen deler som er blitt håndtert _nå_ sender vi ut signal om at innektsmelding er håndtert av de respektive vedtaksperiodene.
-            // De eventuelle vedtaksperiodene som håndtere en del nå, men også ble forkastet sender _ikke_ signal
+            // Om det er noen deler som er blitt håndtert _nå_ emitter vi melding om at innektsmelding er håndtert av de respektive vedtaksperiodene.
+            // De eventuelle vedtaksperiodene som håndtere en del nå, men også ble forkastet emitter _ikke_ melding.
             håndtertInntektsmeldingNå.filter { vedtaksperioder.inneholder(it) }.forEach {
                emitInntektsmeldingHåndtert(inntektsmelding.meldingsreferanseId(), it, inntektsmelding.organisasjonsnummer())
             }
         }
 
-        private fun Person.signaliserInntektsmeldingFørSøknad(
+        private fun Person.inntektsmeldingFørSøknad(
             inntektsmelding: Inntektsmelding,
             overlappendeSykmeldingsperioder: List<Periode>
         ) {
@@ -35,30 +35,30 @@ internal class HåndtertInntektsmelding(private val inntektsmelding: Inntektsmel
             inntektsmelding.info("Inntektsmelding overlapper med sykmeldingsperioder $overlappendeSykmeldingsperioder")
         }
 
-        private fun Person.signaliserInntektsmeldingIkkeHåndtert(
+        private fun Person.inntektsmeldingIkkeHåndtert(
             inntektsmelding: Inntektsmelding
         ) {
             emitInntektsmeldingIkkeHåndtert(inntektsmelding, inntektsmelding.organisasjonsnummer())
             inntektsmelding.info("Inntektsmelding ikke håndtert")
         }
 
-        internal fun List<HåndtertInntektsmelding>.signaliser(
+        internal fun List<HåndtertInntektsmelding>.emit(
             person: Person,
             vedtaksperioder: List<Vedtaksperiode>,
             sykmeldingsperioder: Sykmeldingsperioder
         ) {
-            if (isEmpty()) return
+            check(isNotEmpty()) { "Kan ikke emitte meldinger uten en inntektsmelding" }
             val inntektsmelding = first().inntektsmelding
             val hendelseId = inntektsmelding.meldingsreferanseId()
-            check(all { it.inntektsmelding.meldingsreferanseId() == hendelseId }) { "Kan ikke signalisere på tvers av inntektsmeldinger" }
+            check(all { it.inntektsmelding.meldingsreferanseId() == hendelseId }) { "Kan ikke emitte meldinger på tvers av inntektsmeldinger" }
 
             val håndtertInntektsmeldingNå = map { it.håndtertInntektsmeldingNå }.flatten().toSet()
-            if (vedtaksperioder.any { hendelseId in it.hendelseIder() }) return person.signaliserInntektmeldingHåndtert(inntektsmelding, vedtaksperioder, håndtertInntektsmeldingNå)
+            if (vedtaksperioder.any { hendelseId in it.hendelseIder() }) return person.inntektmeldingHåndtert(inntektsmelding, vedtaksperioder, håndtertInntektsmeldingNå)
 
             val overlappendeSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(inntektsmelding)
-            if (overlappendeSykmeldingsperioder.isNotEmpty())  return person.signaliserInntektsmeldingFørSøknad(inntektsmelding, overlappendeSykmeldingsperioder)
+            if (overlappendeSykmeldingsperioder.isNotEmpty())  return person.inntektsmeldingFørSøknad(inntektsmelding, overlappendeSykmeldingsperioder)
 
-            person.signaliserInntektsmeldingIkkeHåndtert(inntektsmelding)
+            person.inntektsmeldingIkkeHåndtert(inntektsmelding)
         }
     }
 }
