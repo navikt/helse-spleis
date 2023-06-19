@@ -307,7 +307,7 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(dager: DagerFraInntektsmelding) {
         kontekst(dager)
         val skalHåndtereDager = tilstand.skalHåndtereDager(this, dager)
-        if (!skalHåndtereDager || inntektsmeldingHåndtert(dager)) {
+        if (!skalHåndtereDager || dager.alleredeHåndtert(hendelseIder)) {
             dager.vurdertTilOgMed(periode.endInclusive)
 
             // om vedtaksperioden ikke skal håndtere dagene kan dette være fordi inntektsmeldingen har oppgitt
@@ -327,6 +327,7 @@ internal class Vedtaksperiode private constructor(
         håndterDagerFør(dager)
         dager.håndter(periode, ::finnArbeidsgiverperiode) { arbeidsgiver.oppdaterSykdom(it) }?.let { oppdatertSykdomstidslinje ->
             sykdomstidslinje = oppdatertSykdomstidslinje
+            inntektsmeldingHåndtert(dager)
         }
     }
 

@@ -22,14 +22,15 @@ internal class DagerFraInntektsmelding(
     private val gjenståendeDager = opprinneligPeriode?.toMutableSet() ?: mutableSetOf()
     private val alleDager get() = (opprinneligPeriode?: emptySet()) + arbeidsdager
     private val håndterteDager get() = alleDager - gjenståendeDager
+    private val dokumentsporing = Dokumentsporing.inntektsmeldingDager(meldingsreferanseId())
 
     internal fun accept(visitor: DagerFraInntektsmeldingVisitor) {
         visitor.visitGjenståendeDager(gjenståendeDager)
     }
 
     internal fun meldingsreferanseId() = inntektsmelding.meldingsreferanseId()
-    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) =
-        hendelseIder.add(Dokumentsporing.inntektsmeldingDager(meldingsreferanseId()))
+    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = hendelseIder.add(dokumentsporing)
+    internal fun alleredeHåndtert(hendelseIder: Set<Dokumentsporing>) = dokumentsporing in hendelseIder
 
     internal fun vurdertTilOgMed(dato: LocalDate) = inntektsmelding.trimLeft(dato)
     internal fun oppdatertFom(periode: Periode) = inntektsmelding.oppdaterFom(periode)
