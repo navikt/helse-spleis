@@ -2375,6 +2375,7 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
             super.håndter(vedtaksperiode, hendelse, infotrygdhistorikk)
+            if (!vedtaksperiode.forventerInntekt()) return
             // for å hindre at eldre AUUer som vi har tenkt å omgjøre forkaster seg før vi har fått sjanse til å ta stilling til dem
             val tilfeldigValgtDato = 1.januar(2023) // (litt tilfeldig valgt dato, men for å stoppe -NYE- ting)
             if (Toggle.STOPPE_TILSIG_AUU.disabled && vedtaksperiode.periode.endInclusive < tilfeldigValgtDato) return

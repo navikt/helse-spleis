@@ -9,7 +9,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_15
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBetaltRettFør
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.utbetalingsperioder
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -113,8 +112,6 @@ class InfotrygdhistorikkElement private constructor(
         aktivitetslogg.info("Sjekker utbetalte perioder")
         perioder.filterIsInstance<Utbetalingsperiode>()
             .forEach { it.valider(aktivitetslogg, organisasjonsnummer, periode) }
-        aktivitetslogg.info("Sjekker arbeidskategorikoder")
-        if (!erNormalArbeidstaker(skjæringstidspunkt)) aktivitetslogg.funksjonellFeil(RV_IT_15)
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
@@ -140,13 +137,6 @@ class InfotrygdhistorikkElement private constructor(
         visitor.postVisitInfotrygdhistorikkInntektsopplysninger()
         visitor.visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder)
         visitor.postVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId)
-    }
-
-    private fun erNormalArbeidstaker(skjæringstidspunkt: LocalDate?): Boolean {
-        if (arbeidskategorikoder.isEmpty() || skjæringstidspunkt == null) return true
-        return arbeidskategorikoder
-            .filter { (_, dato) -> dato >= skjæringstidspunkt }
-            .all { (arbeidskategorikode, _) -> arbeidskategorikode == "01" }
     }
 
     internal fun funksjoneltLik(other: InfotrygdhistorikkElement): Boolean {

@@ -274,14 +274,6 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
-    fun `validering skal feile når bruker har redusert utbetaling og skjæringstidspunkt i Infotrygd`() {
-        val arbeidskategorikoder = mapOf("07" to 1.januar)
-        val element = nyttHistorikkelement(arbeidskategorikoder = arbeidskategorikoder)
-        assertFalse(element.valider(aktivitetslogg, Periode(6.januar, 23.januar), 1.januar, "ag1"))
-        aktivitetslogg.assertFunksjonellFeil(Varselkode.RV_IT_15)
-    }
-
-    @Test
     fun `validering feiler ikke når det ikke er redusert utbetaling i Infotrygd, men skjæringstidspunkt i Infotrygd`() {
         val arbeidskategorikoder = mapOf("01" to 1.januar)
         val element = nyttHistorikkelement(arbeidskategorikoder = arbeidskategorikoder)
@@ -305,14 +297,6 @@ internal class InfotrygdhistorikkElementTest {
         )
         assertTrue(element.valider(aktivitetslogg, Periode(9.januar, 23.januar), 9.januar, "ag1"))
         aktivitetslogg.assertIngenFunksjonellFeil()
-    }
-
-    @Test
-    fun `validering skal feile når bruker har redusert utbetaling og skjæringstidspunkt i Infotrygd  - flere arbeidsgivere`() {
-        val arbeidskategorikoder = mapOf("01" to 1.januar, "07" to 6.januar)
-        val element = nyttHistorikkelement(arbeidskategorikoder = arbeidskategorikoder)
-        assertFalse(element.valider(aktivitetslogg, Periode(11.januar, 23.januar), 1.januar, "ag1"))
-        aktivitetslogg.assertFunksjonellFeil(Varselkode.RV_IT_15)
     }
 
     @Test
