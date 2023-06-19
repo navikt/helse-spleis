@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -68,6 +69,42 @@ import org.junit.jupiter.api.fail
 import kotlin.reflect.KClass
 
 internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Hullete AGP blir overstyrt slik at siste hull nå er etter AGP - blir sittende med arbeidag på sykdomstidslinjen etter AGP og beregner feil skjæringstidspunkt`() {
+        håndterSøknad(Sykdom(22.februar, 3.mars, 100.prosent))
+        håndterSøknad(Sykdom(4.mars, 16.mars, 100.prosent))
+        håndterSøknad(Sykdom(17.mars, 24.mars, 100.prosent))
+
+        val arbeidsgiverperiode1 = listOf(22.februar.somPeriode(), 24.februar til 27.februar, 1.mars.somPeriode(), 3.mars.somPeriode(), 8.mars.somPeriode(), 10.mars til 13.mars, 15.mars til 18.mars)
+        håndterInntektsmelding(arbeidsgiverperiode1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        assertEquals(15.mars, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(arbeidsgiverperiode1, inspektør.arbeidsgiverperioder(2.vedtaksperiode))
+
+        håndterInntektsmelding(listOf(22.februar til 9.mars))
+        assertEquals(listOf(22.februar til 3.mars, 8.mars.somPeriode(), 10.mars til 13.mars, 15.mars.somPeriode()), inspektør.arbeidsgiverperioder(2.vedtaksperiode))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+
+        håndterOverstyrTidslinje(overstyringsdager = (4.mars til 7.mars).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
+        assertEquals(listOf(22.februar til 8.mars, 10.mars.somPeriode()), inspektør.arbeidsgiverperioder(2.vedtaksperiode))
+
+        assertEquals(15.mars, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals("SUHH SSUSUHH SSSSAHH SSASSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
+
+        assertThrows<IllegalStateException> { håndterYtelser(2.vedtaksperiode) }
+
+        håndterOverstyrTidslinje(overstyringsdager = listOf(ManuellOverskrivingDag(14.mars, Dagtype.Sykedag, 100)))
+
+        assertEquals(10.mars, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals("SUHH SSUSUHH SSSSAHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+    }
 
     @Test
     fun `arbeidsgiver endrer arbeidsgiverperioden tilbake - må overstyre tidslinje for å fikse`() {
