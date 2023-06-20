@@ -301,6 +301,20 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
             periodetilstand = mapTilstand(periode.periodetilstand),
             vilkarsgrunnlagId = periode.vilkårsgrunnlagId
         )
+/*        is UberegnetVilkårsprøvdPeriode -> GraphQLUberegnetVilkarsprovdPeriode(
+            fom = periode.fom,
+            tom = periode.tom,
+            tidslinje = periode.sammenslåttTidslinje.map { mapDag(it) },
+            periodetype = mapPeriodetype(periode.periodetype),
+            inntektstype = mapInntektstype(periode.inntektskilde),
+            erForkastet = periode.erForkastet,
+            opprettet = periode.oppdatert,
+            vedtaksperiodeId = periode.vedtaksperiodeId,
+            periodetilstand = mapTilstand(periode.periodetilstand),
+            skjaeringstidspunkt = periode.skjæringstidspunkt,
+            hendelser = periode.hendelser.map { mapHendelse(it) },
+            vilkarsgrunnlagId = periode.vilkårsgrunnlagId
+        )*/
         else -> GraphQLUberegnetPeriode(
             fom = periode.fom,
             tom = periode.tom,
@@ -330,7 +344,7 @@ private fun mapTilstand(tilstand: Periodetilstand) = when (tilstand) {
     Periodetilstand.VenterPåAnnenPeriode -> GraphQLPeriodetilstand.VenterPaAnnenPeriode
     Periodetilstand.TilGodkjenning -> GraphQLPeriodetilstand.TilGodkjenning
     Periodetilstand.UtbetaltVenterPåAnnenPeriode -> GraphQLPeriodetilstand.UtbetaltVenterPaAnnenPeriode
-    Periodetilstand.TilSkjønnsfastsettelse -> GraphQLPeriodetilstand.TilSkjønnsfastsettelse
+    Periodetilstand.TilSkjønnsfastsettelse -> GraphQLPeriodetilstand.TilSkjonnsfastsettelse
 }
 
 private fun mapArbeidsgiverRefusjon(arbeidsgiverrefusjon: Arbeidsgiverrefusjon) = GraphQLArbeidsgiverrefusjon(

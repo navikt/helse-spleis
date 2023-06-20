@@ -111,13 +111,13 @@ data class UberegnetVilkårsprøvdPeriode(
 ) : Tidslinjeperiode() {
     override val sorteringstidspunkt = opprettet
 
-    internal constructor(uberegnetPeriode: UberegnetPeriode, vilkårsgrunnlagId: UUID) :
+    internal constructor(uberegnetPeriode: UberegnetPeriode, vilkårsgrunnlagId: UUID, tidslinjeperiodetype: Tidslinjeperiodetype) :
             this(
                 vedtaksperiodeId = uberegnetPeriode.vedtaksperiodeId,
                 fom = uberegnetPeriode.fom,
                 tom = uberegnetPeriode.tom,
                 sammenslåttTidslinje = uberegnetPeriode.sammenslåttTidslinje,
-                periodetype = uberegnetPeriode.periodetype,
+                periodetype = tidslinjeperiodetype,
                 inntektskilde = uberegnetPeriode.inntektskilde,
                 erForkastet = uberegnetPeriode.erForkastet,
                 opprettet = uberegnetPeriode.opprettet,
@@ -161,7 +161,7 @@ data class UberegnetPeriode(
         vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk,
         organisasjonsnummer: String
     ): Tidslinjeperiode {
-        return vilkårsgrunnlaghistorikk.potensiellUBeregnetVilkårsprøvdPeriode(this, skjæringstidspunkt) ?: this
+        return vilkårsgrunnlaghistorikk.potensiellUBeregnetVilkårsprøvdPeriode(this, skjæringstidspunkt, organisasjonsnummer, vedtaksperiodeId) ?: this
     }
 
     internal class Builder(

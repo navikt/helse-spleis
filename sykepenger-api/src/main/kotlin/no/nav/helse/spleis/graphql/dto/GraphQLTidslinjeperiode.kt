@@ -78,7 +78,7 @@ enum class GraphQLPeriodetilstand {
     ManglerInformasjon,
     VenterPaAnnenPeriode,
     UtbetaltVenterPaAnnenPeriode,
-    TilSkjønnsfastsettelse,
+    TilSkjonnsfastsettelse,
     TilGodkjenning;
 }
 
@@ -185,6 +185,23 @@ data class GraphQLUberegnetPeriode(
     override val periodetilstand: GraphQLPeriodetilstand,
     override val skjaeringstidspunkt: LocalDate,
     override val hendelser: List<GraphQLHendelse>
+    ) : GraphQLTidslinjeperiode {
+    override val id: UUID = UUID.randomUUID()
+}
+
+data class GraphQLUberegnetVilkarsprovdPeriode(
+    override val fom: LocalDate,
+    override val tom: LocalDate,
+    override val tidslinje: List<GraphQLDag>,
+    override val periodetype: GraphQLPeriodetype,
+    override val inntektstype: GraphQLInntektstype,
+    override val erForkastet: Boolean,
+    override val opprettet: LocalDateTime,
+    override val vedtaksperiodeId: UUID,
+    override val periodetilstand: GraphQLPeriodetilstand,
+    override val skjaeringstidspunkt: LocalDate,
+    override val hendelser: List<GraphQLHendelse>,
+    val vilkarsgrunnlagId: UUID
     ) : GraphQLTidslinjeperiode {
     override val id: UUID = UUID.randomUUID()
 }

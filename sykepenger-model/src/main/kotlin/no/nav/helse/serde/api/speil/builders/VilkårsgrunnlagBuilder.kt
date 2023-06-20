@@ -225,14 +225,17 @@ internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunn
 
     internal fun potensiellUBeregnetVilkårsprøvdPeriode(
         uberegnetPeriode: UberegnetPeriode,
-        skjæringstidspunkt: LocalDate
+        skjæringstidspunkt: LocalDate,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID
     ): UberegnetVilkårsprøvdPeriode? {
         if (Toggle.TjuefemprosentAvvik.disabled) return null
-        val vilkårsgrunnlagId = tilgjengeligeVilkårsgrunnlag[0]?.filterValues {
+        val (vilkårsgrunnlagId, vilkårsgrunnlag) = tilgjengeligeVilkårsgrunnlag[0]?.filterValues {
             it.skjæringstidspunkt == skjæringstidspunkt
-        }?.keys?.singleOrNull() ?: return null
+        }?.entries?.singleOrNull() ?: return null
         leggIBøtta(vilkårsgrunnlagId)
-        return UberegnetVilkårsprøvdPeriode(uberegnetPeriode, vilkårsgrunnlagId)
+        val periodetype = vilkårsgrunnlag.utledPeriodetype(organisasjonsnummer, vedtaksperiodeId)
+        return UberegnetVilkårsprøvdPeriode(uberegnetPeriode, vilkårsgrunnlagId, periodetype)
     }
 }
 
