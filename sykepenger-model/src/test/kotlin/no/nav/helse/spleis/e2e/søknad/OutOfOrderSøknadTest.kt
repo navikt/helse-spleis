@@ -21,6 +21,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
+import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -74,7 +75,7 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        assertVarsel(Varselkode.RV_OO_2, 1.vedtaksperiode.filter())
+        assertIngenVarsel(Varselkode.RV_OO_2, 1.vedtaksperiode.filter())
         assertVarsel(Varselkode.RV_OO_1, 2.vedtaksperiode.filter())
 
         håndterInntektsmelding(listOf(1.februar til 16.februar))

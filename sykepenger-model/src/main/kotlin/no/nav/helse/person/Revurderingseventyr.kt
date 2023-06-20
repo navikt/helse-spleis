@@ -6,7 +6,6 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeData
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.*
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 
@@ -43,7 +42,6 @@ class Revurderingseventyr private constructor(
         inngå(hendelse, vedtaksperiode, TypeEndring.ENDRING)
 
     private fun inngå(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, typeEndring: TypeEndring) : Boolean {
-        if (!hvorfor.kanInngå(hendelse)) return false
         hvorfor.dersomInngått(hendelse)
         vedtaksperiode.inngåIRevurderingseventyret(vedtaksperioder, typeEndring.name)
         return true
@@ -74,7 +72,6 @@ class Revurderingseventyr private constructor(
     private sealed interface RevurderingÅrsak {
 
         fun ikkeRelevant(periodeForEndring: Periode, otherPeriode: Periode): Boolean = false
-        fun kanInngå(hendelse: IAktivitetslogg): Boolean = true
         fun dersomInngått(hendelse: IAktivitetslogg) {}
 
         fun emitOverstyringIgangsattEvent(person: Person, vedtaksperioder: List<VedtaksperiodeData>, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) {
@@ -139,11 +136,6 @@ class Revurderingseventyr private constructor(
             override fun ikkeRelevant(periodeForEndring: Periode, otherPeriode: Periode): Boolean {
                 // hvis endringen treffer en nyere nyopprettet periode, da trenger vi ikke bli med
                 return periodeForEndring.starterEtter(otherPeriode)
-            }
-
-            override fun dersomInngått(hendelse: IAktivitetslogg) {
-                hendelse.varsel(Varselkode.RV_OO_2)
-                hendelse.info("Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode")
             }
 
             override fun navn() = "NY_PERIODE"

@@ -946,9 +946,9 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         assertVarsel(RV_OO_1, 4.vedtaksperiode.filter())
         assertIngenVarsel(RV_OO_2, 4.vedtaksperiode.filter())
-        assertVarsel(RV_OO_2, 1.vedtaksperiode.filter())
-        assertVarsel(RV_OO_2, 2.vedtaksperiode.filter())
-        assertVarsel(RV_OO_2, 3.vedtaksperiode.filter())
+        assertIngenVarsel(RV_OO_2, 1.vedtaksperiode.filter())
+        assertIngenVarsel(RV_OO_2, 2.vedtaksperiode.filter())
+        assertIngenVarsel(RV_OO_2, 3.vedtaksperiode.filter())
     }
 
     @Test

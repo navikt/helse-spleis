@@ -64,8 +64,8 @@ internal class RevurderingFerieTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
 
-        assertVarsel(RV_OO_2, 1.vedtaksperiode.filter())
-        assertVarsel(RV_OO_2, 2.vedtaksperiode.filter())
+        assertIngenVarsel(RV_OO_2, 1.vedtaksperiode.filter())
+        assertIngenVarsel(RV_OO_2, 2.vedtaksperiode.filter())
         assertVarsel(RV_OO_1, 3.vedtaksperiode.filter())
     }
 
