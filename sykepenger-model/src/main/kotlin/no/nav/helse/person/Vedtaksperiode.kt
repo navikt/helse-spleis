@@ -1626,6 +1626,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.trengerInntektsmelding()
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
+            vedtaksperiode.revurderTidslinje(hendelse)
+        }
+
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) =
             INNTEKTSMELDING.utenBegrunnelse
 
@@ -1738,6 +1742,10 @@ internal class Vedtaksperiode private constructor(
         }
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {
             vedtaksperiode.vedtaksperiodeVenter(nestemann)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
+            vedtaksperiode.revurderTidslinje(hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
