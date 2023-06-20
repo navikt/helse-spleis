@@ -106,7 +106,7 @@ class Utbetaling private constructor(
     fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
     private fun erAktiv() = erAvsluttet() || erInFlight()
     private fun erAktivEllerUbetalt() = erAktiv() || erUbetalt()
-    fun erInFlight() = tilstand in listOf(Overført)
+    fun erInFlight() = tilstand == Overført || annulleringer.any { it.tilstand == Overført }
     fun erAvsluttet() = erUtbetalt() || tilstand == GodkjentUtenUtbetaling
     fun erAvvist() = tilstand == IkkeGodkjent
     private fun erAnnullering() = type == ANNULLERING
@@ -198,6 +198,9 @@ class Utbetaling private constructor(
     }
 
     fun gjelderFor(hendelse: UtbetalingHendelse) =
+        hendelseErRelevant(hendelse) || annulleringer.any { it.hendelseErRelevant(hendelse) }
+
+    private fun hendelseErRelevant(hendelse: UtbetalingHendelse) =
         hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId(), personOppdrag.fagsystemId(), id)
 
     fun gjelderFor(hendelse: Utbetalingsgodkjenning) =

@@ -4,14 +4,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.Dagturnering
 
-internal val mandag = 1.mandag
-internal val tirsdag = mandag.plusDays(1)
-internal val onsdag = tirsdag.plusDays(1)
-internal val torsdag = onsdag.plusDays(1)
-internal val fredag = torsdag.plusDays(1)
-internal val lørdag = fredag.plusDays(1)
-internal val søndag = lørdag.plusDays(1)
-
 internal fun perioder(
     periode1: Sykdomstidslinje,
     periode2: Sykdomstidslinje,

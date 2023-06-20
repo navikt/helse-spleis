@@ -1,6 +1,8 @@
 package no.nav.helse.spleis.e2e.søknad
 
 import java.util.UUID
+import no.nav.helse.april
+import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
@@ -12,9 +14,14 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.juni
+import no.nav.helse.lørdag
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
@@ -317,6 +324,170 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
             assertEquals(3.mars, linje.fom)
             assertEquals(30.mars, linje.tom)
             assertEquals(Endringskode.NY, linje.endringskode)
+        }
+    }
+
+    @Test
+    fun `arbeidsgiverperiode slås sammen pga avviklet ferie`() {
+        a1 {
+            nyttVedtak(1.juni, 30.juni)
+            nyttVedtak(1.august, 31.august)
+            nullstillTilstandsendringer()
+            håndterOverstyrTidslinje(1.juli.til(30.juli).map {
+                ManuellOverskrivingDag(it, Dagtype.Feriedag)
+            }.plusElement(ManuellOverskrivingDag(31.juli, Dagtype.Arbeidsdag)))
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+            håndterUtbetalt()
+
+            assertEquals(1.juni til 30.juni, inspektør.periode(1.vedtaksperiode))
+            assertEquals(1.juli til 31.august, inspektør.periode(2.vedtaksperiode))
+            assertEquals("SHH SSSSSHH SSSSSHH SSSSSHH SSSSSHF FFFFFFF FFFFFFF FFFFFFF FFFFFFF FASSSHH SSSSSHH SSSSSHH SSSSSHH SSSSS", inspektør.sykdomstidslinje.toShortString())
+
+            val juniutbetaling = inspektør.utbetaling(0).inspektør
+            val augustutbetaling = inspektør.utbetaling(1).inspektør
+            val annulleringaugust = inspektør.utbetaling(2).inspektør
+            val revurderingaugust = inspektør.utbetaling(3).inspektør
+
+            assertNotEquals(juniutbetaling.korrelasjonsId, augustutbetaling.korrelasjonsId)
+            assertEquals(annulleringaugust.korrelasjonsId, augustutbetaling.korrelasjonsId)
+            assertEquals(juniutbetaling.korrelasjonsId, revurderingaugust.korrelasjonsId)
+
+            assertEquals(2, revurderingaugust.arbeidsgiverOppdrag.size)
+            assertEquals(0, revurderingaugust.personOppdrag.size)
+            assertEquals(Endringskode.ENDR, revurderingaugust.arbeidsgiverOppdrag.inspektør.endringskode)
+            revurderingaugust.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+                assertEquals(17.juni, linje.fom)
+                assertEquals(30.juni, linje.tom)
+                assertEquals(Endringskode.ENDR, linje.endringskode)
+            }
+            revurderingaugust.arbeidsgiverOppdrag[1].inspektør.also { linje ->
+                assertEquals(1.august, linje.fom)
+                assertEquals(31.august, linje.tom)
+                assertEquals(Endringskode.NY, linje.endringskode)
+            }
+
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertTilstand(2.vedtaksperiode, AVSLUTTET)
+        }
+    }
+
+    @Test
+    fun `arbeidsgiverperiode slås sammen pga avviklet ferie - med endring uten utbetalingsendring i forrige periode`() {
+        a1 {
+            nyttVedtak(1.juni, lørdag.den(30.juni))
+            nyttVedtak(1.august, 31.august)
+            nullstillTilstandsendringer()
+            håndterOverstyrTidslinje(lørdag.den(30.juni).til(30.juli).map {
+                ManuellOverskrivingDag(it, Dagtype.Feriedag)
+            }.plusElement(ManuellOverskrivingDag(31.juli, Dagtype.Arbeidsdag)))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            assertEquals(1.juni til 30.juni, inspektør.periode(1.vedtaksperiode))
+            assertEquals(1.juli til 31.august, inspektør.periode(2.vedtaksperiode))
+            assertEquals("SHH SSSSSHH SSSSSHH SSSSSHH SSSSSFF FFFFFFF FFFFFFF FFFFFFF FFFFFFF FASSSHH SSSSSHH SSSSSHH SSSSSHH SSSSS", inspektør.sykdomstidslinje.toShortString())
+
+            val juniutbetaling = inspektør.utbetaling(0).inspektør
+            val augustutbetaling = inspektør.utbetaling(1).inspektør
+            val annulleringaugust = inspektør.utbetaling(2).inspektør
+            val revurderingjuni = inspektør.utbetaling(3).inspektør
+            val revurderingaugust = inspektør.utbetaling(4).inspektør
+
+            assertNotEquals(juniutbetaling.korrelasjonsId, augustutbetaling.korrelasjonsId)
+            assertEquals(annulleringaugust.korrelasjonsId, augustutbetaling.korrelasjonsId)
+            assertEquals(juniutbetaling.korrelasjonsId, revurderingjuni.korrelasjonsId)
+            assertEquals(juniutbetaling.korrelasjonsId, revurderingaugust.korrelasjonsId)
+
+            assertEquals(1, annulleringaugust.arbeidsgiverOppdrag.size)
+            assertEquals(0, annulleringaugust.personOppdrag.size)
+            assertEquals(Endringskode.ENDR, annulleringaugust.arbeidsgiverOppdrag.inspektør.endringskode)
+            annulleringaugust.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+                assertEquals(17.august, linje.fom)
+                assertEquals(31.august, linje.tom)
+                assertEquals(Endringskode.ENDR, linje.endringskode)
+                assertEquals("OPPH", linje.statuskode)
+                assertEquals(17.august, linje.datoStatusFom)
+            }
+
+            assertEquals(1, revurderingjuni.arbeidsgiverOppdrag.size)
+            assertEquals(0, revurderingjuni.personOppdrag.size)
+            assertEquals(Endringskode.UEND, revurderingjuni.arbeidsgiverOppdrag.inspektør.endringskode)
+            revurderingjuni.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+                assertEquals(17.juni, linje.fom)
+                assertEquals(29.juni, linje.tom)
+                assertEquals(Endringskode.UEND, linje.endringskode)
+            }
+
+            assertEquals(2, revurderingaugust.arbeidsgiverOppdrag.size)
+            assertEquals(0, revurderingaugust.personOppdrag.size)
+            assertEquals(Endringskode.ENDR, revurderingaugust.arbeidsgiverOppdrag.inspektør.endringskode)
+            revurderingaugust.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+                assertEquals(17.juni, linje.fom)
+                assertEquals(29.juni, linje.tom)
+                assertEquals(Endringskode.UEND, linje.endringskode)
+            }
+            revurderingaugust.arbeidsgiverOppdrag[1].inspektør.also { linje ->
+                assertEquals(1.august, linje.fom)
+                assertEquals(31.august, linje.tom)
+                assertEquals(Endringskode.NY, linje.endringskode)
+            }
+
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertTilstand(2.vedtaksperiode, AVSLUTTET)
+        }
+    }
+
+    @Test
+    fun `arbeidsgiverperiode slås sammen pga avviklet ferie - med endring uten utbetalingsendring i forrige periode - ny eldre periode mens til utbetaling`() {
+        a1 {
+            nyttVedtak(1.juni, lørdag.den(30.juni))
+            nyttVedtak(1.august, 31.august)
+            håndterOverstyrTidslinje(lørdag.den(30.juni).til(30.juli).map {
+                ManuellOverskrivingDag(it, Dagtype.Feriedag)
+            }.plusElement(ManuellOverskrivingDag(31.juli, Dagtype.Arbeidsdag)))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+            assertEquals(1, observatør.vedtakFattetEventer.getValue(1.vedtaksperiode).size)
+            assertEquals(1, observatør.vedtakFattetEventer.getValue(2.vedtaksperiode).size)
+
+            håndterSøknad(Sykdom(1.april, 16.april, 100.prosent))
+
+            assertEquals(1, observatør.vedtakFattetEventer.getValue(1.vedtaksperiode).size)
+            assertEquals(1, observatør.vedtakFattetEventer.getValue(2.vedtaksperiode).size)
+
+            assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+            assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+            assertTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+            håndterUtbetalt()
+
+            assertEquals(2, observatør.vedtakFattetEventer.getValue(1.vedtaksperiode).size)
+            assertEquals(1, observatør.vedtakFattetEventer.getValue(2.vedtaksperiode).size)
+
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            assertEquals(3, observatør.vedtakFattetEventer.getValue(1.vedtaksperiode).size)
+            assertEquals(2, observatør.vedtakFattetEventer.getValue(2.vedtaksperiode).size)
+
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertTilstand(2.vedtaksperiode, AVSLUTTET)
         }
     }
 

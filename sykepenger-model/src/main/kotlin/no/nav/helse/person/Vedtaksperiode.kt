@@ -665,7 +665,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterUtbetalingHendelse(hendelse: UtbetalingHendelse, onUtbetalt: () -> Unit) {
         if (hendelse.harFunksjonelleFeilEllerVerre()) return hendelse.funksjonellFeil(RV_UT_5)
-        if (!utbetalinger.erUtbetalt()) return
+        if (!utbetalinger.erAvsluttet()) return
         onUtbetalt()
     }
 
@@ -2312,7 +2312,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             when {
                 vedtaksperiode.utbetalinger.erUbetalt() -> vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode)
-                vedtaksperiode.utbetalinger.erUtbetalt() -> vedtaksperiode.tilstand(påminnelse, Avsluttet)
+                vedtaksperiode.utbetalinger.erAvsluttet() -> vedtaksperiode.tilstand(påminnelse, Avsluttet)
             }
         }
     }
