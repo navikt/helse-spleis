@@ -714,7 +714,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Ghosten finnes ikke i vilkårsgrunnlaget selvom ikke har noen ingen beregning enda`() {
+    fun `Ghosten finnes ikke i vilkårsgrunnlaget`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)

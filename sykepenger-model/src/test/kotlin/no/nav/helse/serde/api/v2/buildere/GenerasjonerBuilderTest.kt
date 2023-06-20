@@ -29,7 +29,6 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -66,10 +65,16 @@ import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType.FORELDET_SYKEDAG
 import no.nav.helse.serde.api.dto.Tidslinjeperiode
 import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
-import no.nav.helse.serde.api.dto.Tidslinjeperiodetype.*
+import no.nav.helse.serde.api.dto.Tidslinjeperiodetype.FORLENGELSE
+import no.nav.helse.serde.api.dto.Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.serde.api.dto.Tidslinjeperiodetype.INFOTRYGDFORLENGELSE
+import no.nav.helse.serde.api.dto.Tidslinjeperiodetype.OVERGANG_FRA_IT
 import no.nav.helse.serde.api.dto.UberegnetPeriode
 import no.nav.helse.serde.api.dto.Utbetalingstatus
-import no.nav.helse.serde.api.dto.Utbetalingstatus.*
+import no.nav.helse.serde.api.dto.Utbetalingstatus.GodkjentUtenUtbetaling
+import no.nav.helse.serde.api.dto.Utbetalingstatus.IkkeGodkjent
+import no.nav.helse.serde.api.dto.Utbetalingstatus.Overført
+import no.nav.helse.serde.api.dto.Utbetalingstatus.Ubetalt
 import no.nav.helse.serde.api.dto.Utbetalingtype
 import no.nav.helse.serde.api.dto.Utbetalingtype.ANNULLERING
 import no.nav.helse.serde.api.dto.Utbetalingtype.REVURDERING
@@ -2082,13 +2087,13 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     private fun GenerasjonDTO.beregnetPeriode(index: Int): BeregnetPeriode {
         val periode = this.perioder[index]
-        require(periode is BeregnetPeriode) { "Perioden er ikke en tidslinjeperiode!" }
+        require(periode is BeregnetPeriode) { "Perioden er ikke en beregnet periode!" }
         return periode
     }
 
     private fun GenerasjonDTO.uberegnetPeriode(index: Int): UberegnetPeriode {
         val periode = this.perioder[index]
-        require(periode is UberegnetPeriode) { "Perioden er ikke en kort periode!" }
+        require(periode is UberegnetPeriode) { "Perioden er ikke en uberegnet periode!" }
         return periode
     }
 }

@@ -7,6 +7,7 @@ import no.nav.helse.serde.api.dto.GenerasjonDTO
 import no.nav.helse.serde.api.dto.Tidslinjeperiode
 import no.nav.helse.serde.api.dto.Tidslinjeperiode.Companion.sorterEtterPeriode
 import no.nav.helse.serde.api.dto.UberegnetPeriode
+import no.nav.helse.serde.api.dto.UberegnetVilkårsprøvdPeriode
 
 class Generasjoner {
     private val nåværendeGenerasjon = mutableListOf<Tidslinjeperiode>()
@@ -28,6 +29,10 @@ class Generasjoner {
 
     internal fun uberegnetPeriode(uberegnetPeriode: UberegnetPeriode) {
         tilstand.uberegnetPeriode(this, uberegnetPeriode)
+    }
+
+    internal fun uberegnetVilkårsprøvdPeriode(uberegnetVilkårsprøvdPeriode: UberegnetVilkårsprøvdPeriode) {
+        tilstand.uberegnetVilkårsprøvdPeriode(this, uberegnetVilkårsprøvdPeriode)
     }
 
     internal fun utbetaltPeriode(beregnetPeriode: BeregnetPeriode) {
@@ -58,6 +63,9 @@ class Generasjoner {
     private interface Byggetilstand {
 
         fun uberegnetPeriode(generasjoner: Generasjoner, periode: UberegnetPeriode) {
+            generasjoner.leggTilNyPeriode(periode)
+        }
+        fun uberegnetVilkårsprøvdPeriode(generasjoner: Generasjoner, periode: UberegnetVilkårsprøvdPeriode) {
             generasjoner.leggTilNyPeriode(periode)
         }
         fun utbetaltPeriode(generasjoner: Generasjoner, periode: BeregnetPeriode) {

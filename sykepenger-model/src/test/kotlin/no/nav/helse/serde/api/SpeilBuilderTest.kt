@@ -30,12 +30,14 @@ import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.GhostPeriodeDTO
 import no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Inntektkilde
+import no.nav.helse.serde.api.dto.Periodetilstand.TilSkjønnsfastsettelse
 import no.nav.helse.serde.api.dto.SammenslåttDag
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagKildetype
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
 import no.nav.helse.serde.api.dto.UberegnetPeriode
+import no.nav.helse.serde.api.dto.UberegnetVilkårsprøvdPeriode
 import no.nav.helse.serde.api.dto.Utbetalingsinfo
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -333,6 +335,22 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val periode = speilApi().arbeidsgivere.single().generasjoner.single().perioder.single() as UberegnetPeriode
         assertEquals(listOf(søknadId), periode.hendelser.map { UUID.fromString(it.id) })
     }
+
+    @Test
+    fun `periode til skjønnsfastsettelse`() = Toggle.TjuefemprosentAvvik.enable {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 30000.månedlig)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = 15000.månedlig)
+        nullstillTilstandsendringer()
+        assertTilstander(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE)
+
+        val speilDto = speilApi()
+        val periode = speilDto.arbeidsgivere.single().generasjoner.single().perioder.single() as UberegnetVilkårsprøvdPeriode
+        assertEquals(TilSkjønnsfastsettelse, periode.periodetilstand)
+        val vilkårsgrunnlagId = periode.vilkårsgrunnlagId
+        assertEquals(setOf(vilkårsgrunnlagId), speilDto.vilkårsgrunnlag.keys)
+    }
+
     @Test
     fun `legger ved skjønnsmessig fastsatt sykepengegrunnlag`() = Toggle.TjuefemprosentAvvik.enable {
         val inntektIm = 31000.0

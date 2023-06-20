@@ -11,6 +11,7 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.api.dto.HendelseDTO.Companion.finn
 import no.nav.helse.serde.api.dto.Periodetilstand.ForberederGodkjenning
 import no.nav.helse.serde.api.dto.Periodetilstand.ManglerInformasjon
+import no.nav.helse.serde.api.dto.Periodetilstand.TilSkjønnsfastsettelse
 import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
 import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
 import no.nav.helse.serde.api.speil.Generasjoner
@@ -34,6 +35,7 @@ enum class Periodetilstand {
     ManglerInformasjon,
     UtbetaltVenterPåAnnenPeriode,
     VenterPåAnnenPeriode,
+    TilSkjønnsfastsettelse,
     TilGodkjenning,
     IngenUtbetaling,
     TilInfotrygd;
@@ -92,6 +94,46 @@ abstract class Tidslinjeperiode : Comparable<Tidslinjeperiode> {
 private val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 private fun LocalDate.format() = format(formatter)
 
+data class UberegnetVilkårsprøvdPeriode(
+    override val vedtaksperiodeId: UUID,
+    override val fom: LocalDate,
+    override val tom: LocalDate,
+    override val sammenslåttTidslinje: List<SammenslåttDag>,
+    override val periodetype: Tidslinjeperiodetype, // feltet gir ikke mening for uberegnede perioder
+    override val inntektskilde: UtbetalingInntektskilde, // feltet gir ikke mening for uberegnede perioder
+    override val erForkastet: Boolean,
+    override val opprettet: LocalDateTime,
+    override val oppdatert: LocalDateTime,
+    override val periodetilstand: Periodetilstand,
+    override val skjæringstidspunkt: LocalDate,
+    override val hendelser: List<HendelseDTO>,
+    val vilkårsgrunnlagId: UUID
+) : Tidslinjeperiode() {
+    override val sorteringstidspunkt = opprettet
+
+    internal constructor(uberegnetPeriode: UberegnetPeriode, vilkårsgrunnlagId: UUID) :
+            this(
+                vedtaksperiodeId = uberegnetPeriode.vedtaksperiodeId,
+                fom = uberegnetPeriode.fom,
+                tom = uberegnetPeriode.tom,
+                sammenslåttTidslinje = uberegnetPeriode.sammenslåttTidslinje,
+                periodetype = uberegnetPeriode.periodetype,
+                inntektskilde = uberegnetPeriode.inntektskilde,
+                erForkastet = uberegnetPeriode.erForkastet,
+                opprettet = uberegnetPeriode.opprettet,
+                oppdatert = uberegnetPeriode.oppdatert,
+                periodetilstand = uberegnetPeriode.periodetilstand,
+                skjæringstidspunkt = uberegnetPeriode.skjæringstidspunkt,
+                hendelser = uberegnetPeriode.hendelser,
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
+            )
+
+    override fun tilGenerasjon(generasjoner: Generasjoner) {
+        generasjoner.uberegnetVilkårsprøvdPeriode(this)
+    }
+
+}
+
 data class UberegnetPeriode(
     override val vedtaksperiodeId: UUID,
     override val fom: LocalDate,
@@ -113,6 +155,13 @@ data class UberegnetPeriode(
 
     override fun tilGenerasjon(generasjoner: Generasjoner) {
         generasjoner.uberegnetPeriode(this)
+    }
+
+    override fun registrerBruk(
+        vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk,
+        organisasjonsnummer: String
+    ): Tidslinjeperiode {
+        return vilkårsgrunnlaghistorikk.potensiellUBeregnetVilkårsprøvdPeriode(this, skjæringstidspunkt) ?: this
     }
 
     internal class Builder(
@@ -144,6 +193,7 @@ data class UberegnetPeriode(
                 is Vedtaksperiode.AvventerBlokkerendePeriode -> VenterPåAnnenPeriode
                 is Vedtaksperiode.AvventerHistorikk,
                 is Vedtaksperiode.AvventerVilkårsprøving -> ForberederGodkjenning
+                is Vedtaksperiode.AvventerSkjønnsmessigFastsettelse -> TilSkjønnsfastsettelse
                 else -> ManglerInformasjon
             }
 

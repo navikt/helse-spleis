@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.Opptjening
@@ -26,6 +27,8 @@ import no.nav.helse.serde.api.dto.GhostPeriodeDTO
 import no.nav.helse.serde.api.dto.Refusjonselement
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
+import no.nav.helse.serde.api.dto.UberegnetPeriode
+import no.nav.helse.serde.api.dto.UberegnetVilkårsprøvdPeriode
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
 import no.nav.helse.serde.api.speil.builders.IArbeidsgiverinntekt.Companion.harSkjønnsmessigFastsatt
 import no.nav.helse.økonomi.Inntekt
@@ -218,6 +221,18 @@ internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunn
                 elementer[vilkårsgrunnlagId]
             }
         }
+    }
+
+    internal fun potensiellUBeregnetVilkårsprøvdPeriode(
+        uberegnetPeriode: UberegnetPeriode,
+        skjæringstidspunkt: LocalDate
+    ): UberegnetVilkårsprøvdPeriode? {
+        if (Toggle.TjuefemprosentAvvik.disabled) return null
+        val vilkårsgrunnlagId = tilgjengeligeVilkårsgrunnlag[0]?.filterValues {
+            it.skjæringstidspunkt == skjæringstidspunkt
+        }?.keys?.singleOrNull() ?: return null
+        leggIBøtta(vilkårsgrunnlagId)
+        return UberegnetVilkårsprøvdPeriode(uberegnetPeriode, vilkårsgrunnlagId)
     }
 }
 
