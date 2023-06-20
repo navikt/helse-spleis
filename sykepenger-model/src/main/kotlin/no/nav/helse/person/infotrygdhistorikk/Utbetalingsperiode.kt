@@ -5,6 +5,7 @@ import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.InfotrygdperiodeVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -37,13 +38,21 @@ abstract class Utbetalingsperiode(
         builder.addNAVdag(dato, økonomi.inntekt(inntekt, `6G` = INGEN, refusjonsbeløp = INGEN))
     }
 
-    internal fun valider(
-        aktivitetslogg: IAktivitetslogg,
-        organisasjonsnummer: String,
-        periode: Periode
-    ) {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, periode: Periode) {
+        validerHarBetaltTidligere(periode, aktivitetslogg)
         validerOverlapp(aktivitetslogg, periode)
         validerNyereOpplysninger(aktivitetslogg, organisasjonsnummer, periode)
+    }
+
+
+    private fun validerHarBetaltTidligere(periode: Periode, aktivitetslogg: IAktivitetslogg) {
+        if (!harBetaltTidligere(periode)) return
+        aktivitetslogg.funksjonellFeil(Varselkode.RV_IT_37)
+    }
+
+    private fun harBetaltTidligere(other: Periode): Boolean {
+        val periodeMellom = periode.periodeMellom(other.start) ?: return false
+        return periodeMellom.count() < 20
     }
 
     private fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {

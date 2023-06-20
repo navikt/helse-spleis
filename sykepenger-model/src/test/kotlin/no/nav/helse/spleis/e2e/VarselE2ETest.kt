@@ -20,6 +20,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_13
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_33
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_36
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_37
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_3
@@ -147,7 +148,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
             Inntektsopplysning(ORGNUMMER, 5.februar, INNTEKT, true)
         ))
         håndterYtelser(2.vedtaksperiode)
-        assertFunksjonellFeil(RV_IT_33, 2.vedtaksperiode.filter(ORGNUMMER))
+        assertFunksjonellFeil(RV_IT_37, 2.vedtaksperiode.filter(ORGNUMMER))
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TIL_INFOTRYGD)
     }
 

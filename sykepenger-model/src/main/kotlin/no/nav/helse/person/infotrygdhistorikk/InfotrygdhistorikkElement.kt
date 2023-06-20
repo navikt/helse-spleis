@@ -102,12 +102,7 @@ class InfotrygdhistorikkElement private constructor(
     private fun erTom() =
         perioder.isEmpty() && inntekter.isEmpty() && arbeidskategorikoder.isEmpty()
 
-    internal fun valider(
-        aktivitetslogg: IAktivitetslogg,
-        periode: Periode,
-        skjæringstidspunkt: LocalDate,
-        organisasjonsnummer: String
-    ): Boolean {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, organisasjonsnummer: String): Boolean {
         validerBetaltRettFør(periode, aktivitetslogg)
         aktivitetslogg.info("Sjekker utbetalte perioder")
         perioder.filterIsInstance<Utbetalingsperiode>()

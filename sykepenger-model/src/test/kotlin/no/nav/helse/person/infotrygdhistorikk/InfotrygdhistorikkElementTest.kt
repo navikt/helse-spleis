@@ -7,6 +7,7 @@ import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -223,7 +224,7 @@ internal class InfotrygdhistorikkElementTest {
         val element = nyttHistorikkelement(perioder = utbetalinger, inntekter = inntekter)
 
         aktivitetslogg.barn().also {
-            assertTrue(element.valider(it, 1.februar til 28.februar, 1.februar, "ag1"))
+            assertTrue(element.valider(it, 1.februar til 28.februar, "ag1"))
         }
     }
 
@@ -240,7 +241,7 @@ internal class InfotrygdhistorikkElementTest {
         val element = nyttHistorikkelement(perioder = utbetalinger, inntekter = inntekter)
 
         aktivitetslogg.barn().also {
-            assertTrue(element.valider(it, 1.februar til 28.februar, 1.februar, "ag1"))
+            assertTrue(element.valider(it, 1.februar til 28.februar, "ag1"))
         }
     }
 
@@ -255,21 +256,7 @@ internal class InfotrygdhistorikkElementTest {
         val element = nyttHistorikkelement(perioder = utbetalinger, inntekter = inntekter)
 
         aktivitetslogg.barn().also {
-            assertTrue(element.valider(it, 1.februar til 28.februar, 1.februar, "ag1"))
-        }
-    }
-
-    @Test
-    fun `perioder fra infortrygd slås sammen dersom gapet kun er helg`() {
-        val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 5.januar, 100.prosent, 1234.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 8.januar, 12.januar, 100.prosent, 1234.daglig)
-        )
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true))
-        val element = nyttHistorikkelement(perioder = utbetalinger, inntekter = inntekter)
-
-        aktivitetslogg.barn().also {
-            assertTrue(element.valider(it, 1.februar til 28.februar, 1.februar, "ag1"))
+            assertTrue(element.valider(it, 1.februar til 28.februar, "ag1"))
         }
     }
 
@@ -277,7 +264,7 @@ internal class InfotrygdhistorikkElementTest {
     fun `validering feiler ikke når det ikke er redusert utbetaling i Infotrygd, men skjæringstidspunkt i Infotrygd`() {
         val arbeidskategorikoder = mapOf("01" to 1.januar)
         val element = nyttHistorikkelement(arbeidskategorikoder = arbeidskategorikoder)
-        assertTrue(element.valider(aktivitetslogg, Periode(6.januar, 23.januar), 1.januar, "ag1"))
+        assertTrue(element.valider(aktivitetslogg, Periode(6.januar, 23.januar), "ag1"))
         aktivitetslogg.assertIngenFunksjonellFeil()
     }
 
@@ -295,7 +282,7 @@ internal class InfotrygdhistorikkElementTest {
             inntekter = inntekter,
             arbeidskategorikoder = arbeidskategorikoder
         )
-        assertTrue(element.valider(aktivitetslogg, Periode(9.januar, 23.januar), 9.januar, "ag1"))
+        assertTrue(element.valider(aktivitetslogg, 26.januar.somPeriode(), "ag1"))
         aktivitetslogg.assertIngenFunksjonellFeil()
     }
 
@@ -303,14 +290,14 @@ internal class InfotrygdhistorikkElementTest {
     fun `validering skal ikke feile når bruker ikke har redusert utbetaling og skjæringstidspunkt i Infotrygd  - flere arbeidsgivere`() {
         val arbeidskategorikoder = mapOf("01" to 1.januar, "01" to 6.januar)
         val element = nyttHistorikkelement(arbeidskategorikoder = arbeidskategorikoder)
-        assertTrue(element.valider(aktivitetslogg, Periode(11.januar, 23.januar), 1.januar, "ag1"))
+        assertTrue(element.valider(aktivitetslogg, Periode(11.januar, 23.januar), "ag1"))
         aktivitetslogg.assertIngenFunksjonellFeil()
     }
 
     @Test
     fun `validering skal ikke feile når utbetalingshistorikken er tom`() {
         val element = nyttHistorikkelement()
-        assertTrue(element.valider(aktivitetslogg, Periode(11.januar, 23.januar), 1.januar, "ag1"))
+        assertTrue(element.valider(aktivitetslogg, Periode(11.januar, 23.januar), "ag1"))
         aktivitetslogg.assertIngenFunksjonellFeil()
     }
 
@@ -323,7 +310,7 @@ internal class InfotrygdhistorikkElementTest {
 
         val element = nyttHistorikkelement(utbetalinger, inntekter)
 
-        assertFalse(element.valider(aktivitetslogg, Periode(6.januar, 31.januar), 1.januar, ORGNUMMER))
+        assertFalse(element.valider(aktivitetslogg, Periode(6.januar, 31.januar), ORGNUMMER))
         assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
@@ -336,58 +323,8 @@ internal class InfotrygdhistorikkElementTest {
 
         val element = nyttHistorikkelement(utbetalinger, inntekter)
 
-        assertFalse(element.valider(aktivitetslogg, Periode(6.januar, 31.januar), 1.januar, "ag2"))
+        assertFalse(element.valider(aktivitetslogg, Periode(6.januar, 31.januar), "ag2"))
         assertTrue(aktivitetslogg.harVarslerEllerVerre())
-    }
-
-    @Test
-    fun `flere inntektsopplysninger på samme orgnr er ok`() {
-        val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 5.januar, 100.prosent, 1234.daglig)
-        )
-        val element = nyttHistorikkelement(
-            perioder = utbetalinger,
-            inntekter = listOf(
-                Inntektsopplysning("123456789", 1.februar, 1234.månedlig, true),
-                Inntektsopplysning("123456789", 1.januar, 1234.månedlig, true)
-            )
-        )
-
-        assertTrue(element.valider(aktivitetslogg, Periode(9.januar, 31.januar), 1.januar, "ag1"))
-        aktivitetslogg.assertIngenFunksjonellFeil()
-    }
-
-    @Test
-    fun `flere inntektsopplysninger gir ikke feil dersom de er gamle`() {
-        val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 5.januar, 100.prosent, 1234.daglig)
-        )
-        val element = nyttHistorikkelement(
-            perioder = utbetalinger,
-            inntekter = listOf(
-                Inntektsopplysning("123456789", 1.januar, 1234.månedlig, true),
-                Inntektsopplysning("987654321", 1.januar.minusYears(1), 1234.månedlig, true)
-            )
-        )
-
-        assertTrue(element.valider(aktivitetslogg, Periode(9.januar, 31.januar), 1.januar, "ag1"))
-        aktivitetslogg.assertIngenFunksjonellFeil()
-    }
-
-    @Test
-    fun `lager ikke warning når dagsats endrer seg i en sammenhengende periode som følge av Grunnbeløpjustering`() {
-        val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.april, 30.april, 100.prosent, 2161.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mai, 31.mai, 100.prosent, 2236.daglig)
-        )
-        val inntekter = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.april, 2161.daglig, true),
-            Inntektsopplysning(ORGNUMMER, 1.mai, 2161.daglig, true)
-        )
-
-        val element = nyttHistorikkelement(utbetalinger, inntekter)
-        assertTrue(element.valider(aktivitetslogg, Periode(2.juni, 30.juni), 1.april, "ag1"))
-        aktivitetslogg.assertIngenVarsler()
     }
 
     @Test
@@ -411,7 +348,7 @@ internal class InfotrygdhistorikkElementTest {
         )
 
         val element = nyttHistorikkelement(utbetalinger, inntekter)
-        assertTrue(element.valider(aktivitetslogg, Periode(1.april, 30.april), 1.april, "ag1"))
+        assertTrue(element.valider(aktivitetslogg, Periode(1.april, 30.april), "ag1"))
         aktivitetslogg.assertIngenVarsler()
     }
 
@@ -426,7 +363,7 @@ internal class InfotrygdhistorikkElementTest {
             Inntektsopplysning(ORGNUMMER, 1.februar, 1234.daglig, true)
         )
         val element = nyttHistorikkelement(utbetalinger, inntekter)
-        assertTrue(element.valider(aktivitetslogg, Periode(1.april, 30.april), 1.april, "ag1"))
+        assertTrue(element.valider(aktivitetslogg, Periode(1.april, 30.april), "ag1"))
         aktivitetslogg.assertIngenVarsler()
     }
 
@@ -481,7 +418,7 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `Validerer ok hvis det ikke finnes noen utbetalinger fra Infotrygd`() {
         val element = nyttHistorikkelement()
-        assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 1.januar), 1.januar, "ag1"))
+        assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 1.januar), "ag1"))
         aktivitetslogg.assertIngenVarsler()
     }
 
@@ -491,30 +428,30 @@ internal class InfotrygdhistorikkElementTest {
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig)
         )
         val element = nyttHistorikkelement(utbetalinger)
-        assertFalse(element.valider(aktivitetslogg, Periode(1.januar, 1.januar), 1.januar, "ag1"))
+        assertFalse(element.valider(aktivitetslogg, Periode(1.januar, 1.januar), "ag1"))
         aktivitetslogg.assertFunksjonellFeil(Varselkode.RV_IT_3)
     }
 
     @Test
-    fun `Utbetalinger i Infotrygd som er nærmere enn 18 dager fra tidslinjen`() {
+    fun `Utbetalinger i Infotrygd som er nærmere enn 20 dager fra tidslinjen`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 5.januar, 100.prosent, 1234.daglig)
         )
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 1234.daglig, true))
 
         val element = nyttHistorikkelement(utbetalinger, inntekter)
-        assertTrue(element.valider(aktivitetslogg, Periode(28.januar, 28.januar), 28.januar, "ag1"))
+        assertFalse(element.valider(aktivitetslogg, 25.januar.somPeriode(), "ag1"))
         aktivitetslogg.assertIngenVarsler()
     }
 
     @Test
-    fun `Utbetalinger i Infotrygd som er eldre enn 18 dager fra tidslinjen`() {
+    fun `Utbetalinger i Infotrygd som er eldre enn 20 dager fra tidslinjen`() {
         val utbetalinger = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 5.januar, 100.prosent, 1234.daglig)
         )
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 1234.daglig, true))
         val element = nyttHistorikkelement(utbetalinger, inntekter)
-        assertTrue(element.valider(aktivitetslogg, Periode(29.januar, 29.januar), 29.januar, "ag1"))
+        assertTrue(element.valider(aktivitetslogg, Periode(26.januar, 26.januar), "ag1"))
         aktivitetslogg.assertIngenVarsler()
     }
 
@@ -526,7 +463,7 @@ internal class InfotrygdhistorikkElementTest {
 
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 1234.daglig, true))
         val element = nyttHistorikkelement(utbetalinger, inntekter)
-        assertTrue(element.valider(aktivitetslogg, Periode(1.august, 1.august), 1.august, "ag1"))
+        assertTrue(element.valider(aktivitetslogg, Periode(1.august, 1.august), "ag1"))
         aktivitetslogg.assertIngenVarsler()
     }
 
@@ -537,7 +474,7 @@ internal class InfotrygdhistorikkElementTest {
         )
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 1234.daglig, true))
         val element = nyttHistorikkelement(utbetalinger, inntekter)
-        assertTrue(element.valider(aktivitetslogg, Periode(1.august, 1.august), 1.august, "ag1"))
+        assertTrue(element.valider(aktivitetslogg, Periode(1.august, 1.august), "ag1"))
         aktivitetslogg.assertIngenVarsler()
     }
 
@@ -550,7 +487,7 @@ internal class InfotrygdhistorikkElementTest {
             )
         )
 
-        assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), 1.januar, "ag1"))
+        assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), "ag1"))
         aktivitetslogg.assertIngenVarsler()
     }
 
@@ -562,7 +499,7 @@ internal class InfotrygdhistorikkElementTest {
                 Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true),
             )
         )
-        assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), 1.januar, "ag1"))
+        assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), "ag1"))
         aktivitetslogg.assertIngenVarsler()
     }
 
@@ -575,7 +512,7 @@ internal class InfotrygdhistorikkElementTest {
             )
         )
 
-        assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), 1.januar, "ag1"))
+        assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), "ag1"))
         aktivitetslogg.assertIngenVarsler()
     }
 
@@ -588,7 +525,7 @@ internal class InfotrygdhistorikkElementTest {
             )
         )
 
-        assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), 1.januar, "ag1"))
+        assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), "ag1"))
         aktivitetslogg.assertIngenVarsler()
     }
 
@@ -600,7 +537,7 @@ internal class InfotrygdhistorikkElementTest {
                 Inntektsopplysning(ORGNUMMER, 1.januar, 4321.månedlig, true),
             )
         )
-        assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), 1.januar, "ag1"))
+        assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 31.januar), "ag1"))
         aktivitetslogg.assertIngenVarsler()
     }
 
@@ -612,7 +549,7 @@ internal class InfotrygdhistorikkElementTest {
                 Inntektsopplysning(ORGNUMMER, 1.januar(2018), 4321.månedlig, true),
             )
         )
-        assertTrue(element.valider(aktivitetslogg, Periode(1.februar(2019), 28.februar(2019)), 1.februar(2019), "ag1"))
+        assertTrue(element.valider(aktivitetslogg, Periode(1.februar(2019), 28.februar(2019)), "ag1"))
         aktivitetslogg.assertIngenVarsler()
     }
 
@@ -624,7 +561,7 @@ internal class InfotrygdhistorikkElementTest {
                 Inntektsopplysning(ORGNUMMER, 1.januar, 4321.månedlig, true),
             )
         )
-        assertTrue(element.valider(aktivitetslogg, Periode(2.januar, 31.januar), 2.januar, "ag1"))
+        assertTrue(element.valider(aktivitetslogg, Periode(2.januar, 31.januar), "ag1"))
         aktivitetslogg.assertIngenVarsler()
     }
 

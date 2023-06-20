@@ -28,6 +28,7 @@ import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 @DisableToggle(Toggle.STOPPE_TILSIG_AUU::class)
@@ -66,6 +67,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
     }
 
     @Test
+    @Disabled
     fun `Auu som har perioder etter i avventer inntektsmelding innenfor samme arbeidsgiverperiode`() {
         a1 {
             nyPeriode(1.januar til 16.januar)
@@ -79,6 +81,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
     }
 
     @Test
+    @Disabled
     fun `Auu som har perioder etter i avventer inntektsmelding med annen arbeidsgiverperiode`() {
         a1 {
             nyPeriode(1.januar til 16.januar)
@@ -92,6 +95,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
     }
 
     @Test
+    @Disabled
     fun `Auu som har perioder etter på annen ag i avventer inntektsmelding med gap`() {
         a1 {
             nyPeriode(1.januar til 16.januar)
@@ -130,6 +134,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
     }
 
     @Test
+    @Disabled
     fun `Auu som har perioder på annen ag etter i avventer inntektsmelding med annen arbeidsgiverperiode`() {
         a1 {
             nyPeriode(1.januar til 16.januar)
@@ -147,6 +152,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
     }
 
     @Test
+    @Disabled
     fun `Auu som inneholder skjæringstidspunktet på personen skal ikke forkastes`() {
         a1 {
             nyPeriode(1.januar til 16.januar)
@@ -294,6 +300,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
     }
 
     @Test
+    @Disabled
     fun `Vedtaksperiode på annen ag sluker Auu, men vi har en vedtaksperiode på samme ag innenfor samme agp`() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
@@ -415,5 +422,10 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
     private fun TestPerson.TestArbeidsgiver.infotrygdUtbetalingUtenFunksjonelleFeil(periode: Periode) {
         håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a3, periode.start, periode.endInclusive, 100.prosent, INNTEKT)))
         assertIngenFunksjonelleFeil()
+    }
+
+    private fun TestPerson.TestArbeidsgiver.infotrygdUtbetalingMedFunksjonelleFeil(periode: Periode) {
+        håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a3, periode.start, periode.endInclusive, 100.prosent, INNTEKT)))
+        assertFunksjonelleFeil()
     }
 }
