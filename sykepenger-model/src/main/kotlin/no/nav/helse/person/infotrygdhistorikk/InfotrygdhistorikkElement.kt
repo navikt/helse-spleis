@@ -9,7 +9,9 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_37
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBetaltRettFør
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBetaltTidligere
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.utbetalingsperioder
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
@@ -116,8 +118,13 @@ class InfotrygdhistorikkElement private constructor(
     }
 
     private fun validerBetaltRettFør(periode: Periode, aktivitetslogg: IAktivitetslogg){
-        if (!harBetaltRettFør(periode)) return
+        if (!harBetaltRettFør(periode)) return validerHarBetaltTidligere(periode, aktivitetslogg)
         aktivitetslogg.funksjonellFeil(RV_IT_14)
+    }
+
+    private fun validerHarBetaltTidligere(periode: Periode, aktivitetslogg: IAktivitetslogg) {
+        if (!harBetaltTidligere(periode)) return
+        aktivitetslogg.funksjonellFeil(RV_IT_37)
     }
 
     internal fun utbetalingstidslinje() =
@@ -126,6 +133,7 @@ class InfotrygdhistorikkElement private constructor(
             .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
 
     private fun harBetaltRettFør(periode: Periode) = perioder.harBetaltRettFør(periode)
+    private fun harBetaltTidligere(periode: Periode) = perioder.harBetaltTidligere(periode)
 
     internal fun accept(visitor: InfotrygdhistorikkVisitor) {
         visitor.preVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId)

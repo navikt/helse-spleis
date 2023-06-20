@@ -44,5 +44,10 @@ abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
             .any {
                 it.periode.erRettFør(other)
             }
+        internal fun List<Infotrygdperiode>.harBetaltTidligere(other: Periode) = this
+            .any {
+                val periodeMellom = it.periode.periodeMellom(other.start)
+                periodeMellom != null && periodeMellom.count() < 20
+            }
     }
 }
