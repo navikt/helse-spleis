@@ -107,6 +107,43 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `overstyring av tidslinje i avventer inntektsmelding`() {
+        håndterSøknad(Sykdom(3.februar, 26.februar, 100.prosent))
+        håndterSøknad(Sykdom(27.februar, 12.mars, 100.prosent))
+        håndterSøknad(Sykdom(13.mars, 31.mars, 100.prosent))
+        håndterInntektsmelding(listOf(6.mars til 21.mars))
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(2.februar til 17.februar))
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        nullstillTilstandsendringer()
+
+        assertEquals("UGG UUUUUGG UUUUUGR AAAAARR AAAAARR ASSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
+        håndterOverstyrTidslinje((20.februar til 24.februar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
+        assertEquals("UGG UUUUUGG UUUUUGR ASSSSHR AAAAARR ASSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
+        håndterOverstyrTidslinje((18.februar til 19.februar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
+        assertEquals("UGG UUUUUGG UUUUUGH SSSSSHR AAAAARR ASSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE)
+        assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE)
+    }
+
+    @Test
+    fun `overstyring av tidslinje i avventer inntektsmelding2`() {
+        håndterSøknad(Sykdom(3.februar, 26.februar, 100.prosent))
+        håndterSøknad(Sykdom(27.februar, 12.mars, 100.prosent))
+        håndterInntektsmelding(listOf(3.februar til 21.mars))
+
+    }
+
+    @Test
     fun `arbeidsgiver endrer arbeidsgiverperioden tilbake - må overstyre tidslinje for å fikse`() {
         håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
         nyttVedtak(11.februar, 28.februar, arbeidsgiverperiode = listOf(1.februar til 4.februar, 7.februar til 18.februar))
