@@ -217,6 +217,9 @@ spec:
         - team: tbd
           application: speaker-backend
           access: readwrite
+        - team: tbd
+          application: spre-styringsinfo
+          access: readwrite
         - team: flex
           application: sykepengesoknad-sak-status-metrikk
           access: read
