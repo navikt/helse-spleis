@@ -13,7 +13,6 @@ import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.MerknadDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.PeriodeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsstatusDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadstypeDTO
@@ -487,7 +486,7 @@ internal class TestMessageFactory(
         val månedligInntekt: Double?,
         val forklaring: String? = null,
         val subsumsjon: Subsumsjon? = null,
-        val refusjonsopplysninger: List<Refusjonsopplysning>?
+        val refusjonsopplysninger: List<Refusjonsopplysning>? = null
     )
 
     fun lagYtelser(
@@ -1007,8 +1006,7 @@ internal class TestMessageFactory(
             "arbeidsgivere" to arbeidsgiveropplysninger.map { arbeidgiver ->
                 mutableMapOf(
                     "organisasjonsnummer" to arbeidgiver.organisasjonsnummer,
-                    "månedligInntekt" to arbeidgiver.månedligInntekt,
-                    "refusjonsopplysninger" to arbeidgiver.refusjonsopplysninger?.map { it.toMap }
+                    "månedligInntekt" to arbeidgiver.månedligInntekt
                 )
             }
         )

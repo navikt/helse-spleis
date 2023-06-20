@@ -14,7 +14,7 @@ internal class SkjønnsmessigFastsettelseRiver(
 
     override val eventName = "skjønnsmessig_fastsettelse"
 
-    override val riverName = "Skjønnsmessig faststellese"
+    override val riverName = "Skjønnsmessig fastsettelse"
 
     override fun createMessage(packet: JsonMessage) = SkjønnsmessigFastsettelseMessage(packet)
 
@@ -25,11 +25,6 @@ internal class SkjønnsmessigFastsettelseRiver(
         message.requireArray("arbeidsgivere") {
             require("organisasjonsnummer") { require(it.gyldigTekst) }
             require("månedligInntekt") { require(it.gyldigDouble) }
-            requireArray("refusjonsopplysninger") {
-                require("fom", JsonNode::asLocalDate)
-                interestedIn("tom", JsonNode::asLocalDate)
-                require("beløp") { require(it.gyldigDouble)}
-            }
         }
         message.require("arbeidsgivere") { arbeidsgiveropplysning ->
             val organisasjonsnummer = arbeidsgiveropplysning.map { it.path("organisasjonsnummer").asText() }

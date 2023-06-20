@@ -110,7 +110,7 @@ class Refusjonsopplysning(
         private val validerteRefusjonsopplysninger = refusjonsopplysninger.sortedBy { it.fom }
 
         internal val erTom = validerteRefusjonsopplysninger.isEmpty()
-        internal constructor(): this(emptyList())
+        constructor(): this(emptyList())
 
         init {
             check(!validerteRefusjonsopplysninger.overlapper()) { "Refusjonsopplysninger skal ikke kunne inneholde overlappende informasjon: $refusjonsopplysninger" }
@@ -223,5 +223,3 @@ class Refusjonsopplysning(
     }
 
 }
-
-typealias ManglerRefusjonsopplysning = (LocalDate, Inntekt) -> Unit

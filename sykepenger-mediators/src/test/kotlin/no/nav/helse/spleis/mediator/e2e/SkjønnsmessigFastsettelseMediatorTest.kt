@@ -3,7 +3,6 @@ package no.nav.helse.spleis.mediator.e2e
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsgiveropplysning
-import no.nav.helse.spleis.mediator.TestMessageFactory.Refusjonsopplysning
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.OK
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Test
@@ -24,8 +23,7 @@ internal class SkjønnsmessigFastsettelseMediatorTest : AbstractEndToEndMediator
             skjæringstidspunkt = 1.januar,
             arbeidsgiveropplysninger = listOf(Arbeidsgiveropplysning(
                 organisasjonsnummer = ORGNUMMER,
-                månedligInntekt = INNTEKT *1.25,
-                refusjonsopplysninger = listOf(Refusjonsopplysning(fom = 1.januar, tom = null, beløp = INNTEKT *1.25))
+                månedligInntekt = INNTEKT * 1.25
             ))
         )
         sendYtelser(0)

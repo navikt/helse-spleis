@@ -57,8 +57,8 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage) : He
         )
     }
 
-    internal companion object {
-        internal fun JsonNode.asRefusjonsopplysninger(meldingsreferanseId: UUID, opprettet: LocalDateTime) = RefusjonsopplysningerBuilder().also { builder ->
+    private companion object {
+        private fun JsonNode.asRefusjonsopplysninger(meldingsreferanseId: UUID, opprettet: LocalDateTime) = RefusjonsopplysningerBuilder().also { builder ->
             this.map { refusjonsopplysning ->
                 builder.leggTil(
                     Refusjonsopplysning(
