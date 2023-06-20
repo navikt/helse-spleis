@@ -489,6 +489,11 @@ internal class TestMessageFactory(
         val refusjonsopplysninger: List<Refusjonsopplysning>? = null
     )
 
+    data class SkjønnsmessigFastsatt(
+        val organisasjonsnummer: String,
+        val årlig: Double?,
+    )
+
     fun lagYtelser(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,
@@ -997,16 +1002,16 @@ internal class TestMessageFactory(
     )
     fun lagSkjønnsmessigFastsettelse(
         skjæringstidspunkt: LocalDate,
-        arbeidsgiveropplysninger: List<Arbeidsgiveropplysning>
+        skjønnsmessigFastsatt: List<SkjønnsmessigFastsatt>
     ) = nyHendelse(
         "skjønnsmessig_fastsettelse", mutableMapOf(
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "skjæringstidspunkt" to skjæringstidspunkt,
-            "arbeidsgivere" to arbeidsgiveropplysninger.map { arbeidgiver ->
+            "arbeidsgivere" to skjønnsmessigFastsatt.map { arbeidgiver ->
                 mutableMapOf(
                     "organisasjonsnummer" to arbeidgiver.organisasjonsnummer,
-                    "månedligInntekt" to arbeidgiver.månedligInntekt
+                    "årlig" to arbeidgiver.årlig
                 )
             }
         )

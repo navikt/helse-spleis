@@ -11,7 +11,6 @@ import kotliquery.sessionOf
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.PeriodeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -51,6 +50,7 @@ import no.nav.helse.spleis.mediator.TestMessageFactory.InstitusjonsoppholdTestda
 import no.nav.helse.spleis.mediator.TestMessageFactory.OmsorgspengerTestdata
 import no.nav.helse.spleis.mediator.TestMessageFactory.OpplæringspengerTestdata
 import no.nav.helse.spleis.mediator.TestMessageFactory.PleiepengerTestdata
+import no.nav.helse.spleis.mediator.TestMessageFactory.SkjønnsmessigFastsatt
 import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkForFeriepengerTestdata
 import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkTestdata
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel
@@ -488,11 +488,11 @@ internal abstract class AbstractEndToEndMediatorTest() {
 
     protected fun sendSkjønnsmessigFastsettelse(
         skjæringstidspunkt: LocalDate,
-        arbeidsgiveropplysninger: List<Arbeidsgiveropplysning>
+        skjønnsmessigFastsatt: List<SkjønnsmessigFastsatt>
     ) {
         val (_, message) = meldingsfabrikk.lagSkjønnsmessigFastsettelse(
             skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgiveropplysninger = arbeidsgiveropplysninger
+            skjønnsmessigFastsatt = skjønnsmessigFastsatt
         )
         testRapid.sendTestMessage(message)
     }

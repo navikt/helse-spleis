@@ -24,7 +24,7 @@ internal class SkjønnsmessigFastsettelseRiver(
         message.require("arbeidsgivere") { require(it.size() > 0) { "Må settes minst en arbeidsgiver" } }
         message.requireArray("arbeidsgivere") {
             require("organisasjonsnummer") { require(it.gyldigTekst) }
-            require("månedligInntekt") { require(it.gyldigDouble) }
+            require("årlig") { require(it.gyldigDouble) }
         }
         message.require("arbeidsgivere") { arbeidsgiveropplysning ->
             val organisasjonsnummer = arbeidsgiveropplysning.map { it.path("organisasjonsnummer").asText() }

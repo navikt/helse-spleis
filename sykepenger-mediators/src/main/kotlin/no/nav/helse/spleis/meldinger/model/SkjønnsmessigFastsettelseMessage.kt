@@ -9,7 +9,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spleis.IHendelseMediator
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 
 internal class SkjønnsmessigFastsettelseMessage(packet: JsonMessage) : HendelseMessage(packet) {
 
@@ -32,10 +32,10 @@ internal class SkjønnsmessigFastsettelseMessage(packet: JsonMessage) : Hendelse
 
     private fun JsonNode.asArbeidsgiveropplysninger() = map { arbeidsgiveropplysning ->
         val orgnummer = arbeidsgiveropplysning["organisasjonsnummer"].asText()
-        val månedligInntekt = arbeidsgiveropplysning["månedligInntekt"].asDouble().månedlig
+        val årlig = arbeidsgiveropplysning["årlig"].asDouble().årlig
 
         val skjønnsmessigFastsattInntekt =
-            SkjønnsmessigFastsatt(skjæringstidspunkt, id, månedligInntekt, opprettet)
+            SkjønnsmessigFastsatt(skjæringstidspunkt, id, årlig, opprettet)
 
         ArbeidsgiverInntektsopplysning(orgnummer, skjønnsmessigFastsattInntekt, Refusjonsopplysninger())
     }
