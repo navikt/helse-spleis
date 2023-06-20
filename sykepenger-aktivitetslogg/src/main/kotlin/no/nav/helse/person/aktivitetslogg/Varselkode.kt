@@ -127,7 +127,6 @@ enum class Varselkode(
     RV_IT_34("Avslutter perioden fordi tidligere periode gikk til Infotrygd", avviklet = true),
     RV_IT_35("Det er en utbetalingsperiode i Infotrygd som mangler fom- eller tomdato", avviklet = true),
     RV_IT_36("Periode som før var uten utbetalingsdager har nå utbetalingsdager etter endringer fra Infotrygd"),
-    RV_IT_37("Det er en utbetaling i Infotrygd nærmere enn 20 dager"),
 
     // VV: Vilkårsvurdering
     RV_VV_1("Arbeidsgiver er ikke registrert i Aa-registeret."),

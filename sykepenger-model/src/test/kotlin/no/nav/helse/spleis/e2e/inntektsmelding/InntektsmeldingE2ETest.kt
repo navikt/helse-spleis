@@ -896,6 +896,23 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere utbetalt periode i IT - IM kommer før sykmelding`() {
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar)
+        val utbetalinger = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 21.januar, 100.prosent, 1000.daglig)
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger, inntektshistorikk = inntektshistorikk)
+        håndterSykmelding(Sykmeldingsperiode(3.februar, 25.februar))
+        håndterSøknad(Sykdom(3.februar, 25.februar, 100.prosent))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertEquals(3.februar til 25.februar, inspektør.periode(1.vedtaksperiode))
+    }
+
+    @Test
     fun `replay strekker periode tilbake og lager overlapp`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 19.januar))
         håndterSøknad(Sykdom(3.januar, 19.januar, 100.prosent, null))

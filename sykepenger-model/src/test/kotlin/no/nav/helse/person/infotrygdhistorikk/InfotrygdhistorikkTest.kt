@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -18,7 +17,6 @@ import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElementTest.Comp
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
-import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
@@ -236,12 +234,11 @@ internal class InfotrygdhistorikkTest {
             it.assertVarsel(Varselkode.RV_IT_1)
         }
         aktivitetslogg.barn().also {
-            assertFalse(historikk.valider(it, 20.februar til 28.februar, 20.februar, "ag1"))
-            assertTrue(it.harVarslerEllerVerre())
-            it.assertFunksjonellFeil(Varselkode.RV_IT_37)
+            assertTrue(historikk.valider(it, 20.februar til 28.februar, 20.februar, "ag1"))
+            assertFalse(it.harVarslerEllerVerre())
         }
         aktivitetslogg.barn().also {
-            assertTrue(historikk.valider(it, 1.mai til 5.mai, 1.mai, "ag1"))
+            assertTrue(historikk.valider(it, 1.april til 5.april, 1.april, "ag1"))
             assertFalse(it.harVarslerEllerVerre())
         }
     }
