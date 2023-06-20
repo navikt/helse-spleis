@@ -1,13 +1,16 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
@@ -17,8 +20,10 @@ import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -156,6 +161,40 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             )
         }
 
+    }
+
+    @Test
+    fun `Overstyre refusjon etter skjønnsmessig fastasatt`() {
+        val gammelInntekt = INNTEKT
+        val nyInntekt = INNTEKT * 2
+
+        a1 {
+            // Normal behandling med Inntektsmelding
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = gammelInntekt, refusjon = Refusjon(gammelInntekt, null, emptyList()))
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Inntektsmelding)
+            assertEquals(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, gammelInntekt)), inspektør.refusjonsopplysningerFraVilkårsgrunnlag().inspektør.refusjonsopplysninger)
+
+            // Saksbehandler skjønnsmessig fastsetter
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = nyInntekt, refusjonsopplysninger = emptyList())))
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is SkjønnsmessigFastsatt)
+            assertEquals(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, gammelInntekt)), inspektør.refusjonsopplysningerFraVilkårsgrunnlag().inspektør.refusjonsopplysninger)
+
+            // Saksbehandler endrer kun refusjon, men beholder inntekt
+            val overstyrInntektOgRefusjonId = UUID.randomUUID()
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = nyInntekt, forklaring = "forklaring", refusjonsopplysninger = listOf(Triple(1.januar, null, nyInntekt)))), hendelseId = overstyrInntektOgRefusjonId)
+            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is SkjønnsmessigFastsatt)
+            assertEquals(listOf(Refusjonsopplysning(overstyrInntektOgRefusjonId, 1.januar, null, nyInntekt)), inspektør.refusjonsopplysningerFraVilkårsgrunnlag().inspektør.refusjonsopplysninger)
+        }
     }
 
     private fun TestArbeidsgiverInspektør.inntektsopplysningISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = a1) =
