@@ -980,7 +980,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun igangsettOverstyring(hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
-        if (revurdering.ikkeRelevant(periode, skjæringstidspunkt)) return
+        if (revurdering.ikkeRelevant(skjæringstidspunkt)) return
         kontekst(hendelse)
         tilstand.igangsettOverstyring(this, hendelse, revurdering)
     }
@@ -1245,7 +1245,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
-            if (!revurdering.inngåSomRevurdering(hendelse, vedtaksperiode)) return
+            if (!revurdering.inngåSomRevurdering(hendelse, vedtaksperiode, vedtaksperiode.periode)) return
             if (Toggle.ForenkleRevurdering.disabled) {
                 vedtaksperiode.varsleForrigePeriodeRevurderingOmgjort(hendelse)
             }
@@ -1995,7 +1995,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
-            revurdering.inngåSomEndring(hendelse, vedtaksperiode)
+            if (!revurdering.inngåSomEndring(hendelse, vedtaksperiode, vedtaksperiode.periode)) return
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
     }
@@ -2023,7 +2023,7 @@ internal class Vedtaksperiode private constructor(
             hendelse: IAktivitetslogg,
             revurdering: Revurderingseventyr
         ) {
-            revurdering.inngåSomEndring(hendelse, vedtaksperiode)
+            if (!revurdering.inngåSomEndring(hendelse, vedtaksperiode, vedtaksperiode.periode)) return
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
     }
@@ -2071,7 +2071,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
         }
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
-            revurdering.inngåSomEndring(hendelse, vedtaksperiode)
+            if (!revurdering.inngåSomEndring(hendelse, vedtaksperiode, vedtaksperiode.periode)) return
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
@@ -2210,7 +2210,7 @@ internal class Vedtaksperiode private constructor(
             }
         }
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
-            revurdering.inngåSomEndring(hendelse, vedtaksperiode)
+            if (!revurdering.inngåSomEndring(hendelse, vedtaksperiode, vedtaksperiode.periode)) return
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
@@ -2348,7 +2348,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             if (!vedtaksperiode.forventerInntekt()) return
-            if (!revurdering.inngåSomEndring(hendelse, vedtaksperiode)) return
+            if (!revurdering.inngåSomEndring(hendelse, vedtaksperiode, vedtaksperiode.periode)) return
             revurdering.loggDersomKorrigerendeSøknad(hendelse, "Startet omgjøring grunnet korrigerende søknad")
             hendelse.info(RV_RV_1.varseltekst)
             if (!vedtaksperiode.arbeidsgiver.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt)) {

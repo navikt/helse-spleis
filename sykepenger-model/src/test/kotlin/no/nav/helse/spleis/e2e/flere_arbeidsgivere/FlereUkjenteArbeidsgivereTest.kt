@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import no.nav.helse.februar
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -165,16 +166,27 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         val overstyringerIgangsatt = observatør.overstyringIgangsatt
         assertEquals(3, overstyringerIgangsatt.size)
 
-        overstyringerIgangsatt[1].also { event ->
+        overstyringerIgangsatt[0].also { event ->
             assertEquals(PersonObserver.OverstyringIgangsatt(
                 årsak = "KORRIGERT_INNTEKTSMELDING",
                 skjæringstidspunkt = 1.januar,
-                periodeForEndring = 1.mars til 1.mars,
+                periodeForEndring = 1.januar.somPeriode(),
                 berørtePerioder = listOf(
                     VedtaksperiodeData(a1, 1.vedtaksperiode.id(a1), 1.januar til 31.januar, 1.januar, "REVURDERING"),
                     VedtaksperiodeData(a1, 2.vedtaksperiode.id(a1), 1.februar til 28.februar, 1.januar, "REVURDERING"),
                     VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING"),
                     VedtaksperiodeData(a2, 1.vedtaksperiode.id(a2), 1.januar til 31.januar, 1.januar, "REVURDERING")
+                )
+            ), event)
+        }
+
+        overstyringerIgangsatt[1].also { event ->
+            assertEquals(PersonObserver.OverstyringIgangsatt(
+                årsak = "KORRIGERT_INNTEKTSMELDING",
+                skjæringstidspunkt = 1.januar,
+                periodeForEndring = 1.mars.somPeriode(),
+                berørtePerioder = listOf(
+                    VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
                 )
             ), event)
         }

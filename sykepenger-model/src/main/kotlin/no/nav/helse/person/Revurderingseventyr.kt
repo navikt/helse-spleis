@@ -32,25 +32,22 @@ class Revurderingseventyr private constructor(
     private val vedtaksperioder = mutableListOf<VedtaksperiodeData>()
 
     internal fun inngåSomRevurdering(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, periode: Periode): Boolean {
-        if (periodeForEndring.starterEtter(periode)) return false
-        return inngåSomRevurdering(hendelse, vedtaksperiode)
+        return inngå(hendelse, vedtaksperiode, TypeEndring.REVURDERING, periode)
     }
-    internal fun inngåSomRevurdering(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode) =
-        inngå(hendelse, vedtaksperiode, TypeEndring.REVURDERING)
 
-    internal fun inngåSomEndring(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode) =
-        inngå(hendelse, vedtaksperiode, TypeEndring.ENDRING)
+    internal fun inngåSomEndring(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, periode: Periode) =
+        inngå(hendelse, vedtaksperiode, TypeEndring.ENDRING, periode)
 
-    private fun inngå(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, typeEndring: TypeEndring) : Boolean {
+    private fun inngå(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, typeEndring: TypeEndring, periode: Periode) : Boolean {
+        if (periodeForEndring.starterEtter(periode)) return false
         hvorfor.dersomInngått(hendelse)
         vedtaksperiode.inngåIRevurderingseventyret(vedtaksperioder, typeEndring.name)
         return true
     }
 
-    internal fun ikkeRelevant(periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
+    internal fun ikkeRelevant(skjæringstidspunkt: LocalDate): Boolean {
         // om endringen gjelder et nyere skjæringstidspunkt så trenger vi ikke bryr oss
-        if (this.skjæringstidspunkt > skjæringstidspunkt) return true
-        return hvorfor.ikkeRelevant(periodeForEndring, periode)
+        return this.skjæringstidspunkt > skjæringstidspunkt
     }
 
     internal fun sendOverstyringIgangsattEvent(person: Person) {
@@ -71,7 +68,6 @@ class Revurderingseventyr private constructor(
 
     private sealed interface RevurderingÅrsak {
 
-        fun ikkeRelevant(periodeForEndring: Periode, otherPeriode: Periode): Boolean = false
         fun dersomInngått(hendelse: IAktivitetslogg) {}
 
         fun emitOverstyringIgangsattEvent(person: Person, vedtaksperioder: List<VedtaksperiodeData>, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) {
@@ -133,11 +129,6 @@ class Revurderingseventyr private constructor(
         }
 
         object NyPeriode : RevurderingÅrsak {
-            override fun ikkeRelevant(periodeForEndring: Periode, otherPeriode: Periode): Boolean {
-                // hvis endringen treffer en nyere nyopprettet periode, da trenger vi ikke bli med
-                return periodeForEndring.starterEtter(otherPeriode)
-            }
-
             override fun navn() = "NY_PERIODE"
         }
     }
