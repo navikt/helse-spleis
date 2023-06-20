@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -12,18 +13,24 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeData
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
+import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.forlengVedtak
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterPåminnelse
+import no.nav.helse.spleis.e2e.håndterSkjønnsmessigFastsettelse
 import no.nav.helse.spleis.e2e.håndterSøknad
+import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
@@ -52,6 +59,32 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
 
         revurderingIgangsattEvent {
             this bleForårsaketAv "SYKDOMSTIDSLINJE"
+            this medSkjæringstidspunkt 1.januar
+            this avTypeEndring "OVERSTYRING"
+        }
+    }
+
+    @Test
+    fun `skjønnsfastsetting`() = Toggle.TjuefemprosentAvvik.enable {
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 60000.månedlig)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = 30000.månedlig)
+        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE)
+        håndterSkjønnsmessigFastsettelse(
+            1.januar, listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    orgnummer = ORGNUMMER,
+                    inntekt = 60000.månedlig,
+                    forklaring = "",
+                    subsumsjon = null,
+                    refusjonsopplysninger = listOf(
+                        Triple(1.januar, null, 31000.månedlig)
+                    )
+                )
+            )
+        )
+        revurderingIgangsattEvent {
+            this bleForårsaketAv "SKJØNNSMESSIG_FASTSETTELSE"
             this medSkjæringstidspunkt 1.januar
             this avTypeEndring "OVERSTYRING"
         }
