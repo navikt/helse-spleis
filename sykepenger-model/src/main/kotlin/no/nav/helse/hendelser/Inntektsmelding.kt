@@ -191,13 +191,9 @@ class Inntektsmelding(
         }
         val (årligInntekt, dagligInntekt) = beregnetInntekt.reflection { årlig, _, daglig, _ -> årlig to daglig }
         subsumsjonObserver.`§ 8-10 ledd 3`(årligInntekt, dagligInntekt)
-        return inntektsdato to inntektshistorikk.leggTil(
-            Inntektsmelding(
-                inntektsdato,
-                meldingsreferanseId(),
-                beregnetInntekt
-            )
-        )
+        val lagtTilNå = inntektshistorikk.leggTil(Inntektsmelding(inntektsdato, meldingsreferanseId(), beregnetInntekt))
+        if (!lagtTilNå) info("Inntekt allerede lagret i inntektshistorikken på arbeidsgiver")
+        return inntektsdato to lagtTilNå
     }
 
     internal fun leggTilRefusjon(refusjonshistorikk: Refusjonshistorikk) {

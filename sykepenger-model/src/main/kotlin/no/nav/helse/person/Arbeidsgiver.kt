@@ -842,6 +842,7 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.leggTilRefusjon(refusjonshistorikk)
         if (!lagtTilNå) return
         val skjæringstidspunkt = person.skjæringstidspunkt(inntektsdato.somPeriode())
+        inntektsmelding.info("Lagret inntektekt med inntektsdato $inntektsdato og skjæringstidspunkt $skjæringstidspunkt")
         finnAlternativInntektsdato(inntektsdato, skjæringstidspunkt)?.let {
             inntektsmelding.addInntekt(inntektshistorikk, it)
         }
