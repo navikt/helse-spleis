@@ -55,6 +55,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Økonomi
+import org.slf4j.LoggerFactory
 
 internal class Sykepengegrunnlag private constructor(
     private val alder: Alder,
@@ -84,7 +85,7 @@ internal class Sykepengegrunnlag private constructor(
     private val oppfyllerMinsteinntektskrav = beregningsgrunnlag >= minsteinntekt
     private val avviksprosent = sammenligningsgrunnlag.avviksprosent(omregnetÅrsinntekt, SubsumsjonObserver.NullObserver)
 
-    private var tilstand: Tilstand = tilstand ?: tilstand(AvventerFastsettelseEtterHovedregel) // TODO: utlede starttilstand basert på avviksprosent
+    private var tilstand: Tilstand = tilstand ?: tilstand(Start)
 
     internal constructor(
         alder: Alder,
@@ -116,6 +117,7 @@ internal class Sykepengegrunnlag private constructor(
     internal fun kandidatForSkjønnsmessigFastsettelse() = arbeidsgiverInntektsopplysninger.size == 1
 
     internal companion object {
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         fun opprett(
             alder: Alder,
             arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
@@ -281,7 +283,7 @@ internal class Sykepengegrunnlag private constructor(
             deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
             vurdertInfotrygd = vurdertInfotrygd,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
-            tilstand = tilstand
+            tilstand = null
         )
 
     internal fun justerGrunnbeløp() = kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold)
@@ -429,6 +431,13 @@ internal class Sykepengegrunnlag private constructor(
         }
     }
 
+    object Start : Tilstand {
+        override fun entering(sykepengegrunnlag: Sykepengegrunnlag) {
+            val tilstand = if (sykepengegrunnlag.harAkseptabeltAvvik()) AvventerFastsettelseEtterHovedregel else AvventerFastsettelseEtterSkjønn
+            sykepengegrunnlag.tilstand(tilstand)
+        }
+    }
+
     object AvventerFastsettelseEtterHovedregel : Tilstand {
         override fun entering(sykepengegrunnlag: Sykepengegrunnlag) {
             // Fastsettelse etter hovedregel skjer maskinelt og umiddelbart 💨
@@ -443,6 +452,9 @@ internal class Sykepengegrunnlag private constructor(
     }
 
     object AvventerFastsettelseEtterSkjønn : Tilstand {
+        override fun entering(sykepengegrunnlag: Sykepengegrunnlag) {
+            sikkerLogg.info("Sykepengegrunnlag har tilstand AvventerFastsettelseEtterSkjønn")
+        }
         override fun fastsatt(sykepengegrunnlag: Sykepengegrunnlag) {
             sykepengegrunnlag.tilstand(FastsattEtterSkjønn)
         }

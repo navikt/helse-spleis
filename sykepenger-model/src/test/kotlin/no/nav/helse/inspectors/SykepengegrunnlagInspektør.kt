@@ -7,6 +7,7 @@ import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
+import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
 internal val Sykepengegrunnlag.inspektør get() = SykepengegrunnlagInspektør(this)
@@ -26,9 +27,11 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
         private set
     internal var deaktiverteArbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning> = listOf()
         private set
-    internal var avviksprosent by Delegates.notNull<Int>()
+    internal var nøyaktigAvviksprosent by Delegates.notNull<Double>()
         private set
+    internal val avviksprosent get() = nøyaktigAvviksprosent.roundToInt()
     internal lateinit var tilstand: Sykepengegrunnlag.Tilstand
+        private set
 
     init {
         sykepengegrunnlag.accept(this)
@@ -55,7 +58,7 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
         this.beregningsgrunnlag = beregningsgrunnlag
         this.omregnetÅrsinntekt = totalOmregnetÅrsinntekt
         this.inntektskilde = sykepengegrunnlag1.inntektskilde()
-        this.avviksprosent = avviksprosent.roundToInt()
+        this.nøyaktigAvviksprosent = avviksprosent.prosent()
         this.tilstand = tilstand
     }
 

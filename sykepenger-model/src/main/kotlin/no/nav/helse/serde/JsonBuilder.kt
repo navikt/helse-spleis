@@ -967,6 +967,7 @@ internal class JsonBuilder : AbstractBuilder() {
                         is Sykepengegrunnlag.FastsattEtterHovedregel -> PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData.TilstandData.FASTSATT
                         is Sykepengegrunnlag.AvventerFastsettelseEtterSkjønn -> PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData.TilstandData.AVVENTER_FASTSETTELSE_ETTER_SKJØNN
                         is Sykepengegrunnlag.FastsattEtterSkjønn -> PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData.TilstandData.FASTSATT_ETTER_SKJØNN
+                        is Sykepengegrunnlag.Start -> throw IllegalStateException("Forventet ikke tilstand ${tilstand.javaClass.simpleName}")
                     }
                 )
             )

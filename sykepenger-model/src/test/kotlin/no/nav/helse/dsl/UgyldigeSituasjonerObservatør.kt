@@ -53,15 +53,15 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     internal fun bekreftIngenUgyldigeSituasjoner() {
         bekreftIngenOverlappende()
         validerSykdomshistorikk()
-        bekreftKunFastsattEtterHovedregel()
+        bekreftSykepengegrunnlagtilstand()
     }
 
-    private fun bekreftKunFastsattEtterHovedregel() {
+    private fun bekreftSykepengegrunnlagtilstand() {
         person.inspektør.vilkårsgrunnlagHistorikk.inspektør.grunnlagsdata().forEach {
             val tilstand = it.inspektør.sykepengegrunnlag.inspektør.tilstand
-            check(tilstand == Sykepengegrunnlag.FastsattEtterHovedregel) {
-                "Forventer ikke at sykepengegrunnlaget har tilstand ${tilstand::class.java.simpleName}"
-            }
+            val avvik = it.inspektør.sykepengegrunnlag.inspektør.nøyaktigAvviksprosent
+            if (avvik <= 25) return check(tilstand == Sykepengegrunnlag.FastsattEtterHovedregel) { "Forventer ikke at sykepengegrunnlaget har tilstand ${tilstand::class.java.simpleName} med $avvik% avvik" }
+            check(tilstand == Sykepengegrunnlag.AvventerFastsettelseEtterSkjønn) { "Forventer ikke at sykepengegrunnlaget har tilstand ${tilstand::class.java.simpleName} med $avvik% avvik" }
         }
     }
 
