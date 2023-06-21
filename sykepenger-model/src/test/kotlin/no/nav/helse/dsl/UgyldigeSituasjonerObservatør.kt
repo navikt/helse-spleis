@@ -10,6 +10,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.arbeidsgiver
+import no.nav.helse.person.inntekt.Sykepengegrunnlag
 
 internal class UgyldigeSituasjonerObservatør(private val person: Person): PersonObserver {
 
@@ -27,7 +28,6 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         arbeidsgivereMap.getOrPut(event.organisasjonsnummer) { person.arbeidsgiver(event.organisasjonsnummer) }
         gjeldendeTilstander[event.vedtaksperiodeId] = event.gjeldendeTilstand
         bekreftIngenUgyldigeSituasjoner()
-
     }
 
     override fun vedtaksperiodeVenter(event: PersonObserver.VedtaksperiodeVenterEvent) {
@@ -53,6 +53,16 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     internal fun bekreftIngenUgyldigeSituasjoner() {
         bekreftIngenOverlappende()
         validerSykdomshistorikk()
+        bekreftKunFastsattEtterHovedregel()
+    }
+
+    private fun bekreftKunFastsattEtterHovedregel() {
+        person.inspektør.vilkårsgrunnlagHistorikk.inspektør.grunnlagsdata().forEach {
+            val tilstand = it.inspektør.sykepengegrunnlag.inspektør.tilstand
+            check(tilstand == Sykepengegrunnlag.FastsattEtterHovedregel) {
+                "Forventer ikke at sykepengegrunnlaget har tilstand ${tilstand::class.java.simpleName}"
+            }
+        }
     }
 
     private fun validerSykdomshistorikk() {

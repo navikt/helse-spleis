@@ -28,6 +28,7 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.inntekt.Sykepengegrunnlag.FastsattEtterHovedregel
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -37,6 +38,12 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Sykepengegrunnlag faststt etter hovedregel`() {
+        nyttVedtak(1.januar, 31.januar)
+        assertEquals(FastsattEtterHovedregel, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.tilstand)
+    }
 
     @Test
     fun `skjæringstidspunkt måneden før inntektsmelding`() {

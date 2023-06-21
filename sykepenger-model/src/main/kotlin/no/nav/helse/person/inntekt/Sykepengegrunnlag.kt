@@ -84,7 +84,7 @@ internal class Sykepengegrunnlag private constructor(
     private val oppfyllerMinsteinntektskrav = beregningsgrunnlag >= minsteinntekt
     private val avviksprosent = sammenligningsgrunnlag.avviksprosent(omregnetÅrsinntekt, SubsumsjonObserver.NullObserver)
 
-    private var tilstand: Tilstand = tilstand ?: Fastsatt // TODO: utlede starttilstand basert på avviksprosent
+    private var tilstand: Tilstand = tilstand ?: tilstand(AvventerFastsettelseEtterHovedregel) // TODO: utlede starttilstand basert på avviksprosent
 
     internal constructor(
         alder: Alder,
@@ -415,19 +415,40 @@ internal class Sykepengegrunnlag private constructor(
         }
     }
 
+    private fun tilstand(nyTilstand: Tilstand): Tilstand {
+        if (tilstand == nyTilstand) return tilstand
+        tilstand = nyTilstand
+        tilstand.entering(this)
+        return tilstand
+    }
+
     internal sealed interface Tilstand {
+        fun entering(sykepengegrunnlag: Sykepengegrunnlag) {}
         fun fastsatt(sykepengegrunnlag: Sykepengegrunnlag) {
             throw IllegalStateException("kan ikke fastsette i ${this::class.simpleName}")
         }
     }
 
-    object AvventerFastsettelse : Tilstand {
+    object AvventerFastsettelseEtterHovedregel : Tilstand {
+        override fun entering(sykepengegrunnlag: Sykepengegrunnlag) {
+            // Fastsettelse etter hovedregel skjer maskinelt og umiddelbart 💨
+            fastsatt(sykepengegrunnlag)
+        }
         override fun fastsatt(sykepengegrunnlag: Sykepengegrunnlag) {
-            sykepengegrunnlag.tilstand = Fastsatt
+            sykepengegrunnlag.tilstand(FastsattEtterHovedregel)
         }
     }
-    object Fastsatt : Tilstand {
+    object FastsattEtterHovedregel : Tilstand {
+        override fun fastsatt(sykepengegrunnlag: Sykepengegrunnlag) {}
+    }
 
+    object AvventerFastsettelseEtterSkjønn : Tilstand {
+        override fun fastsatt(sykepengegrunnlag: Sykepengegrunnlag) {
+            sykepengegrunnlag.tilstand(FastsattEtterSkjønn)
+        }
+    }
+    object FastsattEtterSkjønn : Tilstand {
+        override fun fastsatt(sykepengegrunnlag: Sykepengegrunnlag) {}
     }
 }
 

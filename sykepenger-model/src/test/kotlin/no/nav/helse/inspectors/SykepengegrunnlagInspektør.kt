@@ -28,6 +28,7 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
         private set
     internal var avviksprosent by Delegates.notNull<Int>()
         private set
+    internal lateinit var tilstand: Sykepengegrunnlag.Tilstand
 
     init {
         sykepengegrunnlag.accept(this)
@@ -55,6 +56,7 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
         this.omregnetÅrsinntekt = totalOmregnetÅrsinntekt
         this.inntektskilde = sykepengegrunnlag1.inntektskilde()
         this.avviksprosent = avviksprosent.roundToInt()
+        this.tilstand = tilstand
     }
 
     override fun preVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
