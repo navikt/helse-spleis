@@ -319,10 +319,8 @@ internal data class PersonData(
             private val tilstand: TilstandData
         ) {
             enum class TilstandData {
-                AVVENTER_FASTSETTELSE_ETTER_HOVEDREGEL,
-                FASTSATT, // TODO: Rename til FASTSATT_ETTER_HOVEDREGEL sammen med en migrering
-                AVVENTER_FASTSETTELSE_ETTER_SKJØNN,
-                FASTSATT_ETTER_SKJØNN
+                AVVENTER_FASTSETTELSE,
+                FASTSATT
             }
 
             internal fun parseSykepengegrunnlag(
@@ -338,10 +336,8 @@ internal data class PersonData(
                 vurdertInfotrygd = vurdertInfotrygd,
                 `6G` = grunnbeløp?.årlig,
                 tilstand = when (tilstand) {
-                    TilstandData.AVVENTER_FASTSETTELSE_ETTER_HOVEDREGEL -> Sykepengegrunnlag.AvventerFastsettelseEtterHovedregel
-                    TilstandData.FASTSATT -> Sykepengegrunnlag.FastsattEtterHovedregel
-                    TilstandData.AVVENTER_FASTSETTELSE_ETTER_SKJØNN -> Sykepengegrunnlag.AvventerFastsettelseEtterSkjønn
-                    TilstandData.FASTSATT_ETTER_SKJØNN -> Sykepengegrunnlag.FastsattEtterSkjønn
+                    TilstandData.AVVENTER_FASTSETTELSE -> Sykepengegrunnlag.AvventerFastsettelse
+                    TilstandData.FASTSATT -> Sykepengegrunnlag.Fastsatt
                 }
             )
 
@@ -357,7 +353,7 @@ internal data class PersonData(
                 deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.parseArbeidsgiverInntektsopplysninger(builder),
                 vurdertInfotrygd = vurdertInfotrygd,
                 `6G` = grunnbeløp?.årlig,
-                tilstand = Sykepengegrunnlag.FastsattEtterHovedregel
+                tilstand = Sykepengegrunnlag.Fastsatt
             )
         }
 

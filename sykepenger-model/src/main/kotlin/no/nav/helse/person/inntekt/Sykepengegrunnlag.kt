@@ -84,7 +84,7 @@ internal class Sykepengegrunnlag private constructor(
     private val oppfyllerMinsteinntektskrav = beregningsgrunnlag >= minsteinntekt
     private val avviksprosent = sammenligningsgrunnlag.avviksprosent(omregnetÅrsinntekt, SubsumsjonObserver.NullObserver)
 
-    private var tilstand: Tilstand = tilstand ?: AvventerFastsettelseEtterHovedregel // TODO: utlede starttilstand basert på avviksprosent
+    private var tilstand: Tilstand = tilstand ?: Fastsatt // TODO: utlede starttilstand basert på avviksprosent
 
     internal constructor(
         alder: Alder,
@@ -416,32 +416,18 @@ internal class Sykepengegrunnlag private constructor(
     }
 
     internal sealed interface Tilstand {
-        fun entering(sykepengegrunnlag: Sykepengegrunnlag) {}
         fun fastsatt(sykepengegrunnlag: Sykepengegrunnlag) {
             throw IllegalStateException("kan ikke fastsette i ${this::class.simpleName}")
         }
     }
 
-    object AvventerFastsettelseEtterHovedregel : Tilstand {
-        override fun entering(sykepengegrunnlag: Sykepengegrunnlag) {
-            // Fastsettelse etter hovedregel skjer maskinelt og umiddelbart 💨
-            fastsatt(sykepengegrunnlag)
-        }
+    object AvventerFastsettelse : Tilstand {
         override fun fastsatt(sykepengegrunnlag: Sykepengegrunnlag) {
-            sykepengegrunnlag.tilstand = FastsattEtterHovedregel
+            sykepengegrunnlag.tilstand = Fastsatt
         }
     }
-    object FastsattEtterHovedregel : Tilstand {
-        override fun fastsatt(sykepengegrunnlag: Sykepengegrunnlag) {}
-    }
+    object Fastsatt : Tilstand {
 
-    object AvventerFastsettelseEtterSkjønn : Tilstand {
-        override fun fastsatt(sykepengegrunnlag: Sykepengegrunnlag) {
-            sykepengegrunnlag.tilstand = FastsattEtterSkjønn
-        }
-    }
-    object FastsattEtterSkjønn : Tilstand {
-        override fun fastsatt(sykepengegrunnlag: Sykepengegrunnlag) {}
     }
 }
 

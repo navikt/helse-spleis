@@ -51,5 +51,5 @@ internal fun Inntekt.sykepengegrunnlag(orgnr: String, skjæringstidspunkt: Local
         deaktiverteArbeidsforhold = emptyList(),
         vurdertInfotrygd = false,
         `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningstidspunkt),
-        tilstand = Sykepengegrunnlag.FastsattEtterHovedregel
+        tilstand = Sykepengegrunnlag.Fastsatt
     )

@@ -509,7 +509,7 @@ internal class SykepengegrunnlagTest {
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             deaktiverteArbeidsforhold = emptyList(),
             vurdertInfotrygd = false,
-            tilstand = Sykepengegrunnlag.FastsattEtterHovedregel
+            tilstand = Sykepengegrunnlag.Fastsatt
         )
 
         val opptjening = Opptjening(listOf(
@@ -585,7 +585,7 @@ internal class SykepengegrunnlagTest {
             deaktiverteArbeidsforhold = emptyList(),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             vurdertInfotrygd = false,
-            tilstand = Sykepengegrunnlag.FastsattEtterHovedregel
+            tilstand = Sykepengegrunnlag.Fastsatt
         )
 
 
@@ -630,7 +630,7 @@ internal class SykepengegrunnlagTest {
             deaktiverteArbeidsforhold = emptyList(),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             vurdertInfotrygd = false,
-            tilstand = Sykepengegrunnlag.FastsattEtterHovedregel
+            tilstand = Sykepengegrunnlag.Fastsatt
         )
 
 
@@ -673,7 +673,7 @@ internal class SykepengegrunnlagTest {
             deaktiverteArbeidsforhold = emptyList(),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             vurdertInfotrygd = false,
-            tilstand = Sykepengegrunnlag.FastsattEtterHovedregel
+            tilstand = Sykepengegrunnlag.Fastsatt
         )
 
         val opptjeningUtenA2 = Opptjening(listOf(
@@ -748,7 +748,7 @@ internal class SykepengegrunnlagTest {
             deaktiverteArbeidsforhold = emptyList(),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             vurdertInfotrygd = false,
-            tilstand = Sykepengegrunnlag.FastsattEtterHovedregel
+            tilstand = Sykepengegrunnlag.Fastsatt
         )
 
 
@@ -782,7 +782,7 @@ internal class SykepengegrunnlagTest {
             deaktiverteArbeidsforhold = emptyList(),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             vurdertInfotrygd = false,
-            tilstand = Sykepengegrunnlag.FastsattEtterHovedregel
+            tilstand = Sykepengegrunnlag.Fastsatt
         )
 
         assertEquals(sykepengegrunnlag1, sykepengegrunnlag1.justerGrunnbeløp()) { "grunnbeløpet trenger ikke justering" }
@@ -819,7 +819,7 @@ internal class SykepengegrunnlagTest {
                     )
                 ),
                 vurdertInfotrygd = false,
-                tilstand = Sykepengegrunnlag.FastsattEtterHovedregel
+                tilstand = Sykepengegrunnlag.Fastsatt
             )
         )
     }
