@@ -22,6 +22,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
@@ -124,6 +125,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
@@ -172,6 +174,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
@@ -200,6 +203,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
@@ -228,6 +232,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_REVURDERING,
@@ -298,6 +303,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING_REVURDERING,
             AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING
@@ -470,7 +476,15 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterOverstyrInntekt(inntekt = 7000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING
+        )
 
         assertVarsel(RV_IV_2, AktivitetsloggFilter.person())
         assertEquals(2, inspektør.utbetalinger.size)
@@ -484,7 +498,15 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(inntekt = 70000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING
+        )
 
         assertVarsel(RV_IV_2, AktivitetsloggFilter.person())
         assertEquals(2, inspektør.utbetalinger.size)
@@ -503,6 +525,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING
@@ -529,6 +552,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING

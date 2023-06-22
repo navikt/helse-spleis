@@ -340,7 +340,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 refusjonsopplysningerPerArbeidsgiver = refusjonsopplysningerPerArbeidsgiver.toList(),
                 avviksprosent = avviksprosent,
                 sammenligningsgrunnlagTotal = sammenligningsgrunnlagTotal,
-                skjønnsmessigFastsattÅrlig = if (inntekterPerArbeidsgiver.harSkjønnsmessigFastsatt()) beregningsgrunnlag else null
+                skjønnsmessigFastsattÅrlig = if (inntekterPerArbeidsgiver.harSkjønnsmessigFastsatt()) beregningsgrunnlag else null // TODO Kan man heller bruke tilstanden til sykepengegrunnlaget her?
             )
         }
 

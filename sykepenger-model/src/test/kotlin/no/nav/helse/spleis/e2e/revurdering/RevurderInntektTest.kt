@@ -30,6 +30,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
@@ -295,6 +296,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING
         )
@@ -322,6 +324,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING
         )
@@ -351,6 +354,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING
@@ -657,7 +661,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(INNTEKT /2, skjæringstidspunkt = 1.januar)
         håndterUtbetalt()
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
-        assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertNotNull(observatør.vedtakFattetEvent[2.vedtaksperiode.id(ORGNUMMER)])
     }
 
@@ -667,7 +671,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterOverstyrInntekt(INNTEKT /2, skjæringstidspunkt = 1.januar)
         håndterUtbetalt()
-        assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertNotNull(observatør.vedtakFattetEvent[1.vedtaksperiode.id(ORGNUMMER)])
     }
 

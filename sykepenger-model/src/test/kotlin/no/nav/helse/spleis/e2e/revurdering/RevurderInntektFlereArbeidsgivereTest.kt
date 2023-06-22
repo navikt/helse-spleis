@@ -27,6 +27,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -434,6 +435,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -456,6 +458,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 AVSLUTTET

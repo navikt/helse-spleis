@@ -966,7 +966,7 @@ internal class Vedtaksperiode private constructor(
         check(tilstand == AvventerGjennomførtRevurdering){ "Må være i AvventerGjennomførtRevurdering for å igangsette" }
         hendelse.kontekst(arbeidsgiver)
         kontekst(hendelse)
-        tilstand(hendelse, AvventerHistorikkRevurdering)
+        nesteTilstandForAktivRevurdering(hendelse)
     }
 
     internal fun gjenopptaRevurdering(hendelse: IAktivitetslogg, første: Vedtaksperiode) {
@@ -1398,7 +1398,7 @@ internal class Vedtaksperiode private constructor(
                 return hendelse.info("Mangler nødvendig inntekt for vilkårsprøving på annen arbeidsgiver og kan derfor ikke gjenoppta revurdering.")
             if (arbeidsgivere.trengerInntektsmelding(vedtaksperiode.periode))
                 return hendelse.info("Trenger inntektsmelding for overlappende periode på annen arbeidsgiver og kan derfor ikke gjenoppta revurdering.")
-            if (Toggle.ForenkleRevurdering.enabled) return vedtaksperiode.tilstand(hendelse, AvventerHistorikkRevurdering)
+            if (Toggle.ForenkleRevurdering.enabled) return vedtaksperiode.nesteTilstandForAktivRevurdering(hendelse)
             vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
             vedtaksperiode.arbeidsgiver.gjenopptaRevurdering(vedtaksperiode, hendelse)
         }
@@ -1435,6 +1435,16 @@ internal class Vedtaksperiode private constructor(
             }
             vedtaksperiode.person.gjenopptaBehandling(påminnelse)
         }
+    }
+
+    private fun nesteTilstandForAktivRevurdering(hendelse: IAktivitetslogg) {
+        val vilkårsgrunnlag = vilkårsgrunnlag ?: return tilstand(hendelse, AvventerVilkårsprøvingRevurdering) {
+            hendelse.info("Trenger å utføre vilkårsprøving før vi kan beregne utbetaling for revurderingen.")
+        }
+        if (vilkårsgrunnlag.trengerFastsettelseEtterSkjønn()) return tilstand(hendelse, AvventerSkjønnsmessigFastsettelseRevurdering) {
+            hendelse.info("Trenger å skjønnsfastsette sykepengegrunnlaget før vi kan beregne utbetaling for revurderingen")
+        }
+        tilstand(hendelse, AvventerHistorikkRevurdering)
     }
 
     internal object AvventerGjennomførtRevurdering : Vedtaksperiodetilstand {
@@ -2556,7 +2566,8 @@ internal class Vedtaksperiode private constructor(
                 AvventerVilkårsprøvingRevurdering,
                 AvventerHistorikkRevurdering,
                 AvventerSimuleringRevurdering,
-                AvventerGodkjenningRevurdering
+                AvventerGodkjenningRevurdering,
+                AvventerSkjønnsmessigFastsettelseRevurdering
             )
         }
 

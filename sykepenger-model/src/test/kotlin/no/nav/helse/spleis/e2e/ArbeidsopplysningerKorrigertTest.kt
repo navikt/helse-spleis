@@ -220,7 +220,6 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
                 )
             )
         ).meldingsreferanseId()
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         val expected = ArbeidsgiveropplysningerKorrigertEvent(

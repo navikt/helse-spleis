@@ -50,7 +50,6 @@ internal class OverstyrArbeidsgiverperiodeTest : AbstractDslTest() {
 
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.februar, Dagtype.Sykedag, 100)))
 
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

@@ -226,7 +226,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
                 ManuellOverskrivingDag(1.januar, Dagtype.Arbeidsdag, 100),
                 ManuellOverskrivingDag(4.januar, Dagtype.Arbeidsdag, 100),
             ))
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
@@ -246,7 +245,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             val revurdering = inspektør.utbetaling(1).inspektør
             assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
 
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
         }
     }
 
@@ -265,7 +264,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterOverstyrTidslinje((1.januar til 16.januar).map { dag ->
                 ManuellOverskrivingDag(dag, Dagtype.Arbeidsdag, 100)
             })
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -295,7 +293,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertEquals(1.januar til 28.februar, februarutbetaling.periode)
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET
             )
         }
@@ -316,7 +314,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterOverstyrTidslinje((1.januar til 10.januar).map { dag ->
                 ManuellOverskrivingDag(dag, Dagtype.Arbeidsdag, 100)
             })
-            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
@@ -349,7 +346,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertEquals(0, revurdering.personOppdrag.size)
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+                AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
         }
     }
 
@@ -370,7 +367,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterOverstyrTidslinje((1.mars til 10.mars).map { dag ->
                 ManuellOverskrivingDag(dag, Dagtype.Arbeidsdag, 100)
             })
-            håndterYtelser(2.vedtaksperiode)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
 
@@ -401,7 +397,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             }
             assertEquals(0, revurdering.personOppdrag.size)
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+                AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
         }
     }
 
@@ -424,7 +420,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            håndterYtelser(2.vedtaksperiode)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
 
@@ -500,7 +495,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            håndterYtelser(2.vedtaksperiode)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
 
@@ -575,7 +569,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            håndterYtelser(2.vedtaksperiode)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -714,7 +707,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            håndterYtelser(2.vedtaksperiode)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -775,7 +767,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            håndterYtelser(2.vedtaksperiode)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -823,7 +814,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            håndterYtelser(2.vedtaksperiode)
             håndterVilkårsgrunnlag(2.vedtaksperiode, inntektSkatt)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
