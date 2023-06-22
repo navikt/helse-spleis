@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.overstyring
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Toggle
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -23,6 +24,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING
@@ -32,7 +34,9 @@ import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
+import no.nav.helse.person.inntekt.Sykepengegrunnlag.AvventerFastsettelseEtterHovedregel
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.AvventerFastsettelseEtterSkjønn
+import no.nav.helse.person.inntekt.Sykepengegrunnlag.FastsattEtterHovedregel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -174,6 +178,41 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
                 AVVENTER_SKJØNNSMESSIG_FASTSETTELSE,
                 TIL_INFOTRYGD
             )
+        }
+    }
+
+    @Test
+    fun `avvik i utgangspunktet - men så overstyres inntekt`() = Toggle.TjuefemprosentAvvik.enable {
+        a1 {
+            nyPeriode(1.januar til 31.januar, a1)
+            håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT * 2)
+            håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = INNTEKT)
+            assertVarsel(RV_IV_2)
+            assertEquals(AvventerFastsettelseEtterSkjønn, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.tilstand)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE)
+
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar, listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a1,
+                        inntekt = INNTEKT,
+                        forklaring = "forklaring",
+                        refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))
+                    )
+                )
+            )
+            assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Saksbehandler)
+            assertForventetFeil(
+                forklaring = "Sykepengegrunnlaget er fastsatt",
+                nå = {
+                    assertEquals(AvventerFastsettelseEtterHovedregel, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.tilstand)
+                },
+                ønsket = {
+                    assertEquals(FastsattEtterHovedregel, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.tilstand)
+                }
+            )
+            håndterYtelser(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
         }
     }
 
