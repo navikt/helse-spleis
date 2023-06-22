@@ -10,7 +10,8 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.arbeidsgiver
-import no.nav.helse.person.inntekt.Sykepengegrunnlag
+import no.nav.helse.person.inntekt.Sykepengegrunnlag.AvventerFastsettelseEtterSkjønn
+import no.nav.helse.person.inntekt.Sykepengegrunnlag.FastsattEtterSkjønn
 
 internal class UgyldigeSituasjonerObservatør(private val person: Person): PersonObserver {
 
@@ -60,8 +61,9 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         person.inspektør.vilkårsgrunnlagHistorikk.inspektør.grunnlagsdata().forEach {
             val tilstand = it.inspektør.sykepengegrunnlag.inspektør.tilstand
             val avvik = it.inspektør.sykepengegrunnlag.inspektør.nøyaktigAvviksprosent
-            if (avvik <= 25) return check(tilstand == Sykepengegrunnlag.FastsattEtterHovedregel) { "Forventer ikke at sykepengegrunnlaget har tilstand ${tilstand::class.java.simpleName} med $avvik% avvik" }
-            check(tilstand == Sykepengegrunnlag.AvventerFastsettelseEtterSkjønn) { "Forventer ikke at sykepengegrunnlaget har tilstand ${tilstand::class.java.simpleName} med $avvik% avvik" }
+            if (avvik > 25) check(tilstand in listOf(AvventerFastsettelseEtterSkjønn, FastsattEtterSkjønn)) {
+                "Forventer ikke at sykepengegrunnlaget har tilstand ${tilstand::class.java.simpleName} med $avvik% avvik"
+            }
         }
     }
 

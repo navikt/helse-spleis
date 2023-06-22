@@ -169,7 +169,6 @@ internal class Sykepengegrunnlag private constructor(
         return oppfyllerMinsteinntektskrav && !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
-    internal fun harAkseptabeltAvvik() = harAkseptabeltAvvik(avviksprosent)
 
     internal fun harNødvendigInntektForVilkårsprøving(organisasjonsnummer: String) =
         arbeidsgiverInntektsopplysninger.harInntekt(organisasjonsnummer)
@@ -206,13 +205,19 @@ internal class Sykepengegrunnlag private constructor(
     internal fun aktiver(orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserver) =
         deaktiverteArbeidsforhold.aktiver(arbeidsgiverInntektsopplysninger, orgnummer, forklaring, subsumsjonObserver)
             .let { (deaktiverte, aktiverte) ->
-                kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger = aktiverte, deaktiverteArbeidsforhold = deaktiverte)
+                kopierSykepengegrunnlag(
+                    arbeidsgiverInntektsopplysninger = aktiverte,
+                    deaktiverteArbeidsforhold = deaktiverte
+                )
             }
 
     internal fun deaktiver(orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserver) =
         arbeidsgiverInntektsopplysninger.deaktiver(deaktiverteArbeidsforhold, orgnummer, forklaring, subsumsjonObserver)
             .let { (aktiverte, deaktiverte) ->
-                kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger = aktiverte, deaktiverteArbeidsforhold = deaktiverte)
+                kopierSykepengegrunnlag(
+                    arbeidsgiverInntektsopplysninger = aktiverte,
+                    deaktiverteArbeidsforhold = deaktiverte
+                )
             }
 
     internal fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
@@ -234,7 +239,7 @@ internal class Sykepengegrunnlag private constructor(
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(arbeidsgiverInntektsopplysninger, opptjening, subsumsjonObserver)
         hendelse.overstyr(builder)
         val resultat = builder.resultat() ?: return null
-        return kopierSykepengegrunnlag(resultat, deaktiverteArbeidsforhold)
+        return tilstand.fastsattEtterSkjønn(this, resultat)
     }
 
     internal fun refusjonsopplysninger(organisasjonsnummer: String): Refusjonsopplysninger =
@@ -275,7 +280,8 @@ internal class Sykepengegrunnlag private constructor(
 
     private fun kopierSykepengegrunnlag(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-        deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>
+        deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
+        tilstand: Tilstand? = null
     ) = Sykepengegrunnlag(
             alder = alder,
             skjæringstidspunkt = skjæringstidspunkt,
@@ -283,10 +289,13 @@ internal class Sykepengegrunnlag private constructor(
             deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
             vurdertInfotrygd = vurdertInfotrygd,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
-            tilstand = null
+            tilstand = tilstand
         )
 
-    internal fun justerGrunnbeløp() = kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold)
+    internal fun justerGrunnbeløp() = kopierSykepengegrunnlag(
+        arbeidsgiverInntektsopplysninger,
+        deaktiverteArbeidsforhold
+    )
     internal fun accept(visitor: SykepengegrunnlagVisitor) {
         visitor.preVisitSykepengegrunnlag(
             this,
@@ -426,43 +435,49 @@ internal class Sykepengegrunnlag private constructor(
         return tilstand
     }
 
+    internal fun fastsattEtterHovedregel() {
+        tilstand.fastsattEtterHovedregel(this, this.arbeidsgiverInntektsopplysninger)
+    }
+
     internal sealed interface Tilstand {
         fun entering(sykepengegrunnlag: Sykepengegrunnlag) {}
-        fun fastsatt(sykepengegrunnlag: Sykepengegrunnlag) {
-            throw IllegalStateException("kan ikke fastsette i ${this::class.simpleName}")
+        fun fastsattEtterHovedregel(sykepengegrunnlag: Sykepengegrunnlag, resultat: List<ArbeidsgiverInntektsopplysning>): Sykepengegrunnlag {
+            throw IllegalStateException("kan ikke fastsette etter hovedregel i ${this::class.simpleName}")
+        }
+        fun fastsattEtterSkjønn(sykepengegrunnlag: Sykepengegrunnlag, resultat: List<ArbeidsgiverInntektsopplysning>): Sykepengegrunnlag {
+            throw IllegalStateException("kan ikke fastsette etter skjønn i ${this::class.simpleName}")
         }
     }
 
     object Start : Tilstand {
         override fun entering(sykepengegrunnlag: Sykepengegrunnlag) {
-            val tilstand = if (sykepengegrunnlag.harAkseptabeltAvvik()) AvventerFastsettelseEtterHovedregel else AvventerFastsettelseEtterSkjønn
+            val tilstand = if (sykepengegrunnlag.harAkseptabeltAvvik(sykepengegrunnlag.avviksprosent)) AvventerFastsettelseEtterHovedregel else AvventerFastsettelseEtterSkjønn
             sykepengegrunnlag.tilstand(tilstand)
         }
     }
 
     object AvventerFastsettelseEtterHovedregel : Tilstand {
-        override fun entering(sykepengegrunnlag: Sykepengegrunnlag) {
-            // Fastsettelse etter hovedregel skjer maskinelt og umiddelbart 💨
-            fastsatt(sykepengegrunnlag)
-        }
-        override fun fastsatt(sykepengegrunnlag: Sykepengegrunnlag) {
+        override fun fastsattEtterHovedregel(sykepengegrunnlag: Sykepengegrunnlag, resultat: List<ArbeidsgiverInntektsopplysning>): Sykepengegrunnlag {
             sykepengegrunnlag.tilstand(FastsattEtterHovedregel)
+            return sykepengegrunnlag
         }
     }
     object FastsattEtterHovedregel : Tilstand {
-        override fun fastsatt(sykepengegrunnlag: Sykepengegrunnlag) {}
+        override fun fastsattEtterSkjønn(sykepengegrunnlag: Sykepengegrunnlag, resultat: List<ArbeidsgiverInntektsopplysning>): Sykepengegrunnlag {
+            return sykepengegrunnlag.kopierSykepengegrunnlag(resultat, sykepengegrunnlag.deaktiverteArbeidsforhold, FastsattEtterSkjønn)
+        }
     }
 
     object AvventerFastsettelseEtterSkjønn : Tilstand {
         override fun entering(sykepengegrunnlag: Sykepengegrunnlag) {
             sikkerLogg.info("Sykepengegrunnlag har tilstand AvventerFastsettelseEtterSkjønn")
         }
-        override fun fastsatt(sykepengegrunnlag: Sykepengegrunnlag) {
-            sykepengegrunnlag.tilstand(FastsattEtterSkjønn)
+        override fun fastsattEtterSkjønn(sykepengegrunnlag: Sykepengegrunnlag, resultat: List<ArbeidsgiverInntektsopplysning>): Sykepengegrunnlag {
+            return sykepengegrunnlag.kopierSykepengegrunnlag(resultat, sykepengegrunnlag.deaktiverteArbeidsforhold, FastsattEtterSkjønn)
         }
     }
     object FastsattEtterSkjønn : Tilstand {
-        override fun fastsatt(sykepengegrunnlag: Sykepengegrunnlag) {}
+
     }
 }
 

@@ -3,10 +3,10 @@ package no.nav.helse.spleis.e2e.overstyring
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Toggle
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -19,24 +19,25 @@ import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
+import no.nav.helse.person.inntekt.Sykepengegrunnlag.AvventerFastsettelseEtterSkjønn
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.fail
 
 internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
 
@@ -143,11 +144,46 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     }
 
     @Test
+    fun `endring til avvik`() = Toggle.TjuefemprosentAvvik.enable {
+        a1 {
+            tilGodkjenning(1.januar, 31.januar)
+            nullstillTilstandsendringer()
+            håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT * 2)
+            assertVarsel(RV_IV_2)
+            assertEquals(AvventerFastsettelseEtterSkjønn, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.tilstand)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_GODKJENNING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
+            )
+        }
+    }
+
+    @Test
+    fun `endring til avvik2`() {
+        a1 {
+            tilGodkjenning(1.januar, 31.januar)
+            nullstillTilstandsendringer()
+            håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT * 2)
+            assertVarsel(RV_IV_2)
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                AVVENTER_GODKJENNING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_SKJØNNSMESSIG_FASTSETTELSE,
+                TIL_INFOTRYGD
+            )
+        }
+    }
+
+    @Test
     fun `revurdering med avvik går gjennom AvventerSkjønnsmessigFastsettelse`() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
             nullstillTilstandsendringer()
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 2)
+            assertEquals(AvventerFastsettelseEtterSkjønn, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.tilstand)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertTilstander(
@@ -165,7 +201,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     }
 
     @Test
-    fun `Tidligere perioder revurderes mens nyere skjønnsmessig fastsettes `() = Toggle.TjuefemprosentAvvik.enable {
+    fun `Tidligere perioder revurderes mens nyere skjønnsmessig fastsettes`() = Toggle.TjuefemprosentAvvik.enable {
         a1 {
             nyttVedtak(1.januar, 31.januar)
             nyPeriode(1.mars til 31.mars, a1)
@@ -179,16 +215,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-
-            assertForventetFeil(
-                forklaring = "Vi må finne ut av hva vi skal gjøre",
-                nå = {
-                    assertTilstander(2.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-                },
-                ønsket = {
-                    fail { "Vi må finne ut av hva vi skal gjøre"}
-                }
-            )
+            assertTilstander(2.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE)
         }
 
     }
@@ -215,6 +242,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             // Saksbehandler skjønnsmessig fastsetter
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = nyInntekt, refusjonsopplysninger = emptyList())))
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(0, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.avviksprosent)
             assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is SkjønnsmessigFastsatt)
             assertEquals(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, gammelInntekt)), inspektør.refusjonsopplysningerFraVilkårsgrunnlag().inspektør.refusjonsopplysninger)
 

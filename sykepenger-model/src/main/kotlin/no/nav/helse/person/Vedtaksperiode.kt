@@ -135,7 +135,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.slåSammenForkastedeSykdomstidslinjer
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -660,12 +659,10 @@ internal class Vedtaksperiode private constructor(
         person.lagreVilkårsgrunnlag(grunnlagsdata)
         vilkårsgrunnlag.info("Vilkårsgrunnlag vurdert")
         if (vilkårsgrunnlag.harFunksjonelleFeilEllerVerre()) return forkast(vilkårsgrunnlag)
-        if (trengerFastsettelseEtterSkjønn(sykepengegrunnlag)) return tilstand(vilkårsgrunnlag, tilstandMedAvvik)
+        if (sykepengegrunnlag.avventerFastsettelseEtterSkjønn()) return tilstand(vilkårsgrunnlag, tilstandMedAvvik)
+        sykepengegrunnlag.fastsattEtterHovedregel()
         tilstand(vilkårsgrunnlag, tilstandUtenAvvik)
     }
-
-    private fun trengerFastsettelseEtterSkjønn(sykepengegrunnlag: Sykepengegrunnlag) =
-        sykepengegrunnlag.avventerFastsettelseEtterSkjønn()
 
     private fun håndterUtbetalingHendelse(hendelse: UtbetalingHendelse, onUtbetalt: () -> Unit) {
         if (hendelse.harFunksjonelleFeilEllerVerre()) return hendelse.funksjonellFeil(RV_UT_5)
@@ -1806,6 +1803,7 @@ internal class Vedtaksperiode private constructor(
             !arbeidsgivere.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) -> ManglerNødvendigInntektForVilkårsprøvingForAndreArbeidsgivere
             arbeidsgivere.trengerInntektsmelding(vedtaksperiode.periode) -> TrengerInntektsmelding
             vedtaksperiode.vilkårsgrunnlag == null -> KlarForVilkårsprøving
+            vedtaksperiode.vilkårsgrunnlag!!.trengerFastsettelseEtterSkjønn() -> KlarForFastsettelseEtterSkjønn
             else -> KlarForBeregning
         }
 
@@ -1858,6 +1856,15 @@ internal class Vedtaksperiode private constructor(
         private object KlarForVilkårsprøving: Tilstand {
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
                 vedtaksperiode.tilstand(hendelse, AvventerVilkårsprøving)
+            }
+        }
+
+        private object KlarForFastsettelseEtterSkjønn: Tilstand {
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+                if (Toggle.TjuefemprosentAvvik.disabled && (hendelse is OverstyrArbeidsforhold || hendelse is OverstyrArbeidsgiveropplysninger)) {
+                    return vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+                }
+                vedtaksperiode.tilstand(hendelse, AvventerSkjønnsmessigFastsettelse)
             }
         }
         private object KlarForBeregning: Tilstand {
