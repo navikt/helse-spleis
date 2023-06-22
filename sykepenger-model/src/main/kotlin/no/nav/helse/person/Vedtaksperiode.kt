@@ -81,6 +81,7 @@ import no.nav.helse.person.Venteårsak.Hva.BEREGNING
 import no.nav.helse.person.Venteårsak.Hva.GODKJENNING
 import no.nav.helse.person.Venteårsak.Hva.HJELP
 import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
+import no.nav.helse.person.Venteårsak.Hva.SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.person.Venteårsak.Hva.SØKNAD
 import no.nav.helse.person.Venteårsak.Hva.UTBETALING
 import no.nav.helse.person.Venteårsak.Hvorfor.ALLEREDE_UTBETALT
@@ -2032,11 +2033,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.forkast(hendelse)
         }
 
-        override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
-            return null
-        }
-
-        override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {}
+        override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) = SKJØNNSMESSIG_FASTSETTELSE.utenBegrunnelse
+        override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) = vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {}
 
         override fun igangsettOverstyring(
@@ -2056,9 +2054,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
 
-        override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
-            return null
-        }
+        override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) = SKJØNNSMESSIG_FASTSETTELSE fordi OVERSTYRING_IGANGSATT
+        override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) = vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
 
         override fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
@@ -2068,7 +2065,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(hendelse, AvventerHistorikkRevurdering)
         }
 
-        override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {}
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {}
     }
 

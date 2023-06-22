@@ -80,7 +80,8 @@ internal class Venteårsak private constructor(
         INNTEKTSMELDING,
         BEREGNING,
         UTBETALING,
-        HJELP
+        HJELP,
+        SKJØNNSMESSIG_FASTSETTELSE
     }
 
     enum class Hvorfor {
