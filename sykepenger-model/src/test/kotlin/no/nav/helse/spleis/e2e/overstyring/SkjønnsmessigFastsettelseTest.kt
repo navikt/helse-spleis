@@ -34,6 +34,7 @@ import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
+import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.AvventerFastsettelseEtterHovedregel
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.AvventerFastsettelseEtterSkjønn
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.FastsattEtterHovedregel
@@ -165,7 +166,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     }
 
     @Test
-    fun `endring til avvik2`() {
+    fun `endring til avvik før vi støtter skjønnsmessig fastsettelse`() {
         a1 {
             tilGodkjenning(1.januar, 31.januar)
             nullstillTilstandsendringer()
@@ -190,6 +191,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             assertVarsel(RV_IV_2)
             assertEquals(AvventerFastsettelseEtterSkjønn, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.tilstand)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE)
+            assertEquals(100, inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.avviksprosent)
 
             håndterOverstyrArbeidsgiveropplysninger(
                 1.januar, listOf(
@@ -202,6 +204,47 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
                 )
             )
             assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Saksbehandler)
+            assertEquals(0, inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.avviksprosent)
+            assertForventetFeil(
+                forklaring = "Sykepengegrunnlaget er fastsatt",
+                nå = {
+                    assertEquals(AvventerFastsettelseEtterHovedregel, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.tilstand)
+                },
+                ønsket = {
+                    assertEquals(FastsattEtterHovedregel, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.tilstand)
+                }
+            )
+            håndterYtelser(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
+        }
+    }
+
+    @Test
+    fun `skjønnsmessig fastsatt - men så skulle det være etter hovedregel`() = Toggle.TjuefemprosentAvvik.enable {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 2)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            assertEquals(AvventerFastsettelseEtterSkjønn, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.tilstand)
+            assertEquals(100, inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.avviksprosent)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE)
+
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(
+                orgnummer = a1,
+                inntekt = INNTEKT * 2
+            )))
+
+            assertEquals(Sykepengegrunnlag.FastsattEtterSkjønn, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.tilstand)
+            assertEquals(100, inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.avviksprosent)
+
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(
+                orgnummer = a1,
+                inntekt = INNTEKT,
+                forklaring = "forklaring"
+            )))
+
+            assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Saksbehandler)
+            assertEquals(0, inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.avviksprosent)
             assertForventetFeil(
                 forklaring = "Sykepengegrunnlaget er fastsatt",
                 nå = {
