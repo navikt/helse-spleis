@@ -417,6 +417,8 @@ internal class Sykepengegrunnlag private constructor(
         }
     }
 
+    internal fun avventerFastsettelseEtterSkjønn() = tilstand == AvventerFastsettelseEtterSkjønn
+
     private fun tilstand(nyTilstand: Tilstand): Tilstand {
         if (tilstand == nyTilstand) return tilstand
         tilstand = nyTilstand

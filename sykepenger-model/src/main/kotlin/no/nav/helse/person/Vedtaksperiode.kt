@@ -135,6 +135,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.slåSammenForkastedeSykdomstidslinjer
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -659,9 +660,12 @@ internal class Vedtaksperiode private constructor(
         person.lagreVilkårsgrunnlag(grunnlagsdata)
         vilkårsgrunnlag.info("Vilkårsgrunnlag vurdert")
         if (vilkårsgrunnlag.harFunksjonelleFeilEllerVerre()) return forkast(vilkårsgrunnlag)
-        if (!sykepengegrunnlag.harAkseptabeltAvvik()) return tilstand(vilkårsgrunnlag, tilstandMedAvvik)
+        if (trengerFastsettelseEtterSkjønn(sykepengegrunnlag)) return tilstand(vilkårsgrunnlag, tilstandMedAvvik)
         tilstand(vilkårsgrunnlag, tilstandUtenAvvik)
     }
+
+    private fun trengerFastsettelseEtterSkjønn(sykepengegrunnlag: Sykepengegrunnlag) =
+        sykepengegrunnlag.avventerFastsettelseEtterSkjønn()
 
     private fun håndterUtbetalingHendelse(hendelse: UtbetalingHendelse, onUtbetalt: () -> Unit) {
         if (hendelse.harFunksjonelleFeilEllerVerre()) return hendelse.funksjonellFeil(RV_UT_5)
