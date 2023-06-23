@@ -24,10 +24,6 @@ internal data class IArbeidsgiverinntekt(
             deaktivert = deaktivert
         )
     }
-
-    companion object {
-        internal fun List<IArbeidsgiverinntekt>.harSkjønnsmessigFastsatt() = mapNotNull { arbeidsgiver -> arbeidsgiver.skjønnsmessigFastsatt }.isNotEmpty()
-    }
 }
 
 internal data class IArbeidsgiverrefusjon(

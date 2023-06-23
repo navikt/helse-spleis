@@ -23,6 +23,7 @@ import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
+import no.nav.helse.person.inntekt.Sykepengegrunnlag.FastsattEtterSkjønn
 import no.nav.helse.serde.api.dto.GhostPeriodeDTO
 import no.nav.helse.serde.api.dto.Refusjonselement
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
@@ -30,7 +31,6 @@ import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
 import no.nav.helse.serde.api.dto.UberegnetPeriode
 import no.nav.helse.serde.api.dto.UberegnetVilkårsprøvdPeriode
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
-import no.nav.helse.serde.api.speil.builders.IArbeidsgiverinntekt.Companion.harSkjønnsmessigFastsatt
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import kotlin.properties.Delegates
@@ -319,6 +319,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         private val inntekterPerArbeidsgiver = mutableListOf<IArbeidsgiverinntekt>()
         private val refusjonsopplysningerPerArbeidsgiver = mutableListOf<IArbeidsgiverrefusjon>()
         private lateinit var sykepengegrunnlag: IInntekt
+        private lateinit var tilstand: Sykepengegrunnlag.Tilstand
         private var beregningsgrunnlag by Delegates.notNull<Double>()
         private var omregnetÅrsinntekt by Delegates.notNull<Double>()
         private var avviksprosent by Delegates.notNull<Double>()
@@ -340,7 +341,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 refusjonsopplysningerPerArbeidsgiver = refusjonsopplysningerPerArbeidsgiver.toList(),
                 avviksprosent = avviksprosent,
                 sammenligningsgrunnlagTotal = sammenligningsgrunnlagTotal,
-                skjønnsmessigFastsattÅrlig = if (inntekterPerArbeidsgiver.harSkjønnsmessigFastsatt()) beregningsgrunnlag else null // TODO Kan man heller bruke tilstanden til sykepengegrunnlaget her?
+                skjønnsmessigFastsattÅrlig = if (tilstand == FastsattEtterSkjønn) beregningsgrunnlag else null
             )
         }
 
@@ -371,6 +372,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             this.omregnetÅrsinntekt = InntektBuilder(totalOmregnetÅrsinntekt).build().årlig
             this.`6G` = `6G`
             this.avviksprosent = avviksprosent.prosent()
+            this.tilstand = tilstand
         }
 
         private var deaktivert = false
