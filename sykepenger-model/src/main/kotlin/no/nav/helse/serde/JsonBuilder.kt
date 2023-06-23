@@ -963,8 +963,7 @@ internal class JsonBuilder : AbstractBuilder() {
                     "minsteinntekt" to minsteinntekt.reflection { årlig, _, _, _ -> årlig },
                     "oppfyllerMinsteinntektskrav" to oppfyllerMinsteinntektskrav,
                     "tilstand" to when (tilstand) {
-                        is Sykepengegrunnlag.AvventerFastsettelseEtterHovedregel -> PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData.TilstandData.AVVENTER_FASTSETTELSE_ETTER_HOVEDREGEL
-                        is Sykepengegrunnlag.FastsattEtterHovedregel -> PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData.TilstandData.FASTSATT
+                        is Sykepengegrunnlag.FastsattEtterHovedregel -> PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData.TilstandData.FASTSATT_ETTER_HOVEDREGEL
                         is Sykepengegrunnlag.AvventerFastsettelseEtterSkjønn -> PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData.TilstandData.AVVENTER_FASTSETTELSE_ETTER_SKJØNN
                         is Sykepengegrunnlag.FastsattEtterSkjønn -> PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData.TilstandData.FASTSATT_ETTER_SKJØNN
                         is Sykepengegrunnlag.Start -> throw IllegalStateException("Forventet ikke tilstand ${tilstand.javaClass.simpleName}")

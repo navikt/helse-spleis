@@ -25,6 +25,7 @@ import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.build
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.erSkjønnsmessigFastsatt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finn
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnEndringsdato
@@ -196,11 +197,11 @@ internal class Sykepengegrunnlag private constructor(
     }
 
     internal fun validerAvvik(aktivitetslogg: IAktivitetslogg) {
-        if (!harAkseptabeltAvvik(avviksprosent)) return aktivitetslogg.varsel(RV_IV_2)
+        if (!harAkseptabeltAvvik()) return aktivitetslogg.varsel(RV_IV_2)
         aktivitetslogg.info("Har %.0f %% eller mindre avvik i inntekt (%.2f %%)", Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent(), avviksprosent.prosent())
     }
 
-    private fun harAkseptabeltAvvik(avvik: Prosent) = avvik <= Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
+    private fun harAkseptabeltAvvik() = this.avviksprosent <= Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
 
     internal fun aktiver(orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserver) =
         deaktiverteArbeidsforhold.aktiver(arbeidsgiverInntektsopplysninger, orgnummer, forklaring, subsumsjonObserver)
@@ -435,15 +436,9 @@ internal class Sykepengegrunnlag private constructor(
         return tilstand
     }
 
-    internal fun fastsattEtterHovedregel() {
-        tilstand.fastsattEtterHovedregel(this, this.arbeidsgiverInntektsopplysninger)
-    }
-
     internal sealed interface Tilstand {
         fun entering(sykepengegrunnlag: Sykepengegrunnlag) {}
-        fun fastsattEtterHovedregel(sykepengegrunnlag: Sykepengegrunnlag, resultat: List<ArbeidsgiverInntektsopplysning>): Sykepengegrunnlag {
-            throw IllegalStateException("kan ikke fastsette etter hovedregel i ${this::class.simpleName}")
-        }
+
         fun fastsattEtterSkjønn(sykepengegrunnlag: Sykepengegrunnlag, resultat: List<ArbeidsgiverInntektsopplysning>): Sykepengegrunnlag {
             throw IllegalStateException("kan ikke fastsette etter skjønn i ${this::class.simpleName}")
         }
@@ -451,15 +446,12 @@ internal class Sykepengegrunnlag private constructor(
 
     object Start : Tilstand {
         override fun entering(sykepengegrunnlag: Sykepengegrunnlag) {
-            val tilstand = if (sykepengegrunnlag.harAkseptabeltAvvik(sykepengegrunnlag.avviksprosent)) AvventerFastsettelseEtterHovedregel else AvventerFastsettelseEtterSkjønn
+            val tilstand = when {
+                sykepengegrunnlag.arbeidsgiverInntektsopplysninger.erSkjønnsmessigFastsatt() -> FastsattEtterSkjønn
+                sykepengegrunnlag.harAkseptabeltAvvik() -> FastsattEtterHovedregel
+                else -> AvventerFastsettelseEtterSkjønn
+            }
             sykepengegrunnlag.tilstand(tilstand)
-        }
-    }
-
-    object AvventerFastsettelseEtterHovedregel : Tilstand {
-        override fun fastsattEtterHovedregel(sykepengegrunnlag: Sykepengegrunnlag, resultat: List<ArbeidsgiverInntektsopplysning>): Sykepengegrunnlag {
-            sykepengegrunnlag.tilstand(FastsattEtterHovedregel)
-            return sykepengegrunnlag
         }
     }
     object FastsattEtterHovedregel : Tilstand {

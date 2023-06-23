@@ -661,7 +661,6 @@ internal class Vedtaksperiode private constructor(
         vilkårsgrunnlag.info("Vilkårsgrunnlag vurdert")
         if (vilkårsgrunnlag.harFunksjonelleFeilEllerVerre()) return forkast(vilkårsgrunnlag)
         if (sykepengegrunnlag.avventerFastsettelseEtterSkjønn()) return tilstand(vilkårsgrunnlag, tilstandMedAvvik)
-        sykepengegrunnlag.fastsattEtterHovedregel()
         tilstand(vilkårsgrunnlag, tilstandUtenAvvik)
     }
 

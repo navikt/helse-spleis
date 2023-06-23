@@ -1,0 +1,28 @@
+{
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "vilkårsgrunnlag": [
+        {
+          "sykepengegrunnlag": {
+            "tilstand": "FASTSATT_ETTER_HOVEDREGEL"
+          }
+        }
+      ]
+    },
+    {
+      "vilkårsgrunnlag": [
+        {
+          "sykepengegrunnlag": {
+            "tilstand": "FASTSATT_ETTER_HOVEDREGEL"
+          }
+        },
+        {
+          "sykepengegrunnlag": {
+            "tilstand": "AVVENTER_FASTSETTELSE_ETTER_SKJØNN"
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 254
+}

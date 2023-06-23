@@ -92,6 +92,7 @@ class ArbeidsgiverInntektsopplysning(
     internal companion object {
 
         internal fun List<ArbeidsgiverInntektsopplysning>.validerSkjønnsmessigAltEllerIntet() = map { it.inntektsopplysning }.validerSkjønnsmessigAltEllerIntet()
+        internal fun List<ArbeidsgiverInntektsopplysning>.erSkjønnsmessigFastsatt() = any { it.inntektsopplysning is SkjønnsmessigFastsatt }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.finn(orgnummer: String) = firstOrNull { it.gjelder(orgnummer) }
 

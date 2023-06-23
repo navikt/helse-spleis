@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.overstyring
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Toggle
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -34,7 +33,6 @@ import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
-import no.nav.helse.person.inntekt.Sykepengegrunnlag.AvventerFastsettelseEtterHovedregel
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.AvventerFastsettelseEtterSkjønn
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.FastsattEtterHovedregel
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.FastsattEtterSkjønn
@@ -205,15 +203,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             )
             assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Saksbehandler)
             assertEquals(0, inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.avviksprosent)
-            assertForventetFeil(
-                forklaring = "Sykepengegrunnlaget er fastsatt",
-                nå = {
-                    assertEquals(AvventerFastsettelseEtterHovedregel, inspektør.tilstandPåSykepengegrunnlag(1.januar))
-                },
-                ønsket = {
-                    assertEquals(FastsattEtterHovedregel, inspektør.tilstandPåSykepengegrunnlag(1.januar))
-                }
-            )
+            assertEquals(FastsattEtterHovedregel, inspektør.tilstandPåSykepengegrunnlag(1.januar))
             håndterYtelser(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
         }
@@ -245,15 +235,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
 
             assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Saksbehandler)
             assertEquals(0, inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.avviksprosent)
-            assertForventetFeil(
-                forklaring = "Sykepengegrunnlaget er fastsatt",
-                nå = {
-                    assertEquals(AvventerFastsettelseEtterHovedregel, inspektør.tilstandPåSykepengegrunnlag(1.januar))
-                },
-                ønsket = {
-                    assertEquals(FastsattEtterHovedregel, inspektør.tilstandPåSykepengegrunnlag(1.januar))
-                }
-            )
+            assertEquals(FastsattEtterHovedregel, inspektør.tilstandPåSykepengegrunnlag(1.januar))
             håndterYtelser(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
         }
@@ -338,15 +320,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is SkjønnsmessigFastsatt)
             assertEquals(listOf(Refusjonsopplysning(overstyrInntektOgRefusjonId, 1.januar, null, skjønnsfastsattInntekt)), inspektør.refusjonsopplysningerFraVilkårsgrunnlag().inspektør.refusjonsopplysninger)
-            assertForventetFeil(
-                forklaring = "Kun nye refusjonsopplysninger på at skjønnsmessig fastsatt sykepengegrunnlag skal forbli FastsattVedSkjønn. Hvordan ender vi dag opp i AvventerFastsettelseEtterHovedregel 🤯?",
-                nå = {
-                    assertEquals(AvventerFastsettelseEtterHovedregel, inspektør.tilstandPåSykepengegrunnlag(1.januar))
-                },
-                ønsket = {
-                    assertEquals(FastsattEtterSkjønn, inspektør.tilstandPåSykepengegrunnlag(1.januar))
-                }
-            )
+            assertEquals(FastsattEtterSkjønn, inspektør.tilstandPåSykepengegrunnlag(1.januar))
         }
     }
 
