@@ -4,6 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.InfotrygdperiodeVisitor
+import no.nav.helse.person.Vedtaksperiode.Companion.MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
@@ -52,7 +53,7 @@ abstract class Utbetalingsperiode(
 
     private fun harBetaltTidligere(other: Periode): Boolean {
         val periodeMellom = periode.periodeMellom(other.start) ?: return false
-        return periodeMellom.count() < 20
+        return periodeMellom.count() < MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
     }
 
     private fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {

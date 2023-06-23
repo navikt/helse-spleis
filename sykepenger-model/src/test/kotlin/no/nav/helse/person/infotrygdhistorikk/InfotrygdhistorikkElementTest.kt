@@ -433,14 +433,14 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
-    fun `Utbetalinger i Infotrygd som er nærmere enn 20 dager fra tidslinjen`() {
+    fun `Utbetalinger i Infotrygd som er nærmere enn 18 dager fra tidslinjen`() {
         val utbetalinger = listOf(
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 5.januar, 100.prosent, 1234.daglig)
         )
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, 1234.daglig, true))
 
         val element = nyttHistorikkelement(utbetalinger, inntekter)
-        assertFalse(element.valider(aktivitetslogg, 25.januar.somPeriode(), "ag1"))
+        assertFalse(element.valider(aktivitetslogg, 23.januar.somPeriode(), "ag1"))
         aktivitetslogg.assertIngenVarsler()
     }
 

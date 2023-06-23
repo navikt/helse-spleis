@@ -454,10 +454,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun påvirkerArbeidsgiverperioden(ny: Vedtaksperiode): Boolean {
         val dagerMellom = ny.periode.periodeMellom(this.periode.start)?.count() ?: return false
-        // dersom "ny" slutter på en fredag, så starter ikke oppholdstelling før påfølgende mandag.
-        // det kan derfor være mer enn 16 dager avstand mellom periodene, og arbeidsgiverperioden kan være den samme
-        // Derfor bruker vi tallet 18 fremfor kanskje det forventende 16…
-        return dagerMellom < 18L
+        return dagerMellom < MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
     }
 
     override fun compareTo(other: Vedtaksperiode): Int {
@@ -2547,6 +2544,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal companion object {
+        // dersom "ny" slutter på en fredag, så starter ikke oppholdstelling før påfølgende mandag.
+        // det kan derfor være mer enn 16 dager avstand mellom periodene, og arbeidsgiverperioden kan være den samme
+        // Derfor bruker vi tallet 18 fremfor kanskje det forventende 16…
+        internal const val MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD = 18L
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
         // Fredet funksjonsnavn
