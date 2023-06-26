@@ -1858,9 +1858,6 @@ internal class Vedtaksperiode private constructor(
 
         private object KlarForFastsettelseEtterSkjønn: Tilstand {
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-                if (Toggle.TjuefemprosentAvvik.disabled && (hendelse is OverstyrArbeidsforhold || hendelse is OverstyrArbeidsgiveropplysninger)) {
-                    return vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
-                }
                 vedtaksperiode.tilstand(hendelse, AvventerSkjønnsmessigFastsettelse)
             }
         }
@@ -2024,6 +2021,8 @@ internal class Vedtaksperiode private constructor(
             if (Toggle.TjuefemprosentAvvik.enabled) return
             // omgjøringer må enn så lenge gå til godkjenning :/
             if (!vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode)) return vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+            // når saksbehandler overstyrer slik at det blir over 25% avvik vil vi at saksbehandler får resulatet presentert istedenfor at det forkastes og blir "borte" i Speil
+            if (hendelse is OverstyrArbeidsforhold || hendelse is OverstyrArbeidsgiveropplysninger) return vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
             vedtaksperiode.person.kandidatForSkjønnsmessigFastsettelse(vedtaksperiode.vilkårsgrunnlag!!)
             hendelse.funksjonellFeil(Varselkode.RV_IV_2)
             vedtaksperiode.forkast(hendelse)
