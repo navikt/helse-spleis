@@ -1,6 +1,8 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
@@ -18,12 +20,26 @@ import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
 internal class AnmodningOmForkastingTest: AbstractDslTest() {
+
+    @Test
+    fun `anmodning om forkasting i avventer skjønnsmessig fastsettelse`() = Toggle.TjuefemprosentAvvik.enable {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 2)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            nullstillTilstandsendringer()
+            assertTilstander(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE)
+            håndterAnmodningOmForkasting(1.vedtaksperiode)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE, TIL_INFOTRYGD)
+        }
+    }
 
     @Test
     fun `anmodning avslås av en avsluttet vedtaksperiode`(){
