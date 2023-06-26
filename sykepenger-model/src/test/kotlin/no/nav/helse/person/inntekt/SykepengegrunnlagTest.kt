@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.erHelg
@@ -27,6 +28,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
+import no.nav.helse.person.inntekt.Sykepengegrunnlag.AvventerFastsettelseEtterSkjønn
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -35,23 +37,39 @@ import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.NAVDAGER
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import kotlin.properties.Delegates
 
 internal class SykepengegrunnlagTest {
-    private companion object {
-        private val fødseldato67år =  1.februar(1954)
+
+    @Test
+    fun `kan ikke hente ut inntekt eller utbetalingsopplysninger fra et vilkårsgrunnlag i avventer skjønnsmessig fastsettelse`() = Toggle.TjuefemprosentAvvik.enable {
+        val sykepengegrunnlag = 35000.månedlig.sykepengegrunnlag(UNG_PERSON_FØDSELSDATO.alder, "a1", 1.januar, skattInntekt = 50000.månedlig)
+        assertEquals(30, sykepengegrunnlag.inspektør.avviksprosent)
+        assertEquals(AvventerFastsettelseEtterSkjønn, sykepengegrunnlag.inspektør.tilstand)
+
+        assertEquals(
+            "Kan ikke sette inntekt fra vilkårsgrunnlag i AvventerFastsettelseEtterSkjønn",
+            assertThrows<IllegalStateException> { sykepengegrunnlag.medInntekt("a1", 16.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver) }.message
+        )
+        assertEquals(
+            "Kan ikke sette utbetalingsopplysninger fra vilkårsgrunnlag i AvventerFastsettelseEtterSkjønn",
+            assertThrows<IllegalStateException> { sykepengegrunnlag.medUtbetalingsopplysninger("a1", 17.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver) }.message
+        )
     }
 
     @Test
@@ -846,5 +864,9 @@ internal class SykepengegrunnlagTest {
         ) {
            this.`§ 8-51 ledd 2` = oppfylt
         }
+    }
+
+    private companion object {
+        private val fødseldato67år =  1.februar(1954)
     }
 }

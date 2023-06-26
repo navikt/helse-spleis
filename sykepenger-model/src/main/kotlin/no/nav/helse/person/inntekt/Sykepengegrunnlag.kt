@@ -5,6 +5,7 @@ import no.nav.helse.Alder
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.`2G`
 import no.nav.helse.Grunnbeløp.Companion.halvG
+import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -352,11 +353,11 @@ internal class Sykepengegrunnlag private constructor(
         )
     }
     internal fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
-        return arbeidsgiverInntektsopplysninger.medInntekt(organisasjonsnummer, `6G`, dato, økonomi, regler, subsumsjonObserver) ?: utenInntekt(økonomi)
+        return tilstand.medInntekt(this, organisasjonsnummer, `6G`, dato, økonomi, regler, subsumsjonObserver)
     }
 
     internal fun medUtbetalingsopplysninger(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
-        return arbeidsgiverInntektsopplysninger.medUtbetalingsopplysninger(organisasjonsnummer, `6G`, skjæringstidspunkt, dato, økonomi, regler, subsumsjonObserver)
+        return tilstand.medUtbetalingsopplysninger(this, organisasjonsnummer, dato, økonomi, regler, subsumsjonObserver)
     }
     internal fun build(builder: VedtakFattetBuilder) {
         builder
@@ -442,6 +443,14 @@ internal class Sykepengegrunnlag private constructor(
         fun fastsattEtterSkjønn(sykepengegrunnlag: Sykepengegrunnlag, resultat: List<ArbeidsgiverInntektsopplysning>): Sykepengegrunnlag {
             throw IllegalStateException("kan ikke fastsette etter skjønn i ${this::class.simpleName}")
         }
+
+        fun medInntekt(sykepengegrunnlag: Sykepengegrunnlag, organisasjonsnummer: String, inntekt: Inntekt, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
+            return sykepengegrunnlag.arbeidsgiverInntektsopplysninger.medInntekt(organisasjonsnummer, sykepengegrunnlag.`6G`, dato, økonomi, regler, subsumsjonObserver) ?: sykepengegrunnlag.utenInntekt(økonomi)
+        }
+
+        fun medUtbetalingsopplysninger(sykepengegrunnlag: Sykepengegrunnlag, organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
+            return sykepengegrunnlag.arbeidsgiverInntektsopplysninger.medUtbetalingsopplysninger(organisasjonsnummer, sykepengegrunnlag.`6G`, sykepengegrunnlag.skjæringstidspunkt, dato, økonomi, regler, subsumsjonObserver)
+        }
     }
 
     object Start : Tilstand {
@@ -453,6 +462,13 @@ internal class Sykepengegrunnlag private constructor(
             }
             sykepengegrunnlag.tilstand(tilstand)
         }
+
+        override fun medInntekt(sykepengegrunnlag: Sykepengegrunnlag, organisasjonsnummer: String, inntekt: Inntekt, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver) =
+            throw IllegalStateException("Kan ikke sette inntekt fra vilkårsgrunnlag i Start")
+
+        override fun medUtbetalingsopplysninger(sykepengegrunnlag: Sykepengegrunnlag, organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver) =
+            throw IllegalStateException("Kan ikke sette utbetalingsopplysninger fra vilkårsgrunnlag i Start")
+
     }
     object FastsattEtterHovedregel : Tilstand {
         override fun fastsattEtterSkjønn(sykepengegrunnlag: Sykepengegrunnlag, resultat: List<ArbeidsgiverInntektsopplysning>): Sykepengegrunnlag {
@@ -464,12 +480,21 @@ internal class Sykepengegrunnlag private constructor(
         override fun entering(sykepengegrunnlag: Sykepengegrunnlag) {
             sikkerLogg.info("Sykepengegrunnlag har tilstand AvventerFastsettelseEtterSkjønn")
         }
-        override fun fastsattEtterSkjønn(sykepengegrunnlag: Sykepengegrunnlag, resultat: List<ArbeidsgiverInntektsopplysning>): Sykepengegrunnlag {
-            return sykepengegrunnlag.kopierSykepengegrunnlag(resultat, sykepengegrunnlag.deaktiverteArbeidsforhold, FastsattEtterSkjønn)
+
+        override fun fastsattEtterSkjønn(sykepengegrunnlag: Sykepengegrunnlag, resultat: List<ArbeidsgiverInntektsopplysning>) =
+            sykepengegrunnlag.kopierSykepengegrunnlag(resultat, sykepengegrunnlag.deaktiverteArbeidsforhold, FastsattEtterSkjønn)
+
+        override fun medInntekt(sykepengegrunnlag: Sykepengegrunnlag, organisasjonsnummer: String, inntekt: Inntekt, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
+            if (Toggle.TjuefemprosentAvvik.enabled) throw IllegalStateException("Kan ikke sette inntekt fra vilkårsgrunnlag i AvventerFastsettelseEtterSkjønn")
+            return super.medInntekt(sykepengegrunnlag, organisasjonsnummer, inntekt, dato, økonomi, regler, subsumsjonObserver)
+        }
+
+        override fun medUtbetalingsopplysninger(sykepengegrunnlag: Sykepengegrunnlag, organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
+            if (Toggle.TjuefemprosentAvvik.enabled) throw IllegalStateException("Kan ikke sette utbetalingsopplysninger fra vilkårsgrunnlag i AvventerFastsettelseEtterSkjønn")
+            return super.medUtbetalingsopplysninger(sykepengegrunnlag, organisasjonsnummer, dato, økonomi, regler, subsumsjonObserver)
         }
     }
-    object FastsattEtterSkjønn : Tilstand {
 
-    }
+    object FastsattEtterSkjønn : Tilstand
 }
 

@@ -7,11 +7,13 @@ import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
+import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 
@@ -22,7 +24,7 @@ internal fun Inntekt.sykepengegrunnlag(alder: Alder) = sykepengegrunnlag(alder, 
 internal fun Inntekt.sykepengegrunnlag(skjæringstidspunkt: LocalDate) =
     sykepengegrunnlag(AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder, AbstractPersonTest.ORGNUMMER, skjæringstidspunkt)
 
-internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver = SubsumsjonObserver.NullObserver) =
+internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver = SubsumsjonObserver.NullObserver, skattInntekt: Inntekt? = null) =
     Sykepengegrunnlag(
         alder = alder,
         arbeidsgiverInntektsopplysninger = listOf(
@@ -32,7 +34,11 @@ internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringsti
                 Refusjonsopplysninger()
             )
         ),
-        sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
+        sammenligningsgrunnlag = Sammenligningsgrunnlag(skattInntekt?.let {
+            val meldingsreferanseId = UUID.randomUUID()
+            val innteker = (1L..12L).map { Skatteopplysning(meldingsreferanseId, skattInntekt, skjæringstidspunkt.yearMonth.minusMonths(it), Skatteopplysning.Inntekttype.LØNNSINNTEKT, "", "") }
+            listOf(ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(orgnr, innteker))
+        } ?: emptyList()),
         skjæringstidspunkt = skjæringstidspunkt,
         subsumsjonObserver = subsumsjonObserver
     )
