@@ -51,6 +51,11 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     override fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) = IM.håndtert()
     override fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String) = IM.ikkeHåndtert()
     override fun inntektsmeldingFørSøknad(event: PersonObserver.InntektsmeldingFørSøknadEvent) = IM.førSøknad()
+    override fun overstyringIgangsatt(event: PersonObserver.OverstyringIgangsatt) {
+        check(event.berørtePerioder.isNotEmpty()) { "Forventet ikke en igangsatt overstyring uten berørte perioder." }
+        if (event.årsak == "KORRIGERT_INNTEKTSMELDING") IM.korrigertInntekt()
+        if (event.årsak == "ARBEIDSGIVERPERIODE") IM.korrigertArbeidsgiverperiode()
+    }
 
     private fun PersonObserver.VedtaksperiodeVenterEvent.revurderingFeilet() = gjeldendeTilstander[venterPå.vedtaksperiodeId] == REVURDERING_FEILET
     private fun PersonObserver.VedtaksperiodeVenterEvent.auuVilUtbetales() =
@@ -108,20 +113,29 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         fun håndtert() { signaler.add(Signal.HÅNDTERT) }
         fun ikkeHåndtert() { signaler.add(Signal.IKKE_HÅNDTERT) }
         fun førSøknad() { signaler.add(Signal.FØR_SØKNAD) }
+        fun korrigertInntekt() { signaler.add(Signal.KORRIGERT_INNTEKT) }
+        fun korrigertArbeidsgiverperiode() { signaler.add(Signal.KORRIGERT_ARBEIDSGIVERPERIODE) }
         fun behandlingUtført() = signaler.clear()
 
         fun bekreftEntydighåndtering() {
             if (signaler.isEmpty()) return // En behandling uten håndtering av inntektsmeldinger 🤤
+            val unikeSignaler = signaler.toSet()
 
-            check(signaler.toSet().size == 1) {
-                "Sendt ut tvetydige signaler for inntektsmeldinger: $signaler"
+            if (Signal.IKKE_HÅNDTERT in signaler) check(unikeSignaler == setOf(Signal.IKKE_HÅNDTERT)) {
+                "Signalet om at inntektsmelding ikke er håndtert er sendt i kombinasjon med konflikterende signaler: $signaler"
+            }
+
+            if (Signal.FØR_SØKNAD in signaler) check(unikeSignaler == setOf(Signal.FØR_SØKNAD)) {
+                "Signalet om at inntektsmelding kom før søknad er sendt i kombinasjon med konflikterende signaler: $signaler"
             }
         }
 
         private enum class Signal {
             HÅNDTERT,
             IKKE_HÅNDTERT,
-            FØR_SØKNAD
+            FØR_SØKNAD,
+            KORRIGERT_INNTEKT,
+            KORRIGERT_ARBEIDSGIVERPERIODE
         }
     }
 }
