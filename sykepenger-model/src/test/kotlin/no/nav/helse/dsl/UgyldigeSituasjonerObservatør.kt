@@ -28,6 +28,9 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     ) {
         arbeidsgivereMap.getOrPut(event.organisasjonsnummer) { person.arbeidsgiver(event.organisasjonsnummer) }
         gjeldendeTilstander[event.vedtaksperiodeId] = event.gjeldendeTilstand
+    }
+
+    override fun behandlingUtført() {
         bekreftIngenUgyldigeSituasjoner()
     }
 

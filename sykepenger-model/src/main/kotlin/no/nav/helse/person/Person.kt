@@ -769,6 +769,11 @@ class Person private constructor(
             val nestemann = arbeidsgivere.nestemann() ?: return@venter
             arbeidsgivere.venter(nestemann)
         }
+        behandlingUtført()
+    }
+
+    private fun behandlingUtført() {
+        observers.forEach { it.behandlingUtført() }
     }
 
     internal fun igangsettOverstyring(hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
