@@ -48,10 +48,9 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         """.let { throw IllegalStateException(it) }
     }
 
-    override fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) = IM.håndtert(inntektsmeldingId, vedtaksperiodeId)
-    override fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String) = IM.ikkeHåndtert(inntektsmeldingId)
-    override fun inntektsmeldingFørSøknad(event: PersonObserver.InntektsmeldingFørSøknadEvent) = IM.førSøknad(event.inntektsmeldingId)
-    override fun vedtaksperiodeForkastet(event: PersonObserver.VedtaksperiodeForkastetEvent) = IM.vedtaksperiodeForkastet(event.vedtaksperiodeId)
+    override fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) = IM.håndtert()
+    override fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String) = IM.ikkeHåndtert()
+    override fun inntektsmeldingFørSøknad(event: PersonObserver.InntektsmeldingFørSøknadEvent) = IM.førSøknad()
 
     private fun PersonObserver.VedtaksperiodeVenterEvent.revurderingFeilet() = gjeldendeTilstander[venterPå.vedtaksperiodeId] == REVURDERING_FEILET
     private fun PersonObserver.VedtaksperiodeVenterEvent.auuVilUtbetales() =
@@ -106,35 +105,20 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
 
     private class Inntektsmeldinger {
         private val signaler = mutableListOf<Signal>()
-
-        fun håndtert(inntektmeldingId: UUID, vedtaksperiodeId: UUID) { signaler.add(Signal(inntektmeldingId, Signaltype.HÅNDTERT, vedtaksperiodeId)) }
-        fun ikkeHåndtert(inntektmeldingId: UUID) { signaler.add(Signal(inntektmeldingId, Signaltype.IKKE_HÅNDTERT)) }
-        fun førSøknad(inntektmeldingId: UUID) { signaler.add(Signal(inntektmeldingId, Signaltype.FØR_SØKNAD)) }
-        fun vedtaksperiodeForkastet(vedtaksperiodeId: UUID) { signaler.removeIf { it.vedtaksperiodeId == vedtaksperiodeId } }
+        fun håndtert() { signaler.add(Signal.HÅNDTERT) }
+        fun ikkeHåndtert() { signaler.add(Signal.IKKE_HÅNDTERT) }
+        fun førSøknad() { signaler.add(Signal.FØR_SØKNAD) }
         fun behandlingUtført() = signaler.clear()
+
         fun bekreftEntydighåndtering() {
-            val inntektsmeldingerMedFlerSignaler = signaler
-                .groupBy { it.inntektsmeldingId }
-                .mapValues { (_, values) -> values.toSet() }
-                .filterValues { it.size > 1 }
-            check(inntektsmeldingerMedFlerSignaler.isEmpty()) {
-                "Sendt ut tvetydige signaler for inntektsmeldinger.\n" +
-                inntektsmeldingerMedFlerSignaler.map { (key, value) -> " - $key: ${value.map { it.type }}" }.joinToString("\n")
+            if (signaler.isEmpty()) return // En behandling uten håndtering av inntektsmeldinger 🤤
+
+            check(signaler.toSet().size == 1) {
+                "Sendt ut tvetydige signaler for inntektsmeldinger: $signaler"
             }
         }
 
-        private data class Signal(
-            val inntektsmeldingId: UUID,
-            val type: Signaltype,
-            val vedtaksperiodeId: UUID? = null) {
-            override fun equals(other: Any?): Boolean {
-                if (other !is Signal) return false
-                return inntektsmeldingId == other.inntektsmeldingId && type == other.type
-            }
-            override fun hashCode() = inntektsmeldingId.hashCode() + type.hashCode()
-        }
-
-        private enum class Signaltype {
+        private enum class Signal {
             HÅNDTERT,
             IKKE_HÅNDTERT,
             FØR_SØKNAD
