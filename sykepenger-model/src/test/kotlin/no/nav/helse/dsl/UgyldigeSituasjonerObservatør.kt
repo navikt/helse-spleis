@@ -18,6 +18,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     private val arbeidsgivereMap = mutableMapOf<String, Arbeidsgiver>()
     private val gjeldendeTilstander = mutableMapOf<UUID, TilstandType>()
     private val arbeidsgivere get() = arbeidsgivereMap.values
+    private val IM = Inntektsmeldinger()
 
     init {
         person.addObserver(this)
@@ -32,6 +33,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
 
     override fun behandlingUtført() {
         bekreftIngenUgyldigeSituasjoner()
+        IM.behandlingUtført()
     }
 
     override fun vedtaksperiodeVenter(event: PersonObserver.VedtaksperiodeVenterEvent) {
@@ -46,6 +48,11 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         """.let { throw IllegalStateException(it) }
     }
 
+    override fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) = IM.håndtert(inntektsmeldingId, vedtaksperiodeId)
+    override fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String) = IM.ikkeHåndtert(inntektsmeldingId)
+    override fun inntektsmeldingFørSøknad(event: PersonObserver.InntektsmeldingFørSøknadEvent) = IM.førSøknad(event.inntektsmeldingId)
+    override fun vedtaksperiodeForkastet(event: PersonObserver.VedtaksperiodeForkastetEvent) = IM.vedtaksperiodeForkastet(event.vedtaksperiodeId)
+
     private fun PersonObserver.VedtaksperiodeVenterEvent.revurderingFeilet() = gjeldendeTilstander[venterPå.vedtaksperiodeId] == REVURDERING_FEILET
     private fun PersonObserver.VedtaksperiodeVenterEvent.auuVilUtbetales() =
         vedtaksperiodeId == venterPå.vedtaksperiodeId && gjeldendeTilstander[venterPå.vedtaksperiodeId] == AVSLUTTET_UTEN_UTBETALING && venterPå.venteårsak.hvorfor == "VIL_UTBETALES"
@@ -58,6 +65,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         bekreftIngenOverlappende()
         validerSykdomshistorikk()
         bekreftSykepengegrunnlagtilstand()
+        IM.bekreftEntydighåndtering()
     }
 
     private fun bekreftSykepengegrunnlagtilstand() {
@@ -94,5 +102,42 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
                     nåværende = inspektør
                 }
             }
+    }
+
+    private class Inntektsmeldinger {
+        private val signaler = mutableListOf<Signal>()
+
+        fun håndtert(inntektmeldingId: UUID, vedtaksperiodeId: UUID) { signaler.add(Signal(inntektmeldingId, Signaltype.HÅNDTERT, vedtaksperiodeId)) }
+        fun ikkeHåndtert(inntektmeldingId: UUID) { signaler.add(Signal(inntektmeldingId, Signaltype.IKKE_HÅNDTERT)) }
+        fun førSøknad(inntektmeldingId: UUID) { signaler.add(Signal(inntektmeldingId, Signaltype.FØR_SØKNAD)) }
+        fun vedtaksperiodeForkastet(vedtaksperiodeId: UUID) { signaler.removeIf { it.vedtaksperiodeId == vedtaksperiodeId } }
+        fun behandlingUtført() = signaler.clear()
+        fun bekreftEntydighåndtering() {
+            val inntektsmeldingerMedFlerSignaler = signaler
+                .groupBy { it.inntektsmeldingId }
+                .mapValues { (_, values) -> values.toSet() }
+                .filterValues { it.size > 1 }
+            check(inntektsmeldingerMedFlerSignaler.isEmpty()) {
+                "Sendt ut tvetydige signaler for inntektsmeldinger.\n" +
+                inntektsmeldingerMedFlerSignaler.map { (key, value) -> " - $key: ${value.map { it.type }}" }.joinToString("\n")
+            }
+        }
+
+        private data class Signal(
+            val inntektsmeldingId: UUID,
+            val type: Signaltype,
+            val vedtaksperiodeId: UUID? = null) {
+            override fun equals(other: Any?): Boolean {
+                if (other !is Signal) return false
+                return inntektsmeldingId == other.inntektsmeldingId && type == other.type
+            }
+            override fun hashCode() = inntektsmeldingId.hashCode() + type.hashCode()
+        }
+
+        private enum class Signaltype {
+            HÅNDTERT,
+            IKKE_HÅNDTERT,
+            FØR_SØKNAD
+        }
     }
 }
