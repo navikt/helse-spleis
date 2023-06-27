@@ -113,7 +113,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         fun håndtert() { signaler.add(Signal.HÅNDTERT) }
         fun ikkeHåndtert() { signaler.add(Signal.IKKE_HÅNDTERT) }
         fun førSøknad() { signaler.add(Signal.FØR_SØKNAD) }
-        fun korrigertInntekt() { signaler.add(Signal.KORRIGERT_INNTEKT) }
+        fun korrigertInntekt() { /*signaler.add(Signal.KORRIGERT_INNTEKT)*/ }
         fun korrigertArbeidsgiverperiode() { signaler.add(Signal.KORRIGERT_ARBEIDSGIVERPERIODE) }
         fun behandlingUtført() = signaler.clear()
 
