@@ -184,7 +184,7 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         internal fun harNødvendigeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg, organisasjonsnummer: String): Boolean {
             val utbetalingsdager = periode.filter { dag -> arbeidsgiverperiode.utbetalingsdager.any { utbetalingsperiode -> dag in utbetalingsperiode }}
             val førsteUtbetalingsdag = utbetalingsdager.firstOrNull() ?: return true
-            val sisteOppholdsdagFørUtbetalingsdager = arbeidsgiverperiode.oppholdsdager.lastOrNull { it.endInclusive < førsteUtbetalingsdag }?.endInclusive ?: arbeidsgiverperiode.first().forrigeDag
+            val sisteOppholdsdagFørUtbetalingsdager = arbeidsgiverperiode.oppholdsdager.lastOrNull { it.endInclusive < førsteUtbetalingsdag }?.endInclusive ?: arbeidsgiverperiode.firstOrNull()?.forrigeDag
             return refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, utbetalingsdager, sisteOppholdsdagFørUtbetalingsdager, hendelse, organisasjonsnummer)
         }
     }
