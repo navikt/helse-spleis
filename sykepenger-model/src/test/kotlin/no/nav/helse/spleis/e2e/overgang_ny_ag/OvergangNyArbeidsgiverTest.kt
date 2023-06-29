@@ -9,6 +9,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
@@ -16,12 +17,14 @@ internal class OvergangNyArbeidsgiverTest : AbstractDslTest() {
 
     @Test
     fun `overgang til ny arbeidsgiver - innenfor agp - reduksjon oppgitt`() {
+        // Inntektsmelding-signal corner case
         a1 {
             nyttVedtak(1.januar, 31.januar)
         }
         a2 {
             håndterSøknad(Sykdom(1.februar, 16.februar, 100.prosent))
             håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.februar, begrunnelseForReduksjonEllerIkkeUtbetalt = "TidligereVirksomhet")
+            assertFunksjonellFeil(Varselkode.RV_SV_2)
             assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
         }
     }
