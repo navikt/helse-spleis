@@ -14,6 +14,7 @@ import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
@@ -259,8 +260,8 @@ class Inntektsmelding(
         return perioder.mapNotNull { periode -> periode.overlappendePeriode(overlappsperiode) }
     }
 
-    internal fun ikkeHåndert(person: Person, sykmeldingsperioder: Sykmeldingsperioder, dager: DagerFraInntektsmelding) {
-        if (håndtertInntekt || dager.noenDagerHåndtert()) return
+    internal fun ikkeHåndert(person: Person, vedtaksperioder: List<Vedtaksperiode>, sykmeldingsperioder: Sykmeldingsperioder, dager: DagerFraInntektsmelding) {
+        if (håndtertNå(dager) || håndtertTidligere(vedtaksperioder)) return
         info("Inntektsmelding ikke håndtert")
         val overlappendeSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(this)
         if (overlappendeSykmeldingsperioder.isNotEmpty()) {
@@ -269,4 +270,7 @@ class Inntektsmelding(
         }
         person.emitInntektsmeldingIkkeHåndtert(this, organisasjonsnummer)
     }
+
+    private fun håndtertNå(dager: DagerFraInntektsmelding) = håndtertInntekt || dager.noenDagerHåndtert()
+    private fun håndtertTidligere(vedtaksperioder: List<Vedtaksperiode>) = vedtaksperioder.any { meldingsreferanseId() in it.hendelseIder() }
 }

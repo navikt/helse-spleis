@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
@@ -108,6 +109,21 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `sender ikke ut signal om at inntektsmelding ikke er håndtert om annen vedtaksperiode har håndtert inntektsmelding før`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSøknad(Sykdom(20.februar, 20.mars, 100.prosent))
+        assertEquals(emptyList<UUID>(),  observatør.inntektsmeldingIkkeHåndtert)
+    }
+
+    @Test
+    fun `sender ut signal om at inntektsmelding ikke er håndtert på nytt om ingen andre har håndtert den tidligere`() {
+        val inntektsmelding = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        assertEquals(listOf(inntektsmelding), observatør.inntektsmeldingIkkeHåndtert)
+        håndterSøknad(Sykdom(20.februar, 20.mars, 100.prosent))
+        assertEquals(listOf(inntektsmelding, inntektsmelding), observatør.inntektsmeldingIkkeHåndtert)
+    }
+
+    @Test
     fun `Inntektsmelding før søknad`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         val id = håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -142,9 +158,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
         val søknad = håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
         val im = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 10.februar)
-        // im1 blir replayet av søknad i februar, men plukkes naturligvis ikke opp av noen
-        // spre-oppgaver vil ikke lage oppgave likevel, siden inntektsmeldingen har blitt håndtert tidligere
-        assertEquals(listOf(im1), observatør.inntektsmeldingIkkeHåndtert)
+        assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
         assertEquals(hendelserHåndtertFør, inspektør.hendelser(1.vedtaksperiode))
         assertEquals(listOf(
             Dokumentsporing.søknad(søknad),
