@@ -84,7 +84,8 @@ class Inntektsmelding(
             "FiskerMedHyre",
             "StreikEllerLockout",
             "FravaerUtenGyldigGrunn",
-            "BeskjedGittForSent"
+            "BeskjedGittForSent",
+            "IkkeLoenn"
         )
     }
 

@@ -86,7 +86,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
     @Test
     fun `hullete AGP sammen med begrunnelse for reduksjon blir kastet ut foreløpig`() {
         val søknad = håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
-        val im = håndterInntektsmelding(listOf(1.januar til 5.januar, 10.januar til 20.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn", refusjon = Inntektsmelding.Refusjon(INGEN, null))
+        val im = håndterInntektsmelding(listOf(1.januar til 5.januar, 10.januar til 20.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "NoeSomUmuligKanVæreIListaViIkkeTillater", refusjon = Inntektsmelding.Refusjon(INGEN, null))
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
         assertFunksjonellFeil(RV_IM_23)
         assertEquals(Dokumentsporing.søknad(søknad), inspektør.hendelser(1.vedtaksperiode).single())
