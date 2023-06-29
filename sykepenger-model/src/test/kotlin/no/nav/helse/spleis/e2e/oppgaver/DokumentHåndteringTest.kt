@@ -1,6 +1,8 @@
 package no.nav.helse.spleis.e2e.oppgaver
 
 import java.util.UUID
+import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -9,11 +11,14 @@ import no.nav.helse.januar
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
+import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.forkastAlle
+import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -23,6 +28,7 @@ import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
+import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -31,6 +37,85 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class DokumentHåndteringTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `to helt like korrigerende inntektsmeldinger`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent, beregnetInntekt = INNTEKT)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        nullstillTilstandsendringer()
+        observatør.inntektsmeldingIkkeHåndtert.clear()
+        observatør.inntektsmeldingHåndtert.clear()
+        val korrigertInntektsmelding2 = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1)
+        assertEquals(emptyList<UUID>(), observatør.inntektsmeldingHåndtert.map { it.first })
+        assertEquals(listOf(korrigertInntektsmelding2), observatør.inntektsmeldingIkkeHåndtert)
+    }
+
+    @Test
+    fun `inntektsmelding med korrigerende inntekt på én av to arbeidsgivere på ett av to skjæringstidspunkt`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+        forlengVedtak(1.februar, 28.februar, a1, a2)
+        nyeVedtak(1.april, 30.april, a1, a2)
+
+        val januarA1DokumentIderFør = inspektør(a1).hendelseIder(1.vedtaksperiode)
+        val februarA1DokumentIderFør = inspektør(a1).hendelseIder(2.vedtaksperiode)
+        val aprilA1DokumentIderFør = inspektør(a1).hendelseIder(3.vedtaksperiode)
+        val januarA2DokumentIderFør = inspektør(a2).hendelseIder(1.vedtaksperiode)
+        val februarA2DokumentIderFør = inspektør(a2).hendelseIder(2.vedtaksperiode)
+        val aprilA2DokumentIderFør = inspektør(a2).hendelseIder(3.vedtaksperiode)
+
+        val a1KorrigertInntektsmelding = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1, orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        håndterYtelser(3.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode, orgnummer = a1)
+
+        håndterYtelser(3.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode, orgnummer = a2)
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+
+        val januarA1DokumentIderEtter = inspektør(a1).hendelseIder(1.vedtaksperiode)
+        val februarA1DokumentIderEtter = inspektør(a1).hendelseIder(2.vedtaksperiode)
+        val aprilA1DokumentIderEtter = inspektør(a1).hendelseIder(3.vedtaksperiode)
+        val januarA2DokumentIderEtter = inspektør(a2).hendelseIder(1.vedtaksperiode)
+        val februarA2DokumentIderEtter = inspektør(a2).hendelseIder(2.vedtaksperiode)
+        val aprilA2DokumentIderEtter = inspektør(a2).hendelseIder(3.vedtaksperiode)
+
+        assertEquals(januarA2DokumentIderFør, januarA2DokumentIderEtter)
+        assertEquals(februarA2DokumentIderFør, februarA2DokumentIderEtter)
+        assertEquals(aprilA1DokumentIderFør, aprilA1DokumentIderEtter)
+        assertEquals(aprilA2DokumentIderFør, aprilA2DokumentIderEtter)
+
+        assertForventetFeil(
+            forklaring = "legges ikke til dokument for korrigerende inntektsmelding",
+            nå = {
+                assertEquals(januarA1DokumentIderFør, januarA1DokumentIderEtter)
+                assertEquals(februarA1DokumentIderFør, februarA1DokumentIderEtter)
+             },
+            ønsket = {
+                assertEquals(januarA1DokumentIderFør.plus(a1KorrigertInntektsmelding), januarA1DokumentIderEtter)
+                assertEquals(februarA1DokumentIderFør.plus(a1KorrigertInntektsmelding), februarA1DokumentIderEtter)
+            }
+        )
+    }
 
     @Test
     fun `Inntektsmelding før søknad`() {

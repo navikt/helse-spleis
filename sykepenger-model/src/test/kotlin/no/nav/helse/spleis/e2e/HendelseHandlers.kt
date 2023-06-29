@@ -138,19 +138,20 @@ internal fun AbstractEndToEndTest.nyeVedtak(
         }
     }
 ) {
+    val vedtaksperiode = observatør.sisteVedtaksperiode()
     require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
     tilGodkjenning(fom, tom, *organisasjonsnummere, inntekterBlock = inntekterBlock, beregnetInntekt = inntekt)
     val (første, resten) = organisasjonsnummere.first() to organisasjonsnummere.drop(1)
 
     første.let { organisasjonsnummer ->
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = organisasjonsnummer)
+        håndterUtbetalingsgodkjenning(vedtaksperiode, orgnummer = organisasjonsnummer)
         håndterUtbetalt(orgnummer = organisasjonsnummer)
     }
 
     resten.forEach { organisasjonsnummer ->
-        håndterYtelser(1.vedtaksperiode, orgnummer = organisasjonsnummer)
-        håndterSimulering(1.vedtaksperiode, orgnummer = organisasjonsnummer)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = organisasjonsnummer)
+        håndterYtelser(vedtaksperiode, orgnummer = organisasjonsnummer)
+        håndterSimulering(vedtaksperiode, orgnummer = organisasjonsnummer)
+        håndterUtbetalingsgodkjenning(vedtaksperiode, orgnummer = organisasjonsnummer)
         håndterUtbetalt(orgnummer = organisasjonsnummer)
     }
 }
