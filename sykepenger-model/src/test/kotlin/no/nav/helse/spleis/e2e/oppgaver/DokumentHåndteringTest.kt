@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.oppgaver
 
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -104,17 +103,8 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         assertEquals(aprilA1DokumentIderFør, aprilA1DokumentIderEtter)
         assertEquals(aprilA2DokumentIderFør, aprilA2DokumentIderEtter)
 
-        assertForventetFeil(
-            forklaring = "legges ikke til dokument for korrigerende inntektsmelding",
-            nå = {
-                assertEquals(januarA1DokumentIderFør, januarA1DokumentIderEtter)
-                assertEquals(februarA1DokumentIderFør, februarA1DokumentIderEtter)
-             },
-            ønsket = {
-                assertEquals(januarA1DokumentIderFør.plus(a1KorrigertInntektsmelding), januarA1DokumentIderEtter)
-                assertEquals(februarA1DokumentIderFør.plus(a1KorrigertInntektsmelding), februarA1DokumentIderEtter)
-            }
-        )
+        assertEquals(januarA1DokumentIderFør.plus(a1KorrigertInntektsmelding), januarA1DokumentIderEtter)
+        assertEquals(februarA1DokumentIderFør.plus(a1KorrigertInntektsmelding), februarA1DokumentIderEtter)
     }
 
     @Test

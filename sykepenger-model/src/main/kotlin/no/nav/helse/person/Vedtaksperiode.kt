@@ -1429,6 +1429,10 @@ internal class Vedtaksperiode private constructor(
             }
             vedtaksperiode.person.gjenopptaBehandling(påminnelse)
         }
+
+        override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {
+            vedtaksperiode.inntektsmeldingHåndtert(hendelse)
+        }
     }
 
     private fun nesteTilstandForAktivRevurdering(hendelse: IAktivitetslogg) {
