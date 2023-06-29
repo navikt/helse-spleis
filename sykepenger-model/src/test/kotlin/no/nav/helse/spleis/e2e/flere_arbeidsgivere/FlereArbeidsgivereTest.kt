@@ -8,6 +8,7 @@ import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
@@ -42,6 +43,10 @@ import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -49,6 +54,70 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
+
+    @Test
+    fun `forskjellige arbeidsgiverperioder i kombinasjon med 6G og forskjellige refusjon`() {
+        val a1Inntekt = 44000.månedlig
+        val a2Inntekt = 12000.månedlig
+
+        a1 { håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar))}
+        a2 { håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar))}
+
+        a1 {
+            håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(listOf(1.januar til 1.januar, 8.januar til 22.januar), beregnetInntekt = a1Inntekt)
+            assertEquals(listOf(1.januar til 1.januar, 8.januar til 22.januar), inspektør.arbeidsgiverperioder { 1.vedtaksperiode })
+        }
+
+        a2 {
+            håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(listOf(8.januar til 23.januar), beregnetInntekt = a2Inntekt, refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList()))
+            assertEquals(8.januar til 23.januar, inspektør.arbeidsgiverperiode { 1.vedtaksperiode })
+        }
+
+        a1 {
+            håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioderForSammenligningsgrunnlag {
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt a1Inntekt
+                        a2 inntekt a2Inntekt
+                    }
+                }
+            ))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        }
+
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
+        }
+
+        a1 {
+            val `23Januar`= inspektør.utbetalingstidslinjer(1.vedtaksperiode)[23.januar]
+            assertTrue(`23Januar` is NavDag)
+            assertEquals(1698, `23Januar`.arbeidsgiverbeløp)
+            assertEquals(0, `23Januar`.personbeløp)
+
+            val `24Januar` = inspektør.utbetalingstidslinjer(1.vedtaksperiode)[24.januar]
+            assertTrue(`24Januar` is NavDag)
+            assertEquals(2031, `24Januar`.arbeidsgiverbeløp)
+            assertEquals(0, `24Januar`.personbeløp)
+        }
+
+        a2 {
+            val `23Januar`= inspektør.utbetalingstidslinjer(1.vedtaksperiode)[23.januar]
+            assertTrue(`23Januar` is ArbeidsgiverperiodeDag)
+
+            val `24Januar` = inspektør.utbetalingstidslinjer(1.vedtaksperiode)[24.januar]
+            assertTrue(`24Januar` is NavDag)
+            assertEquals(0, `24Januar`.arbeidsgiverbeløp)
+            assertEquals(130, `24Januar`.personbeløp)
+        }
+    }
 
     @Test
     fun `kort sykdom hos ag2 med eksisterende vedtak`() {
@@ -1055,4 +1124,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
         }
     }
+
+    private val Utbetalingsdag.arbeidsgiverbeløp get() = this.økonomi.inspektør.arbeidsgiverbeløp?.reflection { _, _, _, dagligInt -> dagligInt } ?: 0
+    private val Utbetalingsdag.personbeløp get() = this.økonomi.inspektør.personbeløp?.reflection { _, _, _, dagligInt -> dagligInt } ?: 0
 }
