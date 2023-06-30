@@ -16,12 +16,16 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
+import no.nav.helse.person.PersonObserver.VedtakFattetEvent.Sykepengegrunnlagsfakta
 import no.nav.helse.person.SykepengegrunnlagVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
 import no.nav.helse.person.builders.VedtakFattetBuilder
+import no.nav.helse.person.builders.VedtakFattetBuilder.FastsattEtterHovedregelBuilder
+import no.nav.helse.person.builders.VedtakFattetBuilder.FastsattEtterSkjønnBuilder
+import no.nav.helse.person.builders.VedtakFattetBuilder.FastsattIInfotrygdBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.build
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
@@ -363,6 +367,7 @@ internal class Sykepengegrunnlag private constructor(
             .sykepengegrunnlag(this.sykepengegrunnlag)
             .beregningsgrunnlag(this.beregningsgrunnlag)
             .begrensning(this.begrensning)
+            //.sykepengegrunnlagsfakta(tilstand.sykpengegrunnlagsfakta(this))
         arbeidsgiverInntektsopplysninger.build(builder)
     }
     override fun equals(other: Any?): Boolean {
@@ -442,6 +447,10 @@ internal class Sykepengegrunnlag private constructor(
         fun fastsattEtterSkjønn(sykepengegrunnlag: Sykepengegrunnlag, resultat: List<ArbeidsgiverInntektsopplysning>): Sykepengegrunnlag {
             throw IllegalStateException("kan ikke fastsette etter skjønn i ${this::class.simpleName}")
         }
+
+        fun sykpengegrunnlagsfakta(sykepengegrunnlag: Sykepengegrunnlag): Sykepengegrunnlagsfakta {
+            throw IllegalStateException("forventet ikke å sende ut vedtak fattet i ${this::class.simpleName}")
+        }
     }
 
     object Start : Tilstand {
@@ -458,8 +467,14 @@ internal class Sykepengegrunnlag private constructor(
         override fun fastsattEtterSkjønn(sykepengegrunnlag: Sykepengegrunnlag, resultat: List<ArbeidsgiverInntektsopplysning>): Sykepengegrunnlag {
             return sykepengegrunnlag.kopierSykepengegrunnlag(resultat, sykepengegrunnlag.deaktiverteArbeidsforhold, FastsattEtterSkjønn)
         }
+        override fun sykpengegrunnlagsfakta(sykepengegrunnlag: Sykepengegrunnlag): Sykepengegrunnlagsfakta {
+            if (sykepengegrunnlag.vurdertInfotrygd) return FastsattIInfotrygdBuilder(sykepengegrunnlag.omregnetÅrsinntekt).build()
+            val builder = FastsattEtterHovedregelBuilder(sykepengegrunnlag.omregnetÅrsinntekt, sykepengegrunnlag.avviksprosent, sykepengegrunnlag.`6G`, sykepengegrunnlag.begrensning)
+            sykepengegrunnlag.sammenligningsgrunnlag.build(builder)
+            sykepengegrunnlag.arbeidsgiverInntektsopplysninger.build(builder)
+            return builder.build()
+        }
     }
-
     object AvventerFastsettelseEtterSkjønn : Tilstand {
         override fun entering(sykepengegrunnlag: Sykepengegrunnlag) {
             sikkerLogg.info("Sykepengegrunnlag har tilstand AvventerFastsettelseEtterSkjønn")
@@ -469,7 +484,13 @@ internal class Sykepengegrunnlag private constructor(
         }
     }
     object FastsattEtterSkjønn : Tilstand {
-
+        override fun sykpengegrunnlagsfakta(sykepengegrunnlag: Sykepengegrunnlag): Sykepengegrunnlagsfakta {
+            check(!sykepengegrunnlag.vurdertInfotrygd) { "Forventer ikke å fatte vedtak som er vurdert i Infotrygd & skjønnsmessig fastsatt" }
+            val builder = FastsattEtterSkjønnBuilder(sykepengegrunnlag.omregnetÅrsinntekt, sykepengegrunnlag.avviksprosent, sykepengegrunnlag.`6G`, sykepengegrunnlag.begrensning, sykepengegrunnlag.beregningsgrunnlag)
+            sykepengegrunnlag.sammenligningsgrunnlag.build(builder)
+            sykepengegrunnlag.arbeidsgiverInntektsopplysninger.build(builder)
+            return builder.build()
+        }
     }
 }
 

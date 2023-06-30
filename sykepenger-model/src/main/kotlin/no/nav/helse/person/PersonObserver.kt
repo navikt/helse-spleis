@@ -351,7 +351,31 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val utbetalingId: UUID?,
         val sykepengegrunnlagsbegrensning: String,
         val vedtakFattetTidspunkt: LocalDateTime
-    )
+    ) {
+        enum class Fastsatt {
+            EtterHovedregel,
+            EtterSkjønn,
+            IInfotrygd
+        }
+
+        enum class Tag {
+            `6GBegrenset`
+        }
+
+        sealed class Sykepengegrunnlagsfakta {
+            abstract val fastsatt: Fastsatt
+            abstract val omregnetÅrsinntekt: Double
+        }
+        data class FastsattIInfotrygd(override val omregnetÅrsinntekt: Double) : Sykepengegrunnlagsfakta() {
+            override val fastsatt = Fastsatt.IInfotrygd
+        }
+        data class FastsattEtterHovedregel(override val omregnetÅrsinntekt: Double) : Sykepengegrunnlagsfakta() {
+            override val fastsatt = Fastsatt.EtterHovedregel
+        }
+        data class FastsattEtterSkjønn(override val omregnetÅrsinntekt: Double) : Sykepengegrunnlagsfakta() {
+            override val fastsatt = Fastsatt.EtterSkjønn
+        }
+    }
 
     data class OverstyringIgangsatt(
         val årsak: String,

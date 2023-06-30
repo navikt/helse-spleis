@@ -11,6 +11,8 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.VedtakFattetBuilder
+import no.nav.helse.person.builders.VedtakFattetBuilder.FastsattEtterHovedregelBuilder
+import no.nav.helse.person.builders.VedtakFattetBuilder.FastsattEtterSkjønnBuilder
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
@@ -146,6 +148,15 @@ class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.build(builder: VedtakFattetBuilder) {
             builder.omregnetÅrsinntektPerArbeidsgiver(omregnetÅrsinntektPerArbeidsgiver())
+        }
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.build(builder: FastsattEtterSkjønnBuilder) {
+            check(all { it.inntektsopplysning is SkjønnsmessigFastsatt }) { "Forventer at alle inntekter i sykepengegrunnlaget skal være SkjønnsmessigFastsatt ved vedtak på skjønnsfastsatt sykepengegrunnlag" }
+            // TODO: Legge til info per arbeidsgiver
+        }
+        internal fun List<ArbeidsgiverInntektsopplysning>.build(builder: FastsattEtterHovedregelBuilder) {
+            check(none { it.inntektsopplysning is SkjønnsmessigFastsatt }) { "Forventer ikke at noen inntekter i sykepengegrunnlaget skal være SkjønnsmessigFastsatt ved vedtak på sykepengegrunnlag fastsatt etter hovedregel" }
+            // TODO: Legge til info per arbeidsgiver
         }
 
         private fun List<ArbeidsgiverInntektsopplysning>.omregnetÅrsinntektPerArbeidsgiver() =
