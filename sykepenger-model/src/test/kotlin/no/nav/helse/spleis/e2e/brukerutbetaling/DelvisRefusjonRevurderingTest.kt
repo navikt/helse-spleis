@@ -13,11 +13,13 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertUtbetalingsbeløp
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -50,12 +52,9 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
             beregnetInntekt = INNTEKT / 2,
             refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
         )
-        håndterOverstyrInntekt(INNTEKT / 2, skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode))
 
         håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt()
+        assertVarsel(RV_IV_2)
 
         assertUtbetalingsbeløp(1.vedtaksperiode, 0, 715, subset = 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 715, 715, subset = 17.januar til 31.januar)
@@ -89,9 +88,7 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(INNTEKT /2, skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode))
 
         håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt()
+        assertVarsel(RV_IV_2)
 
         assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 715, 1431, subset = 17.januar til 31.januar)

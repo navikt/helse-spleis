@@ -719,6 +719,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
 
     @Test
     fun `flere arbeidsgivere med sykdom`() {
+        val a3Inntekt = 1000.månedlig
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -742,14 +743,14 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                     listOf(
                         sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
                         sammenligningsgrunnlag(a2, 1.januar, INNTEKT.repeat(12)),
-                        sammenligningsgrunnlag(a3, 1.januar, INNTEKT.repeat(12))
+                        sammenligningsgrunnlag(a3, 1.januar, a3Inntekt.repeat(12))
                     )
                 ),
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = listOf(
                         grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
                         grunnlag(a2, 1.januar, INNTEKT.repeat(3)),
-                        grunnlag(a3, 1.januar, INNTEKT.repeat(3))
+                        grunnlag(a3, 1.januar, a3Inntekt.repeat(3))
                     ),
                     arbeidsforhold = emptyList()
                 )
@@ -769,9 +770,9 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
             val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag.inspektør
 
-            assertEquals(1116000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+            assertEquals(756000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
             assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-            assertEquals(1116000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+            assertEquals(756000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
             assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
             a1 { assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode)) }
             a2 { assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode)) }
@@ -786,7 +787,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
             }
             sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a3).inspektør.also {
-                assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
+                assertEquals(a3Inntekt, it.inntektsopplysning.inspektør.beløp)
                 assertEquals(SkattSykepengegrunnlag::class, it.inntektsopplysning::class)
             }
             assertEquals(3, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
@@ -797,7 +798,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 assertEquals(31000.månedlig, it.rapportertInntekt)
             }
             sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a3).inspektør.also {
-                assertEquals(31000.månedlig, it.rapportertInntekt)
+                assertEquals(a3Inntekt, it.rapportertInntekt)
             }
         }
         nullstillTilstandsendringer()
@@ -820,7 +821,6 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -834,7 +834,6 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -848,11 +847,11 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
 
             assertEquals(744000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
             assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-            assertEquals(1116000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+            assertEquals(756000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
             assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
             a1 { assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode)) }
             a2 { assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode)) }
-            assertEquals(33, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
+            assertEquals(2, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
             assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
             sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                 assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
@@ -870,7 +869,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 assertEquals(31000.månedlig, it.rapportertInntekt)
             }
             sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a3).inspektør.also {
-                assertEquals(31000.månedlig, it.rapportertInntekt)
+                assertEquals(a3Inntekt, it.rapportertInntekt)
             }
         }
     }
@@ -991,7 +990,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
         periode.forEach { assertDag(it, arbeidsgiverbeløp, personbeløp) }
 
 
-    private fun TestPerson.TestArbeidsgiver.håndterVilkårsgrunnlagMedGhostArbeidsforhold(vedtaksperiode: UUID, skjæringstidspunkt: LocalDate = 1.januar, inntekt: Inntekt = INNTEKT) {
+    private fun TestPerson.TestArbeidsgiver.håndterVilkårsgrunnlagMedGhostArbeidsforhold(vedtaksperiode: UUID, skjæringstidspunkt: LocalDate = 1.januar, inntekt: Inntekt = INNTEKT, ghostInntekt: Inntekt = inntekt) {
         håndterVilkårsgrunnlag(
             vedtaksperiode,
             arbeidsforhold = listOf(
@@ -1001,13 +1000,13 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             inntektsvurdering = Inntektsvurdering(
                 listOf(
                     sammenligningsgrunnlag(a1, skjæringstidspunkt, inntekt.repeat(12)),
-                    sammenligningsgrunnlag(a2, skjæringstidspunkt, inntekt.repeat(12))
+                    sammenligningsgrunnlag(a2, skjæringstidspunkt, ghostInntekt.repeat(12))
                 )
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(
                     grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3)),
-                    grunnlag(a2, skjæringstidspunkt, inntekt.repeat(3))
+                    grunnlag(a2, skjæringstidspunkt, ghostInntekt.repeat(3))
                 ),
                 arbeidsforhold = emptyList()
             )
