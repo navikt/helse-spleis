@@ -734,7 +734,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterOverstyrArbeidsgiveropplysninger(
                 1.januar, listOf(
                     OverstyrtArbeidsgiveropplysning(
-                        a1, INNTEKT - 50.månedlig, "overstyring", null,
+                        a1, INNTEKT - 50.daglig, "overstyring", null,
                         listOf(
                             Triple(1.januar, null, INNTEKT)
                         )
@@ -747,7 +747,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterOverstyrArbeidsgiveropplysninger(
                 1.januar, listOf(
                     OverstyrtArbeidsgiveropplysning(
-                        a1, INNTEKT - 500.månedlig, "overstyring", null,
+                        a1, INNTEKT - 500.daglig, "overstyring", null,
                         listOf(
                             Triple(1.januar, null, INNTEKT)
                         )
@@ -773,7 +773,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
 
             val sykepengegrunnlag = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør
             val arbeidsgiverInntektsopplysning = sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.inntektsopplysning.inspektør
-            assertEquals(INNTEKT - 500.månedlig, arbeidsgiverInntektsopplysning.beløp)
+            assertEquals(INNTEKT - 500.daglig, arbeidsgiverInntektsopplysning.beløp)
             val hendelseIdFør = sykepengegrunnlagFør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.inntektsopplysning.inspektør.hendelseId
             val hendelseIdEtter = arbeidsgiverInntektsopplysning.hendelseId
             assertEquals(hendelseIdFør, hendelseIdEtter)

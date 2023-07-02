@@ -31,7 +31,6 @@ import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -68,7 +67,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val februarA2DokumentIderFør = inspektør(a2).hendelseIder(2.vedtaksperiode)
         val aprilA2DokumentIderFør = inspektør(a2).hendelseIder(3.vedtaksperiode)
 
-        val a1KorrigertInntektsmelding = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 29000.månedlig, orgnummer = a1)
+        val a1KorrigertInntektsmelding = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1, orgnummer = a1)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
