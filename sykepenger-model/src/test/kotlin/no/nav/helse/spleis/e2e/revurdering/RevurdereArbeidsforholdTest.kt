@@ -2,8 +2,10 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.februar
@@ -29,12 +31,12 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.person
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
@@ -55,7 +57,7 @@ import org.junit.jupiter.api.Test
 internal class RevurderArbeidsforholdTest: AbstractDslTest() {
 
     @Test
-    fun `revurder arbeidsforhold i Avsluttet`() {
+    fun `revurder arbeidsforhold i Avsluttet`() = Toggle.TjuefemprosentAvvik.enable {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -94,11 +96,13 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             }
             nullstillTilstandsendringer()
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, true, "test"))
+            assertVarsel(RV_IV_2)
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 31000.månedlig)))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
             (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
                 val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
                 val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag.inspektør
@@ -112,7 +116,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+                    assertEquals(SkjønnsmessigFastsatt::class, it.inntektsopplysning::class)
                 }
                 assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
@@ -125,7 +129,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
         }
     }
     @Test
-    fun `overstyrer forlengelse, førstegangsbehandling revurderes`() {
+    fun `overstyrer forlengelse, førstegangsbehandling revurderes`() = Toggle.TjuefemprosentAvvik.enable {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -171,6 +175,8 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             }
             nullstillTilstandsendringer()
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, true, "test"))
+            assertVarsel(RV_IV_2)
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 31000.månedlig)))
             assertEquals(50, inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.avviksprosent)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -182,13 +188,15 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
+                AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
                 AVSLUTTET
             )
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE, TIL_INFOTRYGD)
+            assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
             (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
                 val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
                 val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag.inspektør
@@ -202,7 +210,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+                    assertEquals(SkjønnsmessigFastsatt::class, it.inntektsopplysning::class)
                 }
                 assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
@@ -561,7 +569,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
     }
 
     @Test
-    fun `revurderer arbeidsforhold i AvventerGjennomførtRevurdering`() {
+    fun `revurderer arbeidsforhold i AvventerGjennomførtRevurdering`() = Toggle.TjuefemprosentAvvik.enable {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -585,19 +593,23 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             nullstillTilstandsendringer()
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, true, "test"))
-            assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
-            assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertVarsel(RV_IV_2)
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT)))
+            assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
-            assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVSLUTTET)
+            assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVSLUTTET)
             assertTilstander(
                 2.vedtaksperiode,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
+                AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -608,7 +620,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
     }
 
     @Test
-    fun `revurderer tidligere skjæringstidspunkt`() {
+    fun `revurderer tidligere skjæringstidspunkt`() = Toggle.TjuefemprosentAvvik.enable {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -634,6 +646,8 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
             nullstillTilstandsendringer()
             håndterOverstyrArbeidsforhold(1.mars, ArbeidsforholdOverstyrt(a2, true, "test"))
+            assertVarsel(RV_IV_2)
+            håndterSkjønnsmessigFastsettelse(1.mars, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT)))
             assertEquals(50, inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.avviksprosent)
             assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
@@ -685,7 +699,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+                    assertEquals(SkjønnsmessigFastsatt::class, it.inntektsopplysning::class)
                 }
                 assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
@@ -707,7 +721,6 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 2.vedtaksperiode,
                 AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -718,7 +731,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
     }
 
     @Test
-    fun `flere arbeidsgivere med sykdom`() {
+    fun `flere arbeidsgivere med sykdom`() = Toggle.TjuefemprosentAvvik.enable {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -802,7 +815,13 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
         }
         nullstillTilstandsendringer()
         håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a3, true, "test"))
+
         a1 {
+            assertVarsel(RV_IV_2)
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(
+                OverstyrtArbeidsgiveropplysning(a1, 31000.månedlig),
+                OverstyrtArbeidsgiveropplysning(a2, 31000.månedlig)
+            ))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -821,6 +840,8 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
+                AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -834,7 +855,6 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -856,11 +876,11 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
             sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                 assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+                assertEquals(SkjønnsmessigFastsatt::class, it.inntektsopplysning::class)
             }
             sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
                 assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+                assertEquals(SkjønnsmessigFastsatt::class, it.inntektsopplysning::class)
             }
             assertEquals(3, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
             sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {

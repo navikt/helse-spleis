@@ -2060,22 +2060,22 @@ internal class Vedtaksperiode private constructor(
     internal object AvventerSkjønnsmessigFastsettelseRevurdering : Vedtaksperiodetilstand {
         override val type: TilstandType = TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            // TODO: fjerne denne når skjønnsmessig fastsettelse funker i revurdering
-            vedtaksperiode.person.gjenopptaBehandling(hendelse)
+            vurderOmKanGåVidere(vedtaksperiode, hendelse)
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) = SKJØNNSMESSIG_FASTSETTELSE fordi OVERSTYRING_IGANGSATT
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) = vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
 
-        override fun gjenopptaBehandling(
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgivere: Iterable<Arbeidsgiver>,
-            hendelse: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(hendelse, AvventerHistorikkRevurdering)
+        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, arbeidsgivere: Iterable<Arbeidsgiver>, hendelse: IAktivitetslogg) {
+            vurderOmKanGåVidere(vedtaksperiode, hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {}
+
+        private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            if (Toggle.TjuefemprosentAvvik.enabled && vedtaksperiode.trengerFastsettelseEtterSkjønn) return
+            vedtaksperiode.tilstand(hendelse, AvventerHistorikkRevurdering)
+        }
     }
 
     internal object AvventerSimulering : Vedtaksperiodetilstand {

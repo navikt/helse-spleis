@@ -2,8 +2,10 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -24,9 +26,11 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
@@ -44,7 +48,7 @@ import org.junit.jupiter.api.Test
 internal class RevurderGhostInntektTest: AbstractDslTest() {
 
     @Test
-    fun `revurder ghost-inntekt ned`() {
+    fun `revurder ghost-inntekt ned`() = Toggle.TjuefemprosentAvvik.enable {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -83,11 +87,9 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
                 }
             }
             nullstillTilstandsendringer()
-            håndterOverstyrInntekt(
-                inntekt = 15000.månedlig,
-                skjæringstidspunkt = 1.januar,
-                organisasjonsnummer = a2
-            )
+            håndterOverstyrInntekt(inntekt = 15000.månedlig, skjæringstidspunkt = 1.januar, organisasjonsnummer = a2)
+            assertVarsel(RV_IV_2)
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT), OverstyrtArbeidsgiveropplysning(a2, 15000.månedlig)))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -98,6 +100,8 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
                 AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
+                AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -118,11 +122,11 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+                    assertEquals(SkjønnsmessigFastsatt::class, it.inntektsopplysning::class)
                 }
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
                     assertEquals(15000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
+                    assertEquals(SkjønnsmessigFastsatt::class, it.inntektsopplysning::class)
                 }
                 assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
@@ -217,7 +221,7 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
     }
 
     @Test
-    fun `revurder ghost-inntekt til 0 kr`() {
+    fun `revurder ghost-inntekt til 0 kr`() = Toggle.TjuefemprosentAvvik.enable {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -256,11 +260,9 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
                 }
             }
             nullstillTilstandsendringer()
-            håndterOverstyrInntekt(
-                inntekt = 0.månedlig,
-                skjæringstidspunkt = 1.januar,
-                organisasjonsnummer = a2
-            )
+            håndterOverstyrInntekt(inntekt = 0.månedlig, skjæringstidspunkt = 1.januar, organisasjonsnummer = a2)
+            assertVarsel(RV_IV_2)
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT), OverstyrtArbeidsgiveropplysning(a2, 0.månedlig)))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -272,6 +274,8 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
                 AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
+                AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -291,11 +295,11 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                     assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+                    assertEquals(SkjønnsmessigFastsatt::class, it.inntektsopplysning::class)
                 }
                 sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
                     assertEquals(0.månedlig, it.inntektsopplysning.inspektør.beløp)
-                    assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
+                    assertEquals(SkjønnsmessigFastsatt::class, it.inntektsopplysning::class)
                 }
                 assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {

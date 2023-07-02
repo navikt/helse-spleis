@@ -33,9 +33,11 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
+import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
@@ -720,7 +722,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
         }
     }
     @Test
-    fun `gjenbruker saksbehandlerinntekt som overstyrer annen saksbehandler`() {
+    fun `gjenbruker saksbehandlerinntekt som overstyrer annen saksbehandler`() = Toggle.TjuefemprosentAvvik.enable {
         a1 {
             nyttVedtak(1.januar, 31.januar)
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
@@ -731,29 +733,16 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
 
             val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør
 
-            håndterOverstyrArbeidsgiveropplysninger(
-                1.januar, listOf(
-                    OverstyrtArbeidsgiveropplysning(
-                        a1, INNTEKT - 50.daglig, "overstyring", null,
-                        listOf(
-                            Triple(1.januar, null, INNTEKT)
-                        )
-                    )
-                )
-            )
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 50.daglig, "overstyring", null, listOf(Triple(1.januar, null, INNTEKT)))))
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
 
-            håndterOverstyrArbeidsgiveropplysninger(
-                1.januar, listOf(
-                    OverstyrtArbeidsgiveropplysning(
-                        a1, INNTEKT - 500.daglig, "overstyring", null,
-                        listOf(
-                            Triple(1.januar, null, INNTEKT)
-                        )
-                    )
-                )
-            )
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 500.daglig, "overstyring", null, listOf(Triple(1.januar, null, INNTEKT)))))
+
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING)
+            assertVarsel(RV_IV_2)
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 500.daglig)))
+
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
 
@@ -768,6 +757,9 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalt()
 
             håndterVilkårsgrunnlag(2.vedtaksperiode)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING)
+            håndterSkjønnsmessigFastsettelse(1.februar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 500.daglig)))
+
             håndterYtelser(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
@@ -815,6 +807,10 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalt()
 
             håndterVilkårsgrunnlag(2.vedtaksperiode, inntektSkatt)
+            assertVarsel(RV_IV_2, 2.vedtaksperiode.filter())
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING)
+            håndterSkjønnsmessigFastsettelse(1.februar, listOf(OverstyrtArbeidsgiveropplysning(a1, beregnetInntektIM)))
+
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)

@@ -869,6 +869,7 @@ internal class OverstyrtArbeidsgiveropplysning(
     private val subsumsjon: Subsumsjon?,
     private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>
 ) {
+    internal constructor(orgnummer: String, inntekt: Inntekt) : this(orgnummer, inntekt, "forklaring", null, emptyList())
     internal companion object {
         internal fun List<OverstyrtArbeidsgiveropplysning>.tilOverstyrt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) =
             map {

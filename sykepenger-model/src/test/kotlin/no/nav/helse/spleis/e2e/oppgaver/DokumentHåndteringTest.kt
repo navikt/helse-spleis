@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.oppgaver
 
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -12,15 +13,20 @@ import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forkastAlle
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
+import no.nav.helse.spleis.e2e.håndterSkjønnsmessigFastsettelse
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
@@ -55,7 +61,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `inntektsmelding med korrigerende inntekt på én av to arbeidsgivere på ett av to skjæringstidspunkt`() {
+    fun `inntektsmelding med korrigerende inntekt på én av to arbeidsgivere på ett av to skjæringstidspunkt`() = Toggle.TjuefemprosentAvvik.enable {
         nyeVedtak(1.januar, 31.januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)
         nyeVedtak(1.april, 30.april, a1, a2)
@@ -68,6 +74,10 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val aprilA2DokumentIderFør = inspektør(a2).hendelseIder(3.vedtaksperiode)
 
         val a1KorrigertInntektsmelding = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1, orgnummer = a1)
+        assertVarsel(RV_IV_2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING)
+        val skjønnsmessigFastsettelse = håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1), OverstyrtArbeidsgiveropplysning(a2, INNTEKT)))
+
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
@@ -99,13 +109,13 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val februarA2DokumentIderEtter = inspektør(a2).hendelseIder(2.vedtaksperiode)
         val aprilA2DokumentIderEtter = inspektør(a2).hendelseIder(3.vedtaksperiode)
 
-        assertEquals(januarA2DokumentIderFør, januarA2DokumentIderEtter)
-        assertEquals(februarA2DokumentIderFør, februarA2DokumentIderEtter)
+        assertEquals(januarA2DokumentIderFør.plus(skjønnsmessigFastsettelse), januarA2DokumentIderEtter)
+        assertEquals(februarA2DokumentIderFør.plus(skjønnsmessigFastsettelse), februarA2DokumentIderEtter)
         assertEquals(aprilA1DokumentIderFør, aprilA1DokumentIderEtter)
         assertEquals(aprilA2DokumentIderFør, aprilA2DokumentIderEtter)
 
-        assertEquals(januarA1DokumentIderFør.plus(a1KorrigertInntektsmelding), januarA1DokumentIderEtter)
-        assertEquals(februarA1DokumentIderFør.plus(a1KorrigertInntektsmelding), februarA1DokumentIderEtter)
+        assertEquals(januarA1DokumentIderFør.plus(a1KorrigertInntektsmelding).plus(skjønnsmessigFastsettelse), januarA1DokumentIderEtter)
+        assertEquals(februarA1DokumentIderFør.plus(a1KorrigertInntektsmelding).plus(skjønnsmessigFastsettelse), februarA1DokumentIderEtter)
     }
 
     @Test

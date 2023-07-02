@@ -2,7 +2,9 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.nyttVedtak
@@ -29,6 +31,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.grunnlag
@@ -420,12 +423,14 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
     }
 
     @Test
-    fun `revurderer forlengelse`() {
+    fun `revurderer forlengelse`() = Toggle.TjuefemprosentAvvik.enable {
         (a1 og a2).nyeVedtak(1.januar til 31.januar)
         (a1 og a2).forlengVedtak(1.februar til 28.februar)
         nullstillTilstandsendringer()
         a1 {
             håndterOverstyrInntekt(1.januar, 32000.månedlig)
+            assertVarsel(RV_IV_2)
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 32000.månedlig), OverstyrtArbeidsgiveropplysning(a2, 20000.månedlig)))
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -436,6 +441,8 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
+                AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -447,20 +454,25 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVSLUTTET
             )
         }
         a2 {
             håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
             assertTilstander(
                 2.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
                 AVSLUTTET
             )
             assertTilstander(
