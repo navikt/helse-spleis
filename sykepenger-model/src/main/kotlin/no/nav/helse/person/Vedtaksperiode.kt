@@ -1435,11 +1435,13 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
+    private val trengerFastsettelseEtterSkjønn get() = vilkårsgrunnlag?.trengerFastsettelseEtterSkjønn() == true
+
     private fun nesteTilstandForAktivRevurdering(hendelse: IAktivitetslogg) {
-        val vilkårsgrunnlag = vilkårsgrunnlag ?: return tilstand(hendelse, AvventerVilkårsprøvingRevurdering) {
+        vilkårsgrunnlag ?: return tilstand(hendelse, AvventerVilkårsprøvingRevurdering) {
             hendelse.info("Trenger å utføre vilkårsprøving før vi kan beregne utbetaling for revurderingen.")
         }
-        if (vilkårsgrunnlag.trengerFastsettelseEtterSkjønn()) return tilstand(hendelse, AvventerSkjønnsmessigFastsettelseRevurdering) {
+        if (trengerFastsettelseEtterSkjønn) return tilstand(hendelse, AvventerSkjønnsmessigFastsettelseRevurdering) {
             hendelse.info("Trenger å skjønnsfastsette sykepengegrunnlaget før vi kan beregne utbetaling for revurderingen")
         }
         tilstand(hendelse, AvventerHistorikkRevurdering)
@@ -1804,7 +1806,7 @@ internal class Vedtaksperiode private constructor(
             !arbeidsgivere.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) -> ManglerNødvendigInntektForVilkårsprøvingForAndreArbeidsgivere
             arbeidsgivere.trengerInntektsmelding(vedtaksperiode.periode) -> TrengerInntektsmelding
             vedtaksperiode.vilkårsgrunnlag == null -> KlarForVilkårsprøving
-            vedtaksperiode.vilkårsgrunnlag!!.trengerFastsettelseEtterSkjønn() -> KlarForFastsettelseEtterSkjønn
+            vedtaksperiode.trengerFastsettelseEtterSkjønn -> KlarForFastsettelseEtterSkjønn
             else -> KlarForBeregning
         }
 
@@ -2036,17 +2038,22 @@ internal class Vedtaksperiode private constructor(
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) = vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {}
 
-        override fun igangsettOverstyring(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
-            revurdering: Revurderingseventyr
-        ) {
+        override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             if (!revurdering.inngåSomEndring(hendelse, vedtaksperiode, vedtaksperiode.periode)) return
-            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
+            vurderOmKanGåVidere(vedtaksperiode, hendelse)
+        }
+
+        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, arbeidsgivere: Iterable<Arbeidsgiver>, hendelse: IAktivitetslogg)  {
+            vurderOmKanGåVidere(vedtaksperiode, hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
             vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting)
+        }
+
+        private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            if (vedtaksperiode.trengerFastsettelseEtterSkjønn) return
+            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
     }
 
