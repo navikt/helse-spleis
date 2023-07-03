@@ -368,6 +368,7 @@ internal class Sykepengegrunnlag private constructor(
             .beregningsgrunnlag(this.beregningsgrunnlag)
             .begrensning(this.begrensning)
             //.sykepengegrunnlagsfakta(tilstand.sykpengegrunnlagsfakta(this))
+        sikkerLogg.info("Henter sykpengegrunnlagsfakta til vedtak fattet fra sykepengegrunnlag i tilstand ${tilstand::class.simpleName}")
         arbeidsgiverInntektsopplysninger.build(builder)
     }
     override fun equals(other: Any?): Boolean {
