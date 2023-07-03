@@ -350,7 +350,8 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val inntekt: Double,
         val utbetalingId: UUID?,
         val sykepengegrunnlagsbegrensning: String,
-        val vedtakFattetTidspunkt: LocalDateTime
+        val vedtakFattetTidspunkt: LocalDateTime,
+        val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta?
     ) {
         enum class Fastsatt {
             EtterHovedregel,
@@ -369,11 +370,28 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         data class FastsattIInfotrygd(override val omregnetÅrsinntekt: Double) : Sykepengegrunnlagsfakta() {
             override val fastsatt = Fastsatt.IInfotrygd
         }
-        data class FastsattEtterHovedregel(override val omregnetÅrsinntekt: Double) : Sykepengegrunnlagsfakta() {
+        data class FastsattEtterHovedregel(
+            override val omregnetÅrsinntekt: Double,
+            val innrapportertÅrsinntekt: Double,
+            val avviksprosent: Double,
+            val `6G`: Double,
+            val tags: Set<Tag>,
+            val arbeidsgivere: List<Arbeidsgiver>
+        ) : Sykepengegrunnlagsfakta() {
             override val fastsatt = Fastsatt.EtterHovedregel
+            data class Arbeidsgiver(val arbeidsgiver: String, val omregnetÅrsinntekt: Double)
         }
-        data class FastsattEtterSkjønn(override val omregnetÅrsinntekt: Double) : Sykepengegrunnlagsfakta() {
+        data class FastsattEtterSkjønn(
+            override val omregnetÅrsinntekt: Double,
+            val innrapportertÅrsinntekt: Double,
+            val skjønnsfastsatt: Double,
+            val avviksprosent: Double,
+            val `6G`: Double,
+            val tags: Set<Tag>,
+            val arbeidsgivere: List<Arbeidsgiver>
+        ) : Sykepengegrunnlagsfakta() {
             override val fastsatt = Fastsatt.EtterSkjønn
+            data class Arbeidsgiver(val arbeidsgiver: String, val omregnetÅrsinntekt: Double, val skjønnsfastsatt: Double)
         }
     }
 

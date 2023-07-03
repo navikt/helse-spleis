@@ -155,11 +155,22 @@ class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.build(builder: FastsattEtterSkjønnBuilder) {
             check(all { it.inntektsopplysning is SkjønnsmessigFastsatt }) { "Forventer at alle inntekter i sykepengegrunnlaget skal være SkjønnsmessigFastsatt ved vedtak på skjønnsfastsatt sykepengegrunnlag" }
-            // TODO: Legge til info per arbeidsgiver
+            forEach { arbeidsgiver ->
+                builder.arbeidsgiver(
+                    arbeidsgiver = arbeidsgiver.orgnummer,
+                    omregnetÅrsinntekt = arbeidsgiver.inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt(),
+                    skjønnsfastsatt = arbeidsgiver.inntektsopplysning.fastsattÅrsinntekt()
+                )
+            }
         }
         internal fun List<ArbeidsgiverInntektsopplysning>.build(builder: FastsattEtterHovedregelBuilder) {
             check(none { it.inntektsopplysning is SkjønnsmessigFastsatt }) { "Forventer ikke at noen inntekter i sykepengegrunnlaget skal være SkjønnsmessigFastsatt ved vedtak på sykepengegrunnlag fastsatt etter hovedregel" }
-            // TODO: Legge til info per arbeidsgiver
+            forEach { arbeidsgiver ->
+                builder.arbeidsgiver(
+                    arbeidsgiver = arbeidsgiver.orgnummer,
+                    omregnetÅrsinntekt = arbeidsgiver.inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt()
+                )
+            }
         }
 
         private fun List<ArbeidsgiverInntektsopplysning>.omregnetÅrsinntektPerArbeidsgiver() =
