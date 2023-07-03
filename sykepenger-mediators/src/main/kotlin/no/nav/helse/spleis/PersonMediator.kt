@@ -370,6 +370,40 @@ internal class PersonMediator(
             "vedtakFattetTidspunkt" to event.vedtakFattetTidspunkt
         ).apply {
             event.utbetalingId?.let { this["utbetalingId"] = it }
+            event.sykepengegrunnlagsfakta?.let {
+                this["sykepengegrunnlagsfakta"] = when (it) {
+                    is PersonObserver.VedtakFattetEvent.FastsattEtterHovedregel -> mapOf(
+                        "fastsatt" to it.fastsatt,
+                        "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
+                        "innrapportertÅrsinntekt" to it.innrapportertÅrsinntekt,
+                        "avviksprosent" to it.avviksprosent,
+                        "6G" to it.`6G`,
+                        "tags" to it.tags,
+                        "arbeidsgivere" to it.arbeidsgivere.map { arbeidsgiver -> mapOf(
+                            "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
+                            "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt
+                        )}
+                    )
+                    is PersonObserver.VedtakFattetEvent.FastsattEtterSkjønn -> mapOf(
+                        "fastsatt" to it.fastsatt,
+                        "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
+                        "innrapportertÅrsinntekt" to it.innrapportertÅrsinntekt,
+                        "skjønnsfastsatt" to it.skjønnsfastsatt,
+                        "avviksprosent" to it.avviksprosent,
+                        "6G" to it.`6G`,
+                        "tags" to it.tags,
+                        "arbeidsgivere" to it.arbeidsgivere.map { arbeidsgiver -> mapOf(
+                            "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
+                            "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt,
+                            "skjønnsfastsatt" to arbeidsgiver.skjønnsfastsatt
+                        )}
+                    )
+                    is PersonObserver.VedtakFattetEvent.FastsattIInfotrygd -> mapOf(
+                        "fastsatt" to it.fastsatt,
+                        "omregnetÅrsinntekt" to it.omregnetÅrsinntekt
+                    )
+                }
+            }
         }))
     }
 

@@ -1,9 +1,11 @@
 package no.nav.helse.spleis.mediator.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
+import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertUtgåendeMelding
 import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertOgFjernLocalDateTime
 import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertOgFjernUUID
@@ -45,7 +47,75 @@ internal class VedtakkontraktTest : AbstractEndToEndMediatorTest() {
             },
             "inntekt" : 31000.0,
             "begrensning" : "ER_IKKE_6G_BEGRENSET",
-            "hendelser": ["$søknadId", "$inntektsmeldingId"]
+            "hendelser": ["$søknadId", "$inntektsmeldingId"],
+            "sykepengegrunnlagsfakta": {
+              "fastsatt": "EtterHovedregel",
+              "omregnetÅrsinntekt": 372000.0,
+              "innrapportertÅrsinntekt": 372000.0,
+              "avviksprosent": 0.0,
+              "6G": 561804.0,
+              "tags": [],
+              "arbeidsgivere": [
+                {
+                  "arbeidsgiver": "987654321",
+                  "omregnetÅrsinntekt": 372000.0
+                }
+              ]
+            }
+            
+        }
+        """
+        assertVedtakFattet(forventet, forventetUtbetalingEventNavn = "utbetaling_utbetalt")
+    }
+    @Test
+    fun `vedtak med utbetaling hvor sykepengegrunnlaget er fastsatt ved skjønn`() = Toggle.TjuefemprosentAvvik.enable {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        val søknadId = sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
+        val (inntektsmeldingId,_) = sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar, beregnetInntekt = 45000.00)
+        sendVilkårsgrunnlag(0)
+        val (skjønnsmessigFastsettelseId, _) = sendSkjønnsmessigFastsettelse(3.januar, listOf(TestMessageFactory.SkjønnsmessigFastsatt(ORGNUMMER, 47500.00 * 12)))
+        sendYtelser(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK, forventedeFagområder = setOf("SP", "SPREF"))
+        sendUtbetalingsgodkjenning(0)
+        sendUtbetaling()
+        @Language("JSON")
+        val forventet = """
+        {
+            "@event_name": "vedtak_fattet",
+            "aktørId": "$AKTØRID",
+            "fødselsnummer": "$UNG_PERSON_FNR_2018",
+            "organisasjonsnummer": "$ORGNUMMER",
+            "fom": "2018-01-03",
+            "tom": "2018-01-26",
+            "skjæringstidspunkt": "2018-01-03",
+            "sykepengegrunnlag": 561804.0,
+            "grunnlagForSykepengegrunnlag": 570000.0,
+            "grunnlagForSykepengegrunnlagPerArbeidsgiver": {
+                "987654321": 570000.0
+            },
+            "inntekt" : 47500.0,
+            "begrensning" : "ER_6G_BEGRENSET",
+            "hendelser": ["$søknadId", "$inntektsmeldingId", "$skjønnsmessigFastsettelseId"],
+            "sykepengegrunnlagsfakta": {
+                "fastsatt": "EtterSkjønn",
+                "omregnetÅrsinntekt": 540000.0,
+                "innrapportertÅrsinntekt": 372000.0,
+                "skjønnsfastsatt": 570000.0,
+                "avviksprosent": 45.16,
+                "6G": 561804.0,
+                "tags": [
+                  "6GBegrenset"
+                ],
+                "arbeidsgivere": [
+                  {
+                    "arbeidsgiver": "987654321",
+                    "omregnetÅrsinntekt": 540000.0,
+                    "skjønnsfastsatt": 570000.0
+                  }
+                ]
+            }
         }
         """
         assertVedtakFattet(forventet, forventetUtbetalingEventNavn = "utbetaling_utbetalt")
@@ -85,7 +155,7 @@ internal class VedtakkontraktTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
-        val (inntektsmeldingId, _) = sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -116,7 +186,21 @@ internal class VedtakkontraktTest : AbstractEndToEndMediatorTest() {
             },
             "inntekt" : 31000.0,
             "begrensning" : "ER_IKKE_6G_BEGRENSET",
-            "hendelser": ["$søknadId"]
+            "hendelser": ["$søknadId"],
+            "sykepengegrunnlagsfakta": {
+              "fastsatt": "EtterHovedregel",
+              "omregnetÅrsinntekt": 372000.0,
+              "innrapportertÅrsinntekt": 372000.0,
+              "avviksprosent": 0.0,
+              "6G": 561804.0,
+              "tags": [],
+              "arbeidsgivere": [
+                {
+                  "arbeidsgiver": "987654321",
+                  "omregnetÅrsinntekt": 372000.0
+                }
+              ]
+            }
         }
         """
         assertVedtakFattet(forventet, forventetUtbetalingEventNavn = "utbetaling_uten_utbetaling")

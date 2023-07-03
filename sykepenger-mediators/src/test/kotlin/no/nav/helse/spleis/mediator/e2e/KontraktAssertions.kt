@@ -18,7 +18,7 @@ internal object KontraktAssertions {
         faktiskMelding: (aktuelle: List<JsonNode>) -> JsonNode = { it.last() },
         førAssertEquals: (faktiskMelding: ObjectNode) -> Unit
     ): ObjectNode {
-        val eventName = no.nav.helse.spleis.mediator.e2e.KontraktAssertions.objectMapper.readTree(forventetMelding).path("@event_name").asText()
+        val eventName = objectMapper.readTree(forventetMelding).path("@event_name").asText()
         val event = faktiskMelding(inspektør.meldinger(eventName)) as ObjectNode
         val kopi = event.deepCopy()
         event.assertOgFjernStandardfelter()

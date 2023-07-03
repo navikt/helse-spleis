@@ -489,12 +489,13 @@ internal abstract class AbstractEndToEndMediatorTest() {
     protected fun sendSkjønnsmessigFastsettelse(
         skjæringstidspunkt: LocalDate,
         skjønnsmessigFastsatt: List<SkjønnsmessigFastsatt>
-    ) {
-        val (_, message) = meldingsfabrikk.lagSkjønnsmessigFastsettelse(
+    ): Pair<UUID, String> {
+        val (id, message) = meldingsfabrikk.lagSkjønnsmessigFastsettelse(
             skjæringstidspunkt = skjæringstidspunkt,
             skjønnsmessigFastsatt = skjønnsmessigFastsatt
         )
         testRapid.sendTestMessage(message)
+        return id.toUUID() to message
     }
 
     protected fun sendInfotrygdendring() {
