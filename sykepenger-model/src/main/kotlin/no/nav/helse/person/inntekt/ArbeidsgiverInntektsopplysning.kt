@@ -101,8 +101,11 @@ class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.deaktiver(deaktiverte: List<ArbeidsgiverInntektsopplysning>, orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserver) =
             this.fjernInntekt(deaktiverte, orgnummer, forklaring, true, subsumsjonObserver)
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.aktiver(aktiverte: List<ArbeidsgiverInntektsopplysning>, orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserver) =
-            this.fjernInntekt(aktiverte, orgnummer, forklaring, false, subsumsjonObserver)
+        internal fun List<ArbeidsgiverInntektsopplysning>.aktiver(aktiveres: List<ArbeidsgiverInntektsopplysning>, orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserver): Pair<List<ArbeidsgiverInntektsopplysning>, List<ArbeidsgiverInntektsopplysning>> {
+            val (deaktiverte, aktiverte) = this.fjernInntekt(aktiveres, orgnummer, forklaring, false, subsumsjonObserver)
+            // Om inntektene i sykepengegrunnlaget var skjønnsmessig fastsatt før aktivering sikrer vi at alle "rulles tilbake" slik at vi ikke lager et sykepengegrunnlag med mix av SkjønnsmessigFastsatt & andre inntektstyper.
+            return deaktiverte to aktiverte.map { ArbeidsgiverInntektsopplysning(it.orgnummer, it.inntektsopplysning.omregnetÅrsinntekt(), it.refusjonsopplysninger) }
+        }
 
         // flytter inntekt for *orgnummer* fra *this* til *deaktiverte*
         // aktive.deaktiver(deaktiverte, orgnummer) er direkte motsetning til deaktiverte.deaktiver(aktive, orgnummer)

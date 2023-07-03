@@ -19,6 +19,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -51,6 +52,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
@@ -896,7 +898,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
     }
 
     @Test
-    fun `over 6G -- deaktiverer og aktiverer arbeidsforhold medfører tilbakekreving`() {
+    fun `over 6G -- deaktiverer og aktiverer arbeidsforhold medfører tilbakekreving`() = Toggle.TjuefemprosentAvvik.enable {
         val inntekt = 33000.månedlig
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
@@ -907,15 +909,24 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a1) is Inntektsmelding)
+            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a2) is SkattSykepengegrunnlag)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertPeriode(17.januar til 31.januar, 1080.daglig)
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, deaktivert = true, "deaktiverer a2"))
+            assertVarsel(RV_IV_2)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING)
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, inntekt)))
+            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a1) is SkjønnsmessigFastsatt)
+
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertPeriode(17.januar til 31.januar, 1523.daglig)
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, deaktivert = false, "aktiverer a2 igjen"))
+            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a1) is Inntektsmelding)
+            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a2) is SkattSykepengegrunnlag)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -926,7 +937,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
     }
 
     @Test
-    fun `over 6G -- deaktiverer og aktiverer arbeidsforhold medfører tilbakekreving flere arbeidsgivere`() {
+    fun `over 6G -- deaktiverer og aktiverer arbeidsforhold medfører tilbakekreving flere arbeidsgivere`() = Toggle.TjuefemprosentAvvik.enable {
         val inntekt = 23000.månedlig
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
@@ -973,9 +984,24 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a1) is Inntektsmelding)
+            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a2) is Inntektsmelding)
+            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a3) is SkattSykepengegrunnlag)
         }
 
+
         håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a3, true, "deaktiverer a3"))
+
+        a1 {
+            assertVarsel(RV_IV_2)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING)
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(
+                OverstyrtArbeidsgiveropplysning(a1, inntekt),
+                OverstyrtArbeidsgiveropplysning(a2, inntekt)
+            ))
+            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a1) is SkjønnsmessigFastsatt)
+            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a2) is SkjønnsmessigFastsatt)
+        }
 
         (a1 og a2) {
             håndterYtelser(1.vedtaksperiode)
@@ -991,6 +1017,9 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a1) is Inntektsmelding)
+            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a2) is Inntektsmelding)
+            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a3) is SkattSykepengegrunnlag)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", person())
         }
@@ -1033,4 +1062,6 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             )
         )
     }
+
+    private fun TestArbeidsgiverInspektør.inntektsopplysning(vedtaksperiode: UUID, orgnr: String) = vilkårsgrunnlag(vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.first { it.gjelder(orgnr) }.inspektør.inntektsopplysning
 }
