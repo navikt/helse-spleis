@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.oppgaver
 import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -25,6 +26,7 @@ import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forkastAlle
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSkjønnsmessigFastsettelse
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -37,12 +39,64 @@ import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class DokumentHåndteringTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Alle vedtaksperioder på skjæringstidspunktet skal få referanse til overstyring på tvers av arbeidsgivere`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+        forlengVedtak(1.februar, 28.februar, a1, a2)
+
+        val januarA1DokumentIderFør = inspektør(a1).hendelseIder(1.vedtaksperiode)
+        val februarA1DokumentIderFør = inspektør(a1).hendelseIder(2.vedtaksperiode)
+        val januarA2DokumentIderFør = inspektør(a2).hendelseIder(1.vedtaksperiode)
+        val februarA2DokumentIderFør = inspektør(a2).hendelseIder(2.vedtaksperiode)
+
+        val overstyringId = håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
+            OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = 21000.månedlig),
+            OverstyrtArbeidsgiveropplysning(orgnummer = a2, inntekt = 25500.månedlig)
+        ))
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+
+        val januarA1DokumentIderEtter = inspektør(a1).hendelseIder(1.vedtaksperiode)
+        val februarA1DokumentIderEtter = inspektør(a1).hendelseIder(2.vedtaksperiode)
+        val januarA2DokumentIderEtter = inspektør(a2).hendelseIder(1.vedtaksperiode)
+        val februarA2DokumentIderEtter = inspektør(a2).hendelseIder(2.vedtaksperiode)
+
+        assertEquals(januarA1DokumentIderFør.plus(overstyringId), januarA1DokumentIderEtter)
+        assertTrue(inspektør(a1).hendelser(1.vedtaksperiode).contains(Dokumentsporing.overstyrArbeidsgiveropplysninger(overstyringId)))
+        assertEquals(februarA1DokumentIderFør.plus(overstyringId), februarA1DokumentIderEtter)
+
+        assertForventetFeil(
+            forklaring = "Kun vedtaksperiodeNE på første arbeidsgiver får dokumentpsporing",
+            nå = {
+                assertEquals(januarA2DokumentIderFør, januarA2DokumentIderEtter)
+                assertEquals(februarA2DokumentIderFør, februarA2DokumentIderEtter)
+            },
+            ønsket = {
+                assertEquals(februarA1DokumentIderFør.plus(overstyringId), februarA1DokumentIderEtter)
+                assertEquals(februarA2DokumentIderFør.plus(overstyringId), februarA2DokumentIderEtter)
+            }
+        )
+    }
 
     @Test
     fun `to helt like korrigerende inntektsmeldinger`() {
