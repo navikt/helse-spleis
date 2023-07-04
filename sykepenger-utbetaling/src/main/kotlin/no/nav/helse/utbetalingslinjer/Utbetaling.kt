@@ -174,7 +174,8 @@ class Utbetaling private constructor(
         førstegangsbehandling: Boolean,
         inntektskilde: UtbetalingInntektskilde,
         orgnummereMedRelevanteArbeidsforhold: List<String>,
-        tagBuilder: TagBuilder
+        tagBuilder: TagBuilder,
+        kanAvvises: Boolean
     ) {
         hendelse.kontekst(this)
         tilstand.godkjenning(
@@ -186,7 +187,8 @@ class Utbetaling private constructor(
             inntektskilde,
             orgnummereMedRelevanteArbeidsforhold,
             hendelse,
-            tagBuilder
+            tagBuilder,
+            kanAvvises
         )
     }
 
@@ -571,7 +573,8 @@ class Utbetaling private constructor(
             inntektskilde: UtbetalingInntektskilde,
             orgnummereMedRelevanteArbeidsforhold: List<String>,
             hendelse: IAktivitetslogg,
-            tagBuilder: TagBuilder
+            tagBuilder: TagBuilder,
+            kanAvvises: Boolean
         ) {
             hendelse.info("Forventet ikke å lage godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
             hendelse.funksjonellFeil(RV_UT_13)
@@ -620,7 +623,8 @@ class Utbetaling private constructor(
             inntektskilde: UtbetalingInntektskilde,
             orgnummereMedRelevanteArbeidsforhold: List<String>,
             hendelse: IAktivitetslogg,
-            tagBuilder: TagBuilder
+            tagBuilder: TagBuilder,
+            kanAvvises: Boolean
         ) {
             godkjenning(
                 aktivitetslogg = hendelse,
@@ -632,7 +636,8 @@ class Utbetaling private constructor(
                 utbetalingtype = utbetaling.type.name,
                 inntektskilde = inntektskilde.name,
                 orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
-                tags = tags(tagBuilder, utbetaling).build()
+                tags = tags(tagBuilder, utbetaling).build(),
+                kanAvvises = kanAvvises
             )
         }
 

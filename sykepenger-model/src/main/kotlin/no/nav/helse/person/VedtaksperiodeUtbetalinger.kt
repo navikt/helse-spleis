@@ -111,7 +111,8 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Triple<Vilkårsgrun
         periodetype: UtbetalingPeriodetype,
         førstegangsbehandling: Boolean,
         orgnummereMedRelevanteArbeidsforhold: List<String>,
-        tagBuilder: TagBuilder
+        tagBuilder: TagBuilder,
+        kanAvvises: Boolean
     ) {
         siste!!.godkjenning(
             hendelse = hendelse,
@@ -121,7 +122,8 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Triple<Vilkårsgrun
             førstegangsbehandling = førstegangsbehandling,
             inntektskilde = sisteVilkårsgrunnlag!!.inntektskilde(),
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
-            tagBuilder = tagBuilder
+            tagBuilder = tagBuilder,
+            kanAvvises = kanAvvises
         )
     }
 }

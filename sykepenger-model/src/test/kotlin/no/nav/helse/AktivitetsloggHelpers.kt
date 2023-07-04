@@ -50,5 +50,5 @@ internal fun IAktivitetslogg.etterspurteBehov(vedtaksperiodeId: UUID, behov: Akt
 inline fun <reified T> IAktivitetslogg.etterspurtBehov(vedtaksperiodeId: UUID, behov: Aktivitet.Behov.Behovtype, felt: String): T? {
     return this.behov()
         .filter { it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeId.toString() }
-        .first { it.type == behov }.detaljer()[felt] as T?
+        .last { it.type == behov }.detaljer()[felt] as T?
 }

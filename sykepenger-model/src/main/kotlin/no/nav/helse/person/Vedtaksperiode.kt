@@ -944,7 +944,8 @@ internal class Vedtaksperiode private constructor(
             },
             førstegangsbehandling = !erForlengelse,
             tagBuilder = tagBuilder,
-            orgnummereMedRelevanteArbeidsforhold = person.relevanteArbeidsgivere(skjæringstidspunkt)
+            orgnummereMedRelevanteArbeidsforhold = person.relevanteArbeidsgivere(skjæringstidspunkt),
+            kanAvvises = arbeidsgiver.kanForkastes(this)
         )
     }
 

@@ -249,7 +249,8 @@ sealed class Aktivitet(
                 utbetalingtype: String,
                 inntektskilde: String,
                 orgnummereMedRelevanteArbeidsforhold: List<String>,
-                tags: Set<String>
+                tags: Set<String>,
+                kanAvvises: Boolean
             ) {
                 aktivitetslogg.behov(
                     Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler", mapOf(
@@ -261,7 +262,8 @@ sealed class Aktivitet(
                         "utbetalingtype" to utbetalingtype,
                         "inntektskilde" to inntektskilde,
                         "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
-                        "tags" to tags
+                        "tags" to tags,
+                        "kanAvvises" to kanAvvises
                     )
                 )
             }
