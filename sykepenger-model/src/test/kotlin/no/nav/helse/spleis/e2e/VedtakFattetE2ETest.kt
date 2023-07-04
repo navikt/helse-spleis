@@ -161,8 +161,8 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2019) til 1.desember(2019) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt INNTEKT
+                    a1 inntekt INNTEKT + 65.67.månedlig
+                    a2 inntekt INNTEKT + 113.53.månedlig
                 }
             }
         ))
@@ -185,9 +185,9 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
 
         val forventetSykepengegrunnlagsfakta = FastsattEtterSkjønn(
             omregnetÅrsinntekt = 1068000.0,
-            innrapportertÅrsinntekt = 744000.0,
+            innrapportertÅrsinntekt = 746150.40,
             skjønnsfastsatt = 1092000.0,
-            avviksprosent = 43.55,
+            avviksprosent = 43.13,
             `6G` = 599148.0,
             tags = setOf(PersonObserver.VedtakFattetEvent.Tag.`6GBegrenset`),
             arbeidsgivere = listOf(

@@ -69,7 +69,8 @@ internal class VedtakFattetBuilder(
     }
 
     sealed class SykepengegrunnlagsfaktaBuilder {
-        protected val Inntekt.årlig get() = reflection { årlig, _, _, _ -> årlig }
+        protected val Inntekt.årlig get() = reflection { årlig, _, _, _ -> årlig }.toDesimaler
+        protected val Double.toDesimaler get() = toBigDecimal().setScale(2, RoundingMode.HALF_UP).toDouble()
         abstract fun build(): Sykepengegrunnlagsfakta
     }
     internal class FastsattIInfotrygdBuilder(private val omregnetÅrsinntekt: Inntekt) : SykepengegrunnlagsfaktaBuilder() {
@@ -84,7 +85,7 @@ internal class VedtakFattetBuilder(
         protected val tags: Set<Tag> = begrensning.takeIf { it == ER_6G_BEGRENSET }?.let { setOf(Tag.`6GBegrenset`) } ?: emptySet()
         protected lateinit var innrapportertÅrsinntekt: Inntekt
         internal fun innrapportertÅrsinntekt(innrapportertÅrsinntekt: Inntekt) = apply { this.innrapportertÅrsinntekt = innrapportertÅrsinntekt }
-        protected val Prosent.avrundet get() = prosent().toBigDecimal().setScale(2, RoundingMode.HALF_UP).toDouble()
+        protected val Prosent.avrundet get() = prosent().toDesimaler
     }
     internal class FastsattEtterHovedregelBuilder(omregnetÅrsinntekt: Inntekt, avviksprosent: Prosent, `6G`: Inntekt, begrensning: Begrensning) : FastsattISpleisBuilder(omregnetÅrsinntekt, avviksprosent, `6G`, begrensning) {
         private val arbeidsgivere = mutableListOf<FastsattEtterHovedregel.Arbeidsgiver>()
