@@ -2020,6 +2020,10 @@ internal class Vedtaksperiode private constructor(
             if (!revurdering.inngåSomEndring(hendelse, vedtaksperiode, vedtaksperiode.periode)) return
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
+            vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting)
+        }
     }
 
     internal object AvventerSkjønnsmessigFastsettelse : Vedtaksperiodetilstand {
