@@ -491,6 +491,9 @@ internal class Sykepengegrunnlag private constructor(
             sykepengegrunnlag.arbeidsgiverInntektsopplysninger.build(builder)
             return builder.build()
         }
+        override fun fastsattEtterSkjønn(sykepengegrunnlag: Sykepengegrunnlag, resultat: List<ArbeidsgiverInntektsopplysning>): Sykepengegrunnlag {
+            return sykepengegrunnlag.kopierSykepengegrunnlag(resultat, sykepengegrunnlag.deaktiverteArbeidsforhold, FastsattEtterSkjønn)
+        }
     }
 }
 

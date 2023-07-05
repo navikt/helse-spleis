@@ -11,6 +11,7 @@ import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
@@ -87,6 +88,19 @@ internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysni
         tidsstempel: LocalDateTime
     ) {
         this.tilstand.lagreInntekt(this, skattSykepengegrunnlag, beløp, hendelseId, tidsstempel)
+    }
+
+    override fun preVisitSkjønnsmessigFastsatt(
+        saksbehandler: SkjønnsmessigFastsatt,
+        id: UUID,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        forklaring: String?,
+        subsumsjon: Subsumsjon?,
+        tidsstempel: LocalDateTime
+    ) {
+        this.tilstand.lagreInntekt(this, saksbehandler, beløp, hendelseId, tidsstempel)
     }
 
     private sealed interface Tilstand {

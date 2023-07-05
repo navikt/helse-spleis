@@ -45,6 +45,27 @@ import org.junit.jupiter.api.assertThrows
 internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
 
     @Test
+    fun `korrigere inntekten på noe som allerede har blitt skjønnsmessig fastsatt`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertEquals(FastsattEtterSkjønn, inspektør.tilstandPåSykepengegrunnlag(1.januar))
+        inspektør.inntektsopplysningISykepengegrunnlaget(1.januar).let {
+            assertTrue(it is SkjønnsmessigFastsatt)
+            assertEquals(INNTEKT * 2, it.inspektør.beløp)
+        }
+        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 3)))
+        inspektør.inntektsopplysningISykepengegrunnlaget(1.januar).let {
+            assertTrue(it is SkjønnsmessigFastsatt)
+            assertEquals(INNTEKT * 3, it.inspektør.beløp)
+        }
+    }
+
+    @Test
     fun `skjønnsmessig fastsatt inntekt skal ikke ha avviksvurdering`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
