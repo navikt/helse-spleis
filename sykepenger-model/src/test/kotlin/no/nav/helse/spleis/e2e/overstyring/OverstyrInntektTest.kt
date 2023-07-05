@@ -112,7 +112,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         val a2Opplysninger = sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(a2)?.inspektør ?: fail { "må ha inntekt for a2" }
         assertEquals(500.daglig, a2Opplysninger.inntektsopplysning.inspektør.beløp)
         assertEquals(Saksbehandler::class, a2Opplysninger.inntektsopplysning::class)
-        val overstyrtInntekt = a2Opplysninger.inntektsopplysning.inspektør.overstyrtInntekt ?: fail { "forventet overstyrt inntekt" }
+        val overstyrtInntekt = a2Opplysninger.inntektsopplysning.inspektør.forrigeInntekt ?: fail { "forventet overstyrt inntekt" }
         assertEquals(IkkeRapportert::class, overstyrtInntekt::class)
     }
 

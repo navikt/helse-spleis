@@ -25,8 +25,9 @@ internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysni
         private set
     internal lateinit var tidsstempel: LocalDateTime
         private set
-    internal var overstyrtInntekt: Inntektsopplysning? = null
-        private set
+
+    private val historiskeInntekter = mutableListOf<Inntektsopplysning>()
+    internal val forrigeInntekt: Inntektsopplysning? get() = historiskeInntekter.firstOrNull()
 
     private var tilstand: Tilstand = Tilstand.FangeInntekt
 
@@ -133,7 +134,7 @@ internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysni
                 hendelseId: UUID,
                 tidsstempel: LocalDateTime
             ) {
-                inspektør.overstyrtInntekt = inntektsopplysning
+                inspektør.historiskeInntekter.add(inntektsopplysning)
             }
         }
     }

@@ -16,6 +16,6 @@ internal class IkkeRapportertTest {
         val saksbehandler = Saksbehandler(1.januar, UUID.randomUUID(), 500.daglig, "", null, LocalDateTime.now())
         val result = ikkeRapportert.overstyresAv(saksbehandler)
 
-        assertSame(ikkeRapportert, result.inspektør.overstyrtInntekt)
+        assertSame(ikkeRapportert, result.inspektør.forrigeInntekt)
     }
 }
