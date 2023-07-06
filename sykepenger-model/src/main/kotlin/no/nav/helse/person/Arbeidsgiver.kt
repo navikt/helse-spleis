@@ -12,14 +12,11 @@ import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.InntektsmeldingReplayUtført
-import no.nav.helse.hendelser.OverstyrArbeidsforhold
-import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrSykepengegrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
@@ -187,10 +184,6 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.håndter(overstyrSykepengegrunnlag: OverstyrSykepengegrunnlag) =
             any { it.håndter(overstyrSykepengegrunnlag, alleVedtaksperioder) }
-
-        internal fun List<Arbeidsgiver>.håndterSkjønnsmessigFastsettelse(skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse) {
-            skjønnsmessigFastsettelse.håndter(flatMap { it.vedtaksperioder })
-        }
 
         internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
             mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode(filter) }
@@ -777,16 +770,6 @@ internal class Arbeidsgiver private constructor(
     private fun håndter(overstyrSykepengegrunnlag: OverstyrSykepengegrunnlag, alleVedtaksperioder: Iterable<Vedtaksperiode>): Boolean {
         overstyrSykepengegrunnlag.kontekst(this)
         return énHarHåndtert(overstyrSykepengegrunnlag) { håndter(it, alleVedtaksperioder) }
-    }
-
-    private fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
-        overstyrArbeidsforhold.kontekst(this)
-        return énHarHåndtert(overstyrArbeidsforhold) { håndter(it, vedtaksperioder.toList()) }
-    }
-
-    private fun håndter(overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger): Boolean {
-        overstyrArbeidsgiveropplysninger.kontekst(this)
-        return énHarHåndtert(overstyrArbeidsgiveropplysninger) { håndter(it, vedtaksperioder.toList()) }
     }
 
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {

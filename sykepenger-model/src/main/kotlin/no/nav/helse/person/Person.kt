@@ -48,7 +48,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.forkastAUUSomErUtbetaltIInfotr
 import no.nav.helse.person.Arbeidsgiver.Companion.forkastAuu
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
-import no.nav.helse.person.Arbeidsgiver.Companion.håndterSkjønnsmessigFastsettelse
 import no.nav.helse.person.Arbeidsgiver.Companion.identifiserAUUSomErUtbetaltISpleis
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.kandidatForSkjønnsmessigFastsettelse
@@ -401,8 +400,9 @@ class Person private constructor(
 
     fun håndter(hendelse: SkjønnsmessigFastsettelse) {
         hendelse.kontekst(aktivitetslogg, this)
-        arbeidsgivere.håndterSkjønnsmessigFastsettelse(hendelse)
-        hendelse.vilkårsprøvEtterNyInformasjonFraSaksbehandler(this, jurist)
+        check(arbeidsgivere.håndter(hendelse)) {
+            "Ingen vedtaksperioder håndterte skjønnsmessig fastsettelse"
+        }
         håndterGjenoppta(hendelse)
     }
 
