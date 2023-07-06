@@ -210,6 +210,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
         internal fun inntektskilde() = sykepengegrunnlag.inntektskilde()
 
+        internal fun inntektsdata(skjæringstidspunkt: LocalDate, organisasjonsnummer: String) =
+            sykepengegrunnlag.inntektsdata(skjæringstidspunkt, organisasjonsnummer)
+
         internal open fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode): List<Utbetalingstidslinje> {
             return tidslinjer
         }

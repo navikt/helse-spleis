@@ -51,7 +51,8 @@ import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingId
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.Dokumentsporing.Companion.tilSubsumsjonsformat
 import no.nav.helse.person.ForlengelseFraInfotrygd.IKKE_ETTERSPURT
-import no.nav.helse.person.PersonObserver.ArbeidsgiveropplysningerKorrigertEvent.KorrigerendeInntektektsopplysningstype.SAKSBEHANDLER
+import no.nav.helse.person.PersonObserver.Inntektsopplysningstype
+import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
 import no.nav.helse.person.Sykefraværstilfelleeventyr.Companion.bliMed
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -711,7 +712,15 @@ internal class Vedtaksperiode private constructor(
         val beregningsmåneder = 3.downTo(1).map {
             YearMonth.from(skjæringstidspunkt).minusMonths(it.toLong())
         }
-        if (fastsattInntekt == null) return PersonObserver.Inntekt(forslag = PersonObserver.Inntektsforslag(beregningsmåneder))
+        val inntektForrigeSkjæringstidspunkt = person.skjæringstidspunkter()
+            .filter { it != skjæringstidspunkt }
+            .maxOrNull()
+            ?.let { person.vilkårsgrunnlagFor(it)?.inntektsdata(it, organisasjonsnummer) }
+
+        if (fastsattInntekt == null) return PersonObserver.Inntekt(forslag = PersonObserver.Inntektsforslag(
+            beregningsmåneder,
+            forrigeInntekt = inntektForrigeSkjæringstidspunkt
+        ))
         return null
     }
 
@@ -2529,7 +2538,7 @@ internal class Vedtaksperiode private constructor(
                         vedtaksperiode.person.arbeidsgiveropplysningerKorrigert(
                             PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
                                 korrigerendeInntektsopplysningId = dager.meldingsreferanseId(),
-                                korrigerendeInntektektsopplysningstype = PersonObserver.ArbeidsgiveropplysningerKorrigertEvent.KorrigerendeInntektektsopplysningstype.INNTEKTSMELDING,
+                                korrigerendeInntektektsopplysningstype = Inntektsopplysningstype.INNTEKTSMELDING,
                                 korrigertInntektsmeldingId = it
                             ))
                     }

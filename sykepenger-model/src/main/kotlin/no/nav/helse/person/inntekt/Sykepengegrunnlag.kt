@@ -39,6 +39,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finn
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.ingenRefusjonsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.inntekt
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.inntektsdata
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.lagreTidsnæreInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.leggTil
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.markerFlereArbeidsgivere
@@ -478,6 +479,9 @@ internal class Sykepengegrunnlag private constructor(
         tilstand.entering(this)
         return tilstand
     }
+
+    internal fun inntektsdata(skjæringstidspunkt: LocalDate, organisasjonsnummer: String) =
+        arbeidsgiverInntektsopplysninger.inntektsdata(skjæringstidspunkt, organisasjonsnummer,)
 
     internal sealed interface Tilstand {
         fun entering(sykepengegrunnlag: Sykepengegrunnlag) {}

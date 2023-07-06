@@ -24,7 +24,9 @@ class ForespurtOpplysningTest {
                     januar(2018),
                     februar(2018),
                     mars(2018)
-                ))
+                ),
+                PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)
+            )
             ),
             PersonObserver.Arbeidsgiverperiode(listOf(1.april til 16.april)),
             PersonObserver.Refusjon(emptyList())
@@ -78,6 +80,11 @@ class ForespurtOpplysningTest {
                     januar(2018),
                     februar(2018),
                     mars(2018),
+                ),
+                "forrigeInntekt" to mapOf(
+                        "skjæringstidspunkt" to 1.januar,
+                        "kilde" to PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING.name,
+                        "beløp" to 31000.0
                 )
             ),
         ),

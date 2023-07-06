@@ -157,7 +157,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     data class ArbeidsgiveropplysningerKorrigertEvent(
         val korrigertInntektsmeldingId: UUID,
         val korrigerendeInntektsopplysningId: UUID,
-        val korrigerendeInntektektsopplysningstype: KorrigerendeInntektektsopplysningstype
+        val korrigerendeInntektektsopplysningstype: Inntektsopplysningstype
     ) {
         fun toJsonMap(): Map<String, Any> =
             mapOf(
@@ -165,12 +165,8 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
                 "korrigerendeInntektsopplysningId" to korrigerendeInntektsopplysningId,
                 "korrigerendeInntektektsopplysningstype" to korrigerendeInntektektsopplysningstype
             )
-
-        enum class KorrigerendeInntektektsopplysningstype {
-            INNTEKTSMELDING,
-            SAKSBEHANDLER
-        }
     }
+
     sealed class ForespurtOpplysning {
 
         companion object {
@@ -189,7 +185,14 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
                     is Inntekt -> mapOf(
                         "opplysningstype" to "Inntekt",
                         "forslag" to mapOf(
-                            "beregningsmåneder" to forespurtOpplysning.forslag.beregningsmåneder
+                            "beregningsmåneder" to forespurtOpplysning.forslag.beregningsmåneder,
+                            "forrigeInntekt" to forespurtOpplysning.forslag.forrigeInntekt?.let {
+                                mapOf(
+                                    "skjæringstidspunkt" to it.skjæringstidspunkt,
+                                    "kilde" to it.kilde.name,
+                                    "beløp" to it.beløp
+                                )
+                            }
                         )
                     )
 
@@ -213,7 +216,12 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         }
     }
 
-    data class Inntektsforslag(val beregningsmåneder: List<YearMonth>)
+    data class Inntektsforslag(val beregningsmåneder: List<YearMonth>, val forrigeInntekt: Inntektsdata?)
+    data class Inntektsdata(val skjæringstidspunkt: LocalDate, val kilde: Inntektsopplysningstype, val beløp: Double)
+    enum class Inntektsopplysningstype{
+        INNTEKTSMELDING,
+        SAKSBEHANDLER
+    }
     data class Inntekt(val forslag: Inntektsforslag) : ForespurtOpplysning()
     data class FastsattInntekt(val fastsattInntekt: no.nav.helse.økonomi.Inntekt) : ForespurtOpplysning()
     data class Arbeidsgiverperiode(val forslag: List<Periode>) : ForespurtOpplysning()

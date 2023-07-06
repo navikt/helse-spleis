@@ -10,6 +10,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
+import no.nav.inntektsmeldingkontrakt.Periode
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -73,6 +74,54 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             JSONAssert.assertEquals(forventetResultatFastsattInntekt, faktiskResultat, JSONCompareMode.STRICT)
         }
 
+    @Test
+    fun `sender med inntekt fra forrige skjæringstidspunkt`() = Toggle.Egenmelding.enable {
+        sendNySøknad(SoknadsperiodeDTO(fom = 2.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 2.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            egenmeldingerFraSykmelding = listOf(1.januar)
+        )
+        sendInntektsmelding(
+            listOf(Periode(1.januar, 16.januar)),
+            1.januar
+        )
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0)
+        sendUtbetaling()
+
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)),
+            egenmeldingerFraSykmelding = emptyList()
+        )
+        sendInntektsmelding(
+            listOf(Periode(1.mars, 16.mars)),
+            1.mars
+        )
+        sendVilkårsgrunnlag(1)
+        sendYtelser(1)
+        sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(1)
+        sendUtbetaling()
+        Assertions.assertEquals(2, testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver").size)
+        val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
+
+        val faktiskResultat = trengerOpplysningerEvent.json(
+            "@event_name",
+            "organisasjonsnummer",
+            "skjæringstidspunkt",
+            "sykmeldingsperioder",
+            "egenmeldingsperioder",
+            "forespurteOpplysninger",
+            "aktørId",
+            "fødselsnummer"
+        )
+
+        JSONAssert.assertEquals(forventetResultatMedInntektFraTidligereSkjæringstidpunkt, faktiskResultat, JSONCompareMode.STRICT)
+    }
+
     private fun forlengMedFebruar(a1: String) {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100), orgnummer = a1)
         sendSøknad(
@@ -99,12 +148,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         )
 
         sendInntektsmelding(
-            listOf(no.nav.inntektsmeldingkontrakt.Periode(1.januar, 16.januar)),
+            listOf(Periode(1.januar, 16.januar)),
             1.januar,
             orgnummer = a1
         )
         sendInntektsmelding(
-            listOf(no.nav.inntektsmeldingkontrakt.Periode(1.januar, 16.januar)),
+            listOf(Periode(1.januar, 16.januar)),
             1.januar,
             orgnummer = a2
         )
@@ -139,6 +188,43 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         sendUtbetalingsgodkjenning(0, orgnummer = a2)
         sendUtbetaling()
     }
+
+    @Test
+    fun `sender ut forventet event TrengerArbeidsgiveropplysninger ved førstegangsbehandling med kort gap til forrige`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        )
+        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0)
+        sendUtbetaling()
+
+        sendNySøknad(SoknadsperiodeDTO(fom = 10.februar, tom = 10.mars, sykmeldingsgrad = 100))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 10.februar, tom = 10.mars, sykmeldingsgrad = 100))
+        )
+
+        val meldinger = testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver")
+        Assertions.assertEquals(2, meldinger.size)
+        val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
+
+        val faktiskResultat = trengerOpplysningerEvent.json(
+            "@event_name",
+            "organisasjonsnummer",
+            "skjæringstidspunkt",
+            "sykmeldingsperioder",
+            "egenmeldingsperioder",
+            "forespurteOpplysninger",
+            "aktørId",
+            "fødselsnummer"
+        )
+
+        JSONAssert.assertEquals(forventetResultatKortGap, faktiskResultat, JSONCompareMode.STRICT)
+    }
+
 
     @Language("json")
     val forventetResultatFastsattInntekt = """
@@ -208,7 +294,8 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
                   "2017-10",
                   "2017-11",
                   "2017-12"
-                ]
+                ], 
+                "forrigeInntekt": null
               }
             },
             {
@@ -228,6 +315,97 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
           "aktørId": "42",
           "fødselsnummer": "12029240045"
         }"""
+
+    @Language("json")
+    val forventetResultatMedInntektFraTidligereSkjæringstidpunkt = """
+        {
+          "@event_name": "trenger_opplysninger_fra_arbeidsgiver",
+          "organisasjonsnummer": "987654321",
+          "skjæringstidspunkt": "2018-03-01",
+          "sykmeldingsperioder": [
+            {
+              "fom": "2018-03-01",
+              "tom": "2018-03-31"
+            }
+          ],
+          "egenmeldingsperioder": [],
+          "forespurteOpplysninger": [
+            {
+              "opplysningstype": "Inntekt",
+              "forslag": {
+                "beregningsmåneder": [
+                  "2017-12",
+                  "2018-01",
+                  "2018-02"
+                ], 
+                "forrigeInntekt": {
+                  "skjæringstidspunkt": "2018-01-01", 
+                  "kilde": "INNTEKTSMELDING", 
+                  "beløp": 31000.0
+                }
+              }
+            },
+            {
+              "opplysningstype": "Refusjon",
+              "forslag": []
+            },
+            {
+              "opplysningstype": "Arbeidsgiverperiode",
+              "forslag": [
+                {
+                  "fom": "2018-03-01",
+                  "tom": "2018-03-16"
+                }
+              ]
+            }
+          ],
+          "aktørId": "42",
+          "fødselsnummer": "12029240045"
+        }"""
+
+    @Language("json")
+    val forventetResultatKortGap = """
+        {
+          "@event_name": "trenger_opplysninger_fra_arbeidsgiver",
+          "organisasjonsnummer": "987654321",
+          "skjæringstidspunkt": "2018-02-10",
+          "sykmeldingsperioder": [
+            {
+              "fom": "2018-01-01",
+              "tom": "2018-01-31"
+            }, 
+            {
+              "fom": "2018-02-10",
+              "tom": "2018-03-10"
+            }
+
+          ],
+          "egenmeldingsperioder": [],
+          "forespurteOpplysninger": [
+            {
+              "opplysningstype": "Inntekt",
+              "forslag": {
+                "beregningsmåneder": [
+                  "2017-11",
+                  "2017-12",
+                  "2018-01"
+                ],
+                "forrigeInntekt": {
+                  "skjæringstidspunkt": "2018-01-01",
+                  "kilde": "INNTEKTSMELDING",
+                  "beløp": 31000.0
+                }
+              }
+            },
+            {
+              "opplysningstype": "Refusjon",
+              "forslag": []
+            }
+          ],
+          "aktørId": "42",
+          "fødselsnummer": "12029240045"
+        }"""
+
 
 
     private companion object {

@@ -145,6 +145,9 @@ class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.inntekt(organisasjonsnummer: String) =
             firstOrNull { it.orgnummer == organisasjonsnummer }?.inntektsopplysning?.fastsattÅrsinntekt()
 
+        internal fun List<ArbeidsgiverInntektsopplysning>.inntektsdata(skjæringstidspunkt: LocalDate, organisasjonsnummer: String) =
+            firstOrNull { it.gjelder(organisasjonsnummer) }?.inntektsopplysning?.inntektsdata(skjæringstidspunkt)
+
         internal fun List<ArbeidsgiverInntektsopplysning>.subsummer(subsumsjonObserver: SubsumsjonObserver, opptjening: Opptjening? = null) {
             subsumsjonObserver.`§ 8-30 ledd 1`(
                 grunnlagForSykepengegrunnlagPerArbeidsgiverMånedlig = omregnetÅrsinntektPerArbeidsgiver().mapValues { it.value.reflection { _, månedlig, _, _ -> månedlig } },

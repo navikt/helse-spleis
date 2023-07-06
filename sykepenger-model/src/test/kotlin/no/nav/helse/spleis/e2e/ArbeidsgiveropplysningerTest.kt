@@ -70,7 +70,8 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                         november(2017),
                         desember(2017),
                         januar(2018)
-                    )
+                    ),
+                    PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)
                 )
             ),
             PersonObserver.Refusjon(forslag = emptyList())
@@ -109,7 +110,8 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                         november(2017),
                         desember(2017),
                         januar(2018)
-                    )
+                    ),
+                    PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)
                 )
             ),
             PersonObserver.Refusjon(forslag = emptyList()),
@@ -158,7 +160,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sender med riktig sykmeldingsperioder og forslag til arbeidsgiverperiode når arbeidsperioden er stykket opp i flere korte perioder`() {
+    fun `sender med riktig sykmeldingsperioder og forslag til arbeidsgiverperiode når arbeidsgiverperioden er stykket opp i flere korte perioder`() {
         nyPeriode(1.januar til 7.januar)
         nyPeriode(9.januar til 14.januar)
         nyPeriode(16.januar til 21.januar)
@@ -170,7 +172,8 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                         oktober(2017),
                         november(2017),
                         desember(2017)
-                    )
+                    ),
+                    null
                 )
             ),
             PersonObserver.Refusjon(forslag = emptyList()),
@@ -250,7 +253,8 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                         oktober(2017),
                         november(2017),
                         desember(2017)
-                    )
+                    ),
+                    null
                 )
             ),
             PersonObserver.Refusjon(forslag = emptyList()),
@@ -336,7 +340,8 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                         oktober(2017),
                         november(2017),
                         desember(2017)
-                    )
+                    ),
+                    null
                 )
             ),
             PersonObserver.Refusjon(forslag = emptyList()),
@@ -361,7 +366,8 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                         oktober(2017),
                         november(2017),
                         desember(2017)
-                    )
+                    ),
+                    null
                 )
             ),
             PersonObserver.Refusjon(forslag = emptyList()),
@@ -548,6 +554,91 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         val expectedEgenmeldinger = listOf(1.januar til 4.januar)
         assertEquals(expectedEgenmeldinger, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().egenmeldingsperioder)
+    }
+
+    @Test
+    fun `Skal ikke sende med skjønnsfastsatt sykpengegrunnlag som inntektForrigeSkjæringstidspunkt` () {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT*2)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        nyPeriode(16.februar til 15.mars)
+
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+
+        val expectedForespurteOpplysninger = listOf(
+            PersonObserver.Inntekt(
+                PersonObserver.Inntektsforslag(
+                    listOf(
+                        november(2017),
+                        desember(2017),
+                        januar(2018)
+                    ),
+                    PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)
+                )
+            ),
+            PersonObserver.Refusjon(forslag = emptyList())
+        )
+        val actualForespurteOpplysninger =
+            observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
+        assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
+    }
+
+    @Test
+    fun `Skal sende med saksbehandlerinntekt som inntektForrigeSkjæringstidspunkt` () {
+        nyttVedtak(1.januar, 31.januar)
+        håndterOverstyrInntekt(32000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+
+        nyPeriode(16.februar til 15.mars)
+
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+
+        val expectedForespurteOpplysninger = listOf(
+            PersonObserver.Inntekt(
+                PersonObserver.Inntektsforslag(
+                    listOf(
+                        november(2017),
+                        desember(2017),
+                        januar(2018)
+                    ),
+                    PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER, 32000.0)
+                )
+            ),
+            PersonObserver.Refusjon(forslag = emptyList())
+        )
+        val actualForespurteOpplysninger =
+            observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
+        assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
+    }
+
+    @Test
+    fun `Skal ikke sende med inntektForrigeSkjæringstidspunkt fra annen arbeidsgiver`() {
+        nyttVedtak(1.januar, 31.januar, orgnummer = a1)
+        nyPeriode(1.mars til 31.mars, orgnummer = a2)
+
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+
+        val expectedForespurteOpplysninger = listOf(
+            PersonObserver.Inntekt(
+                PersonObserver.Inntektsforslag(
+                    listOf(
+                        desember(2017),
+                        januar(2018),
+                        februar(2018)
+                    ),
+                    null
+                )
+            ),
+            PersonObserver.Refusjon(forslag = emptyList()),
+            PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
+        )
+        val actualForespurteOpplysninger =
+            observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
+        assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
     }
 
     private fun gapHosÉnArbeidsgiver(refusjon: Inntektsmelding.Refusjon) {
