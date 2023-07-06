@@ -3,7 +3,6 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -45,19 +44,7 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = tidsstempel.plusDays(1)
             ))
         }
-
-        assertForventetFeil(
-            forklaring = "benytter ikke siste informasjon fra arbeidsgiver",
-            nå = {
-                assertEquals(listOf(
-                    Refusjonsopplysning(inntektsmelding2, 1.mars, 20.mars, 1000.daglig),
-                    Refusjonsopplysning(inntektsmelding1, 21.mars, null, 0.daglig),
-                ), refusjonshistorikk.refusjonsopplysninger(1.mars).inspektør.refusjonsopplysninger)
-            },
-            ønsket = {
-                assertEquals(listOf(Refusjonsopplysning(inntektsmelding2, 1.mars, null, 1000.daglig)), refusjonshistorikk.refusjonsopplysninger(1.mars).inspektør.refusjonsopplysninger)
-            }
-        )
+        assertEquals(listOf(Refusjonsopplysning(inntektsmelding2, 1.mars, null, 1000.daglig)), refusjonshistorikk.refusjonsopplysninger(1.mars).inspektør.refusjonsopplysninger)
     }
 
     @Test
