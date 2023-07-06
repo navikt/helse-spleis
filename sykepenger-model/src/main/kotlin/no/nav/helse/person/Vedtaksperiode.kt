@@ -607,7 +607,7 @@ internal class Vedtaksperiode private constructor(
     private fun håndterSøknad(søknad: Søknad, nesteTilstand: () -> Vedtaksperiodetilstand? = { null }) {
         oppdaterHistorikk(søknad)
         søknad.valider(periode, jurist())
-        søknad.validerInntektskilder(vilkårsgrunnlag == null)
+        søknad.valider(vilkårsgrunnlag)
         if (manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) søknad.funksjonellFeil(RV_SV_2)
         if (søknad.harFunksjonelleFeilEllerVerre()) {
             return forkast(søknad)
@@ -637,7 +637,7 @@ internal class Vedtaksperiode private constructor(
         if (søknad.utenlandskSykmelding()) return søknad.funksjonellFeil(RV_SØ_29)
         else {
             søknad.valider(periode, jurist())
-            søknad.validerInntektskilder(vilkårsgrunnlag == null)
+            søknad.valider(vilkårsgrunnlag)
             søknad.info("Søknad har trigget en revurdering")
             oppdaterHistorikkBlock(søknad)
         }

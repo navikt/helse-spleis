@@ -20,6 +20,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -123,7 +124,6 @@ class Søknad(
         }
     }
 
-    internal fun harArbeidsdager() = perioder.filterIsInstance<Søknadsperiode.Arbeid>().isNotEmpty()
     internal fun delvisOverlappende(other: Periode) = other.delvisOverlappMed(sykdomsperiode)
 
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
@@ -145,15 +145,15 @@ class Søknad(
         return this
     }
 
-    internal fun validerInntektskilder(manglerVilkårsgrunnlag: Boolean): IAktivitetslogg {
-        if(andreInntektskilder){
-            if(manglerVilkårsgrunnlag){
-                this.funksjonellFeil(RV_SØ_10)
-            } else {
-                this.varsel(RV_SØ_10)
-            }
-        }
+    internal fun valider(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?): IAktivitetslogg {
+        validerInntektskilder(vilkårsgrunnlag)
         return this
+    }
+
+    private fun validerInntektskilder(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?) {
+        if (!andreInntektskilder) return
+        if (vilkårsgrunnlag == null) return this.funksjonellFeil(RV_SØ_10)
+        this.varsel(RV_SØ_10)
     }
 
     internal fun utenlandskSykmelding(): Boolean {
