@@ -25,26 +25,9 @@ class Refusjonsopplysning(
 
     private val periode = fom til (tom ?: LocalDate.MAX)
 
-    private fun merge(other: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
-        if (other.isEmpty()) return listOf(this)
-        val førsteFom = other.minBy { it.fom }.fom
-        // begrenser refusjonsopplysningen slik at den ikke kan strekke tilbake i tid
-        if (fom < førsteFom) return begrensTil(førsteFom, other)
-        // bevarer eksisterende opplysning hvis *this* finnes fra før (dvs. vi bevarer meldingsreferanseId på forrige)
-        if (other.any(::funksjoneltLik)) return other
-        return other
-            .flatMap { it.merge(this) }
-            .plusElement(this)
-    }
-
-    private fun begrensTil(førsteFom: LocalDate, other: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
-        if (periode.endInclusive < førsteFom) return other
-        return Refusjonsopplysning(meldingsreferanseId, førsteFom, tom, beløp).merge(other)
-    }
-
-    private fun merge(ny: Refusjonsopplysning): List<Refusjonsopplysning> {
+    private fun trim(periodeSomSkalFjernes: Periode): List<Refusjonsopplysning> {
         return this.periode
-            .trim(ny.periode)
+            .trim(periodeSomSkalFjernes)
             .map {
                 Refusjonsopplysning(
                     fom = it.start,
@@ -58,12 +41,17 @@ class Refusjonsopplysning(
     internal fun fom() = fom
     internal fun tom() = tom
     internal fun beløp() = beløp
-
     private fun oppdatertTom(nyTom: LocalDate) = if (nyTom < fom) null else Refusjonsopplysning(meldingsreferanseId, fom, nyTom, beløp)
 
     private fun begrensTil(dato: LocalDate): Refusjonsopplysning? {
         return if (dekker(dato)) oppdatertTom(dato.forrigeDag)
         else this
+    }
+
+    private fun begrensetFra(dato: LocalDate): Refusjonsopplysning? {
+        if (periode.endInclusive < dato) return null
+        if (periode.start >= dato) return this
+        return Refusjonsopplysning(meldingsreferanseId, dato, tom, beløp)
     }
 
     private fun dekker(dag: LocalDate) = dag in periode
@@ -97,10 +85,20 @@ class Refusjonsopplysning(
     }
 
     internal companion object {
-        private fun List<Refusjonsopplysning>.merge(nyeOpplysninger: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
+        private fun List<Refusjonsopplysning>.mergeInnNyeOpplysninger(nyeOpplysninger: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
+            val begrensetFra = minOfOrNull { it.fom } ?: LocalDate.MIN
             return nyeOpplysninger
-                .fold(this) { result, opplysning -> opplysning.merge(result) }
+                .fold(this) { resultat, nyOpplysning -> resultat.mergeInnNyOpplysning(nyOpplysning, begrensetFra) }
                 .sortedBy { it.fom }
+        }
+
+        private fun List<Refusjonsopplysning>.mergeInnNyOpplysning(nyOpplysning: Refusjonsopplysning, begrensetFra: LocalDate): List<Refusjonsopplysning> {
+            // begrenser refusjonsopplysningen slik at den ikke kan strekke tilbake i tid
+            val nyOpplysningBegrensetStart = nyOpplysning.begrensetFra(begrensetFra) ?: return this
+            // bevarer eksisterende opplysning hvis ny opplysning finnes fra før (dvs. vi bevarer meldingsreferanseId på forrige)
+            if (any { it.funksjoneltLik(nyOpplysningBegrensetStart) }) return this
+            // Beholder de delene som ikke dekkes av den nye opplysningen og legger til den nye opplysningen
+            return flatMap { eksisterendeOpplysning -> eksisterendeOpplysning.trim(nyOpplysningBegrensetStart.periode) }.plus(nyOpplysningBegrensetStart)
         }
     }
 
@@ -138,13 +136,14 @@ class Refusjonsopplysning(
         }
 
         internal fun merge(other: Refusjonsopplysninger): Refusjonsopplysninger {
-            return Refusjonsopplysninger(validerteRefusjonsopplysninger.merge(other.validerteRefusjonsopplysninger))
+            return Refusjonsopplysninger(validerteRefusjonsopplysninger.mergeInnNyeOpplysninger(other.validerteRefusjonsopplysninger))
         }
 
         override fun equals(other: Any?): Boolean {
             if (other !is Refusjonsopplysninger) return false
             return validerteRefusjonsopplysninger == other.validerteRefusjonsopplysninger
         }
+
 
         override fun hashCode() = validerteRefusjonsopplysninger.hashCode()
 
@@ -216,9 +215,11 @@ class Refusjonsopplysning(
                 refusjonsopplysninger.add(tidsstempel to refusjonsopplysning)
             }
 
-            private fun sorterteRefusjonsopplysninger() = refusjonsopplysninger.sortedWith(compareBy({ it.second.fom }, { it.first })).map { it.second }
+            private fun sorterteRefusjonsopplysninger() = refusjonsopplysninger
+                .sortedWith(compareBy({ (tidsstempel, _) -> tidsstempel }, { (_, refusjonsopplysning) -> refusjonsopplysning.fom }))
+                .map { (_, refusjonsopplysning) -> refusjonsopplysning }
 
-            fun build() = Refusjonsopplysninger(emptyList<Refusjonsopplysning>().merge(sorterteRefusjonsopplysninger()))
+            fun build() = Refusjonsopplysninger(emptyList<Refusjonsopplysning>().mergeInnNyeOpplysninger(sorterteRefusjonsopplysninger()))
         }
     }
 
