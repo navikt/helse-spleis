@@ -54,6 +54,14 @@ enum class Varselkode(
     RV_SØ_37("Søknad forlenger en forkastet periode hos samme arbeidsgiver"),
     RV_SØ_38("Søknad forlenger en forkastet periode hos annen arbeidsgiver"),
 
+    RV_SØ_39("Støtter ikke søknadstypen"),
+    RV_SØ_40("Støtter ikke søknadstypen for forlengelser vilkårsprøvd i Infotrygd"),
+    RV_SØ_41("Støtter kun søknadstypen hvor den aktuelle arbeidsgiveren er den eneste i sykepengegrunnlaget"),
+
+    // Arbeidsledig søknader
+    RV_SØ_42("Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader"),
+    RV_SØ_43("Arbeidsledigsøknad er lagt til grunn, undersøk refusjonsopplysningene før du utbetaler"),
+
     // OO: Out-of-order
     RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne."),
     RV_OO_2("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning."),
@@ -272,6 +280,13 @@ enum class Varselkode(
         val `Overlapper med omsorgspenger` = RV_AY_7
         val `Overlapper med opplæringspenger` = RV_AY_8
         val `Overlapper med institusjonsopphold` = RV_AY_9
+
+
+        val `Støtter ikke søknadstypen` = RV_SØ_39
+        val `Støtter ikke søknadstypen for forlengelser vilkårsprøvd i Infotrygd` = RV_SØ_40
+        val `Støtter kun søknadstypen hvor den aktuelle arbeidsgiveren er den eneste i sykepengegrunnlaget`= RV_SØ_41
+        val `Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader` = RV_SØ_42
+        val `Arbeidsledigsøknad er lagt til grunn` =  RV_SØ_43
 
         fun IAktivitetslogg.varsel(varselkode: Varselkode, detaljer: String) {
             varsel(varselkode)

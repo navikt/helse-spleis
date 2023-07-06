@@ -20,11 +20,14 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.*
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsledigsøknad er lagt til grunn`
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke søknadstypen`
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -53,6 +56,7 @@ class Søknad(
     private val sendTilGosys: Boolean,
     private val yrkesskade: Boolean,
     private val egenmeldinger: List<Søknadsperiode.Arbeidsgiverdag>,
+    private val søknadstype: Søknadstype = Søknadstype.Arbeidstaker,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class, aktivitetslogg) {
 
@@ -145,12 +149,13 @@ class Søknad(
         return this
     }
 
-    internal fun valider(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?): IAktivitetslogg {
+    internal fun valider(vilkårsgrunnlag: VilkårsgrunnlagElement?): IAktivitetslogg {
         validerInntektskilder(vilkårsgrunnlag)
+        søknadstype.valider(this, vilkårsgrunnlag, organisasjonsnummer)
         return this
     }
 
-    private fun validerInntektskilder(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?) {
+    private fun validerInntektskilder(vilkårsgrunnlag: VilkårsgrunnlagElement?) {
         if (!andreInntektskilder) return
         if (vilkårsgrunnlag == null) return this.funksjonellFeil(RV_SØ_10)
         this.varsel(RV_SØ_10)
@@ -224,6 +229,25 @@ class Søknad(
             if (type == "UGYLDIG_TILBAKEDATERING" || type == "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER") {
                 aktivitetslogg.varsel(RV_SØ_3)
             }
+        }
+    }
+
+    class Søknadstype(private val type: String) {
+        internal fun valider(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?, organisasjonsnummer: String) {
+            if (this == Arbeidstaker) return
+            if (this != Arbeidledig) return aktivitetslogg.funksjonellFeil(`Støtter ikke søknadstypen`)
+            if (vilkårsgrunnlag == null) return aktivitetslogg.funksjonellFeil(`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`)
+            if (!vilkårsgrunnlag.validerAnnenSøknadstype(aktivitetslogg, organisasjonsnummer)) return
+            aktivitetslogg.varsel(`Arbeidsledigsøknad er lagt til grunn`)
+        }
+        override fun equals(other: Any?): Boolean {
+            if (other !is Søknadstype) return false
+            return this.type == other.type
+        }
+        override fun hashCode() = type.hashCode()
+        companion object {
+            val Arbeidstaker = Søknadstype("ARBEIDSTAKERE")
+            val Arbeidledig = Søknadstype("ARBEIDSLEDIG")
         }
     }
 

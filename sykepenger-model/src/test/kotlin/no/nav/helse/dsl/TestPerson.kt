@@ -175,7 +175,8 @@ internal class TestPerson(
             sykmeldingSkrevet: LocalDateTime? = null,
             orgnummer: String = "",
             søknadId: UUID = UUID.randomUUID(),
-            utenlandskSykmelding: Boolean = false
+            utenlandskSykmelding: Boolean = false,
+            søknadstype: Søknad.Søknadstype = Søknad.Søknadstype.Arbeidstaker
         ) =
             behovsamler.fangInntektsmeldingReplay({
                 vedtaksperiodesamler.fangVedtaksperiode {
@@ -187,7 +188,8 @@ internal class TestPerson(
                         sykmeldingSkrevet = sykmeldingSkrevet,
                         id = søknadId,
                         yrkesskade = yrkesskade,
-                        utenlandskSykmelding = utenlandskSykmelding
+                        utenlandskSykmelding = utenlandskSykmelding,
+                        søknadstype = søknadstype
                     ).håndter(Person::håndter)
                 }?.also {
                     if (behovsamler.harBehov(it, Sykepengehistorikk)){

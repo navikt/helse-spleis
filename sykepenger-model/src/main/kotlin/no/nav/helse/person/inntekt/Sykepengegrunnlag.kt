@@ -19,6 +19,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver.VedtakFattetEvent.Sykepengegrunnlagsfakta
 import no.nav.helse.person.SykepengegrunnlagVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter kun søknadstypen hvor den aktuelle arbeidsgiveren er den eneste i sykepengegrunnlaget`
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
@@ -433,6 +434,12 @@ internal class Sykepengegrunnlag private constructor(
     }
 
     internal fun avventerFastsettelseEtterSkjønn() = tilstand == AvventerFastsettelseEtterSkjønn
+
+    internal fun validerAnnenSøknadstype(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String): Boolean {
+        if (arbeidsgiverInntektsopplysninger.size == 1 && arbeidsgiverInntektsopplysninger.single().gjelder(organisasjonsnummer)) return true
+        aktivitetslogg.funksjonellFeil(`Støtter kun søknadstypen hvor den aktuelle arbeidsgiveren er den eneste i sykepengegrunnlaget`)
+        return false
+    }
 
     private fun tilstand(nyTilstand: Tilstand): Tilstand {
         if (tilstand == nyTilstand) return tilstand
