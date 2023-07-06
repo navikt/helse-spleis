@@ -706,11 +706,12 @@ class Person private constructor(
         skjæringstidspunkt: LocalDate,
         inntektsmelding: Inntektsmelding,
         subsumsjonObserver: SubsumsjonObserver
-    ) {
-        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return
-        val (nyttGrunnlag, eventyr) = (grunnlag.nyeArbeidsgiverInntektsopplysninger(this, inntektsmelding, subsumsjonObserver) ?: return)
+    ): Boolean {
+        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return false
+        val (nyttGrunnlag, eventyr) = (grunnlag.nyeArbeidsgiverInntektsopplysninger(this, inntektsmelding, subsumsjonObserver) ?: return false)
         nyttVilkårsgrunnlag(inntektsmelding, nyttGrunnlag)
         igangsettOverstyring(inntektsmelding, eventyr)
+        return true
     }
 
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
