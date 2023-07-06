@@ -408,8 +408,8 @@ class Person private constructor(
 
     fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold) {
         overstyrArbeidsforhold.kontekst(aktivitetslogg, this)
-        if (!arbeidsgivere.håndter(overstyrArbeidsforhold)) {
-            overstyrArbeidsforhold.logiskFeil("Kan ikke overstyre arbeidsforhold fordi ingen vedtaksperioder håndterte hendelsen")
+        check(arbeidsgivere.håndter(overstyrArbeidsforhold)) {
+            "Kan ikke overstyre arbeidsforhold fordi ingen vedtaksperioder håndterte hendelsen"
         }
         håndterGjenoppta(overstyrArbeidsforhold)
     }
