@@ -19,6 +19,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplayUtført
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
+import no.nav.helse.hendelser.OverstyrSykepengegrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -426,6 +427,15 @@ internal class Vedtaksperiode private constructor(
             }
         }
         hendelse.trimLeft(periode.endInclusive)
+    }
+
+    internal fun håndter(overstyrSykepengegrunnlag: OverstyrSykepengegrunnlag, alleVedtaksperioder: Iterable<Vedtaksperiode>): Boolean {
+        if (!overstyrSykepengegrunnlag.erRelevant(skjæringstidspunkt)) return false
+        if (vilkårsgrunnlag?.erArbeidsgiverRelevant(organisasjonsnummer) != true) return false
+        kontekst(overstyrSykepengegrunnlag)
+        alleVedtaksperioder.filter(VILKÅRSPRØVD_PÅ(skjæringstidspunkt)).forEach { overstyrSykepengegrunnlag.leggTil(it.hendelseIder) }
+        overstyrSykepengegrunnlag.vilkårsprøvEtterNyInformasjonFraSaksbehandler(person, jurist())
+        return true
     }
 
     internal fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold, vedtaksperioder: Iterable<Vedtaksperiode>): Boolean {
@@ -2600,6 +2610,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal val IKKE_FERDIG_BEHANDLET: VedtaksperiodeFilter = { !it.tilstand.erFerdigBehandlet }
+
+        private val VILKÅRSPRØVD_PÅ = { skjæringstidspunkt: LocalDate ->
+            { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.skjæringstidspunkt == skjæringstidspunkt && vedtaksperiode.vilkårsgrunnlag?.erArbeidsgiverRelevant(vedtaksperiode.organisasjonsnummer) == true }
+        }
 
         internal val MED_SKJÆRINGSTIDSPUNKT = { skjæringstidspunkt: LocalDate ->
             { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.skjæringstidspunkt == skjæringstidspunkt }

@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.InntektsmeldingReplayUtført
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
+import no.nav.helse.hendelser.OverstyrSykepengegrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
@@ -181,6 +182,11 @@ internal class Arbeidsgiver private constructor(
                 arbeidsgiver.håndter(hendelse, infotrygdhistorikk)
             }
         }
+
+        private val List<Arbeidsgiver>.alleVedtaksperioder get() = flatMap { it.vedtaksperioder }
+
+        internal fun List<Arbeidsgiver>.håndter(overstyrSykepengegrunnlag: OverstyrSykepengegrunnlag) =
+            any { it.håndter(overstyrSykepengegrunnlag, alleVedtaksperioder) }
 
         internal fun List<Arbeidsgiver>.håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold) =
             any { it.håndter(overstyrArbeidsforhold) }
@@ -772,6 +778,11 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(hendelse: OverstyrTidslinje) {
         hendelse.kontekst(this)
         håndter(hendelse, Vedtaksperiode::håndter)
+    }
+
+    private fun håndter(overstyrSykepengegrunnlag: OverstyrSykepengegrunnlag, alleVedtaksperioder: Iterable<Vedtaksperiode>): Boolean {
+        overstyrSykepengegrunnlag.kontekst(this)
+        return énHarHåndtert(overstyrSykepengegrunnlag) { håndter(it, alleVedtaksperioder) }
     }
 
     private fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
