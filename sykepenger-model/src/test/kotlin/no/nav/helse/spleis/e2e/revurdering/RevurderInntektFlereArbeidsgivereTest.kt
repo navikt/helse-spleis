@@ -665,7 +665,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertHarHendelseIder(1.vedtaksperiode, hendelseId)
         }
         a2 {
-            assertHarIkkeHendelseIder(1.vedtaksperiode, hendelseId)
+            assertHarHendelseIder(1.vedtaksperiode, hendelseId)
         }
     }
 

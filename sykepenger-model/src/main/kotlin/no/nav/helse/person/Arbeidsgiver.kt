@@ -191,8 +191,6 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold) =
             any { it.håndter(overstyrArbeidsforhold) }
 
-        internal fun List<Arbeidsgiver>.håndterOverstyrArbeidsgiveropplysninger(overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger) =
-            any { it.håndter(overstyrArbeidsgiveropplysninger) }
 
         internal fun List<Arbeidsgiver>.håndterSkjønnsmessigFastsettelse(skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse) {
             skjønnsmessigFastsettelse.håndter(flatMap { it.vedtaksperioder })

@@ -448,20 +448,6 @@ internal class Vedtaksperiode private constructor(
         return true
     }
 
-    internal fun håndter(overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, vedtaksperioder: Iterable<Vedtaksperiode>): Boolean {
-        if (!overstyrArbeidsgiveropplysninger.erRelevant(skjæringstidspunkt)) return false
-        kontekst(overstyrArbeidsgiveropplysninger)
-        vedtaksperioder.filter(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt)).forEach {
-            overstyrArbeidsgiveropplysninger.leggTil(it.hendelseIder)
-        }
-        person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-            overstyrArbeidsgiveropplysninger,
-            this.skjæringstidspunkt,
-            jurist()
-        )
-        return true
-    }
-
     private fun påvirkerArbeidsgiverperioden(ny: Vedtaksperiode): Boolean {
         val dagerMellom = ny.periode.periodeMellom(this.periode.start)?.count() ?: return false
         return dagerMellom < MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD

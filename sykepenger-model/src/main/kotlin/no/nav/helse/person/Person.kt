@@ -48,7 +48,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.forkastAUUSomErUtbetaltIInfotr
 import no.nav.helse.person.Arbeidsgiver.Companion.forkastAuu
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
-import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterSkjønnsmessigFastsettelse
 import no.nav.helse.person.Arbeidsgiver.Companion.identifiserAUUSomErUtbetaltISpleis
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
@@ -394,7 +393,7 @@ class Person private constructor(
 
     fun håndter(hendelse: OverstyrArbeidsgiveropplysninger) {
         hendelse.kontekst(aktivitetslogg, this)
-        check(arbeidsgivere.håndterOverstyrArbeidsgiveropplysninger(hendelse)) {
+        check(arbeidsgivere.håndter(hendelse)) {
             "Ingen vedtaksperioder håndterte overstyringen av arbeidsgiveropplysninger"
         }
         håndterGjenoppta(hendelse)

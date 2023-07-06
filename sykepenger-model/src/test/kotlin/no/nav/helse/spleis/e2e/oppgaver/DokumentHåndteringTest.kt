@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.oppgaver
 import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -81,21 +80,13 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val januarA2DokumentIderEtter = inspektør(a2).hendelseIder(1.vedtaksperiode)
         val februarA2DokumentIderEtter = inspektør(a2).hendelseIder(2.vedtaksperiode)
 
-        assertEquals(januarA1DokumentIderFør.plus(overstyringId), januarA1DokumentIderEtter)
         assertTrue(inspektør(a1).hendelser(1.vedtaksperiode).contains(Dokumentsporing.overstyrArbeidsgiveropplysninger(overstyringId)))
+
+        assertEquals(januarA1DokumentIderFør.plus(overstyringId), januarA1DokumentIderEtter)
         assertEquals(februarA1DokumentIderFør.plus(overstyringId), februarA1DokumentIderEtter)
 
-        assertForventetFeil(
-            forklaring = "Kun vedtaksperiodeNE på første arbeidsgiver får dokumentpsporing",
-            nå = {
-                assertEquals(januarA2DokumentIderFør, januarA2DokumentIderEtter)
-                assertEquals(februarA2DokumentIderFør, februarA2DokumentIderEtter)
-            },
-            ønsket = {
-                assertEquals(februarA1DokumentIderFør.plus(overstyringId), februarA1DokumentIderEtter)
-                assertEquals(februarA2DokumentIderFør.plus(overstyringId), februarA2DokumentIderEtter)
-            }
-        )
+        assertEquals(januarA2DokumentIderFør.plus(overstyringId), januarA2DokumentIderEtter)
+        assertEquals(februarA2DokumentIderFør.plus(overstyringId), februarA2DokumentIderEtter)
     }
 
     @Test
