@@ -256,3 +256,5 @@ spec:
         - team: tbd
           application: spoogle
           access: readwrite
+        - application: spoogle-opprydding-dev
+          access: readwrite
