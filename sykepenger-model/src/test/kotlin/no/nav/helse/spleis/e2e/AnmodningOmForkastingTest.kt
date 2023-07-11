@@ -42,11 +42,11 @@ internal class AnmodningOmForkastingTest: AbstractDslTest() {
     }
 
     @Test
-    fun `anmodning avslås av en avsluttet vedtaksperiode`(){
+    fun `anmodning avslås av en avsluttet vedtaksperiode som har en utbetalt utbetaling`(){
         a1 {
             nyttVedtak(1.januar, 31.januar)
             håndterAnmodningOmForkasting(1.vedtaksperiode)
-            assertInfo("Avslår anmodning om forkasting i AVSLUTTET (kan ikke forkastes)", 1.vedtaksperiode.filter())
+            assertInfo("Kan ikke etterkomme anmodning om forkasting", 1.vedtaksperiode.filter())
         }
     }
 
