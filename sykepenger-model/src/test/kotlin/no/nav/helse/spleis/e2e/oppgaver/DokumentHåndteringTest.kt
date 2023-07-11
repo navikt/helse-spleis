@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.oppgaver
 import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -45,6 +46,55 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class DokumentHåndteringTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Inntektsmelding kommer mellom AUU og søknad for førstegangsbehandling`() {
+        val søknad1 = håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        val inntektsmelding = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        val søknad2 = håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
+
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        assertEquals(setOf(søknad1, inntektsmelding), inspektør.hendelseIder(1.vedtaksperiode))
+
+        assertForventetFeil(
+            forklaring = "Når inntektsmelding kommer mellom AUU & før søknad for førstegangsbehandling får ikke førstegangsbehandling referanse til inntektsmelding",
+            nå = {
+                assertEquals(setOf(søknad2), inspektør.hendelseIder(2.vedtaksperiode))
+            },
+            ønsket = {
+                assertEquals(setOf(søknad2, inntektsmelding), inspektør.hendelseIder(2.vedtaksperiode))
+            }
+        )
+    }
+
+    @Test
+    fun `Inntektsmelding kommer mellom AUU og søknad for førstegangsbehandling flere arbeidsgivere`() {
+        val søknad1A1 = håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        val søknad1A2 = håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a2)
+
+        val inntektsmeldingA1 = håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        val inntektsmeldingA2 = håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+
+        val søknad2A1 = håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a1)
+        val søknad2A2 = håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterVilkårsgrunnlag(2.vedtaksperiode, orgnummer = a1)
+
+        assertEquals(setOf(søknad1A1, inntektsmeldingA1), inspektør(a1).hendelseIder(1.vedtaksperiode))
+        assertEquals(setOf(søknad1A2, inntektsmeldingA2), inspektør(a2).hendelseIder(1.vedtaksperiode))
+
+        assertForventetFeil(
+            forklaring = "Når inntektsmelding kommer mellom AUU & før søknad for førstegangsbehandling får ikke førstegangsbehandling referanse til inntektsmelding",
+            nå = {
+                assertEquals(setOf(søknad2A1), inspektør(a1).hendelseIder(2.vedtaksperiode))
+                assertEquals(setOf(søknad2A2), inspektør(a2).hendelseIder(2.vedtaksperiode))
+            },
+            ønsket = {
+                assertEquals(setOf(søknad2A1, inntektsmeldingA1), inspektør(a1).hendelseIder(2.vedtaksperiode))
+                assertEquals(setOf(søknad2A2, inntektsmeldingA2), inspektør(a2).hendelseIder(2.vedtaksperiode))
+            }
+        )
+    }
 
     @Test
     fun `Alle vedtaksperioder på skjæringstidspunktet skal få referanse til overstyring på tvers av arbeidsgivere`() {
