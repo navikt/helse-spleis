@@ -37,6 +37,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_UTBETALT_I_INFOTRYGD
 import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.auuGruppering
 import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.gruppérAuuer
+import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.nyttVilkårsgrunnlag
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
@@ -51,6 +52,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.sykefraværstilfelle
 import no.nav.helse.person.Vedtaksperiode.Companion.trengerInntektsmelding
 import no.nav.helse.person.Vedtaksperiode.Companion.venter
+import no.nav.helse.person.VilkårsgrunnlagHistorikk.Grunnlagsdata
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -283,6 +285,9 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.sykefraværstilfelle(skjæringstidspunkt: LocalDate) =
             flatMap { it.vedtaksperioder }.sykefraværstilfelle(skjæringstidspunkt)
+
+        internal fun List<Arbeidsgiver>.nyttVilkårsgrunnlag(skjæringstidspunkt: LocalDate, vilkårsgrunnlag: Grunnlagsdata) =
+            flatMap { it.vedtaksperioder }.nyttVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlag)
     }
 
     /* hvorvidt arbeidsgiver ikke inngår i sykepengegrunnlaget som er på et vilkårsgrunnlag,
@@ -300,7 +305,7 @@ internal class Arbeidsgiver private constructor(
     private fun skalInngåISykepengegrunnlaget(skjæringstidspunkt: LocalDate) =
         vedtaksperioder.any(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt))
 
-    internal fun harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg) : Boolean {
+    private fun harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg) : Boolean {
         if (!trengerRefusjonsopplysninger(skjæringstidspunkt, periode)) return true
         val arbeidsgiverperiode = arbeidsgiverperiode(periode) ?: return false
         val vilkårsgrunnlag = person.vilkårsgrunnlagFor(skjæringstidspunkt)

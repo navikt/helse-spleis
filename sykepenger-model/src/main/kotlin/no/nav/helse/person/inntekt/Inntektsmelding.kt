@@ -7,6 +7,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.ArbeidsgiveropplysningerKorrigertEvent.KorrigerendeInntektektsopplysningstype.INNTEKTSMELDING
@@ -89,6 +90,10 @@ internal class Inntektsmelding(
         saksbehandlerOverstyring: OverstyrArbeidsgiveropplysninger
     ) {
         saksbehandlerOverstyring.arbeidsgiveropplysningerKorrigert(person, orgnummer, hendelseId)
+    }
+
+    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
+        hendelseIder.add(Dokumentsporing.inntektsmeldingInntekt(hendelseId))
     }
 
     internal fun kopierTidsnærOpplysning(nyDato: LocalDate, hendelse: IAktivitetslogg, oppholdsperiodeMellom: Periode?): Inntektsmelding {

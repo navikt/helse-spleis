@@ -53,6 +53,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.kandidatForSkjønnsmessigFastsettelse
 import no.nav.helse.person.Arbeidsgiver.Companion.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
+import no.nav.helse.person.Arbeidsgiver.Companion.nyttVilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.sykefraværstilfelle
@@ -630,8 +631,9 @@ class Person private constructor(
     internal fun blitt6GBegrensetSidenSist(skjæringstidspunkt: LocalDate) =
         vilkårsgrunnlagHistorikk.blitt6GBegrensetSidenSist(skjæringstidspunkt)
 
-    internal fun lagreVilkårsgrunnlag(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
+    internal fun lagreVilkårsgrunnlag(skjæringstidspunkt: LocalDate, vilkårsgrunnlag: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
+        arbeidsgivere.nyttVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlag)
     }
 
     internal fun avklarSykepengegrunnlag(

@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -94,6 +95,8 @@ abstract class Inntektsopplysning protected constructor(
         orgnummer: String,
         saksbehandlerOverstyring: OverstyrArbeidsgiveropplysninger
     ) {}
+
+    internal open fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {}
 
     internal companion object {
 

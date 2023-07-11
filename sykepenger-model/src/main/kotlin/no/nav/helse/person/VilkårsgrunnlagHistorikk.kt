@@ -470,6 +470,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 vilkårsgrunnlagId = UUID.randomUUID()
             )
         }
+
+        internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>, organisasjonsnummer: String) =
+            sykepengegrunnlag.leggTil(hendelseIder, organisasjonsnummer)
     }
 
     internal class InfotrygdVilkårsgrunnlag(

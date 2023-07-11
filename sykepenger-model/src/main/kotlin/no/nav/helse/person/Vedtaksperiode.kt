@@ -93,6 +93,7 @@ import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON
 import no.nav.helse.person.Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT
 import no.nav.helse.person.Venteårsak.Hvorfor.VIL_AVSLUTTES
 import no.nav.helse.person.Venteårsak.Hvorfor.VIL_UTBETALES
+import no.nav.helse.person.VilkårsgrunnlagHistorikk.Grunnlagsdata
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
@@ -639,7 +640,7 @@ internal class Vedtaksperiode private constructor(
         vilkårsgrunnlag.valider(sykepengegrunnlag, jurist())
         val grunnlagsdata = vilkårsgrunnlag.grunnlagsdata()
         grunnlagsdata.validerFørstegangsvurdering(vilkårsgrunnlag)
-        person.lagreVilkårsgrunnlag(grunnlagsdata)
+        person.lagreVilkårsgrunnlag(skjæringstidspunkt, grunnlagsdata)
         vilkårsgrunnlag.info("Vilkårsgrunnlag vurdert")
         if (vilkårsgrunnlag.harFunksjonelleFeilEllerVerre()) return forkast(vilkårsgrunnlag)
         if (sykepengegrunnlag.avventerFastsettelseEtterSkjønn()) return tilstand(vilkårsgrunnlag, tilstandMedAvvik)
@@ -2712,6 +2713,9 @@ internal class Vedtaksperiode private constructor(
                         .filter { it.finnArbeidsgiverperiode() == arbeidsgiverperiode }
                         .let { AuuerMedSammeAGP(vedtaksperiode.organisasjonsnummer, it, arbeidsgiverperiode) }
                 }
+
+                internal fun List<Vedtaksperiode>.nyttVilkårsgrunnlag(skjæringstidspunkt: LocalDate, vilkårsgrunnlag: Grunnlagsdata) =
+                    filter(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt)).forEach { vilkårsgrunnlag.leggTil(it.hendelseIder, it.organisasjonsnummer) }
             }
         }
 

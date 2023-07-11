@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver.VedtakFattetEvent.Sykepengegrunnlagsfakta
@@ -38,6 +39,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harI
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.ingenRefusjonsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.inntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.lagreTidsnæreInntekter
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.leggTil
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medUtbetalingsopplysninger
@@ -440,6 +442,9 @@ internal class Sykepengegrunnlag private constructor(
         aktivitetslogg.funksjonellFeil(`Støtter kun søknadstypen hvor den aktuelle arbeidsgiveren er den eneste i sykepengegrunnlaget`)
         return false
     }
+
+    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>, organisasjonsnummer: String) =
+        arbeidsgiverInntektsopplysninger.leggTil(hendelseIder, organisasjonsnummer)
 
     private fun tilstand(nyTilstand: Tilstand): Tilstand {
         if (tilstand == nyTilstand) return tilstand
