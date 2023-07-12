@@ -59,10 +59,39 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektFraInntektsmelding
 
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
+
+    @Test
+    fun `out of order på ghost`() {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        }
+        a2 {
+            håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        }
+        a1 {
+            håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlagMedGhostArbeidsforhold(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
+        }
+        a2 {
+            håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        }
+        a1 {
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
+            assertEquals("Har ingen refusjonsopplysninger på vilkårsgrunnlag med skjæringstidspunkt 2018-01-01 for utbetalingsdag 2018-01-17", assertThrows<Throwable> { håndterYtelser(2.vedtaksperiode) }.message)
+        }
+    }
 
     @Test
     fun `Beholder skatt i sykepengegrunnlag ved inntektsmelding i annen måned enn skjæringstidspunktet` () {
