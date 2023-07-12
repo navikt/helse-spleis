@@ -1930,7 +1930,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (vedtaksperiode.id == UUID.fromString("66e22a9a-026a-4a31-8f73-07d1e183b031")) return vedtaksperiode.tilstand(påminnelse, AvventerInntektsmelding)
             vedtaksperiode.trengerYtelser(påminnelse)
         }
 
