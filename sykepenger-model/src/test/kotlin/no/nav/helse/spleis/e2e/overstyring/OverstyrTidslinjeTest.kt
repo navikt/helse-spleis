@@ -152,8 +152,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(Dag.Arbeidsdag::class, inspektør.sykdomstidslinje[6.februar]::class)
         håndterInntektsmelding(listOf(16.januar til 31.januar))
 
-        val errormelding = assertThrows<IllegalStateException> { håndterYtelser(1.vedtaksperiode) }.message ?: fail { "forventer exception!" }
-        assertTrue(errormelding.contains("Fant ikke vilkårsgrunnlag for 2018-02-01"))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
         håndterOverstyrTidslinje(listOf(
             ManuellOverskrivingDag(5.februar, Dagtype.Sykedag, 100),

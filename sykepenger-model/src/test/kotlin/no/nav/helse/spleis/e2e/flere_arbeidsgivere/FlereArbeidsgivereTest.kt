@@ -59,7 +59,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektFraInntektsmelding
 
@@ -85,11 +84,10 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         }
         a1 {
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
-            assertEquals("Har ingen refusjonsopplysninger på vilkårsgrunnlag med skjæringstidspunkt 2018-01-01 for utbetalingsdag 2018-01-17", assertThrows<Throwable> { håndterYtelser(2.vedtaksperiode) }.message)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
     }
 

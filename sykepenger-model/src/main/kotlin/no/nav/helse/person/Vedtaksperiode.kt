@@ -2364,7 +2364,7 @@ internal class Vedtaksperiode private constructor(
             if (!revurdering.inngåSomEndring(hendelse, vedtaksperiode, vedtaksperiode.periode)) return
             revurdering.loggDersomKorrigerendeSøknad(hendelse, "Startet omgjøring grunnet korrigerende søknad")
             hendelse.info(RV_RV_1.varseltekst)
-            if (!vedtaksperiode.arbeidsgiver.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt)) {
+            if (!vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, hendelse)) {
                 hendelse.info("mangler nødvendige opplysninger fra arbeidsgiver")
                 return vedtaksperiode.tilstand(hendelse, AvventerInntektsmelding)
             }
