@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson
@@ -109,15 +108,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 Refusjonsopplysning(a2Inntektsmelding, 1.februar, null, INNTEKT),
             ), inspektør.refusjonsopplysningerFraVilkårsgrunnlag(1.januar).inspektør.refusjonsopplysninger)
 
-            assertForventetFeil(
-                forklaring = "Ettersom inntekt fra a2 er fra annen måned skal skatteopplysning beholdes i sykepengegrunnlaget",
-                nå = {
-                    assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a2) is InntektFraInntektsmelding)
-                },
-                ønsket = {
-                    assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a2) is SkattSykepengegrunnlag)
-                }
-            )
+            assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a2) is SkattSykepengegrunnlag)
         }
     }
 

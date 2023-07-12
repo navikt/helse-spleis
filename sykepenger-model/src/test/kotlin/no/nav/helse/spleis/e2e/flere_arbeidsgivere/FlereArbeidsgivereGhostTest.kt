@@ -168,7 +168,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
-        assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to InntektsmeldingInntekt::class))
+        assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to SkattSykepengegrunnlag::class))
 
         assertEquals(
             listOf(Refusjonsopplysning(inntektsmelding, 1.januar, 31.januar, beløp = 32000.månedlig), Refusjonsopplysning(inntektsmelding, 1.februar, null, beløp = 32000.månedlig)),
@@ -181,7 +181,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             førsteFraværsdag = 20.februar,
             refusjon = Inntektsmelding.Refusjon(beløp = 30000.månedlig, null)
         )
-        assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to InntektsmeldingInntekt::class))
+        assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to SkattSykepengegrunnlag::class))
 
         assertEquals(
             listOf(
@@ -1115,8 +1115,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to InntektsmeldingInntekt::class))
+        assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to SkattSykepengegrunnlag::class))
 
         // Her står saken nå (*NÅ*)
 

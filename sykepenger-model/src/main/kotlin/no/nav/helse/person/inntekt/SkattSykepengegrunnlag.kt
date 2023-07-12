@@ -79,7 +79,10 @@ internal class SkattSykepengegrunnlag private constructor(
     private fun ansattVedSkjæringstidspunkt(dato: LocalDate) =
         ansattPerioder.any { ansattPeriode -> ansattPeriode.gjelder(dato) }
 
-    override fun kanOverstyresAv(ny: Inntektsopplysning) = true
+    override fun kanOverstyresAv(ny: Inntektsopplysning): Boolean {
+        if (ny !is Inntektsmelding) return true
+        return super.kanOverstyresAv(ny)
+    }
 
     override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
         return ny.overstyrer(this)
