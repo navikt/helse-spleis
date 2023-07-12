@@ -220,6 +220,7 @@ enum class Varselkode(
     RV_UT_21("Utbetaling opphører tidligere utbetaling. Kontroller simuleringen"),
     RV_UT_22("Annullering ble ikke gjennomført", avviklet = true),
     RV_UT_23("Den nye beregningen vil trekke penger i sykefraværstilfellet"),
+    RV_UT_24("Utbetalingen er avvist, men perioden kan ikke forkastes. Overstyr perioden, eller annuller sykefraværstilfellet om nødvendig"),
 
     // OS: Oppdragsystemet
     RV_OS_1("Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen.", avviklet = true),

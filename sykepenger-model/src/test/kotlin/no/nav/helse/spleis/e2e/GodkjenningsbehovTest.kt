@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -29,6 +28,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.september
 import no.nav.helse.sisteBehov
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_GODKJENT
@@ -79,17 +79,9 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-
-        assertForventetFeil(
-            forklaring = "Når det blir forsøkt avvist utbetalingsgodkjenning som ikke skal avvises forkastes utbetalingen & perioder bak, men den aktuelle perioden blir stående ettersom den ikke kan forkastes.",
-            nå = {
-                assertSisteForkastetPeriodeTilstand(a1, 3.vedtaksperiode, TIL_INFOTRYGD)
-            },
-            ønsket = {
-                assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            }
-        )
+        assertVarsel(RV_UT_24, 1.vedtaksperiode.filter())
     }
 
     @Test

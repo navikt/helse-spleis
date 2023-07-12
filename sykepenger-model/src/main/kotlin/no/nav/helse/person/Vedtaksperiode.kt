@@ -133,6 +133,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_37
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_38
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_16
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
 import no.nav.helse.person.builders.VedtakFattetBuilder
@@ -2191,7 +2192,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingsgodkjenning: Utbetalingsgodkjenning
         ) {
-            if (vedtaksperiode.utbetalinger.erAvvist()) return vedtaksperiode.forkast(utbetalingsgodkjenning)
+            if (vedtaksperiode.utbetalinger.erAvvist()) {
+                return if (arbeidsgiver.kanForkastes(vedtaksperiode)) vedtaksperiode.forkast(utbetalingsgodkjenning)
+                else utbetalingsgodkjenning.varsel(RV_UT_24)
+            }
             vedtaksperiode.tilstand(
                 utbetalingsgodkjenning,
                 when {
