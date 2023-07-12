@@ -2481,10 +2481,6 @@ internal class Vedtaksperiode private constructor(
             påminnelse.info("Reberegner vedtaksperiode")
             vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.reberegning(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
         }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
-            vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting)
-        }
     }
 
     internal object RevurderingFeilet : Vedtaksperiodetilstand {
