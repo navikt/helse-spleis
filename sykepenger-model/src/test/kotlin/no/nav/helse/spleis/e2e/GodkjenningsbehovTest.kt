@@ -1,6 +1,8 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
+import java.util.UUID
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -9,10 +11,13 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -25,6 +30,9 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.september
+import no.nav.helse.sisteBehov
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_GODKJENT
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_UTBETALT
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -33,6 +41,57 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `godkjenningsbehov som ikke kan avvises blir forsøkt avvist`() {
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "Agp skal utbetales av NAV!!")
+        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertFalse(kanAvvises(1.vedtaksperiode))
+
+        val utbetalingId = UUID.fromString(person.personLogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning).kontekst()["utbetalingId"])
+        val utbetaling = inspektør.utbetalinger(1.vedtaksperiode).last()
+        assertEquals(utbetalingId, utbetaling.inspektør.utbetalingId)
+
+        assertEquals(IKKE_UTBETALT, utbetaling.inspektør.tilstand)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingId = utbetalingId, utbetalingGodkjent = false)
+        assertEquals(IKKE_GODKJENT, utbetaling.inspektør.tilstand)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+
+
+        assertForventetFeil(
+            forklaring = "Når det blir forsøkt avvist utbetalingsgodkjenning som ikke skal avvises forkastes utbetalingen & perioder bak, men den aktuelle perioden blir stående ettersom den ikke kan forkastes.",
+            nå = {
+                assertSisteForkastetPeriodeTilstand(a1, 3.vedtaksperiode, TIL_INFOTRYGD)
+            },
+            ønsket = {
+                assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            }
+        )
+    }
+
     @Test
     fun `legger ved orgnummer for arbeidsgiver med kun sammenligningsgrunnlag i utbetalingsbehovet`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
