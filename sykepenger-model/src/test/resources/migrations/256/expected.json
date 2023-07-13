@@ -1,0 +1,30 @@
+{
+  "aktørId": "123",
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "id": "51a3d441-c447-43e6-a8c1-594a7c52334d"
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "id": "cf456013-879a-452f-90d1-d0a91bec1f86"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "id": "6da3ba6e-5728-4120-9be4-2a6c1aa58efe"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "id": "99a16183-1249-40c6-b668-854851678568"
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 256
+}
