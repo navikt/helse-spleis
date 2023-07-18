@@ -2,9 +2,13 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
+import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -12,6 +16,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
@@ -61,6 +66,8 @@ import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -1703,5 +1710,90 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         assertIngenVarsel(RV_VV_5, 1.vedtaksperiode.filter(a1))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+    }
+
+    @Test
+    fun `full refusjon ag1, ingen refusjon ag2, beregner riktig dagsats ved utbetaling av ag1 og agp hos ag2`() {
+        val inntektA1 = 51775.månedlig
+        val inntektA2 = 10911.månedlig
+        nyPeriode(1.mai(2023) til 31.mai(2023), orgnummer = a1)
+        nyPeriode(2.mai(2023) til 31.mai(2023), orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.mai(2023) til 16.mai(2023)), orgnummer = a1, beregnetInntekt = inntektA1)
+        håndterInntektsmelding(listOf(2.mai(2023) til 17.mai(2023)), orgnummer = a2, beregnetInntekt = inntektA2, refusjon = Refusjon(
+            INGEN, null, emptyList()
+        ))
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode,
+            inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(
+                Pair(a1, inntektA1),
+                Pair(a2, inntektA2)
+            ), 1.mai(2023)),
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(
+                Pair(a1, inntektA1),
+                Pair(a2, inntektA2)
+            ), 1.mai(2023)),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH),
+            ),
+            orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        val utbetalingstidslinje = inspektør(a1).utbetalingUtbetalingstidslinje(0)
+        assertForventetFeil(
+            forklaring = "Når det er full refusjon hos ag1 og ingen refusjon hos ag2, og det i tillegg er utbetaling hos ag1 og agp hos ag2," +
+                    "da beregner vi feil utbetaling for ag1. Vi hensyntar ikke at ag1 skal refunderes helt ut før vi utbetaler brukerutbetaling",
+            nå = {
+                assertEquals(2261.daglig, utbetalingstidslinje[17.mai(2023)].økonomi.inspektør.arbeidsgiverbeløp)
+            },
+            ønsket = {
+                assertEquals(2390.daglig, utbetalingstidslinje[17.mai(2023)].økonomi.inspektør.arbeidsgiverbeløp)
+            }
+        )
+    }
+
+    @Test
+    fun `avviser dag med totalgrad under 20 %`() {
+        val inntektA1 = 51775.månedlig
+        val inntektA2 = 10911.månedlig
+        nyPeriode(1.mai(2023) til 30.mai(2023), orgnummer = a1)
+        nyPeriode(1.mai(2023) til 31.mai(2023), orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.mai(2023) til 16.mai(2023)), orgnummer = a1, beregnetInntekt = inntektA1)
+        håndterInntektsmelding(listOf(1.mai(2023) til 16.mai(2023)), orgnummer = a2, beregnetInntekt = inntektA2, refusjon = Refusjon(
+            INGEN, null, emptyList())
+        )
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode,
+            inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(
+                Pair(a1, inntektA1),
+                Pair(a2, inntektA2)
+            ), 1.mai(2023)),
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(
+                Pair(a1, inntektA1),
+                Pair(a2, inntektA2)
+            ), 1.mai(2023)),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH),
+            ),
+            orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        val utbetalingstidslinje = inspektør(a2).utbetalingUtbetalingstidslinje(0)
+        assertForventetFeil(
+            forklaring = "Frisk hos ag1 og syk hos ag2, skal føre til avvist dag fordi total sykdomsgrad skal være under 20 prosent",
+            nå = {
+                assertEquals(504.daglig, utbetalingstidslinje[31.mai(2023)].økonomi.inspektør.personbeløp)
+                assertEquals(100.prosent, utbetalingstidslinje[31.mai(2023)].økonomi.inspektør.totalGrad)
+            },
+            ønsket = {
+                assertEquals(0.daglig, utbetalingstidslinje[31.mai(2023)].økonomi.inspektør.personbeløp)
+                assertEquals(17.41.prosent, utbetalingstidslinje[31.mai(2023)].økonomi.inspektør.totalGrad)
+            }
+        )
     }
 }
