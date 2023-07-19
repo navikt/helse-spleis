@@ -62,16 +62,19 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
@@ -1788,10 +1791,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             forklaring = "Frisk hos ag1 og syk hos ag2, skal føre til avvist dag fordi total sykdomsgrad skal være under 20 prosent",
             nå = {
                 assertEquals(504.daglig, utbetalingstidslinje[31.mai(2023)].økonomi.inspektør.personbeløp)
+                assertNull(utbetalingstidslinje[31.mai(2023)].erAvvistMed(Begrunnelse.MinimumSykdomsgrad))
                 assertEquals(100.prosent, utbetalingstidslinje[31.mai(2023)].økonomi.inspektør.totalGrad)
             },
             ønsket = {
                 assertEquals(0.daglig, utbetalingstidslinje[31.mai(2023)].økonomi.inspektør.personbeløp)
+                assertNotNull(utbetalingstidslinje[31.mai(2023)].erAvvistMed(Begrunnelse.MinimumSykdomsgrad))
                 assertEquals(17.41.prosent, utbetalingstidslinje[31.mai(2023)].økonomi.inspektør.totalGrad)
             }
         )
