@@ -50,9 +50,9 @@ internal class DagerFraInntektsmelding(
         gjenståendeDager.removeAll(periodeRettFør)
     }
 
-    private fun overlappendeDager(periode: Periode) =  periode.intersect(gjenståendeDager)
-
     private fun periodeRettFør(periode: Periode) = gjenståendeDager.periodeRettFør(periode.start)
+
+    internal fun overlappendeDager(periode: Periode) =  periode.intersect(gjenståendeDager)
 
     internal fun skalHåndteresAv(periode: Periode): Boolean {
         val overlapperMedVedtaksperiode = overlappendeDager(periode).isNotEmpty()

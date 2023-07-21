@@ -308,7 +308,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(dager: DagerFraInntektsmelding) {
-        kontekst(dager)
+        settKontekst(dager)
         val skalHåndtereDager = tilstand.skalHåndtereDager(this, dager)
         if (!skalHåndtereDager || dager.alleredeHåndtert(hendelseIder)) {
             dager.vurdertTilOgMed(periode.endInclusive)
@@ -324,6 +324,9 @@ internal class Vedtaksperiode private constructor(
         }
         tilstand.håndter(this, dager)
         dager.vurdertTilOgMed(periode.endInclusive)
+    }
+    private fun settKontekst(dager: DagerFraInntektsmelding) {
+        if (dager.overlappendeDager(this.periode).isNotEmpty() || this.periode.start == skjæringstidspunkt) kontekst(dager)
     }
 
     private fun håndterDager(dager: DagerFraInntektsmelding) {
