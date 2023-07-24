@@ -2580,6 +2580,10 @@ internal class Vedtaksperiode private constructor(
 
         internal val HAR_PÅGÅENDE_UTBETALINGER: VedtaksperiodeFilter = { it.utbetalinger.utbetales() }
 
+        internal val HAR_AVVENTENDE_GODKJENNING: VedtaksperiodeFilter = {
+            it.tilstand == AvventerGodkjenning || it.tilstand == AvventerGodkjenningRevurdering
+        }
+
         internal val KLAR_TIL_BEHANDLING: VedtaksperiodeFilter = {
             it.tilstand == AvventerBlokkerendePeriode || it.tilstand == AvventerGodkjenning
         }
@@ -2636,6 +2640,8 @@ internal class Vedtaksperiode private constructor(
         }.filter {
             it.forventerInntekt()
         }
+
+        internal fun List<Vedtaksperiode>.trengerFastsettelseEtterSkjønn() = filter { it.trengerFastsettelseEtterSkjønn }
 
         internal abstract class AuuGruppering protected constructor(
             protected val organisasjonsnummer: String,

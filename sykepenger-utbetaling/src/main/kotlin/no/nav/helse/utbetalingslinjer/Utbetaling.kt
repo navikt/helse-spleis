@@ -132,9 +132,9 @@ class Utbetaling private constructor(
         tilstand.opprett(this, hendelse)
     }
 
-    fun håndter(hendelse: Utbetalingsgodkjenning) {
+    fun håndter(hendelse: Utbetalingsgodkjenning, trengerFastsettelseEtterSkjønn: Boolean) {
         if (!hendelse.erRelevant(id)) return
-        hendelse.valider()
+        hendelse.valider(trengerFastsettelseEtterSkjønn)
         godkjenn(hendelse, hendelse.vurdering())
     }
 

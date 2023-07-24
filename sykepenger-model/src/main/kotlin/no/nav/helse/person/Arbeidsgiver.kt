@@ -38,6 +38,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.AUU_UTBETALT_I_INFOTRYGD
 import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.auuGruppering
 import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.gruppérAuuer
 import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.nyttVilkårsgrunnlag
+import no.nav.helse.person.Vedtaksperiode.Companion.HAR_AVVENTENDE_GODKJENNING
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
@@ -50,6 +51,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.feiletRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.sykefraværstilfelle
+import no.nav.helse.person.Vedtaksperiode.Companion.trengerFastsettelseEtterSkjønn
 import no.nav.helse.person.Vedtaksperiode.Companion.trengerInntektsmelding
 import no.nav.helse.person.Vedtaksperiode.Companion.venter
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.Grunnlagsdata
@@ -577,7 +579,8 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
         utbetalingsgodkjenning.kontekst(this)
-        utbetalinger.forEach { it.håndter(utbetalingsgodkjenning) }
+        val trengerFastsettelseEtterSkjønn = vedtaksperioder.filter(HAR_AVVENTENDE_GODKJENNING).trengerFastsettelseEtterSkjønn().isNotEmpty()
+        utbetalinger.forEach { it.håndter(utbetalingsgodkjenning, trengerFastsettelseEtterSkjønn) }
         håndter(utbetalingsgodkjenning, Vedtaksperiode::håndter)
     }
 

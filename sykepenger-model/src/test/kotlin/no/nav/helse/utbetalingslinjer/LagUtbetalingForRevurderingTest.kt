@@ -309,7 +309,7 @@ internal class LagUtbetalingForRevurderingTest {
             godkjenttidspunkt = LocalDateTime.now(),
             automatiskBehandling = false,
         ).also {
-            utbetaling.håndter(it)
+            utbetaling.håndter(it, trengerFastsettelseEtterSkjønn = false)
         }
 
     private fun kvittèr(

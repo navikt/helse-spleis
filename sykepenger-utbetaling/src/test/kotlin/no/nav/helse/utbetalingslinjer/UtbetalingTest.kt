@@ -30,7 +30,13 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus.*
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.ANNULLERT
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.FORKASTET
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.GODKJENT
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.GODKJENT_UTEN_UTBETALING
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_UTBETALT
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.OVERFØRT
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus.UTBETALT
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -1149,7 +1155,7 @@ internal class UtbetalingTest {
             godkjenttidspunkt = LocalDateTime.now(),
             automatiskBehandling = false,
         ).also {
-            utbetaling.håndter(it)
+            utbetaling.håndter(it, trengerFastsettelseEtterSkjønn = false)
         }
 
     private fun annuller(utbetaling: Utbetaling, fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId()) =

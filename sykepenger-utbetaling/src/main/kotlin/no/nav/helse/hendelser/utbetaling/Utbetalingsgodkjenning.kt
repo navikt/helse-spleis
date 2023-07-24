@@ -34,7 +34,11 @@ class Utbetalingsgodkjenning(
         automatiskBehandling
     )
 
-    fun valider(): IAktivitetslogg {
+    fun valider(trengerFastsettelseEtterSkjønn: Boolean): IAktivitetslogg {
+        if (trengerFastsettelseEtterSkjønn && utbetalingGodkjent) {
+            // i dette tilfellet må det enten skjønnsfastsettes først eller så må utbetalingen annulleres
+            throw IllegalStateException("Sykepengegrunnlaget må skjønnsfastsettes før utbetalingen eventuelt godkjennes, dette må ryddes opp i!")
+        }
         when {
             !utbetalingGodkjent && !automatiskBehandling -> {
                 funksjonellFeil(RV_UT_19)
