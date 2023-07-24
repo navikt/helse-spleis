@@ -370,7 +370,7 @@ internal class Sykepengegrunnlag private constructor(
             .sykepengegrunnlag(this.sykepengegrunnlag)
             .beregningsgrunnlag(this.beregningsgrunnlag)
             .begrensning(this.begrensning)
-            .sykepengegrunnlagsfakta(tilstand.sykpengegrunnlagsfakta(this, builder))
+            .sykepengegrunnlagsfakta(tilstand.sykpengegrunnlagsfakta(this))
         arbeidsgiverInntektsopplysninger.build(builder)
     }
     override fun equals(other: Any?): Boolean {
@@ -460,7 +460,7 @@ internal class Sykepengegrunnlag private constructor(
             throw IllegalStateException("kan ikke fastsette etter skjønn i ${this::class.simpleName}")
         }
 
-        fun sykpengegrunnlagsfakta(sykepengegrunnlag: Sykepengegrunnlag, vedtakFattetBuilder: VedtakFattetBuilder): Sykepengegrunnlagsfakta {
+        fun sykpengegrunnlagsfakta(sykepengegrunnlag: Sykepengegrunnlag): Sykepengegrunnlagsfakta {
             throw IllegalStateException("forventet ikke å sende ut vedtak fattet i ${this::class.simpleName}")
         }
     }
@@ -479,7 +479,7 @@ internal class Sykepengegrunnlag private constructor(
         override fun fastsattEtterSkjønn(sykepengegrunnlag: Sykepengegrunnlag, resultat: List<ArbeidsgiverInntektsopplysning>): Sykepengegrunnlag {
             return sykepengegrunnlag.kopierSykepengegrunnlag(resultat, sykepengegrunnlag.deaktiverteArbeidsforhold, FastsattEtterSkjønn)
         }
-        override fun sykpengegrunnlagsfakta(sykepengegrunnlag: Sykepengegrunnlag, vedtakFattetBuilder: VedtakFattetBuilder): Sykepengegrunnlagsfakta {
+        override fun sykpengegrunnlagsfakta(sykepengegrunnlag: Sykepengegrunnlag): Sykepengegrunnlagsfakta {
             if (sykepengegrunnlag.vurdertInfotrygd) return FastsattIInfotrygdBuilder(sykepengegrunnlag.omregnetÅrsinntekt).build()
             val builder = FastsattEtterHovedregelBuilder(sykepengegrunnlag.omregnetÅrsinntekt, sykepengegrunnlag.avviksprosent, sykepengegrunnlag.`6G`, sykepengegrunnlag.begrensning)
             sykepengegrunnlag.sammenligningsgrunnlag.build(builder)
@@ -494,17 +494,9 @@ internal class Sykepengegrunnlag private constructor(
         override fun fastsattEtterSkjønn(sykepengegrunnlag: Sykepengegrunnlag, resultat: List<ArbeidsgiverInntektsopplysning>): Sykepengegrunnlag {
             return sykepengegrunnlag.kopierSykepengegrunnlag(resultat, sykepengegrunnlag.deaktiverteArbeidsforhold, FastsattEtterSkjønn)
         }
-
-        override fun sykpengegrunnlagsfakta(
-            sykepengegrunnlag: Sykepengegrunnlag,
-            vedtakFattetBuilder: VedtakFattetBuilder
-        ): Sykepengegrunnlagsfakta {
-            if (vedtakFattetBuilder.erOddCase()) return sykepengegrunnlag.tilstand(FastsattEtterHovedregel).sykpengegrunnlagsfakta(sykepengegrunnlag, vedtakFattetBuilder)
-            return super.sykpengegrunnlagsfakta(sykepengegrunnlag, vedtakFattetBuilder)
-        }
     }
     object FastsattEtterSkjønn : Tilstand {
-        override fun sykpengegrunnlagsfakta(sykepengegrunnlag: Sykepengegrunnlag, vedtakFattetBuilder: VedtakFattetBuilder): Sykepengegrunnlagsfakta {
+        override fun sykpengegrunnlagsfakta(sykepengegrunnlag: Sykepengegrunnlag): Sykepengegrunnlagsfakta {
             check(!sykepengegrunnlag.vurdertInfotrygd) { "Forventer ikke å fatte vedtak som er vurdert i Infotrygd & skjønnsmessig fastsatt" }
             val builder = FastsattEtterSkjønnBuilder(sykepengegrunnlag.omregnetÅrsinntekt, sykepengegrunnlag.avviksprosent, sykepengegrunnlag.`6G`, sykepengegrunnlag.begrensning, sykepengegrunnlag.beregningsgrunnlag)
             sykepengegrunnlag.sammenligningsgrunnlag.build(builder)

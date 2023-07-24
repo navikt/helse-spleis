@@ -68,14 +68,6 @@ internal class VedtakFattetBuilder(
         )
     }
 
-    internal fun erOddCase(): Boolean {
-        return vedtaksperiodeId in setOf(
-            UUID.fromString("2c8b522-0107-4704-a5bd-52a186d71993"),
-            UUID.fromString("35839d32-1591-4e42-b946-cb5e0d16c9b7"),
-            UUID.fromString("f68ba44b-e22c-405d-b4df-c9ad79f82e72")
-        )
-    }
-
     sealed class SykepengegrunnlagsfaktaBuilder {
         protected val Inntekt.årlig get() = reflection { årlig, _, _, _ -> årlig }.toDesimaler
         protected val Double.toDesimaler get() = toBigDecimal().setScale(2, RoundingMode.HALF_UP).toDouble()
