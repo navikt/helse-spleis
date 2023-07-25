@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
+import kotlin.math.roundToInt
 import kotlin.reflect.KClass
 
 
@@ -74,8 +75,8 @@ internal fun <T : ArbeidstakerHendelse> AbstractEndToEndTest.assertIkkeEtterspur
 
 internal inline fun <reified R : Utbetalingsdag> assertUtbetalingsdag(dag: Utbetalingsdag, expectedDagtype: KClass<R>, expectedTotalgrad: Double = 100.0) {
     dag.let {
-        it.økonomi.brukTotalGrad { totalGrad ->
-            assertEquals(expectedTotalgrad, totalGrad)
+        it.økonomi.brukAvrundetTotalGrad { totalGrad ->
+            assertEquals(expectedTotalgrad.roundToInt(), totalGrad)
         }
         assertEquals(it::class, expectedDagtype)
     }

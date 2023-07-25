@@ -207,7 +207,7 @@ class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Collection<
 
 sealed class Begrunnelse {
 
-    fun skalAvvises(utbetalingsdag: Utbetalingsdag) = utbetalingsdag is AvvistDag || utbetalingsdag is NavDag
+    fun skalAvvises(utbetalingsdag: Utbetalingsdag) = utbetalingsdag is AvvistDag || utbetalingsdag is NavDag || utbetalingsdag is ArbeidsgiverperiodedagNav
 
     object SykepengedagerOppbrukt : Begrunnelse()
     object SykepengedagerOppbruktOver67 : Begrunnelse()

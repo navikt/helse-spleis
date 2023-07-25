@@ -1,10 +1,13 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.januar
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodedagNav
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.økonomi.Økonomi
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class BegrunnelseTest {
@@ -19,6 +22,7 @@ internal class BegrunnelseTest {
     @Test
     fun `MinimumSykdomsgrad avviser ikke helg`() {
         assertTrue(Begrunnelse.MinimumSykdomsgrad.skalAvvises(NavDag(1.januar, økonomi)))
+        assertTrue(Begrunnelse.MinimumSykdomsgrad.skalAvvises(ArbeidsgiverperiodedagNav(1.januar, økonomi)))
         assertFalse(Begrunnelse.MinimumSykdomsgrad.skalAvvises(NavHelgDag(1.januar, økonomi)))
     }
 
