@@ -3,6 +3,7 @@ package no.nav.helse.serde.api
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Toggle
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -17,6 +18,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -42,6 +44,7 @@ import no.nav.helse.serde.api.dto.Utbetalingsinfo
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
+import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
@@ -58,6 +61,7 @@ import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
+import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
@@ -108,6 +112,46 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             )
         )
         assertEquals(forventetFørstedag, tidslinje.first())
+    }
+
+    @Test
+    fun `nav skal ikke utbetale agp for kort periode likevel - perioden går så til AUU`() {
+        nyPeriode(1.januar til 16.januar)
+        val idIm = håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ja")
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        val idOverstyring = UUID.randomUUID()
+        håndterOverstyrTidslinje((1.januar til 16.januar).map {
+            ManuellOverskrivingDag(it, Dagtype.Sykedag, 100)
+        }, meldingsreferanseId = idOverstyring)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        val speilJson = serializePersonForSpeil(person)
+        val tidslinje = speilJson.arbeidsgivere.single().generasjoner.single().perioder.single().sammenslåttTidslinje
+        val forventetFørstedag = SammenslåttDag(
+            dagen = 1.januar,
+            sykdomstidslinjedagtype = SykdomstidslinjedagType.SYKEDAG,
+            utbetalingstidslinjedagtype = UtbetalingstidslinjedagType.UkjentDag, // ingen utbetalingstidslinje
+            kilde = Sykdomstidslinjedag.SykdomstidslinjedagKilde(SykdomstidslinjedagKildetype.Saksbehandler, idOverstyring),
+            grad = 100.0,
+            utbetalingsinfo = null
+        )
+        assertForventetFeil(
+            forklaring = "kilden skal være saksbehandler",
+            ønsket = {
+                assertEquals(forventetFørstedag, tidslinje.first())
+            },
+            nå = {
+                assertEquals(SammenslåttDag(
+                    dagen = 1.januar,
+                    sykdomstidslinjedagtype = SykdomstidslinjedagType.SYKEDAG,
+                    utbetalingstidslinjedagtype = UtbetalingstidslinjedagType.UkjentDag,
+                    kilde = Sykdomstidslinjedag.SykdomstidslinjedagKilde(SykdomstidslinjedagKildetype.Inntektsmelding, idIm),
+                    grad = 100.0,
+                    utbetalingsinfo = null
+                ), tidslinje.first())
+            }
+        )
     }
 
     @Test
