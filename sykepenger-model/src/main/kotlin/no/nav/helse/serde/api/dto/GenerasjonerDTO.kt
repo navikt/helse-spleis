@@ -200,6 +200,12 @@ data class UberegnetPeriode(
         )
 
         internal fun medSykdomstidslinje(sykdomstidslinje: List<Sykdomstidslinjedag>) = apply {
+            if (this::sykdomstidslinje.isInitialized && sykdomstidslinje != this.sykdomstidslinje) {
+                // Hvis sykdomstidslinjen allerede er initialisert for en uberegnet periode,
+                // skyldes det at vi besøker sykdomstidslinjen fra vedtaksperiodeutbetalinger.
+                // Vi lar ikke disse sykdomstidslinjene overskrive sykdomstidslinjen allerede satt fra vedtaksperioden
+                return this
+            }
             this.sykdomstidslinje = sykdomstidslinje
         }
     }

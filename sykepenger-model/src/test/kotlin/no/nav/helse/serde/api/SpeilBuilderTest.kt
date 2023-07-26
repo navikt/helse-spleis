@@ -3,7 +3,6 @@ package no.nav.helse.serde.api
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Toggle
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -117,7 +116,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `nav skal ikke utbetale agp for kort periode likevel - perioden går så til AUU`() {
         nyPeriode(1.januar til 16.januar)
-        val idIm = håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ja")
+        håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ja")
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -136,22 +135,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             grad = 100.0,
             utbetalingsinfo = null
         )
-        assertForventetFeil(
-            forklaring = "kilden skal være saksbehandler",
-            ønsket = {
-                assertEquals(forventetFørstedag, tidslinje.first())
-            },
-            nå = {
-                assertEquals(SammenslåttDag(
-                    dagen = 1.januar,
-                    sykdomstidslinjedagtype = SykdomstidslinjedagType.SYKEDAG,
-                    utbetalingstidslinjedagtype = UtbetalingstidslinjedagType.UkjentDag,
-                    kilde = Sykdomstidslinjedag.SykdomstidslinjedagKilde(SykdomstidslinjedagKildetype.Inntektsmelding, idIm),
-                    grad = 100.0,
-                    utbetalingsinfo = null
-                ), tidslinje.first())
-            }
-        )
+        assertEquals(forventetFørstedag, tidslinje.first())
     }
 
     @Test
