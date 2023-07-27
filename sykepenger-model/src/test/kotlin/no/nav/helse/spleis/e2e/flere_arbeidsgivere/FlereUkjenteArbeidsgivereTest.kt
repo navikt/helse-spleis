@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
@@ -12,6 +13,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeData
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -32,10 +34,12 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
 import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -276,10 +280,16 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         // a2 sent til festen
-        val id = håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, begrunnelseForReduksjonEllerIkkeUtbetalt = "ja")
-        assertEquals(id, observatør.inntektsmeldingIkkeHåndtert.single())
+        val imId = håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, begrunnelseForReduksjonEllerIkkeUtbetalt = "ja")
+        assertEquals(imId, observatør.inntektsmeldingIkkeHåndtert.single())
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        val søknadId = håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        assertEquals(listOf(
+            Dokumentsporing.søknad(søknadId),
+            Dokumentsporing.inntektsmeldingDager(imId),
+            Dokumentsporing.inntektsmeldingInntekt(imId)
+        ), inspektør(a2).hendelser(1.vedtaksperiode))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -287,6 +297,78 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter(a2))
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            orgnummer = a1
+        )
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a2)
+    }
+
+    @Test
+    fun `to arbeidsgivere - ny overlappende førstegangsbehandling hos ag2 som først var antatt å være frisk - men tidlig inntektsmelding`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
+        val imId = håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, begrunnelseForReduksjonEllerIkkeUtbetalt = "ja")
+        assertEquals(imId, observatør.inntektsmeldingIkkeHåndtert.single())
+
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode,
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+            inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH),
+            ), orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt()
+        nullstillTilstandsendringer()
+
+        // a2 sent til festen
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
+        // Men med ting liggende i vilkårsgrunnlaget
+        val sykepengegrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør
+        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+            assertEquals(INNTEKT, it.inntektsopplysning.fastsattÅrsinntekt())
+            assertEquals(Refusjonsopplysning(imId, 1.januar, null, beløp = INNTEKT), it.refusjonsopplysninger.inspektør.refusjonsopplysninger.single())
+        }
+
+        val søknadId = håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        assertForventetFeil(
+            forklaring = "Fordi ting på a2 ligger i vilkårsgrunnlaget fra før replayes ikke IM, vi får ikke dokumentsporing og ingen validering av dager",
+            nå = {
+                assertEquals(
+                    listOf(
+                        Dokumentsporing.søknad(søknadId)
+                    ), inspektør(a2).hendelser(1.vedtaksperiode)
+                )
+                assertIngenVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter(a2))
+            },
+            ønsket = {
+                assertEquals(
+                    listOf(
+                        Dokumentsporing.søknad(søknadId),
+                        Dokumentsporing.inntektsmeldingDager(imId),
+                        Dokumentsporing.inntektsmeldingInntekt(imId)
+                    ), inspektør(a2).hendelser(1.vedtaksperiode)
+                )
+                assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter(a2))
+            }
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt()
         assertTilstander(
             1.vedtaksperiode,
             AVSLUTTET,
