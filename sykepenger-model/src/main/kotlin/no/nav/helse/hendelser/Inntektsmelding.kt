@@ -186,7 +186,7 @@ class Inntektsmelding(
         subsumsjonObserver: SubsumsjonObserver,
         sykdomstidslinje: Sykdomstidslinje
     ): Pair<LocalDate, Boolean> {
-        val sykdomstidslinjeperiode = sykdomstidslinje.periode()
+        val sykdomstidslinjeperiode = sykdomstidslinje.sykdomsperiode()
         if (sykdomstidslinjeperiode == null || inntektsdato !in sykdomstidslinjeperiode) {
             info("Lagrer ikke inntekt på skjæringstidspunkt fordi inntektdato er oppgitt til å være utenfor den perioden arbeidsgiver har sykdom for")
             return inntektsdato to false
