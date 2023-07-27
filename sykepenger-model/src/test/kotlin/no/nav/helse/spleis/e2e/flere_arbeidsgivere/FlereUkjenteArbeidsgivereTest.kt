@@ -14,17 +14,21 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeData
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
 import no.nav.helse.person.inntekt.Inntektsmelding
@@ -40,6 +44,8 @@ import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
+import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
@@ -239,12 +245,61 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter(a2))
-        assertTilstander(1.vedtaksperiode,
-            TilstandType.AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING, orgnummer = a1)
+        assertTilstander(
+            1.vedtaksperiode,
+            AVVENTER_GODKJENNING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING, orgnummer = a1
+        )
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+    }
+
+    @Test
+    fun `to arbeidsgivere - ny overlappende førstegangsbehandling hos ag2 som først var ansett som ghost - a1 revurderes`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode,
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+            inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH),
+            ), orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt()
+        nullstillTilstandsendringer()
+
+        // a2 sent til festen
+        val id = håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, begrunnelseForReduksjonEllerIkkeUtbetalt = "ja")
+        assertEquals(id, observatør.inntektsmeldingIkkeHåndtert.single())
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt()
+
+        assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter(a2))
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            orgnummer = a1
+        )
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a2)
     }
 
     @Test
