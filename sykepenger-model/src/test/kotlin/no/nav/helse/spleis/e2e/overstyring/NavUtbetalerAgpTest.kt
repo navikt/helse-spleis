@@ -35,6 +35,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -93,6 +94,30 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
         assertTrue(observatør.inntektsmeldingIkkeHåndtert.contains(innteksmeldingId))
+    }
+
+    @Test
+    fun `kort periode så gap til neste - korrigert inntektsmelding opplyser om ikke-utbetalt AGP`() {
+        nyPeriode(1.januar til 15.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        nyPeriode(20.januar til 30.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+
+        assertForventetFeil(
+            forklaring = "Begge periodene trenger varsel om ikke-utbetalt AGP",
+            nå = {
+                assertIngenVarsel(RV_IM_8, 1.vedtaksperiode.filter())
+                assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
+            },
+            ønsket = {
+                assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
+                assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
+            }
+        )
     }
 
     @Test
