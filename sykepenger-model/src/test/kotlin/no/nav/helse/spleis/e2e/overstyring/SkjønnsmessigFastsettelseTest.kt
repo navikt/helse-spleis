@@ -3,13 +3,16 @@ package no.nav.helse.spleis.e2e.overstyring
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Toggle
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.tilGodkjenning
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
@@ -22,6 +25,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
@@ -359,6 +363,33 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             assertEquals(AvventerFastsettelseEtterSkjønn, inspektør.tilstandPåSykepengegrunnlag(1.januar))
             assertThrows<IllegalStateException> { håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true) }
         }
+    }
+
+    @Test
+    fun `Hvis avvikssak som trenger fastsettelse ved skjønn godkjennes kan det skyldes manglende varsel`() = Toggle.TjuefemprosentAvvik.disable {
+        nyttVedtak(1.januar, 31.januar, beregnetInntekt = 20000.månedlig)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(1.februar, 28.februar))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 9000.månedlig)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+        assertEquals(AvventerFastsettelseEtterSkjønn, inspektør.tilstandPåSykepengegrunnlag(1.januar))
+
+        assertForventetFeil(
+            forklaring = "Varsel havner på feil kontekst og blir ikke synlig for saksbehandler fordi 3.vedtaksperiode er en venter-pølse",
+            nå = {
+                assertVarsel(RV_IV_2, 3.vedtaksperiode.filter())
+                assertIngenVarsel(RV_IV_2, 1.vedtaksperiode.filter())
+            },
+            ønsket = {
+                assertVarsel(RV_IV_2, 1.vedtaksperiode.filter())
+                assertIngenVarsel(RV_IV_2, 3.vedtaksperiode.filter())
+            }
+        )
+        assertThrows<IllegalStateException> { håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true) }
     }
 
     private fun TestArbeidsgiverInspektør.inntektsopplysningISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = a1) =
