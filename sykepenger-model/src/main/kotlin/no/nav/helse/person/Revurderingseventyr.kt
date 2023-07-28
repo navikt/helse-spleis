@@ -4,7 +4,15 @@ import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeData
-import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.*
+import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Arbeidsforhold
+import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiveropplysninger
+import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiverperiode
+import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.KorrigertInntektsmelding
+import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.KorrigertSøknad
+import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.NyPeriode
+import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Reberegning
+import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.SkjønssmessigFastsettelse
+import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Sykdomstidslinje
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
@@ -61,6 +69,11 @@ class Revurderingseventyr private constructor(
         }
     }
 
+    internal fun kanIgangsetteOverstyringIAvventerInntektsmelding(hendelse: IAktivitetslogg) =
+        hvorfor.kanIgangsetteOverstyringIAvventerInntektsmelding().also {
+            hendelse.info("Igangsetter ikke overstyring i AvventerInntektsmelding grunnet ${hvorfor::class.simpleName}")
+        }
+
     private enum class TypeEndring {
         ENDRING,
         REVURDERING
@@ -69,6 +82,8 @@ class Revurderingseventyr private constructor(
     private sealed interface RevurderingÅrsak {
 
         fun dersomInngått(hendelse: IAktivitetslogg) {}
+
+        fun kanIgangsetteOverstyringIAvventerInntektsmelding() = true
 
         fun emitOverstyringIgangsattEvent(person: Person, vedtaksperioder: List<VedtaksperiodeData>, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) {
             person.emitOverstyringIgangsattEvent(
@@ -130,6 +145,8 @@ class Revurderingseventyr private constructor(
 
         object NyPeriode : RevurderingÅrsak {
             override fun navn() = "NY_PERIODE"
+
+            override fun kanIgangsetteOverstyringIAvventerInntektsmelding() = false
         }
     }
 

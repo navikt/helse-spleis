@@ -1674,6 +1674,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
+            if (!revurdering.kanIgangsetteOverstyringIAvventerInntektsmelding(hendelse)) return
             vurderOmKanGåVidere(vedtaksperiode, hendelse)
         }
 

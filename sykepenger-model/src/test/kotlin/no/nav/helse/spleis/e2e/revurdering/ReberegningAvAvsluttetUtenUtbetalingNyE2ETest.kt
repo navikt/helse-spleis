@@ -110,7 +110,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         val inntektsmeldingbeløp2 = INNTEKT*1.1
         val inntektsmelding2 = håndterInntektsmelding(listOf(29.mars(2023) til 13.april(2023)), beregnetInntekt = inntektsmeldingbeløp2)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
 
         assertEquals(listOf(Dokumentsporing.søknad(søknad1), Dokumentsporing.inntektsmeldingDager(inntektsmelding1), Dokumentsporing.inntektsmeldingDager(inntektsmelding2)), inspektør.hendelser(1.vedtaksperiode))
         assertEquals(29.mars(2023), inspektør.skjæringstidspunkt(1.vedtaksperiode))
