@@ -35,7 +35,6 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
-import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -87,7 +86,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         val innteksmeldingId = håndterInntektsmelding(listOf(14.april til 14.april, 18.april til 2.mai), førsteFraværsdag = 22.mai, begrunnelseForReduksjonEllerIkkeUtbetalt = "EnBegrunnelse")
 
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
-        assertFunksjonellFeil(RV_IM_23, 3.vedtaksperiode.filter())
+        assertFunksjonellFeil(RV_IM_23, 1.vedtaksperiode.filter())
 
         assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S", inspektør.sykdomstidslinje.toShortString())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -103,21 +102,16 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         nyPeriode(20.januar til 30.januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 20.januar,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel"
+        )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
-        assertForventetFeil(
-            forklaring = "Begge periodene trenger varsel om ikke-utbetalt AGP",
-            nå = {
-                assertIngenVarsel(RV_IM_8, 1.vedtaksperiode.filter())
-                assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
-            },
-            ønsket = {
-                assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
-                assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
-            }
-        )
+        assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
+        assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
     }
 
     @Test
