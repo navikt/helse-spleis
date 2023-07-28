@@ -308,7 +308,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(dager: DagerFraInntektsmelding) {
-        kontekst(dager)
         val skalHåndtereDager = tilstand.skalHåndtereDager(this, dager)
         if (!skalHåndtereDager || dager.alleredeHåndtert(hendelseIder)) {
             dager.vurdertTilOgMed(periode.endInclusive)
@@ -316,12 +315,14 @@ internal class Vedtaksperiode private constructor(
             // om vedtaksperioden ikke skal håndtere dagene kan dette være fordi inntektsmeldingen har oppgitt
             // første fraværsdag slik at arbeidsgiverperioden ikke håndteres. Vi vil likevel kunne trenge varsel,
             // så for å produsere evt. varsel håndteres det av perioden(e) som overlaper med oppgitt agp eller første fraværsdag
-            if (!skalHåndtereDager) {
+            if (!skalHåndtereDager && dager.skalValideresAv(periode)) {
+                kontekst(dager)
                 dager.valider(this.periode, finnArbeidsgiverperiode())
                 if (dager.harFunksjonelleFeilEllerVerre()) forkast(dager)
             }
             return
         }
+        kontekst(dager)
         tilstand.håndter(this, dager)
         dager.vurdertTilOgMed(periode.endInclusive)
     }

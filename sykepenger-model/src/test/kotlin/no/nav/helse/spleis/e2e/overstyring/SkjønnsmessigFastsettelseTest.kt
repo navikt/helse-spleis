@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.overstyring
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Toggle
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -366,7 +365,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     }
 
     @Test
-    fun `Hvis avvikssak som trenger fastsettelse ved skjønn godkjennes kan det skyldes manglende varsel`() = Toggle.TjuefemprosentAvvik.disable {
+    fun `Hindrer tilstandsendring hvis avvikssak som trenger fastsettelse ved skjønn godkjennes - med senere uferdige periode`() = Toggle.TjuefemprosentAvvik.disable {
         nyttVedtak(1.januar, 31.januar, beregnetInntekt = 20000.månedlig)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
@@ -378,17 +377,8 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         assertEquals(AvventerFastsettelseEtterSkjønn, inspektør.tilstandPåSykepengegrunnlag(1.januar))
 
-        assertForventetFeil(
-            forklaring = "Varsel havner på feil kontekst og blir ikke synlig for saksbehandler fordi 3.vedtaksperiode er en venter-pølse",
-            nå = {
-                assertVarsel(RV_IV_2, 3.vedtaksperiode.filter())
-                assertIngenVarsel(RV_IV_2, 1.vedtaksperiode.filter())
-            },
-            ønsket = {
-                assertVarsel(RV_IV_2, 1.vedtaksperiode.filter())
-                assertIngenVarsel(RV_IV_2, 3.vedtaksperiode.filter())
-            }
-        )
+        assertVarsel(RV_IV_2, 1.vedtaksperiode.filter())
+        assertIngenVarsel(RV_IV_2, 3.vedtaksperiode.filter())
         assertThrows<IllegalStateException> { håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true) }
     }
 

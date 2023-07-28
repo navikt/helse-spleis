@@ -156,7 +156,7 @@ class Inntektsmelding(
         return this
     }
 
-    private fun skalValideresAv(periode: Periode) = overlappsperiode?.overlapperMed(periode) == true
+    internal fun skalValideresAv(periode: Periode) = overlappsperiode?.overlapperMed(periode) == true
 
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
         if (!skalValideresAv(periode)) return this

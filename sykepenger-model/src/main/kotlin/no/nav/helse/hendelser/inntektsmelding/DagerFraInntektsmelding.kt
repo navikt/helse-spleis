@@ -71,6 +71,8 @@ internal class DagerFraInntektsmelding(
         return arbeidsgiverSykedomstidslinje.subset(periode)
     }
 
+    internal fun skalValideresAv(periode: Periode) = inntektsmelding.skalValideresAv(periode)
+
     internal fun valider(periode: Periode) {
         inntektsmelding.valider(periode, NullObserver)
     }
