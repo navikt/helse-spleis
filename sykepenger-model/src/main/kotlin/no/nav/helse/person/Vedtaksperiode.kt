@@ -1528,7 +1528,8 @@ internal class Vedtaksperiode private constructor(
             håndterRevurdering(ytelser) {
                 if (Toggle.ForenkleRevurdering.enabled) {
                     // når toggle er enabled er det samme kode som førstegangsvurderinger
-                    val beregningsperiode = vedtaksperiode.finnArbeidsgiverperiode()?.periode(vedtaksperiode.periode.endInclusive) ?: vedtaksperiode.periode
+                    val sisteTomKlarTilBehandling = beregningsperioderFørstegangsbehandling(person, vedtaksperiode)
+                    val beregningsperiode = vedtaksperiode.finnArbeidsgiverperiode()?.periode(sisteTomKlarTilBehandling) ?: vedtaksperiode.periode
                     val beregningsperioder = listOf(Triple(vedtaksperiode.periode, ytelser, vedtaksperiode.jurist()))
 
                     val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
@@ -1545,7 +1546,7 @@ internal class Vedtaksperiode private constructor(
                 } else {
                     // beregningsperiode brukes for å avgjøre hvilke perioder vi skal -kreve- inntekt for
                     // beregningsperioder brukes for å lage varsel
-                    val utvalg = beregningsperioder(person, vedtaksperiode)
+                    val utvalg = beregningsperioderRevurdering(person, vedtaksperiode)
 
                     person.valider(ytelser, vilkårsgrunnlag, vedtaksperiode.organisasjonsnummer, vedtaksperiode.skjæringstidspunkt)
 
@@ -1570,13 +1571,6 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.høstingsresultater(ytelser, AvventerSimuleringRevurdering, AvventerGodkjenningRevurdering)
             }
         }
-
-        private fun beregningsperioder(person: Person, vedtaksperiode: Vedtaksperiode) =
-            (listOf(vedtaksperiode) + person
-                .vedtaksperioder {
-                    it.tilstand in listOf(AvventerGjennomførtRevurdering, AvventerRevurdering)
-                            && it.skjæringstidspunkt == vedtaksperiode.skjæringstidspunkt
-                })
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
@@ -1981,7 +1975,8 @@ internal class Vedtaksperiode private constructor(
                     lateinit var arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
                     valider(RV_UT_16) {
                         arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
-                        val beregningsperiode = vedtaksperiode.finnArbeidsgiverperiode()?.periode(vedtaksperiode.periode.endInclusive) ?: vedtaksperiode.periode
+                        val sisteTomKlarTilBehandling = beregningsperioderFørstegangsbehandling(person, vedtaksperiode)
+                        val beregningsperiode = vedtaksperiode.finnArbeidsgiverperiode()?.periode(sisteTomKlarTilBehandling) ?: vedtaksperiode.periode
                         val beregningsperioder = listOf(Triple(vedtaksperiode.periode, this, vedtaksperiode.jurist()))
 
                         vedtaksperiode.beregnUtbetalinger(
@@ -2951,6 +2946,19 @@ internal class Vedtaksperiode private constructor(
             manglendeUtbetalingsopplysninger(dag, "inngår ikke i sykepengegrunnlaget")
         internal fun List<Vedtaksperiode>.manglerRefusjonsopplysninger(dag: LocalDate) =
             manglendeUtbetalingsopplysninger(dag, "mangler refusjonsopplysninger")
+
+        private fun beregningsperioderFørstegangsbehandling(person: Person, vedtaksperiode: Vedtaksperiode) = (
+                listOf(vedtaksperiode) + person
+                    .vedtaksperioder(KLAR_TIL_BEHANDLING)
+                    .filter(MED_SKJÆRINGSTIDSPUNKT(vedtaksperiode.skjæringstidspunkt))
+                ).maxOf { it.periode.endInclusive }
+
+        private fun beregningsperioderRevurdering(person: Person, vedtaksperiode: Vedtaksperiode) =
+            (listOf(vedtaksperiode) + person
+                .vedtaksperioder {
+                    it.tilstand in listOf(AvventerGjennomførtRevurdering, AvventerRevurdering)
+                            && it.skjæringstidspunkt == vedtaksperiode.skjæringstidspunkt
+                })
 
     }
 }

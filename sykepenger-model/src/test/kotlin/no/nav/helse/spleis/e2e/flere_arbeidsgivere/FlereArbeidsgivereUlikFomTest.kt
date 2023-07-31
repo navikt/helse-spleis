@@ -74,7 +74,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
@@ -1758,7 +1757,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `avviser dag med totalgrad under 20 %`() {
+    fun `avviser dag med totalgrad under 20 prosent`() {
         val inntektA1 = 51775.månedlig
         val inntektA2 = 10911.månedlig
         nyPeriode(1.mai(2023) til 30.mai(2023), orgnummer = a1)
@@ -1787,18 +1786,9 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         val utbetalingstidslinje = inspektør(a2).utbetalingUtbetalingstidslinje(0)
-        assertForventetFeil(
-            forklaring = "Frisk hos ag1 og syk hos ag2, skal føre til avvist dag fordi total sykdomsgrad skal være under 20 prosent",
-            nå = {
-                assertEquals(504.daglig, utbetalingstidslinje[31.mai(2023)].økonomi.inspektør.personbeløp)
-                assertNull(utbetalingstidslinje[31.mai(2023)].erAvvistMed(Begrunnelse.MinimumSykdomsgrad))
-                assertEquals(100.prosent, utbetalingstidslinje[31.mai(2023)].økonomi.inspektør.totalGrad)
-            },
-            ønsket = {
-                assertEquals(0.daglig, utbetalingstidslinje[31.mai(2023)].økonomi.inspektør.personbeløp)
-                assertNotNull(utbetalingstidslinje[31.mai(2023)].erAvvistMed(Begrunnelse.MinimumSykdomsgrad))
-                assertEquals(17.41.prosent, utbetalingstidslinje[31.mai(2023)].økonomi.inspektør.totalGrad)
-            }
-        )
+
+        assertEquals(0.daglig, utbetalingstidslinje[31.mai(2023)].økonomi.inspektør.personbeløp)
+        assertNotNull(utbetalingstidslinje[31.mai(2023)].erAvvistMed(Begrunnelse.MinimumSykdomsgrad))
+        assertEquals(17, utbetalingstidslinje[31.mai(2023)].økonomi.inspektør.totalGrad.roundToInt())
     }
 }
