@@ -5108,6 +5108,11 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "FeriedagUtenSykmelding",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "ForeldetSykedag",
           "description" : null,
           "isDeprecated" : false,
