@@ -40,7 +40,8 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
     override fun visit(dag: Utbetalingsdag.Fridag, dato: LocalDate, økonomi: Økonomi) {
         val dagtype = when (sykdomstidslinje[dato]) {
             is Dag.Permisjonsdag -> PersonObserver.Utbetalingsdag.Dagtype.Permisjonsdag
-            is Dag.Feriedag -> PersonObserver.Utbetalingsdag.Dagtype.Feriedag
+            is Dag.Feriedag,
+            is Dag.FerieUtenSykmeldingDag -> PersonObserver.Utbetalingsdag.Dagtype.Feriedag
             else -> PersonObserver.Utbetalingsdag.Dagtype.Fridag
         }
         utbetalingsdager.add(PersonObserver.Utbetalingsdag(dato, dagtype))
