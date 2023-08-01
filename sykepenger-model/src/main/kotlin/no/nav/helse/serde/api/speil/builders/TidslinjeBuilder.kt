@@ -23,7 +23,6 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -81,6 +80,12 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
 
     override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
         leggTilDag(dag, dato, null, kilde)
+
+    override fun visitDag(
+        dag: Dag.FerieUtenSykmeldingDag,
+        dato: LocalDate,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) = leggTilDag(dag, dato, null, kilde)
 
     override fun visitDag(dag: Dag.FriskHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
         leggTilDag(dag, dato, null, kilde)
@@ -156,6 +161,7 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
         is Dag.Arbeidsdag -> SykdomstidslinjedagType.ARBEIDSDAG
         is Dag.Arbeidsgiverdag -> SykdomstidslinjedagType.ARBEIDSGIVERDAG
         is Dag.Feriedag -> SykdomstidslinjedagType.FERIEDAG
+        is Dag.FerieUtenSykmeldingDag -> SykdomstidslinjedagType.FERIE_UTEN_SYKMELDINGDAG
         is Dag.FriskHelgedag -> SykdomstidslinjedagType.FRISK_HELGEDAG
         is Dag.ArbeidsgiverHelgedag -> SykdomstidslinjedagType.ARBEIDSGIVERDAG
         is Dag.ForeldetSykedag -> SykdomstidslinjedagType.FORELDET_SYKEDAG

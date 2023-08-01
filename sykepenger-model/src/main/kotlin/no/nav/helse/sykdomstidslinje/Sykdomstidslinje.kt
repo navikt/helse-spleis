@@ -25,6 +25,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
+import no.nav.helse.sykdomstidslinje.Dag.FerieUtenSykmeldingDag
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.ForeldetSykedag
 import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
@@ -254,6 +255,7 @@ internal class Sykdomstidslinje private constructor(
                     is Arbeidsgiverdag -> "U"
                     is ArbeidsgiverHelgedag -> "G"
                     is Feriedag -> "F"
+                    is FerieUtenSykmeldingDag -> "J"
                     is Permisjonsdag -> "P"
                     is FriskHelgedag -> "R"
                     is ForeldetSykedag -> "K"
@@ -420,6 +422,16 @@ internal class Sykdomstidslinje private constructor(
             Sykdomstidslinje(
                 førsteDato.datesUntil(sisteDato.plusDays(1))
                     .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { Feriedag(it, kilde) }))
+            )
+
+        internal fun feriedagerUtenSykmelding(
+            førsteDato: LocalDate,
+            sisteDato: LocalDate,
+            kilde: Hendelseskilde
+        ) =
+            Sykdomstidslinje(
+                førsteDato.datesUntil(sisteDato.plusDays(1))
+                    .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { FerieUtenSykmeldingDag(it, kilde) }))
             )
 
         internal fun permisjonsdager(
