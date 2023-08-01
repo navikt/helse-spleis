@@ -23,7 +23,7 @@ data class ManuellOverskrivingDag(
 }
 
 enum class Dagtype {
-    Sykedag, Feriedag, Egenmeldingsdag, Permisjonsdag, Arbeidsdag, SykedagNav
+    Sykedag, Feriedag, FeriedagUtenSykmelding, Egenmeldingsdag, Permisjonsdag, Arbeidsdag, SykedagNav
 }
 
 class OverstyrTidslinje(
@@ -48,6 +48,11 @@ class OverstyrTidslinje(
                     kilde = kilde
                 )
                 Dagtype.Feriedag -> Sykdomstidslinje.feriedager(
+                    førsteDato = it.dato,
+                    sisteDato = it.dato,
+                    kilde = kilde
+                )
+                Dagtype.FeriedagUtenSykmelding -> Sykdomstidslinje.feriedagerUtenSykmelding(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     kilde = kilde

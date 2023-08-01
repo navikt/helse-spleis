@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
+import no.nav.helse.august
 import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -14,6 +15,8 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -182,6 +185,45 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         val arbeidsgiverInntektsopplysning = sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(ORGNUMMER).inspektør
         assertEquals(INNTEKT, arbeidsgiverInntektsopplysning.inntektsopplysning.inspektør.beløp)
         assertEquals(Inntektsmelding::class, arbeidsgiverInntektsopplysning.inntektsopplysning::class)
+    }
+
+    @Test
+    fun `ferie uten sykmelding mellom to perioder`() {
+        nyttVedtak(1.juni, 30.juni)
+
+        håndterSøknad(Sykdom(1.august, 31.august, 100.prosent))
+        håndterInntektsmelding(listOf(1.juni til 16.juni), førsteFraværsdag = 1.august, begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering")
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+
+        nullstillTilstandsendringer()
+
+        håndterOverstyrTidslinje((1.juli til 31.juli).map { ManuellOverskrivingDag(it, Dagtype.FeriedagUtenSykmelding) })
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+
+        assertEquals("SHH SSSSSHH SSSSSHH SSSSSHH SSSSSHJ JJJJJJJ JJJJJJJ JJJJJJJ JJJJJJJ JJSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSS", inspektør.sykdomstidslinje.toShortString())
+
+        assertEquals(1.august, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(1.juli til 31.august, inspektør.periode(2.vedtaksperiode))
+
+        val juniutbetaling = inspektør.utbetaling(0).inspektør
+        val augustutbetalingFør = inspektør.utbetaling(1).inspektør
+        val augustutbetalingEtter = inspektør.utbetaling(2).inspektør
+
+        assertNotEquals(juniutbetaling.korrelasjonsId, augustutbetalingFør.korrelasjonsId)
+        assertEquals(juniutbetaling.korrelasjonsId, augustutbetalingEtter.korrelasjonsId)
+
+        augustutbetalingEtter.arbeidsgiverOppdrag.also { oppdrag ->
+            assertEquals(2, oppdrag.size)
+            oppdrag[0].also { linje ->
+                assertEquals(17.juni til 30.juni, linje.fom til linje.tom)
+            }
+            oppdrag[1].also { linje ->
+                assertEquals(1.august til 31.august, linje.fom til linje.tom)
+            }
+        }
     }
 
     @Test
