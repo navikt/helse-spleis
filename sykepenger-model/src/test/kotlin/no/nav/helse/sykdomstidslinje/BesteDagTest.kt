@@ -1,5 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.januar
 import no.nav.helse.mandag
 import no.nav.helse.testhelpers.TestEvent
 import no.nav.helse.tournament.Dagturnering
@@ -11,21 +12,20 @@ import org.junit.jupiter.api.Test
 internal class BesteDagTest {
 
     companion object {
-        private val ukjentDag get() = Dag.UkjentDag(2.mandag, TestEvent.søknad)
-        private val arbeidsdagFraSøknad get() = Dag.Arbeidsdag(2.mandag, TestEvent.søknad)
-        private val ferieFraInntektsmelding get() = Dag.Feriedag(2.mandag, TestEvent.inntektsmelding)
-        private val arbeidsgiverdagFraInntektsmelding
-            get() = Dag.Arbeidsgiverdag(
-                2.mandag,
-                Økonomi.sykdomsgrad(100.prosent),
-                TestEvent.inntektsmelding
-            )
-        private val ferieFraSøknad get() = Dag.Feriedag(2.mandag, TestEvent.søknad)
-        private val permisjonFraSøknad get() = Dag.Permisjonsdag(2.mandag, TestEvent.søknad)
-        private val sykedagFraSøknad get() = Dag.Sykedag(2.mandag, Økonomi.sykdomsgrad(100.prosent), TestEvent.søknad)
-        private val egenmeldingsdagFraSaksbehandler get() = Dag.Arbeidsgiverdag(2.mandag, Økonomi.sykdomsgrad(100.prosent), TestEvent.saksbehandler)
-        private val arbeidsdagFraSaksbehandler get() = Dag.Arbeidsdag(2.mandag, TestEvent.saksbehandler)
-        private val sykedagNavFraSaksbehandler get() = Dag.SykedagNav(2.mandag, Økonomi.sykdomsgrad(100.prosent), TestEvent.saksbehandler)
+        private val ukjentDag = Dag.UkjentDag(1.januar, TestEvent.søknad)
+        private val arbeidsdagFraSøknad = Dag.Arbeidsdag(1.januar, TestEvent.søknad)
+        private val arbeidsdagFraInntektsmelding = Dag.Arbeidsdag(1.januar, TestEvent.inntektsmelding)
+        private val ferieFraInntektsmelding = Dag.Feriedag(1.januar, TestEvent.inntektsmelding)
+        private val ferieUtenSykmeldingdag = Dag.FerieUtenSykmeldingDag(1.januar, TestEvent.saksbehandler)
+        private val arbeidsgiverdagFraInntektsmelding = Dag.Arbeidsgiverdag(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.inntektsmelding)
+        private val ferieFraSøknad = Dag.Feriedag(1.januar, TestEvent.søknad)
+        private val ferieFraSaksbehandler = Dag.Feriedag(1.januar, TestEvent.saksbehandler)
+        private val permisjonFraSøknad = Dag.Permisjonsdag(1.januar, TestEvent.søknad)
+        private val sykedagFraSøknad = Dag.Sykedag(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.søknad)
+        private val sykedagFraSaksbehandler = Dag.Sykedag(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.saksbehandler)
+        private val egenmeldingsdagFraSaksbehandler = Dag.Arbeidsgiverdag(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.saksbehandler)
+        private val arbeidsdagFraSaksbehandler = Dag.Arbeidsdag(1.januar, TestEvent.saksbehandler)
+        private val sykedagNavFraSaksbehandler = Dag.SykedagNav(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.saksbehandler)
     }
 
     @Test
@@ -53,6 +53,24 @@ internal class BesteDagTest {
         assertWinnerBidirectional(egenmeldingsdagFraSaksbehandler, permisjonFraSøknad, permisjonFraSøknad)
         assertWinnerBidirectional(egenmeldingsdagFraSaksbehandler, arbeidsgiverdagFraInntektsmelding, arbeidsgiverdagFraInntektsmelding)
         assertWinnerBidirectional(egenmeldingsdagFraSaksbehandler, ukjentDag, egenmeldingsdagFraSaksbehandler)
+    }
+
+    @Test
+    fun `ferie uten sykmelding`() {
+        assertWinnerBidirectional(arbeidsdagFraSøknad, ferieUtenSykmeldingdag, arbeidsdagFraSøknad)
+        assertWinnerBidirectional(arbeidsdagFraInntektsmelding, ferieUtenSykmeldingdag, arbeidsdagFraInntektsmelding)
+        assertWinnerBidirectional(sykedagFraSøknad, ferieUtenSykmeldingdag, sykedagFraSøknad)
+        assertWinnerBidirectional(ferieFraSøknad, ferieUtenSykmeldingdag, ferieFraSøknad)
+        assertWinnerBidirectional(arbeidsgiverdagFraInntektsmelding, ferieUtenSykmeldingdag, arbeidsgiverdagFraInntektsmelding)
+
+        assertWinner(ferieFraSaksbehandler, ferieUtenSykmeldingdag, ferieUtenSykmeldingdag)
+        assertWinner(ferieUtenSykmeldingdag, ferieFraSaksbehandler, ferieFraSaksbehandler)
+
+        assertWinner(sykedagNavFraSaksbehandler, ferieUtenSykmeldingdag, ferieUtenSykmeldingdag)
+        assertWinner(ferieUtenSykmeldingdag, sykedagNavFraSaksbehandler, sykedagNavFraSaksbehandler)
+
+        assertWinner(sykedagFraSaksbehandler, ferieUtenSykmeldingdag, ferieUtenSykmeldingdag)
+        assertWinner(ferieUtenSykmeldingdag, sykedagFraSaksbehandler, sykedagFraSaksbehandler)
     }
 
     @Test

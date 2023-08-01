@@ -14,6 +14,7 @@ import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 
+// disse verdiene må være 1-til-1 mellom navnene i dagturnering-csv-filene
 internal enum class Turneringsnøkkel {
     Arbeidsdag_SØ,
     Arbeidsdag_IM,
@@ -21,6 +22,7 @@ internal enum class Turneringsnøkkel {
     ForeldetSykedag,
     Feriedag_SØ,
     Feriedag_IM,
+    FerieUtenSykmeldingdag,
     Permisjonsdag_SØ,
     SykHelgedag_SØ,
     Arbeidsgiverdag_IM,
@@ -38,6 +40,7 @@ internal enum class Turneringsnøkkel {
         fun fraDag(dag: Dag) = when {
             dag is Arbeidsgiverdag && dag.kommerFra(OverstyrTidslinje::class) -> Arbeidsgiverdag_SB
             dag is Arbeidsdag && dag.kommerFra(OverstyrTidslinje::class) -> Arbeidsdag_SB
+            dag is Dag.FerieUtenSykmeldingDag -> FerieUtenSykmeldingdag
             dag.kommerFra(OverstyrTidslinje::class) -> Saksbehandlerdag
             dag is Arbeidsdag && dag.kommerFra(Inntektsmelding::class) -> Arbeidsdag_IM
             dag is Arbeidsdag && dag.kommerFra(Søknad::class) -> Arbeidsdag_SØ
