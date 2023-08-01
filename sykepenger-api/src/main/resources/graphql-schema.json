@@ -5108,7 +5108,7 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
-          "name" : "FeriedagUtenSykmelding",
+          "name" : "FerieUtenSykmeldingDag",
           "description" : null,
           "isDeprecated" : false,
           "deprecationReason" : null
