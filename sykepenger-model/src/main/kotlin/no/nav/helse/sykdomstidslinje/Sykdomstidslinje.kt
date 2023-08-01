@@ -207,7 +207,7 @@ internal class Sykdomstidslinje private constructor(
     }
 
     private fun erArbeidsdag(dato: LocalDate) =
-        this[dato] is Arbeidsdag || this[dato] is FriskHelgedag
+        this[dato] is Arbeidsdag || this[dato] is FriskHelgedag || this[dato] is FerieUtenSykmeldingDag
 
     private fun erGyldigHelgegap(dato: LocalDate): Boolean {
         if (!dato.erHelg()) return false

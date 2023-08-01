@@ -16,6 +16,7 @@ import no.nav.helse.somPersonidentifikator
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.H
+import no.nav.helse.testhelpers.J
 import no.nav.helse.testhelpers.N
 import no.nav.helse.testhelpers.P
 import no.nav.helse.testhelpers.S
@@ -48,6 +49,7 @@ internal class SkjæringstidspunktTest {
         assertNull(1.P.sisteSkjæringstidspunkt())
         assertNull(1.opphold.sisteSkjæringstidspunkt())
         assertNull(1.A.sisteSkjæringstidspunkt())
+        assertNull(1.J.sisteSkjæringstidspunkt())
     }
 
     @Test
@@ -55,6 +57,16 @@ internal class SkjæringstidspunktTest {
         assertFørsteDagErSkjæringstidspunkt(1.S)
         assertFørsteDagErSkjæringstidspunkt(1.U)
         assertFørsteDagErSkjæringstidspunkt(1.H)
+    }
+
+    @Test
+    fun `syk-ferie uten sykmelding-helg-syk regnes som gap`() {
+        assertDagenErSkjæringstidspunkt(22.januar, 15.S + 4.J + 2.opphold + 1.S)
+    }
+
+    @Test
+    fun `syk-helg-ferie uten sykmelding-syk regnes ikke som gap`() {
+        assertDagenErSkjæringstidspunkt(17.januar, 12.S + 2.opphold + 2.J + 1.S)
     }
 
     @Test
@@ -97,6 +109,12 @@ internal class SkjæringstidspunktTest {
         perioder(2.S, 2.A, 2.S, 2.A) { _, _, sisteSykedager, _ ->
             assertFørsteDagErSkjæringstidspunkt(sisteSykedager, this)
         }
+        perioder(2.S, 2.J, 2.F, 2.S) { _, _, _, periode4 ->
+            assertFørsteDagErSkjæringstidspunkt(periode4, this)
+        }
+        perioder(2.S, 2.F, 2.J, 2.S) { _, _, _, periode4 ->
+            assertFørsteDagErSkjæringstidspunkt(periode4, this)
+        }
     }
 
     @Test
@@ -112,6 +130,9 @@ internal class SkjæringstidspunktTest {
     @Test
     fun `bare ferie - tidligere sykdom`() {
         perioder(2.S, 1.A, 14.F) { _, _, _ ->
+            assertNull(sisteSkjæringstidspunkt())
+        }
+        perioder(2.S, 1.J, 14.F) { _, _, _ ->
             assertNull(sisteSkjæringstidspunkt())
         }
     }
