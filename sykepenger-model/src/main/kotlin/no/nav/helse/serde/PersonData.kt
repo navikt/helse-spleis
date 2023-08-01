@@ -784,6 +784,10 @@ internal data class PersonData(
                         dato,
                         hendelseskilde
                     )
+                    JsonDagType.FERIE_UTEN_SYKMELDINGDAG -> Dag.FerieUtenSykmeldingDag(
+                        dato,
+                        hendelseskilde
+                    )
                     JsonDagType.FRISK_HELGEDAG -> Dag.FriskHelgedag(
                         dato,
                         hendelseskilde
@@ -822,6 +826,7 @@ internal data class PersonData(
                 ARBEIDSGIVERDAG,
 
                 FERIEDAG,
+                FERIE_UTEN_SYKMELDINGDAG,
                 FRISK_HELGEDAG,
                 FORELDET_SYKEDAG,
                 PERMISJONSDAG,

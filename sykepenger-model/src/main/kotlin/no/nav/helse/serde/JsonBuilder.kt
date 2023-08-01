@@ -43,6 +43,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonD
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSDAG
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FERIEDAG
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FERIE_UTEN_SYKMELDINGDAG
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FORELDET_SYKEDAG
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FRISK_HELGEDAG
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PERMISJONSDAG
@@ -1917,6 +1918,9 @@ internal class JsonBuilder : AbstractBuilder() {
 
         override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: Hendelseskilde) =
             leggTilDag(dato, DagJsonBuilder(FERIEDAG, kilde))
+
+        override fun visitDag(dag: Dag.FerieUtenSykmeldingDag, dato: LocalDate, kilde: Hendelseskilde)  =
+            leggTilDag(dato, DagJsonBuilder(FERIE_UTEN_SYKMELDINGDAG, kilde))
 
         override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) =
             leggTilDag(dato, DagJsonBuilder(PERMISJONSDAG, kilde))
