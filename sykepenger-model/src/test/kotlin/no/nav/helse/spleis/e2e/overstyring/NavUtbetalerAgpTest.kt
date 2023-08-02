@@ -18,6 +18,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
+import no.nav.helse.mars
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -102,16 +103,25 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         nyPeriode(20.januar til 30.januar)
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            førsteFraværsdag = 20.januar,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel"
-        )
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
+        assertEquals("SSSSSHH SSSSSHH SU???HH NSSSSHH SS", inspektør.sykdomstidslinje.toShortString())
         assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
         assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `begrunnelse for reduksjon påvirker ikke tidligere arbeidsgiverperiode når første fraværsdag er opplyst`() {
+        nyPeriode(1.januar til 4.januar)
+        nyPeriode(5.januar til 10.januar)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel", førsteFraværsdag = 1.mars)
+
+        assertEquals("SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
@@ -352,24 +362,5 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
         assertUtbetalingsdag(inspektør.sisteUtbetalingUtbetalingstidslinje()[2.januar], expectedDagtype = Utbetalingsdag.AvvistDag::class, 11.42)
-    }
-
-    @Test
-    fun `To korte perioder mottar to inntektsmeldinger som er uenige om hvem som skal betale AGP - da blir ting litt sprøtt`() {
-        nyPeriode(7.april(2023) til 9.april(2023))
-        nyPeriode(10.april(2023) til 13.april(2023))
-
-        håndterInntektsmelding(listOf(7.april(2023) til 22.april(2023)))
-        håndterInntektsmelding(listOf(7.april(2023) til 22.april(2023)), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel", førsteFraværsdag = 1.mai(2023))
-
-        assertForventetFeil(
-            forklaring = "To inntektsmeldinger krangler om hvem som skal betale AGP, i en perfekt verden skulle AGP i begge perioder blitt betalt av NAV",
-            nå = {
-                assertEquals("NHH SSSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-            },
-            ønsket = {
-                assertEquals("NHH NNNN", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-            }
-        )
     }
 }

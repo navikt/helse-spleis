@@ -113,12 +113,13 @@ class Inntektsmelding(
 
     private fun lagArbeidsgivertidslinje(): Sykdomstidslinje {
         check(!ignorerDager) { "Skal ikke brukes når vi ignorerer dager fra inntektsmelding" }
-        if (begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank()) return arbeidsgiverperioder.map(::arbeidsgiverdager).merge()
-        return arbeidsgiverperiodeNavSkalUtbetale().map(::sykedagerNav).merge()
+        val agp = arbeidsgiverperioder.map(::arbeidsgiverdager).merge()
+        if (begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank()) return agp
+        return agp.merge(arbeidsgiverperiodeNavSkalUtbetale().map(::sykedagerNav).merge(), replace)
     }
 
     private fun arbeidsgiverperiodeNavSkalUtbetale(): List<Periode> {
-        if (arbeidsgiverperioder.isNotEmpty()) return arbeidsgiverperioder
+        if (arbeidsgiverperioder.isNotEmpty() && !førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) return arbeidsgiverperioder
         return listOfNotNull(førsteFraværsdag?.førsteArbeidsdag()?.somPeriode())
     }
 
