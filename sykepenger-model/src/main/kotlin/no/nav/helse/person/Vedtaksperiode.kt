@@ -2595,6 +2595,10 @@ internal class Vedtaksperiode private constructor(
             { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.skjæringstidspunkt == skjæringstidspunkt && vedtaksperiode.vilkårsgrunnlag?.erArbeidsgiverRelevant(vedtaksperiode.organisasjonsnummer) == true }
         }
 
+        private val OVERLAPPER_MED = { other: Vedtaksperiode ->
+            { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.periode.overlapperMed(other.periode) }
+        }
+
         internal val MED_SKJÆRINGSTIDSPUNKT = { skjæringstidspunkt: LocalDate ->
             { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.skjæringstidspunkt == skjæringstidspunkt }
         }
@@ -2953,7 +2957,7 @@ internal class Vedtaksperiode private constructor(
 
         private fun beregningsperioderFørstegangsbehandling(person: Person, vedtaksperiode: Vedtaksperiode) = (
                 listOf(vedtaksperiode) + person
-                    .vedtaksperioder(KLAR_TIL_BEHANDLING)
+                    .vedtaksperioder(OVERLAPPER_MED(vedtaksperiode))
                     .filter(MED_SKJÆRINGSTIDSPUNKT(vedtaksperiode.skjæringstidspunkt))
                 ).maxOf { it.periode.endInclusive }
 

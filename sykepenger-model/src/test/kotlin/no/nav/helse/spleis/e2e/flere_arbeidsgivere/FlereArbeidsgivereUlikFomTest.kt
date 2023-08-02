@@ -49,6 +49,7 @@ import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.forlengVedtak
+import no.nav.helse.spleis.e2e.forlengelseTilGodkjenning
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -1711,6 +1712,51 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         assertIngenVarsel(RV_VV_5, 1.vedtaksperiode.filter(a1))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+    }
+
+    @Test
+    fun `ghost blir syk, vi har ikke mottatt IM enda, men kan beregne tidligere periode`() {
+        nyPeriode(1.januar til 31.januar, orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurdering = lagStandardSammenligningsgrunnlag(
+                listOf(
+                    Pair(a1, INNTEKT),
+                    Pair(a2, 1000.månedlig)
+                ), 1.januar
+            ),
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                listOf(
+                    Pair(a1, INNTEKT),
+                    Pair(a2, 1000.månedlig)
+                ), 1.januar
+            ),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH),
+            ),
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt()
+
+        forlengelseTilGodkjenning(1.februar, 28.februar, a1)
+        nyPeriode(1.mars til 31.mars, orgnummer = a1)
+        nyPeriode(1.april til 30.april, orgnummer = a1)
+        nyPeriode(1.april til 30.april, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt()
+        håndterYtelser(3.vedtaksperiode, orgnummer = a1)
+
+        val utbetalinger = inspektør.utbetalinger(3.vedtaksperiode)
+        assertEquals(1, utbetalinger.size)
+        assertEquals(1.januar til 31.mars, utbetalinger.single().inspektør.periode)
+
+        val utbetalingstidslinje = inspektør.utbetalingstidslinjeBeregninger.last()
+        assertEquals(1.januar til 30.april, utbetalingstidslinje.utbetalingstidslinje().periode())
     }
 
     @Test
