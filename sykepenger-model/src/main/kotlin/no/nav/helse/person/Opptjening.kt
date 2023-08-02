@@ -23,6 +23,8 @@ internal class Opptjening private constructor(
     private val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>,
     private val opptjeningsperiode: Periode
 ) {
+    private val opptjeningsdager by lazy { opptjeningsperiode.dagerMellom() }
+
     internal constructor(arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) : this(skjæringstidspunkt, arbeidsforhold, arbeidsforhold.opptjeningsperiode(skjæringstidspunkt)) {
         val arbeidsforholdForJurist = arbeidsforhold.arbeidsforholdForJurist()
         subsumsjonObserver.`§ 8-2 ledd 1`(
@@ -30,15 +32,15 @@ internal class Opptjening private constructor(
             skjæringstidspunkt = skjæringstidspunkt,
             tilstrekkeligAntallOpptjeningsdager = TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER,
             arbeidsforhold = arbeidsforholdForJurist,
-            antallOpptjeningsdager = opptjeningsperiode.dagerMellom()
+            antallOpptjeningsdager = opptjeningsdager
         )
     }
 
     internal fun ansattVedSkjæringstidspunkt(orgnummer: String) =
         arbeidsforhold.any { it.ansattVedSkjæringstidspunkt(orgnummer, skjæringstidspunkt) }
 
-    internal fun opptjeningsdager() = opptjeningsperiode.dagerMellom()
-    internal fun erOppfylt(): Boolean = opptjeningsperiode.dagerMellom() >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
+    internal fun opptjeningsdager() = opptjeningsdager
+    internal fun erOppfylt(): Boolean = opptjeningsdager >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
 
     internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
         val erOppfylt = erOppfylt()

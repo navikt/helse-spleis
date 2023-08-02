@@ -13,6 +13,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.math.BigDecimal
 import java.math.RoundingMode
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeUtbetalinger
@@ -47,6 +48,9 @@ private class InfotrygdhistorikkElementMixin
 @JsonIgnoreProperties("ansattPerioder")
 private class SkattSykepengegrunnlagMixin
 
+@JsonIgnoreProperties("opptjeningsdager\$delegate")
+private class OpptjeningMixin
+
 internal class BigDecimalSerializer : JsonSerializer<BigDecimal>() {
     private companion object {
         private const val PRECISION = 15
@@ -74,7 +78,8 @@ private val objectMapper = jacksonObjectMapper()
             Begrunnelse::class.java to BegrunnelseMixin::class.java,
             InfotrygdhistorikkElement::class.java to InfotrygdhistorikkElementMixin::class.java,
             Prosentdel::class.java to ProsentdelMixin::class.java,
-            SkattSykepengegrunnlag::class.java to SkattSykepengegrunnlagMixin::class.java
+            SkattSykepengegrunnlag::class.java to SkattSykepengegrunnlagMixin::class.java,
+            Opptjening::class.java to OpptjeningMixin::class.java
         )
     )
     .setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE)

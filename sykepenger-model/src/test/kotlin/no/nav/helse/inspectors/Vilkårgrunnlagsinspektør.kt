@@ -114,10 +114,6 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         private set
     internal lateinit var sammenligningsgrunnlag: Sammenligningsgrunnlag
         private set
-    internal var antallOpptjeningsdagerErMinst by Delegates.notNull<Int>()
-        private set
-    internal var harOpptjening by Delegates.notNull<Boolean>()
-        private set
     internal lateinit var opptjening: Opptjening
         private set
     internal var meldingsreferanseId: UUID? = null
@@ -167,11 +163,6 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         this.sykepengegrunnlag = sykepengegrunnlag
         this.vilkårsgrunnlagId = vilkårsgrunnlagId
         this.type = "Infotrygd"
-    }
-
-    override fun preVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {
-        this.antallOpptjeningsdagerErMinst = opptjening.opptjeningsdager()
-        this.harOpptjening = opptjening.erOppfylt()
     }
 
     override fun preVisitSammenligningsgrunnlag(
