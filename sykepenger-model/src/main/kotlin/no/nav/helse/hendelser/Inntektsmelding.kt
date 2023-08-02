@@ -94,7 +94,10 @@ class Inntektsmelding(
         val periodeMellom = førsteFraværsdag?.let{
             arbeidsgiverperiode?.periodeMellom(it)
         }
-        if (periodeMellom != null && periodeMellom.count() >= 20) return Sykdomstidslinje()
+        if (periodeMellom != null && periodeMellom.count() >= 20) {
+            if (begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank() || !førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) return Sykdomstidslinje()
+            return Sykdomstidslinje.sykedagerNav(førsteFraværsdag, førsteFraværsdag, 100.prosent, kilde)
+        }
         val arbeidsdager = arbeidsgiverperiode?.let { Sykdomstidslinje.arbeidsdager(arbeidsgiverperiode, kilde) } ?: Sykdomstidslinje()
         val friskHelg = førsteFraværsdag
             ?.takeIf { arbeidsgiverperiode?.erRettFør(førsteFraværsdag) == true }
@@ -107,7 +110,7 @@ class Inntektsmelding(
     private val ignorerDager get(): Boolean {
         if (begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank()) return false
         if (begrunnelseForReduksjonEllerIkkeUtbetalt in ikkeStøttedeBegrunnelserForReduksjon) return true
-        if (arbeidsgiverperioder.size > 1) return true
+        if (arbeidsgiverperioder.size > 1 && !førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) return true
         return false
     }
 
@@ -159,7 +162,7 @@ class Inntektsmelding(
 
     internal fun skalValideresAv(periode: Periode) = overlappsperiode?.overlapperMed(periode) == true || ikkeUtbetaltAGPOgAGPOverlapper(periode)
 
-    private fun ikkeUtbetaltAGPOgAGPOverlapper(periode: Periode) = begrunnelseForReduksjonEllerIkkeUtbetalt != null && arbeidsgiverperioder.periode()?.overlapperMed(periode) == true
+    private fun ikkeUtbetaltAGPOgAGPOverlapper(periode: Periode) = !begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank() && arbeidsgiverperioder.periode()?.overlapperMed(periode) == true && !førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)
 
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
         if (!skalValideresAv(periode)) return this
@@ -167,7 +170,7 @@ class Inntektsmelding(
         if (harFlereInntektsmeldinger) varsel(RV_IM_22)
         if (begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank()) return this
         info("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s".format(begrunnelseForReduksjonEllerIkkeUtbetalt))
-        if (arbeidsgiverperioder.size > 1) funksjonellFeil(RV_IM_23)
+        if (arbeidsgiverperioder.size > 1 && !førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) funksjonellFeil(RV_IM_23)
         if (begrunnelseForReduksjonEllerIkkeUtbetalt in ikkeStøttedeBegrunnelserForReduksjon) funksjonellFeil(RV_IM_8)
         else varsel(RV_IM_8)
         return this

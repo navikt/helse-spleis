@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.overstyring
 import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
+import no.nav.helse.august
 import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -17,25 +18,32 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_23
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -53,6 +61,7 @@ import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
+import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.sykdomstidslinje.Dag
@@ -84,7 +93,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
 
         assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S?????? ?SSSSH", inspektør.sykdomstidslinje.toShortString())
 
-        val innteksmeldingId = håndterInntektsmelding(listOf(14.april til 14.april, 18.april til 2.mai), førsteFraværsdag = 22.mai, begrunnelseForReduksjonEllerIkkeUtbetalt = "EnBegrunnelse")
+        val innteksmeldingId = håndterInntektsmelding(listOf(14.april til 14.april, 18.april til 2.mai), begrunnelseForReduksjonEllerIkkeUtbetalt = "EnBegrunnelse")
 
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
         assertFunksjonellFeil(RV_IM_23, 1.vedtaksperiode.filter())
@@ -94,6 +103,31 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
         assertTrue(observatør.inntektsmeldingIkkeHåndtert.contains(innteksmeldingId))
+    }
+
+    @Test
+    fun `begrunnelse satt med første fraværsdag og hullete arbeidsgiverperiode kan behandles`() {
+        håndterSøknad(Sykdom(18.april, 30.april, 100.prosent))
+        håndterSøknad(Sykdom(1.mai, 14.mai, 100.prosent))
+        håndterInntektsmelding(listOf(14.april til 14.april, 18.april til 2.mai))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+        håndterSøknad(Sykdom(22.mai, 26.mai, 100.prosent))
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(14.april til 14.april, 18.april til 2.mai), førsteFraværsdag = 22.mai, begrunnelseForReduksjonEllerIkkeUtbetalt = "EnBegrunnelse")
+
+        assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S?????? ?NSSSH", inspektør.sykdomstidslinje.toShortString())
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertTilstander(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
     }
 
     @Test
@@ -108,7 +142,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
         assertEquals("SSSSSHH SSSSSHH SU???HH NSSSSHH SS", inspektør.sykdomstidslinje.toShortString())
-        assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
+        assertIngenVarsler(1.vedtaksperiode.filter())
         assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
     }
 
@@ -312,6 +346,35 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
     }
 
     @Test
+    fun `kort periode etter ferie uten sykdom`() {
+        nyttVedtak(1.juni, 30.juni)
+        håndterSøknad(Sykdom(1.august, 10.august, 100.prosent))
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(1.juni til 16.juni), førsteFraværsdag = 1.august, begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering")
+        assertTilstander(1.vedtaksperiode, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        assertIngenVarsler(1.vedtaksperiode.filter())
+        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+        assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `kort periode etter ferie uten sykdom med arbeidsgiverperioden spredt litt utover`() {
+        nyttVedtak(1.juni, 30.juni, arbeidsgiverperiode = listOf(
+            1.juni til 5.juni,
+            8.juni til 18.juni
+        ))
+        håndterSøknad(Sykdom(1.august, 10.august, 100.prosent))
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(1.juni til 5.juni, 8.juni til 18.juni), førsteFraværsdag = 1.august, begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering")
+        assertTilstander(1.vedtaksperiode, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        assertIngenVarsler(1.vedtaksperiode.filter())
+        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+        assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
+    }
+
+    @Test
     fun `Inntektsmelding med begrunnelseForReduksjonEllerIkkeUtbetalt må forkaste alle perioder med samme arbeidsgiverperiode`() {
         håndterSøknad(Sykdom(14.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent))
@@ -325,7 +388,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         assertEquals("UUUARR AAAAARH SSSSSHH SSSSS?? ??????? ???SSHH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
 
         nullstillTilstandsendringer()
-        håndterInntektsmelding(listOf(2.januar til 4.januar, 14.januar til 26.januar), førsteFraværsdag = 8.februar, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")
+        håndterInntektsmelding(listOf(2.januar til 4.januar, 14.januar til 26.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
