@@ -495,8 +495,6 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
-            forklaring: String?,
-            subsumsjon: Subsumsjon?,
             tidsstempel: LocalDateTime
         ) {
             val skjønnsmessigFastsattInntekt = InntektBuilder(beløp).build()

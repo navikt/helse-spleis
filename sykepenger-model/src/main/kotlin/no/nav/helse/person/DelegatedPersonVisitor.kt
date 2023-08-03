@@ -940,11 +940,9 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
-        forklaring: String?,
-        subsumsjon: Subsumsjon?,
         tidsstempel: LocalDateTime
     ) {
-        delegatee.preVisitSkjønnsmessigFastsatt(saksbehandler, id, dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
+        delegatee.preVisitSkjønnsmessigFastsatt(saksbehandler, id, dato, hendelseId, beløp, tidsstempel)
     }
 
     override fun postVisitSkjønnsmessigFastsatt(
@@ -953,11 +951,9 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
-        forklaring: String?,
-        subsumsjon: Subsumsjon?,
         tidsstempel: LocalDateTime
     ) {
-        delegatee.postVisitSkjønnsmessigFastsatt(saksbehandler, id, dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
+        delegatee.postVisitSkjønnsmessigFastsatt(saksbehandler, id, dato, hendelseId, beløp, tidsstempel)
     }
 
     override fun visitInntektsmelding(

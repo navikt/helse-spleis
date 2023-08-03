@@ -1051,8 +1051,6 @@ internal class JsonBuilder : AbstractBuilder() {
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
-            forklaring: String?,
-            subsumsjon: Subsumsjon?,
             tidsstempel: LocalDateTime
         ) {
             pushState(SkjønnsmessigFastsattInntektState(id) { inntektsopplysning -> tilstand.lagreInntekt(this, inntektsopplysning) })
@@ -1203,8 +1201,6 @@ internal class JsonBuilder : AbstractBuilder() {
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
-            forklaring: String?,
-            subsumsjon: Subsumsjon?,
             tidsstempel: LocalDateTime
         ) {
             lagreId(id)
@@ -1313,8 +1309,6 @@ internal class JsonBuilder : AbstractBuilder() {
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
-            forklaring: String?,
-            subsumsjon: Subsumsjon?,
             tidsstempel: LocalDateTime
         ) {
             lagreId(id)
@@ -1339,8 +1333,6 @@ internal class JsonBuilder : AbstractBuilder() {
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
-            forklaring: String?,
-            subsumsjon: Subsumsjon?,
             tidsstempel: LocalDateTime
         ) {
             if (id != skjønnsmessigFastsattId) return
@@ -1351,14 +1343,6 @@ internal class JsonBuilder : AbstractBuilder() {
                 "hendelseId" to hendelseId,
                 "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
                 "kilde" to Inntektsopplysningskilde.SKJØNNSMESSIG_FASTSATT,
-                "forklaring" to forklaring,
-                "subsumsjon" to subsumsjon?.let {
-                    mapOf(
-                        "paragraf" to subsumsjon.paragraf,
-                        "ledd" to subsumsjon.ledd,
-                        "bokstav" to subsumsjon.bokstav
-                    )
-                },
                 "tidsstempel" to tidsstempel
             )
             lagreInntekt(inntektDetaljer)
