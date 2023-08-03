@@ -74,4 +74,6 @@ spec:
     value: "spleis"
   - name: FORENKLE_REVURDERING
     value: "false"
+  - name: AVVIKSAKER
+    value: "true"
 
