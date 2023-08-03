@@ -564,11 +564,13 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `overstyring av andre ytelser`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterOverstyrTidslinje((17.januar til 19.januar).map { manuellForeldrepengedag(it) })
-        assertEquals("SSSSSHH SSSSSHH SSYYYHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        håndterOverstyrTidslinje((20.januar til 31.januar).map { manuellForeldrepengedag(it) })
+        assertEquals("SSSSSHH SSSSSHH SSSSSYY YYYYYYY YYY", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         håndterYtelser(1.vedtaksperiode)
         assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+        val utbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør
+        assertEquals(12, utbetalingstidslinje.avvistDagTeller)
     }
 
     private fun assertSykdomstidslinjedag(dato: LocalDate, dagtype: KClass<out Dag>, kommerFra: KClass<out SykdomstidslinjeHendelse>) {
