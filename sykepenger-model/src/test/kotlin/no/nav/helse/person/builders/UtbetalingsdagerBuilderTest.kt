@@ -52,7 +52,7 @@ internal class UtbetalingsdagerBuilderTest {
                 Utbetalingsdag(4.januar, Arbeidsdag),
                 Utbetalingsdag(5.januar, Fridag),
                 Utbetalingsdag(6.januar, ForeldetDag),
-                Utbetalingsdag(7.januar, AvvistDag, listOf(BegrunnelseDTO.SykepengedagerOppbrukt))
+                Utbetalingsdag(7.januar, AvvistDag, listOf(Utbetalingsdag.EksternBegrunnelseDTO.SykepengedagerOppbrukt))
             ), builder.result()
         )
     }

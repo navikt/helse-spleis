@@ -769,52 +769,31 @@ internal data class PersonData(
                 private val hendelseskilde get() = kilde.parseKilde()
 
                 internal fun parseDag(dato: LocalDate): Dag = when (type) {
-                    JsonDagType.ARBEIDSDAG -> Dag.Arbeidsdag(
-                        dato,
-                        hendelseskilde
-                    )
+                    JsonDagType.ARBEIDSDAG -> Dag.Arbeidsdag(dato, hendelseskilde)
                     JsonDagType.ARBEIDSGIVERDAG -> if (dato.erHelg()) {
                         Dag.ArbeidsgiverHelgedag(dato, økonomi, hendelseskilde)
                     } else {
                         Dag.Arbeidsgiverdag(dato, økonomi, hendelseskilde)
                     }
-                    JsonDagType.FERIEDAG -> Dag.Feriedag(
-                        dato,
-                        hendelseskilde
-                    )
-                    JsonDagType.FERIE_UTEN_SYKMELDINGDAG -> Dag.FerieUtenSykmeldingDag(
-                        dato,
-                        hendelseskilde
-                    )
-                    JsonDagType.FRISK_HELGEDAG -> Dag.FriskHelgedag(
-                        dato,
-                        hendelseskilde
-                    )
-                    JsonDagType.FORELDET_SYKEDAG -> Dag.ForeldetSykedag(
-                        dato,
-                        økonomi,
-                        hendelseskilde
-                    )
-                    JsonDagType.PERMISJONSDAG -> Dag.Permisjonsdag(
-                        dato,
-                        hendelseskilde
-                    )
-                    JsonDagType.PROBLEMDAG -> Dag.ProblemDag(
-                        dato,
-                        hendelseskilde,
-                        other!!.parseKilde(),
-                        melding!!
-                    )
+                    JsonDagType.FERIEDAG -> Dag.Feriedag(dato, hendelseskilde)
+                    JsonDagType.FERIE_UTEN_SYKMELDINGDAG -> Dag.FerieUtenSykmeldingDag(dato, hendelseskilde)
+                    JsonDagType.FRISK_HELGEDAG -> Dag.FriskHelgedag(dato, hendelseskilde)
+                    JsonDagType.FORELDET_SYKEDAG -> Dag.ForeldetSykedag(dato, økonomi, hendelseskilde)
+                    JsonDagType.PERMISJONSDAG -> Dag.Permisjonsdag(dato, hendelseskilde)
+                    JsonDagType.PROBLEMDAG -> Dag.ProblemDag(dato, hendelseskilde, other!!.parseKilde(), melding!!)
                     JsonDagType.SYKEDAG -> if (dato.erHelg()) {
                         Dag.SykHelgedag(dato, økonomi, hendelseskilde)
                     } else {
                         Dag.Sykedag(dato, økonomi, hendelseskilde)
                     }
-                    JsonDagType.SYKEDAG_NAV -> Dag.SykedagNav(
-                        dato,
-                        økonomi,
-                        hendelseskilde
-                    )
+                    JsonDagType.SYKEDAG_NAV -> Dag.SykedagNav(dato, økonomi, hendelseskilde)
+                    JsonDagType.ANDRE_YTELSER_FORELDREPENGER -> Dag.AndreYtelser(dato, hendelseskilde, Dag.AndreYtelser.AnnenYtelse.Foreldrepenger)
+                    JsonDagType.ANDRE_YTELSER_AAP -> Dag.AndreYtelser(dato, hendelseskilde, Dag.AndreYtelser.AnnenYtelse.AAP)
+                    JsonDagType.ANDRE_YTELSER_OMSORGSPENGER -> Dag.AndreYtelser(dato, hendelseskilde, Dag.AndreYtelser.AnnenYtelse.Omsorgspenger)
+                    JsonDagType.ANDRE_YTELSER_PLEIEPENGER -> Dag.AndreYtelser(dato, hendelseskilde, Dag.AndreYtelser.AnnenYtelse.Pleiepenger)
+                    JsonDagType.ANDRE_YTELSER_SVANGERSKAPSPENGER -> Dag.AndreYtelser(dato, hendelseskilde, Dag.AndreYtelser.AnnenYtelse.Svangerskapspenger)
+                    JsonDagType.ANDRE_YTELSER_OPPLÆRINGSPENGER -> Dag.AndreYtelser(dato, hendelseskilde, Dag.AndreYtelser.AnnenYtelse.Opplæringspenger)
+                    JsonDagType.ANDRE_YTELSER_DAGPENGER -> Dag.AndreYtelser(dato, hendelseskilde, Dag.AndreYtelser.AnnenYtelse.Dagpenger)
                     JsonDagType.UKJENT_DAG -> throw IllegalStateException("Deserialisering av $type er ikke støttet")
                 }
             }
@@ -831,6 +810,13 @@ internal data class PersonData(
                 PROBLEMDAG,
                 SYKEDAG,
                 SYKEDAG_NAV,
+                ANDRE_YTELSER_FORELDREPENGER,
+                ANDRE_YTELSER_AAP,
+                ANDRE_YTELSER_OMSORGSPENGER,
+                ANDRE_YTELSER_PLEIEPENGER,
+                ANDRE_YTELSER_SVANGERSKAPSPENGER,
+                ANDRE_YTELSER_OPPLÆRINGSPENGER,
+                ANDRE_YTELSER_DAGPENGER,
 
                 UKJENT_DAG
             }
@@ -1330,6 +1316,7 @@ internal data class PersonData(
             MinimumInntekt,
             MinimumInntektOver67,
             EgenmeldingUtenforArbeidsgiverperiode,
+            AndreYtelser,
             MinimumSykdomsgrad,
             EtterDødsdato,
             ManglerMedlemskap,
@@ -1342,6 +1329,7 @@ internal data class PersonData(
                 SykepengedagerOppbruktOver67 -> Begrunnelse.SykepengedagerOppbruktOver67
                 MinimumSykdomsgrad -> Begrunnelse.MinimumSykdomsgrad
                 EgenmeldingUtenforArbeidsgiverperiode -> Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
+                AndreYtelser -> Begrunnelse.AndreYtelser
                 MinimumInntekt -> Begrunnelse.MinimumInntekt
                 MinimumInntektOver67 -> Begrunnelse.MinimumInntektOver67
                 EtterDødsdato -> Begrunnelse.EtterDødsdato
@@ -1357,6 +1345,7 @@ internal data class PersonData(
                     is Begrunnelse.SykepengedagerOppbruktOver67 -> SykepengedagerOppbruktOver67
                     is Begrunnelse.MinimumSykdomsgrad -> MinimumSykdomsgrad
                     is Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode -> EgenmeldingUtenforArbeidsgiverperiode
+                    is Begrunnelse.AndreYtelser -> AndreYtelser
                     is Begrunnelse.MinimumInntekt -> MinimumInntekt
                     is Begrunnelse.MinimumInntektOver67 -> MinimumInntektOver67
                     is Begrunnelse.EtterDødsdato -> EtterDødsdato

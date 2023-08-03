@@ -40,20 +40,12 @@ import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSDAG
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FERIEDAG
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FERIE_UTEN_SYKMELDINGDAG
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FORELDET_SYKEDAG
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FRISK_HELGEDAG
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PERMISJONSDAG
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PROBLEMDAG
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG_NAV
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.*
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.api.BuilderState
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.*
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -1950,6 +1942,25 @@ internal class JsonBuilder : AbstractBuilder() {
             other: Hendelseskilde?,
             melding: String
         ) = leggTilDag(dato, DagJsonBuilder(PROBLEMDAG, kilde).annenKilde(other).melding(melding))
+
+        override fun visitDag(
+            dag: Dag.AndreYtelser,
+            dato: LocalDate,
+            kilde: Hendelseskilde,
+            ytelse: Dag.AndreYtelser.AnnenYtelse
+        ) {
+            leggTilDag(dato, DagJsonBuilder(
+                when (ytelse) {
+                    Foreldrepenger -> ANDRE_YTELSER_FORELDREPENGER
+                    AAP -> ANDRE_YTELSER_AAP
+                    Omsorgspenger -> ANDRE_YTELSER_OMSORGSPENGER
+                    Pleiepenger -> ANDRE_YTELSER_PLEIEPENGER
+                    Svangerskapspenger -> ANDRE_YTELSER_SVANGERSKAPSPENGER
+                    Opplæringspenger -> ANDRE_YTELSER_OPPLÆRINGSPENGER
+                    Dagpenger -> ANDRE_YTELSER_DAGPENGER
+                }, kilde
+            ))
+        }
 
         private fun leggTilDag(dato: LocalDate, builder: DagJsonBuilder) {
             dateRanges.plus(dato, builder.build())

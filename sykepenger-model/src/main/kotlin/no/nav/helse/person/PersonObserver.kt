@@ -12,6 +12,7 @@ import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Prosentdel
 
 interface PersonObserver : SykefraværstilfelleeventyrObserver {
@@ -257,7 +258,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     data class Utbetalingsdag(
         val dato: LocalDate,
         val type: Dagtype,
-        val begrunnelser: List<BegrunnelseDTO>? = null
+        val begrunnelser: List<EksternBegrunnelseDTO>? = null
     ) {
         enum class Dagtype {
             ArbeidsgiverperiodeDag,
@@ -270,6 +271,37 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
             ForeldetDag,
             Permisjonsdag,
             Feriedag
+        }
+
+        enum class EksternBegrunnelseDTO {
+            SykepengedagerOppbrukt,
+            SykepengedagerOppbruktOver67,
+            MinimumInntekt,
+            MinimumInntektOver67,
+            EgenmeldingUtenforArbeidsgiverperiode,
+            // TODO: legg til denne når Flex/spre-gosys forstår seg på den: AndreYtelser,
+            MinimumSykdomsgrad,
+            EtterDødsdato,
+            ManglerMedlemskap,
+            ManglerOpptjening,
+            Over70;
+
+            internal companion object {
+                fun fraBegrunnelse(begrunnelse: Begrunnelse) = when (begrunnelse) {
+                    is Begrunnelse.SykepengedagerOppbrukt -> SykepengedagerOppbrukt
+                    is Begrunnelse.SykepengedagerOppbruktOver67 -> SykepengedagerOppbruktOver67
+                    is Begrunnelse.MinimumSykdomsgrad -> MinimumSykdomsgrad
+                    is Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode -> EgenmeldingUtenforArbeidsgiverperiode
+                    is Begrunnelse.MinimumInntekt -> MinimumInntekt
+                    is Begrunnelse.MinimumInntektOver67 -> MinimumInntektOver67
+                    is Begrunnelse.EtterDødsdato -> EtterDødsdato
+                    is Begrunnelse.ManglerMedlemskap -> ManglerMedlemskap
+                    is Begrunnelse.ManglerOpptjening -> ManglerOpptjening
+                    is Begrunnelse.Over70 -> Over70
+                    is Begrunnelse.AndreYtelser -> EgenmeldingUtenforArbeidsgiverperiode // TODO: erstatte med: AndreYtelser
+                    is Begrunnelse.NyVilkårsprøvingNødvendig -> SykepengedagerOppbrukt // TODO: Map til NyVilkårsprøvingNødvendig
+                }
+            }
         }
     }
 

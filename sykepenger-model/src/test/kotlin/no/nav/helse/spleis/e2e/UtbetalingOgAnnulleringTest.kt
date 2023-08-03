@@ -23,7 +23,6 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -379,7 +378,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         assertEquals(1, observatør.utbetalingMedUtbetalingEventer.size)
         assertEquals(7, avvisteDager.size)
         assertEquals(23, ikkeAvvisteDager.size)
-        assertTrue(avvisteDager.all { it.begrunnelser == listOf(BegrunnelseDTO.MinimumSykdomsgrad) })
+        assertTrue(avvisteDager.all { it.begrunnelser == listOf(PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.MinimumSykdomsgrad) })
         assertTrue(ikkeAvvisteDager.all { it.begrunnelser == null })
     }
 }

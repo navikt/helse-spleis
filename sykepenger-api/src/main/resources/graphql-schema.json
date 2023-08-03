@@ -5143,6 +5143,11 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "AndreYtelser",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "Avslatt",
           "description" : null,
           "isDeprecated" : false,
@@ -5266,6 +5271,11 @@
           "deprecationReason" : null
         }, {
           "name" : "EgenmeldingUtenforArbeidsgiverperiode",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "AndreYtelser",
           "description" : null,
           "isDeprecated" : false,
           "deprecationReason" : null

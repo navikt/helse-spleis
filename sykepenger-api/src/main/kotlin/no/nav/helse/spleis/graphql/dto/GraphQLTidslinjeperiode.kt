@@ -29,6 +29,7 @@ enum class GraphQLSykdomsdagtype {
     Sykedag,
     SykHelgedag,
     Ubestemtdag,
+    AndreYtelser,
     Avslatt
 }
 
@@ -58,6 +59,7 @@ enum class GraphQLBegrunnelse {
     MinimumInntekt,
     MinimumInntektOver67,
     EgenmeldingUtenforArbeidsgiverperiode,
+    AndreYtelser,
     MinimumSykdomsgrad,
     EtterDodsdato,
     ManglerMedlemskap,
