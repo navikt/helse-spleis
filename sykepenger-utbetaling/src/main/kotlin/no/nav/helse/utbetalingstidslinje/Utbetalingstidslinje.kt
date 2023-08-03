@@ -214,6 +214,7 @@ sealed class Begrunnelse {
     object MinimumInntekt : Begrunnelse()
     object MinimumInntektOver67 : Begrunnelse()
     object EgenmeldingUtenforArbeidsgiverperiode : Begrunnelse()
+    object AndreYtelser : Begrunnelse()
     object MinimumSykdomsgrad : Begrunnelse()
     object EtterDødsdato : Begrunnelse()
     object Over70 : Begrunnelse()

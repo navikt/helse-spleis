@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -20,7 +19,7 @@ internal class IkkeUtbetaltDagDokumentTypeTest {
             "EtterDødsdato",
             "Over70",
         )
-        BegrunnelseDTO.values().forEach { begrunnelse ->
+        PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.values().forEach { begrunnelse ->
             assertTrue(begrunnelserSomSpreGosysKjennerTil.contains(begrunnelse.name)) {
                 """
 

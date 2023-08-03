@@ -129,6 +129,13 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
         leggTilDag(dag, dato, null, kilde)
 
     override fun visitDag(
+        dag: Dag.AndreYtelser,
+        dato: LocalDate,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde,
+        ytelse: Dag.AndreYtelser.AnnenYtelse
+    ) = leggTilDag(dag, dato, null, kilde)
+
+    override fun visitDag(
         dag: Dag.ProblemDag,
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde,

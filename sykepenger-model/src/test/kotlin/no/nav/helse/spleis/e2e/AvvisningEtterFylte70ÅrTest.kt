@@ -16,7 +16,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
-import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -91,7 +90,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
 
         assertEquals(3, avvisteDager.size)
         assertEquals(16 + 16, arbeidsgiverperiodedager.size)
-        assertTrue(avvisteDager.all { it.begrunnelser == listOf(BegrunnelseDTO.Over70) })
+        assertTrue(avvisteDager.all { it.begrunnelser == listOf(PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.Over70) })
         assertTrue(arbeidsgiverperiodedager.all { it.begrunnelser == null })
     }
 

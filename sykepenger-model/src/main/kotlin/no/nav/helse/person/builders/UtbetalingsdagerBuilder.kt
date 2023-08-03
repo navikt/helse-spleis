@@ -2,7 +2,6 @@ package no.nav.helse.person.builders
 
 import java.time.LocalDate
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
@@ -49,7 +48,7 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
 
     override fun visit(dag: Utbetalingsdag.AvvistDag, dato: LocalDate, økonomi: Økonomi) {
         utbetalingsdager.add(PersonObserver.Utbetalingsdag(dato, PersonObserver.Utbetalingsdag.Dagtype.AvvistDag, dag.begrunnelser.map {
-            BegrunnelseDTO.fraBegrunnelse(it)
+            PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.fraBegrunnelse(it)
         }))
     }
 

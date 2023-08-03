@@ -85,6 +85,7 @@ private fun mapDag(dag: SammenslåttDag) = GraphQLDag(
         SykdomstidslinjedagType.PERMISJONSDAG -> GraphQLSykdomsdagtype.Permisjonsdag
         SykdomstidslinjedagType.SYKEDAG -> GraphQLSykdomsdagtype.Sykedag
         SykdomstidslinjedagType.SYK_HELGEDAG -> GraphQLSykdomsdagtype.SykHelgedag
+        SykdomstidslinjedagType.ANDRE_YTELSER -> GraphQLSykdomsdagtype.AndreYtelser
         SykdomstidslinjedagType.UBESTEMTDAG -> GraphQLSykdomsdagtype.Ubestemtdag
     },
     utbetalingsdagtype = when (dag.utbetalingstidslinjedagtype) {
@@ -126,6 +127,7 @@ private fun mapDag(dag: SammenslåttDag) = GraphQLDag(
             BegrunnelseDTO.MinimumInntekt -> GraphQLBegrunnelse.MinimumInntekt
             BegrunnelseDTO.MinimumInntektOver67 -> GraphQLBegrunnelse.MinimumInntektOver67
             BegrunnelseDTO.EgenmeldingUtenforArbeidsgiverperiode -> GraphQLBegrunnelse.EgenmeldingUtenforArbeidsgiverperiode
+            BegrunnelseDTO.AndreYtelser -> GraphQLBegrunnelse.AndreYtelser
             BegrunnelseDTO.MinimumSykdomsgrad -> GraphQLBegrunnelse.MinimumSykdomsgrad
             BegrunnelseDTO.EtterDødsdato -> GraphQLBegrunnelse.EtterDodsdato
             BegrunnelseDTO.ManglerMedlemskap -> GraphQLBegrunnelse.ManglerMedlemskap
