@@ -25,6 +25,7 @@ import no.nav.helse.testhelpers.PROBLEM
 import no.nav.helse.testhelpers.R
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.U
+import no.nav.helse.testhelpers.Y
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
@@ -222,7 +223,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `ferie og permisjon med i arbeidsgiverperioden`() {
-        undersøkeLike({ 6.S + 6.F + 6.S }, { 6.S + 6.P + 6.S }, { 6.S + 6.J + 6.S }) {
+        undersøkeLike({ 6.S + 6.F + 6.S }, { 6.S + 6.P + 6.S }, { 6.S + 6.J + 6.S }, { 6.S + 6.Y + 6.S }) {
             assertEquals(18, inspektør.size)
             assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
             assertEquals(2, inspektør.navDagTeller)
@@ -233,7 +234,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `ferie og permisjon fullfører arbeidsgiverperioden`() {
-        undersøkeLike({ 1.S + 15.F + 6.S }, { 1.S + 15.P + 6.S }, { 1.S + 15.J + 6.S }) {
+        undersøkeLike({ 1.S + 15.F + 6.S }, { 1.S + 15.P + 6.S }, { 1.S + 15.J + 6.S }, { 1.S + 15.Y + 6.S }) {
             assertEquals(22, inspektør.size)
             assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
             assertEquals(4, inspektør.navDagTeller)
@@ -252,6 +253,39 @@ internal class UtbetalingstidslinjeBuilderTest {
             assertEquals(1, perioder.size)
             assertEquals(1.januar til 16.januar, perioder.first())
         }
+    }
+
+    @Test
+    fun `andre ytelser etter utbetaling`() {
+        undersøke(16.S + 15.Y)
+        assertEquals(31, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(15, inspektør.avvistDagTeller)
+        assertEquals(1, perioder.size)
+        assertEquals(1.januar til 16.januar, perioder.first())
+    }
+
+    @Test
+    fun `andre ytelser umiddelbart etter utbetaling teller ikke som opphold`() {
+        undersøke(16.S + 16.Y + 10.S)
+        assertEquals(42, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(16, inspektør.avvistDagTeller)
+        assertEquals(1, perioder.size)
+        assertEquals(1.januar til 16.januar, perioder.first())
+    }
+
+    @Test
+    fun `andre ytelser umiddelbart etter utbetaling teller ikke som opphold hvis etterfølgt av arbeidsdag`() {
+        undersøke(16.S + 15.Y + 1.A + 10.S)
+        assertEquals(42, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(6, inspektør.navDagTeller)
+        assertEquals(4, inspektør.navHelgDagTeller)
+        assertEquals(15, inspektør.avvistDagTeller)
+        assertEquals(1, inspektør.arbeidsdagTeller)
+        assertEquals(1, perioder.size)
+        assertEquals(1.januar til 16.januar, perioder.first())
     }
 
     @Test
