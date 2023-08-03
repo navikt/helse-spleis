@@ -21,6 +21,7 @@ import no.nav.helse.serde.api.dto.SøknadArbeidsgiverDTO
 import no.nav.helse.serde.api.dto.SøknadNavDTO
 import no.nav.helse.serde.api.dto.Tidslinjeperiode
 import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
+import no.nav.helse.serde.api.dto.UberegnetVilkårsprøvdPeriode
 import no.nav.helse.serde.api.dto.Utbetaling
 import no.nav.helse.serde.api.dto.Utbetalingstatus
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
@@ -58,6 +59,7 @@ import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagtype
 import no.nav.helse.spleis.graphql.dto.GraphQLSykepengegrunnlagsgrense
 import no.nav.helse.spleis.graphql.dto.GraphQLSykmelding
 import no.nav.helse.spleis.graphql.dto.GraphQLUberegnetPeriode
+import no.nav.helse.spleis.graphql.dto.GraphQLUberegnetVilkarsprovdPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetaling
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingsdagType
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingsinfo
@@ -302,7 +304,7 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
             periodetilstand = mapTilstand(periode.periodetilstand),
             vilkarsgrunnlagId = periode.vilkårsgrunnlagId
         )
-/*        is UberegnetVilkårsprøvdPeriode -> GraphQLUberegnetVilkarsprovdPeriode(
+        is UberegnetVilkårsprøvdPeriode -> GraphQLUberegnetVilkarsprovdPeriode(
             fom = periode.fom,
             tom = periode.tom,
             tidslinje = periode.sammenslåttTidslinje.map { mapDag(it) },
@@ -315,7 +317,7 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
             skjaeringstidspunkt = periode.skjæringstidspunkt,
             hendelser = periode.hendelser.map { mapHendelse(it) },
             vilkarsgrunnlagId = periode.vilkårsgrunnlagId
-        )*/
+        )
         else -> GraphQLUberegnetPeriode(
             fom = periode.fom,
             tom = periode.tom,
