@@ -113,6 +113,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad som delvis overlapper`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_10
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_33
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_36
@@ -2484,6 +2485,25 @@ internal class Vedtaksperiode private constructor(
             if (!påminnelse.skalReberegnes()) return
             påminnelse.info("Reberegner vedtaksperiode")
             vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.reberegning(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
+            if (Toggle.RevurdereAgpFraIm.enabled) {
+                dager.valider(vedtaksperiode.periode)
+                if (dager.harFunksjonelleFeilEllerVerre()) {
+                    vedtaksperiode.forkast(dager)
+                    return
+                }
+                val gammelAgp = vedtaksperiode.finnArbeidsgiverperiode()
+                vedtaksperiode.låsOpp()
+                vedtaksperiode.håndterDager(dager)
+                vedtaksperiode.lås()
+                val nyAgp = vedtaksperiode.finnArbeidsgiverperiode()
+                if (gammelAgp != nyAgp) dager.varsel(RV_IM_24, "Inntektsmeldingen ville påvirket sykdomstidslinjen i ${type.name}")
+                vedtaksperiode.person.igangsettOverstyring(dager, Revurderingseventyr.korrigertInntektsmelding(skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt, endringsdato = vedtaksperiode.skjæringstidspunkt))
+            } else {
+                super.håndter(vedtaksperiode, dager)
+            }
         }
     }
 
