@@ -221,14 +221,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val annullertAvSaksbehandler: LocalDateTime,
         val saksbehandlerEpost: String,
         val saksbehandlerIdent: String
-    ) {
-        init {
-            require(arbeidsgiverFagsystemId != null || personFagsystemId != null) {
-                "Enten arbeidsgiverFagsystemId eller personfagsystemId må være satt"
-            }
-        }
-    }
-
+    )
     data class UtbetalingEndretEvent(
         val organisasjonsnummer: String,
         val utbetalingId: UUID,
