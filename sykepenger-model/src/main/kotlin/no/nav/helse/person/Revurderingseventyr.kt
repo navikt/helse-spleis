@@ -71,8 +71,7 @@ class Revurderingseventyr private constructor(
 
     internal fun kanIgangsetteOverstyringIAvventerInntektsmelding(hendelse: IAktivitetslogg) =
         hvorfor.kanIgangsetteOverstyringIAvventerInntektsmelding().also {
-            hendelse.info("Igangsetter ikke overstyring i AvventerInntektsmelding grunnet ${hvorfor::class.simpleName}")
-        }
+            if (!it) hendelse.info("Igangsetter ikke overstyring i AvventerInntektsmelding grunnet ${hvorfor::class.simpleName}") }
 
     private enum class TypeEndring {
         ENDRING,
