@@ -113,6 +113,14 @@ internal val Int.J
         SykdomstidslinjeHendelse.Hendelseskilde.INGEN
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
+internal val Int.Y
+    get() = Sykdomstidslinje.andreYtelsedager(
+        dagensDato,
+        dagensDato.plusDays(this.toLong() - 1),
+        SykdomstidslinjeHendelse.Hendelseskilde.INGEN,
+        Dag.AndreYtelser.AnnenYtelse.Foreldrepenger
+    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+
 internal val Int.H
     get() = Sykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
