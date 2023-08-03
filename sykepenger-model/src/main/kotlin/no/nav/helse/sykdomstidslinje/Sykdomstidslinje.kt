@@ -195,21 +195,21 @@ internal class Sykdomstidslinje private constructor(
     internal fun erRettFør(other: Sykdomstidslinje): Boolean {
         return this.sisteDag().erRettFør(other.førsteDag()) && !this.erSisteDagArbeidsdag() && !other.erFørsteDagArbeidsdag()
     }
-    private fun erFørsteDagArbeidsdag() = this.dager.keys.firstOrNull()?.let(::erArbeidsdag) ?: true
-    private fun erSisteDagArbeidsdag() = this.dager.keys.lastOrNull()?.let(::erArbeidsdag) ?: true
+    private fun erFørsteDagArbeidsdag() = this.dager.keys.firstOrNull()?.let(::erOppholdsdagtype) ?: true
+    private fun erSisteDagArbeidsdag() = this.dager.keys.lastOrNull()?.let(::erOppholdsdagtype) ?: true
 
     private fun sisteOppholdsdag() = periode?.lastOrNull { erOppholdsdag(it) }
     private fun førsteOppholdsdag(etter: LocalDate) = periode?.firstOrNull { it > etter && erOppholdsdag(it) }
     private fun sisteOppholdsdag(før: LocalDate) = periode?.filter { erOppholdsdag(it) }?.lastOrNull { it.isBefore(før) }
 
     private fun erOppholdsdag(dato: LocalDate): Boolean {
-        if (erArbeidsdag(dato)) return true
+        if (erOppholdsdagtype(dato)) return true
         if (this[dato] !is UkjentDag) return false
         return !erGyldigHelgegap(dato)
     }
 
-    private fun erArbeidsdag(dato: LocalDate) =
-        this[dato] is Arbeidsdag || this[dato] is FriskHelgedag || this[dato] is FerieUtenSykmeldingDag
+    private fun erOppholdsdagtype(dato: LocalDate) =
+        this[dato] is Arbeidsdag || this[dato] is FriskHelgedag || this[dato] is FerieUtenSykmeldingDag || this[dato] is AndreYtelser
 
     private fun erGyldigHelgegap(dato: LocalDate): Boolean {
         if (!dato.erHelg()) return false
