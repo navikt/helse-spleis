@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.brukerutbetaling
 
+import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -102,6 +103,37 @@ internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `starter med refusjon, så korrigeres refusjonen til ingenting`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(AKSEPTERT)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(
+            INNTEKT, 31.januar))
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(AKSEPTERT)
+
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(AKSEPTERT)
+
+        assertFalse(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.harUtbetalinger())
+        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag))
+        assertTrue(inspektør.utbetaling(2).inspektør.personOppdrag.harUtbetalinger())
+        assertEquals(1.februar til 28.februar, Oppdrag.periode(inspektør.utbetaling(2).inspektør.personOppdrag))
+    }
+
+    @Test
+    fun `starter med refusjon, så korrigeres refusjonen til ingenting med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)

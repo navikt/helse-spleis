@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
@@ -1349,6 +1350,98 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
     @Test
     fun `To arbeidsgivere med ulik fom i samme måned - med en tidligere periode i samme måned - andre vedtaksperiode velger IM for egen første fraværsdag`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar, 18.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 18.januar, 100.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+
+        val sammenligningsgrunnlag = Inntektsvurdering(
+            listOf(
+                sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
+                sammenligningsgrunnlag(a2, 1.januar, 32000.månedlig.repeat(12))
+            )
+        )
+        val sykepengegrunnlag = InntektForSykepengegrunnlag(
+            inntekter = listOf(
+                grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                grunnlag(a2, 1.januar, INNTEKT.repeat(3))
+            ), arbeidsforhold = emptyList()
+        )
+
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurdering = sammenligningsgrunnlag,
+            inntektsvurderingForSykepengegrunnlag = sykepengegrunnlag,
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar), orgnummer = a2)
+        håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 21.januar, orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 22.januar, beregnetInntekt = 32000.månedlig, orgnummer = a2)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        håndterVilkårsgrunnlag(
+            2.vedtaksperiode,
+            inntektsvurdering = sammenligningsgrunnlag,
+            inntektsvurderingForSykepengegrunnlag = sykepengegrunnlag,
+            orgnummer = a1
+        )
+
+        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(2.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
+        val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+        val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag.inspektør
+
+        assertEquals(756000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+        assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+        assertEquals(756000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+        assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
+        assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(2.vedtaksperiode))
+        assertEquals(0, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
+        assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+            assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
+            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+        }
+        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+            assertEquals(32000.månedlig, it.inntektsopplysning.inspektør.beløp)
+            assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
+        }
+
+        assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+        sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+            assertEquals(31000.månedlig, it.rapportertInntekt)
+        }
+        sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+            assertEquals(32000.månedlig, it.rapportertInntekt)
+        }
+    }
+
+
+    @Test
+    fun `To arbeidsgivere med ulik fom i samme måned - med en tidligere periode i samme måned - andre vedtaksperiode velger IM for egen første fraværsdag med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 18.januar, 100.prosent), orgnummer = a1)

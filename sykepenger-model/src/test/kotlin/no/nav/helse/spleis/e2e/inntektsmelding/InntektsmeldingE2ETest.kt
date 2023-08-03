@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
@@ -562,6 +563,61 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(21.november(2020), 10.desember(2020)))
         håndterSøknad(Sykdom(21.november(2020), 10.desember(2020), 100.prosent))
 
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterYtelser(2.vedtaksperiode)
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
+        )
+    }
+
+    @Test
+    fun `Opphør i refusjon som overlapper med senere periode med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
+        håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020)))
+        håndterSøknad(Sykdom(1.november(2020), 20.november(2020), 100.prosent))
+        håndterInntektsmelding(
+            listOf(Periode(1.november(2020), 16.november(2020))),
+            førsteFraværsdag = 1.november(2020)
+        )
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioderForSammenligningsgrunnlag {
+                1.november(2019) til 1.oktober(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt()
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+
+        håndterInntektsmelding(
+            listOf(Periode(1.november(2020), 16.november(2020))),
+            førsteFraværsdag = 1.november(2020), refusjon = Refusjon(INNTEKT, 6.desember(2020), emptyList())
+        )
+
+        håndterSykmelding(Sykmeldingsperiode(21.november(2020), 10.desember(2020)))
+        håndterSøknad(Sykdom(21.november(2020), 10.desember(2020), 100.prosent))
+
         håndterYtelser(2.vedtaksperiode)
         assertTilstander(
             2.vedtaksperiode,
@@ -574,6 +630,57 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Opphør i refusjon som ikke overlapper med senere periode fører ikke til at perioden forkastes`() {
+        håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020)))
+        håndterSøknad(Sykdom(1.november(2020), 20.november(2020), 100.prosent))
+        håndterInntektsmelding(
+            listOf(Periode(1.november(2020), 16.november(2020))),
+            førsteFraværsdag = 1.november(2020)
+        )
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioderForSammenligningsgrunnlag {
+                1.november(2019) til 1.oktober(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt()
+
+        håndterSykmelding(Sykmeldingsperiode(25.november(2020), 10.desember(2020)))
+        håndterSøknad(Sykdom(25.november(2020), 10.desember(2020), 100.prosent))
+        håndterInntektsmelding(
+            listOf(Periode(1.november(2020), 16.november(2020))),
+            førsteFraværsdag = 1.november(2020), refusjon = Refusjon(INNTEKT, 6.desember(2020), emptyList())
+        )
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING
+        )
+    }
+
+    @Test
+    fun `Opphør i refusjon som ikke overlapper med senere periode fører ikke til at perioden forkastes med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
         håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020)))
         håndterSøknad(Sykdom(1.november(2020), 20.november(2020), 100.prosent))
         håndterInntektsmelding(
@@ -913,6 +1020,52 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(7.februar, 7.februar))
         håndterSøknad(Sykdom(7.februar, 7.februar, 100.prosent, null))
         håndterInntektsmelding(listOf(3.januar til 18.januar), 7.februar)
+
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterInntektsmelding(listOf(3.januar til 18.januar), 23.februar)
+        håndterSykmelding(Sykmeldingsperiode(23.februar, 25.februar))
+        håndterSøknad(Sykdom(23.februar, 25.februar, 100.prosent, null))
+        håndterVilkårsgrunnlag(4.vedtaksperiode)
+        håndterYtelser(4.vedtaksperiode)
+        håndterSimulering(4.vedtaksperiode)
+
+        assertEquals(3.januar til 19.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(20.januar til 3.februar, inspektør.periode(2.vedtaksperiode))
+        assertEquals(7.februar til 7.februar, inspektør.periode(3.vedtaksperiode))
+        assertEquals(23.februar til 25.februar, inspektør.periode(4.vedtaksperiode))
+    }
+
+    @Test
+    fun `replay strekker periode tilbake og lager overlapp med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 19.januar))
+        håndterSøknad(Sykdom(3.januar, 19.januar, 100.prosent, null))
+        håndterInntektsmelding(listOf(3.januar til 18.januar), 3.januar)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 3.februar))
+        håndterSøknad(Sykdom(20.januar, 3.februar, 100.prosent, null))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterSykmelding(Sykmeldingsperiode(7.februar, 7.februar))
+        håndterSøknad(Sykdom(7.februar, 7.februar, 100.prosent, null))
+        håndterInntektsmelding(listOf(3.januar til 18.januar), 7.februar)
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -974,6 +1127,29 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Unngår aggresiv håndtering av arbeidsdager før opplyst AGP ved tidligere revurdering uten endring`() {
+        nyPeriode(1.januar til 16.januar)
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar))
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), Ferie(22.januar, 23.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterOverstyrTidslinje((22.januar til 23.januar).map { ManuellOverskrivingDag(it, Permisjonsdag) })
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        nyPeriode(1.februar til 28.februar)
+        håndterInntektsmelding(listOf(1.februar til 16.februar))
+
+        assertEquals("SSSSSHH SSSSSHH SSAAARR PPAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+    }
+
+    @Test
+    fun `Unngår aggresiv håndtering av arbeidsdager før opplyst AGP ved tidligere revurdering uten endring med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
         nyPeriode(1.januar til 16.januar)
         håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar))
         håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), Ferie(22.januar, 23.januar))
@@ -1643,6 +1819,11 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -1658,7 +1839,63 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
-           AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            AVSLUTTET
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+    }
+
+
+    @Test
+    fun `ignorer inntektsmeldinger på påfølgende perioder med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
+        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+
+        assertIngenFunksjonelleFeil()
+        assertActivities(person)
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -1679,6 +1916,71 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Inntektsmelding vil ikke utvide vedtaksperiode til tidligere vedtaksperiode`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
+        håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterInntektsmelding(listOf(3.januar til 18.januar), 3.januar)
+        assertIngenFunksjonelleFeil()
+        assertIngenVarsler()
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar))
+        håndterSøknad(Sykdom(1.februar, 23.februar, 100.prosent))
+        håndterInntektsmelding(listOf(3.januar til 18.januar), førsteFraværsdag = 1.februar) // Touches prior periode
+        assertIngenFunksjonelleFeil()
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+        assertIngenFunksjonelleFeil()
+
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+        assertIngenFunksjonelleFeil()
+
+        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            AVSLUTTET
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+    }
+
+    @Test
+    fun `Inntektsmelding vil ikke utvide vedtaksperiode til tidligere vedtaksperiode med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), 3.januar)
@@ -1734,6 +2036,37 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `inntektsmelding oppgir ny arbeidsgiverperiode i en sammenhengende periode`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 28.februar))
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterInntektsmelding(listOf(27.februar til 14.mars))
+        // Siden vi tidligere fylte ut 2. vedtaksperiode med arbeidsdager ville vi regne ut et ekstra skjæringstidspunkt i den sammenhengende perioden
+        assertEquals(listOf(27.februar, 1.januar), person.skjæringstidspunkter())
+        assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSAARR AAAAARR AAAAARR AAAAARR AUUSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+
+        assertIngenVarsel(RV_IM_4, 1.vedtaksperiode.filter())
+        assertIngenVarsel(RV_IM_2, 2.vedtaksperiode.filter())
+        assertVarsel(RV_IM_4, 3.vedtaksperiode.filter())
+        assertEquals(1.januar til 31.mars, inspektør.utbetalinger.last().inspektør.periode)
+    }
+
+    @Test
+    fun `inntektsmelding oppgir ny arbeidsgiverperiode i en sammenhengende periode med toggle diabled`() = Toggle.RevurdereAgpFraIm.disable {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 28.februar))
