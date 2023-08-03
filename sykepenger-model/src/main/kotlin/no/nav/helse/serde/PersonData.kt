@@ -454,8 +454,6 @@ internal data class PersonData(
                         dato = dato,
                         hendelseId = ekteHendelseId,
                         beløp = requireNotNull(beløp).månedlig,
-                        forklaring = forklaring,
-                        subsumsjon = subsumsjon?.tilModellobjekt(),
                         overstyrtInntekt = builder.hentInntekt(requireNotNull(overstyrtInntektId)),
                         tidsstempel = tidsstempel
                     )

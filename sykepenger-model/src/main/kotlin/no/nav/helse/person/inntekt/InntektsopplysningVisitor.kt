@@ -36,8 +36,6 @@ internal interface InntektsopplysningVisitor : InntektsmeldingVisitor, Skatteopp
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
-        forklaring: String?,
-        subsumsjon: Subsumsjon?,
         tidsstempel: LocalDateTime
     ) {
     }
@@ -47,8 +45,6 @@ internal interface InntektsopplysningVisitor : InntektsmeldingVisitor, Skatteopp
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
-        forklaring: String?,
-        subsumsjon: Subsumsjon?,
         tidsstempel: LocalDateTime
     ) {
     }

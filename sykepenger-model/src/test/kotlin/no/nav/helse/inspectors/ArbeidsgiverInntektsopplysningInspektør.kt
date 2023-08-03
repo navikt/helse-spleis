@@ -4,8 +4,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Subsumsjon
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningVisitor
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningVisitor
 import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Inntektsmelding
@@ -60,8 +60,6 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
-        forklaring: String?,
-        subsumsjon: Subsumsjon?,
         tidsstempel: LocalDateTime
     ) {
         this.tilstand.lagreInntekt(this, saksbehandler)
