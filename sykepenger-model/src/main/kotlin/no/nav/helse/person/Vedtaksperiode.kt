@@ -2494,12 +2494,23 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.forkast(dager)
                     return
                 }
+                val korrigertInntektsmeldingId =  vedtaksperiode.hendelseIder.sisteInntektsmeldingId()
                 val gammelAgp = vedtaksperiode.finnArbeidsgiverperiode()
                 vedtaksperiode.låsOpp()
                 vedtaksperiode.håndterDager(dager)
                 vedtaksperiode.lås()
                 val nyAgp = vedtaksperiode.finnArbeidsgiverperiode()
-                if (gammelAgp != nyAgp) dager.varsel(RV_IM_24, "Inntektsmeldingen ville påvirket sykdomstidslinjen i ${type.name}")
+                if (gammelAgp != nyAgp) {
+                    dager.varsel(RV_IM_24, "Inntektsmeldingen ville påvirket sykdomstidslinjen i ${type.name}")
+                    korrigertInntektsmeldingId?.let {
+                        vedtaksperiode.person.arbeidsgiveropplysningerKorrigert(
+                            PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
+                                korrigerendeInntektsopplysningId = dager.meldingsreferanseId(),
+                                korrigerendeInntektektsopplysningstype = PersonObserver.ArbeidsgiveropplysningerKorrigertEvent.KorrigerendeInntektektsopplysningstype.INNTEKTSMELDING,
+                                korrigertInntektsmeldingId = it
+                            ))
+                    }
+                }
                 vedtaksperiode.person.igangsettOverstyring(dager, Revurderingseventyr.korrigertInntektsmelding(skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt, endringsdato = vedtaksperiode.skjæringstidspunkt))
             } else {
                 super.håndter(vedtaksperiode, dager)
