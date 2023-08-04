@@ -29,7 +29,13 @@ enum class GraphQLSykdomsdagtype {
     Sykedag,
     SykHelgedag,
     Ubestemtdag,
-    AndreYtelser,
+    AndreYtelserForeldrepenger,
+    AndreYtelserAap,
+    AndreYtelserOmsorgspenger,
+    AndreYtelserPleiepenger,
+    AndreYtelserSvangerskapspenger,
+    AndreYtelserOpplaringspenger,
+    AndreYtelserDagpenger,
     Avslatt
 }
 

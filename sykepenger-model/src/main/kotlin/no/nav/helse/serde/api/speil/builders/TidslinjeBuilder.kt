@@ -10,6 +10,7 @@ import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
+import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.api.dto.AvvistDag
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
@@ -133,7 +134,15 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde,
         ytelse: Dag.AndreYtelser.AnnenYtelse
-    ) = leggTilDag(dag, dato, null, kilde)
+    ) = leggTilDag(dag, dato, null, kilde, when (ytelse) {
+        Dag.AndreYtelser.AnnenYtelse.Foreldrepenger -> SykdomstidslinjedagType.ANDRE_YTELSER_FORELDREPENGER
+        Dag.AndreYtelser.AnnenYtelse.AAP -> SykdomstidslinjedagType.ANDRE_YTELSER_AAP
+        Dag.AndreYtelser.AnnenYtelse.Omsorgspenger -> SykdomstidslinjedagType.ANDRE_YTELSER_OMSORGSPENGER
+        Dag.AndreYtelser.AnnenYtelse.Pleiepenger -> SykdomstidslinjedagType.ANDRE_YTELSER_PLEIEPENGER
+        Dag.AndreYtelser.AnnenYtelse.Svangerskapspenger -> SykdomstidslinjedagType.ANDRE_YTELSER_SVANGERSKAPSPENGER
+        Dag.AndreYtelser.AnnenYtelse.Opplæringspenger -> SykdomstidslinjedagType.ANDRE_YTELSER_OPPLÆRINGSPENGER
+        Dag.AndreYtelser.AnnenYtelse.Dagpenger -> SykdomstidslinjedagType.ANDRE_YTELSER_DAGPENGER
+    })
 
     override fun visitDag(
         dag: Dag.ProblemDag,
@@ -144,10 +153,10 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
     ) =
         leggTilDag(dag, dato, null, kilde)
 
-    private fun leggTilDag(dag: Dag, dato: LocalDate, økonomi: Økonomi?, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+    private fun leggTilDag(dag: Dag, dato: LocalDate, økonomi: Økonomi?, kilde: SykdomstidslinjeHendelse.Hendelseskilde, dagtype: SykdomstidslinjedagType = dag.toDagtypeDTO()) {
         val dagDto = Sykdomstidslinjedag(
             dato,
-            dag.toDagtypeDTO(),
+            dagtype,
             Sykdomstidslinjedag.SykdomstidslinjedagKilde(kilde.toKildetypeDTO(), kilde.meldingsreferanseId()),
             økonomi?.brukGrad { grad -> grad }
         )
@@ -176,7 +185,7 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
         is Dag.Permisjonsdag -> SykdomstidslinjedagType.PERMISJONSDAG
         is Dag.ProblemDag -> SykdomstidslinjedagType.UBESTEMTDAG
         is Dag.SykedagNav -> SykdomstidslinjedagType.SYKEDAG
-        is Dag.AndreYtelser -> SykdomstidslinjedagType.ANDRE_YTELSER
+        is Dag.AndreYtelser -> error("denne må settes manuelt")
     }
 }
 
