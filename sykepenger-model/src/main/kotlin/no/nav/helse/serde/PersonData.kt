@@ -118,7 +118,7 @@ internal data class PersonData(
     )
 
     internal fun createPerson(jurist: MaskinellJurist, tidligereBehandlinger: List<Person> = emptyList()): Person {
-        val personJurist = jurist.medFødselsnummer(fødselsnummer.somPersonidentifikator())
+        val personJurist = jurist.medFødselsnummer(fødselsnummer.somPersonidentifikator().toString())
         val person = person(personJurist, tidligereBehandlinger)
         arbeidsgivereliste.addAll(this.arbeidsgivere.map {
             it.konverterTilArbeidsgiver(

@@ -1,14 +1,16 @@
 package no.nav.helse.etterlevelse
 
 import java.io.Serializable
+import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.Period
 import java.time.Year
 import java.time.format.DateTimeFormatter
 import java.util.UUID
-import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_A
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_B
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_C
+import no.nav.helse.etterlevelse.Inntektsubsumsjon.Companion.subsumsjonsformat
 import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.etterlevelse.Ledd.LEDD_1
 import no.nav.helse.etterlevelse.Ledd.LEDD_2
@@ -30,26 +32,22 @@ import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_30
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_51
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_9
 import no.nav.helse.etterlevelse.Punktum.Companion.punktum
+import no.nav.helse.etterlevelse.RangeIterator.Companion.forEach
+import no.nav.helse.etterlevelse.RangeIterator.Companion.iterator
+import no.nav.helse.etterlevelse.RangeIterator.Companion.trim
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_BEREGNET
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.etterlevelse.Tidslinjedag.Companion.dager
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.januar
-import no.nav.helse.juni
-import no.nav.helse.person.DokumentType
-import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosent
 
 class MaskinellJurist private constructor(
     private val parent: MaskinellJurist?,
     private val kontekster: Map<String, KontekstType>,
-    vedtaksperiode: Periode? = null
+    vedtaksperiode: ClosedRange<LocalDate>? = null
 ) : SubsumsjonObserver {
 
-    private val periode: () -> Periode
+    private val periode: () -> ClosedRange<LocalDate>
 
     init {
         // Når periode blir kalt av en subsumsjon skal vi være i kontekst av en vedtaksperiode.
@@ -67,20 +65,20 @@ class MaskinellJurist private constructor(
 
     private fun kontekster(): Map<String, KontekstType> = this.kontekster.toMap()
 
-    fun medFødselsnummer(personidentifikator: Personidentifikator) =
-        kopierMedKontekst(mapOf(personidentifikator.toString() to KontekstType.Fødselsnummer) + kontekster.filterNot { it.value == KontekstType.Fødselsnummer })
+    fun medFødselsnummer(personidentifikator: String) =
+        kopierMedKontekst(mapOf(personidentifikator to KontekstType.Fødselsnummer) + kontekster.filterNot { it.value == KontekstType.Fødselsnummer })
 
     fun medOrganisasjonsnummer(organisasjonsnummer: String) =
         kopierMedKontekst(mapOf(organisasjonsnummer to KontekstType.Organisasjonsnummer) + kontekster.filterNot { it.value == KontekstType.Organisasjonsnummer })
 
-    fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: Map<UUID, DokumentType>, periode: Periode) =
+    fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: Map<UUID, KontekstType>, periode: ClosedRange<LocalDate>) =
         kopierMedKontekst(
             mapOf(vedtaksperiodeId.toString() to KontekstType.Vedtaksperiode) + hendelseIder
-                .map { it.key.toString() to it.value.tilKontekst() } + kontekster,
+                .map { it.key.toString() to it.value } + kontekster,
             periode
         )
 
-    private fun kopierMedKontekst(kontekster: Map<String, KontekstType>, periode: Periode? = null) = MaskinellJurist(this, kontekster, periode)
+    private fun kopierMedKontekst(kontekster: Map<String, KontekstType>, periode: ClosedRange<LocalDate>? = null) = MaskinellJurist(this, kontekster, periode)
 
     override fun `§ 8-2 ledd 1`(
         oppfylt: Boolean,
@@ -114,7 +112,7 @@ class MaskinellJurist private constructor(
         utfallTom: LocalDate,
         tidslinjeFom: LocalDate,
         tidslinjeTom: LocalDate,
-        avvisteDager: List<LocalDate>
+        avvistePerioder: List<ClosedRange<LocalDate>>
     ) {
         leggTil(
             EnkelSubsumsjon(
@@ -131,13 +129,13 @@ class MaskinellJurist private constructor(
                     "tidslinjeFom" to tidslinjeFom,
                     "tidslinjeTom" to tidslinjeTom
                 ),
-                output = mapOf("avvisteDager" to avvisteDager.grupperSammenhengendePerioder()),
+                output = mapOf("avvisteDager" to avvistePerioder),
                 kontekster = kontekster()
             )
         )
     }
 
-    override fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, beregningsgrunnlag: Inntekt, minimumInntekt: Inntekt) {
+    override fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, beregningsgrunnlagÅrlig: Double, minimumInntektÅrlig: Double) {
         leggTil(
             EnkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
@@ -148,8 +146,8 @@ class MaskinellJurist private constructor(
                 punktum = 1.punktum,
                 input = mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt,
-                    "grunnlagForSykepengegrunnlag" to beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
-                    "minimumInntekt" to minimumInntekt.reflection { årlig, _, _, _ -> årlig }
+                    "grunnlagForSykepengegrunnlag" to beregningsgrunnlagÅrlig,
+                    "minimumInntekt" to minimumInntektÅrlig
                 ),
                 output = emptyMap(),
                 kontekster = kontekster()
@@ -157,14 +155,14 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-9 ledd 1`(oppfylt: Boolean, utlandsperiode: Periode, søknadsperioder: List<Map<String, Serializable>>) {
+    override fun `§ 8-9 ledd 1`(oppfylt: Boolean, utlandsperiode: ClosedRange<LocalDate>, søknadsperioder: List<Map<String, Serializable>>) {
         utlandsperiode.forEach {
             leggTil(
                 GrupperbarSubsumsjon(
                     dato = it,
                     lovverk = "folketrygdloven",
                     utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
-                    versjon = 1.juni(2021),
+                    versjon = LocalDate.of(2021, 6, 1),
                     paragraf = PARAGRAF_8_9,
                     ledd = LEDD_1,
                     input = mapOf( "soknadsPerioder" to søknadsperioder),
@@ -177,9 +175,9 @@ class MaskinellJurist private constructor(
 
     override fun `§ 8-10 ledd 2 punktum 1`(
         erBegrenset: Boolean,
-        maksimaltSykepengegrunnlag: Inntekt,
+        maksimaltSykepengegrunnlagÅrlig: Double,
         skjæringstidspunkt: LocalDate,
-        beregningsgrunnlag: Inntekt
+        beregningsgrunnlagÅrlig: Double
     ) {
         leggTil(
             EnkelSubsumsjon(
@@ -190,9 +188,9 @@ class MaskinellJurist private constructor(
                 ledd = 2.ledd,
                 punktum = 1.punktum,
                 input = mapOf(
-                    "maksimaltSykepengegrunnlag" to maksimaltSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "maksimaltSykepengegrunnlag" to maksimaltSykepengegrunnlagÅrlig,
                     "skjæringstidspunkt" to skjæringstidspunkt,
-                    "grunnlagForSykepengegrunnlag" to beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
+                    "grunnlagForSykepengegrunnlag" to beregningsgrunnlagÅrlig
                 ),
                 output = mapOf(
                     "erBegrenset" to erBegrenset
@@ -207,7 +205,7 @@ class MaskinellJurist private constructor(
             EnkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
                 lovverk = "folketrygdloven",
-                versjon = 1.januar(2020),
+                versjon = LocalDate.of(2020, 1, 1),
                 paragraf = PARAGRAF_8_10,
                 ledd = 3.ledd,
                 input = mapOf("årligInntekt" to årsinntekt),
@@ -234,7 +232,7 @@ class MaskinellJurist private constructor(
     }
 
     override fun `§ 8-12 ledd 1 punktum 1`(
-        periode: Periode,
+        periode: ClosedRange<LocalDate>,
         tidslinjegrunnlag: List<List<Tidslinjedag>>,
         beregnetTidslinje: List<Tidslinjedag>,
         gjenståendeSykedager: Int,
@@ -242,11 +240,10 @@ class MaskinellJurist private constructor(
         maksdato: LocalDate,
         startdatoSykepengerettighet: LocalDate
     ) {
-        val (dagerOppfylt, dagerIkkeOppfylt) =
-            periode
-                .filter { it >= startdatoSykepengerettighet }
-                .sorted()
-                .partition { it <= maksdato }
+        val iterator = RangeIterator(periode).subsetFom(startdatoSykepengerettighet)
+        val (dagerOppfylt, dagerIkkeOppfylt) = iterator
+            .asSequence()
+            .partition { it <= maksdato }
 
         fun logg(utfall: Utfall, utfallFom: LocalDate, utfallTom: LocalDate) {
             leggTil(
@@ -309,9 +306,7 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-13 ledd 1`(periode: Periode, avvisteDager: List<LocalDate>, tidslinjer: List<List<Tidslinjedag>>) {
-        fun periode() = periode.toList() - avvisteDager
-
+    override fun `§ 8-13 ledd 1`(periode: ClosedRange<LocalDate>, avvisteDager: List<LocalDate>, tidslinjer: List<List<Tidslinjedag>>) {
         fun logg(utfall: Utfall, dager: List<LocalDate>) {
             dager.forEach { dagen ->
                 leggTil(
@@ -332,17 +327,16 @@ class MaskinellJurist private constructor(
             }
         }
 
-        val oppfylteDager = periode()
-
+        val oppfylteDager = periode.trim(avvisteDager).flatMap { it.iterator().asSequence().toList() }
         if (oppfylteDager.isNotEmpty()) logg(VILKAR_OPPFYLT, oppfylteDager)
         if (avvisteDager.isNotEmpty()) logg(VILKAR_IKKE_OPPFYLT, avvisteDager)
     }
 
     override fun `§ 8-13 ledd 2`(
-        periode: Periode,
+        periode: ClosedRange<LocalDate>,
         tidslinjer: List<List<Tidslinjedag>>,
         grense: Double,
-        dagerUnderGrensen: Set<LocalDate>
+        dagerUnderGrensen: List<ClosedRange<LocalDate>>
     ) {
         periode.forEach { dagen ->
             leggTil(
@@ -358,7 +352,7 @@ class MaskinellJurist private constructor(
                         "grense" to grense
                     ),
                     output = mapOf(
-                        "dagerUnderGrensen" to dagerUnderGrensen.grupperSammenhengendePerioder().map {
+                        "dagerUnderGrensen" to dagerUnderGrensen.map {
                             mapOf(
                                 "fom" to it.start,
                                 "tom" to it.endInclusive
@@ -374,7 +368,7 @@ class MaskinellJurist private constructor(
     override fun `§ 8-15`(
         skjæringstidspunkt: LocalDate,
         organisasjonsnummer: String,
-        inntekterSisteTreMåneder: List<Map<String, Any>>,
+        inntekterSisteTreMåneder: List<Inntektsubsumsjon>,
         forklaring: String,
         oppfylt: Boolean
     ) {
@@ -390,7 +384,7 @@ class MaskinellJurist private constructor(
                 input = mapOf(
                     "organisasjonsnummer" to organisasjonsnummer,
                     "skjæringstidspunkt" to skjæringstidspunkt,
-                    "inntekterSisteTreMåneder" to inntekterSisteTreMåneder,
+                    "inntekterSisteTreMåneder" to inntekterSisteTreMåneder.subsumsjonsformat(),
                     "forklaring" to forklaring
                 ),
                 kontekster = kontekster(),
@@ -488,7 +482,7 @@ class MaskinellJurist private constructor(
             EnkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
                 lovverk = "folketrygdloven",
-                versjon = 1.januar(2001),
+                versjon = LocalDate.of(2001, 1, 1),
                 paragraf = PARAGRAF_8_19,
                 ledd = 1.ledd,
                 input = mapOf(
@@ -508,7 +502,7 @@ class MaskinellJurist private constructor(
                 dato = dato,
                 lovverk = "folketrygdloven",
                 utfall = VILKAR_BEREGNET,
-                versjon = 1.januar(2001),
+                versjon = LocalDate.of(2001, 1, 1),
                 paragraf = PARAGRAF_8_19,
                 ledd = 2.ledd,
                 input = mapOf(
@@ -526,7 +520,7 @@ class MaskinellJurist private constructor(
                 dato = dato,
                 lovverk = "folketrygdloven",
                 utfall = VILKAR_BEREGNET,
-                versjon = 1.januar(2001),
+                versjon = LocalDate.of(2001, 1, 1),
                 paragraf = PARAGRAF_8_19,
                 ledd = 3.ledd,
                 input = mapOf(
@@ -544,7 +538,7 @@ class MaskinellJurist private constructor(
                 dato = dato,
                 lovverk = "folketrygdloven",
                 utfall = VILKAR_BEREGNET,
-                versjon = 1.januar(2001),
+                versjon = LocalDate.of(2001, 1, 1),
                 paragraf = PARAGRAF_8_19,
                 ledd = 4.ledd,
                 input = mapOf(
@@ -558,8 +552,9 @@ class MaskinellJurist private constructor(
 
     override fun `§ 8-28 ledd 3 bokstav a`(
         organisasjonsnummer: String,
-        inntekterSisteTreMåneder: List<Map<String, Any>>,
-        grunnlagForSykepengegrunnlag: Inntekt,
+        inntekterSisteTreMåneder: List<Inntektsubsumsjon>,
+        grunnlagForSykepengegrunnlagÅrlig: Double,
+        grunnlagForSykepengegrunnlagMånedlig: Double,
         skjæringstidspunkt: LocalDate
     ) {
         leggTil(
@@ -572,12 +567,12 @@ class MaskinellJurist private constructor(
                 bokstav = BOKSTAV_A,
                 input = mapOf(
                     "organisasjonsnummer" to organisasjonsnummer,
-                    "inntekterSisteTreMåneder" to inntekterSisteTreMåneder,
+                    "inntekterSisteTreMåneder" to inntekterSisteTreMåneder.subsumsjonsformat(),
                     "skjæringstidspunkt" to skjæringstidspunkt
                 ),
                 output = mapOf(
-                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
-                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlag.reflection { _, månedlig, _, _ -> månedlig }
+                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlagÅrlig,
+                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlagMånedlig
                 ),
                 kontekster = kontekster()
             )
@@ -590,7 +585,8 @@ class MaskinellJurist private constructor(
         overstyrtInntektFraSaksbehandler: Map<String, Any>,
         skjæringstidspunkt: LocalDate,
         forklaring: String,
-        grunnlagForSykepengegrunnlag: Inntekt
+        grunnlagForSykepengegrunnlagÅrlig: Double,
+        grunnlagForSykepengegrunnlagMånedlig: Double
     ) {
         leggTil(
             EnkelSubsumsjon(
@@ -608,8 +604,8 @@ class MaskinellJurist private constructor(
                     "forklaring" to forklaring
                 ),
                 output = mapOf(
-                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
-                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlag.reflection { _, månedlig, _, _ -> månedlig }
+                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlagÅrlig,
+                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlagMånedlig
                 ),
                 kontekster = kontekster()
             )
@@ -621,7 +617,8 @@ class MaskinellJurist private constructor(
         overstyrtInntektFraSaksbehandler: Map<String, Any>,
         skjæringstidspunkt: LocalDate,
         forklaring: String,
-        grunnlagForSykepengegrunnlag: Inntekt
+        grunnlagForSykepengegrunnlagÅrlig: Double,
+        grunnlagForSykepengegrunnlagMånedlig: Double
     ) {
         leggTil(
             EnkelSubsumsjon(
@@ -638,8 +635,8 @@ class MaskinellJurist private constructor(
                     "forklaring" to forklaring
                 ),
                 output = mapOf(
-                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
-                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlag.reflection { _, månedlig, _, _ -> månedlig }
+                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlagÅrlig,
+                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlagMånedlig
                 ),
                 kontekster = kontekster()
             )
@@ -651,7 +648,8 @@ class MaskinellJurist private constructor(
         overstyrtInntektFraSaksbehandler: Map<String, Any>,
         skjæringstidspunkt: LocalDate,
         forklaring: String,
-        grunnlagForSykepengegrunnlag: Inntekt
+        grunnlagForSykepengegrunnlagÅrlig: Double,
+        grunnlagForSykepengegrunnlagMånedlig: Double,
     ) {
         leggTil(
             EnkelSubsumsjon(
@@ -667,8 +665,8 @@ class MaskinellJurist private constructor(
                     "forklaring" to forklaring
                 ),
                 output = mapOf(
-                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
-                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlag.reflection { _, månedlig, _, _ -> månedlig }
+                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlagÅrlig,
+                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlagMånedlig
                 ),
                 kontekster = kontekster()
             )
@@ -677,8 +675,8 @@ class MaskinellJurist private constructor(
 
     override fun `§ 8-29`(
         skjæringstidspunkt: LocalDate,
-        grunnlagForSykepengegrunnlag: Inntekt,
-        inntektsopplysninger: List<Map<String, Any>>,
+        grunnlagForSykepengegrunnlagÅrlig: Double,
+        inntektsopplysninger: List<Inntektsubsumsjon>,
         organisasjonsnummer: String
     ) {
         leggTil(
@@ -691,19 +689,17 @@ class MaskinellJurist private constructor(
                 input = mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt,
                     "organisasjonsnummer" to organisasjonsnummer,
-                    "inntektsopplysninger" to inntektsopplysninger
+                    "inntektsopplysninger" to inntektsopplysninger.subsumsjonsformat()
                 ),
                 output = mapOf(
-                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig }
+                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlagÅrlig
                 ),
                 kontekster = kontekster()
             )
         )
     }
 
-    override fun `§ 8-30 ledd 1`(grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>, grunnlagForSykepengegrunnlag: Inntekt) {
-        val beregnetMånedsinntektPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver
-            .mapValues { it.value.reflection { _, månedlig, _, _ -> månedlig } }
+    override fun `§ 8-30 ledd 1`(grunnlagForSykepengegrunnlagPerArbeidsgiverMånedlig: Map<String, Double>, grunnlagForSykepengegrunnlagÅrlig: Double) {
         leggTil(
             EnkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
@@ -712,10 +708,10 @@ class MaskinellJurist private constructor(
                 paragraf = PARAGRAF_8_30,
                 ledd = LEDD_1,
                 input = mapOf(
-                    "beregnetMånedsinntektPerArbeidsgiver" to beregnetMånedsinntektPerArbeidsgiver
+                    "beregnetMånedsinntektPerArbeidsgiver" to grunnlagForSykepengegrunnlagPerArbeidsgiverMånedlig
                 ),
                 output = mapOf(
-                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig }
+                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlagÅrlig
                 ),
                 kontekster = kontekster()
             )
@@ -723,10 +719,10 @@ class MaskinellJurist private constructor(
     }
 
     override fun `§ 8-30 ledd 2 punktum 1`(
-        maksimaltTillattAvvikPåÅrsinntekt: Prosent,
-        grunnlagForSykepengegrunnlag: Inntekt,
-        sammenligningsgrunnlag: Inntekt,
-        avvik: Prosent
+        maksimaltTillattAvvikPåÅrsinntekt: Int,
+        grunnlagForSykepengegrunnlagÅrlig: Double,
+        sammenligningsgrunnlag: Double,
+        avvik: Double
     ) {
         leggTil(
             EnkelSubsumsjon(
@@ -737,11 +733,11 @@ class MaskinellJurist private constructor(
                 ledd = 2.ledd,
                 punktum = 1.punktum,
                 input = mapOf(
-                    "maksimaltTillattAvvikPåÅrsinntekt" to maksimaltTillattAvvikPåÅrsinntekt.prosent(),
-                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
-                    "sammenligningsgrunnlag" to sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
+                    "maksimaltTillattAvvikPåÅrsinntekt" to maksimaltTillattAvvikPåÅrsinntekt.toDouble(),
+                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlagÅrlig,
+                    "sammenligningsgrunnlag" to sammenligningsgrunnlag
                 ),
-                output = mapOf("avviksprosent" to avvik.prosent()),
+                output = mapOf("avviksprosent" to avvik),
                 kontekster = kontekster()
             )
         )
@@ -779,8 +775,8 @@ class MaskinellJurist private constructor(
         oppfylt: Boolean,
         skjæringstidspunkt: LocalDate,
         alderPåSkjæringstidspunkt: Int,
-        beregningsgrunnlag: Inntekt,
-        minimumInntekt: Inntekt
+        beregningsgrunnlagÅrlig: Double,
+        minimumInntektÅrlig: Double
     ) {
         leggTil(
             EnkelSubsumsjon(
@@ -792,8 +788,8 @@ class MaskinellJurist private constructor(
                 input = mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt,
                     "alderPåSkjæringstidspunkt" to alderPåSkjæringstidspunkt,
-                    "grunnlagForSykepengegrunnlag" to beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
-                    "minimumInntekt" to minimumInntekt.reflection { årlig, _, _, _ -> årlig }
+                    "grunnlagForSykepengegrunnlag" to beregningsgrunnlagÅrlig,
+                    "minimumInntekt" to minimumInntektÅrlig
                 ),
                 output = emptyMap(),
                 kontekster = kontekster()
@@ -802,7 +798,7 @@ class MaskinellJurist private constructor(
     }
 
     override fun `§ 8-51 ledd 3`(
-        periode: Periode,
+        periode: ClosedRange<LocalDate>,
         tidslinjegrunnlag: List<List<Tidslinjedag>>,
         beregnetTidslinje: List<Tidslinjedag>,
         gjenståendeSykedager: Int,
@@ -810,11 +806,8 @@ class MaskinellJurist private constructor(
         maksdato: LocalDate,
         startdatoSykepengerettighet: LocalDate
     ) {
-        val (dagerOppfylt, dagerIkkeOppfylt) =
-            periode
-                .filter { it >= startdatoSykepengerettighet }
-                .sorted()
-                .partition { it <= maksdato }
+        val iterator = RangeIterator(periode).subsetFom(startdatoSykepengerettighet)
+        val (dagerOppfylt, dagerIkkeOppfylt) = iterator.asSequence().partition { it <= maksdato }
 
         fun logg(utfall: Utfall, utfallFom: LocalDate, utfallTom: LocalDate) {
             leggTil(
@@ -845,7 +838,7 @@ class MaskinellJurist private constructor(
         if (dagerIkkeOppfylt.isNotEmpty()) logg(VILKAR_IKKE_OPPFYLT, dagerIkkeOppfylt.first(), dagerIkkeOppfylt.last())
     }
 
-    override fun `§ 22-13 ledd 3`(avskjæringsdato: LocalDate, perioder: List<Periode>) {
+    override fun `§ 22-13 ledd 3`(avskjæringsdato: LocalDate, perioder: List<ClosedRange<LocalDate>>) {
         leggTil(EnkelSubsumsjon(
             utfall = VILKAR_IKKE_OPPFYLT,
             lovverk = "folketrygdloven",
@@ -949,19 +942,75 @@ class MaskinellJurist private constructor(
             }
         }
     }
-
-    private fun DokumentType.tilKontekst() = when (this) {
-        DokumentType.Sykmelding -> KontekstType.Sykmelding
-        DokumentType.Søknad -> KontekstType.Søknad
-        DokumentType.InntektsmeldingDager -> KontekstType.Inntektsmelding
-        DokumentType.InntektsmeldingInntekt -> KontekstType.Inntektsmelding
-        DokumentType.OverstyrTidslinje -> KontekstType.OverstyrTidslinje
-        DokumentType.OverstyrInntekt -> KontekstType.OverstyrInntekt
-        DokumentType.OverstyrRefusjon -> KontekstType.OverstyrRefusjon
-        DokumentType.OverstyrArbeidsgiveropplysninger -> KontekstType.OverstyrArbeidsgiveropplysninger
-        DokumentType.OverstyrArbeidsforhold -> KontekstType.OverstyrArbeidsforhold
-        DokumentType.SkjønnsmessigFastsettelse -> KontekstType.SkjønnsmessigFastsettelse
-    }
-
 }
 
+internal class RangeIterator(start: LocalDate, private val end: LocalDate): Iterator<LocalDate> {
+    private var currentDate = start
+    constructor(range: ClosedRange<LocalDate>) : this(range.start, range.endInclusive)
+    fun subsetFom(fom: LocalDate) = apply {
+        currentDate = maxOf(currentDate, fom)
+    }
+    override fun hasNext() = end >= currentDate
+    override fun next(): LocalDate {
+        check(hasNext())
+        return currentDate.also {
+            currentDate = it.plusDays(1)
+        }
+    }
+
+    internal companion object {
+        // forutsetter at <other> er sortert
+        fun ClosedRange<LocalDate>.trim(other: List<LocalDate>): List<ClosedRange<LocalDate>> {
+            return other.fold(listOf(this)) { result, date ->
+                val siste = result.last()
+                // ingen trim
+                if (date !in siste) result
+                // trimmer hele
+                else {
+                    val matcherSiste = date == siste.endInclusive
+                    val matcherFørste = date == siste.start
+                    if (matcherFørste && matcherSiste) result.dropLast(1)
+                    else {
+                        val nye = mutableListOf<ClosedRange<LocalDate>>()
+                        // trimmer slutten eller inni
+                        if (matcherSiste || !matcherFørste) nye.add(siste.start.rangeTo(date.minusDays(1)))
+                        // trimmer starten eller inni
+                        if (matcherFørste || !matcherSiste) nye.add(date.plusDays(1).rangeTo(siste.endInclusive))
+                        result.dropLast(1) + nye
+                    }
+                }
+            }
+        }
+        // utvider perioden hvis <dato> ligger inntil, foran eller bak, (inkl. helg)
+        fun ClosedRange<LocalDate>.utvide(dato: LocalDate): ClosedRange<LocalDate>? {
+            if (dato in this) return this
+            val dagen = dato.dayOfWeek
+            return when {
+                (endInclusive == dato.minusDays(1)) ||
+                (endInclusive in dato.minusDays(2)..dato.minusDays(1) && dagen == DayOfWeek.SUNDAY) ||
+                (endInclusive in dato.minusDays(3)..dato.minusDays(1) && dagen == DayOfWeek.MONDAY) ->
+                    start.rangeTo(dato)
+                (start == dato.plusDays(1)) ||
+                (start in dato.plusDays(1)..dato.plusDays(2) && dagen == DayOfWeek.SATURDAY) ||
+                (start in dato.plusDays(1)..dato.plusDays(3) && dagen == DayOfWeek.FRIDAY) ->
+                    dato.rangeTo(endInclusive)
+                else -> null
+            }
+        }
+        fun List<ClosedRange<LocalDate>>.merge(): List<ClosedRange<LocalDate>> {
+            if (this.size <= 1) return this
+            return this
+                .sortedBy { it.start }
+                .fold(emptyList()) { result, range ->
+                    val ny = result.lastOrNull()?.utvide(range.start)
+                    if (result.isEmpty()) listOf(range)
+                    else if (ny != null) result.dropLast(1).plusElement(ny)
+                    else result.plusElement(range)
+                }
+        }
+        fun ClosedRange<LocalDate>.iterator(): Iterator<LocalDate> = RangeIterator(this)
+        fun ClosedRange<LocalDate>.forEach(block: (LocalDate) -> Unit) {
+            iterator().forEach(block)
+        }
+    }
+}

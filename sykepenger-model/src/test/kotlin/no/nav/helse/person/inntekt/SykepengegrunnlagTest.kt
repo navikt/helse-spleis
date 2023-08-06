@@ -831,8 +831,8 @@ internal class SykepengegrunnlagTest {
         override fun `§ 8-3 ledd 2 punktum 1`(
             oppfylt: Boolean,
             skjæringstidspunkt: LocalDate,
-            beregningsgrunnlag: Inntekt,
-            minimumInntekt: Inntekt
+            beregningsgrunnlagÅrlig: Double,
+            minimumInntektÅrlig: Double
         ) {
             this.`§ 8-3 ledd 2 punktum 1` = oppfylt
         }
@@ -841,10 +841,10 @@ internal class SykepengegrunnlagTest {
             oppfylt: Boolean,
             skjæringstidspunkt: LocalDate,
             alderPåSkjæringstidspunkt: Int,
-            beregningsgrunnlag: Inntekt,
-            minimumInntekt: Inntekt
+            beregningsgrunnlagÅrlig: Double,
+            minimumInntektÅrlig: Double
         ) {
-           this.`§ 8-51 ledd 2` = oppfylt
+            this.`§ 8-51 ledd 2` = oppfylt
         }
     }
 }

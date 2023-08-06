@@ -29,7 +29,7 @@ internal class VedtakFattetBuilder(
     private var sykepengegrunnlag =  Inntekt.INGEN
     private var beregningsgrunnlag = Inntekt.INGEN
     private var begrensning: Begrensning? = null
-    private var omregnetÅrsinntektPerArbeidsgiver = emptyMap<String, Inntekt>()
+    private var omregnetÅrsinntektPerArbeidsgiverÅrlig = emptyMap<String, Double>()
     private var vedtakFattetTidspunkt = LocalDateTime.now()
     private var utbetalingId: UUID? = null
 
@@ -38,7 +38,7 @@ internal class VedtakFattetBuilder(
     internal fun sykepengegrunnlag(sykepengegrunnlag: Inntekt) = apply { this.sykepengegrunnlag = sykepengegrunnlag }
     internal fun beregningsgrunnlag(beregningsgrunnlag: Inntekt) = apply { this.beregningsgrunnlag = beregningsgrunnlag }
     internal fun begrensning(begrensning: Begrensning) = apply { this.begrensning = begrensning }
-    internal fun omregnetÅrsinntektPerArbeidsgiver(omregnetÅrsinntektPerArbeidsgiver: Map<String, Inntekt>) = apply { this.omregnetÅrsinntektPerArbeidsgiver = omregnetÅrsinntektPerArbeidsgiver }
+    internal fun omregnetÅrsinntektPerArbeidsgiver(omregnetÅrsinntektPerArbeidsgiverÅrlig: Map<String, Double>) = apply { this.omregnetÅrsinntektPerArbeidsgiverÅrlig = omregnetÅrsinntektPerArbeidsgiverÅrlig }
 
     private var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta? = null
     internal fun sykepengegrunnlagsfakta(sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta) = apply { this.sykepengegrunnlagsfakta = sykepengegrunnlagsfakta }
@@ -54,7 +54,7 @@ internal class VedtakFattetBuilder(
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
             beregningsgrunnlag = beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
-            omregnetÅrsinntektPerArbeidsgiver = omregnetÅrsinntektPerArbeidsgiver.mapValues { (_, inntekt) -> inntekt.reflection { årlig, _, _, _ -> årlig} },
+            omregnetÅrsinntektPerArbeidsgiver = omregnetÅrsinntektPerArbeidsgiverÅrlig,
             inntekt = beregningsgrunnlag.reflection { _, månedlig, _, _ -> månedlig },
             utbetalingId = utbetalingId,
             sykepengegrunnlagsbegrensning = when (begrensning) {

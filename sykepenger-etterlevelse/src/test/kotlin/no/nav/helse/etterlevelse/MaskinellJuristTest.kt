@@ -1,29 +1,18 @@
-package no.nav.helse.person.etterlevelse
+package no.nav.helse.etterlevelse
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.januar
-import no.nav.helse.somPersonidentifikator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
-import no.nav.helse.etterlevelse.Bokstav
-import no.nav.helse.etterlevelse.KontekstType
-import no.nav.helse.etterlevelse.Ledd
-import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.Paragraf
-import no.nav.helse.etterlevelse.Punktum
-import no.nav.helse.etterlevelse.Subsumsjon
-import no.nav.helse.etterlevelse.SubsumsjonVisitor
 
 internal class MaskinellJuristTest {
 
     @Test
     fun `jurist lytter på endringer av kontekst`() {
         val vedtaksperiodeJurist = MaskinellJurist()
-            .medFødselsnummer("10052088033".somPersonidentifikator())
+            .medFødselsnummer("10052088033")
             .medOrganisasjonsnummer("123456789")
-            .medVedtaksperiode(UUID.fromString("6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"), emptyMap(), Periode(1.januar, 31.januar))
+            .medVedtaksperiode(UUID.fromString("6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"), emptyMap(), 1.januar..31.januar)
 
         vedtaksperiodeJurist.`§ 8-2 ledd 1`(true, LocalDate.now(), 1, emptyList(), 1)
 
@@ -38,7 +27,7 @@ internal class MaskinellJuristTest {
     @Test
     fun `alltid nyeste kontekst som gjelder`() {
         val arbeidsgiverJurist = MaskinellJurist()
-            .medFødselsnummer("10052088033".somPersonidentifikator())
+            .medFødselsnummer("10052088033")
             .medOrganisasjonsnummer("123456789")
             .medOrganisasjonsnummer("987654321")
 
@@ -54,7 +43,7 @@ internal class MaskinellJuristTest {
     @Test
     fun `avviste dager`(){
         val vedtaksperiodeJurist = MaskinellJurist()
-        vedtaksperiodeJurist.`§ 8-13 ledd 1`(Periode(1.januar, 31.januar), listOf(16.januar, 15.januar), emptyList())
+        vedtaksperiodeJurist.`§ 8-13 ledd 1`(1.januar..31.januar, listOf(16.januar, 15.januar), emptyList())
     }
 
     private fun assertKontekster(subsumsjon: Subsumsjon, vararg kontekster: Pair<String, KontekstType>) {

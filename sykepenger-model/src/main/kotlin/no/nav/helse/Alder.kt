@@ -7,6 +7,7 @@ import java.time.Year
 import java.time.temporal.ChronoUnit.YEARS
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -91,7 +92,7 @@ class Alder(private val fødselsdato: LocalDate, private val dødsdato: LocalDat
             utfallTom = minOf(syttiårsdagen.minusDays(1), periode.endInclusive),
             tidslinjeFom = periode.start,
             tidslinjeTom = periode.endInclusive,
-            avvisteDager = emptyList()
+            avvistePerioder = emptyList()
         )
     }
 
@@ -106,7 +107,7 @@ class Alder(private val fødselsdato: LocalDate, private val dødsdato: LocalDat
             utfallTom = periode.endInclusive,
             tidslinjeFom = periode.start,
             tidslinjeTom = periode.endInclusive,
-            avvisteDager = avvisteDagerFraOgMedSøtti
+            avvistePerioder = avvisteDagerFraOgMedSøtti.grupperSammenhengendePerioder()
         )
     }
 

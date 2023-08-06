@@ -1,7 +1,6 @@
 package no.nav.helse.etterlevelse
 
 import java.time.LocalDate
-import no.nav.helse.hendelser.Periode
 
 class Tidslinjedag(
     private val dato: LocalDate,
@@ -15,7 +14,7 @@ class Tidslinjedag(
     fun erAvvistDag() = dagtype == "AVVISTDAG"
 
     companion object {
-        fun List<Tidslinjedag>.dager(periode: Periode? = null): List<Map<String, Any?>> {
+        fun List<Tidslinjedag>.dager(periode: ClosedRange<LocalDate>? = null): List<Map<String, Any?>> {
             return this
                 .filter { it.dato >= (periode?.start ?: LocalDate.MIN) && it.dato <= (periode?.endInclusive ?: LocalDate.MAX) }
                 .sortedBy { it.dato }

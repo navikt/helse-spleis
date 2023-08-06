@@ -3,9 +3,6 @@ package no.nav.helse.etterlevelse
 import java.io.Serializable
 import java.time.LocalDate
 import java.time.Year
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosent
 
 interface SubsumsjonObserver {
 
@@ -39,7 +36,7 @@ interface SubsumsjonObserver {
      * @param utfallTom til-og-med-dato [oppfylt]-vurderingen gjelder for
      * @param tidslinjeFom fra-og-med-dato vurderingen gjøres for
      * @param tidslinjeTom til-og-med-dato vurderingen gjøres for
-     * @param avvisteDager alle dager vurderingen ikke er [oppfylt] for. Tom dersom sykmeldte ikke fyller 70 år mellom [tidslinjeFom] og [tidslinjeTom]
+     * @param avvistePerioder alle dager vurderingen ikke er [oppfylt] for. Tom dersom sykmeldte ikke fyller 70 år mellom [tidslinjeFom] og [tidslinjeTom]
      */
     fun `§ 8-3 ledd 1 punktum 2`(
         oppfylt: Boolean,
@@ -48,7 +45,7 @@ interface SubsumsjonObserver {
         utfallTom: LocalDate,
         tidslinjeFom: LocalDate,
         tidslinjeTom: LocalDate,
-        avvisteDager: List<LocalDate>
+        avvistePerioder: List<ClosedRange<LocalDate>>
     ) {}
 
     /**
@@ -58,10 +55,10 @@ interface SubsumsjonObserver {
      *
      * @param oppfylt hvorvidt sykmeldte har inntekt lik eller større enn minimum inntekt
      * @param skjæringstidspunkt dato det tas utgangspunkt i ved vurdering av minimum inntekt
-     * @param beregningsgrunnlag total inntekt på tvers av alle relevante arbeidsgivere
-     * @param minimumInntekt minimum beløp [beregningsgrunnlag] må være lik eller større enn for at vilkåret skal være [oppfylt]
+     * @param beregningsgrunnlagÅrlig total inntekt på tvers av alle relevante arbeidsgivere
+     * @param minimumInntektÅrlig minimum beløp [beregningsgrunnlagÅrlig] må være lik eller større enn for at vilkåret skal være [oppfylt]
      */
-    fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, beregningsgrunnlag: Inntekt, minimumInntekt: Inntekt) {}
+    fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, beregningsgrunnlagÅrlig: Double, minimumInntektÅrlig: Double) {}
 
 
     /**
@@ -73,23 +70,23 @@ interface SubsumsjonObserver {
      * @param utlandsperiode perioden burker har oppgitt å ha vært i utlandet
      * @param søknadsperioder perioder i søknaden som ligger til grunn
      */
-    fun `§ 8-9 ledd 1`(oppfylt: Boolean, utlandsperiode: Periode, søknadsperioder: List<Map<String, Serializable>>) {}
+    fun `§ 8-9 ledd 1`(oppfylt: Boolean, utlandsperiode: ClosedRange<LocalDate>, søknadsperioder: List<Map<String, Serializable>>) {}
 
     /**
      * Vurdering av maksimalt sykepengegrunnlag
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-10)
      *
-     * @param erBegrenset dersom hjemlen slår inn ved at [beregningsgrunnlag] blir begrenset til [maksimaltSykepengegrunnlag]
-     * @param maksimaltSykepengegrunnlag maksimalt årlig beløp utbetaling skal beregnes ut fra
-     * @param skjæringstidspunkt dato [maksimaltSykepengegrunnlag] settes ut fra
-     * @param beregningsgrunnlag total inntekt på tvers av alle relevante arbeidsgivere
+     * @param erBegrenset dersom hjemlen slår inn ved at [beregningsgrunnlagÅrlig] blir begrenset til [maksimaltSykepengegrunnlagÅrlig]
+     * @param maksimaltSykepengegrunnlagÅrlig maksimalt årlig beløp utbetaling skal beregnes ut fra
+     * @param skjæringstidspunkt dato [maksimaltSykepengegrunnlagÅrlig] settes ut fra
+     * @param beregningsgrunnlagÅrlig total inntekt på tvers av alle relevante arbeidsgivere
      */
     fun `§ 8-10 ledd 2 punktum 1`(
         erBegrenset: Boolean,
-        maksimaltSykepengegrunnlag: Inntekt,
+        maksimaltSykepengegrunnlagÅrlig: Double,
         skjæringstidspunkt: LocalDate,
-        beregningsgrunnlag: Inntekt
+        beregningsgrunnlagÅrlig: Double
     ) {}
 
     /**
@@ -125,7 +122,7 @@ interface SubsumsjonObserver {
      * @param startdatoSykepengerettighet første NAV-dag i siste 248-dagers sykeforløp
      */
     fun `§ 8-12 ledd 1 punktum 1`(
-        periode: Periode,
+        periode: ClosedRange<LocalDate>,
         tidslinjegrunnlag: List<List<Tidslinjedag>>,
         beregnetTidslinje: List<Tidslinjedag>,
         gjenståendeSykedager: Int,
@@ -164,7 +161,7 @@ interface SubsumsjonObserver {
      * @param avvisteDager dager som vilkåret ikke er oppfylt for, hvis noen
      * @param tidslinjer alle tidslinjer på tvers av arbeidsgivere
      */
-    fun `§ 8-13 ledd 1`(periode: Periode, avvisteDager: List<LocalDate>, tidslinjer: List<List<Tidslinjedag>>) {}
+    fun `§ 8-13 ledd 1`(periode: ClosedRange<LocalDate>, avvisteDager: List<LocalDate>, tidslinjer: List<List<Tidslinjedag>>) {}
 
     /**
      * Vurdering av sykepengenes størrelse
@@ -176,7 +173,7 @@ interface SubsumsjonObserver {
      * @param grense grense brukt til å vurdere [dagerUnderGrensen]
      * @param dagerUnderGrensen dager som befinner seg under tilstrekkelig uføregrad, gitt av [grense]
      */
-    fun `§ 8-13 ledd 2`(periode: Periode, tidslinjer: List<List<Tidslinjedag>>, grense: Double, dagerUnderGrensen: Set<LocalDate>) {}
+    fun `§ 8-13 ledd 2`(periode: ClosedRange<LocalDate>, tidslinjer: List<List<Tidslinjedag>>, grense: Double, dagerUnderGrensen: List<ClosedRange<LocalDate>>) {}
 
     /**
      * Retten til sykepenger etter dette kapitlet faller bort når arbeidsforholdet midlertidig avbrytes i mer enn 14 dager
@@ -189,7 +186,7 @@ interface SubsumsjonObserver {
      * @param forklaring saksbehandler sin forklaring for overstyring av arbeidsforhold
      * @param oppfylt **true** dersom [organisasjonsnummer] har avbrudd mer enn 14 dager
      */
-    fun `§ 8-15`(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, inntekterSisteTreMåneder: List<Map<String, Any>>, forklaring: String, oppfylt: Boolean){}
+    fun `§ 8-15`(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, inntekterSisteTreMåneder: List<Inntektsubsumsjon>, forklaring: String, oppfylt: Boolean){}
 
     /**
      * Fastsettelse av dekningsgrunnlag
@@ -294,15 +291,17 @@ interface SubsumsjonObserver {
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-28)
      *
-     * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlag] er beregnet for
+     * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlagÅrlig] er beregnet for
      * @param inntekterSisteTreMåneder månedlig inntekt for de tre siste måneder før skjæringstidspunktet
-     * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlag] beregnes relativt til
-     * @param grunnlagForSykepengegrunnlag beregnet grunnlag basert på [inntekterSisteTreMåneder]
+     * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlagÅrlig] beregnes relativt til
+     * @param grunnlagForSykepengegrunnlagÅrlig beregnet grunnlag basert på [inntekterSisteTreMåneder]
+     * @param grunnlagForSykepengegrunnlagMånedlig beregnet grunnlag basert på [inntekterSisteTreMåneder]
      */
     fun `§ 8-28 ledd 3 bokstav a`(
         organisasjonsnummer: String,
-        inntekterSisteTreMåneder: List<Map<String, Any>>,
-        grunnlagForSykepengegrunnlag: Inntekt,
+        inntekterSisteTreMåneder: List<Inntektsubsumsjon>,
+        grunnlagForSykepengegrunnlagÅrlig: Double,
+        grunnlagForSykepengegrunnlagMånedlig: Double,
         skjæringstidspunkt: LocalDate
     ) {}
 
@@ -312,12 +311,13 @@ interface SubsumsjonObserver {
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-28)
      *
-     * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlag] er beregnet for
+     * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlagÅrlig] er beregnet for
      * @param startdatoArbeidsforhold startdato hos arbeidsgiver [organisasjonsnummer]
      * @param overstyrtInntektFraSaksbehandler inntekt saksbehandler har vurdert korrekt iht. § 8-28 (3) b
-     * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlag] beregnes relativt til
+     * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlagÅrlig] beregnes relativt til
      * @param forklaring saksbehandler sin forklaring for overstyring av inntekt
-     * @param grunnlagForSykepengegrunnlag beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
+     * @param grunnlagForSykepengegrunnlagÅrlig beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
+     * @param grunnlagForSykepengegrunnlagMånedlig beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
      */
     fun `§ 8-28 ledd 3 bokstav b`(
         organisasjonsnummer: String,
@@ -325,7 +325,8 @@ interface SubsumsjonObserver {
         overstyrtInntektFraSaksbehandler: Map<String, Any>,
         skjæringstidspunkt: LocalDate,
         forklaring: String,
-        grunnlagForSykepengegrunnlag: Inntekt
+        grunnlagForSykepengegrunnlagÅrlig: Double,
+        grunnlagForSykepengegrunnlagMånedlig: Double
     ) {}
 
     /**
@@ -334,18 +335,20 @@ interface SubsumsjonObserver {
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-28)
      *
-     * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlag] er beregnet for
+     * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlagÅrlig] er beregnet for
      * @param overstyrtInntektFraSaksbehandler inntekt saksbehandler har vurdert korrekt iht. § 8-28 (3) c
-     * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlag] beregnes relativt til
+     * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlagÅrlig] beregnes relativt til
      * @param forklaring saksbehandler sin forklaring for overstyring av inntekt
-     * @param grunnlagForSykepengegrunnlag beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
+     * @param grunnlagForSykepengegrunnlagÅrlig beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
+     * @param grunnlagForSykepengegrunnlagMånedlig beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
      */
     fun `§ 8-28 ledd 3 bokstav c`(
         organisasjonsnummer: String,
         overstyrtInntektFraSaksbehandler: Map<String, Any>,
         skjæringstidspunkt: LocalDate,
         forklaring: String,
-        grunnlagForSykepengegrunnlag: Inntekt
+        grunnlagForSykepengegrunnlagÅrlig: Double,
+        grunnlagForSykepengegrunnlagMånedlig: Double
     ) {}
 
     /**
@@ -354,18 +357,20 @@ interface SubsumsjonObserver {
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-28)
      *
-     * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlag] er beregnet for
+     * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlagÅrlig] er beregnet for
      * @param overstyrtInntektFraSaksbehandler inntekt saksbehandler har vurdert korrekt iht. § 8-28 (3) c
-     * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlag] beregnes relativt til
+     * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlagÅrlig] beregnes relativt til
      * @param forklaring saksbehandler sin forklaring for overstyring av inntekt
-     * @param grunnlagForSykepengegrunnlag beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
+     * @param grunnlagForSykepengegrunnlagÅrlig beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
+     * @param grunnlagForSykepengegrunnlagMånedlig beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
      */
     fun `§ 8-28 ledd 5`(
         organisasjonsnummer: String,
         overstyrtInntektFraSaksbehandler: Map<String, Any>,
         skjæringstidspunkt: LocalDate,
         forklaring: String,
-        grunnlagForSykepengegrunnlag: Inntekt
+        grunnlagForSykepengegrunnlagÅrlig: Double,
+        grunnlagForSykepengegrunnlagMånedlig: Double
     ) {}
 
     /**
@@ -373,15 +378,15 @@ interface SubsumsjonObserver {
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-29)
      *
-     * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlag] er beregnet for
-     * @param inntektsopplysninger inntekter som ligger til grunn for beregning av [grunnlagForSykepengegrunnlag]
-     * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlag] beregnes relativt til
-     * @param grunnlagForSykepengegrunnlag beregnet grunnlag basert på [inntektsopplysninger]
+     * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlagÅrlig] er beregnet for
+     * @param inntektsopplysninger inntekter som ligger til grunn for beregning av [grunnlagForSykepengegrunnlagÅrlig]
+     * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlagÅrlig] beregnes relativt til
+     * @param grunnlagForSykepengegrunnlagÅrlig beregnet grunnlag basert på [inntektsopplysninger]
      */
     fun `§ 8-29`(
         skjæringstidspunkt: LocalDate,
-        grunnlagForSykepengegrunnlag: Inntekt,
-        inntektsopplysninger: List<Map<String, Any>>,
+        grunnlagForSykepengegrunnlagÅrlig: Double,
+        inntektsopplysninger: List<Inntektsubsumsjon>,
         organisasjonsnummer: String
     ) {}
 
@@ -392,10 +397,10 @@ interface SubsumsjonObserver {
      *
      * Merk: Alltid oppfylt
      *
-     * @param grunnlagForSykepengegrunnlagPerArbeidsgiver beregnet inntekt per arbeidsgiver
-     * @param grunnlagForSykepengegrunnlag beregnet inntekt på tvers av arbeidsgivere
+     * @param grunnlagForSykepengegrunnlagPerArbeidsgiverMånedlig beregnet inntekt per arbeidsgiver
+     * @param grunnlagForSykepengegrunnlagÅrlig beregnet inntekt på tvers av arbeidsgivere
      */
-    fun `§ 8-30 ledd 1`(grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>, grunnlagForSykepengegrunnlag: Inntekt) {}
+    fun `§ 8-30 ledd 1`(grunnlagForSykepengegrunnlagPerArbeidsgiverMånedlig: Map<String, Double>, grunnlagForSykepengegrunnlagÅrlig: Double) {}
 
     /**
      * Vurdering av avvik mellom omregnet årsinntekt og innrapportert inntekt til a-ordningen
@@ -403,15 +408,15 @@ interface SubsumsjonObserver {
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-30)
      *
      * @param maksimaltTillattAvvikPåÅrsinntekt margin
-     * @param grunnlagForSykepengegrunnlag beregnet inntekt på tvers av arbeidsgivere
+     * @param grunnlagForSykepengegrunnlagÅrlig beregnet inntekt på tvers av arbeidsgivere
      * @param sammenligningsgrunnlag innrapportert inntekt til a-ordningen
      * @param avvik beregnet avvik mellom omregnet årsinntekt og innrapportert inntekt til a-ordningen
      */
     fun `§ 8-30 ledd 2 punktum 1`(
-        maksimaltTillattAvvikPåÅrsinntekt: Prosent,
-        grunnlagForSykepengegrunnlag: Inntekt,
-        sammenligningsgrunnlag: Inntekt,
-        avvik: Prosent
+        maksimaltTillattAvvikPåÅrsinntekt: Int,
+        grunnlagForSykepengegrunnlagÅrlig: Double,
+        sammenligningsgrunnlag: Double,
+        avvik: Double
     ) {}
 
     /**
@@ -438,15 +443,15 @@ interface SubsumsjonObserver {
      * @param oppfylt dersom vedkommende har inntekt større enn eller lik to ganger grunnbeløpet. Det er en forutsetning at vedkommende er mellom 67 og 70 år
      * @param skjæringstidspunkt dato det tas utgangspunkt i ved vurdering av minimum inntekt
      * @param alderPåSkjæringstidspunkt alder på skjæringstidspunktet
-     * @param beregningsgrunnlag total inntekt på tvers av alle relevante arbeidsgivere
-     * @param minimumInntekt minimum beløp [beregningsgrunnlag] må være lik eller større enn for at vilkåret skal være [oppfylt]
+     * @param beregningsgrunnlagÅrlig total inntekt på tvers av alle relevante arbeidsgivere
+     * @param minimumInntektÅrlig minimum beløp [beregningsgrunnlagÅrlig] må være lik eller større enn for at vilkåret skal være [oppfylt]
      */
     fun `§ 8-51 ledd 2`(
         oppfylt: Boolean,
         skjæringstidspunkt: LocalDate,
         alderPåSkjæringstidspunkt: Int,
-        beregningsgrunnlag: Inntekt,
-        minimumInntekt: Inntekt
+        beregningsgrunnlagÅrlig: Double,
+        minimumInntektÅrlig: Double
     ) {}
 
     /**
@@ -463,7 +468,7 @@ interface SubsumsjonObserver {
      * @param startdatoSykepengerettighet første NAV-dag i siste 248-dagers sykeforløp
      */
     fun `§ 8-51 ledd 3`(
-        periode: Periode,
+        periode: ClosedRange<LocalDate>,
         tidslinjegrunnlag: List<List<Tidslinjedag>>,
         beregnetTidslinje: List<Tidslinjedag>,
         gjenståendeSykedager: Int,
@@ -477,7 +482,7 @@ interface SubsumsjonObserver {
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/§22-13)
      */
-    fun `§ 22-13 ledd 3`(avskjæringsdato: LocalDate, perioder: List<Periode>) {}
+    fun `§ 22-13 ledd 3`(avskjæringsdato: LocalDate, perioder: List<ClosedRange<LocalDate>>) {}
 
     /**
      * Omgjøring av vedtak uten klage

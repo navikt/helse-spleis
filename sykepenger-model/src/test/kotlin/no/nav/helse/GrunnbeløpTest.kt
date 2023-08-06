@@ -186,11 +186,20 @@ internal class GrunnbeløpTest {
         val oppfylt = gjeldendeGrense.oppfyllerMinsteInntekt(skjæringstidspunkt, inntekt)
 
         if (alder.forhøyetInntektskrav(skjæringstidspunkt)) {
-            subsumsjonObserver.`§ 8-51 ledd 2`(oppfylt, skjæringstidspunkt, alder.alderPåDato(skjæringstidspunkt), inntekt, gjeldendeGrense.minsteinntekt(skjæringstidspunkt))
+            subsumsjonObserver.`§ 8-51 ledd 2`(
+                oppfylt = oppfylt,
+                skjæringstidspunkt = skjæringstidspunkt,
+                alderPåSkjæringstidspunkt = alder.alderPåDato(skjæringstidspunkt),
+                beregningsgrunnlagÅrlig = inntekt.reflection { årlig, _, _, _ -> årlig },
+                minimumInntektÅrlig = gjeldendeGrense.minsteinntekt(skjæringstidspunkt).reflection { årlig, _, _, _ -> årlig })
             if (oppfylt) return null
             return Begrunnelse.MinimumInntektOver67
         }
-        subsumsjonObserver.`§ 8-3 ledd 2 punktum 1`(oppfylt, skjæringstidspunkt, inntekt, gjeldendeGrense.minsteinntekt(skjæringstidspunkt))
+        subsumsjonObserver.`§ 8-3 ledd 2 punktum 1`(
+            oppfylt = oppfylt,
+            skjæringstidspunkt = skjæringstidspunkt,
+            beregningsgrunnlagÅrlig = inntekt.reflection { årlig, _, _, _ -> årlig },
+            minimumInntektÅrlig = gjeldendeGrense.minsteinntekt(skjæringstidspunkt).reflection { årlig, _, _, _ -> årlig })
         if (oppfylt) return null
         return Begrunnelse.MinimumInntekt
     }

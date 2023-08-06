@@ -9,7 +9,6 @@ import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.ider
-import no.nav.helse.person.Dokumentsporing.Companion.toMap
 import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.IdInnhenter

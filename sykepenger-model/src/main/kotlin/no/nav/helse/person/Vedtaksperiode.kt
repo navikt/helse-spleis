@@ -49,7 +49,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingId
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
-import no.nav.helse.person.Dokumentsporing.Companion.toMap
+import no.nav.helse.person.Dokumentsporing.Companion.tilSubsumsjonsformat
 import no.nav.helse.person.ForlengelseFraInfotrygd.IKKE_ETTERSPURT
 import no.nav.helse.person.PersonObserver.ArbeidsgiveropplysningerKorrigertEvent.KorrigerendeInntektektsopplysningstype.SAKSBEHANDLER
 import no.nav.helse.person.Sykefraværstilfelleeventyr.Companion.bliMed
@@ -176,7 +176,7 @@ internal class Vedtaksperiode private constructor(
     jurist: MaskinellJurist
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode> {
 
-    private val jurist = jurist.medVedtaksperiode(id, hendelseIder.toMap(), sykmeldingsperiode)
+    private val jurist = jurist.medVedtaksperiode(id, hendelseIder.tilSubsumsjonsformat(), sykmeldingsperiode)
     private val skjæringstidspunkt get() = person.skjæringstidspunkt(sykdomstidslinje.sykdomsperiode() ?: periode)
     private val vilkårsgrunnlag get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)
 
@@ -254,7 +254,7 @@ internal class Vedtaksperiode private constructor(
         return SpesifikkKontekst("Vedtaksperiode", mapOf("vedtaksperiodeId" to id.toString()))
     }
 
-    internal fun jurist() = jurist.medVedtaksperiode(id, hendelseIder.toSet().toMap(), sykmeldingsperiode)
+    internal fun jurist() = jurist.medVedtaksperiode(id, hendelseIder.tilSubsumsjonsformat(), sykmeldingsperiode)
 
     internal fun hendelseIder() = hendelseIder.ider()
 

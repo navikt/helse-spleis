@@ -146,12 +146,15 @@ class ArbeidsgiverInntektsopplysning(
             firstOrNull { it.orgnummer == organisasjonsnummer }?.inntektsopplysning?.fastsattÅrsinntekt()
 
         internal fun List<ArbeidsgiverInntektsopplysning>.subsummer(subsumsjonObserver: SubsumsjonObserver, opptjening: Opptjening? = null) {
-            subsumsjonObserver.`§ 8-30 ledd 1`(omregnetÅrsinntektPerArbeidsgiver(), fastsattÅrsinntekt())
+            subsumsjonObserver.`§ 8-30 ledd 1`(
+                grunnlagForSykepengegrunnlagPerArbeidsgiverMånedlig = omregnetÅrsinntektPerArbeidsgiver().mapValues { it.value.reflection { _, månedlig, _, _ -> månedlig } },
+                grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig }
+            )
             forEach { it.subsummer(subsumsjonObserver, opptjening) }
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.build(builder: VedtakFattetBuilder) {
-            builder.omregnetÅrsinntektPerArbeidsgiver(omregnetÅrsinntektPerArbeidsgiver())
+            builder.omregnetÅrsinntektPerArbeidsgiver(omregnetÅrsinntektPerArbeidsgiver().mapValues { it.value.reflection { årlig, _, _, _ -> årlig } })
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.build(builder: FastsattEtterSkjønnBuilder) {
