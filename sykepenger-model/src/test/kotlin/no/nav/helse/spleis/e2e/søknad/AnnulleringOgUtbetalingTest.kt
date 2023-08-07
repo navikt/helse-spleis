@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.søknad
 
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
@@ -149,18 +150,48 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         nullstillTilstandsendringer()
         nyPeriode(5.februar til 15.februar, a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar)
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode, foreldrepenger = listOf(5.februar til 15.februar))
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-        assertEquals(5, inspektør.utbetalinger.size)
+        assertEquals(6, inspektør.utbetalinger.size)
         assertEquals(UTBETALT, inspektør.utbetaling(0).inspektør.tilstand)
         assertEquals(UTBETALT, inspektør.utbetaling(1).inspektør.tilstand)
         assertEquals(FORKASTET, inspektør.utbetaling(2).inspektør.tilstand)
         assertEquals(FORKASTET, inspektør.utbetaling(3).inspektør.tilstand)
         assertEquals(GODKJENT_UTEN_UTBETALING, inspektør.utbetaling(4).inspektør.tilstand)
+    }
+
+    @Test
+    fun `Forkaster feilaktig avsluttet periode når to utbetalinger blir til én med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(1.mars, 31.mars)
+
+            nullstillTilstandsendringer()
+            nyPeriode(5.februar til 15.februar, a1)
+            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar)
+            håndterVilkårsgrunnlag(3.vedtaksperiode)
+            håndterYtelser(3.vedtaksperiode, foreldrepenger = listOf(5.februar til 15.februar))
+            håndterYtelser(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+            assertEquals(5, inspektør.utbetalinger.size)
+            assertEquals(UTBETALT, inspektør.utbetaling(0).inspektør.tilstand)
+            assertEquals(UTBETALT, inspektør.utbetaling(1).inspektør.tilstand)
+            assertEquals(FORKASTET, inspektør.utbetaling(2).inspektør.tilstand)
+            assertEquals(FORKASTET, inspektør.utbetaling(3).inspektør.tilstand)
+            assertEquals(GODKJENT_UTEN_UTBETALING, inspektør.utbetaling(4).inspektør.tilstand)
+        }
     }
 
     @Test

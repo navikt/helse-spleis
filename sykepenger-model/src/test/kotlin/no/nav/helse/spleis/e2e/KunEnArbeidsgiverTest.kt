@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDateTime
+import no.nav.helse.Toggle
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -327,6 +328,46 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
     @Test
     fun `inntektsmeldingen padder ikke senere vedtaksperioder med arbeidsdager`() {
+        håndterSykmelding(Sykmeldingsperiode(4.januar, 22.januar))
+        håndterSøknad(Sykdom(4.januar, 22.januar, 100.prosent))
+        håndterInntektsmelding(listOf(4.januar til 19.januar), INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterSykmelding(Sykmeldingsperiode(24.januar, 31.januar))
+        håndterSøknad(Sykdom(24.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(4.januar til 19.januar),
+            beregnetInntekt = INNTEKT,
+            førsteFraværsdag = 24.januar
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertIngenFunksjonelleFeil()
+        assertActivities()
+        inspektør.also {
+            assertInntektForDato(INNTEKT, 4.januar, inspektør = it)
+            assertInntektForDato(INNTEKT, 24.januar, inspektør = it)
+            assertEquals(4.januar, it.skjæringstidspunkt(1.vedtaksperiode))
+            assertEquals(24.januar, it.skjæringstidspunkt(2.vedtaksperiode))
+            assertEquals(19, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
+            assertEquals(8, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
+            assertEquals(1, it.sykdomstidslinje.inspektør.dagteller[Dag.UkjentDag::class])
+        }
+    }
+
+    @Test
+    fun `inntektsmeldingen padder ikke senere vedtaksperioder med arbeidsdager med toggle av`() = Toggle.RevurdereAgpFraIm.disable {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 22.januar))
         håndterSøknad(Sykdom(4.januar, 22.januar, 100.prosent))
         håndterInntektsmelding(listOf(4.januar til 19.januar), INNTEKT)

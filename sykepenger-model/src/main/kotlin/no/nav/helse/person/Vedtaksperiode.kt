@@ -2445,7 +2445,6 @@ internal class Vedtaksperiode private constructor(
         override val type = AVSLUTTET
 
         override val erFerdigBehandlet = true
-
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.lås()
             check(vedtaksperiode.utbetalinger.erAvsluttet()) {
@@ -2511,7 +2510,7 @@ internal class Vedtaksperiode private constructor(
                             ))
                     }
                 }
-                vedtaksperiode.person.igangsettOverstyring(dager, Revurderingseventyr.korrigertInntektsmelding(skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt, endringsdato = vedtaksperiode.skjæringstidspunkt))
+                vedtaksperiode.person.igangsettOverstyring(dager, Revurderingseventyr.korrigertInntektsmeldingArbeidsgiverperiode(skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt, periodeForEndring = vedtaksperiode.periode))
             } else {
                 super.håndter(vedtaksperiode, dager)
             }
