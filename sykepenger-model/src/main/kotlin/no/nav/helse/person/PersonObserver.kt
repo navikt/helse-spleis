@@ -278,7 +278,13 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
             MinimumInntekt,
             MinimumInntektOver67,
             EgenmeldingUtenforArbeidsgiverperiode,
-            // TODO: legg til denne når Flex/spre-gosys forstår seg på den: AndreYtelser,
+            AndreYtelserAap,
+            AndreYtelserDagpenger,
+            AndreYtelserForeldrepenger,
+            AndreYtelserOmsorgspenger,
+            AndreYtelserOpplaringspenger,
+            AndreYtelserPleiepenger,
+            AndreYtelserSvangerskapspenger,
             MinimumSykdomsgrad,
             EtterDødsdato,
             ManglerMedlemskap,
@@ -297,13 +303,13 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
                     is Begrunnelse.ManglerMedlemskap -> ManglerMedlemskap
                     is Begrunnelse.ManglerOpptjening -> ManglerOpptjening
                     is Begrunnelse.Over70 -> Over70
-                    is Begrunnelse.AndreYtelserAap -> EgenmeldingUtenforArbeidsgiverperiode // TODO: erstatte med: AndreYtelser
-                    is Begrunnelse.AndreYtelserDagpenger -> EgenmeldingUtenforArbeidsgiverperiode // TODO: erstatte med: AndreYtelser
-                    is Begrunnelse.AndreYtelserForeldrepenger -> EgenmeldingUtenforArbeidsgiverperiode // TODO: erstatte med: AndreYtelser
-                    is Begrunnelse.AndreYtelserOmsorgspenger -> EgenmeldingUtenforArbeidsgiverperiode // TODO: erstatte med: AndreYtelser
-                    is Begrunnelse.AndreYtelserOpplaringspenger -> EgenmeldingUtenforArbeidsgiverperiode // TODO: erstatte med: AndreYtelser
-                    is Begrunnelse.AndreYtelserPleiepenger -> EgenmeldingUtenforArbeidsgiverperiode // TODO: erstatte med: AndreYtelser
-                    is Begrunnelse.AndreYtelserSvangerskapspenger -> EgenmeldingUtenforArbeidsgiverperiode // TODO: erstatte med: AndreYtelser
+                    is Begrunnelse.AndreYtelserAap -> AndreYtelserAap
+                    is Begrunnelse.AndreYtelserDagpenger -> AndreYtelserDagpenger
+                    is Begrunnelse.AndreYtelserForeldrepenger -> AndreYtelserForeldrepenger
+                    is Begrunnelse.AndreYtelserOmsorgspenger -> AndreYtelserOmsorgspenger
+                    is Begrunnelse.AndreYtelserOpplaringspenger -> AndreYtelserOpplaringspenger
+                    is Begrunnelse.AndreYtelserPleiepenger -> AndreYtelserPleiepenger
+                    is Begrunnelse.AndreYtelserSvangerskapspenger -> AndreYtelserSvangerskapspenger
                     is Begrunnelse.NyVilkårsprøvingNødvendig -> SykepengedagerOppbrukt // TODO: Map til NyVilkårsprøvingNødvendig
                 }
             }
