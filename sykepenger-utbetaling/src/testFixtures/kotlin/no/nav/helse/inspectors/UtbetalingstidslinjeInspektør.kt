@@ -14,6 +14,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeVisitor
 import no.nav.helse.økonomi.Økonomi
 import no.nav.helse.økonomi.ØkonomiVisitor
 import kotlin.reflect.KClass
@@ -22,7 +23,7 @@ val Utbetalingstidslinje.inspektør get() = UtbetalingstidslinjeInspektør(this)
 
 // Collects assertable statistics for a Utbetalingstidslinje
 class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalingstidslinje):
-    UtbetalingsdagVisitor, ØkonomiVisitor {
+    UtbetalingstidslinjeVisitor, ØkonomiVisitor {
     var førstedato = LocalDate.MIN
     var sistedato = LocalDate.MAX
     lateinit var førstedag: Utbetalingsdag

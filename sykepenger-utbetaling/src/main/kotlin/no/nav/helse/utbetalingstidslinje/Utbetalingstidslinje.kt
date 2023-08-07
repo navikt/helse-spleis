@@ -21,7 +21,7 @@ import no.nav.helse.økonomi.Økonomi
  * Forstår utbetalingsforpliktelser for en bestemt arbeidsgiver
  */
 
-class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Collection<Utbetalingsdag> by utbetalingsdager {
+class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Collection<Utbetalingsdag> by utbetalingsdager {
     private val utbetalingsdager = utbetalingsdager.toList()
     private val førsteDato get() = utbetalingsdager.first().dato
     private val sisteDato get() = utbetalingsdager.last().dato
@@ -65,7 +65,7 @@ class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Collection<
         }
     }
 
-    fun accept(visitor: UtbetalingsdagVisitor) {
+    fun accept(visitor: UtbetalingstidslinjeVisitor) {
         visitor.preVisitUtbetalingstidslinje(this, when(this.isEmpty()) {
             true -> null
             else -> this.periode()

@@ -15,13 +15,14 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeVisitor
 import no.nav.helse.økonomi.Økonomi
 
 class UtbetalingkladderBuilder(
     tidslinje: Utbetalingstidslinje,
     private val mottakerRefusjon: String,
     private val mottakerBruker: String
-) : UtbetalingsdagVisitor {
+) : UtbetalingstidslinjeVisitor {
     private companion object {
         private const val MaksimaltAntallOppholdsdagerFørNyArbeidsgiverperiode = 15
     }
