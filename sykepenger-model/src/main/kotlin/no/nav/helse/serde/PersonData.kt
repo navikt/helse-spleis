@@ -1316,8 +1316,14 @@ internal data class PersonData(
             MinimumInntekt,
             MinimumInntektOver67,
             EgenmeldingUtenforArbeidsgiverperiode,
-            AndreYtelser,
             MinimumSykdomsgrad,
+            AndreYtelserAap,
+            AndreYtelserDagpenger,
+            AndreYtelserForeldrepenger,
+            AndreYtelserOmsorgspenger,
+            AndreYtelserOpplaringspenger,
+            AndreYtelserPleiepenger,
+            AndreYtelserSvangerskapspenger,
             EtterDødsdato,
             ManglerMedlemskap,
             ManglerOpptjening,
@@ -1329,7 +1335,13 @@ internal data class PersonData(
                 SykepengedagerOppbruktOver67 -> Begrunnelse.SykepengedagerOppbruktOver67
                 MinimumSykdomsgrad -> Begrunnelse.MinimumSykdomsgrad
                 EgenmeldingUtenforArbeidsgiverperiode -> Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
-                AndreYtelser -> Begrunnelse.AndreYtelser
+                AndreYtelserAap -> Begrunnelse.AndreYtelserAap
+                AndreYtelserDagpenger -> Begrunnelse.AndreYtelserDagpenger
+                AndreYtelserForeldrepenger -> Begrunnelse.AndreYtelserForeldrepenger
+                AndreYtelserOmsorgspenger -> Begrunnelse.AndreYtelserOmsorgspenger
+                AndreYtelserOpplaringspenger -> Begrunnelse.AndreYtelserOpplaringspenger
+                AndreYtelserPleiepenger -> Begrunnelse.AndreYtelserPleiepenger
+                AndreYtelserSvangerskapspenger -> Begrunnelse.AndreYtelserSvangerskapspenger
                 MinimumInntekt -> Begrunnelse.MinimumInntekt
                 MinimumInntektOver67 -> Begrunnelse.MinimumInntektOver67
                 EtterDødsdato -> Begrunnelse.EtterDødsdato
@@ -1345,7 +1357,13 @@ internal data class PersonData(
                     is Begrunnelse.SykepengedagerOppbruktOver67 -> SykepengedagerOppbruktOver67
                     is Begrunnelse.MinimumSykdomsgrad -> MinimumSykdomsgrad
                     is Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode -> EgenmeldingUtenforArbeidsgiverperiode
-                    is Begrunnelse.AndreYtelser -> AndreYtelser
+                    is Begrunnelse.AndreYtelserAap -> AndreYtelserAap
+                    is Begrunnelse.AndreYtelserDagpenger -> AndreYtelserDagpenger
+                    is Begrunnelse.AndreYtelserForeldrepenger -> AndreYtelserForeldrepenger
+                    is Begrunnelse.AndreYtelserOmsorgspenger -> AndreYtelserOmsorgspenger
+                    is Begrunnelse.AndreYtelserOpplaringspenger -> AndreYtelserOpplaringspenger
+                    is Begrunnelse.AndreYtelserPleiepenger -> AndreYtelserPleiepenger
+                    is Begrunnelse.AndreYtelserSvangerskapspenger -> AndreYtelserSvangerskapspenger
                     is Begrunnelse.MinimumInntekt -> MinimumInntekt
                     is Begrunnelse.MinimumInntektOver67 -> MinimumInntektOver67
                     is Begrunnelse.EtterDødsdato -> EtterDødsdato

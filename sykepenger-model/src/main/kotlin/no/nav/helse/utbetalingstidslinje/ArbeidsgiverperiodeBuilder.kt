@@ -132,7 +132,17 @@ internal class ArbeidsgiverperiodeBuilder(
         kilde: Hendelseskilde,
         ytelse: Dag.AndreYtelser.AnnenYtelse
     ) {
-        tilstand.andreYtelser(this, dato)
+        val begrunnelse = when(ytelse) {
+            Dag.AndreYtelser.AnnenYtelse.AAP -> Begrunnelse.AndreYtelserAap
+            Dag.AndreYtelser.AnnenYtelse.Dagpenger -> Begrunnelse.AndreYtelserDagpenger
+            Dag.AndreYtelser.AnnenYtelse.Foreldrepenger -> Begrunnelse.AndreYtelserForeldrepenger
+            Dag.AndreYtelser.AnnenYtelse.Omsorgspenger -> Begrunnelse.AndreYtelserOmsorgspenger
+            Dag.AndreYtelser.AnnenYtelse.Opplæringspenger -> Begrunnelse.AndreYtelserOpplaringspenger
+            Dag.AndreYtelser.AnnenYtelse.Pleiepenger -> Begrunnelse.AndreYtelserPleiepenger
+            Dag.AndreYtelser.AnnenYtelse.Svangerskapspenger -> Begrunnelse.AndreYtelserSvangerskapspenger
+
+        }
+        tilstand.andreYtelser(this, dato, begrunnelse)
     }
 
     override fun visitDag(dag: Dag.Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) {
@@ -203,7 +213,7 @@ internal class ArbeidsgiverperiodeBuilder(
         fun feriedagSomSyk(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, kilde: Hendelseskilde)
         fun feriedag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate)
         fun leaving(builder: ArbeidsgiverperiodeBuilder) {}
-        fun andreYtelser(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate)
+        fun andreYtelser(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, begrunnelse: Begrunnelse)
     }
     private object Initiell : Tilstand {
         override fun feriedag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate) {
@@ -211,7 +221,7 @@ internal class ArbeidsgiverperiodeBuilder(
             builder.mediator.fridagOppholdsdag(dato)
         }
 
-        override fun andreYtelser(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate) {
+        override fun andreYtelser(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, begrunnelse: Begrunnelse) {
             builder.arbeidsgiverperiodeteller.dec()
             builder.mediator.fridagOppholdsdag(dato)
         }
@@ -242,7 +252,7 @@ internal class ArbeidsgiverperiodeBuilder(
         override fun feriedag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate) {
             builder.fridager.add(dato)
         }
-        override fun andreYtelser(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate) {
+        override fun andreYtelser(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, begrunnelse: Begrunnelse) {
             builder.fridager.add(dato)
         }
 
@@ -287,7 +297,7 @@ internal class ArbeidsgiverperiodeBuilder(
             throw IllegalStateException("kan ikke ha fridag som siste dag i arbeidsgiverperioden")
         }
 
-        override fun andreYtelser(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate) {
+        override fun andreYtelser(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, begrunnelse: Begrunnelse) {
             throw IllegalStateException("kan ikke ha andre ytelser som siste dag i arbeidsgiverperioden")
         }
     }
@@ -307,8 +317,8 @@ internal class ArbeidsgiverperiodeBuilder(
             builder.mediator.fridag(dato)
         }
 
-        override fun andreYtelser(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate) {
-            builder.mediator.avvistDag(dato, Begrunnelse.AndreYtelser, Økonomi.ikkeBetalt())
+        override fun andreYtelser(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, begrunnelse: Begrunnelse) {
+            builder.mediator.avvistDag(dato, begrunnelse, Økonomi.ikkeBetalt())
         }
 
         override fun feriedagSomSyk(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, kilde: Hendelseskilde) {

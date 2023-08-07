@@ -8,7 +8,13 @@ enum class BegrunnelseDTO {
     MinimumInntekt,
     MinimumInntektOver67,
     EgenmeldingUtenforArbeidsgiverperiode,
-    AndreYtelser,
+    AndreYtelserAap,
+    AndreYtelserDagpenger,
+    AndreYtelserForeldrepenger,
+    AndreYtelserOmsorgspenger,
+    AndreYtelserOpplaringspenger,
+    AndreYtelserPleiepenger,
+    AndreYtelserSvangerskapspenger,
     MinimumSykdomsgrad,
     EtterDødsdato,
     ManglerMedlemskap,
@@ -27,7 +33,13 @@ enum class BegrunnelseDTO {
             is Begrunnelse.ManglerMedlemskap -> ManglerMedlemskap
             is Begrunnelse.ManglerOpptjening -> ManglerOpptjening
             is Begrunnelse.Over70 -> Over70
-            is Begrunnelse.AndreYtelser -> AndreYtelser
+            is Begrunnelse.AndreYtelserAap -> AndreYtelserAap
+            is Begrunnelse.AndreYtelserDagpenger -> AndreYtelserDagpenger
+            is Begrunnelse.AndreYtelserForeldrepenger -> AndreYtelserForeldrepenger
+            is Begrunnelse.AndreYtelserOmsorgspenger -> AndreYtelserOmsorgspenger
+            is Begrunnelse.AndreYtelserOpplaringspenger -> AndreYtelserOpplaringspenger
+            is Begrunnelse.AndreYtelserPleiepenger -> AndreYtelserPleiepenger
+            is Begrunnelse.AndreYtelserSvangerskapspenger -> AndreYtelserSvangerskapspenger
             is Begrunnelse.NyVilkårsprøvingNødvendig -> SykepengedagerOppbrukt // TODO: Map til NyVilkårsprøvingNødvendig
         }
     }

@@ -133,7 +133,13 @@ private fun mapDag(dag: SammenslåttDag) = GraphQLDag(
             BegrunnelseDTO.MinimumInntekt -> GraphQLBegrunnelse.MinimumInntekt
             BegrunnelseDTO.MinimumInntektOver67 -> GraphQLBegrunnelse.MinimumInntektOver67
             BegrunnelseDTO.EgenmeldingUtenforArbeidsgiverperiode -> GraphQLBegrunnelse.EgenmeldingUtenforArbeidsgiverperiode
-            BegrunnelseDTO.AndreYtelser -> GraphQLBegrunnelse.AndreYtelser
+            BegrunnelseDTO.AndreYtelserAap -> GraphQLBegrunnelse.AndreYtelser
+            BegrunnelseDTO.AndreYtelserDagpenger -> GraphQLBegrunnelse.AndreYtelser
+            BegrunnelseDTO.AndreYtelserForeldrepenger -> GraphQLBegrunnelse.AndreYtelser
+            BegrunnelseDTO.AndreYtelserOmsorgspenger -> GraphQLBegrunnelse.AndreYtelser
+            BegrunnelseDTO.AndreYtelserOpplaringspenger -> GraphQLBegrunnelse.AndreYtelser
+            BegrunnelseDTO.AndreYtelserPleiepenger -> GraphQLBegrunnelse.AndreYtelser
+            BegrunnelseDTO.AndreYtelserSvangerskapspenger -> GraphQLBegrunnelse.AndreYtelser
             BegrunnelseDTO.MinimumSykdomsgrad -> GraphQLBegrunnelse.MinimumSykdomsgrad
             BegrunnelseDTO.EtterDødsdato -> GraphQLBegrunnelse.EtterDodsdato
             BegrunnelseDTO.ManglerMedlemskap -> GraphQLBegrunnelse.ManglerMedlemskap

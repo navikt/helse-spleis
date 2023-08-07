@@ -25,7 +25,13 @@ import no.nav.helse.testhelpers.PROBLEM
 import no.nav.helse.testhelpers.R
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.U
-import no.nav.helse.testhelpers.Y
+import no.nav.helse.testhelpers.YA
+import no.nav.helse.testhelpers.YD
+import no.nav.helse.testhelpers.YF
+import no.nav.helse.testhelpers.YO
+import no.nav.helse.testhelpers.YOL
+import no.nav.helse.testhelpers.YP
+import no.nav.helse.testhelpers.YS
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
@@ -223,7 +229,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `ferie og permisjon med i arbeidsgiverperioden`() {
-        undersøkeLike({ 6.S + 6.F + 6.S }, { 6.S + 6.P + 6.S }, { 6.S + 6.J + 6.S }, { 6.S + 6.Y + 6.S }) {
+        undersøkeLike({ 6.S + 6.F + 6.S }, { 6.S + 6.P + 6.S }, { 6.S + 6.J + 6.S }, { 6.S + 6.YF + 6.S }) {
             assertEquals(18, inspektør.size)
             assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
             assertEquals(2, inspektør.navDagTeller)
@@ -234,7 +240,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `ferie og permisjon fullfører arbeidsgiverperioden`() {
-        undersøkeLike({ 1.S + 15.F + 6.S }, { 1.S + 15.P + 6.S }, { 1.S + 15.J + 6.S }, { 1.S + 15.Y + 6.S }) {
+        undersøkeLike({ 1.S + 15.F + 6.S }, { 1.S + 15.P + 6.S }, { 1.S + 15.J + 6.S }, { 1.S + 15.YF + 6.S }) {
             assertEquals(22, inspektør.size)
             assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
             assertEquals(4, inspektør.navDagTeller)
@@ -257,7 +263,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `andre ytelser etter utbetaling`() {
-        undersøke(16.S + 15.Y)
+        undersøke(16.S + 15.YF)
         assertEquals(31, inspektør.size)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(15, inspektør.avvistDagTeller)
@@ -267,7 +273,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `andre ytelser umiddelbart etter utbetaling teller ikke som opphold`() {
-        undersøke(16.S + 16.Y + 10.S)
+        undersøke(16.S + 16.YF + 10.S)
         assertEquals(42, inspektør.size)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(16, inspektør.avvistDagTeller)
@@ -277,7 +283,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `andre ytelser umiddelbart etter utbetaling teller ikke som opphold hvis etterfølgt av arbeidsdag`() {
-        undersøke(16.S + 15.Y + 1.A + 10.S)
+        undersøke(16.S + 15.YF + 1.A + 10.S)
         assertEquals(42, inspektør.size)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(6, inspektør.navDagTeller)
@@ -546,6 +552,19 @@ internal class UtbetalingstidslinjeBuilderTest {
         val andreArbeidsgiverperiode = listOf(11.februar til 17.februar)
         assertEquals(førsteArbeidsgiverperiode, perioder.first())
         assertEquals(andreArbeidsgiverperiode, perioder.last())
+    }
+
+    @Test
+    fun `avviser andre ytelser med riktige begrunnelser`() {
+        undersøke(16.S + 1.YF + 1.YD + 1.YA + 1.YO + 1.YP + 1.YS + 1.YOL)
+        assertEquals(7, inspektør.avvistDagTeller)
+        assertEquals(Begrunnelse.AndreYtelserForeldrepenger, inspektør.begrunnelse(17.januar).single())
+        assertEquals(Begrunnelse.AndreYtelserDagpenger, inspektør.begrunnelse(18.januar).single())
+        assertEquals(Begrunnelse.AndreYtelserAap, inspektør.begrunnelse(19.januar).single())
+        assertEquals(Begrunnelse.AndreYtelserOmsorgspenger, inspektør.begrunnelse(20.januar).single())
+        assertEquals(Begrunnelse.AndreYtelserPleiepenger, inspektør.begrunnelse(21.januar).single())
+        assertEquals(Begrunnelse.AndreYtelserSvangerskapspenger, inspektør.begrunnelse(22.januar).single())
+        assertEquals(Begrunnelse.AndreYtelserOpplaringspenger, inspektør.begrunnelse(23.januar).single())
     }
 
     private lateinit var teller: Arbeidsgiverperiodeteller

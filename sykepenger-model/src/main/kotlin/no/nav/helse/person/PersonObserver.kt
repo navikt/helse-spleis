@@ -297,7 +297,13 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
                     is Begrunnelse.ManglerMedlemskap -> ManglerMedlemskap
                     is Begrunnelse.ManglerOpptjening -> ManglerOpptjening
                     is Begrunnelse.Over70 -> Over70
-                    is Begrunnelse.AndreYtelser -> EgenmeldingUtenforArbeidsgiverperiode // TODO: erstatte med: AndreYtelser
+                    is Begrunnelse.AndreYtelserAap -> EgenmeldingUtenforArbeidsgiverperiode // TODO: erstatte med: AndreYtelser
+                    is Begrunnelse.AndreYtelserDagpenger -> EgenmeldingUtenforArbeidsgiverperiode // TODO: erstatte med: AndreYtelser
+                    is Begrunnelse.AndreYtelserForeldrepenger -> EgenmeldingUtenforArbeidsgiverperiode // TODO: erstatte med: AndreYtelser
+                    is Begrunnelse.AndreYtelserOmsorgspenger -> EgenmeldingUtenforArbeidsgiverperiode // TODO: erstatte med: AndreYtelser
+                    is Begrunnelse.AndreYtelserOpplaringspenger -> EgenmeldingUtenforArbeidsgiverperiode // TODO: erstatte med: AndreYtelser
+                    is Begrunnelse.AndreYtelserPleiepenger -> EgenmeldingUtenforArbeidsgiverperiode // TODO: erstatte med: AndreYtelser
+                    is Begrunnelse.AndreYtelserSvangerskapspenger -> EgenmeldingUtenforArbeidsgiverperiode // TODO: erstatte med: AndreYtelser
                     is Begrunnelse.NyVilkårsprøvingNødvendig -> SykepengedagerOppbrukt // TODO: Map til NyVilkårsprøvingNødvendig
                 }
             }

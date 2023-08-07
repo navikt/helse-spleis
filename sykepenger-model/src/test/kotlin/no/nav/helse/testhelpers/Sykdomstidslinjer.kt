@@ -113,12 +113,60 @@ internal val Int.J
         SykdomstidslinjeHendelse.Hendelseskilde.INGEN
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal val Int.Y
+internal val Int.YF
     get() = Sykdomstidslinje.andreYtelsedager(
         dagensDato,
         dagensDato.plusDays(this.toLong() - 1),
         SykdomstidslinjeHendelse.Hendelseskilde.INGEN,
         Dag.AndreYtelser.AnnenYtelse.Foreldrepenger
+    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+
+internal val Int.YD
+    get() = Sykdomstidslinje.andreYtelsedager(
+        dagensDato,
+        dagensDato.plusDays(this.toLong() - 1),
+        SykdomstidslinjeHendelse.Hendelseskilde.INGEN,
+        Dag.AndreYtelser.AnnenYtelse.Dagpenger
+    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+
+internal val Int.YA
+    get() = Sykdomstidslinje.andreYtelsedager(
+        dagensDato,
+        dagensDato.plusDays(this.toLong() - 1),
+        SykdomstidslinjeHendelse.Hendelseskilde.INGEN,
+        Dag.AndreYtelser.AnnenYtelse.AAP
+    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+
+internal val Int.YO
+    get() = Sykdomstidslinje.andreYtelsedager(
+        dagensDato,
+        dagensDato.plusDays(this.toLong() - 1),
+        SykdomstidslinjeHendelse.Hendelseskilde.INGEN,
+        Dag.AndreYtelser.AnnenYtelse.Omsorgspenger
+    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+
+internal val Int.YP
+    get() = Sykdomstidslinje.andreYtelsedager(
+        dagensDato,
+        dagensDato.plusDays(this.toLong() - 1),
+        SykdomstidslinjeHendelse.Hendelseskilde.INGEN,
+        Dag.AndreYtelser.AnnenYtelse.Pleiepenger
+    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+
+internal val Int.YS
+    get() = Sykdomstidslinje.andreYtelsedager(
+        dagensDato,
+        dagensDato.plusDays(this.toLong() - 1),
+        SykdomstidslinjeHendelse.Hendelseskilde.INGEN,
+        Dag.AndreYtelser.AnnenYtelse.Svangerskapspenger
+    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+
+internal val Int.YOL
+    get() = Sykdomstidslinje.andreYtelsedager(
+        dagensDato,
+        dagensDato.plusDays(this.toLong() - 1),
+        SykdomstidslinjeHendelse.Hendelseskilde.INGEN,
+        Dag.AndreYtelser.AnnenYtelse.Opplæringspenger
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.H

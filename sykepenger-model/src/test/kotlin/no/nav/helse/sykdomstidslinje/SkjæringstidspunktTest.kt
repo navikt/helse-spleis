@@ -22,7 +22,7 @@ import no.nav.helse.testhelpers.P
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.U
 import no.nav.helse.testhelpers.UK
-import no.nav.helse.testhelpers.Y
+import no.nav.helse.testhelpers.YF
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.tournament.Dagturnering
@@ -51,7 +51,7 @@ internal class SkjæringstidspunktTest {
         assertNull(1.opphold.sisteSkjæringstidspunkt())
         assertNull(1.A.sisteSkjæringstidspunkt())
         assertNull(1.J.sisteSkjæringstidspunkt())
-        assertNull(1.Y.sisteSkjæringstidspunkt())
+        assertNull(1.YF.sisteSkjæringstidspunkt())
     }
 
     @Test
@@ -117,13 +117,13 @@ internal class SkjæringstidspunktTest {
         perioder(2.S, 2.F, 2.J, 2.S) { _, _, _, periode4 ->
             assertFørsteDagErSkjæringstidspunkt(periode4, this)
         }
-        perioder(2.S, 2.Y, 2.F, 2.S) { _, _, _, periode4 ->
+        perioder(2.S, 2.YF, 2.F, 2.S) { _, _, _, periode4 ->
             assertFørsteDagErSkjæringstidspunkt(periode4, this)
         }
-        perioder(2.S, 2.F, 2.Y, 2.S) { _, _, _, periode4 ->
+        perioder(2.S, 2.F, 2.YF, 2.S) { _, _, _, periode4 ->
             assertFørsteDagErSkjæringstidspunkt(periode4, this)
         }
-        perioder(2.S, 2.Y, 2.S) { _, _, periode3 ->
+        perioder(2.S, 2.YF, 2.S) { _, _, periode3 ->
             assertFørsteDagErSkjæringstidspunkt(periode3, this)
         }
     }
@@ -136,7 +136,7 @@ internal class SkjæringstidspunktTest {
         perioder(2.S, 2.P) { periode1, _ ->
             assertFørsteDagErSkjæringstidspunkt(periode1, this)
         }
-        perioder(2.S, 2.Y) { periode1, _ ->
+        perioder(2.S, 2.YF) { periode1, _ ->
             assertFørsteDagErSkjæringstidspunkt(periode1, this)
         }
     }
