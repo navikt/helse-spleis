@@ -5,14 +5,12 @@ dependencies {
     api(project(":sykepenger-utbetaling"))
     api(project(":sykepenger-aktivitetslogg"))
     api(project(":sykepenger-etterlevelse"))
-    implementation(project(":sykepenger-inntekt"))
     implementation(libs.bundles.jackson)
     implementation(libs.bundles.logging) {
         exclude("com.fasterxml.jackson.core")
         exclude("com.fasterxml.jackson.dataformat")
     }
     testImplementation(testFixtures(project(":sykepenger-utbetaling")))
-    testImplementation(testFixtures(project(":sykepenger-primitiver")))
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
 }
 

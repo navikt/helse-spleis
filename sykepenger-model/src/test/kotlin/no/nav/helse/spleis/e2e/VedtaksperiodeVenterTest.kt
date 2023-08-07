@@ -1,10 +1,8 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.AKTØRID
-import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.TestPerson.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -17,9 +15,6 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

@@ -10,7 +10,6 @@ import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
-import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.api.dto.AvvistDag
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.serde.api.dto.Sykdomstidslinjedag

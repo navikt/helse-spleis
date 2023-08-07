@@ -11,7 +11,6 @@ import no.nav.helse.person.PersonObserver.ForespurtOpplysning.Companion.toJsonMa
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.person.inntekt.Refusjonsopplysning
-import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Prosentdel
 

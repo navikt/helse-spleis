@@ -54,7 +54,10 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
 
         utbetalingstidslinje.filterNot { it.dato.erHelg() }.forEach { utbetalingsdag ->
             utbetalingsdag.økonomi.accept(AvrundetØkonomiAsserter { _, arbeidsgiverRefusjonsbeløp, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
-                assertEquals(forventetArbeidsgiverbeløp, arbeidsgiverbeløp) { "feil arbeidsgiverbeløp for dag ${utbetalingsdag.dato} "}
+                assertEquals(
+                    forventetArbeidsgiverbeløp,
+                    arbeidsgiverbeløp
+                ) { "feil arbeidsgiverbeløp for dag ${utbetalingsdag.dato} " }
                 assertEquals(forventetArbeidsgiverRefusjonsbeløp, arbeidsgiverRefusjonsbeløp)
                 assertEquals(0, personbeløp)
             })

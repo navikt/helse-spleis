@@ -11,7 +11,6 @@ import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.Fridag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.NavDag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.NavHelgDag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.Permisjonsdag
-import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB

@@ -12,11 +12,6 @@ import no.nav.helse.serde.api.BuilderState
 import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.PersonDTO
 import no.nav.helse.Alder
-import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.person.Opptjening
-import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Sykepengegrunnlag
-import no.nav.helse.økonomi.Prosent
 
 internal class PersonBuilder(
     builder: AbstractBuilder,

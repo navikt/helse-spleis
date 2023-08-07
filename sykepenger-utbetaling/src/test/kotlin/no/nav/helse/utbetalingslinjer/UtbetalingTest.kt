@@ -3,7 +3,6 @@ package no.nav.helse.utbetalingslinjer
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
@@ -14,7 +13,6 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -525,8 +523,7 @@ internal class UtbetalingTest {
         val første = opprettUtbetaling(tidslinje, sisteDato = 21.januar)
         val andre = opprettUtbetaling(tidslinje, første, 28.januar)
         val tredje = opprettUtbetaling(tidslinje, andre, 2.februar)
-        val annullering = annuller(tredje)
-        no.nav.helse.testhelpers.assertNotNull(annullering)
+        val annullering = annuller(tredje) ?: fail { "forventet utbetaling" }
         val utbetalingInspektør = annullering.inspektør
         assertEquals(første.inspektør.korrelasjonsId, utbetalingInspektør.korrelasjonsId)
         assertEquals(1.januar til 2.februar, utbetalingInspektør.periode)
@@ -540,8 +537,7 @@ internal class UtbetalingTest {
     fun `forlenger seg ikke på en annullering`() {
         val tidslinje = tidslinjeOf(16.AP, 10.NAV).betale()
         val første = opprettUtbetaling(tidslinje)
-        val annullering = annuller(første)
-        no.nav.helse.testhelpers.assertNotNull(annullering)
+        val annullering = annuller(første) ?: fail { "forventet utbetaling" }
         val andre = opprettUtbetaling(tidslinje, annullering)
         assertNotEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
         assertNotEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
@@ -620,8 +616,7 @@ internal class UtbetalingTest {
         val første = opprettUtbetaling(tidslinje.kutt(19.januar(2020)))
         val andre = opprettUtbetaling(tidslinje.kutt(24.januar(2020)), tidligere = første)
         val tredje = opprettUtbetaling(tidslinje.kutt(18.februar(2020)), tidligere = andre)
-        val andreAnnullert = annuller(andre)
-        no.nav.helse.testhelpers.assertNotNull(andreAnnullert)
+        val andreAnnullert = annuller(andre) ?: fail { "forventet utbetaling" }
         godkjenn(andreAnnullert)
         assertEquals(listOf(andre, tredje), listOf(tredje, andre, første).aktive())
         assertEquals(listOf(tredje), listOf(andreAnnullert, tredje, andre, første).aktive())
@@ -794,8 +789,7 @@ internal class UtbetalingTest {
     fun `annullere delvis refusjon`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600)).betale()
         val utbetaling = opprettUtbetaling(tidslinje)
-        val annullering = annuller(utbetaling)
-        no.nav.helse.testhelpers.assertNotNull(annullering)
+        val annullering = annuller(utbetaling) ?: fail { "forventet utbetaling" }
         assertTrue(annullering.inspektør.arbeidsgiverOppdrag.last().erOpphør())
         assertTrue(annullering.inspektør.personOppdrag.last().erOpphør())
     }
@@ -813,8 +807,7 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 5.NAV, 10.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600)).betale()
         val første = opprettUtbetaling(tidslinje.kutt(21.januar))
         val andre = opprettUtbetaling(tidslinje, første)
-        val annullering = annuller(andre)
-        no.nav.helse.testhelpers.assertNotNull(annullering)
+        val annullering = annuller(andre) ?: fail { "forventet utbetaling" }
         assertTrue(annullering.inspektør.arbeidsgiverOppdrag.last().erOpphør())
         assertTrue(annullering.inspektør.personOppdrag.last().erOpphør())
     }
@@ -1169,3 +1162,9 @@ internal class UtbetalingTest {
     private fun IAktivitetslogg.harBehov(behov: Behovtype) =
         this.behov().any { it.type == behov }
 }
+
+private val frø = LocalDate.of(2018, 1, 1)
+val Int.januar get() = frø.withMonth(1).withDayOfMonth(this)
+val Int.februar get() = frø.withMonth(2).withDayOfMonth(this)
+val Int.mars get() = frø.withMonth(3).withDayOfMonth(this)
+val Int.desember get() = frø.withMonth(12).withDayOfMonth(this)
