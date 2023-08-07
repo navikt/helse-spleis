@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 
-val serdeObjectMapper: ObjectMapper = jacksonObjectMapper()
+internal val serdeObjectMapper: ObjectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
     .registerModule(SimpleModule().addSerializer(SetSerializer(Set::class.java)))
     .registerModule(SimpleModule().addDeserializer(Set::class.java, SetDeserializer(Set::class.java)))

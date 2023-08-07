@@ -2,10 +2,8 @@ package no.nav.helse.hendelser
 
 import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.serde.serdeObjectMapper
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdrag
-import org.slf4j.LoggerFactory
 
 class Simulering(
     meldingsreferanseId: UUID,
@@ -20,18 +18,6 @@ class Simulering(
     val simuleringResultat: SimuleringResultat?,
     private val utbetalingId: UUID
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, orgnummer) {
-
-    companion object {
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-    }
-    init {
-        simuleringResultat?.totalbeløp?.let {
-            if (it < 0) {
-                sikkerlogg.info("Negativt totalbeløp på simulering: ${serdeObjectMapper.writeValueAsString(simuleringResultat.toMap())} for aktørId: ${aktørId}")
-            }
-        }
-    }
-
     private val fagområde = Fagområde.from(fagområde)
 
     fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
