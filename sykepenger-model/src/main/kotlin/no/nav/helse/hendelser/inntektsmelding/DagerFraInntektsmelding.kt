@@ -20,6 +20,7 @@ internal class DagerFraInntektsmelding(
     private val opprinneligPeriode = inntektsmelding.sykdomstidslinje().periode()
     private val arbeidsdager = mutableSetOf<LocalDate>()
     private val gjenståendeDager = opprinneligPeriode?.toMutableSet() ?: mutableSetOf()
+    private var dagerHåndtert = false
     private val alleDager get() = (opprinneligPeriode?: emptySet()) + arbeidsdager
     private val håndterteDager get() = alleDager - gjenståendeDager
     private val dokumentsporing = Dokumentsporing.inntektsmeldingDager(meldingsreferanseId())
@@ -32,7 +33,10 @@ internal class DagerFraInntektsmelding(
     internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = hendelseIder.add(dokumentsporing)
     internal fun alleredeHåndtert(hendelseIder: Set<Dokumentsporing>) = dokumentsporing in hendelseIder
 
-    internal fun vurdertTilOgMed(dato: LocalDate) = inntektsmelding.trimLeft(dato)
+    internal fun vurdertTilOgMed(dato: LocalDate) {
+        inntektsmelding.trimLeft(dato)
+        gjenståendeDager.removeAll {gjenstående -> gjenstående <= dato}
+    }
     internal fun oppdatertFom(periode: Periode) = inntektsmelding.oppdaterFom(periode)
     internal fun leggTilArbeidsdagerFør(dato: LocalDate) {
         checkNotNull(opprinneligPeriode) { "Forventer ikke å utvide en tom sykdomstidslinje" }
@@ -44,10 +48,9 @@ internal class DagerFraInntektsmelding(
         gjenståendeDager.addAll(arbeidsdagerFør)
     }
 
-    internal fun håndterPeriodeRettFør(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Unit) {
-        val periodeRettFør = periodeRettFør(periode) ?: return
-        oppdaterSykdom(BitAvInntektsmelding(inntektsmelding, periodeRettFør))
-        gjenståendeDager.removeAll(periodeRettFør)
+    internal fun håndterPeriodeRettFør(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Sykdomstidslinje): Sykdomstidslinje {
+        val periodeRettFør = periodeRettFør(periode) ?: return Sykdomstidslinje()
+        return håndter(periodeRettFør, oppdaterSykdom)
     }
 
     private fun overlappendeDager(periode: Periode) =  periode.intersect(gjenståendeDager)
@@ -63,12 +66,18 @@ internal class DagerFraInntektsmelding(
 
     internal fun harBlittHåndtertAv(periode: Periode) = håndterteDager.any { it in periode }
 
+    private fun håndter(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Sykdomstidslinje): Sykdomstidslinje {
+        val arbeidsgiverSykdomstidslinje = oppdaterSykdom(BitAvInntektsmelding(inntektsmelding, periode))
+        gjenståendeDager.removeAll(periode)
+        dagerHåndtert = true
+        return arbeidsgiverSykdomstidslinje
+    }
+
     internal fun håndter(periode: Periode, arbeidsgiverperiode: () -> Arbeidsgiverperiode?, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Sykdomstidslinje): Sykdomstidslinje? {
         val overlappendeDager = overlappendeDager(periode).takeUnless { it.isEmpty() } ?: return null
-        val arbeidsgiverSykedomstidslinje = oppdaterSykdom(BitAvInntektsmelding(inntektsmelding, overlappendeDager.omsluttendePeriode!!))
-        gjenståendeDager.removeAll(overlappendeDager)
+        val arbeidsgiverSykdomstidslinje = håndter(overlappendeDager.omsluttendePeriode!!, oppdaterSykdom)
         if (gjenståendeDager.isEmpty()) inntektsmelding.validerArbeidsgiverperiode(periode, arbeidsgiverperiode())
-        return arbeidsgiverSykedomstidslinje.subset(periode)
+        return arbeidsgiverSykdomstidslinje.subset(periode)
     }
 
     internal fun skalValideresAv(periode: Periode) = inntektsmelding.skalValideresAv(periode)
@@ -82,7 +91,7 @@ internal class DagerFraInntektsmelding(
         inntektsmelding.validerArbeidsgiverperiode(periode, arbeidsgiverperiode)
     }
 
-    internal fun noenDagerHåndtert() = håndterteDager.isNotEmpty()
+    internal fun noenDagerHåndtert() = dagerHåndtert
 
     internal fun påvirker(sykdomstidslinje: Sykdomstidslinje): Boolean {
         val periode = sykdomstidslinje.periode() ?: return false

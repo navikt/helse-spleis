@@ -220,11 +220,9 @@ internal class InntektsmeldingMatchingTest {
     }
 
     private fun DagerFraInntektsmelding.håndterPeriodeRettFør(periode: Periode): Periode? {
-        var håndtertPeriode: Periode? = null
-        håndterPeriodeRettFør(periode) {
-            håndtertPeriode = it.sykdomstidslinje().periode()
-        }
-        return håndtertPeriode
+        return håndterPeriodeRettFør(periode) {
+            it.sykdomstidslinje()
+        }.periode()
     }
 
     private companion object {
