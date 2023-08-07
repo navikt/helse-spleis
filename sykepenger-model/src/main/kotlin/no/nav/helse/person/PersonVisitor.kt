@@ -32,6 +32,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
@@ -332,7 +333,7 @@ internal interface FeriepengeutbetalingVisitor : OppdragVisitor {
     fun postVisitFeriepengeutbetalinger(feriepengeutbetalinger: List<Feriepengeutbetaling>) {}
 }
 
-internal interface UtbetalingstidslinjeberegningVisitor : UtbetalingsdagVisitor {
+internal interface UtbetalingstidslinjeberegningVisitor : UtbetalingstidslinjeVisitor {
     fun preVisitUtbetalingstidslinjeberegning(
         id: UUID,
         tidsstempel: LocalDateTime,

@@ -19,8 +19,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_19
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_20
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_28
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_31
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_33

@@ -2,7 +2,6 @@ package no.nav.helse.spleis.mediator.e2e
 
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
-import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.inntektsmeldingkontrakt.Periode

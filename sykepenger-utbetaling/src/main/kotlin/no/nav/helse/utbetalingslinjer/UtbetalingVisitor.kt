@@ -6,8 +6,9 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeVisitor
 
-interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor, UtbetalingVurderingVisitor {
+interface UtbetalingVisitor : UtbetalingstidslinjeVisitor, OppdragVisitor, UtbetalingVurderingVisitor {
     fun preVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,

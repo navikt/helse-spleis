@@ -17,7 +17,7 @@ internal class MaksimumSykepengedagerfilter(
     private val alder: Alder,
     private val arbeidsgiverRegler: ArbeidsgiverRegler,
     private val infotrygdtidslinje: Utbetalingstidslinje
-): UtbetalingstidslinjerFilter, UtbetalingsdagVisitor {
+): UtbetalingstidslinjerFilter, UtbetalingstidslinjeVisitor {
 
     private companion object {
         const val TILSTREKKELIG_OPPHOLD_I_SYKEDAGER = 26 * 7

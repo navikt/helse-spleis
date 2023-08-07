@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDateTime
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -12,14 +11,10 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_9
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_13
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_33
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_36
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_37
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
