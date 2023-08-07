@@ -26,7 +26,7 @@ internal object Sykdomsgradfilter: UtbetalingstidslinjerFilter {
 
         perioder.forEach { (periode, aktivitetslogg, subsumsjonObserver) ->
             Prosentdel.subsumsjon(subsumsjonObserver) { grense ->
-                `§ 8-13 ledd 2`(periode, tidslinjerForSubsumsjon, grense, dagerUnderGrensen)
+                `§ 8-13 ledd 2`(periode, tidslinjerForSubsumsjon, grense, dagerUnderGrensen.grupperSammenhengendePerioder())
             }
             val avvisteDager = avvisteDager(avvisteTidslinjer, periode, Begrunnelse.MinimumSykdomsgrad)
             val harAvvisteDager = avvisteDager.isNotEmpty()

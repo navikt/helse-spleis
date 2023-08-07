@@ -1,4 +1,4 @@
-package no.nav.helse.person.etterlevelse
+package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.time.YearMonth
@@ -57,28 +57,6 @@ import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType
 import no.nav.helse.september
 import no.nav.helse.somPersonidentifikator
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.spleis.e2e.assertSisteTilstand
-import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
-import no.nav.helse.spleis.e2e.forlengVedtak
-import no.nav.helse.spleis.e2e.grunnlag
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
-import no.nav.helse.spleis.e2e.håndterInntektsmeldingMedValidering
-import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsforhold
-import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
-import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
-import no.nav.helse.spleis.e2e.håndterSimulering
-import no.nav.helse.spleis.e2e.håndterSykmelding
-import no.nav.helse.spleis.e2e.håndterSøknad
-import no.nav.helse.spleis.e2e.håndterSøknadMedValidering
-import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalt
-import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
-import no.nav.helse.spleis.e2e.håndterYtelser
-import no.nav.helse.spleis.e2e.nyttVedtak
-import no.nav.helse.spleis.e2e.repeat
-import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus

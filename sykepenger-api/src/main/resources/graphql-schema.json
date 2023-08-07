@@ -5143,7 +5143,37 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
-          "name" : "AndreYtelser",
+          "name" : "AndreYtelserForeldrepenger",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "AndreYtelserAap",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "AndreYtelserOmsorgspenger",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "AndreYtelserPleiepenger",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "AndreYtelserSvangerskapspenger",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "AndreYtelserOpplaringspenger",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "AndreYtelserDagpenger",
           "description" : null,
           "isDeprecated" : false,
           "deprecationReason" : null

@@ -14,7 +14,12 @@ internal class Sammenligningsgrunnlag(
 
     internal fun avviksprosent(beregningsgrunnlag: Inntekt, subsumsjonObserver: SubsumsjonObserver) =
         beregningsgrunnlag.avviksprosent(sammenligningsgrunnlag).also { avvik ->
-            subsumsjonObserver.`§ 8-30 ledd 2 punktum 1`(Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, beregningsgrunnlag, sammenligningsgrunnlag, avvik)
+            subsumsjonObserver.`§ 8-30 ledd 2 punktum 1`(
+                maksimaltTillattAvvikPåÅrsinntekt = Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT,
+                grunnlagForSykepengegrunnlagÅrlig = beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
+                sammenligningsgrunnlag = sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
+                avvik = avvik.prosent()
+            )
         }
 
     internal constructor(arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>) : this(

@@ -1,3 +1,3 @@
 dependencies {
-    implementation(project(":sykepenger-primitiver"))
+    api(project(":sykepenger-etterlevelse-api"))
 }

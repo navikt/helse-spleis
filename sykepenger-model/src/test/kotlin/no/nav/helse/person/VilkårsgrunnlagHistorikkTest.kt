@@ -25,7 +25,6 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Com
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.somPersonidentifikator
-import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.AP

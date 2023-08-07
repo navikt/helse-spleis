@@ -8,7 +8,7 @@ class Prosent private constructor(private val desimal: Double) : Comparable<Pros
 
     companion object {
         private const val EPSILON = 0.000001
-        val MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT = 25.prosent
+        val MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT = 25
 
         fun ratio(ratio: Double) = Prosent(ratio)
         fun prosent(prosent: Double) = Prosent(prosent / 100)

@@ -8,7 +8,6 @@ import no.nav.helse.januar
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.SubsumsjonMediator
 import no.nav.helse.spleis.mediator.TestHendelseMessage
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -31,7 +30,7 @@ internal class SubsumsjonsmeldingTest {
     @BeforeEach
     fun beforeEach() {
         jurist = MaskinellJurist()
-            .medFødselsnummer(fnr.somPersonidentifikator())
+            .medFødselsnummer(fnr)
             .medOrganisasjonsnummer("123456789")
             .medVedtaksperiode(UUID.randomUUID(), emptyMap(), Periode(1.januar, 31.januar))
         subsumsjonMediator = SubsumsjonMediator(jurist, fnr, TestHendelseMessage(fnr), versjonAvKode)

@@ -82,7 +82,8 @@ class Saksbehandler internal constructor(
                 overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
                 skjæringstidspunkt = dato,
                 forklaring = forklaring,
-                grunnlagForSykepengegrunnlag = fastsattÅrsinntekt()
+                grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig },
+                grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().reflection { _, månedlig, _, _ -> månedlig }
             )
         } else if (subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref
             && subsumsjon.ledd == Ledd.LEDD_3.nummer
@@ -93,7 +94,8 @@ class Saksbehandler internal constructor(
                 overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
                 skjæringstidspunkt = dato,
                 forklaring = forklaring,
-                grunnlagForSykepengegrunnlag = fastsattÅrsinntekt()
+                grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig },
+                grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().reflection { _, månedlig, _, _ -> månedlig }
             )
         } else if (subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref && subsumsjon.ledd == Ledd.LEDD_5.nummer) {
             subsumsjonObserver.`§ 8-28 ledd 5`(
@@ -101,7 +103,8 @@ class Saksbehandler internal constructor(
                 overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
                 skjæringstidspunkt = dato,
                 forklaring = forklaring,
-                grunnlagForSykepengegrunnlag = fastsattÅrsinntekt()
+                grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig },
+                grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().reflection { _, månedlig, _, _ -> månedlig }
             )
         } else {
             sikkerLogg.warn("Overstyring av ghost: inntekt ble overstyrt med ukjent årsak: $forklaring")

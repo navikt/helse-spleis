@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.util.Objects
 import java.util.UUID
+import no.nav.helse.etterlevelse.KontekstType
 
 class Dokumentsporing private constructor(private val id: UUID, private val dokumentType: DokumentType) {
 
@@ -17,12 +18,25 @@ class Dokumentsporing private constructor(private val id: UUID, private val doku
         internal fun overstyrArbeidsforhold(id: UUID) = Dokumentsporing(id, DokumentType.OverstyrArbeidsforhold)
         internal fun skjønnsmessigFastsettelse(id: UUID) = Dokumentsporing(id, DokumentType.SkjønnsmessigFastsettelse)
 
-        // overskriver potensielt dersom en vedtaksperiode har håndtert en hendelse to ganger (les: InntektsmeldingDager/InntektsmeldingInntekt)
-        internal fun Iterable<Dokumentsporing>.toMap() = associate { it.id to it.dokumentType }
         internal fun Iterable<Dokumentsporing>.toJsonList() = map { it.id to it.dokumentType }
         internal fun Iterable<Dokumentsporing>.ider() = map { it.id }.toSet()
         internal fun Iterable<Dokumentsporing>.søknadIder() = filter { it.dokumentType == DokumentType.Søknad }.map { it.id }.toSet()
         internal fun Iterable<Dokumentsporing>.sisteInntektsmeldingId() = lastOrNull { it.dokumentType == DokumentType.InntektsmeldingDager }?.id
+
+        internal fun Iterable<Dokumentsporing>.tilSubsumsjonsformat() = associate {
+            it.id to when (it.dokumentType) {
+                DokumentType.Sykmelding -> KontekstType.Sykmelding
+                DokumentType.Søknad -> KontekstType.Søknad
+                DokumentType.InntektsmeldingDager -> KontekstType.Inntektsmelding
+                DokumentType.InntektsmeldingInntekt -> KontekstType.Inntektsmelding
+                DokumentType.OverstyrTidslinje -> KontekstType.OverstyrTidslinje
+                DokumentType.OverstyrInntekt -> KontekstType.OverstyrInntekt
+                DokumentType.OverstyrRefusjon -> KontekstType.OverstyrRefusjon
+                DokumentType.OverstyrArbeidsgiveropplysninger -> KontekstType.OverstyrArbeidsgiveropplysninger
+                DokumentType.OverstyrArbeidsforhold -> KontekstType.OverstyrArbeidsforhold
+                DokumentType.SkjønnsmessigFastsettelse -> KontekstType.SkjønnsmessigFastsettelse
+            }
+        }
     }
 
     override fun equals(other: Any?): Boolean {

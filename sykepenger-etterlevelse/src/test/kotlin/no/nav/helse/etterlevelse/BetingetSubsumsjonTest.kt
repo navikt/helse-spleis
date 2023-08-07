@@ -1,4 +1,4 @@
-package no.nav.helse.person.etterlevelse
+package no.nav.helse.etterlevelse
 
 import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall
@@ -6,14 +6,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import no.nav.helse.etterlevelse.BetingetSubsumsjon
-import no.nav.helse.etterlevelse.Bokstav
-import no.nav.helse.etterlevelse.KontekstType
-import no.nav.helse.etterlevelse.Ledd
-import no.nav.helse.etterlevelse.Paragraf
-import no.nav.helse.etterlevelse.Punktum
-import no.nav.helse.etterlevelse.Subsumsjon
-import no.nav.helse.etterlevelse.SubsumsjonVisitor
 
 internal class BetingetSubsumsjonTest {
 

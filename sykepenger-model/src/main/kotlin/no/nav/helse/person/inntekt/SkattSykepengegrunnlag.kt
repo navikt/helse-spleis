@@ -93,9 +93,15 @@ internal class SkattSykepengegrunnlag private constructor(
             organisasjonsnummer = organisasjonsnummer,
             skjæringstidspunkt = dato,
             inntekterSisteTreMåneder = inntektsopplysninger.subsumsjonsformat(),
-            grunnlagForSykepengegrunnlag = fastsattÅrsinntekt()
+            grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig },
+            grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().reflection { _, månedlig, _, _ -> månedlig }
         )
-        subsumsjonObserver.`§ 8-29`(dato, fastsattÅrsinntekt(), inntektsopplysninger.subsumsjonsformat(), organisasjonsnummer)
+        subsumsjonObserver.`§ 8-29`(
+            skjæringstidspunkt = dato,
+            grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig },
+            inntektsopplysninger = inntektsopplysninger.subsumsjonsformat(),
+            organisasjonsnummer = organisasjonsnummer
+        )
     }
 
     override fun subsumerArbeidsforhold(

@@ -1,6 +1,5 @@
 package no.nav.helse.etterlevelse
 
-import no.nav.helse.hendelser.Periode
 import java.time.LocalDate
 
 interface SubsumsjonVisitor {
@@ -17,7 +16,7 @@ interface SubsumsjonVisitor {
         kontekster: Map<String, KontekstType>
     ) {}
 
-    fun visitGrupperbarSubsumsjon(perioder: List<Periode>) {}
+    fun visitGrupperbarSubsumsjon(perioder: List<ClosedRange<LocalDate>>) {}
     fun visitBetingetSubsumsjon(funnetRelevant: Boolean) {}
 
     fun postVisitSubsumsjon(

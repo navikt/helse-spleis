@@ -1,9 +1,10 @@
 package no.nav.helse.etterlevelse
 
+import java.time.DayOfWeek
 import java.time.LocalDate
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
-import no.nav.helse.hendelser.til
+import no.nav.helse.etterlevelse.RangeIterator.Companion.iterator
+import no.nav.helse.etterlevelse.RangeIterator.Companion.merge
+import no.nav.helse.etterlevelse.RangeIterator.Companion.utvide
 
 abstract class Subsumsjon {
 
@@ -92,7 +93,7 @@ class EnkelSubsumsjon(
 }
 
 class GrupperbarSubsumsjon private constructor(
-    private val perioder: List<Periode>,
+    private val perioder: List<ClosedRange<LocalDate>>,
     override val lovverk: String,
     override val utfall: Utfall,
     override val versjon: LocalDate,
@@ -116,7 +117,7 @@ class GrupperbarSubsumsjon private constructor(
         punktum: Punktum? = null,
         bokstav: Bokstav? = null,
         kontekster: Map<String, KontekstType>
-    ) : this(listOf(dato til dato), lovverk, utfall, versjon, paragraf, ledd, punktum, bokstav, output, input, kontekster)
+    ) : this(listOf(dato.rangeTo(dato)), lovverk, utfall, versjon, paragraf, ledd, punktum, bokstav, output, input, kontekster)
 
     override val output: Map<String, Any> = originalOutput.toMutableMap().apply {
         this["perioder"] = perioder.map {
@@ -137,11 +138,31 @@ class GrupperbarSubsumsjon private constructor(
     }
 
     override fun sammenstillMed(medSammeDatagrunnlag: List<Subsumsjon>): Subsumsjon {
-        val sammenstiltePerioder = (medSammeDatagrunnlag + this)
-            .flatMap { (it as GrupperbarSubsumsjon).perioder }
-            .grupperSammenhengendePerioderMedHensynTilHelg()
-
-        return GrupperbarSubsumsjon(sammenstiltePerioder, lovverk, utfall, versjon, paragraf, ledd, punktum, bokstav, originalOutput, input, kontekster)
+        // en ny grupperbar subsumsjon er alltid én enkelt dato
+        val ny = this.perioder.single().iterator().asSequence().toList().single()
+        var dato: LocalDate? = ny
+        // utvider eventuelt en av de andre periodene om <ny> forlenger (over evt. helg)
+        val sammenstiltePerioder = medSammeDatagrunnlag
+            .filterIsInstance<GrupperbarSubsumsjon>()
+            .flatMap { it.perioder }
+            .map { other ->
+                dato?.let {
+                    other.utvide(it)?.also { dato = null }
+                } ?: other
+            } + listOfNotNull(dato?.let { it.rangeTo(it) })
+        return GrupperbarSubsumsjon(
+            perioder = sammenstiltePerioder.merge(),
+            lovverk = lovverk,
+            utfall = utfall,
+            versjon = versjon,
+            paragraf = paragraf,
+            ledd = ledd,
+            punktum = punktum,
+            bokstav = bokstav,
+            originalOutput = originalOutput,
+            input = input,
+            kontekster = kontekster
+        )
     }
 }
 

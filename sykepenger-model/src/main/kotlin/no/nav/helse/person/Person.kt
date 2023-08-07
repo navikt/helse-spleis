@@ -141,7 +141,7 @@ class Person private constructor(
         LocalDateTime.now(),
         Infotrygdhistorikk(),
         VilkårsgrunnlagHistorikk(),
-        jurist.medFødselsnummer(personidentifikator),
+        jurist.medFødselsnummer(personidentifikator.toString()),
         emptyList<Person>(),
         regler = regler
     )

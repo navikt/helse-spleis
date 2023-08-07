@@ -1,5 +1,5 @@
 rootProject.name = "sykepenger-spleis"
-include("jobs", "sykepenger-api", "sykepenger-model", "sykepenger-mediators", "sykepenger-opprydding-dev", "sykepenger-primitiver", "sykepenger-utbetaling", "sykepenger-aktivitetslogg", "sykepenger-etterlevelse", "sykepenger-inntekt")
+include("jobs", "sykepenger-api", "sykepenger-model", "sykepenger-mediators", "sykepenger-opprydding-dev", "sykepenger-primitiver", "sykepenger-utbetaling", "sykepenger-aktivitetslogg", "sykepenger-etterlevelse", "sykepenger-etterlevelse-api", "sykepenger-inntekt")
 
 dependencyResolutionManagement {
     versionCatalogs {
