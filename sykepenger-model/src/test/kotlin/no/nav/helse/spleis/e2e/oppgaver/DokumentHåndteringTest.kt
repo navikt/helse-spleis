@@ -122,7 +122,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to helt like korrigerende inntektsmeldinger`() {
+    fun `to helt like korrigerende inntektsmeldinger med toggle på`() = Toggle.RevurdereAgpFraIm.enable {
         nyttVedtak(1.januar, 31.januar, 100.prosent, beregnetInntekt = INNTEKT)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1)
         håndterYtelser(1.vedtaksperiode)
@@ -138,7 +138,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to helt like korrigerende inntektsmeldinger med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
+    fun `to helt like korrigerende inntektsmeldinger`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent, beregnetInntekt = INNTEKT)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1)
         håndterYtelser(1.vedtaksperiode)
