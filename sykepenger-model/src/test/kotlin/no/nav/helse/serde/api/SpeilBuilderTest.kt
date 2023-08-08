@@ -335,44 +335,11 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), 1.februar, refusjon = Inntektsmelding.Refusjon(INGEN, null))
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
         val januarVilkårsgrunnlagId = (speilApi().arbeidsgivere.first().generasjoner.last().perioder.last() as BeregnetPeriode).vilkårsgrunnlagId
-        val februarVilkårsgrunnlagId = (speilApi().arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-        val vilkårsgrunnlag = speilApi().vilkårsgrunnlag
-
-        assertEquals(1, vilkårsgrunnlag[januarVilkårsgrunnlagId]!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.size)
-        assertEquals(2, vilkårsgrunnlag[februarVilkårsgrunnlagId]!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.size)
-
-        val førsteRefusjonsopplysning = vilkårsgrunnlag[februarVilkårsgrunnlagId]!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.first()
-        val sisteRefusjonsopplysning = vilkårsgrunnlag[februarVilkårsgrunnlagId]!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.last()
-
-        assertEquals(1.januar, førsteRefusjonsopplysning.fom)
-        assertEquals(31.januar, førsteRefusjonsopplysning.tom)
-        assertEquals(INNTEKT, førsteRefusjonsopplysning.beløp.månedlig)
-
-        assertEquals(1.februar, sisteRefusjonsopplysning.fom)
-        assertEquals(null, sisteRefusjonsopplysning.tom)
-        assertEquals(INGEN, sisteRefusjonsopplysning.beløp.månedlig)
-    }
-
-    @Test
-    fun `Endring til ingen refusjon i forlengelsen med toggle av`() = Toggle.RevurdereAgpFraIm.disable {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), 1.februar, refusjon = Inntektsmelding.Refusjon(INGEN, null))
-
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-
-        val januarVilkårsgrunnlagId = (speilApi().arbeidsgivere.first().generasjoner.last().perioder.last() as BeregnetPeriode).vilkårsgrunnlagId
-        val februarVilkårsgrunnlagId = (speilApi().arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val februarVilkårsgrunnlagId = (speilApi().arbeidsgivere.first().generasjoner.last().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = speilApi().vilkårsgrunnlag
 
         assertEquals(1, vilkårsgrunnlag[januarVilkårsgrunnlagId]!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.size)

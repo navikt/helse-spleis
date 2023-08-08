@@ -264,7 +264,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 subsumsjonObserver
             ) ?: return null
             val endringsdato = sykepengegrunnlag.finnEndringsdato(this.sykepengegrunnlag)
-            val eventyr = Revurderingseventyr.korrigertInntektsmeldingInntektsopplysninger(skjæringstidspunkt, endringsdato)
+            val eventyr = Revurderingseventyr.korrigertInntektsmelding(skjæringstidspunkt, endringsdato)
             return kopierMed(inntektsmelding, sykepengegrunnlag, opptjening, NullObserver) to eventyr
         }
 

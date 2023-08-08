@@ -748,9 +748,6 @@ class Utbetaling private constructor(
     }
     internal object Forkastet : Tilstand {
         override val status = Utbetalingstatus.FORKASTET
-        override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
-            super.entering(utbetaling, hendelse)
-        }
     }
 
     class Vurdering(

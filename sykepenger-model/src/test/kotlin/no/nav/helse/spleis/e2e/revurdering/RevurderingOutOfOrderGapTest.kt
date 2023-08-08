@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype.Feriedag
@@ -894,39 +893,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars)
 
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-
-        håndterYtelser(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
-
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-    }
-
-    @Test
-    fun `kort periode, lang periode kommer out of order og fører til utbetaling på kort periode som nå trenger IM med toggle skrudd av`() = Toggle.RevurdereAgpFraIm.disable {
-        nyPeriode(1.mars til 16.mars)
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-
-        nyPeriode(1.februar til 25.februar)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        håndterInntektsmelding(listOf(1.februar til 16.februar))
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
-
-        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars)
-
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
@@ -1031,43 +997,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
     @Test
     fun `Out of order gjør at AUU revurderes fordi de ikke lenger er innen AGP - ber om inntektsmelding`() {
-        nyPeriode(1.mars til 10.mars)
-        nyPeriode(11.mars til 16.mars)
-
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-
-        nyttVedtak(1.februar, 25.februar)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        assertEquals(2, observatør.manglendeInntektsmeldingVedtaksperioder.size) // For 1. februar og 1.mars
-
-        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars)
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-
-        håndterYtelser(3.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-        håndterUtbetalt()
-
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
-
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-    }
-
-
-    @Test
-    fun `Out of order gjør at AUU revurderes fordi de ikke lenger er innen AGP - ber om inntektsmelding med toggle skrudd av`() = Toggle.RevurdereAgpFraIm.disable {
         nyPeriode(1.mars til 10.mars)
         nyPeriode(11.mars til 16.mars)
 

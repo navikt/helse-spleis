@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.søknad
 
-import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -31,7 +30,6 @@ import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
@@ -157,46 +155,6 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `foreldet søknad etter annen foreldet søknad - samme arbeidsgiverperiode - deler korrelasjonsId`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 19.januar))
-        håndterSykmelding(Sykmeldingsperiode(24.januar, 31.januar))
-
-        // foreldet søknad :(
-        håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-
-        // foreldet søknad :(
-        håndterSøknad(Sykdom(24.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 24.januar)
-
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-
-        val førsteUtbetaling = inspektør.utbetaling(0).inspektør
-        val andreUtbetaling = inspektør.utbetaling(1).inspektør
-        val tredjeUtbetaling = inspektør.utbetaling(2).inspektør
-
-        assertEquals(førsteUtbetaling.korrelasjonsId, andreUtbetaling.korrelasjonsId)
-        assertEquals(0, førsteUtbetaling.arbeidsgiverOppdrag.size)
-        assertEquals(0, førsteUtbetaling.personOppdrag.size)
-        assertEquals(0, andreUtbetaling.arbeidsgiverOppdrag.size)
-        assertEquals(0, andreUtbetaling.personOppdrag.size)
-        assertEquals(0, tredjeUtbetaling.arbeidsgiverOppdrag.size)
-        assertEquals(0, tredjeUtbetaling.personOppdrag.size)
-
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-    }
-
-    @Test
-    fun `foreldet søknad etter annen foreldet søknad - samme arbeidsgiverperiode - deler korrelasjonsId med toggle disable`() = Toggle.RevurdereAgpFraIm.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 19.januar))
         håndterSykmelding(Sykmeldingsperiode(24.januar, 31.januar))
 

@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDate
-import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -149,38 +148,6 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `ferie med gap til forrige, replay av IM`() {
-        nyttVedtak(1.januar, 31.januar, orgnummer = a1)
-        nullstillTilstandsendringer()
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar), orgnummer = a2)
-
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar, orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(5.februar, 20.februar), orgnummer = a1)
-        håndterSøknad(Sykdom(5.februar, 20.februar, 100.prosent), Ferie(5.februar, 20.februar), orgnummer = a1)
-
-        håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent), orgnummer = a2)
-
-        assertFunksjonellFeil("Minst en arbeidsgiver inngår ikke i sykepengegrunnlaget", 1.vedtaksperiode.filter(a2))
-
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
-        assertForkastetPeriodeTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVSLUTTET_UTEN_UTBETALING,
-            TIL_INFOTRYGD,
-            orgnummer = a1
-        )
-        assertForkastetPeriodeTilstander(
-            1.vedtaksperiode,
-            START,
-            TIL_INFOTRYGD,
-            orgnummer = a2
-        )
-    }
-
-    @Test
-    fun `ferie med gap til forrige, replay av IM med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
         nullstillTilstandsendringer()
         håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar), orgnummer = a2)

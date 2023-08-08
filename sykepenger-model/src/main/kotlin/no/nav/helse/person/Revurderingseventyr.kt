@@ -7,8 +7,7 @@ import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeDat
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Arbeidsforhold
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiveropplysninger
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiverperiode
-import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.KorrigertInntektsmeldingArbeidsgiverperiode
-import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.KorrigertInntektsmeldingInntektsopplysninger
+import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.KorrigertInntektsmelding
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.KorrigertSøknad
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.NyPeriode
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Reberegning
@@ -35,8 +34,7 @@ class Revurderingseventyr private constructor(
         fun arbeidsgiveropplysninger(skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(Arbeidsgiveropplysninger, skjæringstidspunkt, endringsdato.somPeriode())
         fun skjønnsmessigFastsettelse(skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(SkjønssmessigFastsettelse, skjæringstidspunkt, endringsdato.somPeriode())
         fun arbeidsgiverperiode(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Arbeidsgiverperiode, skjæringstidspunkt, periodeForEndring)
-        fun korrigertInntektsmeldingInntektsopplysninger(skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(KorrigertInntektsmeldingInntektsopplysninger, skjæringstidspunkt, endringsdato.somPeriode())
-        fun korrigertInntektsmeldingArbeidsgiverperiode(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(KorrigertInntektsmeldingArbeidsgiverperiode, skjæringstidspunkt, periodeForEndring)
+        fun korrigertInntektsmelding(skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(KorrigertInntektsmelding, skjæringstidspunkt, endringsdato.somPeriode())
     }
 
     private val vedtaksperioder = mutableListOf<VedtaksperiodeData>()
@@ -134,23 +132,14 @@ class Revurderingseventyr private constructor(
             override fun navn() = "KORRIGERT_SØKNAD"
         }
 
-        object KorrigertInntektsmeldingInntektsopplysninger : RevurderingÅrsak {
+        object KorrigertInntektsmelding : RevurderingÅrsak {
 
             override fun dersomInngått(hendelse: IAktivitetslogg) {
                 hendelse.varsel(RV_IM_4, "Inngår i revurdering på grunn av korrigert inntektsmelding")
-                hendelse.info("korrigert inntektsmelding trigget revurdering på grunn av inntektsopplysninger")
+                hendelse.info("korrigert inntektsmelding trigget revurdering")
             }
 
-            override fun navn() = "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER"
-        }
-
-        object KorrigertInntektsmeldingArbeidsgiverperiode : RevurderingÅrsak {
-
-            override fun dersomInngått(hendelse: IAktivitetslogg) {
-                hendelse.info("korrigert inntektsmelding trigget revurdering på grunn av arbeidsgiverperiode")
-            }
-
-            override fun navn() = "KORRIGERT_INNTEKTSMELDING_ARBEIDSGIVERPERIODE"
+            override fun navn() = "KORRIGERT_INNTEKTSMELDING"
         }
 
         object NyPeriode : RevurderingÅrsak {
