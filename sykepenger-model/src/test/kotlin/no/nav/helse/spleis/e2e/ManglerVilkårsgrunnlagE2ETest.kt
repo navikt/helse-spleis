@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -8,6 +9,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
@@ -15,6 +17,9 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -110,6 +115,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
     }
 
+
     @Test
     fun `korrigert arbeidsgiverperiode under pågående revurdering`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
@@ -130,6 +136,32 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `korrigert arbeidsgiverperiode under pågående revurdering - korrigert søknad for februar`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        forlengVedtak(1.februar, 28.februar, 100.prosent)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 80.prosent))
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        nullstillTilstandsendringer()
+        assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar)
+        assertEquals("AAAAARR AAAAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertEquals(listOf(1.februar), person.skjæringstidspunkter())
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+
+        assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+    }
+
+    @Test
+    fun `korrigert arbeidsgiverperiode under pågående revurdering - korrigert søknad for februar med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         forlengVedtak(1.februar, 28.februar, 100.prosent)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 80.prosent))

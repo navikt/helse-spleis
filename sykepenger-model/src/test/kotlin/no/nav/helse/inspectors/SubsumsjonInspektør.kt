@@ -133,6 +133,26 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         assertResultat(input, output, subsumsjon)
     }
 
+    internal fun assertOppfyltPaaIndeks(
+        index: Int,
+        forventetAntall: Int,
+        paragraf: Paragraf,
+        versjon: LocalDate,
+        ledd: Ledd? = null,
+        punktum: Punktum? = null,
+        bokstav: Bokstav? = null,
+        input: Map<String, Any>? = null,
+        output: Map<String, Any>? = null,
+        vedtaksperiodeId: IdInnhenter? = null,
+        organisasjonsnummer: String = ORGNUMMER
+    ) {
+        val resultat = finnSubsumsjoner(paragraf, versjon, ledd, punktum, bokstav, VILKAR_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
+        val subsumsjon = resultat[index]
+        assertEquals(forventetAntall, resultat.size, "Forventer $forventetAntall subsumsjoner for vilkåret. Subsumsjoner funnet: ${resultat.size}")
+        assertEquals(VILKAR_OPPFYLT, subsumsjon.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
+        assertResultat(input, output, subsumsjon)
+    }
+
     internal fun assertIkkeOppfylt(
         paragraf: Paragraf,
         versjon: LocalDate,

@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.overstyring
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Toggle
+import no.nav.helse.Toggle.Companion.disable
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -366,6 +367,24 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
 
     @Test
     fun `Hindrer tilstandsendring hvis avvikssak som trenger fastsettelse ved skjønn godkjennes - med senere uferdige periode`() = Toggle.TjuefemprosentAvvik.disable {
+        nyttVedtak(1.januar, 31.januar, beregnetInntekt = 20000.månedlig)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(1.februar, 28.februar))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 9000.månedlig)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+        assertEquals(AvventerFastsettelseEtterSkjønn, inspektør.tilstandPåSykepengegrunnlag(1.januar))
+
+        assertVarsel(RV_IV_2, 1.vedtaksperiode.filter())
+        assertThrows<IllegalStateException> { håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true) }
+    }
+
+
+    @Test
+    fun `Hindrer tilstandsendring hvis avvikssak som trenger fastsettelse ved skjønn godkjennes - med senere uferdige periode med toggle disabled`() = listOf(Toggle.TjuefemprosentAvvik, Toggle.RevurdereAgpFraIm).disable  {
         nyttVedtak(1.januar, 31.januar, beregnetInntekt = 20000.månedlig)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
