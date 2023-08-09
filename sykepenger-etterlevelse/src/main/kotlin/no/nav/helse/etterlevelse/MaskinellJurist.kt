@@ -3,7 +3,6 @@ package no.nav.helse.etterlevelse
 import java.io.Serializable
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.Period
 import java.time.Year
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -16,6 +15,7 @@ import no.nav.helse.etterlevelse.Ledd.LEDD_1
 import no.nav.helse.etterlevelse.Ledd.LEDD_2
 import no.nav.helse.etterlevelse.Ledd.LEDD_3
 import no.nav.helse.etterlevelse.Ledd.LEDD_5
+import no.nav.helse.etterlevelse.Paragraf.KJENNELSE_2006_4023
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_10
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_11
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_12
@@ -29,6 +29,7 @@ import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_28
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_29
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_3
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_30
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_48
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_51
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_9
 import no.nav.helse.etterlevelse.Punktum.Companion.punktum
@@ -868,6 +869,35 @@ class MaskinellJurist private constructor(
             paragraf = Paragraf.PARAGRAF_35,
             ledd = LEDD_1,
             input = emptyMap(),
+            output = emptyMap(),
+            kontekster = kontekster()
+        ))
+    }
+
+    override fun `§ 8-48 ledd 2 punktum 2`(dato: LocalDate, sykdomstidslinje: List<Tidslinjedag>) {
+        leggTil(GrupperbarSubsumsjon(
+            dato = dato,
+            utfall = VILKAR_IKKE_OPPFYLT,
+            lovverk = "folketrygdloven",
+            versjon = LocalDate.parse("2021-05-21"),
+            paragraf = PARAGRAF_8_48,
+            ledd = LEDD_2,
+            punktum = Punktum.PUNKTUM_2,
+            input = mapOf("sykdomstidslinje" to sykdomstidslinje.dager(periode())),
+            output = emptyMap(),
+            kontekster = kontekster()
+        ))
+    }
+
+    override fun `Trygderettens kjennelse 2006-4023`(dato: LocalDate, sykdomstidslinje: List<Tidslinjedag>) {
+        leggTil(GrupperbarSubsumsjon(
+            dato = dato,
+            utfall = VILKAR_IKKE_OPPFYLT,
+            lovverk = "trygderetten",
+            versjon = LocalDate.parse("2007-03-02"),
+            paragraf = KJENNELSE_2006_4023,
+            ledd = null,
+            input = mapOf("sykdomstidslinje" to sykdomstidslinje.dager(periode())),
             output = emptyMap(),
             kontekster = kontekster()
         ))

@@ -491,6 +491,20 @@ interface SubsumsjonObserver {
      */
     fun `fvl § 35 ledd 1`() {}
 
+    /**
+     * Arbeidsavklaringspenger istedenfor sykepenger
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-48)
+     */
+    fun `§ 8-48 ledd 2 punktum 2`(dato: LocalDate, sykdomstidslinje: List<Tidslinjedag>) {}
+
+    /**
+     * Annen livsoppsoppholdsytelse istedenfor sykepenger
+     *
+     *  Lovdata: [lenke](https://lovdata.no/dokument/TRR/avgjorelse/trr-2006-4023)
+     */
+    fun `Trygderettens kjennelse 2006-4023`(dato: LocalDate, sykdomstidslinje: List<Tidslinjedag>) {}
+
     class SammenligningsgrunnlagDTO(
         val sammenligningsgrunnlag: Double,
         val inntekterFraAOrdningen: Map<String, List<Map<String, Any>>>

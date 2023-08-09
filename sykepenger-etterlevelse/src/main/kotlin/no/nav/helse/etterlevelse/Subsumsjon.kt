@@ -1,6 +1,5 @@
 package no.nav.helse.etterlevelse
 
-import java.time.DayOfWeek
 import java.time.LocalDate
 import no.nav.helse.etterlevelse.RangeIterator.Companion.iterator
 import no.nav.helse.etterlevelse.RangeIterator.Companion.merge
@@ -113,7 +112,7 @@ class GrupperbarSubsumsjon private constructor(
         utfall: Utfall,
         versjon: LocalDate,
         paragraf: Paragraf,
-        ledd: Ledd,
+        ledd: Ledd?,
         punktum: Punktum? = null,
         bokstav: Bokstav? = null,
         kontekster: Map<String, KontekstType>
