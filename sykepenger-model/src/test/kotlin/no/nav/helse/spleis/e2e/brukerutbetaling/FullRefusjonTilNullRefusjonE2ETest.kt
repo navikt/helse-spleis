@@ -102,7 +102,7 @@ internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `starter med refusjon, så korrigeres refusjonen til ingenting`() {
+    fun `starter med refusjon, så korrigeres refusjonen til ingenting med toggle på`() = Toggle.RevurdereAgpFraIm.enable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
@@ -133,7 +133,7 @@ internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `starter med refusjon, så korrigeres refusjonen til ingenting med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
+    fun `starter med refusjon, så korrigeres refusjonen til ingenting`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)

@@ -327,7 +327,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    fun `inntektsmeldingen padder ikke senere vedtaksperioder med arbeidsdager`() {
+    fun `inntektsmeldingen padder ikke senere vedtaksperioder med arbeidsdager med toggle`() = Toggle.RevurdereAgpFraIm.enable {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 22.januar))
         håndterSøknad(Sykdom(4.januar, 22.januar, 100.prosent))
         håndterInntektsmelding(listOf(4.januar til 19.januar), INNTEKT)
@@ -367,7 +367,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    fun `inntektsmeldingen padder ikke senere vedtaksperioder med arbeidsdager med toggle av`() = Toggle.RevurdereAgpFraIm.disable {
+    fun `inntektsmeldingen padder ikke senere vedtaksperioder med arbeidsdager`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 22.januar))
         håndterSøknad(Sykdom(4.januar, 22.januar, 100.prosent))
         håndterInntektsmelding(listOf(4.januar til 19.januar), INNTEKT)

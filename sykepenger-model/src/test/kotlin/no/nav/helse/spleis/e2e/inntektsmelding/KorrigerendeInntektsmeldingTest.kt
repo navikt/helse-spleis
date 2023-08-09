@@ -41,7 +41,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Avsluttet vedtaksperiode skal ikke få varsel ved korrigerende inntektsmelding med endring i agp`() {
+    fun `Avsluttet vedtaksperiode skal ikke få varsel ved korrigerende inntektsmelding med endring i agp med toggle på`() = Toggle.RevurdereAgpFraIm.enable {
         nyttVedtak(1.januar, 31.januar)
 
         håndterInntektsmelding(listOf(2.januar til 17.januar))
@@ -50,7 +50,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Avsluttet vedtaksperiode skal ikke få varsel ved korrigerende inntektsmelding med endring i agp med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
+    fun `Avsluttet vedtaksperiode skal ikke få varsel ved korrigerende inntektsmelding med endring i agp`() {
         nyttVedtak(1.januar, 31.januar)
 
         håndterInntektsmelding(listOf(2.januar til 17.januar))

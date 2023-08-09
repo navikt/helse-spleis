@@ -145,53 +145,55 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
     }
     @Test
-    fun `Forkaster feilaktig avsluttet periode når to utbetalinger blir til én`() = a1 {
-        nyttVedtak(1.januar, 31.januar)
-        nyttVedtak(1.mars, 31.mars)
+    fun `Forkaster feilaktig avsluttet periode når to utbetalinger blir til én med toggle på`() = Toggle.RevurdereAgpFraIm.enable {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(1.mars, 31.mars)
 
-        nullstillTilstandsendringer()
-        nyPeriode(5.februar til 15.februar, a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar)
+            nullstillTilstandsendringer()
+            nyPeriode(5.februar til 15.februar, a1)
+            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar)
 
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
 
-        håndterVilkårsgrunnlag(3.vedtaksperiode)
-        håndterYtelser(3.vedtaksperiode, foreldrepenger = listOf(5.februar til 15.februar))
+            håndterVilkårsgrunnlag(3.vedtaksperiode)
+            håndterYtelser(3.vedtaksperiode, foreldrepenger = listOf(5.februar til 15.februar))
 
 
-        inspektør.utbetaling(0).inspektør.let {
-            assertEquals(1.januar til 31.januar, it.periode)
-            assertEquals(UTBETALT, it.tilstand)
+            inspektør.utbetaling(0).inspektør.let {
+                assertEquals(1.januar til 31.januar, it.periode)
+                assertEquals(UTBETALT, it.tilstand)
+            }
+            inspektør.utbetaling(1).inspektør.let {
+                assertEquals(1.mars til 31.mars, it.periode)
+                assertEquals(UTBETALT, it.tilstand)
+            }
+            inspektør.utbetaling(2).inspektør.let {
+                assertEquals(1.mars til 31.mars, it.periode)
+                assertEquals(ANNULLERT, it.tilstand)
+            }
+
+            inspektør.utbetaling(3).inspektør.let {
+                assertEquals(1.januar til 31.januar, it.periode)
+                assertEquals(GODKJENT_UTEN_UTBETALING, it.tilstand)
+            }
+
+            inspektør.utbetaling(4).inspektør.let {
+                assertEquals(1.januar til 15.februar, it.periode)
+                assertEquals(FORKASTET, it.tilstand)
+            }
+
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
         }
-        inspektør.utbetaling(1).inspektør.let {
-            assertEquals(1.mars til 31.mars, it.periode)
-            assertEquals(UTBETALT, it.tilstand)
-        }
-        inspektør.utbetaling(2).inspektør.let {
-            assertEquals(1.mars til 31.mars, it.periode)
-            assertEquals(ANNULLERT, it.tilstand)
-        }
-
-        inspektør.utbetaling(3).inspektør.let {
-            assertEquals(1.januar til 31.januar, it.periode)
-            assertEquals(GODKJENT_UTEN_UTBETALING, it.tilstand)
-        }
-
-        inspektør.utbetaling(4).inspektør.let {
-            assertEquals(1.januar til 15.februar, it.periode)
-            assertEquals(FORKASTET, it.tilstand)
-        }
-
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
-        assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
     }
 
     @Test
-    fun `Forkaster feilaktig avsluttet periode når to utbetalinger blir til én med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
+    fun `Forkaster feilaktig avsluttet periode når to utbetalinger blir til én`() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
             nyttVedtak(1.mars, 31.mars)

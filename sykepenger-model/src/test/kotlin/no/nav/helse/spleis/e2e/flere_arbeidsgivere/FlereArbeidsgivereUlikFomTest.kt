@@ -1349,7 +1349,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `To arbeidsgivere med ulik fom i samme måned - med en tidligere periode i samme måned - andre vedtaksperiode velger IM for egen første fraværsdag`() {
+    fun `To arbeidsgivere med ulik fom i samme måned - med en tidligere periode i samme måned - andre vedtaksperiode velger IM for egen første fraværsdag med toggle på`() = Toggle.RevurdereAgpFraIm.enable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 18.januar, 100.prosent), orgnummer = a1)
@@ -1441,7 +1441,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
 
     @Test
-    fun `To arbeidsgivere med ulik fom i samme måned - med en tidligere periode i samme måned - andre vedtaksperiode velger IM for egen første fraværsdag med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
+    fun `To arbeidsgivere med ulik fom i samme måned - med en tidligere periode i samme måned - andre vedtaksperiode velger IM for egen første fraværsdag`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 18.januar, 100.prosent), orgnummer = a1)

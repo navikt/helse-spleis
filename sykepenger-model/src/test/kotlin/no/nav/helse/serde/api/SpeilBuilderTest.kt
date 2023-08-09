@@ -330,7 +330,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Endring til ingen refusjon i forlengelsen`() {
+    fun `Endring til ingen refusjon i forlengelsen med toggle`() = Toggle.RevurdereAgpFraIm.enable {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
@@ -362,7 +362,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Endring til ingen refusjon i forlengelsen med toggle av`() = Toggle.RevurdereAgpFraIm.disable {
+    fun `Endring til ingen refusjon i forlengelsen`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))

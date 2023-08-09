@@ -99,7 +99,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `én arbeidsgiver blir to - førstegangsbehandlingen hos ag2 forkastes`() {
+    fun `én arbeidsgiver blir to - førstegangsbehandlingen hos ag2 forkastes med toggle på1`() = Toggle.RevurdereAgpFraIm.enable {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
         forlengVedtak(1.februar, 28.februar, orgnummer = a1)
         forlengVedtak(1.mars, 31.mars, orgnummer = a1)
@@ -153,7 +153,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
 
 
     @Test
-    fun `én arbeidsgiver blir to - førstegangsbehandlingen hos ag2 forkastes med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
+    fun `én arbeidsgiver blir to - førstegangsbehandlingen hos ag2 forkastes `() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
         forlengVedtak(1.februar, 28.februar, orgnummer = a1)
         forlengVedtak(1.mars, 31.mars, orgnummer = a1)
@@ -194,7 +194,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
 
 
     @Test
-    fun `to arbeidsgivere - ny overlappende førstegangsbehandlingen hos ag2`() {
+    fun `to arbeidsgivere - ny overlappende førstegangsbehandlingen hos ag2 med toggle på`() = Toggle.RevurdereAgpFraIm.enable {
         val inntektA1 = INNTEKT + 500.daglig
         val inntektA2 = INNTEKT
 
@@ -272,7 +272,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to arbeidsgivere - ny overlappende førstegangsbehandlingen hos ag2 med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
+    fun `to arbeidsgivere - ny overlappende førstegangsbehandlingen hos ag2`() {
         val inntektA1 = INNTEKT + 500.daglig
         val inntektA2 = INNTEKT
 
