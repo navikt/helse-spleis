@@ -10,8 +10,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.inspectors.AvrundetØkonomiAsserter
-import no.nav.helse.inspectors.ØkonomiAsserter
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -576,14 +574,13 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
     @Test
     fun `feriedag før siste arbeidsgiverperiodedag`() {
         (15.U + 1.F + 1.U + 10.S).utbetalingslinjer()
-        tidslinje.inspektør
+        assertNotEquals(INGEN, tidslinje.inspektør
             .navdager
             .first()
             .økonomi
-            .accept(ØkonomiAsserter
-            { _, _, dekningsgrunnlag, _, _, _, _, _ ->
-                assertNotEquals(0.0, dekningsgrunnlag)
-            })
+            .inspektør
+            .dekningsgrunnlag
+        )
         assertEquals(18.januar, tidslinje.inspektør.navdager.first().dato)
     }
 
@@ -811,7 +808,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         assertEquals(3, tidslinje.inspektør.arbeidsdagTeller)
         assertEquals(2, tidslinje.inspektør.navDagTeller)
         assertEquals(2, tidslinje.inspektør.navHelgDagTeller)
-        tidslinje.inspektør.navdager.assertDekningsgrunnlag(8.januar til 23.januar, 1431.daglig)
+        tidslinje.inspektør.navdager.assertDekningsgrunnlag(8.januar til 23.januar, 31000.månedlig)
     }
 
     @Test
@@ -909,20 +906,15 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
 
     private fun assertInntekter(dekningsgrunnlaget: Int? = null, aktuelleDagsinntekten: Int? = null) {
         tidslinje.inspektør.navdager.forEach { navDag ->
-            navDag.økonomi.accept(AvrundetØkonomiAsserter { _, _, dekningsgrunnlag, _, aktuellDagsinntekt, _, _, _ ->
-                dekningsgrunnlaget?.let { assertEquals(it, dekningsgrunnlag) }
-                aktuelleDagsinntekten?.let { assertEquals(it, aktuellDagsinntekt) }
-            })
+            dekningsgrunnlaget?.let { assertEquals(it.daglig, navDag.økonomi.inspektør.dekningsgrunnlag.rundTilDaglig()) }
+            aktuelleDagsinntekten?.let { assertEquals(it.daglig, navDag.økonomi.inspektør.aktuellDagsinntekt.rundTilDaglig()) }
         }
     }
 
     private fun List<Utbetalingsdag>.assertDekningsgrunnlag(periode: Periode, dekningsgrunnlaget: Inntekt?) =
         filter { it.dato in periode }
             .forEach { utbetalingsdag ->
-                val daglig = dekningsgrunnlaget?.reflection { _, _, _, daglig -> daglig }
-                utbetalingsdag.økonomi.accept( AvrundetØkonomiAsserter { _, _, dekningsgrunnlag, _, _, _, _, _ ->
-                    assertEquals(daglig, dekningsgrunnlag)
-                })
+                assertEquals(dekningsgrunnlaget, utbetalingsdag.økonomi.inspektør.dekningsgrunnlag)
             }
 
     private fun Sykdomstidslinje.utbetalingslinjer(

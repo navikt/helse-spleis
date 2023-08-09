@@ -12,7 +12,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Fridag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
-import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeVisitor
 import no.nav.helse.økonomi.Økonomi
@@ -39,7 +38,6 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
     var foreldetDagTeller = 0
     var ukjentDagTeller = 0
     var totalUtbetaling = 0.0
-    var totalInntekt = 0.0
 
     val navdager = mutableListOf<NavDag>()
     val navHelgdager = mutableListOf<NavHelgDag>()
@@ -78,10 +76,9 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
     }
 
     fun grad(dag: LocalDate) = økonomi.getValue(dag).brukAvrundetGrad { grad -> grad }
-    fun <R> økonomi(lambda: (Økonomi) -> R): List<R> = økonomi.values.map(lambda)
+    fun arbeidsgiverbeløp(dag: LocalDate) = økonomi.getValue(dag).inspektør.arbeidsgiverbeløp
 
     fun totalUtbetaling() = totalUtbetaling
-    fun totalInntekt() = totalInntekt
 
     fun begrunnelse(dato: LocalDate) =
         begrunnelser[dato] ?: emptyList()
@@ -161,19 +158,15 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
         collect(dag, dato, økonomi)
     }
 
-    override fun visitØkonomi(
-        grad: Double,
-        arbeidsgiverRefusjonsbeløp: Double,
-        dekningsgrunnlag: Double,
-        totalGrad: Double,
-        aktuellDagsinntekt: Double,
-        arbeidsgiverbeløp: Double?,
-        personbeløp: Double?,
-        er6GBegrenset: Boolean?
+    override fun visitAvrundetØkonomi(
+        arbeidsgiverRefusjonsbeløp: Int,
+        dekningsgrunnlag: Int,
+        aktuellDagsinntekt: Int,
+        arbeidsgiverbeløp: Int?,
+        personbeløp: Int?
     ) {
-        totalUtbetaling += arbeidsgiverbeløp ?: 0.0
-        totalUtbetaling += personbeløp ?: 0.0
-        totalInntekt += aktuellDagsinntekt
+        totalUtbetaling += arbeidsgiverbeløp ?: 0
+        totalUtbetaling += personbeløp ?: 0
     }
 
     override fun visit(

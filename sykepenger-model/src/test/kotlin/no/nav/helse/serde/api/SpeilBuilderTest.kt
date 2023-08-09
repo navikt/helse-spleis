@@ -100,14 +100,11 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             sykdomstidslinjedagtype = SykdomstidslinjedagType.SYKEDAG,
             utbetalingstidslinjedagtype = UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag,
             kilde = Sykdomstidslinjedag.SykdomstidslinjedagKilde(SykdomstidslinjedagKildetype.Saksbehandler, id),
-            grad = 100.0,
+            grad = 100,
             utbetalingsinfo = Utbetalingsinfo(
-                inntekt = 1431,
-                utbetaling = 1431,
                 personbeløp = 0,
                 arbeidsgiverbeløp = 1431,
-                refusjonsbeløp = 1431,
-                totalGrad = 100.0
+                totalGrad = 100
             )
         )
         assertEquals(forventetFørstedag, tidslinje.first())
@@ -132,7 +129,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             sykdomstidslinjedagtype = SykdomstidslinjedagType.SYKEDAG,
             utbetalingstidslinjedagtype = UtbetalingstidslinjedagType.UkjentDag, // ingen utbetalingstidslinje
             kilde = Sykdomstidslinjedag.SykdomstidslinjedagKilde(SykdomstidslinjedagKildetype.Saksbehandler, idOverstyring),
-            grad = 100.0,
+            grad = 100,
             utbetalingsinfo = null
         )
         assertEquals(forventetFørstedag, tidslinje.first())

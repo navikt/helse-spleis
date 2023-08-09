@@ -8,7 +8,7 @@ data class SammenslåttDag(
     val sykdomstidslinjedagtype: SykdomstidslinjedagType,
     val utbetalingstidslinjedagtype: UtbetalingstidslinjedagType,
     val kilde: Sykdomstidslinjedag.SykdomstidslinjedagKilde,
-    val grad: Double? = null,
+    val grad: Int? = null,
     val utbetalingsinfo: Utbetalingsinfo? = null,
     val begrunnelser: List<BegrunnelseDTO>? = null,
 )
@@ -45,7 +45,7 @@ data class Sykdomstidslinjedag(
     val dagen: LocalDate,
     val type: SykdomstidslinjedagType,
     val kilde: SykdomstidslinjedagKilde,
-    val grad: Double? = null
+    val grad: Int? = null
 ) {
     data class SykdomstidslinjedagKilde(
         val type: SykdomstidslinjedagKildetype,
@@ -67,7 +67,6 @@ enum class UtbetalingstidslinjedagType {
 
 interface Utbetalingstidslinjedag {
     val type: UtbetalingstidslinjedagType
-    val inntekt: Int
     val dato: LocalDate
 
     fun utbetalingsinfo(): Utbetalingsinfo? = null
@@ -75,38 +74,24 @@ interface Utbetalingstidslinjedag {
 
 data class UtbetalingsdagDTO(
     override val type: UtbetalingstidslinjedagType = UtbetalingstidslinjedagType.NavDag,
-    override val inntekt: Int,
     override val dato: LocalDate,
-    val utbetaling: Int,
     val personbeløp: Int,
     val arbeidsgiverbeløp: Int,
-    val refusjonsbeløp: Int?,
-    val grad: Double,
-    val totalGrad: Double?
+    val totalGrad: Int
 ) : Utbetalingstidslinjedag {
-    override fun utbetalingsinfo() = Utbetalingsinfo(inntekt, utbetaling, personbeløp, arbeidsgiverbeløp, refusjonsbeløp, totalGrad)
+    override fun utbetalingsinfo() = Utbetalingsinfo(personbeløp, arbeidsgiverbeløp, totalGrad)
 }
 
 data class AvvistDag(
     override val type: UtbetalingstidslinjedagType = UtbetalingstidslinjedagType.AvvistDag,
-    override val inntekt: Int,
     override val dato: LocalDate,
     val begrunnelser: List<BegrunnelseDTO>,
-    val grad: Double,
-    val totalGrad: Double?
+    val totalGrad: Int
 ) : Utbetalingstidslinjedag {
-    override fun utbetalingsinfo() = Utbetalingsinfo(inntekt, null, null, null, null, totalGrad)
+    override fun utbetalingsinfo() = Utbetalingsinfo(null, null, totalGrad)
 }
 
 data class UtbetalingstidslinjedagUtenGrad(
     override val type: UtbetalingstidslinjedagType,
-    override val inntekt: Int,
     override val dato: LocalDate
-) : Utbetalingstidslinjedag
-
-data class UtbetalingstidslinjedagMedGrad(
-    override val type: UtbetalingstidslinjedagType,
-    override val inntekt: Int,
-    override val dato: LocalDate,
-    val grad: Double
 ) : Utbetalingstidslinjedag

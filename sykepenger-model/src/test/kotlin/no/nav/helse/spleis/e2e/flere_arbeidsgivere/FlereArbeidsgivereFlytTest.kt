@@ -154,7 +154,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         val utbetalingstidslinje = inspektør(a1).utbetalingstidslinjer(3.vedtaksperiode)
         assertEquals(1080.daglig, utbetalingstidslinje[1.mars].økonomi.inspektør.arbeidsgiverbeløp)
         assertEquals(INGEN, utbetalingstidslinje[1.mars].økonomi.inspektør.personbeløp)
-        assertEquals(100.prosent, utbetalingstidslinje[1.mars].økonomi.inspektør.totalGrad)
+        assertEquals(100, utbetalingstidslinje[1.mars].økonomi.inspektør.totalGrad)
     }
 
     @Test
@@ -175,7 +175,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         val økonomiInspektør = utbetalingstidslinje[17.januar].økonomi.inspektør
         assertEquals(1081.daglig, økonomiInspektør.arbeidsgiverbeløp)
         assertEquals(INGEN, økonomiInspektør.personbeløp)
-        assertEquals(100.prosent, økonomiInspektør.totalGrad)
+        assertEquals(100, økonomiInspektør.totalGrad)
     }
 
 

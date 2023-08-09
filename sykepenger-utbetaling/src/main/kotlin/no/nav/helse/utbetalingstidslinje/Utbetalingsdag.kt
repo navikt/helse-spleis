@@ -19,7 +19,7 @@ sealed class Utbetalingsdag(
         return this.prioritet.compareTo(other.prioritet)
     }
 
-    override fun toString() = "${this.javaClass.simpleName} ($dato) ${økonomi.brukGrad { grad-> grad }} %"
+    override fun toString() = "${this.javaClass.simpleName} ($dato) ${økonomi.brukAvrundetGrad { grad-> grad }} %"
 
     fun avvis(begrunnelser: List<Begrunnelse>) = begrunnelser
         .filter { it.skalAvvises(this) }
@@ -152,7 +152,13 @@ internal class BeløpkildeAdapter(økonomi: Økonomi): Beløpkilde, ØkonomiVisi
     override fun arbeidsgiverbeløp(): Int = arbeidsgiverbeløp!!
     override fun personbeløp(): Int = personbeløp!!
 
-    override fun visitAvrundetØkonomi(grad: Int, arbeidsgiverRefusjonsbeløp: Int, dekningsgrunnlag: Int, totalGrad: Int, aktuellDagsinntekt: Int, arbeidsgiverbeløp: Int?, personbeløp: Int?, er6GBegrenset: Boolean?) {
+    override fun visitAvrundetØkonomi(
+        arbeidsgiverRefusjonsbeløp: Int,
+        dekningsgrunnlag: Int,
+        aktuellDagsinntekt: Int,
+        arbeidsgiverbeløp: Int?,
+        personbeløp: Int?
+    ) {
         this.arbeidsgiverbeløp = arbeidsgiverbeløp
         this.personbeløp = personbeløp
     }

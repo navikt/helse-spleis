@@ -26,9 +26,9 @@ class UtbetalingkladdBuilder(private var periode: Periode, arbeidsgivermottaker:
 
     fun betalingsdag(beløpkilde: Beløpkilde, dato: LocalDate, økonomi: Økonomi) {
         periode = periode.oppdaterTom(dato)
-        økonomi.medAvrundetData { grad, aktuellDagsinntekt ->
-            arbeidsgiveroppdragBuilder.betalingsdag(beløpkilde, dato, grad, aktuellDagsinntekt)
-            personoppdragBuilder.betalingsdag(beløpkilde, dato, grad, aktuellDagsinntekt)
+        økonomi.medAvrundetData { aktuellDagsinntekt ->
+            arbeidsgiveroppdragBuilder.betalingsdag(beløpkilde, dato, økonomi.brukAvrundetGrad { grad -> grad }, aktuellDagsinntekt)
+            personoppdragBuilder.betalingsdag(beløpkilde, dato, økonomi.brukAvrundetGrad { grad -> grad }, aktuellDagsinntekt)
         }
     }
 

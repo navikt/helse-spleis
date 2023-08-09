@@ -42,12 +42,9 @@ enum class Periodetilstand {
 }
 
 data class Utbetalingsinfo(
-    val inntekt: Int? = null,
-    val utbetaling: Int? = null,
     val personbeløp: Int? = null,
     val arbeidsgiverbeløp: Int? = null,
-    val refusjonsbeløp: Int? = null,
-    val totalGrad: Double? = null
+    val totalGrad: Int // Speil vises grad i heltall
 ) {
     fun harUtbetaling() = personbeløp != null || arbeidsgiverbeløp != null
 }

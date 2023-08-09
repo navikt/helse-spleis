@@ -3,9 +3,9 @@ package no.nav.helse.dsl
 import java.util.UUID
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.inspectors.AvrundetØkonomiAsserter
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
@@ -13,6 +13,8 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -53,14 +55,9 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
         val utbetalingstidslinje = inspektør.utbetalingstidslinjer(vedtaksperiodeId).let { subset?.let(it::subset) ?: it }
 
         utbetalingstidslinje.filterNot { it.dato.erHelg() }.forEach { utbetalingsdag ->
-            utbetalingsdag.økonomi.accept(AvrundetØkonomiAsserter { _, arbeidsgiverRefusjonsbeløp, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
-                assertEquals(
-                    forventetArbeidsgiverbeløp,
-                    arbeidsgiverbeløp
-                ) { "feil arbeidsgiverbeløp for dag ${utbetalingsdag.dato} " }
-                assertEquals(forventetArbeidsgiverRefusjonsbeløp, arbeidsgiverRefusjonsbeløp)
-                assertEquals(0, personbeløp)
-            })
+            assertEquals(forventetArbeidsgiverbeløp.daglig, utbetalingsdag.økonomi.inspektør.arbeidsgiverbeløp) { "feil arbeidsgiverbeløp for dag ${utbetalingsdag.dato} " }
+            assertEquals(forventetArbeidsgiverRefusjonsbeløp.daglig, utbetalingsdag.økonomi.inspektør.arbeidsgiverRefusjonsbeløp.rundTilDaglig())
+            assertEquals(INGEN, utbetalingsdag.økonomi.inspektør.personbeløp)
         }
     }
 

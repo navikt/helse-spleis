@@ -34,7 +34,7 @@ internal class SykdomstidslinjeBuilder(sykdomstidslinje: Sykdomstidslinje) : Syk
     }
 
     private fun visit(dato: LocalDate, dagtype: String, økonomi: Økonomi?) {
-        val grad = økonomi?.brukGrad { grad-> grad }
-        navdager.add(Tidslinjedag(dato, dagtype, grad?.roundToInt()))
+        val grad = økonomi?.brukAvrundetGrad { grad-> grad }
+        navdager.add(Tidslinjedag(dato, dagtype, grad))
     }
 }

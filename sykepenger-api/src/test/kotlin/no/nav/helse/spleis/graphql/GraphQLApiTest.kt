@@ -724,9 +724,9 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                       "utbetalingsdagtype": "NavDag",
                       "utbetalingsinfo": {
                         "arbeidsgiverbelop": 1431,
-                        "inntekt": 1431,
+                        "inntekt": null,
                         "personbelop": 0,
-                        "refusjonsbelop": 1431,
+                        "refusjonsbelop": null,
                         "totalGrad": 100.0,
                         "utbetaling": 1431
                       }
@@ -743,9 +743,9 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                       "utbetalingsdagtype": "NavDag",
                       "utbetalingsinfo": {
                         "arbeidsgiverbelop": 1431,
-                        "inntekt": 1431,
+                        "inntekt": null,
                         "personbelop": 0,
-                        "refusjonsbelop": 1431,
+                        "refusjonsbelop": null,
                         "totalGrad": 100.0,
                         "utbetaling": 1431
                       }
@@ -762,9 +762,9 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                       "utbetalingsdagtype": "NavDag",
                       "utbetalingsinfo": {
                         "arbeidsgiverbelop": 1431,
-                        "inntekt": 1431,
+                        "inntekt": null,
                         "personbelop": 0,
-                        "refusjonsbelop": 1431,
+                        "refusjonsbelop": null,
                         "totalGrad": 100.0,
                         "utbetaling": 1431
                       }
@@ -805,9 +805,9 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                       "utbetalingsdagtype": "NavDag",
                       "utbetalingsinfo": {
                         "arbeidsgiverbelop": 1431,
-                        "inntekt": 1431,
+                        "inntekt": null,
                         "personbelop": 0,
-                        "refusjonsbelop": 1431,
+                        "refusjonsbelop": null,
                         "totalGrad": 100.0,
                         "utbetaling": 1431
                       }
@@ -824,9 +824,9 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                       "utbetalingsdagtype": "NavDag",
                       "utbetalingsinfo": {
                         "arbeidsgiverbelop": 1431,
-                        "inntekt": 1431,
+                        "inntekt": null,
                         "personbelop": 0,
-                        "refusjonsbelop": 1431,
+                        "refusjonsbelop": null,
                         "totalGrad": 100.0,
                         "utbetaling": 1431
                       }
@@ -843,9 +843,9 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                       "utbetalingsdagtype": "NavDag",
                       "utbetalingsinfo": {
                         "arbeidsgiverbelop": 1431,
-                        "inntekt": 1431,
+                        "inntekt": null,
                         "personbelop": 0,
-                        "refusjonsbelop": 1431,
+                        "refusjonsbelop": null,
                         "totalGrad": 100.0,
                         "utbetaling": 1431
                       }
@@ -862,9 +862,9 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                       "utbetalingsdagtype": "NavDag",
                       "utbetalingsinfo": {
                         "arbeidsgiverbelop": 1431,
-                        "inntekt": 1431,
+                        "inntekt": null,
                         "personbelop": 0,
-                        "refusjonsbelop": 1431,
+                        "refusjonsbelop": null,
                         "totalGrad": 100.0,
                         "utbetaling": 1431
                       }
@@ -881,9 +881,9 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                       "utbetalingsdagtype": "NavDag",
                       "utbetalingsinfo": {
                         "arbeidsgiverbelop": 1431,
-                        "inntekt": 1431,
+                        "inntekt": null,
                         "personbelop": 0,
-                        "refusjonsbelop": 1431,
+                        "refusjonsbelop": null,
                         "totalGrad": 100.0,
                         "utbetaling": 1431
                       }
@@ -924,9 +924,9 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                       "utbetalingsdagtype": "NavDag",
                       "utbetalingsinfo": {
                         "arbeidsgiverbelop": 1431,
-                        "inntekt": 1431,
+                        "inntekt": null,
                         "personbelop": 0,
-                        "refusjonsbelop": 1431,
+                        "refusjonsbelop": null,
                         "totalGrad": 100.0,
                         "utbetaling": 1431
                       }
@@ -943,9 +943,9 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                       "utbetalingsdagtype": "NavDag",
                       "utbetalingsinfo": {
                         "arbeidsgiverbelop": 1431,
-                        "inntekt": 1431,
+                        "inntekt": null,
                         "personbelop": 0,
-                        "refusjonsbelop": 1431,
+                        "refusjonsbelop": null,
                         "totalGrad": 100.0,
                         "utbetaling": 1431
                       }

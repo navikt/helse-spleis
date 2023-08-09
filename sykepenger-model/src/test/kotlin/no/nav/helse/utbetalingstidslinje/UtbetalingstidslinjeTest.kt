@@ -57,8 +57,8 @@ internal class UtbetalingstidslinjeTest {
             val mc = MathContext(15)
             val expected = (100 / 6.0).toBigDecimal(mc)
             result.forEach {
-                val actual = it[dato].økonomi.inspektør.totalGrad.toDouble().toBigDecimal(mc)
-                assertEquals(expected, actual)
+                val actual = it[dato].økonomi.inspektør.totalGrad.toBigDecimal(mc)
+                assertEquals(expected.toInt(), actual.toInt())
             }
         }
 
@@ -67,8 +67,8 @@ internal class UtbetalingstidslinjeTest {
             val mc = MathContext(15)
             val expected = (250 / 3.0).toBigDecimal(mc)
             result.forEach {
-                val actual = it[dato].økonomi.inspektør.totalGrad.toDouble().toBigDecimal(mc)
-                assertEquals(expected, actual)
+                val actual = it[dato].økonomi.inspektør.totalGrad.toBigDecimal(mc)
+                assertEquals(expected.toInt(), actual.toInt())
             }
         }
     }
@@ -80,7 +80,7 @@ internal class UtbetalingstidslinjeTest {
         val result = Utbetalingsdag.totalSykdomsgrad(tidslinjer)
 
         1.januar.also { dato ->
-            val expected = 50.prosent
+            val expected = 50
             val actual = result[0][dato].økonomi.inspektør.totalGrad
             assertEquals(expected, actual)
         }

@@ -1885,6 +1885,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         assertEquals(0.daglig, utbetalingstidslinje[31.mai(2023)].økonomi.inspektør.personbeløp)
         assertNotNull(utbetalingstidslinje[31.mai(2023)].erAvvistMed(Begrunnelse.MinimumSykdomsgrad))
-        assertEquals(17, utbetalingstidslinje[31.mai(2023)].økonomi.inspektør.totalGrad.roundToInt())
+        assertEquals(17, utbetalingstidslinje[31.mai(2023)].økonomi.inspektør.totalGrad)
     }
 }

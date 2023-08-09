@@ -257,7 +257,7 @@ class Utbetalingslinje(
         "sats" to beløp,
         // TODO: Skal bort etter apper er migrert over til sats
         "dagsats" to beløp,
-        "lønn" to aktuellDagsinntekt,
+        "lønn" to aktuellDagsinntekt, // deprecated
         "grad" to grad?.toDouble(), // backwards-compatibility mot andre systemer som forventer double: må gjennomgås
         "stønadsdager" to stønadsdager(),
         "totalbeløp" to totalbeløp(),

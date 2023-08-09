@@ -6,7 +6,6 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.inspectors.AvrundetØkonomiAsserter
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
@@ -21,11 +20,12 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
-import kotlin.math.roundToInt
 import kotlin.reflect.KClass
 
 
@@ -73,10 +73,10 @@ internal fun <T : ArbeidstakerHendelse> AbstractEndToEndTest.assertIkkeEtterspur
     }
 }
 
-internal inline fun <reified R : Utbetalingsdag> assertUtbetalingsdag(dag: Utbetalingsdag, expectedDagtype: KClass<R>, expectedTotalgrad: Double = 100.0) {
+internal inline fun <reified R : Utbetalingsdag> assertUtbetalingsdag(dag: Utbetalingsdag, expectedDagtype: KClass<R>, expectedTotalgrad: Int = 100) {
     dag.let {
-        it.økonomi.brukAvrundetTotalGrad { totalGrad ->
-            assertEquals(expectedTotalgrad.roundToInt(), totalGrad)
+        it.økonomi.brukTotalGrad { totalGrad ->
+            assertEquals(expectedTotalgrad, totalGrad)
         }
         assertEquals(it::class, expectedDagtype)
     }
@@ -92,14 +92,9 @@ internal fun AbstractEndToEndTest.assertUtbetalingsbeløp(
     val utbetalingstidslinje = inspektør(orgnummer).utbetalingstidslinjer(vedtaksperiodeIdInnhenter).let { subset?.let(it::subset) ?: it }
 
     utbetalingstidslinje.filterNot { it.dato.erHelg() }.forEach { utbetalingsdag ->
-        utbetalingsdag.økonomi.accept(AvrundetØkonomiAsserter { _, arbeidsgiverRefusjonsbeløp, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
-            assertEquals(
-                forventetArbeidsgiverbeløp,
-                arbeidsgiverbeløp
-            ) { "feil arbeidsgiverbeløp for dag ${utbetalingsdag.dato} " }
-            assertEquals(forventetArbeidsgiverRefusjonsbeløp, arbeidsgiverRefusjonsbeløp)
-            assertEquals(0, personbeløp)
-        })
+        assertEquals(forventetArbeidsgiverbeløp.daglig, utbetalingsdag.økonomi.inspektør.arbeidsgiverbeløp) { "feil arbeidsgiverbeløp for dag ${utbetalingsdag.dato} " }
+        assertEquals(forventetArbeidsgiverRefusjonsbeløp.daglig, utbetalingsdag.økonomi.inspektør.arbeidsgiverRefusjonsbeløp.rundTilDaglig())
+        assertEquals(INGEN, utbetalingsdag.økonomi.inspektør.personbeløp)
     }
 }
 

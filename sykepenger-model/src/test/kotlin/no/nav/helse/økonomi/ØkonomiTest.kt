@@ -4,9 +4,7 @@ import java.math.MathContext
 import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.AvrundetØkonomiAsserter
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.inspectors.ØkonomiAsserter
 import no.nav.helse.januar
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -171,9 +169,9 @@ internal class ØkonomiTest {
 
     @Test
     fun `arbeidsgiverrefusjon med inntekt`() {
-        100.prosent.sykdomsgrad.inntekt(1000.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1000.daglig).accept( ØkonomiAsserter { _, arbeidsgiverRefusjonsbeløp, _, _, _, _, _, _ ->
-            assertEquals(1000.0, arbeidsgiverRefusjonsbeløp)
-        })
+        100.prosent.sykdomsgrad.inntekt(1000.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1000.daglig).also { økonomi ->
+            assertEquals(1000.daglig, økonomi.inspektør.arbeidsgiverRefusjonsbeløp)
+        }
     }
 
     @Test
@@ -193,30 +191,26 @@ internal class ØkonomiTest {
 
     @Test
     fun `toMap uten dekningsgrunnlag`() {
-        79.5.prosent.sykdomsgrad
-            .accept( ØkonomiAsserter { grad, _, dekningsgrunnlag, _, aktuellDagsinntekt, _, _, _ ->
-                assertEquals(79.5, grad)
-                assertEquals(0.0, dekningsgrunnlag)
-                assertEquals(0.0, aktuellDagsinntekt)
-            })
+        val økonomi = 79.5.prosent.sykdomsgrad
+        assertEquals(79.5, økonomi.inspektør.grad.toDouble())
+        assertEquals(INGEN, økonomi.inspektør.dekningsgrunnlag)
+        assertEquals(INGEN, økonomi.inspektør.aktuellDagsinntekt)
     }
 
     @Test
     fun `toMap med dekningsgrunnlag`() {
-        79.5.prosent.sykdomsgrad.inntekt(1200.4.daglig, 1200.4.daglig, `6G` = `6G`.beløp(1.januar))
-            .accept( ØkonomiAsserter { grad, _, dekningsgrunnlag, _, _, _, _, _ ->
-                assertEquals(79.5, grad)
-                assertEquals(1200.4, dekningsgrunnlag)
-            })
+        val økonomi = 79.5.prosent.sykdomsgrad.inntekt(1200.4.daglig, 1200.4.daglig, `6G` = `6G`.beløp(1.januar))
+        assertEquals(79.5, økonomi.inspektør.grad.toDouble())
+        assertEquals(1200.4.daglig, økonomi.inspektør.dekningsgrunnlag)
     }
 
     @Test
     fun `toIntMap med dekningsgrunnlag`() {
         79.5.prosent.sykdomsgrad.inntekt(1200.4.daglig, 1200.4.daglig, `6G` = `6G`.beløp(1.januar))
-            .accept(AvrundetØkonomiAsserter { grad, _, dekningsgrunnlag, _, _, _, _, _ ->
-                assertEquals(80, grad)
-                assertEquals(1200, dekningsgrunnlag)
-            })
+            .also { økonomi ->
+                assertEquals(79.5, økonomi.inspektør.grad.toDouble())
+                assertEquals(1200.4.daglig, økonomi.inspektør.dekningsgrunnlag)
+            }
     }
 
     @Test
@@ -232,18 +226,18 @@ internal class ØkonomiTest {
     fun `Beregn utbetaling når mindre enn 6G`() {
         80.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 1200.daglig).also {
             val betalte = listOf(it).betal()
-            betalte.single().accept( ØkonomiAsserter { grad, _, dekningsgrunnlag, _, _, arbeidsgiverbeløp, personbeløp, _ ->
-                assertEquals(80.0, grad)
-                assertEquals(1200.0, dekningsgrunnlag)
-                assertEquals(960.0, arbeidsgiverbeløp)
-                assertEquals(0.0, personbeløp)
-            })
-            betalte.single().accept(AvrundetØkonomiAsserter { grad, _, dekningsgrunnlag, _, _, arbeidsgiverbeløp, personbeløp, _ ->
-                assertEquals(80, grad)
-                assertEquals(1200, dekningsgrunnlag)
-                assertEquals(960, arbeidsgiverbeløp)
-                assertEquals(0, personbeløp)
-            })
+            betalte.single().also { økonomi ->
+                assertEquals(80.0, økonomi.inspektør.grad.toDouble())
+                assertEquals(1200.daglig, økonomi.inspektør.dekningsgrunnlag)
+                assertEquals(960.daglig, økonomi.inspektør.arbeidsgiverbeløp)
+                assertEquals(INGEN, økonomi.inspektør.personbeløp)
+            }
+            betalte.single().also { økonomi ->
+                assertEquals(80.0, økonomi.inspektør.grad.toDouble())
+                assertEquals(1200.daglig, økonomi.inspektør.dekningsgrunnlag)
+                assertEquals(960.daglig, økonomi.inspektør.arbeidsgiverbeløp)
+                assertEquals(INGEN, økonomi.inspektør.personbeløp)
+            }
         }
     }
 
@@ -253,13 +247,13 @@ internal class ØkonomiTest {
             .inntekt(999.daglig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 499.5.daglig)
             .also {
                 val betalte = listOf(it).betal()
-                betalte.single().accept( ØkonomiAsserter { grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, _, _, arbeidsgiverbeløp, personbeløp, _ ->
-                    assertEquals(100.0, grad)
-                    assertEquals(499.5, arbeidsgiverRefusjonsbeløp)
-                    assertEquals(999.0, dekningsgrunnlag)
-                    assertEquals(500.0, arbeidsgiverbeløp)
-                    assertEquals(499.0, personbeløp)
-                })
+                betalte.single().also { økonomi ->
+                    assertEquals(100.0, økonomi.inspektør.grad.toDouble())
+                    assertEquals(499.5.daglig, økonomi.inspektør.arbeidsgiverRefusjonsbeløp)
+                    assertEquals(999.daglig, økonomi.inspektør.dekningsgrunnlag)
+                    assertEquals(500.daglig, økonomi.inspektør.arbeidsgiverbeløp)
+                    assertEquals(499.daglig, økonomi.inspektør.personbeløp)
+                }
             }
     }
 
@@ -466,10 +460,8 @@ internal class ØkonomiTest {
     }
 
     private fun assertUtbetaling(økonomi: Økonomi, expectedArbeidsgiver: Double, expectedPerson: Double) {
-        økonomi.accept( ØkonomiAsserter { _, _, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
-            assertEquals(expectedArbeidsgiver, arbeidsgiverbeløp, "arbeidsgiverbeløp problem")
-            assertEquals(expectedPerson, personbeløp, "personbeløp problem")
-        })
+        assertEquals(expectedArbeidsgiver.daglig, økonomi.inspektør.arbeidsgiverbeløp, "arbeidsgiverbeløp problem")
+        assertEquals(expectedPerson.daglig, økonomi.inspektør.personbeløp, "personbeløp problem")
     }
 
     private val Prosentdel.sykdomsgrad get() = Økonomi.sykdomsgrad(this)

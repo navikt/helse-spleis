@@ -115,15 +115,15 @@ private fun mapDag(dag: SammenslåttDag) = GraphQLDag(
             SykdomstidslinjedagKildetype.Ukjent -> GraphQLSykdomsdagkildetype.Ukjent
         }
     ),
-    grad = dag.grad,
+    grad = dag.grad?.toDouble(),
     utbetalingsinfo = dag.utbetalingsinfo?.let {
         GraphQLUtbetalingsinfo(
-            inntekt = it.inntekt,
-            utbetaling = it.utbetaling,
+            inntekt = null, // deprecated: speil bruker ikke denne verdien
+            utbetaling = it.arbeidsgiverbeløp, // deprecated: verdien settes til det samme som arbeidsgiverbeløp
             personbelop = it.personbeløp,
             arbeidsgiverbelop = it.arbeidsgiverbeløp,
-            refusjonsbelop = it.refusjonsbeløp,
-            totalGrad = it.totalGrad
+            refusjonsbelop = null, // deprecated: speil bruker ikke denne verdien
+            totalGrad = it.totalGrad.toDouble() // double er deprecated: speil forventer float, med runder ned før visning
         )
     },
     begrunnelser = dag.begrunnelser?.map {

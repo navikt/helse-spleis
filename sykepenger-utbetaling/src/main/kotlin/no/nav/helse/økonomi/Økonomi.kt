@@ -147,34 +147,21 @@ class Økonomi private constructor(
             .tilstand(tilstand)
     }
 
-    fun <R> brukGrad(block: (grad: Double) -> R) = block(grad.toDouble())
-    fun <R> brukAvrundetGrad(block: (grad: Int) -> R) = block(grad.roundToInt())
-    fun <R> brukTotalGrad(block: (totalGrad: Double) -> R) = block(totalGrad.toDouble())
-    fun <R> brukAvrundetTotalGrad(block: (totalGrad: Int) -> R) = block(totalGrad.roundToInt())
-    fun brukAvrundetDagsinntekt(block: (aktuellDagsinntekt: Int) -> Unit) = block(aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig }.roundToInt())
-    fun medAvrundetData(block: (grad: Int, aktuellDagsinntekt: Int) -> Unit) =
-        block(grad.roundToInt(), aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig }.roundToInt())
+    // sykdomsgrader opprettes som int, og det gir ikke mening å runde opp og på den måten "gjøre personen mer syk"
+    fun <R> brukAvrundetGrad(block: (grad: Int) -> R) = block(grad.toDouble().toInt())
+    // speil viser grad som nedrundet int (det rundes -ikke- oppover siden det ville gjort 19.5 % (for liten sykdomsgrad) til 20 % (ok sykdomsgrad)
+    fun <R> brukTotalGrad(block: (totalGrad: Int) -> R) = block(totalGrad.toDouble().toInt())
+    // deprecated: bare Utbetalingslinjer bruker denne; og aktuellDagsinntekt i Utbetalingslinje er deprecated også
+    fun medAvrundetData(block: (aktuellDagsinntekt: Int) -> Unit) =
+        block(aktuellDagsinntekt.reflection { _, _, _, dagligInt -> dagligInt })
 
     fun accept(visitor: ØkonomiVisitor) {
-        visitor.visitØkonomi(
-            grad.toDouble(),
-            arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig },
-            dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig },
-            totalGrad.toDouble(),
-            aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig },
-            arbeidsgiverbeløp?.reflection { _, _, daglig, _ -> daglig },
-            personbeløp?.reflection { _, _, daglig, _ -> daglig },
-            er6GBegrenset
-        )
         visitor.visitAvrundetØkonomi(
-            grad.roundToInt(),
-            arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig.roundToInt() },
-            dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig.roundToInt() },
-            totalGrad.roundToInt(),
-            aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig.roundToInt() },
-            arbeidsgiverbeløp?.reflection { _, _, daglig, _ -> daglig.roundToInt() },
-            personbeløp?.reflection { _, _, daglig, _ -> daglig.roundToInt() },
-            er6GBegrenset
+            arbeidsgiverRefusjonsbeløp.reflection { _, _, _, daglig -> daglig },
+            dekningsgrunnlag.reflection { _, _, _, daglig -> daglig },
+            aktuellDagsinntekt.reflection { _, _, _, daglig -> daglig },
+            arbeidsgiverbeløp?.reflection { _, _, _, daglig -> daglig },
+            personbeløp?.reflection { _, _, _, daglig -> daglig }
         )
     }
 
@@ -424,24 +411,11 @@ fun List<Økonomi>.er6GBegrenset() = Økonomi.er6GBegrenset(this)
 Fordi vi må vekk fra `medData` og gjøre like ting sånn nogenlunde likt.
  */
 interface ØkonomiVisitor {
-    fun visitØkonomi(
-        grad: Double,
-        arbeidsgiverRefusjonsbeløp: Double,
-        dekningsgrunnlag: Double,
-        totalGrad: Double,
-        aktuellDagsinntekt: Double,
-        arbeidsgiverbeløp: Double?,
-        personbeløp: Double?,
-        er6GBegrenset: Boolean?
-    ) {}
     fun visitAvrundetØkonomi(
-        grad: Int,
         arbeidsgiverRefusjonsbeløp: Int,
         dekningsgrunnlag: Int,
-        totalGrad: Int,
         aktuellDagsinntekt: Int,
         arbeidsgiverbeløp: Int?,
-        personbeløp: Int?,
-        er6GBegrenset: Boolean?
+        personbeløp: Int?
     ) {}
 }

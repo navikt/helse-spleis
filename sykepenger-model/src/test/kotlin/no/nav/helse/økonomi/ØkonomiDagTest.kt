@@ -7,7 +7,7 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.inspectors.ØkonomiAsserter
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.AVV
 import no.nav.helse.testhelpers.NAV
@@ -167,18 +167,8 @@ internal class ØkonomiDagTest {
 
     private fun assertØkonomi(tidslinje: Utbetalingstidslinje, arbeidsgiverbeløp: Double?, personbeløp: Double? = 0.0) {
         tidslinje.forEach {
-            it.økonomi.accept( ØkonomiAsserter {
-                    _,
-                    _,
-                    _,
-                    _,
-                    _,
-                    actualArbeidsgiverbeløp,
-                    actualPersonbeløp,
-                    _ ->
-                assertEquals(arbeidsgiverbeløp, actualArbeidsgiverbeløp)
-                assertEquals(personbeløp, actualPersonbeløp)
-            })
+            assertEquals(arbeidsgiverbeløp?.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(personbeløp?.daglig, it.økonomi.inspektør.personbeløp)
         }
     }
 

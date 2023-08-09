@@ -4,58 +4,23 @@ import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrTidslinje
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.VedtaksperiodeVisitor
 import no.nav.helse.serde.api.dto.AvvistDag
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagKildetype
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
 import no.nav.helse.serde.api.dto.Utbetalingstidslinjedag
-import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagMedGrad
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagUtenGrad
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
-
-// Besøker hele sykdomshistorikk-treet
-internal class VedtaksperiodeSykdomstidslinjeBuilder(vedtaksperiode: Vedtaksperiode): VedtaksperiodeVisitor {
-    private val sykdomstidslinje: MutableList<Sykdomstidslinjedag> = mutableListOf()
-    init {
-        vedtaksperiode.accept(this)
-    }
-
-    internal fun build() = sykdomstidslinje.toList()
-
-    override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: MutableList<Periode>) {
-        this.sykdomstidslinje.addAll(SykdomstidslinjeBuilder(tidslinje).build())
-    }
-}
-
-internal class SykdomshistorikkBuilder(element: Sykdomshistorikk.Element) : SykdomshistorikkVisitor {
-    private val beregnetTidslinje: MutableList<Sykdomstidslinjedag> = mutableListOf()
-
-    init {
-        element.accept(this)
-    }
-
-    fun build() = beregnetTidslinje.toList()
-
-    override fun preVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {
-        this.beregnetTidslinje.addAll(SykdomstidslinjeBuilder(tidslinje).build())
-    }
-
-}
 
 internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): SykdomstidslinjeVisitor {
     private val tidslinje = mutableListOf<Sykdomstidslinjedag>()
@@ -157,7 +122,7 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
             dato,
             dagtype,
             Sykdomstidslinjedag.SykdomstidslinjedagKilde(kilde.toKildetypeDTO(), kilde.meldingsreferanseId()),
-            økonomi?.brukGrad { grad -> grad }
+            økonomi?.brukAvrundetGrad { grad -> grad }
         )
 
         tidslinje.add(dagDto)
@@ -203,15 +168,7 @@ internal class UtbetalingstidslinjeBuilder(utbetalingstidslinje: Utbetalingstids
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.brukAvrundetDagsinntekt { aktuellDagsinntekt ->
-            utbetalingstidslinje.add(
-                UtbetalingstidslinjedagUtenGrad(
-                    type = UtbetalingstidslinjedagType.Arbeidsdag,
-                    inntekt = aktuellDagsinntekt,
-                    dato = dato
-                )
-            )
-        }
+        utbetalingstidslinje.add(UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.Arbeidsdag, dato = dato))
     }
 
     override fun visit(
@@ -219,15 +176,7 @@ internal class UtbetalingstidslinjeBuilder(utbetalingstidslinje: Utbetalingstids
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.brukAvrundetDagsinntekt { aktuellDagsinntekt ->
-            utbetalingstidslinje.add(
-                UtbetalingstidslinjedagUtenGrad(
-                    type = UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag,
-                    inntekt = aktuellDagsinntekt,
-                    dato = dato
-                )
-            )
-        }
+        utbetalingstidslinje.add(UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag, dato = dato))
     }
 
     private fun leggTilUtbetalingsdag(dato: LocalDate, økonomi: Økonomi, type: UtbetalingstidslinjedagType) {
@@ -247,16 +196,7 @@ internal class UtbetalingstidslinjeBuilder(utbetalingstidslinje: Utbetalingstids
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.brukGrad { grad ->
-            utbetalingstidslinje.add(
-                UtbetalingstidslinjedagMedGrad(
-                    type = UtbetalingstidslinjedagType.NavHelgDag,
-                    inntekt = 0,   // Speil needs zero here
-                    dato = dato,
-                    grad = grad
-                )
-            )
-        }
+        utbetalingstidslinje.add(UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.NavHelgDag, dato = dato))
     }
 
     override fun visit(
@@ -267,7 +207,6 @@ internal class UtbetalingstidslinjeBuilder(utbetalingstidslinje: Utbetalingstids
         utbetalingstidslinje.add(
             UtbetalingstidslinjedagUtenGrad(
                 type = if (dato.erHelg()) UtbetalingstidslinjedagType.Helgedag else UtbetalingstidslinjedagType.Feriedag,
-                inntekt = 0,    // Speil needs zero here
                 dato = dato
             )
         )
@@ -281,7 +220,6 @@ internal class UtbetalingstidslinjeBuilder(utbetalingstidslinje: Utbetalingstids
         utbetalingstidslinje.add(
             UtbetalingstidslinjedagUtenGrad(
                 type = UtbetalingstidslinjedagType.UkjentDag,
-                inntekt = 0,    // Speil needs zero here
                 dato = dato
             )
         )
@@ -296,10 +234,8 @@ internal class UtbetalingstidslinjeBuilder(utbetalingstidslinje: Utbetalingstids
             utbetalingstidslinje.add(
                 AvvistDag(
                     type = UtbetalingstidslinjedagType.AvvistDag,
-                    inntekt = 0, // Speil needs zero here
                     dato = dato,
                     begrunnelser = dag.begrunnelser.map { BegrunnelseDTO.fraBegrunnelse(it) },
-                    grad = 0.0,  // Speil wants zero here
                     totalGrad = totalGrad
                 )
             )
@@ -311,12 +247,6 @@ internal class UtbetalingstidslinjeBuilder(utbetalingstidslinje: Utbetalingstids
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        utbetalingstidslinje.add(
-            UtbetalingstidslinjedagUtenGrad(
-                type = UtbetalingstidslinjedagType.ForeldetDag,
-                inntekt = 0,    // Speil needs zero here
-                dato = dato
-            )
-        )
+        utbetalingstidslinje.add(UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.ForeldetDag, dato = dato))
     }
 }

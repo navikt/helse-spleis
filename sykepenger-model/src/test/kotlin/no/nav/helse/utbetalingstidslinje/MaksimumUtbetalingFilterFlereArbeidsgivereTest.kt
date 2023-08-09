@@ -2,16 +2,12 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Økonomi
-import no.nav.helse.økonomi.ØkonomiVisitor
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -38,25 +34,17 @@ internal class MaksimumUtbetalingFilterFlereArbeidsgivereTest {
 
         val resultat = MaksimumUtbetalingFilter().betal(listOf(ag2.first, ag1.first), periode, aktivitetslogg, MaskinellJurist())
 
-        val arbeidsgiverbeløp = { økonomi: Økonomi -> visitArbeidsgiverbeløp(økonomi) }
-
-        assertTrue(resultat.first().inspektør.økonomi(arbeidsgiverbeløp).all { it.daglig == maksDagsats }) {
-            "noen dager har fått nytt grunnbeløp"
+        resultat.first().inspektør.also { inspektør ->
+            resultat.first().forEach { dag ->
+                assertEquals(maksDagsats, inspektør.arbeidsgiverbeløp(dag.dato)) { "noen dager har fått nytt grunnbeløp" }
+            }
         }
-        assertTrue(resultat.last().inspektør.økonomi(arbeidsgiverbeløp).all { it.daglig == maksDagsats }) {
-            "noen dager har fått nytt grunnbeløp"
+        resultat.last().inspektør.also { inspektør ->
+            resultat.last().forEach { dag ->
+                assertEquals(maksDagsats, inspektør.arbeidsgiverbeløp(dag.dato)) { "noen dager har fått nytt grunnbeløp" }
+            }
         }
         assertEquals(ag1.second, resultat.last().inspektør.totalUtbetaling())
         assertEquals(ag2.second, resultat.first().inspektør.totalUtbetaling())
-    }
-
-    private fun visitArbeidsgiverbeløp(økonomi: Økonomi): Int {
-        var res: Int? = null
-        økonomi.accept(object: ØkonomiVisitor {
-            override fun visitAvrundetØkonomi(grad: Int, arbeidsgiverRefusjonsbeløp: Int, dekningsgrunnlag: Int, totalGrad: Int, aktuellDagsinntekt: Int, arbeidsgiverbeløp: Int?, personbeløp: Int?, er6GBegrenset: Boolean?) {
-                res = arbeidsgiverbeløp
-            }
-        })
-        return res!!
     }
 }

@@ -1174,13 +1174,13 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         val utbetaling1 = inspektør(a1).utbetaling(0).inspektør
-        assertEquals(75, utbetaling1.utbetalingstidslinje[1.januar].økonomi.inspektør.totalGrad.roundToInt())
+        assertEquals(74, utbetaling1.utbetalingstidslinje[1.januar].økonomi.inspektør.totalGrad)
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         val utbetaling2 = inspektør(a1).utbetaling(1).inspektør
-        assertEquals(100, utbetaling2.utbetalingstidslinje[1.januar].økonomi.inspektør.totalGrad.roundToInt())
+        assertEquals(100, utbetaling2.utbetalingstidslinje[1.januar].økonomi.inspektør.totalGrad)
     }
 
     private fun assertInntektstype(skjæringstidspunkt: LocalDate, forventet: Map<String, KClass<out Inntektsopplysning>>) {
