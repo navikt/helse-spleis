@@ -2498,7 +2498,7 @@ internal class Vedtaksperiode private constructor(
                 val korrigertInntektsmeldingId =  vedtaksperiode.hendelseIder.sisteInntektsmeldingId()
                 val gammelAgp = vedtaksperiode.finnArbeidsgiverperiode()
                 vedtaksperiode.låsOpp()
-                vedtaksperiode.håndterDager(dager)
+                dager.håndterRevurdering(gammelAgp) { vedtaksperiode.håndterDager(dager) }
                 vedtaksperiode.lås()
                 val nyAgp = vedtaksperiode.finnArbeidsgiverperiode()
                 if (gammelAgp != nyAgp) {

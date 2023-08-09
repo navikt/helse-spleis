@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -96,6 +97,18 @@ internal class DagerFraInntektsmelding(
     internal fun påvirker(sykdomstidslinje: Sykdomstidslinje): Boolean {
         val periode = sykdomstidslinje.periode() ?: return false
         return sykdomstidslinje.påvirkesAv(BitAvInntektsmelding(inntektsmelding, periode).sykdomstidslinje())
+    }
+
+    internal fun håndterRevurdering(gammelAgp: Arbeidsgiverperiode?, håndterDager: () -> Unit) {
+        if (opprinneligPeriode == null) return
+        if (gammelAgp == null) return håndterDager()
+        val periodeMellom = gammelAgp.omsluttendePeriode!!.periodeMellom(opprinneligPeriode.start)
+        if (periodeMellom != null && periodeMellom.count() >= 20) {
+            info("Ignorerer dager fra inntektsmelding fordi perioden mellom gammel agp og opplyst agp er mer enn 19 dager")
+            varsel(RV_IM_3)
+            return
+        }
+        håndterDager()
     }
 
     private class BitAvInntektsmelding(
