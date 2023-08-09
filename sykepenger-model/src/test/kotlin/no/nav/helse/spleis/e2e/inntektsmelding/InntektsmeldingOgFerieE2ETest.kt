@@ -148,7 +148,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ferie med gap til forrige, replay av IM med toggle på`() = Toggle.RevurdereAgpFraIm.enable {
+    fun `ferie med gap til forrige, replay av IM`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
         nullstillTilstandsendringer()
         håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar), orgnummer = a2)
@@ -180,7 +180,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ferie med gap til forrige, replay av IM`() {
+    fun `ferie med gap til forrige, replay av IM med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
         nullstillTilstandsendringer()
         håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar), orgnummer = a2)

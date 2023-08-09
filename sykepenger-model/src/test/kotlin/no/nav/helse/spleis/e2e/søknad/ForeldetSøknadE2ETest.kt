@@ -156,7 +156,7 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `foreldet søknad etter annen foreldet søknad - samme arbeidsgiverperiode - deler korrelasjonsId med toggle på`() = Toggle.RevurdereAgpFraIm.enable {
+    fun `foreldet søknad etter annen foreldet søknad - samme arbeidsgiverperiode - deler korrelasjonsId`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 19.januar))
         håndterSykmelding(Sykmeldingsperiode(24.januar, 31.januar))
 
@@ -196,7 +196,7 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `foreldet søknad etter annen foreldet søknad - samme arbeidsgiverperiode - deler korrelasjonsId`() {
+    fun `foreldet søknad etter annen foreldet søknad - samme arbeidsgiverperiode - deler korrelasjonsId med toggle disable`() = Toggle.RevurdereAgpFraIm.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 19.januar))
         håndterSykmelding(Sykmeldingsperiode(24.januar, 31.januar))
 

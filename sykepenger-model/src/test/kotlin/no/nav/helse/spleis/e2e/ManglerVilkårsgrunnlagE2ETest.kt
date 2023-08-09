@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
@@ -17,6 +18,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -133,7 +135,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `korrigert arbeidsgiverperiode under pågående revurdering - korrigert søknad for februar med toggle på`() = Toggle.RevurdereAgpFraIm.enable {
+    fun `korrigert arbeidsgiverperiode under pågående revurdering - korrigert søknad for februar`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         forlengVedtak(1.februar, 28.februar, 100.prosent)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 80.prosent))
@@ -159,7 +161,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `korrigert arbeidsgiverperiode under pågående revurdering - korrigert søknad for februar`() {
+    fun `korrigert arbeidsgiverperiode under pågående revurdering - korrigert søknad for februar med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         forlengVedtak(1.februar, 28.februar, 100.prosent)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 80.prosent))

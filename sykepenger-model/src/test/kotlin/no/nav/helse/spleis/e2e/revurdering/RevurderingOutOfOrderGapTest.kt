@@ -879,7 +879,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `kort periode, lang periode kommer out of order og fører til utbetaling på kort periode som nå trenger IM med toggle på`() = Toggle.RevurdereAgpFraIm.enable {
+    fun `kort periode, lang periode kommer out of order og fører til utbetaling på kort periode som nå trenger IM`() {
         nyPeriode(1.mars til 16.mars)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
@@ -912,7 +912,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `kort periode, lang periode kommer out of order og fører til utbetaling på kort periode som nå trenger IM`(){
+    fun `kort periode, lang periode kommer out of order og fører til utbetaling på kort periode som nå trenger IM med toggle skrudd av`() = Toggle.RevurdereAgpFraIm.disable {
         nyPeriode(1.mars til 16.mars)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
@@ -1030,7 +1030,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Out of order gjør at AUU revurderes fordi de ikke lenger er innen AGP - ber om inntektsmelding med toggle på`() = Toggle.RevurdereAgpFraIm.enable {
+    fun `Out of order gjør at AUU revurderes fordi de ikke lenger er innen AGP - ber om inntektsmelding`() {
         nyPeriode(1.mars til 10.mars)
         nyPeriode(11.mars til 16.mars)
 
@@ -1067,7 +1067,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
 
     @Test
-    fun `Out of order gjør at AUU revurderes fordi de ikke lenger er innen AGP - ber om inntektsmelding`() {
+    fun `Out of order gjør at AUU revurderes fordi de ikke lenger er innen AGP - ber om inntektsmelding med toggle skrudd av`() = Toggle.RevurdereAgpFraIm.disable {
         nyPeriode(1.mars til 10.mars)
         nyPeriode(11.mars til 16.mars)
 
