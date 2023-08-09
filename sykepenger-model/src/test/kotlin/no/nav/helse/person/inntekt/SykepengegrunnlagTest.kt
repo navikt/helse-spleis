@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.erHelg
@@ -25,8 +26,10 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
+import no.nav.helse.person.inntekt.Sykepengegrunnlag.AvventerFastsettelseEtterSkjønn
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -35,22 +38,46 @@ import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.NAVDAGER
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 import kotlin.properties.Delegates
 
 internal class SykepengegrunnlagTest {
     private companion object {
         private val fødseldato67år =  1.februar(1954)
+    }
+
+    @Test
+    fun `kan ikke hente ut utbetalingsopplysninger fra et vilkårsgrunnlag i avventer skjønnsmessig fastsettelse når toggle er på`() = Toggle.TjuefemprosentAvvik.enable {
+        val sykepengegrunnlag = 35000.månedlig.sykepengegrunnlag(UNG_PERSON_FØDSELSDATO.alder, "a1", 1.januar, skattInntekt = 50000.månedlig, refusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 35000.månedlig).refusjonsopplysninger)
+        assertEquals(30, sykepengegrunnlag.inspektør.avviksprosent)
+        assertEquals(AvventerFastsettelseEtterSkjønn, sykepengegrunnlag.inspektør.tilstand)
+
+        assertEquals(
+            "forventet ikke å sette utbetalingsopplysninger i AvventerFastsettelseEtterSkjønn",
+            assertThrows<IllegalStateException> { sykepengegrunnlag.medUtbetalingsopplysninger("a1", 17.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver) }.message
+        )
+    }
+
+    @Test
+    fun `kan hente ut utbetalingsopplysninger fra et vilkårsgrunnlag i avventer skjønnsmessig fastsettelse når toggle er av`() = Toggle.TjuefemprosentAvvik.disable {
+        val sykepengegrunnlag = 35000.månedlig.sykepengegrunnlag(UNG_PERSON_FØDSELSDATO.alder, "a1", 1.januar, skattInntekt = 50000.månedlig, refusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 35000.månedlig).refusjonsopplysninger)
+        assertEquals(30, sykepengegrunnlag.inspektør.avviksprosent)
+        assertEquals(AvventerFastsettelseEtterSkjønn, sykepengegrunnlag.inspektør.tilstand)
+        assertDoesNotThrow { sykepengegrunnlag.medUtbetalingsopplysninger("a1", 17.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver) }
     }
 
     @Test
@@ -545,7 +572,6 @@ internal class SykepengegrunnlagTest {
         val a2 = "a2"
         val skjæringstidspunkt = 1.mars
         val førsteFraværsdagAG1 = skjæringstidspunkt
-        val førsteFraværsdagAG2 = skjæringstidspunkt.nesteDag
         val sykepengegrunnlag = Sykepengegrunnlag.ferdigSykepengegrunnlag(
             alder = UNG_PERSON_FØDSELSDATO.alder,
             skjæringstidspunkt = skjæringstidspunkt,
