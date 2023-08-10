@@ -392,8 +392,8 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(melding.path("gjeldendeStatus").asText().isNotEmpty())
         assertEquals(fra, melding.path("forrigeStatus").asText())
         assertEquals(til, melding.path("gjeldendeStatus").asText())
-        assertOppdragdetaljerEnkel(melding.path("arbeidsgiverOppdrag"))
-        assertOppdragdetaljerEnkel(melding.path("personOppdrag"))
+        assertOppdragdetaljer(melding.path("arbeidsgiverOppdrag"), annullering)
+        assertOppdragdetaljer(melding.path("personOppdrag"), annullering)
     }
 
     private fun assertUtbetalt(melding: JsonNode) {
@@ -416,11 +416,6 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(melding.path("automatiskBehandling").isBoolean)
         assertOppdragdetaljer(melding.path("arbeidsgiverOppdrag"), false)
         assertOppdragdetaljer(melding.path("personOppdrag"), false)
-    }
-
-    private fun assertOppdragdetaljerEnkel(oppdrag: JsonNode) {
-        assertTrue(oppdrag.path("fagsystemId").asText().isNotEmpty())
-        assertTrue(oppdrag.path("nettoBeløp").isInt())
     }
 
     private fun assertOppdragdetaljer(oppdrag: JsonNode, erAnnullering: Boolean) {

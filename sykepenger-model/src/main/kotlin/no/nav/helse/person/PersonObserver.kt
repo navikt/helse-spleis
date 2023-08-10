@@ -228,12 +228,10 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val type: String,
         val forrigeStatus: String,
         val gjeldendeStatus: String,
-        val arbeidsgiverOppdrag: OppdragEventDetaljer,
-        val personOppdrag: OppdragEventDetaljer,
+        val arbeidsgiverOppdrag: Map<String, Any?>,
+        val personOppdrag: Map<String, Any?>,
         val korrelasjonsId: UUID
-    ) {
-        data class OppdragEventDetaljer(val fagsystemId: String, val nettoBeløp: Int)
-    }
+    )
 
     data class UtbetalingUtbetaltEvent(
         val organisasjonsnummer: String,
