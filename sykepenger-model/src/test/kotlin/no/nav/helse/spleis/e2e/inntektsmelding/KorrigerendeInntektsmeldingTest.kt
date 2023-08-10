@@ -165,4 +165,62 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
 
         assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
     }
+
+    @Test
+    fun `Antall dager mellom opplyst agp og gammel agp er mindre enn 20`()  = Toggle.RevurdereAgpFraIm.enable  {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(1.mars, 31.mars)
+
+        håndterInntektsmelding(listOf(1.februar til 16.februar))
+        assertEquals("AAAAARR AAAAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
+        assertEquals(listOf("KORRIGERT_INNTEKTSMELDING_ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
+        assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `Endring i både dager og inntekt`()  = Toggle.RevurdereAgpFraIm.enable  {
+        nyttVedtak(1.januar, 31.januar)
+        håndterInntektsmelding(listOf(15.januar til 31.januar), beregnetInntekt = INNTEKT * 1.1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
+        assertEquals(listOf("KORRIGERT_INNTEKTSMELDING_ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
+        assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
+        assertEquals(INNTEKT * 1.1, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.omregnetÅrsinntekt)
+    }
+
+    @Test
+    fun `Endring i bare inntekt`()  = Toggle.RevurdereAgpFraIm.enable  {
+        nyttVedtak(1.januar, 31.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
+        assertEquals(listOf("KORRIGERT_INNTEKTSMELDING_ARBEIDSGIVERPERIODE", "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER"), overstyringerIgangsatt)
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
+    }
 }
