@@ -45,9 +45,9 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
 
         private val tilDagligDoubleMemoized = { tall: Double -> tall / ARBEIDSDAGER_PER_ÅR }.memoize()
         private val tilMånedligDoubleMemoized = { tall: Double -> tall / 12 }.memoize()
-        private val tilDagligIntMemoized = { tall: Double -> tilDagligDoubleMemoized(tall).roundToInt() }
-        private val rundTilDagligMemoized = { tall: Double -> tilDagligIntMemoized(tall).daglig }.memoize()
-        private val rundNedTilDagligMemoized = { tall: Double -> tilDagligDoubleMemoized(tall).toInt().daglig }.memoize()
+        private val tilDagligIntMemoized = { tall: Double -> tilDagligDoubleMemoized(tall).toInt() }
+        private val rundTilDagligMemoized = { tall: Double -> tilDagligDoubleMemoized(tall).roundToInt().daglig }.memoize()
+        private val rundNedTilDagligMemoized = { tall: Double -> tilDagligIntMemoized(tall).daglig }.memoize()
     }
 
     fun <R> reflection(block: (årlig: Double, månedlig: Double, daglig: Double, dagligInt: Int) -> R) = block(

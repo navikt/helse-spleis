@@ -46,10 +46,8 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
     }
 
     private fun set(dag: Dag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
-        økonomi.brukAvrundetGrad {
-            grad-> this.grader[dato] = grad
-            set(dag, dato, kilde)
-        }
+        this.grader[dato] = økonomi.inspektør.grad.roundToInt()
+        set(dag, dato, kilde)
     }
 
     private fun set(dag: Dag, dato: LocalDate, kilde: Hendelseskilde, melding: String) {

@@ -54,6 +54,10 @@ import kotlin.math.roundToInt
 @EnableToggle(Toggle.SendFeriepengeOppdrag::class)
 @Isolated
 internal class FeriepengeE2ETest : AbstractEndToEndTest() {
+    private companion object {
+        val DAGSINNTEKT = INNTEKT.rundTilDaglig().reflection { _, _, _, dagligInt -> dagligInt }
+    }
+
     private fun fangLoggmeldinger(vararg filter: String, block: () -> Any): List<ILoggingEvent> {
         val logCollector = LogCollector()
 
@@ -189,7 +193,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Infotrygd har betalt ut 48 dager til person - Spleis har utbetalt 48 i forkant`() {
         nyttVedtak(1.januar(2022), 31.mars(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
-        val dagsatsIT = (INNTEKT*1.1).reflection { _, _, _, dagligInt -> dagligInt }
+        val dagsatsIT = 1574
 
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2022),
@@ -218,7 +222,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Spleis utbetaler feriepenger til person, blir annullert i Spleis mellom første og andre kjøring`() {
         nyttVedtak(1.januar(2022), 31.mars(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
-        val dagsatsIT = (INNTEKT*1.1).reflection { _, _, _, dagligInt -> dagligInt }
+        val dagsatsIT = 1574
 
         // Første kjøring
         håndterUtbetalingshistorikkForFeriepenger(

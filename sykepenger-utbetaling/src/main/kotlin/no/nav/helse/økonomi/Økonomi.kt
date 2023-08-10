@@ -153,15 +153,15 @@ class Økonomi private constructor(
     fun <R> brukTotalGrad(block: (totalGrad: Int) -> R) = block(totalGrad.toDouble().toInt())
     // deprecated: bare Utbetalingslinjer bruker denne; og aktuellDagsinntekt i Utbetalingslinje er deprecated også
     fun medAvrundetData(block: (aktuellDagsinntekt: Int) -> Unit) =
-        block(aktuellDagsinntekt.reflection { _, _, _, dagligInt -> dagligInt })
+        block(aktuellDagsinntekt.rundTilDaglig().reflection { _, _, _, daglig -> daglig })
 
     fun accept(visitor: ØkonomiVisitor) {
         visitor.visitAvrundetØkonomi(
-            arbeidsgiverRefusjonsbeløp.reflection { _, _, _, daglig -> daglig },
-            dekningsgrunnlag.reflection { _, _, _, daglig -> daglig },
-            aktuellDagsinntekt.reflection { _, _, _, daglig -> daglig },
-            arbeidsgiverbeløp?.reflection { _, _, _, daglig -> daglig },
-            personbeløp?.reflection { _, _, _, daglig -> daglig }
+            arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig.toInt() },
+            dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig.toInt() },
+            aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig.toInt() },
+            arbeidsgiverbeløp?.reflection { _, _, daglig, _ -> daglig.toInt() },
+            personbeløp?.reflection { _, _, daglig, _ -> daglig.toInt() }
         )
     }
 
