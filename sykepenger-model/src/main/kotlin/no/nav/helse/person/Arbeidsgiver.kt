@@ -127,7 +127,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal companion object {
-        internal fun List<Arbeidsgiver>.kandidatForSkjønnsmessigFastsettelse() = any { it.utbetalinger.isNotEmpty() }
         internal fun List<Arbeidsgiver>.finn(orgnr: String) = find { it.organisasjonsnummer() == orgnr }
 
         internal fun List<Arbeidsgiver>.tidligsteDato(): LocalDate {

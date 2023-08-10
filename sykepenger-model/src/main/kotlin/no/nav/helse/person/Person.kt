@@ -50,7 +50,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.identifiserAUUSomErUtbetaltISpleis
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
-import no.nav.helse.person.Arbeidsgiver.Companion.kandidatForSkjønnsmessigFastsettelse
 import no.nav.helse.person.Arbeidsgiver.Companion.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
 import no.nav.helse.person.Arbeidsgiver.Companion.nyttVilkårsgrunnlag
@@ -810,7 +809,6 @@ class Person private constructor(
     internal fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) = vedtaksperiode.makstid(tilstandsendringstidspunkt, arbeidsgivere)
     internal fun forkastAuu(hendelse: IAktivitetslogg, auu: Vedtaksperiode) = arbeidsgivere.forkastAuu(hendelse, auu)
     internal fun kandidatForSkjønnsmessigFastsettelse(vilkårsgrunnlag: VilkårsgrunnlagElement) {
-        if (!arbeidsgivere.kandidatForSkjønnsmessigFastsettelse()) return
         if (!vilkårsgrunnlag.kandidatForSkjønnsmessigFastsettelse()) return
         if (!alder.kandidatForSkjønnsmessigFastsettelse()) return
         sikkerLogg.info("Kandidat for skjønnsmessig fastsettelse {}", keyValue("fødselsnummer", "$personidentifikator"))
