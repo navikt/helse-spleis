@@ -10,7 +10,8 @@ import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -104,8 +105,7 @@ internal class DagerFraInntektsmelding(
         if (gammelAgp == null) return håndterDager()
         val periodeMellom = gammelAgp.omsluttendePeriode!!.periodeMellom(opprinneligPeriode.start)
         if (periodeMellom != null && periodeMellom.count() >= 20) {
-            info("Ignorerer dager fra inntektsmelding fordi perioden mellom gammel agp og opplyst agp er mer enn 19 dager")
-            varsel(RV_IM_3)
+            varsel(Varselkode.RV_IM_24, "Ignorerer dager fra inntektsmelding fordi perioden mellom gammel agp og opplyst agp er mer enn 19 dager")
             return
         }
         håndterDager()

@@ -52,6 +52,7 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_1
@@ -2061,7 +2062,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertIngenVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertIngenVarsel(RV_IM_2, 2.vedtaksperiode.filter())
         assertVarsel(RV_IM_4, 3.vedtaksperiode.filter())
-        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+        assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
         assertEquals(1.januar til 31.mars, inspektør.utbetalinger.last().inspektør.periode)
     }
 
