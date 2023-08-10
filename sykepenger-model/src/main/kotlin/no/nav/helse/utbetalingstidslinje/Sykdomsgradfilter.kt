@@ -22,11 +22,11 @@ internal object Sykdomsgradfilter: UtbetalingstidslinjerFilter {
 
         val dagerUnderGrensen = Utbetalingsdag.dagerUnderGrensen(oppdaterte)
 
-        val avvisteTidslinjer = avvis(oppdaterte, dagerUnderGrensen.grupperSammenhengendePerioder(), listOf(Begrunnelse.MinimumSykdomsgrad))
+        val avvisteTidslinjer = avvis(oppdaterte, dagerUnderGrensen, listOf(Begrunnelse.MinimumSykdomsgrad))
 
         perioder.forEach { (periode, aktivitetslogg, subsumsjonObserver) ->
             Prosentdel.subsumsjon(subsumsjonObserver) { grense ->
-                `§ 8-13 ledd 2`(periode, tidslinjerForSubsumsjon, grense, dagerUnderGrensen.grupperSammenhengendePerioder())
+                `§ 8-13 ledd 2`(periode, tidslinjerForSubsumsjon, grense, dagerUnderGrensen)
             }
             val avvisteDager = avvisteDager(avvisteTidslinjer, periode, Begrunnelse.MinimumSykdomsgrad)
             val harAvvisteDager = avvisteDager.isNotEmpty()

@@ -40,7 +40,7 @@ class Økonomi private constructor(
             }
         }
 
-        fun List<Økonomi>.erUnderGrensen() = any { it.totalGrad.erUnderGrensen() }
+        fun List<Økonomi>.erUnderGrensen() = none { !it.totalGrad.erUnderGrensen() }
 
         private fun totalUtbetalingsgrad(økonomiList: List<Økonomi>) =
             Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.utbetalingsgrad() to it.aktuellDagsinntekt })

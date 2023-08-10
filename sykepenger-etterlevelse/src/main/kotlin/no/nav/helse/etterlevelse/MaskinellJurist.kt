@@ -339,6 +339,13 @@ class MaskinellJurist private constructor(
         grense: Double,
         dagerUnderGrensen: List<ClosedRange<LocalDate>>
     ) {
+        val tidslinjegrunnlag = tidslinjer.map { it.dager(periode) }
+        val dagerUnderGrensenMap = dagerUnderGrensen.map {
+            mapOf(
+                "fom" to it.start,
+                "tom" to it.endInclusive
+            )
+        }
         periode.forEach { dagen ->
             leggTil(
                 GrupperbarSubsumsjon(
@@ -349,16 +356,11 @@ class MaskinellJurist private constructor(
                     ledd = LEDD_2,
                     versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
                     input = mapOf(
-                        "tidslinjegrunnlag" to tidslinjer.map { it.dager(periode) },
+                        "tidslinjegrunnlag" to tidslinjegrunnlag,
                         "grense" to grense
                     ),
                     output = mapOf(
-                        "dagerUnderGrensen" to dagerUnderGrensen.map {
-                            mapOf(
-                                "fom" to it.start,
-                                "tom" to it.endInclusive
-                            )
-                        }
+                        "dagerUnderGrensen" to dagerUnderGrensenMap
                     ),
                     kontekster = kontekster()
                 )

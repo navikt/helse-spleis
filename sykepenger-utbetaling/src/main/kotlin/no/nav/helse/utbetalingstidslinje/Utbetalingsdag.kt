@@ -1,6 +1,8 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.utbetalingslinjer.Beløpkilde
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.periode
 import no.nav.helse.økonomi.betal
@@ -102,12 +104,10 @@ sealed class Utbetalingsdag(
     }
 
     companion object {
-        fun dagerUnderGrensen(tidslinjer: List<Utbetalingstidslinje>): Set<LocalDate> {
-            return tidslinjer
-                .flatten()
-                .groupBy({ it.dato }) { it.økonomi }
-                .filterValues { it.erUnderGrensen() }
-                .keys
+        fun dagerUnderGrensen(tidslinjer: List<Utbetalingstidslinje>): List<Periode> {
+            return periode(tidslinjer)
+                .filter { dato -> tidslinjer.map { it[dato].økonomi }.erUnderGrensen() }
+                .grupperSammenhengendePerioder()
         }
 
         fun betale(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
