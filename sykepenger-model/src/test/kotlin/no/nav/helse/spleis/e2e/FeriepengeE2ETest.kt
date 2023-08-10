@@ -749,9 +749,6 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             assertEquals("2021-05-31", linje["tom"])
             assertEquals("1460", "${linje["totalbeløp"]}")
         }
-        assertTrue(observatør.utbetaltEndretEventer.any {
-            it.arbeidsgiverOppdrag["linjer"].castAsList<Map<String, Any>>().single()["satstype"] == "ENG"
-        })
     }
 
     @Test
@@ -815,9 +812,6 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
         val feriepengerUtbetaltEndretEventer = observatør.utbetaltEndretEventer.filter { it.type == Utbetalingtype.FERIEPENGER.name }
         assertEquals(2, feriepengerUtbetaltEndretEventer.size)
-        assertTrue(feriepengerUtbetaltEndretEventer.any {
-            it.arbeidsgiverOppdrag["linjer"].castAsList<Map<String, Any>>().single()["satstype"] == "ENG"
-        })
     }
 
     @Test

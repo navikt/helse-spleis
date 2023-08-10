@@ -33,6 +33,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomstidslinjer
+import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_UTBETALT_I_INFOTRYGD
 import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.auuGruppering
@@ -733,8 +734,8 @@ internal class Arbeidsgiver private constructor(
                 type = type.name,
                 forrigeStatus = forrigeTilstand.name,
                 gjeldendeStatus = nesteTilstand.name,
-                arbeidsgiverOppdrag = arbeidsgiverOppdrag.toHendelseMap(),
-                personOppdrag = personOppdrag.toHendelseMap(),
+                arbeidsgiverOppdrag = OppdragEventDetaljer(arbeidsgiverOppdrag.fagsystemId(), arbeidsgiverOppdrag.nettoBeløp()),
+                personOppdrag = OppdragEventDetaljer(personOppdrag.fagsystemId(), personOppdrag.nettoBeløp()),
                 korrelasjonsId = korrelasjonsId
             )
         )

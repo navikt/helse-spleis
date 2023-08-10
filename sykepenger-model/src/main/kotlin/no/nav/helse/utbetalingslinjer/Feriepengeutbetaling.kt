@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.person.FeriepengeutbetalingVisitor
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
@@ -124,8 +125,8 @@ internal class Feriepengeutbetaling private constructor(
                 type = Utbetalingtype.FERIEPENGER.name,
                 forrigeStatus = Utbetalingstatus.IKKE_UTBETALT.name,
                 gjeldendeStatus = Utbetalingstatus.UTBETALT.name,
-                arbeidsgiverOppdrag = oppdrag.toHendelseMap(),
-                personOppdrag = personoppdrag.toHendelseMap(),
+                arbeidsgiverOppdrag = OppdragEventDetaljer(oppdrag.fagsystemId(), oppdrag.nettoBeløp()),
+                personOppdrag = OppdragEventDetaljer(personoppdrag.fagsystemId(), personoppdrag.nettoBeløp()),
                 korrelasjonsId = UUID.randomUUID()
             )
         )
