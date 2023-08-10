@@ -159,6 +159,7 @@ class Oppdrag private constructor(
     }
 
     fun fagsystemId() = fagsystemId
+    fun mottaker() = mottaker
 
     private operator fun contains(other: Oppdrag) = this.tilhører(other) || this.overlapperMed(other) || sammenhengendeUtbetalingsperiode(other)
 

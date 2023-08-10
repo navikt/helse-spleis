@@ -302,6 +302,10 @@ internal class PersonMediator(
             "vedtaksperiodeIder" to event.vedtaksperiodeIder
         ))
 
+    /*
+       feriepenger_utbetalt (helse-spre):
+        - bruker fom, tom, totalbeløp på arbeidsgiverOppdrag og personOppdrag
+     */
     override fun feriepengerUtbetalt(event: PersonObserver.FeriepengerUtbetaltEvent) =
         queueMessage(JsonMessage.newMessage("feriepenger_utbetalt", mapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,

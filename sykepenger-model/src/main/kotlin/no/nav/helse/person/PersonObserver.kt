@@ -8,11 +8,14 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.PersonObserver.ForespurtOpplysning.Companion.toJsonMap
+import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer.OppdragEventLinjeDetaljer
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Prosentdel
+import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Local
 
 interface PersonObserver : SykefraværstilfelleeventyrObserver {
     data class VedtaksperiodeIkkeFunnetEvent(
@@ -228,10 +231,37 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val type: String,
         val forrigeStatus: String,
         val gjeldendeStatus: String,
-        val arbeidsgiverOppdrag: Map<String, Any?>,
-        val personOppdrag: Map<String, Any?>,
+        val arbeidsgiverOppdrag: OppdragEventDetaljer,
+        val personOppdrag: OppdragEventDetaljer,
         val korrelasjonsId: UUID
-    )
+    ) {
+        data class OppdragEventDetaljer(
+            val fagsystemId: String,
+            val mottaker: String,
+            val nettoBeløp: Int,
+            val linjer: List<OppdragEventLinjeDetaljer>
+        ) {
+            data class OppdragEventLinjeDetaljer(
+                val fom: LocalDate,
+                val tom: LocalDate,
+                val totalbeløp: Int
+            )
+
+            companion object {
+                fun mapOppdrag(oppdrag: Oppdrag) = OppdragEventDetaljer(
+                    fagsystemId = oppdrag.fagsystemId(),
+                    mottaker = oppdrag.mottaker(),
+                    nettoBeløp = oppdrag.nettoBeløp(),
+                    linjer = oppdrag.map { linje ->
+                        OppdragEventLinjeDetaljer(
+                            fom = linje.fom,
+                            tom = linje.tom,
+                            totalbeløp = linje.totalbeløp()
+                        )
+                    })
+            }
+        }
+    }
 
     data class UtbetalingUtbetaltEvent(
         val organisasjonsnummer: String,
