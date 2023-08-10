@@ -23,6 +23,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
     private val subsumsjoner = mutableListOf<Subsumsjon>()
 
     private data class Subsumsjon(
+        val lovverk: String,
         val paragraf: Paragraf,
         val ledd: Ledd?,
         val punktum: Punktum?,
@@ -41,6 +42,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
     }
 
     private fun finnSubsumsjoner(
+        lovverk: String,
         paragraf: Paragraf,
         versjon: LocalDate?,
         ledd: Ledd?,
@@ -50,7 +52,8 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         vedtaksperiodeId: UUID? = null
     ) =
         subsumsjoner.filter {
-            it.paragraf == paragraf
+            lovverk == it.lovverk
+                && it.paragraf == paragraf
                 && versjon?.equals(it.versjon) ?: true
                 && utfall?.equals(it.utfall) ?: true
                 && ledd?.equals(it.ledd) ?: true
@@ -60,6 +63,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         }
 
     internal fun antallSubsumsjoner(
+        lovverk: String = "folketrygdloven",
         paragraf: Paragraf,
         versjon: LocalDate?,
         ledd: Ledd?,
@@ -67,7 +71,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         bokstav: Bokstav?,
         utfall: Utfall? = null,
         vedtaksperiodeId: UUID? = null
-    ) = finnSubsumsjoner(paragraf, versjon, ledd, punktum, bokstav, utfall, vedtaksperiodeId).size
+    ) = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, utfall, vedtaksperiodeId).size
 
     internal fun assertBeregnet(
         paragraf: Paragraf,
@@ -96,9 +100,10 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         output: Map<String, Any>,
         sporing: Map<String, KontekstType>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
-        organisasjonsnummer: String = ORGNUMMER
+        organisasjonsnummer: String = ORGNUMMER,
+        lovverk: String = "folketrygdloven"
     ) {
-        val resultat = finnSubsumsjoner(paragraf, versjon, ledd, punktum, bokstav, VILKAR_BEREGNET, vedtaksperiodeId?.id(organisasjonsnummer))
+        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_BEREGNET, vedtaksperiodeId?.id(organisasjonsnummer))
         assertEquals(forventetAntall, resultat.size, "Forventer kun en subsumsjon. Subsumsjoner funnet: $resultat")
         val subsumsjon = resultat[index]
         sporing?.also { forventet ->
@@ -115,6 +120,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
     }
 
     internal fun assertOppfylt(
+        lovverk: String = "folketrygdloven",
         paragraf: Paragraf,
         versjon: LocalDate,
         ledd: Ledd? = null,
@@ -125,7 +131,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = ORGNUMMER
     ) {
-        val resultat = finnSubsumsjoner(paragraf, versjon, ledd, punktum, bokstav, VILKAR_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
+        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
         assertEquals(1, resultat.size, "Forventer kun en subsumsjon. Subsumsjoner funnet: $resultat")
         val subsumsjon = resultat.first()
         assertEquals(VILKAR_OPPFYLT, subsumsjon.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
@@ -134,6 +140,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
     }
 
     internal fun assertOppfyltPaaIndeks(
+        lovverk: String = "folketrygdloven",
         index: Int,
         forventetAntall: Int,
         paragraf: Paragraf,
@@ -146,7 +153,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = ORGNUMMER
     ) {
-        val resultat = finnSubsumsjoner(paragraf, versjon, ledd, punktum, bokstav, VILKAR_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
+        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
         val subsumsjon = resultat[index]
         assertEquals(forventetAntall, resultat.size, "Forventer $forventetAntall subsumsjoner for vilkåret. Subsumsjoner funnet: ${resultat.size}")
         assertEquals(VILKAR_OPPFYLT, subsumsjon.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
@@ -154,6 +161,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
     }
 
     internal fun assertIkkeOppfylt(
+        lovverk: String = "folketrygdloven",
         paragraf: Paragraf,
         versjon: LocalDate,
         ledd: Ledd? = null,
@@ -165,7 +173,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         organisasjonsnummer: String = ORGNUMMER
     ) {
         val resultat =
-            finnSubsumsjoner(paragraf, versjon, ledd, punktum, bokstav, VILKAR_IKKE_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
+            finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_IKKE_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
         assertEquals(1, resultat.size, "Forventer kun en subsumsjon. Subsumsjoner funnet: $resultat")
         val subsumsjon = resultat.first()
         assertEquals(VILKAR_IKKE_OPPFYLT, subsumsjon.utfall) { "Forventet ikke oppfylt $paragraf $ledd $punktum" }
@@ -212,9 +220,10 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         bokstav: Bokstav? = null,
         vedtaksperiodeId: IdInnhenter? = null,
         versjon: LocalDate? = null,
-        organisasjonsnummer: String = ORGNUMMER
+        organisasjonsnummer: String = ORGNUMMER,
+        lovverk: String = "folketrygdloven"
     ) {
-        val resultat = finnSubsumsjoner(paragraf, versjon, ledd, punktum, bokstav, null, vedtaksperiodeId?.id(organisasjonsnummer))
+        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, null, vedtaksperiodeId?.id(organisasjonsnummer))
         assertEquals(1, resultat.size, "Forventer kun en subsumsjon. Subsumsjoner funnet: $resultat")
     }
 
@@ -225,9 +234,10 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         bokstav: Bokstav? = null,
         vedtaksperiodeId: IdInnhenter? = null,
         versjon: LocalDate? = null,
-        organisasjonsnummer: String = ORGNUMMER
+        organisasjonsnummer: String = ORGNUMMER,
+        lovverk: String = "folketrygdloven"
     ) {
-        val resultat = finnSubsumsjoner(paragraf, versjon, ledd, punktum, bokstav, null, vedtaksperiodeId?.id(organisasjonsnummer))
+        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, null, vedtaksperiodeId?.id(organisasjonsnummer))
         assertEquals(0, resultat.size, "Forventer ingen subsumsjoner. Subsumsjoner funnet: $resultat")
     }
 
@@ -248,6 +258,6 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         output: Map<String, Any>,
         kontekster: Map<String, KontekstType>
     ) {
-        subsumsjoner.add(Subsumsjon(paragraf, ledd, punktum, bokstav, versjon, kontekster, utfall, input, output))
+        subsumsjoner.add(Subsumsjon(lovverk, paragraf, ledd, punktum, bokstav, versjon, kontekster, utfall, input, output))
     }
 }
