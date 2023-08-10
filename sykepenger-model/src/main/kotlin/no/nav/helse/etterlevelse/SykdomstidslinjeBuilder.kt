@@ -6,7 +6,6 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.økonomi.Økonomi
-import kotlin.math.roundToInt
 
 internal class SykdomstidslinjeBuilder(sykdomstidslinje: Sykdomstidslinje) : SykdomstidslinjeVisitor {
     private val navdager = mutableListOf<Tidslinjedag>()
@@ -31,6 +30,18 @@ internal class SykdomstidslinjeBuilder(sykdomstidslinje: Sykdomstidslinje) : Syk
 
     override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
         visit(dato, "PERMISJONSDAG", null)
+    }
+
+    override fun visitDag(dag: Dag.AndreYtelser, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde, ytelse: Dag.AndreYtelser.AnnenYtelse) {
+        visit(dato, when(ytelse) {
+            Dag.AndreYtelser.AnnenYtelse.Foreldrepenger -> "FORELDREPENGER"
+            Dag.AndreYtelser.AnnenYtelse.AAP -> "ARBEIDSAVKLARINGSPENGER"
+            Dag.AndreYtelser.AnnenYtelse.Omsorgspenger -> "OMSORGSPENGER"
+            Dag.AndreYtelser.AnnenYtelse.Pleiepenger -> "PLEIEPENGER"
+            Dag.AndreYtelser.AnnenYtelse.Svangerskapspenger -> "SVANGERSKAPSPENGER"
+            Dag.AndreYtelser.AnnenYtelse.Opplæringspenger -> "OPPLÆRINGSPENGER"
+            Dag.AndreYtelser.AnnenYtelse.Dagpenger -> "DAGPENGER"
+        }, null)
     }
 
     private fun visit(dato: LocalDate, dagtype: String, økonomi: Økonomi?) {

@@ -182,6 +182,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
     }
 
     internal fun assertFlereIkkeOppfylt(
+        antall: Int,
         lovverk: String,
         paragraf: Paragraf,
         versjon: LocalDate,
@@ -189,16 +190,15 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         punktum: Punktum? = null,
         bokstav: Bokstav? = null,
         input: Map<String, Any>,
-        output: Map<Int, Map<String, Any>>,
+        output: Map<String, Any>,
         vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = ORGNUMMER
     ) {
-        val forventetAntall = output.size
         val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_IKKE_OPPFYLT, vedtaksperiodeId?.id(organisasjonsnummer)).also {
-            assertEquals(forventetAntall, it.size, "Forventer $forventetAntall subsumsjoner for vilkåret. Subsumsjoner funnet: $it")
+            assertEquals(antall, it.size, "Forventer $antall subsumsjoner for vilkåret. Subsumsjoner funnet: $it")
         }
-        resultat.forEachIndexed { index,  it ->
-            assertResultat(input, output[index], it)
+        resultat.forEach {
+            assertResultat(input, output, it)
         }
     }
 
