@@ -250,14 +250,11 @@ class Utbetalingslinje(
         }
     }
 
-    fun toHendelseMap() = mapOf<String, Any?>(
+    fun behovdetaljer() = mapOf<String, Any?>(
         "fom" to fom.toString(),
         "tom" to tom.toString(),
         "satstype" to "$satstype",
         "sats" to beløp,
-        // TODO: Skal bort etter apper er migrert over til sats
-        "dagsats" to beløp,
-        "lønn" to aktuellDagsinntekt, // deprecated
         "grad" to grad?.toDouble(), // backwards-compatibility mot andre systemer som forventer double: må gjennomgås
         "stønadsdager" to stønadsdager(),
         "totalbeløp" to totalbeløp(),

@@ -83,12 +83,11 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test
     fun hendelsemap() {
-        (1.januar to 5.januar dagsats 500 satstype Satstype.Engang).asUtbetalingslinje().toHendelseMap().also { map ->
+        (1.januar to 5.januar dagsats 500 satstype Satstype.Engang).asUtbetalingslinje().behovdetaljer().also { map ->
             assertEquals("${1.januar}", map.getValue("fom"))
             assertEquals("${5.januar}", map.getValue("tom"))
             assertEquals("ENG", map.getValue("satstype"))
             assertEquals(500, map.getValue("sats"))
-            assertEquals(500, map.getValue("dagsats"))
             assertEquals(500, map.getValue("totalbeløp"))
             assertEquals(100.0, map.getValue("grad"))
             assertEquals(5, map.getValue("stønadsdager"))

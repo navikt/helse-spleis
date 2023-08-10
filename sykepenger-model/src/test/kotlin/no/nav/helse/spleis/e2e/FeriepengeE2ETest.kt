@@ -742,12 +742,11 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         assertTrue(person.personLogg.toString().contains("Data for feriepenger fra Oppdrag/UR"))
         assertTrue(person.personLogg.toString().contains("utbetalt ok: ja"))
         observatør.feriepengerUtbetaltEventer.first().let { event ->
-            assertEquals(fagsystemIdFeriepenger, event.arbeidsgiverOppdrag["fagsystemId"])
-            @Suppress("unchecked_cast")
-            val linje = (event.arbeidsgiverOppdrag["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
-            assertEquals("2021-05-01", linje["fom"])
-            assertEquals("2021-05-31", linje["tom"])
-            assertEquals("1460", "${linje["totalbeløp"]}")
+            assertEquals(fagsystemIdFeriepenger, event.arbeidsgiverOppdrag.fagsystemId)
+            val linje = event.arbeidsgiverOppdrag.linjer.first()
+            assertEquals("2021-05-01", linje.fom.toString())
+            assertEquals("2021-05-31", linje.tom.toString())
+            assertEquals("1460", linje.totalbeløp.toString())
         }
     }
 
@@ -794,20 +793,18 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         assertEquals(2, observatør.feriepengerUtbetaltEventer.size)
 
         observatør.feriepengerUtbetaltEventer.first().let { event ->
-            assertEquals(fagsystemIdFeriepenger, event.arbeidsgiverOppdrag["fagsystemId"])
-            @Suppress("unchecked_cast")
-            val linje = (event.arbeidsgiverOppdrag["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
-            assertEquals("2021-05-01", linje["fom"])
-            assertEquals("2021-05-31", linje["tom"])
-            assertEquals("1460", "${linje["totalbeløp"]}")
+            assertEquals(fagsystemIdFeriepenger, event.arbeidsgiverOppdrag.fagsystemId)
+            val linje = (event.arbeidsgiverOppdrag.linjer).first()
+            assertEquals("2021-05-01", linje.fom.toString())
+            assertEquals("2021-05-31", linje.tom.toString())
+            assertEquals("1460", linje.totalbeløp.toString())
         }
         observatør.feriepengerUtbetaltEventer.last().let { event ->
-            assertEquals(fagsystemIdFeriepenger, event.arbeidsgiverOppdrag["fagsystemId"])
-            @Suppress("unchecked_cast")
-            val linje = (event.arbeidsgiverOppdrag["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
-            assertEquals("2021-05-01", linje["fom"])
-            assertEquals("2021-05-31", linje["tom"])
-            assertEquals("2627", "${linje["totalbeløp"]}")
+            assertEquals(fagsystemIdFeriepenger, event.arbeidsgiverOppdrag.fagsystemId)
+            val linje = (event.arbeidsgiverOppdrag.linjer).first()
+            assertEquals("2021-05-01", linje.fom.toString())
+            assertEquals("2021-05-31", linje.tom.toString())
+            assertEquals("2627",  linje.totalbeløp.toString())
         }
 
         val feriepengerUtbetaltEndretEventer = observatør.utbetaltEndretEventer.filter { it.type == Utbetalingtype.FERIEPENGER.name }

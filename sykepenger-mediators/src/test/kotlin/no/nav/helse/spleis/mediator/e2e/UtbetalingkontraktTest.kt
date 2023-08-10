@@ -435,7 +435,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(oppdrag.path("mottaker").asText().isNotEmpty())
         assertTrue(oppdrag.path("fagsystemId").asText().isNotEmpty())
         assertTrue(oppdrag.path("fagområde").asText().isNotEmpty())
-        assertTrue(oppdrag.path("endringskode").asText().isNotEmpty())
+        assertTrue(oppdrag.path("nettoBeløp").isInt)
         assertTrue(oppdrag.path("stønadsdager").isInt)
         assertDato(oppdrag.path("fom").asText())
         assertDato(oppdrag.path("tom").asText())
@@ -447,9 +447,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         linjer.forEach { linje ->
             assertDato(linje.path("fom").asText())
             assertDato(linje.path("tom").asText())
-            assertTrue(linje.path("dagsats").isInt)
             assertTrue(linje.path("sats").isInt)
-            assertTrue(linje.path("lønn").isInt)
             assertTrue(linje.path("grad").isDouble)
             assertTrue(linje.path("stønadsdager").isInt)
             assertTrue(linje.path("totalbeløp").isInt)
@@ -457,18 +455,11 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
                 assertEquals(0, linje.path("stønadsdager").asInt())
                 assertEquals(0, linje.path("totalbeløp").asInt())
             }
-            assertTrue(linje.path("delytelseId").isInt)
-            assertTrue(linje.has("refFagsystemId"))
-            assertTrue(linje.has("refDelytelseId"))
             if (!erAnnullering) {
-                assertTrue(linje.has("datoStatusFom"))
                 assertTrue(linje.has("statuskode"))
             } else {
-                assertDato(linje.path("datoStatusFom").asText())
                 assertTrue(linje.path("statuskode").asText().isNotEmpty())
             }
-            assertTrue(linje.path("endringskode").asText().isNotEmpty())
-            assertTrue(linje.path("klassekode").asText().isNotEmpty())
         }
     }
 
@@ -488,10 +479,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
             it.assertOgFjernUUID("korrelasjonsId")
             it.assertOgFjernLocalDateTime("tidspunkt")
             it.assertOgFjernFagsystemId("arbeidsgiverOppdrag.fagsystemId")
-            it.assertOgFjernLocalDateTime("arbeidsgiverOppdrag.tidsstempel")
-            it.assertOgFjernLocalDateTime("arbeidsgiverOppdrag.overføringstidspunkt")
             it.assertOgFjernFagsystemId("personOppdrag.fagsystemId")
-            it.assertOgFjernLocalDateTime("personOppdrag.tidsstempel")
             it.assertOgFjern("vedtaksperiodeIder") { vedtaksperiodeIder ->
                 check(vedtaksperiodeIder.isArray)
                 check(vedtaksperiodeIder.size() == 1)
@@ -549,78 +537,25 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
                 "linjer": [{
                     "fom": "2018-01-19",
                     "tom": "2018-01-26",
-                    "satstype": "DAG",
                     "sats": 1431,
-                    "dagsats": 1431,
-                    "lønn": 1431,
                     "grad": 100.0,
                     "stønadsdager": 6,
                     "totalbeløp": 8586,
-                    "endringskode": "NY",
-                    "delytelseId": 1,
-                    "refDelytelseId": null,
-                    "refFagsystemId": null,
-                    "statuskode": null,
-                    "datoStatusFom": null,
-                    "klassekode": "SPREFAG-IOP"
+                    "statuskode": null
                 }],
-                "endringskode": "NY",
-                "sisteArbeidsgiverdag": "2018-01-18",
                 "nettoBeløp": 8586,
                 "stønadsdager": 6,
-                "avstemmingsnøkkel": "123456",
-                "status": "AKSEPTERT",
                 "fom": "2018-01-19",
-                "tom": "2018-01-26",
-                "simuleringsResultat": {
-                    "totalbeløp": 9999,
-                    "perioder": [{
-                        "fom": "2020-01-01",
-                        "tom": "2020-01-02",
-                        "utbetalinger": [{
-                            "forfallsdato": "2020-01-03",
-                            "utbetalesTil": {
-                                "id": "987654321",
-                                "navn": "Koronavirus"
-                            },
-                            "feilkonto": true,
-                            "detaljer": [{
-                                "fom": "2020-01-01",
-                                "tom": "2020-01-02",
-                                "konto": "12345678910og1112",
-                                "beløp": 9999,
-                                "klassekode": {
-                                    "kode": "SPREFAG-IOP",
-                                    "beskrivelse": "Sykepenger, Refusjon arbeidsgiver"
-                                },
-                                "uføregrad": 100,
-                                "utbetalingstype": "YTEL",
-                                "tilbakeføring": false,
-                                "sats": {
-                                    "sats": 1000.5,
-                                    "antall": 9,
-                                    "type": "DAG"
-                                },
-                                "refunderesOrgnummer": "987654321"
-                            }]
-                        }]
-                    }]
-                }
+                "tom": "2018-01-26"
             },
             "personOppdrag": {
                 "mottaker": "12029240045",
                 "fagområde": "SP",
                 "linjer": [],
-                "endringskode": "NY",
-                "sisteArbeidsgiverdag": "2018-01-18",
                 "nettoBeløp": 0,
                 "stønadsdager": 0,
-                "avstemmingsnøkkel": null,
-                "status": null,
-                "overføringstidspunkt": null,
                 "fom": "-999999999-01-01",
-                "tom": "-999999999-01-01",
-                "simuleringsResultat": null
+                "tom": "-999999999-01-01"
             },
             "utbetalingsdager": [{
                 "dato": "2018-01-03",

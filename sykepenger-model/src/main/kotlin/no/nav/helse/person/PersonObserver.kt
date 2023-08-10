@@ -7,15 +7,21 @@ import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.PersonObserver.ForespurtOpplysning.Companion.toJsonMap
-import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer.OppdragEventLinjeDetaljer
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Fagområde
+import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.OppdragVisitor
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.Satstype
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Prosentdel
-import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Local
 
 interface PersonObserver : SykefraværstilfelleeventyrObserver {
     data class VedtaksperiodeIkkeFunnetEvent(
@@ -277,12 +283,88 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val epost: String,
         val tidspunkt: LocalDateTime,
         val automatiskBehandling: Boolean,
-        val arbeidsgiverOppdrag: Map<String, Any?>,
-        val personOppdrag: Map<String, Any?>,
+        val arbeidsgiverOppdrag: OppdragEventDetaljer,
+        val personOppdrag: OppdragEventDetaljer,
         val utbetalingsdager: List<Utbetalingsdag>,
         val vedtaksperiodeIder: List<UUID>,
         val ident: String
-    )
+    ) {
+        data class OppdragEventDetaljer(
+            val fagsystemId: String,
+            val fagområde: String,
+            val mottaker: String,
+            val nettoBeløp: Int,
+            val stønadsdager: Int,
+            val fom: LocalDate,
+            val tom: LocalDate,
+            val linjer: List<OppdragEventLinjeDetaljer>
+        ) {
+            data class OppdragEventLinjeDetaljer(
+                val fom: LocalDate,
+                val tom: LocalDate,
+                val sats: Int,
+                val grad: Double,
+                val stønadsdager: Int,
+                val totalbeløp: Int,
+                val statuskode: String?
+            )
+
+            companion object {
+                fun mapOppdrag(oppdrag: Oppdrag): OppdragEventDetaljer {
+                    val builder = Builder()
+                    oppdrag.accept(builder)
+                    return builder.build()
+                }
+            }
+            private class Builder : OppdragVisitor {
+                private lateinit var dto: OppdragEventDetaljer
+                private val linjene = mutableListOf<OppdragEventLinjeDetaljer>()
+
+                fun build() = dto
+
+                override fun visitUtbetalingslinje(
+                    linje: Utbetalingslinje,
+                    fom: LocalDate,
+                    tom: LocalDate,
+                    stønadsdager: Int,
+                    totalbeløp: Int,
+                    satstype: Satstype,
+                    beløp: Int?,
+                    aktuellDagsinntekt: Int?,
+                    grad: Int?,
+                    delytelseId: Int,
+                    refDelytelseId: Int?,
+                    refFagsystemId: String?,
+                    endringskode: Endringskode,
+                    datoStatusFom: LocalDate?,
+                    statuskode: String?,
+                    klassekode: Klassekode
+                ) {
+                    linjene.add(OppdragEventLinjeDetaljer(fom, tom, beløp ?: error("mangler beløp for linje"), grad?.toDouble() ?: error("mangler grad for linje"), stønadsdager, totalbeløp, statuskode))
+                }
+
+                override fun postVisitOppdrag(
+                    oppdrag: Oppdrag,
+                    fagområde: Fagområde,
+                    fagsystemId: String,
+                    mottaker: String,
+                    sisteArbeidsgiverdag: LocalDate?,
+                    stønadsdager: Int,
+                    totalBeløp: Int,
+                    nettoBeløp: Int,
+                    tidsstempel: LocalDateTime,
+                    endringskode: Endringskode,
+                    avstemmingsnøkkel: Long?,
+                    status: Oppdragstatus?,
+                    overføringstidspunkt: LocalDateTime?,
+                    erSimulert: Boolean,
+                    simuleringsResultat: SimuleringResultat?
+                ) {
+                    dto = OppdragEventDetaljer(fagsystemId, fagområde.verdi, mottaker, nettoBeløp, stønadsdager, linjene.firstOrNull()?.fom ?: LocalDate.MIN, linjene.lastOrNull()?.tom ?: LocalDate.MIN, linjene)
+                }
+            }
+        }
+    }
 
     data class Utbetalingsdag(
         val dato: LocalDate,
@@ -348,9 +430,78 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
 
     data class FeriepengerUtbetaltEvent(
         val organisasjonsnummer: String,
-        val arbeidsgiverOppdrag: Map<String, Any?>,
-        val personOppdrag: Map<String, Any?> = mapOf("linjer" to emptyList<String>())
-    )
+        val arbeidsgiverOppdrag: OppdragEventDetaljer,
+        val personOppdrag: OppdragEventDetaljer
+    ) {
+        data class OppdragEventDetaljer(
+            val fagsystemId: String,
+            val mottaker: String,
+            val fom: LocalDate,
+            val tom: LocalDate,
+            val linjer: List<OppdragEventLinjeDetaljer>
+        ) {
+            data class OppdragEventLinjeDetaljer(
+                val fom: LocalDate,
+                val tom: LocalDate,
+                val totalbeløp: Int
+            )
+
+            companion object {
+                fun mapOppdrag(oppdrag: Oppdrag): OppdragEventDetaljer {
+                    val builder = Builder()
+                    oppdrag.accept(builder)
+                    return builder.build()
+                }
+            }
+            private class Builder : OppdragVisitor {
+                private lateinit var dto: OppdragEventDetaljer
+                private val linjene = mutableListOf<OppdragEventLinjeDetaljer>()
+
+                fun build() = dto
+
+                override fun visitUtbetalingslinje(
+                    linje: Utbetalingslinje,
+                    fom: LocalDate,
+                    tom: LocalDate,
+                    stønadsdager: Int,
+                    totalbeløp: Int,
+                    satstype: Satstype,
+                    beløp: Int?,
+                    aktuellDagsinntekt: Int?,
+                    grad: Int?,
+                    delytelseId: Int,
+                    refDelytelseId: Int?,
+                    refFagsystemId: String?,
+                    endringskode: Endringskode,
+                    datoStatusFom: LocalDate?,
+                    statuskode: String?,
+                    klassekode: Klassekode
+                ) {
+                    linjene.add(OppdragEventLinjeDetaljer(fom, tom, totalbeløp))
+                }
+
+                override fun postVisitOppdrag(
+                    oppdrag: Oppdrag,
+                    fagområde: Fagområde,
+                    fagsystemId: String,
+                    mottaker: String,
+                    sisteArbeidsgiverdag: LocalDate?,
+                    stønadsdager: Int,
+                    totalBeløp: Int,
+                    nettoBeløp: Int,
+                    tidsstempel: LocalDateTime,
+                    endringskode: Endringskode,
+                    avstemmingsnøkkel: Long?,
+                    status: Oppdragstatus?,
+                    overføringstidspunkt: LocalDateTime?,
+                    erSimulert: Boolean,
+                    simuleringsResultat: SimuleringResultat?
+                ) {
+                    dto = OppdragEventDetaljer(fagsystemId, mottaker, linjene.firstOrNull()?.fom ?: LocalDate.MIN, linjene.lastOrNull()?.tom ?: LocalDate.MIN, linjene)
+                }
+            }
+        }
+    }
 
     data class OverlappendeInfotrygdperiodeEtterInfotrygdendring(
         val organisasjonsnummer: String,

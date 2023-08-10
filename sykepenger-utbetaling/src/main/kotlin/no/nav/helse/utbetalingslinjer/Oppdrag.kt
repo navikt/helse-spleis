@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
-import java.time.LocalDate.MIN
 import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.hendelser.Periode
@@ -196,7 +195,7 @@ class Oppdrag private constructor(
         return mutableMapOf(
             "mottaker" to mottaker,
             "fagområde" to "$fagområde",
-            "linjer" to kopierKunLinjerMedEndring().map(Utbetalingslinje::toHendelseMap),
+            "linjer" to kopierKunLinjerMedEndring().map(Utbetalingslinje::behovdetaljer),
             "fagsystemId" to fagsystemId,
             "endringskode" to "$endringskode",
             "saksbehandler" to saksbehandler
@@ -369,24 +368,6 @@ class Oppdrag private constructor(
         linjer.kobleTil(tidligere.fagsystemId),
         tidligere.fagsystemId,
         Endringskode.ENDR
-    )
-
-    fun toHendelseMap() = mapOf(
-        "mottaker" to mottaker,
-        "fagområde" to "$fagområde",
-        "linjer" to map(Utbetalingslinje::toHendelseMap),
-        "fagsystemId" to fagsystemId,
-        "endringskode" to "$endringskode",
-        "sisteArbeidsgiverdag" to sisteArbeidsgiverdag,
-        "tidsstempel" to tidsstempel,
-        "nettoBeløp" to nettoBeløp,
-        "stønadsdager" to stønadsdager(),
-        "avstemmingsnøkkel" to avstemmingsnøkkel?.let { "$it" },
-        "status" to status?.let { "$it" },
-        "overføringstidspunkt" to overføringstidspunkt,
-        "fom" to (linjeperiode?.start ?: MIN),
-        "tom" to (linjeperiode?.endInclusive ?: MIN),
-        "simuleringsResultat" to simuleringsResultat?.toMap()
     )
 
     fun lagreOverføringsinformasjon(hendelse: UtbetalingHendelse) {

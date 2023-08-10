@@ -16,6 +16,7 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.serde.serdeObjectMapper
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import org.slf4j.LoggerFactory
 import kotlin.math.roundToInt
@@ -113,8 +114,8 @@ internal class Feriepengeutbetaling private constructor(
         person.feriepengerUtbetalt(
             PersonObserver.FeriepengerUtbetaltEvent(
                 organisasjonsnummer = organisasjonsnummer,
-                arbeidsgiverOppdrag = oppdrag.toHendelseMap(),
-                personOppdrag = personoppdrag.toHendelseMap()
+                arbeidsgiverOppdrag = PersonObserver.FeriepengerUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(oppdrag),
+                personOppdrag = PersonObserver.FeriepengerUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personoppdrag)
             )
         )
 
@@ -277,6 +278,8 @@ internal class Feriepengeutbetaling private constructor(
                 """.trimIndent()
             )
 
+            val arbeidsgiveroppdragdetaljer = serdeObjectMapper.writeValueAsString(PersonObserver.FeriepengerUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(arbeidsgiveroppdrag))
+            val personoppdragdetaljer = serdeObjectMapper.writeValueAsString(PersonObserver.FeriepengerUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personoppdrag))
             // Logging
             sikkerLogg.info(
                 """
@@ -308,11 +311,11 @@ internal class Feriepengeutbetaling private constructor(
                 - OPPDRAG:
                 Skal sende arbeidsgiveroppdrag til OS: $sendArbeidsgiveroppdrag
                 Differanse fra forrige sendte arbeidsgoiveroppdrag: ${forrigeSendteArbeidsgiverOppdrag?.totalbeløp()?.minus(arbeidsgiveroppdrag.totalbeløp())}
-                Arbeidsgiveroppdrag: ${arbeidsgiveroppdrag.toHendelseMap()}
+                Arbeidsgiveroppdrag: $arbeidsgiveroppdragdetaljer
                 
                 Skal sende personoppdrag til OS: $sendPersonoppdrag
                 Differanse fra forrige sendte personoppdrag: ${forrigeSendtePersonOppdrag?.totalbeløp()?.minus(personoppdrag.totalbeløp())}
-                Personoppdrag: ${personoppdrag.toHendelseMap()}
+                Personoppdrag: $personoppdragdetaljer
                 """
             )
 
