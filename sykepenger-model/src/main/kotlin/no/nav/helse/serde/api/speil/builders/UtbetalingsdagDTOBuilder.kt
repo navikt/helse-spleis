@@ -14,9 +14,6 @@ class UtbetalingsdagDTOBuilder(økonomi: Økonomi, private val type: Utbetalings
         økonomi.accept(this)
     }
     override fun visitAvrundetØkonomi(
-        arbeidsgiverRefusjonsbeløp: Int,
-        dekningsgrunnlag: Int,
-        aktuellDagsinntekt: Int,
         arbeidsgiverbeløp: Int?,
         personbeløp: Int?
     ) {

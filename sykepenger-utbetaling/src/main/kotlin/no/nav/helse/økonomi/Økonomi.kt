@@ -6,7 +6,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.fraRatio
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
 class Økonomi private constructor(
@@ -154,9 +153,6 @@ class Økonomi private constructor(
 
     fun accept(visitor: ØkonomiVisitor) {
         visitor.visitAvrundetØkonomi(
-            arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig.toInt() },
-            dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig.toInt() },
-            aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig.toInt() },
             arbeidsgiverbeløp?.reflection { _, _, daglig, _ -> daglig.toInt() },
             personbeløp?.reflection { _, _, daglig, _ -> daglig.toInt() }
         )
@@ -409,9 +405,6 @@ Fordi vi må vekk fra `medData` og gjøre like ting sånn nogenlunde likt.
  */
 interface ØkonomiVisitor {
     fun visitAvrundetØkonomi(
-        arbeidsgiverRefusjonsbeløp: Int,
-        dekningsgrunnlag: Int,
-        aktuellDagsinntekt: Int,
         arbeidsgiverbeløp: Int?,
         personbeløp: Int?
     ) {}

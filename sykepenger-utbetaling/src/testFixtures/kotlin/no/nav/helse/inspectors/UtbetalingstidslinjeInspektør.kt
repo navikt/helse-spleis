@@ -159,9 +159,6 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
     }
 
     override fun visitAvrundetØkonomi(
-        arbeidsgiverRefusjonsbeløp: Int,
-        dekningsgrunnlag: Int,
-        aktuellDagsinntekt: Int,
         arbeidsgiverbeløp: Int?,
         personbeløp: Int?
     ) {

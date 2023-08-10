@@ -153,9 +153,6 @@ internal class BeløpkildeAdapter(økonomi: Økonomi): Beløpkilde, ØkonomiVisi
     override fun personbeløp(): Int = personbeløp!!
 
     override fun visitAvrundetØkonomi(
-        arbeidsgiverRefusjonsbeløp: Int,
-        dekningsgrunnlag: Int,
-        aktuellDagsinntekt: Int,
         arbeidsgiverbeløp: Int?,
         personbeløp: Int?
     ) {
