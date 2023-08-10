@@ -182,34 +182,23 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
     }
 
     internal fun assertFlereIkkeOppfylt(
-        antall: Int,
+        lovverk: String,
         paragraf: Paragraf,
         versjon: LocalDate,
-        ledd: Ledd,
+        ledd: Ledd? = null,
         punktum: Punktum? = null,
         bokstav: Bokstav? = null,
         input: Map<String, Any>,
-        output: Map<String, Any>,
+        output: Map<Int, Map<String, Any>>,
         vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = ORGNUMMER
     ) {
-        val resultat = subsumsjoner.filter {
-            it.paragraf == paragraf
-                && (versjon == it.versjon)
-                && (VILKAR_IKKE_OPPFYLT == it.utfall)
-                && (ledd == it.ledd)
-                && punktum?.equals(it.punktum) ?: true
-                && bokstav?.equals(it.bokstav) ?: true
-                && (input == it.input)
-                && (output == it.output)
-                && vedtaksperiodeId?.id(organisasjonsnummer)?.equals(it.vedtaksperiodeIdFraSporing()) ?: true
-        }.let {
-            assertEquals(antall, it.size, "Forventer $antall subsumsjoner for vilkåret. Subsumsjoner funnet: $it")
-            it
+        val forventetAntall = output.size
+        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_IKKE_OPPFYLT, vedtaksperiodeId?.id(organisasjonsnummer)).also {
+            assertEquals(forventetAntall, it.size, "Forventer $forventetAntall subsumsjoner for vilkåret. Subsumsjoner funnet: $it")
         }
-        resultat.forEach {
-            assertEquals(VILKAR_IKKE_OPPFYLT, it.utfall) { "Forventet ikke oppfylt $paragraf $ledd $punktum" }
-            assertResultat(input, output, it)
+        resultat.forEachIndexed { index,  it ->
+            assertResultat(input, output[index], it)
         }
     }
 
