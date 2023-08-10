@@ -170,7 +170,7 @@ internal class UtbetalingTest {
             periode = 1.februar til 15.februar,
             utbetalingstidslinje = Utbetalingstidslinje(),
             arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon, linjer = listOf(
-                Utbetalingslinje(1.februar, 15.februar, beløp = 500, aktuellDagsinntekt = 500, grad = 10, delytelseId = 1, endringskode = ENDR, datoStatusFom = 1.februar)
+                Utbetalingslinje(1.februar, 15.februar, beløp = 500, grad = 10, delytelseId = 1, endringskode = ENDR, datoStatusFom = 1.februar)
             )),
             personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
             type = Utbetalingtype.ANNULLERING,
@@ -247,7 +247,7 @@ internal class UtbetalingTest {
             periode = 1.februar til 15.februar,
             utbetalingstidslinje = Utbetalingstidslinje(),
             arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon, linjer = listOf(
-                Utbetalingslinje(1.februar, 15.februar, beløp = 500, aktuellDagsinntekt = 500, grad = 10, delytelseId = 1, endringskode = ENDR, datoStatusFom = 1.februar)
+                Utbetalingslinje(1.februar, 15.februar, beløp = 500, grad = 10, delytelseId = 1, endringskode = ENDR, datoStatusFom = 1.februar)
             )),
             personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
             type = Utbetalingtype.ANNULLERING,
@@ -274,7 +274,7 @@ internal class UtbetalingTest {
             periode = 1.januar til 31.mars,
             utbetalingstidslinje = Utbetalingstidslinje(),
             arbeidsgiverOppdrag = Oppdrag("orgnr", Fagområde.SykepengerRefusjon, linjer = listOf(
-                Utbetalingslinje(1.januar, 31.januar, beløp = 500, aktuellDagsinntekt = 500, grad = 10, delytelseId = 1, endringskode = NY)
+                Utbetalingslinje(1.januar, 31.januar, beløp = 500, grad = 10, delytelseId = 1, endringskode = NY)
             )),
             personOppdrag = Oppdrag("fnr", Fagområde.Sykepenger),
             type = Utbetalingtype.UTBETALING,

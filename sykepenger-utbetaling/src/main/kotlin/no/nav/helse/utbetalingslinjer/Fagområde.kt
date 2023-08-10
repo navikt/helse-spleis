@@ -14,14 +14,14 @@ enum class Fagområde(
 
     override fun toString() = verdi
 
-    fun linje(fagsystemId: String, økonomi: Beløpkilde, dato: LocalDate, grad: Int, beløp: Int) =
-        Utbetalingslinje(dato, dato, Satstype.Daglig, beløpStrategy(økonomi), beløp, grad, fagsystemId, klassekode = klassekode)
+    fun linje(fagsystemId: String, økonomi: Beløpkilde, dato: LocalDate, grad: Int) =
+        Utbetalingslinje(dato, dato, Satstype.Daglig, beløpStrategy(økonomi), grad, fagsystemId, klassekode = klassekode)
 
     fun linje(fagsystemId: String, dato: LocalDate, grad: Int) =
-        Utbetalingslinje(dato, dato, Satstype.Daglig, null, 0, grad, fagsystemId, klassekode = klassekode)
+        Utbetalingslinje(dato, dato, Satstype.Daglig, null, grad, fagsystemId, klassekode = klassekode)
 
-    fun utvidLinje(linje: Utbetalingslinje, dato: LocalDate, økonomi: Beløpkilde, beløp: Int) =
-        linje.kopier(tom = dato, beløp = beløpStrategy(økonomi), aktuellDagsinntekt = beløp)
+    fun utvidLinje(linje: Utbetalingslinje, dato: LocalDate, økonomi: Beløpkilde) =
+        linje.kopier(tom = dato, beløp = beløpStrategy(økonomi))
 
     fun kanLinjeUtvides(linje: Utbetalingslinje, økonomi: Beløpkilde, grad: Int) =
         grad == linje.grad && (linje.beløp == null || linje.beløp == beløpStrategy(økonomi))

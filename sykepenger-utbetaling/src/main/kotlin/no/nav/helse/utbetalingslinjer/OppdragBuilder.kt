@@ -15,16 +15,11 @@ class OppdragBuilder(
 
     fun build() = Oppdrag(mottaker, fagområde, utbetalingslinjer, fagsystemId, sisteArbeidsgiverdag)
 
-    fun betalingsdag(
-        beløpkilde: Beløpkilde,
-        dato: LocalDate,
-        grad: Int,
-        aktuellDagsinntekt: Int
-    ) {
+    fun betalingsdag(beløpkilde: Beløpkilde, dato: LocalDate, grad: Int) {
         if (utbetalingslinjer.isEmpty() || !fagområde.kanLinjeUtvides(linje, beløpkilde, grad))
-            tilstand.nyLinje(beløpkilde, dato, grad, aktuellDagsinntekt)
+            tilstand.nyLinje(beløpkilde, dato, grad)
         else
-            tilstand.betalingsdag(beløpkilde, dato, grad, aktuellDagsinntekt)
+            tilstand.betalingsdag(beløpkilde, dato, grad)
     }
 
     fun betalingshelgedag(dato: LocalDate, grad: Int) {
@@ -38,8 +33,8 @@ class OppdragBuilder(
         tilstand.ikkeBetalingsdag()
     }
 
-    private fun addLinje(beløpkilde: Beløpkilde, dato: LocalDate, grad: Int, aktuellDagsinntekt: Int) {
-        utbetalingslinjer.add(fagområde.linje(fagsystemId, beløpkilde, dato, grad, aktuellDagsinntekt))
+    private fun addLinje(beløpkilde: Beløpkilde, dato: LocalDate, grad: Int) {
+        utbetalingslinjer.add(fagområde.linje(fagsystemId, beløpkilde, dato, grad))
     }
 
     private fun addLinje(dato: LocalDate, grad: Int) {
@@ -51,8 +46,7 @@ class OppdragBuilder(
         fun betalingsdag(
             beløpkilde: Beløpkilde,
             dato: LocalDate,
-            grad: Int,
-            aktuellDagsinntekt: Int
+            grad: Int
         ) {}
 
         fun helgedag(dato: LocalDate, grad: Int) {}
@@ -60,8 +54,7 @@ class OppdragBuilder(
         fun nyLinje(
             beløpkilde: Beløpkilde,
             dato: LocalDate,
-            grad: Int,
-            aktuellDagsinntekt: Int
+            grad: Int
         ) {}
 
         fun nyLinje(dato: LocalDate, grad: Int) {}
@@ -73,10 +66,9 @@ class OppdragBuilder(
         override fun betalingsdag(
             beløpkilde: Beløpkilde,
             dato: LocalDate,
-            grad: Int,
-            aktuellDagsinntekt: Int
+            grad: Int
         ) {
-            addLinje(beløpkilde, dato, grad, aktuellDagsinntekt)
+            addLinje(beløpkilde, dato, grad)
             tilstand = LinjeMedSats()
         }
 
@@ -84,10 +76,9 @@ class OppdragBuilder(
         override fun nyLinje(
             beløpkilde: Beløpkilde,
             dato: LocalDate,
-            grad: Int,
-            aktuellDagsinntekt: Int
+            grad: Int
         ) {
-            addLinje(beløpkilde, dato, grad, aktuellDagsinntekt)
+            addLinje(beløpkilde, dato, grad)
             tilstand = LinjeMedSats()
         }
 
@@ -111,8 +102,7 @@ class OppdragBuilder(
         override fun betalingsdag(
             beløpkilde: Beløpkilde,
             dato: LocalDate,
-            grad: Int,
-            aktuellDagsinntekt: Int
+            grad: Int
         ) {
             val førsteLinje = utbetalingslinjer.removeLast()
             utbetalingslinjer.add(førsteLinje.kopier(tom = dato))
@@ -121,10 +111,9 @@ class OppdragBuilder(
         override fun nyLinje(
             beløpkilde: Beløpkilde,
             dato: LocalDate,
-            grad: Int,
-            aktuellDagsinntekt: Int
+            grad: Int
         ) {
-            addLinje(beløpkilde, dato, grad, aktuellDagsinntekt)
+            addLinje(beløpkilde, dato, grad)
         }
 
         override fun helgedag(dato: LocalDate, grad: Int) {
@@ -147,20 +136,18 @@ class OppdragBuilder(
         override fun betalingsdag(
             beløpkilde: Beløpkilde,
             dato: LocalDate,
-            grad: Int,
-            aktuellDagsinntekt: Int
+            grad: Int
         ) {
-            utbetalingslinjer.add(fagområde.utvidLinje(utbetalingslinjer.removeLast(), dato, beløpkilde, aktuellDagsinntekt))
+            utbetalingslinjer.add(fagområde.utvidLinje(utbetalingslinjer.removeLast(), dato, beløpkilde))
             tilstand = LinjeMedSats()
         }
 
         override fun nyLinje(
             beløpkilde: Beløpkilde,
             dato: LocalDate,
-            grad: Int,
-            aktuellDagsinntekt: Int
+            grad: Int
         ) {
-            addLinje(beløpkilde, dato, grad, aktuellDagsinntekt)
+            addLinje(beløpkilde, dato, grad)
             tilstand = LinjeMedSats()
         }
 

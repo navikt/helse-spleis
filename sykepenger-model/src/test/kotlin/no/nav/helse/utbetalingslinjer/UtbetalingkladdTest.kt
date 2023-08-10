@@ -81,7 +81,7 @@ internal class UtbetalingkladdTest {
         val kladd2 = Utbetalingkladd(
             periode = 16.januar til 31.januar,
             arbeidsgiveroppdrag = Oppdrag("orgnr", SykepengerRefusjon, listOf(
-                Utbetalingslinje(17.januar, 31.januar, beløp = 500, aktuellDagsinntekt = null, grad = 100)
+                Utbetalingslinje(17.januar, 31.januar, beløp = 500, grad = 100)
             )),
             personoppdrag = Oppdrag("fnr", Sykepenger)
         )
@@ -94,14 +94,14 @@ internal class UtbetalingkladdTest {
         val kladd1 = Utbetalingkladd(
             periode = 1.januar(2017) til 15.januar,
             arbeidsgiveroppdrag = Oppdrag("orgnr", SykepengerRefusjon, listOf(
-                Utbetalingslinje(17.januar(2017), 31.januar(2017), beløp = 500, aktuellDagsinntekt = null, grad = 100)
+                Utbetalingslinje(17.januar(2017), 31.januar(2017), beløp = 500, grad = 100)
             )),
             personoppdrag = Oppdrag("fnr", Sykepenger)
         )
         val kladd2 = Utbetalingkladd(
             periode = 16.januar til 31.januar,
             arbeidsgiveroppdrag = Oppdrag("orgnr", SykepengerRefusjon, listOf(
-                Utbetalingslinje(17.januar, 31.januar, beløp = 500, aktuellDagsinntekt = null, grad = 100)
+                Utbetalingslinje(17.januar, 31.januar, beløp = 500, grad = 100)
             )),
             personoppdrag = Oppdrag("fnr", Sykepenger)
         )
@@ -114,14 +114,14 @@ internal class UtbetalingkladdTest {
         val kladd1 = Utbetalingkladd(
             periode = 1.januar(2017) til 15.januar,
             arbeidsgiveroppdrag = Oppdrag("orgnr", SykepengerRefusjon, listOf(
-                Utbetalingslinje(17.januar(2017), 15.januar, beløp = 500, aktuellDagsinntekt = null, grad = 100)
+                Utbetalingslinje(17.januar(2017), 15.januar, beløp = 500, grad = 100)
             )),
             personoppdrag = Oppdrag("fnr", Sykepenger)
         )
         val kladd2 = Utbetalingkladd(
             periode = 16.januar til 31.januar,
             arbeidsgiveroppdrag = Oppdrag("orgnr", SykepengerRefusjon, listOf(
-                Utbetalingslinje(17.januar, 31.januar, beløp = 500, aktuellDagsinntekt = null, grad = 100)
+                Utbetalingslinje(17.januar, 31.januar, beløp = 500, grad = 100)
             )),
             personoppdrag = Oppdrag("fnr", Sykepenger)
         )

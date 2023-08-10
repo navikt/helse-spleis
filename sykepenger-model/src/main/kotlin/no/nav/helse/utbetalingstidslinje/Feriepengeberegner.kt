@@ -328,7 +328,6 @@ internal class Feriepengeberegner(
                 totalbeløp: Int,
                 satstype: Satstype,
                 beløp: Int?,
-                aktuellDagsinntekt: Int?,
                 grad: Int?,
                 delytelseId: Int,
                 refDelytelseId: Int?,

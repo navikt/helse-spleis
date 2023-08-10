@@ -23,7 +23,6 @@ internal class OppdragTest {
                 fom = 19.januar,
                 tom = 25.januar,
                 endringskode = Endringskode.UEND,
-                aktuellDagsinntekt = 1000,
                 beløp = 1000,
                 grad = 100,
                 delytelseId = 1,
@@ -34,7 +33,6 @@ internal class OppdragTest {
                 fom = 26.januar,
                 tom = 28.januar,
                 endringskode = Endringskode.ENDR,
-                aktuellDagsinntekt = 1000,
                 beløp = 500,
                 grad = 50,
                 delytelseId = 2,
@@ -45,7 +43,6 @@ internal class OppdragTest {
                 fom = 29.januar,
                 tom = 31.januar,
                 endringskode = Endringskode.NY,
-                aktuellDagsinntekt = 1000,
                 beløp = 1000,
                 grad = 100,
                 delytelseId = 3,
@@ -76,7 +73,6 @@ internal class OppdragTest {
                 fom = 19.januar,
                 tom = 25.januar,
                 endringskode = Endringskode.UEND,
-                aktuellDagsinntekt = 1000,
                 beløp = 1000,
                 grad = 100,
                 delytelseId = 1,
@@ -87,7 +83,6 @@ internal class OppdragTest {
                 fom = 26.januar,
                 tom = 28.januar,
                 endringskode = Endringskode.ENDR,
-                aktuellDagsinntekt = 1000,
                 beløp = 500,
                 grad = 50,
                 delytelseId = 2,
@@ -98,7 +93,6 @@ internal class OppdragTest {
                 fom = 29.januar,
                 tom = 31.januar,
                 endringskode = Endringskode.NY,
-                aktuellDagsinntekt = 1000,
                 beløp = 1000,
                 grad = 100,
                 delytelseId = 3,
@@ -132,7 +126,6 @@ internal class OppdragTest {
                 fom = 19.januar,
                 tom = 25.januar,
                 endringskode = Endringskode.ENDR,
-                aktuellDagsinntekt = 1000,
                 datoStatusFom = 16.januar,
                 beløp = 1000,
                 grad = 100,
@@ -144,7 +137,6 @@ internal class OppdragTest {
                 fom = 26.januar,
                 tom = 29.januar,
                 endringskode = Endringskode.NY,
-                aktuellDagsinntekt = 1000,
                 beløp = 500,
                 grad = 50,
                 delytelseId = 2,
@@ -175,7 +167,6 @@ internal class OppdragTest {
                 fom = 19.januar,
                 tom = 25.januar,
                 endringskode = Endringskode.UEND,
-                aktuellDagsinntekt = 1000,
                 beløp = 1000,
                 grad = 100,
                 delytelseId = 1,
@@ -186,7 +177,6 @@ internal class OppdragTest {
                 fom = 26.januar,
                 tom = 28.januar,
                 endringskode = Endringskode.ENDR,
-                aktuellDagsinntekt = 1000,
                 beløp = 500,
                 grad = 50,
                 delytelseId = 2,
@@ -197,7 +187,6 @@ internal class OppdragTest {
                 fom = 29.januar,
                 tom = 31.januar,
                 endringskode = Endringskode.NY,
-                aktuellDagsinntekt = 1000,
                 beløp = 1000,
                 grad = 100,
                 delytelseId = 3,
@@ -210,7 +199,6 @@ internal class OppdragTest {
                 fom = 17.januar,
                 tom = 18.januar,
                 endringskode = Endringskode.NY,
-                aktuellDagsinntekt = 1000,
                 beløp = 1000,
                 grad = 100
             )
@@ -221,7 +209,6 @@ internal class OppdragTest {
                 fom = 17.januar,
                 tom = 25.januar,
                 endringskode = Endringskode.NY,
-                aktuellDagsinntekt = 1000,
                 beløp = 1000,
                 grad = 100,
                 delytelseId = 1,
@@ -232,7 +219,6 @@ internal class OppdragTest {
                 fom = 26.januar,
                 tom = 28.januar,
                 endringskode = Endringskode.ENDR,
-                aktuellDagsinntekt = 1000,
                 beløp = 500,
                 grad = 50,
                 delytelseId = 2,
@@ -243,7 +229,6 @@ internal class OppdragTest {
                 fom = 29.januar,
                 tom = 31.januar,
                 endringskode = Endringskode.NY,
-                aktuellDagsinntekt = 1000,
                 beløp = 1000,
                 grad = 100,
                 delytelseId = 3,
@@ -260,7 +245,6 @@ internal class OppdragTest {
                 fom = 17.januar,
                 tom = 25.januar,
                 endringskode = Endringskode.NY,
-                aktuellDagsinntekt = 1000,
                 beløp = 1000,
                 grad = 100,
                 delytelseId = 4,
@@ -271,7 +255,6 @@ internal class OppdragTest {
                 fom = 26.januar,
                 tom = 28.januar,
                 endringskode = Endringskode.NY,
-                aktuellDagsinntekt = 1000,
                 beløp = 500,
                 grad = 50,
                 delytelseId = 5,
@@ -282,7 +265,6 @@ internal class OppdragTest {
                 fom = 29.januar,
                 tom = 31.januar,
                 endringskode = Endringskode.NY,
-                aktuellDagsinntekt = 1000,
                 beløp = 1000,
                 grad = 100,
                 delytelseId = 6,
@@ -322,7 +304,6 @@ internal class OppdragTest {
                 fom = 1.januar,
                 tom = 16.januar,
                 endringskode = Endringskode.NY,
-                aktuellDagsinntekt = 1000,
                 beløp = 1000,
                 grad = 100
             )
@@ -339,7 +320,6 @@ internal class OppdragTest {
                 fom = 1.januar,
                 tom = 16.januar,
                 endringskode = Endringskode.NY,
-                aktuellDagsinntekt = 1000,
                 beløp = 1000,
                 grad = 100
             )
@@ -357,7 +337,6 @@ internal class OppdragTest {
                 fom = 1.januar,
                 tom = 16.januar,
                 endringskode = Endringskode.NY,
-                aktuellDagsinntekt = 1000,
                 beløp = 1000,
                 grad = 100
             )
@@ -367,7 +346,6 @@ internal class OppdragTest {
                 fom = 1.januar,
                 tom = 16.januar,
                 endringskode = Endringskode.NY,
-                aktuellDagsinntekt = 1000,
                 beløp = 1000,
                 grad = 100
             )
@@ -383,7 +361,6 @@ internal class OppdragTest {
                 fom = 1.januar,
                 tom = 16.januar,
                 endringskode = Endringskode.NY,
-                aktuellDagsinntekt = 1000,
                 beløp = 1000,
                 grad = 100
             )
@@ -393,7 +370,6 @@ internal class OppdragTest {
                 fom = 1.januar,
                 tom = 16.januar,
                 endringskode = Endringskode.NY,
-                aktuellDagsinntekt = 1000,
                 beløp = 1000,
                 grad = 100
             )
@@ -410,7 +386,6 @@ internal class OppdragTest {
                 fom = 1.januar,
                 tom = 16.januar,
                 endringskode = Endringskode.NY,
-                aktuellDagsinntekt = 1000,
                 beløp = 1000,
                 grad = 100
             )
@@ -420,7 +395,6 @@ internal class OppdragTest {
                 fom = 1.januar,
                 tom = 16.januar,
                 endringskode = Endringskode.NY,
-                aktuellDagsinntekt = 1000,
                 beløp = 1000,
                 grad = 100
             )
@@ -446,7 +420,6 @@ internal class OppdragTest {
                     fom = 1.januar,
                     tom = 16.januar,
                     endringskode = Endringskode.UEND,
-                    aktuellDagsinntekt = 1000,
                     beløp = 1000,
                     grad = 100
                 )
@@ -465,7 +438,6 @@ internal class OppdragTest {
                     fom = 1.januar,
                     tom = 16.januar,
                     endringskode = Endringskode.UEND,
-                    aktuellDagsinntekt = 1000,
                     beløp = 1000,
                     grad = 100
                 )
@@ -519,7 +491,6 @@ internal class OppdragTest {
                     fom = 17.januar,
                     tom = 31.januar,
                     endringskode = Endringskode.NY,
-                    aktuellDagsinntekt = 1000,
                     beløp = 1000,
                     grad = 100
                 )
@@ -539,7 +510,6 @@ internal class OppdragTest {
                     fom = 17.januar,
                     tom = 31.januar,
                     endringskode = Endringskode.NY,
-                    aktuellDagsinntekt = 1000,
                     beløp = 1000,
                     grad = 100
                 )
@@ -559,7 +529,6 @@ internal class OppdragTest {
                     fom = 17.januar,
                     tom = 31.januar,
                     endringskode = Endringskode.NY,
-                    aktuellDagsinntekt = 1000,
                     beløp = 1000,
                     grad = 100
                 )
@@ -595,7 +564,6 @@ internal class OppdragTest {
                     fom = 17.januar,
                     tom = 31.januar,
                     endringskode = Endringskode.NY,
-                    aktuellDagsinntekt = 1000,
                     beløp = 1000,
                     grad = 100
                 )
@@ -645,7 +613,6 @@ internal class OppdragTest {
                     fom = 17.januar,
                     tom = 31.januar,
                     endringskode = Endringskode.NY,
-                    aktuellDagsinntekt = 1000,
                     beløp = 1000,
                     grad = 100
                 )

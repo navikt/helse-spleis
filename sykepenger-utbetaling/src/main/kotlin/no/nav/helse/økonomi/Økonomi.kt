@@ -151,9 +151,6 @@ class Økonomi private constructor(
     fun <R> brukAvrundetGrad(block: (grad: Int) -> R) = block(grad.toDouble().toInt())
     // speil viser grad som nedrundet int (det rundes -ikke- oppover siden det ville gjort 19.5 % (for liten sykdomsgrad) til 20 % (ok sykdomsgrad)
     fun <R> brukTotalGrad(block: (totalGrad: Int) -> R) = block(totalGrad.toDouble().toInt())
-    // deprecated: bare Utbetalingslinjer bruker denne; og aktuellDagsinntekt i Utbetalingslinje er deprecated også
-    fun medAvrundetData(block: (aktuellDagsinntekt: Int) -> Unit) =
-        block(aktuellDagsinntekt.rundTilDaglig().reflection { _, _, _, daglig -> daglig })
 
     fun accept(visitor: ØkonomiVisitor) {
         visitor.visitAvrundetØkonomi(

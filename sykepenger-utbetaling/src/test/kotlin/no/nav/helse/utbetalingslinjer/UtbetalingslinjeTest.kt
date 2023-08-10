@@ -2,8 +2,6 @@ package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
 import no.nav.helse.januar
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -16,7 +14,6 @@ internal class UtbetalingslinjeTest {
         val linje = Utbetalingslinje(
             fom = 1.januar(2018),
             tom = 7.januar(2018),
-            aktuellDagsinntekt = null,
             grad = null,
             beløp = null
         )
@@ -31,7 +28,6 @@ internal class UtbetalingslinjeTest {
         val linje = Utbetalingslinje(
             fom = 6.januar(2018),
             tom = 7.januar(2018),
-            aktuellDagsinntekt = null,
             grad = null,
             beløp = null
         )
@@ -60,7 +56,6 @@ internal class UtbetalingslinjeInspektør(linje: Utbetalingslinje) : Utbetalings
         totalbeløp: Int,
         satstype: Satstype,
         beløp: Int?,
-        aktuellDagsinntekt: Int?,
         grad: Int?,
         delytelseId: Int,
         refDelytelseId: Int?,

@@ -1144,7 +1144,6 @@ internal class UtbetalingslinjeForskjellTest {
                 tom = tom,
                 satstype = satstype,
                 beløp = dagsats,
-                aktuellDagsinntekt = dagsats,
                 grad = grad,
                 endringskode = endringskode,
                 datoStatusFom = datoStatusFom,

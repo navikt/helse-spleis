@@ -55,7 +55,6 @@ class UtbetalingslinjeInspektør(utbetalingslinje: Utbetalingslinje) : OppdragVi
         totalbeløp: Int,
         satstype: Satstype,
         beløp: Int?,
-        aktuellDagsinntekt: Int?,
         grad: Int?,
         delytelseId: Int,
         refDelytelseId: Int?,

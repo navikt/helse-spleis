@@ -248,7 +248,6 @@ internal class GenerasjonerBuilder(
         totalbeløp: Int,
         satstype: Satstype,
         beløp: Int?,
-        aktuellDagsinntekt: Int?,
         grad: Int?,
         delytelseId: Int,
         refDelytelseId: Int?,
