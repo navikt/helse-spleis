@@ -67,6 +67,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
+import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
@@ -1138,8 +1139,29 @@ internal class Vedtaksperiode private constructor(
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>)
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {}
-        fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
-            dager.skalHåndteresAv(vedtaksperiode.periode)
+        fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
+            if (type in listOf(
+                    AVVENTER_REVURDERING,
+                    AVVENTER_GJENNOMFØRT_REVURDERING,
+                    AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
+                    AVVENTER_VILKÅRSPRØVING_REVURDERING,
+                    AVVENTER_HISTORIKK_REVURDERING,
+                    AVVENTER_SIMULERING_REVURDERING,
+                    AVVENTER_GODKJENNING_REVURDERING,
+                    AVSLUTTET
+                )
+            ) {
+                val sammenhengende = vedtaksperiode.arbeidsgiver.finnSammenhengendeVedtaksperioder(vedtaksperiode)
+                    .map { it.periode }
+                    .periode() ?: return false
+                return dager.skalHåndteresAvRevurdering(
+                    vedtaksperiode.periode,
+                    sammenhengende,
+                    vedtaksperiode.finnArbeidsgiverperiode()
+                )
+            }
+            return dager.skalHåndteresAv(vedtaksperiode.periode)
+        }
         fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
             if (!dager.påvirker(vedtaksperiode.sykdomstidslinje)) return
             dager.varsel(RV_IM_4, "Inntektsmeldingen ville påvirket sykdomstidslinjen i ${type.name}")

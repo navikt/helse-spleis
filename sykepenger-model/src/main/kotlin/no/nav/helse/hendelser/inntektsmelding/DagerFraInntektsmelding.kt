@@ -66,6 +66,16 @@ internal class DagerFraInntektsmelding(
         return overlapperMedVedtaksperiode || periodeRettFør || vedtaksperiodeRettFør
     }
 
+    internal fun skalHåndteresAvRevurdering(periode: Periode, sammenhengende: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?): Boolean {
+        val overlapperMedVedtaksperiode = overlappendeDager(periode).isNotEmpty()
+        val periodeRettFør = periodeRettFør(periode) != null
+        if (overlapperMedVedtaksperiode || periodeRettFør) return true
+        // vedtaksperiodene før dagene skal bare håndtere dagene om de nye opplyste dagene er nærmere enn 10 dager fra forrige AGP-beregning
+        if (opprinneligPeriode == null || arbeidsgiverperiode == null) return false
+        val periodeMellomForrigeAgpOgNyAgp = arbeidsgiverperiode.omsluttendePeriode?.periodeMellom(opprinneligPeriode.start) ?: return false
+        return periodeMellomForrigeAgpOgNyAgp.count() <= 10 && sammenhengende.contains(periodeMellomForrigeAgpOgNyAgp)
+    }
+
     internal fun harBlittHåndtertAv(periode: Periode) = håndterteDager.any { it in periode }
 
     private fun håndter(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Sykdomstidslinje): Sykdomstidslinje {
@@ -103,9 +113,9 @@ internal class DagerFraInntektsmelding(
     internal fun håndterRevurdering(gammelAgp: Arbeidsgiverperiode?, håndterDager: () -> Unit) {
         if (opprinneligPeriode == null) return
         if (gammelAgp == null) return håndterDager()
-        val periodeMellom = gammelAgp.omsluttendePeriode!!.periodeMellom(opprinneligPeriode.start)
-        if (periodeMellom != null && periodeMellom.count() >= 20) {
-            varsel(Varselkode.RV_IM_24, "Ignorerer dager fra inntektsmelding fordi perioden mellom gammel agp og opplyst agp er mer enn 19 dager")
+        val periodeMellom = gammelAgp.omsluttendePeriode?.periodeMellom(opprinneligPeriode.start)
+        if (periodeMellom != null && periodeMellom.count() > 10) {
+            varsel(Varselkode.RV_IM_24, "Ignorerer dager fra inntektsmelding fordi perioden mellom gammel agp og opplyst agp er mer enn 10 dager")
             return
         }
         håndterDager()

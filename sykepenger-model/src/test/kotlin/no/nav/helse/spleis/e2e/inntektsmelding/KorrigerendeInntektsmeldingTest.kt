@@ -101,13 +101,10 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     @Test
     fun `Korrigerende inntektsmelding med lik agp skal ikke ha varsel`() = Toggle.RevurdereAgpFraIm.enable {
         nyttVedtak(1.januar, 31.januar)
-
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-
         assertEquals(1.januar til 16.januar, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
         assertIngenVarsel(RV_IM_24, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -122,13 +119,10 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     @Test
     fun `Korrigerende inntektsmelding som strekker agp fremover`() = Toggle.RevurdereAgpFraIm.enable {
         nyttVedtak(1.januar, 31.januar)
-
         håndterInntektsmelding(listOf(2.januar til 17.januar))
-
         assertEquals(2.januar til 17.januar, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
-
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -136,7 +130,6 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         håndterUtbetalt()
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         val utbetalingstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje
-
         assertTrue(utbetalingstidslinje[1.januar] is Utbetalingsdag.Arbeidsdag)
         assertEquals(0.daglig, utbetalingstidslinje[1.januar].økonomi.inspektør.arbeidsgiverbeløp)
         assertTrue(utbetalingstidslinje.subset(2.januar til 17.januar).all {
@@ -150,43 +143,74 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Antall dager mellom opplyst agp og gammel agp er mer enn 20`()  = Toggle.RevurdereAgpFraIm.enable  {
+    fun `Antall dager mellom opplyst agp og gammel agp er mer enn 10`()  = Toggle.RevurdereAgpFraIm.enable  {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
-
         håndterInntektsmelding(listOf(1.mars til 16.mars))
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         håndterYtelser(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
-
-        assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
+        assertVarsel(RV_IM_24, 3.vedtaksperiode.filter())
     }
 
     @Test
-    fun `Antall dager mellom opplyst agp og gammel agp er mindre enn 20`()  = Toggle.RevurdereAgpFraIm.enable  {
-        nyttVedtak(1.januar, 31.januar)
+    fun `Antall dager mellom opplyst agp og gammel agp er mindre enn 10`()  = Toggle.RevurdereAgpFraIm.enable  {
+        nyttVedtak(10.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
-
         håndterInntektsmelding(listOf(1.februar til 16.februar))
-        assertEquals("AAAAARR AAAAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-
+        assertEquals("AAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
+        val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
+        assertEquals(listOf("KORRIGERT_INNTEKTSMELDING_ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
+        assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
+    }
 
+    @Test
+    fun `her er det et gap mellom første og andre vedtaksperiode og mindre enn 10 dager mellom agps`() = Toggle.RevurdereAgpFraIm.enable  {
+        nyttVedtak(10.januar, 29.januar)
+        nyttVedtak(1.februar, 28.februar)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        håndterInntektsmelding(listOf(1.februar til 16.februar))
+        assertEquals("SSSHH SSSSSHH SSSSSHH S??SSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+    }
+
+    @Test
+    fun `Antall dager mellom opplyst agp og gammel agp er mindre enn 10 - flere perioder før korrigerte dager`()  = Toggle.RevurdereAgpFraIm.enable  {
+        nyttVedtak(10.januar, 30.januar)
+        forlengVedtak(31.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        håndterInntektsmelding(listOf(1.februar til 16.februar))
+        assertEquals("AAARR AAAAARR AAAAARR AASSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt()
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
         assertEquals(listOf("KORRIGERT_INNTEKTSMELDING_ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
@@ -202,7 +226,6 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
         assertEquals(listOf("KORRIGERT_INNTEKTSMELDING_ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
