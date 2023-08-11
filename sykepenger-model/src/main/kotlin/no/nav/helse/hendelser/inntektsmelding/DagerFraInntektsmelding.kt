@@ -66,6 +66,15 @@ internal class DagerFraInntektsmelding(
         return overlapperMedVedtaksperiode || periodeRettFør || vedtaksperiodeRettFør
     }
 
+    internal fun skalHåndteresAvRevurdering(periode: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?): Boolean {
+        val overlapperMedVedtaksperiode = overlappendeDager(periode).isNotEmpty()
+        val periodeRettFør = periodeRettFør(periode) != null
+        if (overlapperMedVedtaksperiode || periodeRettFør) return true
+
+        val periodeMellom = arbeidsgiverperiode?.omsluttendePeriode!!.periodeMellom(opprinneligPeriode.start)
+        return !(periodeMellom != null && periodeMellom.count() >= 20)
+    }
+
     internal fun harBlittHåndtertAv(periode: Periode) = håndterteDager.any { it in periode }
 
     private fun håndter(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Sykdomstidslinje): Sykdomstidslinje {
