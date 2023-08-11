@@ -133,11 +133,11 @@ internal class InntektsmeldingMatchingTest {
         val vedtaksperiode1 =  2.januar til 15.januar
         val dager = inntektsmelding(1.januar, 1.januar til 16.januar)
 
-        assertTrue(dager.skalHåndteresAv(vedtaksperiode1, erRevurdering = false))
+        assertTrue(dager.skalHåndteresAv(vedtaksperiode1))
         assertFalse(dager.harBlittHåndtertAv(vedtaksperiode1))
         assertEquals(1.januar.somPeriode(), dager.håndterPeriodeRettFør(vedtaksperiode1))
         assertEquals(2.januar til 15.januar, dager.håndter(vedtaksperiode1))
-        assertTrue(dager.skalHåndteresAv(vedtaksperiode1, erRevurdering = false))
+        assertTrue(dager.skalHåndteresAv(vedtaksperiode1))
         assertTrue(dager.harBlittHåndtertAv(vedtaksperiode1))
     }
 

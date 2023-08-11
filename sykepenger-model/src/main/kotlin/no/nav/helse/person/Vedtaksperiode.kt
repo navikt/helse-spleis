@@ -1151,9 +1151,16 @@ internal class Vedtaksperiode private constructor(
                     AVSLUTTET
                 )
             ) {
-                return dager.skalHåndteresAv(vedtaksperiode.periode, erRevurdering = true)
+                val sammenhengende = vedtaksperiode.arbeidsgiver.finnSammenhengendeVedtaksperioder(vedtaksperiode)
+                    .map { it.periode }
+                    .periode() ?: return false
+                return dager.skalHåndteresAvRevurdering(
+                    vedtaksperiode.periode,
+                    sammenhengende,
+                    vedtaksperiode.finnArbeidsgiverperiode()
+                )
             }
-            return dager.skalHåndteresAv(vedtaksperiode.periode, erRevurdering = false)
+            return dager.skalHåndteresAv(vedtaksperiode.periode)
         }
         fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
             if (!dager.påvirker(vedtaksperiode.sykdomstidslinje)) return
@@ -1657,7 +1664,7 @@ internal class Vedtaksperiode private constructor(
             val sammenhengende = vedtaksperiode.arbeidsgiver.finnSammenhengendeVedtaksperioder(vedtaksperiode)
                 .map { it.periode }
                 .periode() ?: return false
-            if (!dager.skalHåndteresAv(sammenhengende, false)) return false
+            if (!dager.skalHåndteresAv(sammenhengende)) return false
             dager.info("Vedtaksperioden ${vedtaksperiode.periode} håndterer dager fordi den sammenhengende perioden $sammenhengende overlapper med inntektsmelding")
             return true
         }

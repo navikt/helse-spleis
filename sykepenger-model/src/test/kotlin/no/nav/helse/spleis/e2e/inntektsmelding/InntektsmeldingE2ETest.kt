@@ -1146,7 +1146,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         nyPeriode(1.februar til 28.februar)
         håndterInntektsmelding(listOf(1.februar til 16.februar))
 
-        assertEquals("SSSSSHH SSSSSHH SSAAARR PPAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertEquals("SSSSSHH SSSSSHH SSSSSHH PPSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
     }
 
     @Test
