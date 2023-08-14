@@ -31,7 +31,7 @@ data class ManuellOverskrivingDag(
 
 enum class Dagtype {
     Sykedag, Feriedag, FerieUtenSykmeldingDag, Egenmeldingsdag, Permisjonsdag, Arbeidsdag, SykedagNav,
-    Foreldrepengerdag, AAPdag, Omsorgspengerdag, Pleiepengerdag, Svangerskapspengerdag, Opplæringspengerdag, Dagpengerdag
+    Foreldrepengerdag, AAPdag, Omsorgspengerdag, Pleiepengerdag, Svangerskapspengerdag, Opplaringspengerdag, Dagpengerdag
 }
 
 class OverstyrTidslinje(
@@ -117,7 +117,7 @@ class OverstyrTidslinje(
                     kilde = kilde,
                     ytelse = Svangerskapspenger
                 )
-                Dagtype.Opplæringspengerdag -> Sykdomstidslinje.andreYtelsedager(
+                Dagtype.Opplaringspengerdag -> Sykdomstidslinje.andreYtelsedager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     kilde = kilde,
