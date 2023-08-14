@@ -53,10 +53,10 @@ private class PensjonsgivendeInntekt(
 ) {
 
     internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate): Inntekt {
-        val grense = Grunnbeløp.`6G`.snitt(år)
+        val grense = Grunnbeløp.`2G`.beløp(skjæringstidspunkt)
         val utgangspunkt = beløp * (Grunnbeløp.`1G`.beløp(skjæringstidspunkt) ratio Grunnbeløp.`3G`.snitt(år))
-        if (beløp <= grense) return utgangspunkt
-        val `2G` = Grunnbeløp.`2G`.beløp(skjæringstidspunkt)
-        return (`2G` + ((utgangspunkt - `2G`) / 3))
+        val aktuelt = minOf(grense, utgangspunkt)
+        val ekstra = (utgangspunkt - aktuelt) / 3
+        return aktuelt + ekstra
     }
 }
