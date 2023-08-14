@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
@@ -11,6 +12,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -142,6 +144,52 @@ internal class InntektsmeldingMatchingTest {
     }
 
     @Test
+    fun `Har ikke blitt håndtert av revurdering mer enn 10 dager`() {
+        val vedtaksperiode1 =  1.januar til 31.januar
+        val vedtaksperiode2 =  1.februar til 28.februar
+        val sammenhengendePeriode = 1.januar til 28.februar
+        val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar))
+        val dager = inntektsmelding(1.februar, 1.februar til 16.februar)
+
+        assertFalse(dager.skalHåndteresAvRevurdering(vedtaksperiode1, sammenhengendePeriode, arbeidsgiverperiode))
+        assertTrue(dager.skalHåndteresAvRevurdering(vedtaksperiode2, sammenhengendePeriode, arbeidsgiverperiode))
+
+        val håndtertDagerFraRevurdering = dager.håndterDagerFraRevurdering(arbeidsgiverperiode)
+        assertFalse(håndtertDagerFraRevurdering)
+    }
+
+    @Test
+    fun `Har blitt håndtert av revurdering mindre enn 10 dager`() {
+        val vedtaksperiode1 =  10.januar til 31.januar
+        val vedtaksperiode2 =  1.februar til 28.februar
+        val sammenhengendePeriode = 10.januar til 28.februar
+        val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(10.januar til 26.januar))
+        val dager = inntektsmelding(1.februar, 1.februar til 16.februar)
+
+        assertTrue(dager.skalHåndteresAvRevurdering(vedtaksperiode1, sammenhengendePeriode, arbeidsgiverperiode))
+        assertTrue(dager.skalHåndteresAvRevurdering(vedtaksperiode2, sammenhengendePeriode, arbeidsgiverperiode))
+
+        val håndtertDagerFraRevurdering = dager.håndterDagerFraRevurdering(arbeidsgiverperiode)
+        assertTrue(håndtertDagerFraRevurdering)
+    }
+
+    @Test
+    fun `Har ikke blitt håndtert av revurdering mindre enn 10 dager med gap`() {
+        val vedtaksperiode1 =  10.januar til 31.januar
+        val vedtaksperiode2 =  2.februar til 28.februar
+        val sammenhengendePeriode1 = 10.januar til 31.januar
+        val sammenhengendePeriode2 = 2.februar til 28.februar
+        val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(10.januar til 26.januar))
+        val dager = inntektsmelding(2.februar, 2.februar til 17.februar)
+
+        assertFalse(dager.skalHåndteresAvRevurdering(vedtaksperiode1, sammenhengendePeriode1, arbeidsgiverperiode))
+        assertTrue(dager.skalHåndteresAvRevurdering(vedtaksperiode2, sammenhengendePeriode2, arbeidsgiverperiode))
+
+        val håndtertDagerFraRevurdering = dager.håndterDagerFraRevurdering(arbeidsgiverperiode)
+        assertTrue(håndtertDagerFraRevurdering)
+    }
+
+    @Test
     fun `arbeidsgiverperiode rett i forkant av vedtaksperiode`() {
         val vedtaksperiode1 = 17.januar til 31.januar
         val dager = inntektsmelding(1.januar, 1.januar til 16.januar)
@@ -223,6 +271,12 @@ internal class InntektsmeldingMatchingTest {
         return håndterPeriodeRettFør(periode) {
             it.sykdomstidslinje()
         }.periode()
+    }
+
+    private fun DagerFraInntektsmelding.håndterDagerFraRevurdering(arbeidsgiverperiode: Arbeidsgiverperiode): Boolean {
+        var håndtert = false
+        håndterRevurdering(arbeidsgiverperiode) { håndtert = true }
+        return håndtert
     }
 
     private companion object {
