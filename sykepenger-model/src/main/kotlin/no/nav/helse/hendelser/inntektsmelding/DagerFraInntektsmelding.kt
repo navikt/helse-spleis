@@ -27,6 +27,10 @@ internal class DagerFraInntektsmelding(
     private val håndterteDager get() = alleDager - gjenståendeDager
     private val dokumentsporing = Dokumentsporing.inntektsmeldingDager(meldingsreferanseId())
 
+    private companion object {
+        private const val MAKS_ANTALL_DAGER_MELLOM_TIDLIGERE_OG_NY_AGP_FOR_HÅNDTERING_AV_DAGER = 10
+    }
+
     internal fun accept(visitor: DagerFraInntektsmeldingVisitor) {
         visitor.visitGjenståendeDager(gjenståendeDager)
     }
@@ -73,7 +77,7 @@ internal class DagerFraInntektsmelding(
         // vedtaksperiodene før dagene skal bare håndtere dagene om de nye opplyste dagene er nærmere enn 10 dager fra forrige AGP-beregning
         if (opprinneligPeriode == null || arbeidsgiverperiode == null) return false
         val periodeMellomForrigeAgpOgNyAgp = arbeidsgiverperiode.omsluttendePeriode?.periodeMellom(opprinneligPeriode.start) ?: return false
-        return periodeMellomForrigeAgpOgNyAgp.count() <= 10 && sammenhengende.contains(periodeMellomForrigeAgpOgNyAgp)
+        return periodeMellomForrigeAgpOgNyAgp.count() <= MAKS_ANTALL_DAGER_MELLOM_TIDLIGERE_OG_NY_AGP_FOR_HÅNDTERING_AV_DAGER && sammenhengende.contains(periodeMellomForrigeAgpOgNyAgp)
     }
 
     internal fun harBlittHåndtertAv(periode: Periode) = håndterteDager.any { it in periode }
@@ -114,7 +118,7 @@ internal class DagerFraInntektsmelding(
         if (opprinneligPeriode == null) return
         if (gammelAgp == null) return håndterDager()
         val periodeMellom = gammelAgp.omsluttendePeriode?.periodeMellom(opprinneligPeriode.start)
-        if (periodeMellom != null && periodeMellom.count() > 10) {
+        if (periodeMellom != null && periodeMellom.count() > MAKS_ANTALL_DAGER_MELLOM_TIDLIGERE_OG_NY_AGP_FOR_HÅNDTERING_AV_DAGER) {
             varsel(Varselkode.RV_IM_24, "Ignorerer dager fra inntektsmelding fordi perioden mellom gammel agp og opplyst agp er mer enn 10 dager")
             return
         }
