@@ -3,7 +3,9 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.juni
+import no.nav.helse.mai
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -13,7 +15,7 @@ import kotlin.math.roundToInt
 internal class PensjonsgivendeInntektTest {
 
     @Test
-    fun `sykepengegrunnlag under 6g`() {
+    fun `fastsatt årsinntekt under 6g`() {
         val inntekter = listOf(
             PensjonsgivendeInntekt(2016, 500000.årlig),
             PensjonsgivendeInntekt(2015, 450000.årlig),
@@ -22,6 +24,17 @@ internal class PensjonsgivendeInntektTest {
 
         assertEquals(478906.årlig, SelvstendigNæringsdrivende(inntekter).fastsattÅrsinntekt(16.juni))
     }
+
+    @Test
+    fun `fastsatt årsinntekt over 6g`() {
+        val inntekter = listOf(
+            PensjonsgivendeInntekt(2016, 670000.årlig),
+            PensjonsgivendeInntekt(2015, 590000.årlig),
+            PensjonsgivendeInntekt(2014, 490000.årlig),
+        )
+
+        assertEquals(589138.årlig, SelvstendigNæringsdrivende(inntekter).fastsattÅrsinntekt(12.mai))
+    }
 }
 
 private class SelvstendigNæringsdrivende(private val inntekter: List<PensjonsgivendeInntekt>) {
@@ -29,7 +42,7 @@ private class SelvstendigNæringsdrivende(private val inntekter: List<Pensjonsgi
         return inntekter
             .map { it.omregnetÅrsinntekt(skjæringstidspunkt) }
             .summer()
-            .reflection { årlig, _, _, _ -> årlig.roundToInt() }
+            .reflection { årlig, _, _, _ -> årlig.toInt() }
             .årlig
     }
 }
@@ -39,6 +52,11 @@ private class PensjonsgivendeInntekt(
     private val beløp: Inntekt
 ) {
 
-    internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate) =
-        beløp * (Grunnbeløp.`1G`.beløp(skjæringstidspunkt) ratio Grunnbeløp.`3G`.snitt(år))
+    internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate): Inntekt {
+        val grense = Grunnbeløp.`6G`.snitt(år)
+        val utgangspunkt = beløp * (Grunnbeløp.`1G`.beløp(skjæringstidspunkt) ratio Grunnbeløp.`3G`.snitt(år))
+        if (beløp <= grense) return utgangspunkt
+        val `2G` = Grunnbeløp.`2G`.beløp(skjæringstidspunkt)
+        return (`2G` + ((utgangspunkt - `2G`) / 3))
+    }
 }
