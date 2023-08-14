@@ -1,8 +1,12 @@
 package no.nav.helse
 
 import java.time.LocalDate
+import no.nav.helse.hendelser.til
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
+import kotlin.math.roundToInt
 
 class Grunnbeløp private constructor(private val multiplier: Double) {
     private val grunnbeløp = listOf(
@@ -87,6 +91,8 @@ class Grunnbeløp private constructor(private val multiplier: Double) {
     fun dagsats(dato: LocalDate) = beløp(dato).rundTilDaglig()
     fun dagsats(dato: LocalDate, virkningFra: LocalDate) = beløp(dato, virkningFra).rundTilDaglig()
 
+    fun snitt(år: Int) = HistoriskGrunnbeløp.snitt(grunnbeløp, år) * multiplier
+
     private fun gjeldende(dato: LocalDate, virkningFra: LocalDate? = null) =
         HistoriskGrunnbeløp.gjeldendeGrunnbeløp(grunnbeløp, dato, virkningFra ?: dato)
 
@@ -111,10 +117,33 @@ class Grunnbeløp private constructor(private val multiplier: Double) {
         }
     }
 
-    private class HistoriskGrunnbeløp(private val beløp: Inntekt, private val gyldigFra: LocalDate, private val virkningsdato: LocalDate = gyldigFra, private val gyldigMinsteinntektKrav: LocalDate) {
+    private class HistoriskGrunnbeløp(
+        private val beløp: Inntekt,
+        private val gyldigFra: LocalDate,
+        private val virkningsdato: LocalDate = gyldigFra,
+        private val gyldigMinsteinntektKrav: LocalDate
+    ) {
         init {
             require(virkningsdato >= gyldigFra) { "Virkningsdato må være nyere eller lik gyldighetstidspunktet" }
             require(gyldigMinsteinntektKrav >= gyldigFra) { "Virkningsdato for kravet til minsteinntekt må være nyere eller lik gyldighetstidspunktet" }
+        }
+
+        private fun gyldighetsperiode(år: Int, andre: List<HistoriskGrunnbeløp>) =
+            gyldigFra til (andre
+                .filter { it.gyldigFra > this.gyldigFra }
+                .minByOrNull { it.gyldigFra }
+                ?.gyldigFra?.forrigeDag
+                ?: gyldigFra.withMonth(12).withDayOfMonth(31))
+
+        private fun snitt(år: Int, andre: List<HistoriskGrunnbeløp>): Inntekt {
+            val gyldighetsperiode = gyldighetsperiode(år, andre)
+            val periode = 1.januar(år) til 31.desember(år)
+            if (!gyldighetsperiode.overlapperMed(periode)) return INGEN
+            val antallMånederSomDekkesAvGrunnbeløpet = gyldighetsperiode.subset(periode)
+                .let { it.endInclusive.monthValue - it.start.monthValue + 1}
+            return beløp(antallMånederSomDekkesAvGrunnbeløpet.toDouble())
+                .reflection { _, månedlig, _, _ ->  månedlig }
+                .årlig
         }
 
         companion object {
@@ -132,6 +161,14 @@ class Grunnbeløp private constructor(private val multiplier: Double) {
                     .filter { dato >= it.gyldigMinsteinntektKrav }
                     .maxByOrNull { it.gyldigMinsteinntektKrav }
                     ?: throw NoSuchElementException("Finner ingen grunnbeløp som gyldig som minsteinntektskrav for $dato")
+            }
+
+            fun snitt(grunnbeløper: List<HistoriskGrunnbeløp>, år: Int): Inntekt {
+                return grunnbeløper
+                    .map { it.snitt(år, grunnbeløper) }
+                    .summer()
+                    .reflection { årlig, _, _, _ -> årlig.roundToInt() }
+                    .årlig
             }
         }
 

@@ -28,6 +28,14 @@ internal class GrunnbeløpTest {
     }
 
     @Test
+    fun snitt() {
+        assertEquals(116239.årlig, Grunnbeløp.`1G`.snitt(2023))
+        assertEquals(109784.årlig, Grunnbeløp.`1G`.snitt(2022))
+        assertEquals(104716.årlig, Grunnbeløp.`1G`.snitt(2021))
+        assertEquals(33575.årlig, Grunnbeløp.`1G`.snitt(1990))
+    }
+
+    @Test
     fun `grunnbeløp før virkingdato`() {
         assertEquals(99858.årlig, Grunnbeløp.`1G`.beløp(1.mai(2020)))
         assertEquals(99858.årlig, Grunnbeløp.`1G`.beløp(30.april(2020), 20.september(2020)))
