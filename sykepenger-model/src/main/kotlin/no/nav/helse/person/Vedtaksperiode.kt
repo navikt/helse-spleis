@@ -2523,7 +2523,6 @@ internal class Vedtaksperiode private constructor(
             if (Toggle.RevurdereAgpFraIm.enabled) {
                 dager.valider(vedtaksperiode.periode)
                 if (dager.harFunksjonelleFeilEllerVerre()) {
-                    vedtaksperiode.forkast(dager)
                     return
                 }
                 val korrigertInntektsmeldingId =  vedtaksperiode.hendelseIder.sisteInntektsmeldingId()

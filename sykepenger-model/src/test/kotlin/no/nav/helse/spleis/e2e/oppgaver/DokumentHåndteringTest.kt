@@ -499,4 +499,12 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             søknadId2 to 2.vedtaksperiode.id(ORGNUMMER)
         ), observatør.søknadHåndtert)
     }
+
+    @Test
+    fun `sender ut inntektsmelding ikke håndtert på im med funksjonelle feil ved revurdering av dager`() {
+        nyttVedtak(1.januar, 31.januar)
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, harOpphørAvNaturalytelser = true)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertTrue(inntektsmeldingId in observatør.inntektsmeldingIkkeHåndtert)
+    }
 }
