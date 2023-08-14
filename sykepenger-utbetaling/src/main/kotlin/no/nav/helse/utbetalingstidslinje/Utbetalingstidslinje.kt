@@ -207,7 +207,7 @@ class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Colle
 
 sealed class Begrunnelse {
 
-    fun skalAvvises(utbetalingsdag: Utbetalingsdag) = utbetalingsdag is AvvistDag || utbetalingsdag is NavDag || utbetalingsdag is ArbeidsgiverperiodedagNav
+    open fun skalAvvises(utbetalingsdag: Utbetalingsdag) = utbetalingsdag is AvvistDag || utbetalingsdag is NavDag || utbetalingsdag is ArbeidsgiverperiodedagNav
 
     object SykepengedagerOppbrukt : Begrunnelse()
     object SykepengedagerOppbruktOver67 : Begrunnelse()
@@ -221,7 +221,9 @@ sealed class Begrunnelse {
     object AndreYtelserSvangerskapspenger: Begrunnelse()
     object AndreYtelserOpplaringspenger: Begrunnelse()
     object AndreYtelserDagpenger: Begrunnelse()
-    object MinimumSykdomsgrad : Begrunnelse()
+    object MinimumSykdomsgrad : Begrunnelse() {
+        override fun skalAvvises(utbetalingsdag: Utbetalingsdag) = utbetalingsdag is NavDag || utbetalingsdag is ArbeidsgiverperiodedagNav
+    }
     object EtterDødsdato : Begrunnelse()
     object Over70 : Begrunnelse()
     object ManglerOpptjening : Begrunnelse()

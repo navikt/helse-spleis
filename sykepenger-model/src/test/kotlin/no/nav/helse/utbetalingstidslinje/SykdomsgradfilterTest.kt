@@ -101,13 +101,25 @@ internal class SykdomsgradfilterTest {
             tidslinjeOf(16.AP, 5.NAV, 1.FRI)
         )
         val periode = Periode(1.januar, 22.januar)
+        val resultat = undersøke(tidslinjer, periode)
+        assertEquals(4, resultat.inspektør(0).navDagTeller)
+        assertEquals(2, resultat.inspektør(0).navHelgDagTeller)
+        assertEquals(0, resultat.inspektør(0).avvistDagTeller)
+        assertEquals(3, resultat.inspektør(1).navDagTeller)
+        assertEquals(2, resultat.inspektør(1).navHelgDagTeller)
+        assertEquals(1, resultat.inspektør(1).fridagTeller)
+    }
+
+    @Test
+    fun `avviser ikke andre ytelser`() {
+        val tidslinjer = listOf(
+            tidslinjeOf(16.AP, 6.AVV(grad = 0, dekningsgrunnlag = 0, begrunnelse = Begrunnelse.AndreYtelserForeldrepenger))
+        )
+        val periode = Periode(1.januar, 22.januar)
         undersøke(tidslinjer, periode)
-        assertEquals(4, tidslinjer.inspektør(0).navDagTeller)
-        assertEquals(2, tidslinjer.inspektør(0).navHelgDagTeller)
-        assertEquals(0, tidslinjer.inspektør(0).avvistDagTeller)
-        assertEquals(3, tidslinjer.inspektør(1).navDagTeller)
-        assertEquals(2, tidslinjer.inspektør(1).navHelgDagTeller)
-        assertEquals(1, tidslinjer.inspektør(1).fridagTeller)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(6, inspektør.avvistDagTeller)
+        assertEquals(listOf(Begrunnelse.AndreYtelserForeldrepenger), inspektør.begrunnelse(17.januar))
     }
 
     private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, periode: Periode): List<Utbetalingstidslinje> {
