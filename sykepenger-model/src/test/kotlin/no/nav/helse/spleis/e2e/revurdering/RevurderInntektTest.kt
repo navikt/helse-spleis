@@ -220,7 +220,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyr inntekt to vedtak med kort opphold med toggle på`() = Toggle.RevurdereAgpFraIm.enable {
+    fun `overstyr inntekt to vedtak med kort opphold`() {
         nyttVedtak(1.januar, 26.januar, 100.prosent)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 14.februar))
@@ -289,7 +289,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertEquals(3, inspektør.utbetalinger.filter { it.inspektør.erUtbetalt }.size)
     }
     @Test
-    fun `overstyr inntekt to vedtak med kort opphold`() {
+    fun `overstyr inntekt to vedtak med kort opphold med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
         nyttVedtak(1.januar, 26.januar, 100.prosent)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 14.februar))
