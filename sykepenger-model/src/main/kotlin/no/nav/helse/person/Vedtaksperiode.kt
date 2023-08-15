@@ -339,6 +339,13 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
+    private fun håndterDagerRevurdering(dager: DagerFraInntektsmelding) {
+        håndterDagerFør(dager)
+        dager.håndter(periode, ::finnArbeidsgiverperiode) { arbeidsgiver.oppdaterSykdom(it) }?.let { oppdatertSykdomstidslinje ->
+            sykdomstidslinje = oppdatertSykdomstidslinje
+        }
+    }
+
     private fun håndterDagerFør(dager: DagerFraInntektsmelding) {
         val periodstartFør = periode.start
         dager.leggTilArbeidsdagerFør(periode.start)
@@ -2528,7 +2535,7 @@ internal class Vedtaksperiode private constructor(
                 val korrigertInntektsmeldingId =  vedtaksperiode.hendelseIder.sisteInntektsmeldingId()
                 val gammelAgp = vedtaksperiode.finnArbeidsgiverperiode()
                 vedtaksperiode.låsOpp()
-                dager.håndterRevurdering(gammelAgp) { vedtaksperiode.håndterDager(dager) }
+                dager.håndterRevurdering(gammelAgp) { vedtaksperiode.håndterDagerRevurdering(dager) }
                 vedtaksperiode.lås()
                 val nyAgp = vedtaksperiode.finnArbeidsgiverperiode()
                 if (gammelAgp != null && !gammelAgp.klinLik(nyAgp)) {
@@ -2542,6 +2549,7 @@ internal class Vedtaksperiode private constructor(
                             ))
                     }
                 }
+                vedtaksperiode.inntektsmeldingHåndtert(dager)
                 vedtaksperiode.person.igangsettOverstyring(dager, Revurderingseventyr.korrigertInntektsmeldingArbeidsgiverperiode(skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt, periodeForEndring = vedtaksperiode.periode))
             } else {
                 super.håndter(vedtaksperiode, dager)

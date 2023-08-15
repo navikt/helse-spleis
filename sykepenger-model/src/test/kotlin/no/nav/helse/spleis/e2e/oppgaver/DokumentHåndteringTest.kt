@@ -41,6 +41,7 @@ import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -506,5 +507,14 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, harOpphørAvNaturalytelser = true)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertTrue(inntektsmeldingId in observatør.inntektsmeldingIkkeHåndtert)
+    }
+
+    @Test
+    fun `inntektsmelding håndtert selvom vi ikke legger til dagene i historikken`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars)
+        assertFalse(inntektsmeldingId in observatør.inntektsmeldingIkkeHåndtert)
+        assertTrue(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
     }
 }

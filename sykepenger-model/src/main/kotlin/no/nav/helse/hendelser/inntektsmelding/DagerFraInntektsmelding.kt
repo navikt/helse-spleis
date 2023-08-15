@@ -36,7 +36,10 @@ internal class DagerFraInntektsmelding(
     }
 
     internal fun meldingsreferanseId() = inntektsmelding.meldingsreferanseId()
-    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = hendelseIder.add(dokumentsporing)
+    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) : Boolean {
+        dagerHåndtert = true
+        return hendelseIder.add(dokumentsporing)
+    }
     internal fun alleredeHåndtert(hendelseIder: Set<Dokumentsporing>) = dokumentsporing in hendelseIder
 
     internal fun vurdertTilOgMed(dato: LocalDate) {
