@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    fun `Periode med overlappende pleiepenger blir sendt til Infotrygd`() {
+    fun `Periode med overlappende pleiepenger får varsel`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
@@ -31,12 +31,12 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
-            "TIL_INFOTRYGD"
+            "AVVENTER_SIMULERING"
         )
     }
 
     @Test
-    fun `Periode med overlappende omsorgspenger blir sendt til Infotrygd`() {
+    fun `Periode med overlappende omsorgspenger får varsel`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
@@ -55,12 +55,12 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
-            "TIL_INFOTRYGD"
+            "AVVENTER_SIMULERING"
         )
     }
 
     @Test
-    fun `Periode med overlappende opplæringspenger blir sendt til Infotrygd`() {
+    fun `Periode med overlappende opplæringspenger får varsel`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
@@ -79,7 +79,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
-            "TIL_INFOTRYGD"
+            "AVVENTER_SIMULERING"
         )
     }
 

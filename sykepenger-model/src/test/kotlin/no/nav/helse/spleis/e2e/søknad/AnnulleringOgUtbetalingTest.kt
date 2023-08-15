@@ -8,6 +8,8 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.Institusjonsopphold
+import no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -159,7 +161,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         håndterUtbetalt()
 
         håndterVilkårsgrunnlag(3.vedtaksperiode)
-        håndterYtelser(3.vedtaksperiode, foreldrepenger = listOf(5.februar til 15.februar))
+        håndterYtelser(3.vedtaksperiode, institusjonsoppholdsperioder = listOf(Institusjonsoppholdsperiode(5.februar, 15.februar)))
 
 
         inspektør.utbetaling(0).inspektør.let {
@@ -200,7 +202,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
             nyPeriode(5.februar til 15.februar, a1)
             håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar)
             håndterVilkårsgrunnlag(3.vedtaksperiode)
-            håndterYtelser(3.vedtaksperiode, foreldrepenger = listOf(5.februar til 15.februar))
+            håndterYtelser(3.vedtaksperiode, institusjonsoppholdsperioder = listOf(Institusjonsoppholdsperiode(5.februar, 15.februar)))
 
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
