@@ -74,6 +74,9 @@ spec:
           application: sparkel-inntekt
           access: readwrite
         - team: tbd
+          application: sparkel-sigrun
+          access: readwrite
+        - team: tbd
           application: sparkel-institusjonsopphold
           access: readwrite
         - team: tbd
