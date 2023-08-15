@@ -2531,7 +2531,7 @@ internal class Vedtaksperiode private constructor(
                 dager.håndterRevurdering(gammelAgp) { vedtaksperiode.håndterDager(dager) }
                 vedtaksperiode.lås()
                 val nyAgp = vedtaksperiode.finnArbeidsgiverperiode()
-                if (gammelAgp != nyAgp) {
+                if (gammelAgp != null && !gammelAgp.klinLik(nyAgp)) {
                     dager.varsel(RV_IM_24, "Ny agp er utregnet til å være ulik tidligere utregnet agp i ${type.name}")
                     korrigertInntektsmeldingId?.let {
                         vedtaksperiode.person.arbeidsgiveropplysningerKorrigert(

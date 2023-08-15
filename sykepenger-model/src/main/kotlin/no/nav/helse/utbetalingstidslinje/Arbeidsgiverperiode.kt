@@ -146,6 +146,12 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         it is NavDag && it.økonomi.harBeløp()
     }
 
+    internal fun klinLik(other: Arbeidsgiverperiode?): Boolean {
+        if (other == null) return false
+        if (this.toSet().containsAll(other.toSet())) return true
+        return false
+    }
+
     internal companion object {
         internal enum class Utbetalingssituasjon {
             UTBETALT,

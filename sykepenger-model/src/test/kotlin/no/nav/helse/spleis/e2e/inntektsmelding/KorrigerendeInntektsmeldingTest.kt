@@ -4,6 +4,7 @@ import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -262,11 +263,29 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         assertEquals(Arbeidsgiverperiode(listOf(1.januar til 5.januar, 10.januar til 26.januar)), agpFør)
         assertEquals(Arbeidsgiverperiode(listOf(1.januar til 5.januar, 12.januar til 28.januar)), agpEtter)
 
+        assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
+
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
         assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `arbeidsgiver korrigerer AGP ved å stykke den opp`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterInntektsmelding(listOf(1.januar til 15.januar, 20.januar.somPeriode()))
+        assertEquals("SSSSSHH SSSSSHH SAAAAHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `arbeidsgiver korrigerer AGP men første og siste dag er lik`() {
+        nyttVedtak(1.januar, 31.januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 15.januar til 21.januar))
+        håndterInntektsmelding(listOf(1.januar til 8.januar, 13.januar til 21.januar))
+        assertEquals("SSSSSHH SAAAAGG SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
     }
 }
