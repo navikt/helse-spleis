@@ -122,6 +122,7 @@ internal class DagerFraInntektsmelding(
             varsel(Varselkode.RV_IM_24, "Ignorerer dager fra inntektsmelding fordi perioden mellom gammel agp og opplyst agp er mer enn 10 dager")
             return
         }
+        info("Håndterer dager fordi perioden mellom gammel agp og opplyst agp er mindre enn 10 dager")
         håndterDager()
     }
 
