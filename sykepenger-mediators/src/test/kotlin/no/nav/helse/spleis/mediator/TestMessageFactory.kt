@@ -162,7 +162,8 @@ internal class TestMessageFactory(
         opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
         beregnetInntekt: Double = inntekt,
         orgnummer: String,
-        opphørsdatoForRefusjon: LocalDate? = null
+        opphørsdatoForRefusjon: LocalDate? = null,
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
     ) = Inntektsmelding(
         inntektsmeldingId = UUID.randomUUID().toString(),
         arbeidstakerFnr = fødselsnummer,
@@ -182,7 +183,8 @@ internal class TestMessageFactory(
         arkivreferanse = "",
         ferieperioder = emptyList(),
         foersteFravaersdag = førsteFraværsdag,
-        mottattDato = LocalDateTime.now()
+        mottattDato = LocalDateTime.now(),
+        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt
     )
 
     fun lagInnteksmelding(
@@ -191,7 +193,8 @@ internal class TestMessageFactory(
         opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
         beregnetInntekt: Double = inntekt,
         opphørsdatoForRefusjon: LocalDate? = null,
-        orgnummer: String = organisasjonsnummer
+        orgnummer: String = organisasjonsnummer,
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
     ) = nyHendelse(
         "inntektsmelding", lagInntektsmelding(
             arbeidsgiverperiode,
@@ -199,7 +202,8 @@ internal class TestMessageFactory(
             opphørAvNaturalytelser,
             beregnetInntekt,
             orgnummer,
-            opphørsdatoForRefusjon
+            opphørsdatoForRefusjon,
+            begrunnelseForReduksjonEllerIkkeUtbetalt
         ).toMapMedFelterFraSpedisjon(fødselsdato, aktørId)
     )
 

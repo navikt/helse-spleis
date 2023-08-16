@@ -4,7 +4,10 @@ import no.nav.helse.april
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
+import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.OK
 import org.junit.jupiter.api.Test
 import no.nav.inntektsmeldingkontrakt.Periode as IMPeriode
 
@@ -40,6 +43,24 @@ internal class InntektsmeldingReplayTest: AbstractEndToEndMediatorTest() {
         assertTilstand(4, "AVVENTER_BLOKKERENDE_PERIODE")
         assertTilstand(5, "AVVENTER_INNTEKTSMELDING")
         assertIngenVarsler()
+    }
+
+    @Test
+    fun `Får med oss informasjon fra inntektsmelding også når den kommer før søknad`() {
+        nyPeriode(1.januar til 31.januar, ORGNUMMER)
+        sendInntektsmelding(listOf(IMPeriode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        sendSimulering(0, OK)
+        sendUtbetalingsgodkjenning(0)
+        sendUtbetaling()
+        assertTilstand(0, "AVSLUTTET")
+
+        sykmelding(1.mars til 31.mars, ORGNUMMER)
+        sendInntektsmelding(emptyList(), førsteFraværsdag = 1.mars, orgnummer = ORGNUMMER, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+        søknad(1.mars til 31.mars, ORGNUMMER)
+        assertTilstand(1, "AVVENTER_VILKÅRSPRØVING")
+        assertVarsel(1, RV_IM_8)
     }
 
     private fun nyPeriode(periode: Periode, orgnr: String) {
