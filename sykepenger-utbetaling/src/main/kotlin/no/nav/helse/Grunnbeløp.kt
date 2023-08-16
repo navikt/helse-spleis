@@ -107,6 +107,7 @@ class Grunnbeløp private constructor(private val multiplier: Double) {
     companion object {
         val `6G` = Grunnbeløp(6.0)
         val halvG = Grunnbeløp(0.5)
+        val `4G` = Grunnbeløp(4.0)
         val `3G` = Grunnbeløp(3.0)
         val `2G` = Grunnbeløp(2.0)
         val `1G` = Grunnbeløp(1.0)
