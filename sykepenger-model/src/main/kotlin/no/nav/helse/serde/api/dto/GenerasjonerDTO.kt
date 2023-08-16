@@ -258,11 +258,10 @@ data class BeregnetPeriode(
         ved å se om det har vært endringer på den nye perioden
      */
     private fun ingenEndringerMellom(other: BeregnetPeriode): Boolean {
-        checkNotNull(other.forrigeGenerasjon) { "forventet ikke at forrigeGenerasjon er null" }
-        check(other.forrigeGenerasjon.utbetaling.type == Utbetalingtype.REVURDERING) { "forventet ikke at utbetalingtypen skulle være ${other.forrigeGenerasjon.utbetaling.type}"}
-        if (other.vilkårsgrunnlagId != other.forrigeGenerasjon.vilkårsgrunnlagId) return false
-        return other.sammenslåttTidslinje
-            .zip(other.forrigeGenerasjon.sammenslåttTidslinje) { ny, gammel -> ny == gammel }
+        checkNotNull(this.forrigeGenerasjon) { "forventet ikke at forrigeGenerasjon er null" }
+        if (this.vilkårsgrunnlagId != this.forrigeGenerasjon.vilkårsgrunnlagId) return false
+        return this.sammenslåttTidslinje
+            .zip(this.forrigeGenerasjon.sammenslåttTidslinje) { ny, gammel -> ny == gammel }
             .all { it }
     }
 
