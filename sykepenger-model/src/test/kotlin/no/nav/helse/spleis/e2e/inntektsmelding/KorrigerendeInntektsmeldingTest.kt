@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -59,15 +58,6 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Avsluttet vedtaksperiode skal ikke få varsel ved korrigerende inntektsmelding med endring i agp med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
-        nyttVedtak(1.januar, 31.januar)
-
-        håndterInntektsmelding(listOf(2.januar til 17.januar))
-
-        assertVarsel(RV_IM_4)
-    }
-
-    @Test
     fun `Avsluttet vedtaksperiode skal ikke få varsel ved korrigerende inntektsmelding med endring i refusjonsbeløp`() {
         nyttVedtak(1.januar, 31.januar)
 
@@ -77,7 +67,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Korrigerende inntektsmelding som strekker agp tilbake skal ha varsel`() = Toggle.RevurdereAgpFraIm.enable {
+    fun `Korrigerende inntektsmelding som strekker agp tilbake skal ha varsel`() {
         nyttVedtak(2.januar, 31.januar)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -105,7 +95,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Korrigerende inntektsmelding med lik agp skal ikke ha varsel`() = Toggle.RevurdereAgpFraIm.enable {
+    fun `Korrigerende inntektsmelding med lik agp skal ikke ha varsel`() {
         nyttVedtak(1.januar, 31.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertEquals(1.januar til 16.januar, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
@@ -123,7 +113,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Korrigerende inntektsmelding som strekker agp fremover`() = Toggle.RevurdereAgpFraIm.enable {
+    fun `Korrigerende inntektsmelding som strekker agp fremover`() {
         nyttVedtak(1.januar, 31.januar)
         håndterInntektsmelding(listOf(2.januar til 17.januar))
         assertEquals(2.januar til 17.januar, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
@@ -149,7 +139,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Antall dager mellom opplyst agp og gammel agp er mer enn 10`()  = Toggle.RevurdereAgpFraIm.enable  {
+    fun `Antall dager mellom opplyst agp og gammel agp er mer enn 10`()  {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
@@ -165,7 +155,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Antall dager mellom opplyst agp og gammel agp er mindre enn 10`()  = Toggle.RevurdereAgpFraIm.enable  {
+    fun `Antall dager mellom opplyst agp og gammel agp er mindre enn 10`()  {
         nyttVedtak(10.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
@@ -188,7 +178,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `her er det et gap mellom første og andre vedtaksperiode og mindre enn 10 dager mellom agps`() = Toggle.RevurdereAgpFraIm.enable  {
+    fun `her er det et gap mellom første og andre vedtaksperiode og mindre enn 10 dager mellom agps`() {
         nyttVedtak(10.januar, 29.januar)
         nyttVedtak(1.februar, 28.februar)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
@@ -200,7 +190,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Antall dager mellom opplyst agp og gammel agp er mindre enn 10 - flere perioder før korrigerte dager`()  = Toggle.RevurdereAgpFraIm.enable  {
+    fun `Antall dager mellom opplyst agp og gammel agp er mindre enn 10 - flere perioder før korrigerte dager`() {
         nyttVedtak(10.januar, 30.januar)
         forlengVedtak(31.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
@@ -224,7 +214,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Endring i både dager og inntekt`()  = Toggle.RevurdereAgpFraIm.enable  {
+    fun `Endring i både dager og inntekt`() {
         nyttVedtak(1.januar, 31.januar)
         håndterInntektsmelding(listOf(15.januar til 31.januar), beregnetInntekt = INNTEKT * 1.1)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -239,7 +229,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Endring i bare inntekt`()  = Toggle.RevurdereAgpFraIm.enable  {
+    fun `Endring i bare inntekt`() {
         nyttVedtak(1.januar, 31.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1)
         håndterYtelser(1.vedtaksperiode)
@@ -253,7 +243,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Endring i siste del av agp`()  = Toggle.RevurdereAgpFraIm.enable  {
+    fun `Endring i siste del av agp`() {
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
         nyttVedtak(10.januar, 31.januar)
         val agpFør = inspektør.arbeidsgiver.arbeidsgiverperiode(10.januar til 31.januar)

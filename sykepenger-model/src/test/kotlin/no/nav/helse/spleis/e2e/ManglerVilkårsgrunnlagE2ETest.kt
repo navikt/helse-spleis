@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -127,26 +126,6 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
-        assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
-    }
-
-    @Test
-    fun `korrigert arbeidsgiverperiode under pågående revurdering - korrigert søknad for februar med toggle på`() = Toggle.RevurdereAgpFraIm.enable {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
-        forlengVedtak(1.februar, 28.februar, 100.prosent)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 80.prosent))
-
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        nullstillTilstandsendringer()
-        assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar)
-        assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-        assertEquals(listOf(1.januar), person.skjæringstidspunkter())
-
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
     }
 

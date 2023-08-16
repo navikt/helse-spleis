@@ -139,22 +139,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to helt like korrigerende inntektsmeldinger med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
-        nyttVedtak(1.januar, 31.januar, 100.prosent, beregnetInntekt = INNTEKT)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-        nullstillTilstandsendringer()
-        observatør.inntektsmeldingIkkeHåndtert.clear()
-        observatør.inntektsmeldingHåndtert.clear()
-        val korrigertInntektsmelding2 = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1)
-        assertEquals(emptyList<UUID>(), observatør.inntektsmeldingHåndtert.map { it.first })
-        assertEquals(listOf(korrigertInntektsmelding2), observatør.inntektsmeldingIkkeHåndtert)
-    }
-
-    @Test
     fun `inntektsmelding med korrigerende inntekt på én av to arbeidsgivere på ett av to skjæringstidspunkt`() = Toggle.TjuefemprosentAvvik.enable {
         nyeVedtak(1.januar, 31.januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)

@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.antallEtterspurteBehov
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -1445,32 +1444,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(25.januar, Dagtype.Sykedag, 80)))
-        håndterYtelser(2.vedtaksperiode)
-
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING,
-        )
-    }
-
-    @Test
-    fun `revurder første dag i periode på en sykedag som forlenger tidligere arbeidsgiverperiode med nytt skjæringstidspunkt med toggle disabled`() = Toggle.RevurdereAgpFraIm.disable {
-        nyttVedtak(1.januar, 20.januar)
-        nyttVedtak(25.januar, 25.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(25.januar, Dagtype.Sykedag, 80)))
         håndterYtelser(2.vedtaksperiode)
 

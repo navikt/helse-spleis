@@ -58,5 +58,3 @@ spec:
     value: "false"
   - name: AVVIKSAKER
     value: "true"
-  - name: REVURDERE_AGP_FRA_IM
-    value: "true"
