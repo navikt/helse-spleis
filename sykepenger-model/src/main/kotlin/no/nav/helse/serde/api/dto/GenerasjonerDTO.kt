@@ -231,7 +231,8 @@ data class BeregnetPeriode(
     val maksdato: LocalDate,
     val utbetaling: Utbetaling,
     val periodevilkår: Vilkår,
-    val vilkårsgrunnlagId: UUID? // dette feltet er i != for beregnede perioder, men må være nullable så lenge annullerte perioder mappes til beregnet periode
+    val vilkårsgrunnlagId: UUID?, // dette feltet er i != for beregnede perioder, men må være nullable så lenge annullerte perioder mappes til beregnet periode
+    val forrigeGenerasjon: BeregnetPeriode? = null
 ) : Tidslinjeperiode() {
     override val sorteringstidspunkt = beregnet
 
@@ -246,8 +247,24 @@ data class BeregnetPeriode(
         return this.copy(periodetype = periodetype)
     }
 
-    internal fun sammeUtbetaling(other: BeregnetPeriode) = this.utbetaling.id == other.utbetaling.id
-            || (Toggle.ForenkleRevurdering.enabled && this.utbetaling.korrelasjonsId == other.utbetaling.korrelasjonsId)
+    internal fun sammeUtbetaling(other: BeregnetPeriode): Boolean {
+        if (this.utbetaling.id == other.utbetaling.id) return true
+        if (Toggle.ForenkleRevurdering.disabled) return false
+        return ingenEndringerMellom(other)
+    }
+
+    /*
+        finner ut om det har vært endringer i sykdomstidslinjen eller vilkårsgrunnlagene mellom periodene
+        ved å se om det har vært endringer på den nye perioden
+     */
+    private fun ingenEndringerMellom(other: BeregnetPeriode): Boolean {
+        checkNotNull(other.forrigeGenerasjon) { "forventet ikke at forrigeGenerasjon er null" }
+        check(other.forrigeGenerasjon.utbetaling.type == Utbetalingtype.REVURDERING) { "forventet ikke at utbetalingtypen skulle være ${other.forrigeGenerasjon.utbetaling.type}"}
+        if (other.vilkårsgrunnlagId != other.forrigeGenerasjon.vilkårsgrunnlagId) return false
+        return other.sammenslåttTidslinje
+            .zip(other.forrigeGenerasjon.sammenslåttTidslinje) { ny, gammel -> ny == gammel }
+            .all { it }
+    }
 
     internal fun somAnnullering(annulleringer: List<AnnullertUtbetaling>): AnnullertPeriode? {
         val annulleringen = annulleringer.firstOrNull { it.annullerer(this.utbetaling.korrelasjonsId) } ?: return null
@@ -332,7 +349,8 @@ data class BeregnetPeriode(
         private val opprettet: LocalDateTime,
         private val oppdatert: LocalDateTime,
         private val periode: Periode,
-        private val hendelser: List<HendelseDTO>
+        private val hendelser: List<HendelseDTO>,
+        private val forrigeBeregnetPeriode: BeregnetPeriode?
     ) {
         private lateinit var beregnet: LocalDateTime
         private lateinit var skjæringstidspunkt: LocalDate
@@ -393,6 +411,7 @@ data class BeregnetPeriode(
                 utbetaling = utbetalingDTO,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
                 periodetilstand = utledePeriodetilstand(utbetalingDTO, avgrensetUtbetalingstidslinje),
+                forrigeGenerasjon = forrigeBeregnetPeriode
             )
         }
 

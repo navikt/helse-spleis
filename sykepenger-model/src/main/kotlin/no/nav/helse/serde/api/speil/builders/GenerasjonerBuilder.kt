@@ -390,12 +390,13 @@ internal class GenerasjonerBuilder(
 
             override fun forlatBeregnetPeriode(builder: GenerasjonerBuilder) {
                 beregnetPeriodeBuilder?.build(builder.alder)?.also {
+                    vedtaksperiodebuilder?.nyBeregnetPeriode(it)
                     nyBeregnetPeriode(builder, it)
                 }
                 beregnetPeriodeBuilder = null
             }
 
-            override fun besøkUtbetaling(
+            final override fun besøkUtbetaling(
                 builder: GenerasjonerBuilder,
                 id: UUID,
                 korrelasjonsId: UUID,
@@ -513,7 +514,10 @@ internal class GenerasjonerBuilder(
             private val periode: Periode,
             private val hendelser: List<HendelseDTO>
         ) {
-            internal fun nyBeregnetPeriode() = BeregnetPeriode.Builder(vedtaksperiode, vedtaksperiodeId, tilstand, opprettet, oppdatert, periode, hendelser)
+            private var forrigeBeregnetPeriode: BeregnetPeriode? = null
+
+            internal fun nyBeregnetPeriode(ny: BeregnetPeriode) { forrigeBeregnetPeriode = ny }
+            internal fun nyBeregnetPeriode() = BeregnetPeriode.Builder(vedtaksperiode, vedtaksperiodeId, tilstand, opprettet, oppdatert, periode, hendelser, forrigeBeregnetPeriode)
             internal fun nyUberegnetPeriode() = UberegnetPeriode.Builder(vedtaksperiodeId, skjæringstidspunkt, tilstand, opprettet, oppdatert, periode, hendelser)
         }
     }
