@@ -59,6 +59,7 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, da
                     logger = LoggerFactory.getLogger("no.nav.helse.spleis.api.CallLogging")
                     level = Level.INFO
                     callIdMdc("callId")
+                    disableDefaultColors()
                     filter { call -> call.request.path().startsWith("/api/") }
                 }
                 preStopHook(teller)
