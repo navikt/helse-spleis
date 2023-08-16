@@ -117,7 +117,7 @@ internal class DagerFraInntektsmelding(
         return sykdomstidslinje.påvirkesAv(BitAvInntektsmelding(inntektsmelding, periode).sykdomstidslinje())
     }
 
-    internal fun håndterRevurdering(gammelAgp: Arbeidsgiverperiode?, håndterDager: () -> Unit) {
+    internal fun håndterKorrigering(gammelAgp: Arbeidsgiverperiode?, håndterDager: () -> Unit) {
         if (opprinneligPeriode == null) return
         if (gammelAgp == null) return håndterDager()
         val periodeMellom = gammelAgp.omsluttendePeriode?.periodeMellom(opprinneligPeriode.start)

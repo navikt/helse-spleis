@@ -1129,14 +1129,18 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(30.januar, 5.februar))
+        assertEquals("SSSHH SSSSSHH SFFFFFF FFFFF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 30.januar)
+        assertEquals("UUSSSHH SSSSSHH SFFFFFF FFFFF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
 
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(30.januar, 5.februar, 100.prosent))
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+        assertTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
 
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -1160,6 +1164,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
+
     }
 
     @Test

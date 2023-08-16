@@ -339,7 +339,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun håndterDagerRevurdering(dager: DagerFraInntektsmelding) {
+    private fun håndterDagerKorrigering(dager: DagerFraInntektsmelding) {
         håndterDagerFør(dager)
         dager.håndter(periode, ::finnArbeidsgiverperiode) { arbeidsgiver.oppdaterSykdom(it) }?.let { oppdatertSykdomstidslinje ->
             sykdomstidslinje = oppdatertSykdomstidslinje
@@ -646,6 +646,29 @@ internal class Vedtaksperiode private constructor(
         }
 
         person.igangsettOverstyring(søknad, Revurderingseventyr.korrigertSøknad(skjæringstidspunkt, periode))
+    }
+
+    private fun håndterKorrigerendeInntektsmelding(dager: DagerFraInntektsmelding, gammelAgp: Arbeidsgiverperiode?, block: () -> Unit) {
+        dager.valider(periode)
+        if (dager.harFunksjonelleFeilEllerVerre()) {
+            return
+        }
+        val korrigertInntektsmeldingId =  hendelseIder.sisteInntektsmeldingId()
+        block()
+        val nyAgp = finnArbeidsgiverperiode()
+        if (gammelAgp != null && !gammelAgp.klinLik(nyAgp)) {
+            dager.varsel(RV_IM_24, "Ny agp er utregnet til å være ulik tidligere utregnet agp i ${tilstand.type.name}")
+            korrigertInntektsmeldingId?.let {
+                person.arbeidsgiveropplysningerKorrigert(
+                    PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
+                        korrigerendeInntektsopplysningId = dager.meldingsreferanseId(),
+                        korrigerendeInntektektsopplysningstype = Inntektsopplysningstype.INNTEKTSMELDING,
+                        korrigertInntektsmeldingId = it
+                    ))
+            }
+        }
+        inntektsmeldingHåndtert(dager)
+        person.igangsettOverstyring(dager, Revurderingseventyr.korrigertInntektsmeldingArbeidsgiverperiode(skjæringstidspunkt = skjæringstidspunkt, periodeForEndring = periode))
     }
 
     private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, tilstandUtenAvvik: Vedtaksperiodetilstand, tilstandMedAvvik: Vedtaksperiodetilstand) {
@@ -1179,8 +1202,10 @@ internal class Vedtaksperiode private constructor(
             return dager.skalHåndteresAv(vedtaksperiode.periode)
         }
         fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
-            if (!dager.påvirker(vedtaksperiode.sykdomstidslinje)) return
-            dager.varsel(RV_IM_4, "Inntektsmeldingen ville påvirket sykdomstidslinjen i ${type.name}")
+            val gammelAgp = vedtaksperiode.finnArbeidsgiverperiode()
+            vedtaksperiode.håndterKorrigerendeInntektsmelding(dager, gammelAgp) {
+                dager.håndterKorrigering(gammelAgp) { vedtaksperiode.håndterDagerKorrigering(dager) }
+            }
         }
 
         fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {}
@@ -1361,6 +1386,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
         }
+        override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {}
 
         override fun igangsettOverstyring(
             vedtaksperiode: Vedtaksperiode,
@@ -2498,6 +2524,14 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) = HJELP.utenBegrunnelse
+        override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
+            val gammelAgp = vedtaksperiode.finnArbeidsgiverperiode()
+            vedtaksperiode.håndterKorrigerendeInntektsmelding(dager, gammelAgp) {
+                vedtaksperiode.låsOpp()
+                dager.håndterKorrigering(gammelAgp) { vedtaksperiode.håndterDagerKorrigering(dager) }
+                vedtaksperiode.lås()
+            }
+        }
 
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {}
 
@@ -2524,32 +2558,6 @@ internal class Vedtaksperiode private constructor(
             if (!påminnelse.skalReberegnes()) return
             påminnelse.info("Reberegner vedtaksperiode")
             vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.reberegning(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
-            dager.valider(vedtaksperiode.periode)
-            if (dager.harFunksjonelleFeilEllerVerre()) {
-                return
-            }
-            val korrigertInntektsmeldingId =  vedtaksperiode.hendelseIder.sisteInntektsmeldingId()
-            val gammelAgp = vedtaksperiode.finnArbeidsgiverperiode()
-            vedtaksperiode.låsOpp()
-            dager.håndterRevurdering(gammelAgp) { vedtaksperiode.håndterDagerRevurdering(dager) }
-            vedtaksperiode.lås()
-            val nyAgp = vedtaksperiode.finnArbeidsgiverperiode()
-            if (gammelAgp != null && !gammelAgp.klinLik(nyAgp)) {
-                dager.varsel(RV_IM_24, "Ny agp er utregnet til å være ulik tidligere utregnet agp i ${type.name}")
-                korrigertInntektsmeldingId?.let {
-                    vedtaksperiode.person.arbeidsgiveropplysningerKorrigert(
-                        PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
-                            korrigerendeInntektsopplysningId = dager.meldingsreferanseId(),
-                            korrigerendeInntektektsopplysningstype = Inntektsopplysningstype.INNTEKTSMELDING,
-                            korrigertInntektsmeldingId = it
-                        ))
-                }
-            }
-            vedtaksperiode.inntektsmeldingHåndtert(dager)
-            vedtaksperiode.person.igangsettOverstyring(dager, Revurderingseventyr.korrigertInntektsmeldingArbeidsgiverperiode(skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt, periodeForEndring = vedtaksperiode.periode))
         }
     }
 

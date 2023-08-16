@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -43,6 +42,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
@@ -389,11 +389,15 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterSøknad(Sykdom(31.januar, 27.februar, 100.prosent))
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 31.januar, beregnetInntekt = INNTEKT)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
 
         nullstillTilstandsendringer()
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
@@ -969,18 +973,13 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         val im = håndterInntektsmelding(listOf(
             22.januar til 6.februar
         ), beregnetInntekt = riktigInntekt)
-        assertTrue(im in observatør.inntektsmeldingIkkeHåndtert)
-        assertForventetFeil(
-            forklaring = "når verken inntekt eller dager fra IM håndteres, skal det likevel lages varsel?",
-            nå = {
-                assertIngenVarsler(1.vedtaksperiode.filter())
-            },
-            ønsket = {
-                assertVarsel(RV_IM_4, 1.vedtaksperiode.filter()) // gir dette egentlig mening?
-            }
-        )
-        assertEquals(24.januar til 11.februar, inspektør.periode(1.vedtaksperiode))
-        assertEquals("UUUGG UUUUUGG SSSSSHH SSSSSHH SS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertTrue(im in observatør.inntektsmeldingHåndtert.map { it.first })
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
+        assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
+        assertEquals(22.januar til 11.februar, inspektør.periode(1.vedtaksperiode))
+        assertEquals("UUUUUGG UUUUUGG SSSSSHH SSSSSHH SS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
@@ -994,24 +993,27 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør
 
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(forMyeInntekt, it.inntektsopplysning.inspektør.beløp)
+            assertEquals(riktigInntekt, it.inntektsopplysning.inspektør.beløp)
             assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
 
-        assertEquals(forMyeInntekt, vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
+        assertEquals(riktigInntekt, vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
 
         val utbetaling = inspektør.gjeldendeUtbetalingForVedtaksperiode(1.vedtaksperiode)
         val utbetalingInspektør = utbetaling.inspektør
 
         val førsteUtbetalingsdag = utbetalingInspektør.utbetalingstidslinje[7.februar]
-        assertEquals(forMyeInntekt, førsteUtbetalingsdag.økonomi.inspektør.aktuellDagsinntekt)
-        assertEquals(forMyeInntekt, førsteUtbetalingsdag.økonomi.inspektør.arbeidsgiverRefusjonsbeløp)
-        assertEquals(24.januar til 11.februar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(riktigInntekt, førsteUtbetalingsdag.økonomi.inspektør.aktuellDagsinntekt)
+        assertEquals(riktigInntekt, førsteUtbetalingsdag.økonomi.inspektør.arbeidsgiverRefusjonsbeløp)
 
         assertTilstander(
             1.vedtaksperiode,
             AVSLUTTET_UTEN_UTBETALING,
             AVVENTER_INNTEKTSMELDING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,

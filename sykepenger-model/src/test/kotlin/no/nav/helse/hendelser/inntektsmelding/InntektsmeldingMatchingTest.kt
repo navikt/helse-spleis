@@ -275,7 +275,7 @@ internal class InntektsmeldingMatchingTest {
 
     private fun DagerFraInntektsmelding.håndterDagerFraRevurdering(arbeidsgiverperiode: Arbeidsgiverperiode): Boolean {
         var håndtert = false
-        håndterRevurdering(arbeidsgiverperiode) { håndtert = true }
+        håndterKorrigering(arbeidsgiverperiode) { håndtert = true }
         return håndtert
     }
 

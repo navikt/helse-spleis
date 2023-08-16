@@ -5,7 +5,6 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -158,51 +157,5 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         )
         assertEquals(2, inspektør.hendelseIder(2.vedtaksperiode).size)
         assertTrue(inspektør.hendelseIder(2.vedtaksperiode).containsAll(listOf(søknadId, inntektsmeldingId)))
-    }
-
-    @Test
-    fun `vilkårsgrunnlag tilbakestilles når vi ikke er en forlengelse likevel`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar))
-        håndterSykmelding(Sykmeldingsperiode(22.januar, 22.februar))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
-        håndterSøknad(
-            Sykdom(1.januar, 21.januar, 100.prosent),
-            Arbeid(18.januar, 21.januar)
-        )
-        håndterSøknad(Sykdom(22.januar, 22.februar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 22.januar)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING
-        )
-        assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-        assertNotNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
-        assertNotEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
     }
 }
