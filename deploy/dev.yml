@@ -55,6 +55,6 @@ spec:
   - name: IDENTBYTTE
     value: "true"
   - name: FORENKLE_REVURDERING
-    value: "false"
+    value: "true"
   - name: AVVIKSAKER
     value: "true"

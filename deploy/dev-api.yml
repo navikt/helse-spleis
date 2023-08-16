@@ -73,7 +73,7 @@ spec:
   - name: DATABASE_DATABASE
     value: "spleis"
   - name: FORENKLE_REVURDERING
-    value: "false"
+    value: "true"
   - name: AVVIKSAKER
     value: "true"
 
