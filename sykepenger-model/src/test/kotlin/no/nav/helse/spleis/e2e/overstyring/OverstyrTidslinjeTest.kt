@@ -17,6 +17,11 @@ import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mars
+import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.Fridag
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.NavDag
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.NavHelgDag
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -50,6 +55,7 @@ import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterSøknadMedValidering
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.manuellArbeidsgiverdag
@@ -524,15 +530,43 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyring av andre ytelser`() {
+    fun `overstyring av andre ytelser i halen`() {
         nyttVedtak(1.januar, 31.januar)
         håndterOverstyrTidslinje((20.januar til 31.januar).map { manuellForeldrepengedag(it) })
         assertEquals("SSSSSHH SSSSSHH SSSSSYY YYYYYYY YYY", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         håndterYtelser(1.vedtaksperiode)
         assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         val utbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør
         assertEquals(12, utbetalingstidslinje.avvistDagTeller)
+    }
+
+    @Test
+    fun `overstyring av andre ytelser i snuten`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterOverstyrTidslinje((1.januar til 10.januar).map { manuellForeldrepengedag(it) })
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        val forventetUtbetaling =
+            (1.januar til 16.januar).associateWith { ArbeidsgiverperiodeDag } +
+            (17.januar til 19.januar).associateWith { NavDag } +
+            (20.januar til 21.januar).associateWith { NavHelgDag } +
+            (22.januar til 26.januar).associateWith { NavDag } +
+            (27.januar til 28.januar).associateWith { NavHelgDag } +
+            (29.januar til 31.januar).associateWith { NavDag }
+
+        assertEquals(forventetUtbetaling, observatør.utbetalingMedUtbetalingEventer.first().dager)
+
+        val forventetRevurdering =
+            (1.januar til 10.januar).associateWith { Fridag } +
+            (11.januar til 26.januar).associateWith { ArbeidsgiverperiodeDag } +
+            (27.januar til 28.januar).associateWith { NavHelgDag } +
+            (29.januar til 31.januar).associateWith { NavDag }
+
+        assertEquals(forventetRevurdering, observatør.utbetalingMedUtbetalingEventer.last().dager)
     }
 
     private fun assertSykdomstidslinjedag(dato: LocalDate, dagtype: KClass<out Dag>, kommerFra: KClass<out SykdomstidslinjeHendelse>) {
@@ -540,4 +574,6 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(dagtype, dagen::class)
         assertTrue(dagen.kommerFra(kommerFra))
     }
+
+    private val PersonObserver.UtbetalingUtbetaltEvent.dager get() = utbetalingsdager.associateBy { it.dato }.mapValues { it.value.type }
 }
