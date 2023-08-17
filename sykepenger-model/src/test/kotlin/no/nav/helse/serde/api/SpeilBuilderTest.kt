@@ -23,6 +23,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
+import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SI_3
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
@@ -31,6 +32,7 @@ import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.GhostPeriodeDTO
 import no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Inntektkilde
+import no.nav.helse.serde.api.dto.Periodetilstand
 import no.nav.helse.serde.api.dto.Periodetilstand.TilSkjønnsfastsettelse
 import no.nav.helse.serde.api.dto.SammenslåttDag
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
@@ -51,6 +53,7 @@ import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterAnnullerUtbetaling
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSkjønnsmessigFastsettelse
@@ -72,6 +75,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -315,15 +319,24 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `korrigert inntektsmelding i Avsluttet, velger opprinnelig refusjon`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
-        val vilkårsgrunnlagId = (speilApi().arbeidsgivere.first().generasjoner.last().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-
         håndterInntektsmelding(listOf(1.januar til 16.januar),  refusjon = Inntektsmelding.Refusjon(20000.månedlig, null))
-        val vilkårsgrunnlagIdEtterIm = (speilApi().arbeidsgivere.first().generasjoner.last().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-        assertEquals(vilkårsgrunnlagId, vilkårsgrunnlagIdEtterIm)
 
-        val speilVilkårsgrunnlagId = (speilApi().arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-        val vilkårsgrunnlag = speilApi().vilkårsgrunnlag[speilVilkårsgrunnlagId] as? SpleisVilkårsgrunnlag
-        assertEquals(INNTEKT, vilkårsgrunnlag!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.single().beløp.månedlig)
+        val speil = speilApi()
+        val generasjoner = speil.arbeidsgivere.first().generasjoner
+        assertEquals(2, generasjoner.size)
+
+        generasjoner.last().also { eldsteGenerasjon ->
+            assertEquals(1, eldsteGenerasjon.perioder.size)
+            val vilkårsgrunnlagId = (eldsteGenerasjon.perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+            val vilkårsgrunnlag = speil.vilkårsgrunnlag[vilkårsgrunnlagId] as? SpleisVilkårsgrunnlag
+            assertEquals(INNTEKT, vilkårsgrunnlag!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.single().beløp.månedlig)
+        }
+        generasjoner.first().also { nyesteGenerasjon ->
+            assertEquals(1, nyesteGenerasjon.perioder.size)
+            val vilkårsgrunnlagId = (nyesteGenerasjon.perioder.first() as UberegnetVilkårsprøvdPeriode).vilkårsgrunnlagId
+            val vilkårsgrunnlag = speil.vilkårsgrunnlag[vilkårsgrunnlagId] as? SpleisVilkårsgrunnlag
+            assertEquals(20000.månedlig, vilkårsgrunnlag!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.single().beløp.månedlig)
+        }
     }
 
     @Test
@@ -378,6 +391,38 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(TilSkjønnsfastsettelse, periode.periodetilstand)
         val vilkårsgrunnlagId = periode.vilkårsgrunnlagId
         assertEquals(setOf(vilkårsgrunnlagId), speilDto.vilkårsgrunnlag.keys)
+    }
+
+    @Test
+    fun `periode til skjønnsfastsettelse - revurdering`() = Toggle.TjuefemprosentAvvik.enable {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 30000.månedlig)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = 15000.månedlig)
+        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 30000.månedlig)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 45000.månedlig)))
+        nullstillTilstandsendringer()
+        assertTilstander(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING)
+
+        val speilDto = speilApi()
+        val generasjoner = speilDto.arbeidsgivere.single().generasjoner
+        assertEquals(2, generasjoner.size)
+        generasjoner[0].also { generasjon ->
+            assertEquals(1, generasjon.perioder.size)
+            assertInstanceOf(UberegnetVilkårsprøvdPeriode::class.java, generasjon.perioder[0])
+            val periode = generasjon.perioder[0] as UberegnetVilkårsprøvdPeriode
+            assertEquals(TilSkjønnsfastsettelse, periode.periodetilstand)
+        }
+        generasjoner[1].also { generasjon ->
+            assertEquals(1, generasjon.perioder.size)
+            assertInstanceOf(BeregnetPeriode::class.java, generasjon.perioder[0])
+            val periode = generasjon.perioder[0] as BeregnetPeriode
+            assertEquals(Periodetilstand.Utbetalt, periode.periodetilstand)
+        }
+        assertEquals(2, speilDto.vilkårsgrunnlag.keys.size)
     }
 
     @Test

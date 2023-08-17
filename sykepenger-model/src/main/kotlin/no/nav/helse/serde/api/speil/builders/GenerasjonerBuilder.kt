@@ -455,7 +455,7 @@ internal class GenerasjonerBuilder(
         class AktivePerioder : Periodebygger() {
             private var uberegnetPeriodeBuilder: UberegnetPeriode.Builder? = null
             override fun nyBeregnetPeriode(builder: GenerasjonerBuilder, beregnetPeriode: BeregnetPeriode) {
-                this.uberegnetPeriodeBuilder = null
+                uberegnetPeriodeBuilder?.medForrigeBeregnetPeriode(beregnetPeriode)
                 builder.aktivePerioder.add(beregnetPeriode)
             }
 

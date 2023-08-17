@@ -12,6 +12,7 @@ import no.nav.helse.serde.api.dto.Periodetilstand.ForberederGodkjenning
 import no.nav.helse.serde.api.dto.Periodetilstand.ManglerInformasjon
 import no.nav.helse.serde.api.dto.Periodetilstand.TilSkjønnsfastsettelse
 import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
+import no.nav.helse.serde.api.dto.Periodetilstand.UtbetaltVenterPåAnnenPeriode
 import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
 import no.nav.helse.serde.api.speil.Generasjoner
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
@@ -68,7 +69,7 @@ abstract class Tidslinjeperiode : Comparable<Tidslinjeperiode> {
     abstract val periodetilstand: Periodetilstand
     abstract val skjæringstidspunkt: LocalDate
     abstract val hendelser: List<HendelseDTO>
-    protected abstract val sorteringstidspunkt: LocalDateTime
+    abstract val sorteringstidspunkt: LocalDateTime
 
     internal open fun registrerBruk(vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk, organisasjonsnummer: String): Tidslinjeperiode {
         return this
@@ -98,6 +99,7 @@ data class UberegnetVilkårsprøvdPeriode(
     override val periodetype: Tidslinjeperiodetype, // feltet gir ikke mening for uberegnede perioder
     override val inntektskilde: UtbetalingInntektskilde, // feltet gir ikke mening for uberegnede perioder
     override val erForkastet: Boolean,
+    override val sorteringstidspunkt: LocalDateTime,
     override val opprettet: LocalDateTime,
     override val oppdatert: LocalDateTime,
     override val periodetilstand: Periodetilstand,
@@ -105,7 +107,6 @@ data class UberegnetVilkårsprøvdPeriode(
     override val hendelser: List<HendelseDTO>,
     val vilkårsgrunnlagId: UUID
 ) : Tidslinjeperiode() {
-    override val sorteringstidspunkt = opprettet
 
     internal constructor(uberegnetPeriode: UberegnetPeriode, vilkårsgrunnlagId: UUID, tidslinjeperiodetype: Tidslinjeperiodetype) :
             this(
@@ -116,6 +117,7 @@ data class UberegnetVilkårsprøvdPeriode(
                 periodetype = tidslinjeperiodetype,
                 inntektskilde = uberegnetPeriode.inntektskilde,
                 erForkastet = uberegnetPeriode.erForkastet,
+                sorteringstidspunkt = uberegnetPeriode.sorteringstidspunkt,
                 opprettet = uberegnetPeriode.opprettet,
                 oppdatert = uberegnetPeriode.oppdatert,
                 periodetilstand = uberegnetPeriode.periodetilstand,
@@ -139,11 +141,11 @@ data class UberegnetPeriode(
     override val erForkastet: Boolean,
     override val opprettet: LocalDateTime,
     override val oppdatert: LocalDateTime,
+    override val sorteringstidspunkt: LocalDateTime,
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate,
     override val hendelser: List<HendelseDTO>
 ) : Tidslinjeperiode() {
-    override val sorteringstidspunkt = opprettet
     override fun toString(): String {
         return "${fom.format()}-${tom.format()} - $periodetilstand"
     }
@@ -170,31 +172,48 @@ data class UberegnetPeriode(
         private val periode: Periode,
         private val hendelser: List<HendelseDTO>
     ) {
+        private var forrigeBeregnetPeriode: BeregnetPeriode? = null
         private lateinit var sykdomstidslinje: List<Sykdomstidslinjedag>
 
-        internal fun build() = UberegnetPeriode(
-            vedtaksperiodeId = vedtaksperiodeId,
-            fom = periode.start,
-            tom = periode.endInclusive,
-            sammenslåttTidslinje = sykdomstidslinje.merge(emptyList()),
-            periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING, // feltet gir ikke mening for uberegnede perioder
-            inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER, // feltet gir ikke mening for uberegnede perioder
-            erForkastet = false,
-            opprettet = opprettet,
-            oppdatert = oppdatert,
-            skjæringstidspunkt = skjæringstidspunkt,
-            hendelser = hendelser,
-            periodetilstand = when (tilstand) {
-                is Vedtaksperiode.AvsluttetUtenUtbetaling -> Periodetilstand.IngenUtbetaling
-                is Vedtaksperiode.AvventerRevurdering,
-                is Vedtaksperiode.AvventerBlokkerendePeriode -> VenterPåAnnenPeriode
-                is Vedtaksperiode.AvventerHistorikk,
-                is Vedtaksperiode.AvventerVilkårsprøving -> ForberederGodkjenning
-                is Vedtaksperiode.AvventerSkjønnsmessigFastsettelse -> TilSkjønnsfastsettelse
-                else -> ManglerInformasjon
-            }
+        fun medForrigeBeregnetPeriode(beregnetPeriode: BeregnetPeriode) {
+            forrigeBeregnetPeriode = beregnetPeriode
+        }
 
-        )
+        internal fun build(): UberegnetPeriode? {
+            // det er ikke vits å lage en Uberegnet periode dersom vedtaksperioden er helt avsluttet
+            if (tilstand in setOf(Vedtaksperiode.Avsluttet)) return null
+            // det er ikke vits å lage en Uberegnet periode dersom forrige beregnet periode faktisk ikke er avsluttet
+            if (forrigeBeregnetPeriode?.utbetaling?.status in setOf(Utbetalingstatus.Overført, Utbetalingstatus.Godkjent, Utbetalingstatus.Ubetalt, Utbetalingstatus.IkkeGodkjent)) return null
+            return UberegnetPeriode(
+                vedtaksperiodeId = vedtaksperiodeId,
+                fom = periode.start,
+                tom = periode.endInclusive,
+                sammenslåttTidslinje = sykdomstidslinje.merge(emptyList()),
+                periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING, // feltet gir ikke mening for uberegnede perioder
+                inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER, // feltet gir ikke mening for uberegnede perioder
+                erForkastet = false,
+                sorteringstidspunkt = if (forrigeBeregnetPeriode == null) opprettet else oppdatert,
+                opprettet = opprettet,
+                oppdatert = oppdatert,
+                skjæringstidspunkt = skjæringstidspunkt,
+                hendelser = hendelser,
+                periodetilstand = when (tilstand) {
+                    is Vedtaksperiode.AvsluttetUtenUtbetaling -> Periodetilstand.IngenUtbetaling
+                    is Vedtaksperiode.AvventerRevurdering -> if (forrigeBeregnetPeriode == null) VenterPåAnnenPeriode else UtbetaltVenterPåAnnenPeriode
+                    is Vedtaksperiode.AvventerBlokkerendePeriode -> VenterPåAnnenPeriode
+
+                    is Vedtaksperiode.AvventerHistorikk,
+                    is Vedtaksperiode.AvventerHistorikkRevurdering,
+                    is Vedtaksperiode.AvventerVilkårsprøving -> ForberederGodkjenning
+
+                    is Vedtaksperiode.AvventerSkjønnsmessigFastsettelse,
+                    is Vedtaksperiode.AvventerSkjønnsmessigFastsettelseRevurdering -> TilSkjønnsfastsettelse
+
+                    else -> ManglerInformasjon
+                }
+
+            )
+        }
 
         internal fun medSykdomstidslinje(sykdomstidslinje: List<Sykdomstidslinjedag>) = apply {
             if (this::sykdomstidslinje.isInitialized && sykdomstidslinje != this.sykdomstidslinje) {
@@ -416,7 +435,6 @@ data class BeregnetPeriode(
             when (utbetalingDTO.status) {
                 Utbetalingstatus.IkkeGodkjent -> Periodetilstand.RevurderingFeilet
                 Utbetalingstatus.Utbetalt -> when {
-                    periodetilstand == Vedtaksperiode.AvventerRevurdering -> Periodetilstand.UtbetaltVenterPåAnnenPeriode
                     avgrensetUtbetalingstidslinje.none { it.utbetalingsinfo()?.harUtbetaling() == true } -> Periodetilstand.IngenUtbetaling
                     else -> Utbetalt
                 }
@@ -427,7 +445,6 @@ data class BeregnetPeriode(
                     else -> VenterPåAnnenPeriode
                 }
                 Utbetalingstatus.GodkjentUtenUtbetaling -> when {
-                    periodetilstand == Vedtaksperiode.AvventerRevurdering -> Periodetilstand.UtbetaltVenterPåAnnenPeriode
                     utbetalingDTO.type == Utbetalingtype.REVURDERING -> Utbetalt
                     else -> Periodetilstand.IngenUtbetaling
                 }

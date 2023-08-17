@@ -225,50 +225,24 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         val inntekt2Ag2 = andreGenerasjon.inntekter.first { it.organisasjonsnummer == AG2 }
         assertEquals(inntektAg2, inntekt2Ag2)
 
-        assertForventetFeil(
-            forklaring = "Vi støtter ikke revurdering av inntekt på flere arbeidsgivere. Vi overstyrer begge arbeidsgiverne",
-            nå = {
-                assertEquals(1, vilkårsgrunnlag().values.size)
-                assertSpleisVilkårsprøving(
-                    vilkårsgrunnlag = andreGenerasjon,
-                    sammenligningsgrunnlag = 480000.0,
-                    avviksprosent = 0.0,
-                    omregnetÅrsinntekt = 480000.0,
-                    beregningsgrunnlag = 480000.0,
-                    skjæringstidspunkt = 1.januar,
-                    sykepengegrunnlag = 480000.0,
-                    oppfyllerKravOmMedlemskap = true,
-                )
-                assertInntekt(
-                    inntekt2Ag1,
-                    sammenligningsgrunnlag = 228000.0,
-                    orgnummer = AG1,
-                    omregnetÅrsinntekt = 240000.0,
-                    inntektskilde = Inntektkilde.Inntektsmelding,
-                    omregnetÅrsinntektMånedsbeløp = 20000.0
-                )
-            },
-            ønsket = {
-                assertEquals(2, vilkårsgrunnlag().values.size)
-                assertSpleisVilkårsprøving(
-                    vilkårsgrunnlag = andreGenerasjon,
-                    sammenligningsgrunnlag = 480000.0,
-                    avviksprosent = 5.3,
-                    omregnetÅrsinntekt = 456000.0,
-                    beregningsgrunnlag = 456000.0,
-                    skjæringstidspunkt = 1.januar,
-                    sykepengegrunnlag = 456000.0,
-                    oppfyllerKravOmMedlemskap = true,
-                )
-                assertInntekt(
-                    inntekt2Ag1,
-                    sammenligningsgrunnlag = 228000.0,
-                    orgnummer = AG1,
-                    omregnetÅrsinntekt = 216000.0,
-                    inntektskilde = Inntektkilde.Saksbehandler,
-                    omregnetÅrsinntektMånedsbeløp = 18000.0
-                )
-            }
+        assertEquals(2, vilkårsgrunnlag().values.size)
+        assertSpleisVilkårsprøving(
+            vilkårsgrunnlag = andreGenerasjon,
+            sammenligningsgrunnlag = 480000.0,
+            avviksprosent = 5.0,
+            omregnetÅrsinntekt = 456000.0,
+            beregningsgrunnlag = 456000.0,
+            skjæringstidspunkt = 1.januar,
+            sykepengegrunnlag = 456000.0,
+            oppfyllerKravOmMedlemskap = true,
+        )
+        assertInntekt(
+            inntekt2Ag1,
+            sammenligningsgrunnlag = 228000.0,
+            orgnummer = AG1,
+            omregnetÅrsinntekt = 216000.0,
+            inntektskilde = Inntektkilde.Saksbehandler,
+            omregnetÅrsinntektMånedsbeløp = 18000.0
         )
     }
 

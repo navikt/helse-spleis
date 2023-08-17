@@ -294,6 +294,7 @@ internal class GenerasjonerTest {
         periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING,
         inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER,
         erForkastet = false,
+        sorteringstidspunkt = LocalDateTime.now(),
         opprettet = LocalDateTime.now(),
         oppdatert = LocalDateTime.now(),
         periodetilstand = Periodetilstand.IngenUtbetaling,

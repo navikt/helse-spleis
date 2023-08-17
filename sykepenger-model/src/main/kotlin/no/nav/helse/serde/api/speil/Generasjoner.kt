@@ -89,6 +89,17 @@ class Generasjoner {
                 if (periode < forrigeBeregnet) return generasjoner.leggTilNyPeriode(periode, EndringITidligerePeriodeGenerasjon(periode))
                 generasjoner.leggTilNyPeriode(periode, AktivGenerasjon(periode))
             }
+
+            override fun uberegnetVilkårsprøvdPeriode(generasjoner: Generasjoner, periode: UberegnetVilkårsprøvdPeriode) {
+                if (periode > forrigeBeregnet) return generasjoner.leggTilNyPeriode(periode, AktivGenerasjon(forrigeBeregnet))
+                generasjoner.leggTilNyRadOgPeriode(periode, UberegnetVilkårsprøvdPeriodeGenerasjon())
+            }
+        }
+
+        class UberegnetVilkårsprøvdPeriodeGenerasjon() : Byggetilstand {
+            override fun revurdertPeriode(generasjoner: Generasjoner, periode: BeregnetPeriode) {
+                generasjoner.leggTilNyPeriode(periode, RevurdertGenerasjon(periode))
+            }
         }
 
         class EndringITidligerePeriodeGenerasjon(private val outOfOrderPeriode: BeregnetPeriode) : Byggetilstand {
